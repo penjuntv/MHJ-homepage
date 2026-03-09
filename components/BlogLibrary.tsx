@@ -475,13 +475,34 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
         flexDirection: 'column',
         justifyContent: 'flex-end',
       }}>
-        {/* 메타 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,0.4)', letterSpacing: 4, textTransform: 'uppercase' }}>
-            {blog.date}
-          </span>
-          <span style={{ fontSize: 9, fontWeight: 900, color: '#818cf8', letterSpacing: 4, textTransform: 'uppercase' }}>
+        {/* 메타 — 카테고리 뱃지 + 날짜 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+          {/* 카테고리 뱃지 */}
+          <span style={{
+            background: CATEGORY_COLORS[blog.category] || '#4F46E5',
+            borderRadius: 999,
+            padding: '5px 14px',
+            fontSize: 10,
+            fontWeight: 900,
+            letterSpacing: 3,
+            textTransform: 'uppercase',
+            color: 'white',
+          }}>
             {blog.category}
+          </span>
+          {/* 날짜 */}
+          <span style={{
+            background: 'rgba(255,255,255,0.12)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: 999,
+            padding: '5px 14px',
+            fontSize: 10,
+            fontWeight: 900,
+            letterSpacing: 2,
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.75)',
+          }}>
+            {blog.date}
           </span>
           {typeof blog.view_count === 'number' && blog.view_count > 0 && (
             <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 2 }}>
