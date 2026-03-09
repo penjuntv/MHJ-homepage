@@ -1,0 +1,5 @@
+[
+  { "name": "CHO YUMIN", "role": "First Daughter / Year 6", "bio": "머레이스 베이 초등학교의 든든한 첫째. 그림 그리는 것을 좋아하고 뉴질랜드의 드넓은 자연에서 새로운 영감을 찾고 있습니다.", "image_url": "https://picsum.photos/seed/yumin/400/500", "sort_order": 1 },
+  { "name": "CHO YUHYEON", "role": "Second Daughter / Year 5", "bio": "호기심 많은 둘째. 학교 축구팀에서 활약하며 뉴질랜드 친구들과 금방 가까워진 사교성 만점의 소녀입니다.", "image_url": "https://picsum.photos/seed/yuhyeon/400/500", "sort_order": 2 },
+  { "name": "CHO YUJIN", "role": "Third Daughter / Year 1 (Soon)", "bio": "우리 집의 귀염둥이 막내. 내년 머레이스 베이 입학을 기다리며 매일 언니들의 가방을 탐내는 야심가입니다.", "image_url": "https://picsum.photos/seed/yujin/400/500", "sort_order": 3 }
+]

@@ -1,0 +1,334 @@
+/* ══════════════════════════════════════════════
+   MHJ HOMEPAGE — globals.css
+   Google Fonts + 커스텀 CSS (Tailwind 보완)
+   ══════════════════════════════════════════════ */
+
+/* ─── Google Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap');
+
+/* ─── Tailwind 베이스 ─── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS 변수 (라이트/다크 모드) ─── */
+:root {
+  --bg:             #FFFFFF;
+  --bg-surface:     #F8FAFC;
+  --bg-card:        #FFFFFF;
+  --text:           #1A1A1A;
+  --text-secondary: #64748B;
+  --text-tertiary:  #CBD5E1;
+  --border:         #F1F5F9;
+  --border-medium:  #E2E8F0;
+  --nav-bg:         rgba(255,255,255,0.95);
+  --overlay-bg:     rgba(255,255,255,0.95);
+  --modal-bg:       rgba(255,255,255,0.4);
+  --drop-cap-color: #F1F5F9;
+}
+
+.dark {
+  --bg:             #0A0A0A;
+  --bg-surface:     #141414;
+  --bg-card:        #1A1A1A;
+  --text:           #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary:  #475569;
+  --border:         #262626;
+  --border-medium:  #383838;
+  --nav-bg:         rgba(10,10,10,0.95);
+  --overlay-bg:     rgba(10,10,10,0.97);
+  --modal-bg:       rgba(0,0,0,0.7);
+  --drop-cap-color: #262626;
+}
+
+/* ─── 기본 설정 ─── */
+@layer base {
+  * {
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    color: var(--text);
+    background: var(--bg);
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+/* ─── 유틸리티 클래스 ─── */
+@layer utilities {
+
+  /* 스크롤바 숨김 */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Display 폰트 */
+  .font-display {
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* 세로 텍스트 (서가 spine) */
+  .vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  /* vivid-hover: 이미지 채도 강화 */
+  .vivid-hover {
+    filter: saturate(1.2) contrast(1.05);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .group:hover .vivid-hover {
+    filter: saturate(2.2) contrast(1.1) brightness(1.05);
+  }
+
+  /* 매거진 서가 아이템 */
+  .magazine-item {
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    height: 100%;
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  /* body scroll lock (모달 오픈 시) */
+  .body-lock {
+    overflow: hidden;
+  }
+}
+
+/* ─── 키프레임 애니메이션 (Tailwind 보완) ─── */
+
+/* stagger 지연 — Tailwind animation-delay가 기본 지원 안 됨 */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+
+/* ─── 반응형 ─── */
+
+/* 네비게이션: 데스크톱 메뉴 / 모바일 토글 */
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .mobile-toggle {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-toggle {
+    display: none !important;
+  }
+}
+
+/* 모달 내부 패딩 반응형 */
+@media (min-width: 769px) {
+  .modal-inner-pad {
+    padding: 96px 96px !important;
+  }
+}
+
+/* ─── 서가 spine 세로 제목: clamp() ─── */
+.spine-title {
+  font-size: clamp(18px, 2.5vw, 28px);
+  font-weight: 900;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  color: white;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── 서가 cover 제목 ─── */
+.cover-title {
+  font-size: clamp(32px, 5vw, 72px);
+  font-weight: 900;
+  color: white;
+  line-height: 0.8;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── 히어로 대형 제목 ─── */
+.hero-title {
+  font-size: clamp(40px, 10vw, 160px);
+  font-weight: 900;
+  letter-spacing: -4px;
+  line-height: 0.8;
+  text-transform: uppercase;
+  max-width: 900px;
+  color: white;
+}
+
+/* ─── 모달 대형 제목 ─── */
+.modal-title {
+  font-size: clamp(40px, 8vw, 120px);
+  font-weight: 900;
+  letter-spacing: -3px;
+  line-height: 0.8;
+  text-transform: uppercase;
+  word-break: break-all;
+}
+
+/* ─── 드롭캡 (모달 본문 첫 글자) ─── */
+.drop-cap {
+  font-size: clamp(48px, 8vw, 140px);
+  font-weight: 900;
+  float: left;
+  margin-right: 16px;
+  line-height: 0.8;
+  color: var(--drop-cap-color);
+}
+
+/* ─── 섹션 패딩 유틸리티 ─── */
+.section-pad {
+  padding: clamp(40px, 8vw, 128px) clamp(24px, 4vw, 40px);
+}
+
+.section-pad-lg {
+  padding: clamp(60px, 10vw, 128px) clamp(24px, 4vw, 40px);
+}
+
+.section-pad-xl {
+  padding: clamp(60px, 10vw, 160px) clamp(24px, 4vw, 40px);
+}
+
+/* ─── AI Insight 반사 카드 ─── */
+.ai-reflection {
+  padding: 32px 40px;
+  background: rgba(238, 242, 255, 0.4);
+  border-radius: 32px;
+  border: 1px solid rgba(79, 70, 229, 0.1);
+}
+.dark .ai-reflection {
+  background: rgba(30, 27, 75, 0.3);
+  border-color: rgba(129, 140, 248, 0.15);
+}
+
+.ai-reflection-text {
+  font-size: clamp(18px, 3vw, 32px);
+  font-style: italic;
+  color: #312e81;
+  line-height: 1.4;
+}
+.dark .ai-reflection-text {
+  color: #a5b4fc;
+}
+
+/* ─── grayscale → color 전환 (About 프로필) ─── */
+.grayscale-hover {
+  filter: grayscale(100%);
+  transition: filter 1s;
+}
+.grayscale-hover:hover {
+  filter: grayscale(0%);
+}
+
+/* ─── 블로그 카드 그라디언트 오버레이 ─── */
+.blog-card-gradient {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 100%
+  );
+}
+
+/* ─── 히어로 오버레이 ─── */
+.hero-overlay {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Intro 이미지 그라디언트 ─── */
+.intro-gradient {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+}
+
+/* ─── 서가 오버레이 ─── */
+.shelf-overlay-spine {
+  background: rgba(0, 0, 0, 0.6);
+  transition: all 0.7s;
+}
+.shelf-overlay-active {
+  background: rgba(0, 0, 0, 0.4);
+  transition: all 0.7s;
+}
+
+/* ─── 서가 Issue 라벨 ─── */
+.shelf-issue-label {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  color: white;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* ─── RSS 아이콘 링크 ─── */
+.rss-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.3);
+  transition: color 0.2s, border-color 0.2s;
+}
+.rss-icon-link:hover {
+  color: #F97316;
+  border-color: #F97316;
+}
+
+/* ─── 네비게이션 백드롭 ─── */
+.nav-backdrop {
+  background: var(--nav-bg);
+  backdrop-filter: blur(20px);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ─── 모달 백드롭 ─── */
+.modal-backdrop {
+  background: var(--modal-bg);
+  backdrop-filter: blur(40px);
+}
+
+/* ─── CMS 백드롭 ─── */
+.cms-backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+/* ─── 다크 모드: DetailModal HTML 콘텐츠 ─── */
+.dark .detail-html-content {
+  color: var(--text) !important;
+}
+.dark .detail-html-content blockquote {
+  border-left-color: var(--border-medium);
+  color: var(--text-secondary);
+}
+
+/* ─── 테마 전환 트랜지션 ─── */
+.theme-transition,
+.theme-transition * {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease !important;
+}
