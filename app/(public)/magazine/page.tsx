@@ -37,7 +37,7 @@ async function getMagazines(): Promise<Magazine[]> {
   const { data } = await supabase
     .from('magazines')
     .select('*, articles(count)')
-    .order('created_at', { ascending: false });
+    .order('id', { ascending: false });
 
   if (!data?.length) return FALLBACK_MAGAZINES;
 
