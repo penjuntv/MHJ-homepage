@@ -5,6 +5,8 @@ export interface Magazine {
   title: string;
   editor: string;
   image_url: string;
+  pdf_url?: string | null;   // 통합 PDF (매거진 전체)
+  article_count?: number;    // 개별 기사 수 (서가 UI 뱃지용)
   created_at?: string;
 }
 
@@ -16,7 +18,9 @@ export interface Article {
   date: string;          // '2026.03.02'
   image_url: string;
   content: string;
-  pdf_url?: string | null;  // 이미지/PDF 콘텐츠 URL (있으면 새 탭으로 열기)
+  pdf_url?: string | null;          // 이미지/PDF 콘텐츠 URL
+  article_type?: 'cover' | 'contents' | 'article' | null;
+  sort_order?: number | null;
   created_at?: string;
 }
 

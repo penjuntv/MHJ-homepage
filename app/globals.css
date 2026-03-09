@@ -332,3 +332,13 @@
     border-color 0.3s ease,
     color 0.3s ease !important;
 }
+
+/* ─── 매거진 뷰어 페이지 전환 애니메이션 ─── */
+@keyframes magazinePageIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes magazinePageOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-20px); }
+}

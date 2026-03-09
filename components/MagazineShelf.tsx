@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import SafeImage from '@/components/SafeImage';
-import { ArrowRight, MousePointer2 } from 'lucide-react';
+import { ArrowRight, MousePointer2, BookOpen } from 'lucide-react';
 import type { Magazine } from '@/lib/types';
 
 interface Props {
@@ -186,8 +186,21 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
                       {item.title}
                     </h3>
 
-                    {/* 하단 장식선 */}
-                    <div style={{ width: 1, height: 48, background: 'rgba(255,255,255,0.4)' }} />
+                    {/* 하단: 상태 뱃지 */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                      <div style={{ width: 1, height: 32, background: 'rgba(255,255,255,0.3)' }} />
+                      {item.pdf_url ? (
+                        <BookOpen size={12} color="rgba(255,255,255,0.6)" />
+                      ) : (item.article_count ?? 0) > 0 ? (
+                        <span style={{ fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,0.5)', letterSpacing: 1 }}>
+                          {item.article_count}
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: 8, fontWeight: 900, color: 'rgba(255,255,255,0.25)', letterSpacing: 1, textTransform: 'uppercase' }}>
+                          Soon
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* ── Cover (호버 상태) ── */}
@@ -243,15 +256,31 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
                         borderTop: '1px solid rgba(255,255,255,0.2)',
                         paddingTop: 24,
                       }}>
-                        <span style={{
-                          fontSize: 11,
-                          fontWeight: 900,
-                          color: 'white',
-                          letterSpacing: 5,
-                          textTransform: 'uppercase',
-                        }}>
-                          Open Edition
-                        </span>
+                        <div>
+                          <span style={{
+                            fontSize: 11,
+                            fontWeight: 900,
+                            color: 'white',
+                            letterSpacing: 5,
+                            textTransform: 'uppercase',
+                            display: 'block',
+                          }}>
+                            Open Edition
+                          </span>
+                          <span style={{
+                            fontSize: 9,
+                            fontWeight: 700,
+                            color: 'rgba(255,255,255,0.45)',
+                            letterSpacing: 2,
+                            textTransform: 'uppercase',
+                          }}>
+                            {item.pdf_url
+                              ? '📖 PDF'
+                              : (item.article_count ?? 0) > 0
+                              ? `${item.article_count} articles`
+                              : 'Coming Soon'}
+                          </span>
+                        </div>
                         <div style={{
                           padding: 12,
                           background: 'white',

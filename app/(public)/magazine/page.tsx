@@ -33,11 +33,20 @@ const FALLBACK_MAGAZINES: Magazine[] = [
 ];
 
 async function getMagazines(): Promise<Magazine[]> {
+  // articles 개수도 함께 가져오기 (서가 뱃지용)
   const { data } = await supabase
     .from('magazines')
-    .select('*')
+    .select('*, articles(count)')
     .order('created_at', { ascending: false });
-  return data?.length ? data : FALLBACK_MAGAZINES;
+
+  if (!data?.length) return FALLBACK_MAGAZINES;
+
+  // article_count 필드로 변환
+  return data.map((m) => ({
+    ...m,
+    article_count: (m.articles as { count: number }[])?.[0]?.count ?? 0,
+    articles: undefined,
+  }));
 }
 
 export default async function MagazinePage() {
