@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 import type { Article } from '@/lib/types';
 import DetailModal from './DetailModal';
@@ -23,6 +24,14 @@ export default function ArticleGrid({ articles }: Props) {
     );
   }
 
+  function handleClick(article: Article) {
+    if (article.pdf_url) {
+      window.open(article.pdf_url, '_blank', 'noopener,noreferrer');
+    } else {
+      setSelectedItem(article);
+    }
+  }
+
   return (
     <>
       {articles.map((a, i) => (
@@ -30,7 +39,7 @@ export default function ArticleGrid({ articles }: Props) {
           key={a.id}
           article={a}
           staggerClass={STAGGER[Math.min(i, 3)]}
-          onClick={() => setSelectedItem(a)}
+          onClick={() => handleClick(a)}
         />
       ))}
 
@@ -87,6 +96,17 @@ function ArticleCard({ article, staggerClass, onClick }: CardProps) {
           background: hovered ? 'transparent' : 'rgba(0,0,0,0.2)',
           transition: 'background 0.3s',
         }} />
+        {/* PDF/이미지 아이콘 */}
+        {article.pdf_url && (
+          <div style={{
+            position: 'absolute', top: 16, right: 16,
+            background: 'rgba(255,255,255,0.9)', borderRadius: '999px',
+            padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 4,
+            fontSize: 10, fontWeight: 900, letterSpacing: 1, color: '#4F46E5',
+          }}>
+            <ExternalLink size={10} /> VIEW
+          </div>
+        )}
       </div>
 
       {/* 텍스트 */}

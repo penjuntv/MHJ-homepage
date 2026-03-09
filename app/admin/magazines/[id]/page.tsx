@@ -17,6 +17,7 @@ const EMPTY_ARTICLE = (magazineId: string): ArticleInput => ({
   date: new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, ''),
   image_url: '',
   content: '',
+  pdf_url: '',
 });
 
 export default function MagazineDetailPage() {
@@ -50,7 +51,7 @@ export default function MagazineDetailPage() {
 
   // 현재 편집 중인 폼 (새 글 or 수정)
   const activeForm: ArticleInput | null = editingArticle
-    ? { magazine_id: editingArticle.magazine_id, title: editingArticle.title, author: editingArticle.author, date: editingArticle.date, image_url: editingArticle.image_url, content: editingArticle.content }
+    ? { magazine_id: editingArticle.magazine_id, title: editingArticle.title, author: editingArticle.author, date: editingArticle.date, image_url: editingArticle.image_url, content: editingArticle.content, pdf_url: editingArticle.pdf_url ?? '' }
     : newArticle;
 
   function setActiveForm(patch: Partial<ArticleInput>) {
@@ -75,7 +76,8 @@ export default function MagazineDetailPage() {
   async function saveArticle(e: React.FormEvent) {
     e.preventDefault();
     if (!activeForm) return;
-    if (!activeForm.title || !activeForm.content) { setFormError('제목과 내용은 필수입니다.'); return; }
+    if (!activeForm.title) { setFormError('제목은 필수입니다.'); return; }
+    if (!activeForm.content && !activeForm.pdf_url) { setFormError('내용 또는 이미지/PDF URL 중 하나는 필요합니다.'); return; }
     setSaving(true);
     setFormError('');
 
@@ -308,9 +310,9 @@ function ArticleFormFields({
         </div>
       </div>
 
-      {/* 이미지 */}
+      {/* 커버 이미지 */}
       <div>
-        <label style={labelStyle}>이미지</label>
+        <label style={labelStyle}>커버 이미지 (썸네일)</label>
         <div
           onClick={() => fileRef.current?.click()}
           style={{ border: '2px dashed #F1F5F9', borderRadius: '16px', padding: '20px', textAlign: 'center', cursor: 'pointer', background: '#F8FAFC' }}
@@ -322,7 +324,7 @@ function ArticleFormFields({
           ) : (
             <div style={{ color: '#94A3B8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               {uploading ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={20} />}
-              <p style={{ fontSize: '12px', fontWeight: 700 }}>{uploading ? '업로드 중...' : '이미지 업로드'}</p>
+              <p style={{ fontSize: '12px', fontWeight: 700 }}>{uploading ? '업로드 중...' : '커버 이미지 업로드'}</p>
             </div>
           )}
         </div>
@@ -334,15 +336,28 @@ function ArticleFormFields({
         />
       </div>
 
-      {/* 내용 */}
+      {/* PDF / 콘텐츠 이미지 URL */}
       <div>
-        <label style={labelStyle}>내용 *</label>
+        <label style={labelStyle}>콘텐츠 이미지 / PDF URL</label>
+        <p style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '8px' }}>
+          캔바 디자인 이미지나 PDF를 Supabase Storage에 올린 뒤 URL을 붙여넣으세요. 카드 클릭 시 새 탭에서 열립니다.
+        </p>
+        <input
+          value={form.pdf_url ?? ''}
+          onChange={e => setForm({ pdf_url: e.target.value })}
+          placeholder="https://... (이미지 URL 또는 PDF URL)"
+          style={inputStyle}
+        />
+      </div>
+
+      {/* 내용 — pdf_url 없을 때만 필요 */}
+      <div>
+        <label style={labelStyle}>텍스트 내용 <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(이미지/PDF URL이 없을 경우 필수)</span></label>
         <textarea
           value={form.content}
           onChange={e => setForm({ content: e.target.value })}
-          placeholder="아티클 내용..."
-          rows={6}
-          required
+          placeholder="아티클 텍스트 본문... (이미지 콘텐츠라면 비워도 됩니다)"
+          rows={4}
           style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.6' }}
         />
       </div>

@@ -16,6 +16,7 @@ export interface Article {
   date: string;          // '2026.03.02'
   image_url: string;
   content: string;
+  pdf_url?: string | null;  // 이미지/PDF 콘텐츠 URL (있으면 새 탭으로 열기)
   created_at?: string;
 }
 
