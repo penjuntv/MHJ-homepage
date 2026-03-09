@@ -20,7 +20,8 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
   const handleWheel = useCallback((e: WheelEvent) => {
     if (scrollRef.current) {
       e.preventDefault();
-      scrollRef.current.scrollLeft += e.deltaY;
+      // 우아한 스크롤: deltaY를 0.55 감속 적용
+      scrollRef.current.scrollLeft += e.deltaY * 0.55;
     }
   }, []);
 
@@ -34,7 +35,12 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
   return (
     <div
       className="animate-fade-in"
-      style={{ display: 'flex', flexDirection: 'column', minHeight: '85vh' }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '85vh',
+        background: '#0a0a1a',  // 1) 깊은 네이비 배경
+      }}
     >
       {/* 헤더 */}
       <div style={{
@@ -47,7 +53,7 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
           fontSize: 14,
           fontWeight: 900,
           letterSpacing: 5,
-          color: '#cbd5e1',
+          color: 'rgba(203,213,225,0.7)',
           textTransform: 'uppercase',
           fontStyle: 'italic',
           margin: 0,
@@ -58,7 +64,7 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
           display: 'flex',
           fontSize: 10,
           fontWeight: 700,
-          color: '#cbd5e1',
+          color: 'rgba(203,213,225,0.5)',
           textTransform: 'uppercase',
           letterSpacing: 3,
           alignItems: 'center',
@@ -98,8 +104,14 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
                     ? 'clamp(300px, 40vw, 520px)'
                     : 'clamp(80px, 8vw, 120px)',
                   cursor: 'pointer',
-                  borderRight: '1px solid rgba(241,245,249,0.3)',
-                  background: '#1a1a1a',
+                  // 2) 좌우 경계: 미묘한 gradient border
+                  borderRight: isActive
+                    ? '1px solid rgba(255,255,255,0.08)'
+                    : '1px solid transparent',
+                  boxShadow: isActive
+                    ? 'none'
+                    : 'inset -1px 0 0 rgba(255,255,255,0.06), inset 1px 0 0 rgba(255,255,255,0.03)',
+                  background: '#0d0d20',
                 }}
               >
                 {/* 배경 이미지 or 그라디언트 폴백 */}
@@ -118,12 +130,22 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
                           transition: 'filter 0.6s',
                         }}
                       />
+                      {/* 3) 확장 상태: 하단 집중 그라디언트 + 기본 오버레이 */}
                       <div style={{
                         position: 'absolute',
                         inset: 0,
-                        background: isActive ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.6)',
+                        background: isActive
+                          ? 'rgba(0,0,0,0.25)'
+                          : 'rgba(0,0,0,0.65)',
                         transition: 'all 0.7s',
                       }} />
+                      {isActive && (
+                        <div style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'linear-gradient(to top, rgba(5,5,20,0.95) 0%, rgba(5,5,20,0.6) 40%, rgba(5,5,20,0.1) 70%, transparent 100%)',
+                        }} />
+                      )}
                     </>
                   ) : (
                     /* 이미지 없을 때: 인디고 그라디언트 배경 */
@@ -132,8 +154,8 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
                         position: 'absolute',
                         inset: 0,
                         background: isActive
-                          ? 'linear-gradient(160deg, #4F46E5 0%, #312E81 60%, #1e1b4b 100%)'
-                          : 'linear-gradient(160deg, #3730a3 0%, #1e1b4b 100%)',
+                          ? 'linear-gradient(160deg, #4338ca 0%, #1e1b4b 50%, #0a0a1a 100%)'
+                          : 'linear-gradient(160deg, #1e1b4b 0%, #0d0d20 100%)',
                         transition: 'background 0.7s',
                       }} />
                       {/* 장식용 원형 패턴 */}
@@ -204,9 +226,14 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
                       </span>
                     </div>
 
-                    {/* 세로 제목 */}
+                    {/* 2) 세로 제목: 더 선명한 텍스트 + 미묘한 glow */}
                     <h3
                       className="vertical-text spine-title"
+                      style={{
+                        textShadow: '0 0 20px rgba(148,163,184,0.3), 0 4px 16px rgba(0,0,0,0.8)',
+                        color: 'rgba(255,255,255,0.95)',
+                        letterSpacing: 3,
+                      }}
                     >
                       {item.title}
                     </h3>
@@ -242,15 +269,17 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
                     pointerEvents: isActive ? 'auto' : 'none',
                   }}>
                     <div style={{ maxWidth: 400 }}>
-                      {/* 이슈 라벨 */}
+                      {/* 3) 이슈 라벨: glass morphism 강화 */}
                       <span style={{
-                        background: 'rgba(255,255,255,0.2)',
-                        backdropFilter: 'blur(12px)',
+                        background: 'rgba(255,255,255,0.12)',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255,255,255,0.18)',
                         padding: '6px 16px',
                         borderRadius: 999,
                         fontSize: 10,
                         fontWeight: 900,
-                        color: 'white',
+                        color: 'rgba(255,255,255,0.9)',
                         letterSpacing: 3,
                         textTransform: 'uppercase',
                         marginBottom: 16,
