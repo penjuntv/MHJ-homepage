@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, ExternalLink } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [blogCount, setBlogCount] = useState<number | null>(null);
@@ -36,6 +36,8 @@ export default function AdminDashboard() {
     { label: '매거진 이슈', value: magazineCount, href: '/admin/magazines' },
     { label: '미승인 댓글', value: pendingComments, href: '/admin/comments' },
   ];
+
+  const ANALYTICS_URL = 'https://vercel.com/mhj-fams-projects/mhj-homepage/analytics';
 
   return (
     <div style={{ padding: '48px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -170,6 +172,29 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Analytics 카드 */}
+      <a
+        href={ANALYTICS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'white', borderRadius: '24px', padding: '28px 32px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.04)', textDecoration: 'none',
+          marginBottom: '48px', transition: 'all 0.2s',
+        }}
+      >
+        <div>
+          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '4px', color: '#4F46E5', marginBottom: '8px' }}>
+            Vercel Analytics
+          </p>
+          <p style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+            방문자 수 · 페이지뷰 · 성능 지표 확인
+          </p>
+        </div>
+        <ExternalLink size={20} color="#CBD5E1" />
+      </a>
 
       {/* 빠른 액션 */}
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
