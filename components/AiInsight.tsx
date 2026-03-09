@@ -64,7 +64,7 @@ export default function AiInsight({ title, content }: Props) {
       {/* 5) AI 감상평: 큰 따옴표 + 그라디언트 배경 */}
       {insight && (
         <div
-          className="animate-fade-in"
+          className="animate-zoom-in ai-insight-card"
           style={{
             position: 'relative',
             background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 60%, #FDF4FF 100%)',

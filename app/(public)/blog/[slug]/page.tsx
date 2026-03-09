@@ -190,7 +190,7 @@ export default async function BlogDetailPage({
 
           {/* 1) 대형 제목 */}
           <h1
-            className="font-display"
+            className="font-display slide-up stagger-1"
             style={{
               fontSize: 'clamp(48px, 10vw, 140px)',
               fontWeight: 900,
@@ -206,7 +206,7 @@ export default async function BlogDetailPage({
           </h1>
 
           {/* 1) 저자 · 날짜 · 카테고리 한 줄 */}
-          <div style={{
+          <div className="slide-up stagger-2" style={{
             display: 'flex',
             alignItems: 'center',
             gap: 16,
@@ -492,8 +492,10 @@ export default async function BlogDetailPage({
                 gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
                 gap: 24,
               }}>
-                {relatedBlogs.map((related) => (
-                  <RelatedCard key={related.id} blog={related} />
+                {relatedBlogs.map((related, i) => (
+                  <div key={related.id} className={`slide-up stagger-${Math.min(i + 1, 4)}`}>
+                    <RelatedCard blog={related} />
+                  </div>
                 ))}
               </div>
             </div>

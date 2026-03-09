@@ -239,6 +239,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
             {comments.map((c, i) => (
               <div
                 key={c.id}
+                className={`slide-up stagger-${Math.min(i + 1, 4)}`}
                 style={{
                   padding: '32px 0',
                   borderBottom: i < comments.length - 1
