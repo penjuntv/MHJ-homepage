@@ -389,3 +389,35 @@
 .dark .most-read-card:hover {
   box-shadow: 0 30px 60px rgba(0,0,0,0.35) !important;
 }
+
+/* ─── B-2 Blog Library 리파인: hover 효과 ─── */
+
+/* 블로그 카드 제목 underline 슬라이드인 */
+.blog-card-title {
+  position: relative;
+  display: inline-block;
+}
+.blog-card-title::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: rgba(255,255,255,0.6);
+  transition: width 0.4s ease;
+}
+.blog-card:hover .blog-card-title::after {
+  width: 100%;
+}
+
+/* Popular Tags hover: translateY + outline → fill */
+.blog-tag {
+  transition: all 0.25s ease;
+}
+.blog-tag:hover {
+  background: var(--text) !important;
+  color: var(--bg) !important;
+  border-color: var(--text) !important;
+  transform: translateY(-2px);
+}
