@@ -159,11 +159,16 @@ export default async function BlogDetailPage({
             <ArrowLeft size={18} /> Back to Library
           </Link>
 
-          <article>
+          <article style={blog.is_sponsored ? {
+            background: 'var(--bg-surface)',
+            borderRadius: 32,
+            padding: 'clamp(32px, 4vw, 56px)',
+            marginBottom: 32,
+          } : undefined}>
             <header style={{ marginBottom: 80 }}>
 
               {/* 카테고리 / 날짜 */}
-              <div style={{ marginBottom: 40 }}>
+              <div style={{ marginBottom: blog.is_sponsored ? 16 : 40 }}>
                 <span style={{
                   fontSize: 12,
                   fontWeight: 900,
@@ -174,6 +179,32 @@ export default async function BlogDetailPage({
                   {blog.category} / {blog.date}
                 </span>
               </div>
+
+              {/* 스폰서 표시 */}
+              {blog.is_sponsored && blog.sponsor_name && (
+                <p style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: 'var(--text-secondary)',
+                  letterSpacing: 2,
+                  textTransform: 'uppercase',
+                  marginBottom: 24,
+                }}>
+                  Sponsored by {blog.sponsor_name}
+                </p>
+              )}
+              {blog.is_sponsored && !blog.sponsor_name && (
+                <p style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: 'var(--text-secondary)',
+                  letterSpacing: 2,
+                  textTransform: 'uppercase',
+                  marginBottom: 24,
+                }}>
+                  Sponsored Content
+                </p>
+              )}
 
               {/* 대형 제목 */}
               <h1

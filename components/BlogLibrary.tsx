@@ -233,6 +233,25 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
         transition: 'all 0.7s',
       }} />
 
+      {/* 스폰서 라벨 */}
+      {blog.is_sponsored && (
+        <div style={{
+          position: 'absolute', top: 20, left: 20,
+          background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(8px)',
+          borderRadius: 999,
+          padding: '6px 14px',
+          zIndex: 2,
+        }}>
+          <span style={{
+            fontSize: 9, fontWeight: 900, letterSpacing: 3,
+            textTransform: 'uppercase', color: 'white',
+          }}>
+            Sponsored
+          </span>
+        </div>
+      )}
+
       {/* 인기 글 순위 뱃지 */}
       {showRank !== undefined && (
         <div style={{

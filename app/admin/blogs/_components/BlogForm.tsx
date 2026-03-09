@@ -43,6 +43,8 @@ export default function BlogForm({ initial }: Props) {
     meta_description: initial?.meta_description ?? '',
     og_image_url: initial?.og_image_url ?? '',
     published: initial?.published ?? false,
+    is_sponsored: initial?.is_sponsored ?? false,
+    sponsor_name: initial?.sponsor_name ?? '',
   });
 
   const [saving, setSaving] = useState(false);
@@ -430,6 +432,44 @@ export default function BlogForm({ initial }: Props) {
               이 글 발행 시 구독자에게 자동으로 이메일을 보냅니다 (RESEND_API_KEY 필요)
             </p>
           </label>
+        </div>
+
+        {/* 스폰서 콘텐츠 */}
+        <div style={{ padding: '20px 24px', background: 'white', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A1A' }}>Sponsored Post</p>
+              <p style={{ fontSize: '12px', color: '#94A3B8', marginTop: '2px' }}>
+                {form.is_sponsored ? '스폰서 콘텐츠로 표시됩니다' : '일반 글로 표시됩니다'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => set('is_sponsored', !form.is_sponsored)}
+              style={{
+                width: '52px', height: '28px', borderRadius: '999px', border: 'none',
+                background: form.is_sponsored ? '#F59E0B' : '#E2E8F0',
+                cursor: 'pointer', position: 'relative', transition: 'background 0.3s',
+                flexShrink: 0,
+              }}
+            >
+              <span style={{
+                position: 'absolute', top: '4px',
+                left: form.is_sponsored ? '28px' : '4px',
+                width: '20px', height: '20px', borderRadius: '50%',
+                background: 'white', transition: 'left 0.3s',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              }} />
+            </button>
+          </div>
+          {form.is_sponsored && (
+            <input
+              value={form.sponsor_name ?? ''}
+              onChange={e => set('sponsor_name', e.target.value)}
+              placeholder="Sponsor name"
+              style={inputStyle}
+            />
+          )}
         </div>
 
         {error && (

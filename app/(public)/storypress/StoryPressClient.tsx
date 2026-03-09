@@ -79,7 +79,7 @@ export default function StoryPressClient({ title }: Props) {
     const res = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name: 'StoryPress Waitlist' }),
+      body: JSON.stringify({ email, name: 'StoryPress Waitlist', source: 'storypress' }),
     });
     if (res.ok) { setStatus('success'); setEmail(''); }
     else if (res.status === 409) setStatus('duplicate');

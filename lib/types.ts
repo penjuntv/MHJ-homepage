@@ -34,6 +34,8 @@ export interface Blog {
   view_count?: number;
   tags?: string[];
   publish_at?: string | null;
+  is_sponsored?: boolean;
+  sponsor_name?: string | null;
   created_at?: string;
 }
 
