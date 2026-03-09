@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
+import FallbackImage from '@/components/FallbackImage';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
@@ -100,7 +100,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
                   transition: 'transform 0.3s, box-shadow 0.3s',
                 }} className="blog-tag-card">
                   <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}>
-                    <Image
+                    <FallbackImage
                       src={blog.image_url}
                       alt={blog.title}
                       fill

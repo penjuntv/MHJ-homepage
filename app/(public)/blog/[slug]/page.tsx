@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import FallbackImage from '@/components/FallbackImage';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -316,7 +316,7 @@ export default async function BlogDetailPage({
               boxShadow: '0 25px 60px rgba(0,0,0,0.12)',
               position: 'relative',
             }}>
-              <Image
+              <FallbackImage
                 src={blog.image_url}
                 alt={blog.title}
                 fill

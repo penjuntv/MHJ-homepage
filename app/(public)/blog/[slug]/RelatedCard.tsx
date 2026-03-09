@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import FallbackImage from '@/components/FallbackImage';
 import Link from 'next/link';
 import type { Blog } from '@/lib/types';
 
@@ -35,7 +35,7 @@ export default function RelatedCard({ blog }: { blog: Blog }) {
       `}</style>
 
       {/* 이미지 */}
-      <Image
+      <FallbackImage
         src={blog.image_url}
         alt={blog.title}
         fill

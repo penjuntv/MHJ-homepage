@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import FallbackImage from '@/components/FallbackImage';
 import type { Article } from '@/lib/types';
 import DetailModal from './DetailModal';
 
@@ -74,7 +74,7 @@ function ArticleCard({ article, staggerClass, onClick }: CardProps) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <Image
+        <FallbackImage
           src={article.image_url}
           alt={article.title}
           fill

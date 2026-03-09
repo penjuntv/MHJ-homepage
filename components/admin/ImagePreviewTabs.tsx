@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import FallbackImage from '@/components/FallbackImage';
 
 export interface PreviewTab {
   id: string;
@@ -99,7 +99,7 @@ export default function ImagePreviewTabs({ imageUrl, tabs }: Props) {
             ? '2px 2px 8px rgba(0,0,0,0.18), inset -2px 0 4px rgba(0,0,0,0.08)'
             : '0 2px 12px rgba(0,0,0,0.1)',
         }}>
-          <Image
+          <FallbackImage
             src={imageUrl}
             alt="미리보기"
             fill

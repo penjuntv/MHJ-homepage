@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import FallbackImage from './FallbackImage';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -192,7 +192,6 @@ interface CardProps {
 
 function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
   const [hovered, setHovered] = useState(false);
-  const [imgError, setImgError] = useState(false);
 
   return (
     <div
@@ -215,15 +214,12 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
       }}
     >
       {/* 이미지 */}
-      {!imgError && (
-        <Image
-          src={blog.image_url}
-          alt={blog.title}
-          fill
-          className="object-cover"
-          onError={() => setImgError(true)}
-        />
-      )}
+      <FallbackImage
+        src={blog.image_url}
+        alt={blog.title}
+        fill
+        className="object-cover"
+      />
 
       {/* 그라디언트 오버레이 */}
       <div style={{

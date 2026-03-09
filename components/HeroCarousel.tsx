@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import FallbackImage from '@/components/FallbackImage';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import type { Blog } from '@/lib/types';
 import DetailModal from './DetailModal';
@@ -37,7 +37,7 @@ export default function HeroCarousel({ items, heroLabel }: Props) {
               zIndex: i === idx ? 10 : 0,
             }}
           >
-            <Image
+            <FallbackImage
               src={item.image_url}
               alt={item.title}
               fill

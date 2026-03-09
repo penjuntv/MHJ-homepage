@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import Image from 'next/image';
+import FallbackImage from '@/components/FallbackImage';
 import { X, Share2 } from 'lucide-react';
 import type { Blog, Article } from '@/lib/types';
 import AiInsight from './AiInsight';
@@ -188,7 +188,7 @@ export default function DetailModal({ item, onClose }: Props) {
               boxShadow: '0 25px 60px rgba(0,0,0,0.12)',
               position: 'relative',
             }}>
-              <Image
+              <FallbackImage
                 src={item.image_url}
                 alt={item.title}
                 fill

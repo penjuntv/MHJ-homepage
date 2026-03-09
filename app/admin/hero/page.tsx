@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import FallbackImage from '@/components/FallbackImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
@@ -162,7 +162,7 @@ export default function HeroManagePage() {
                 }}
               >
                 {b.image_url && (
-                  <Image src={b.image_url} alt={b.title} fill style={{ objectFit: 'cover' }} sizes="120px" />
+                  <FallbackImage src={b.image_url} alt={b.title} fill style={{ objectFit: 'cover' }} sizes="120px" />
                 )}
                 <div style={{
                   position: 'absolute', inset: 0,
@@ -203,7 +203,7 @@ export default function HeroManagePage() {
                 {/* 썸네일 */}
                 {blog.image_url && (
                   <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-                    <Image src={blog.image_url} alt={blog.title} fill style={{ objectFit: 'cover' }} sizes="56px" />
+                    <FallbackImage src={blog.image_url} alt={blog.title} fill style={{ objectFit: 'cover' }} sizes="56px" />
                   </div>
                 )}
 
