@@ -420,7 +420,7 @@ function ArticleCardDemo() {
 
 function FilterBarDemo() {
   const [active, setActive] = useState('All');
-  const cats = ['All', 'Daily', 'School', 'Kids', 'Travel', 'Food'];
+  const cats = ['All', 'Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
   return (
     <div style={{
       display: 'flex', flexWrap: 'wrap', gap: 8, padding: 6,

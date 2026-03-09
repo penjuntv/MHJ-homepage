@@ -21,7 +21,7 @@ export interface Article {
 
 export interface Blog {
   id: number;
-  category: 'Daily' | 'School' | 'Kids' | 'Travel' | 'Food' | 'Immigration' | 'Bilingual' | 'Home' | 'Wellness';
+  category: 'Education' | 'Settlement' | 'Girls' | 'Locals' | 'Life' | 'Travel';
   title: string;
   author: string;        // default 'Heejong Jo'
   date: string;

@@ -18,11 +18,12 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 const QUICK_LINKS = [
-  { label: 'Daily', href: '/blog?category=Daily' },
-  { label: 'School', href: '/blog?category=School' },
-  { label: 'Kids', href: '/blog?category=Kids' },
+  { label: 'Education', href: '/blog?category=Education' },
+  { label: 'Settlement', href: '/blog?category=Settlement' },
+  { label: 'Girls', href: '/blog?category=Girls' },
+  { label: 'Locals', href: '/blog?category=Locals' },
+  { label: 'Life', href: '/blog?category=Life' },
   { label: 'Travel', href: '/blog?category=Travel' },
-  { label: 'Food', href: '/blog?category=Food' },
   { label: 'Magazine', href: '/magazine' },
   { label: 'Gallery', href: '/gallery' },
 ];

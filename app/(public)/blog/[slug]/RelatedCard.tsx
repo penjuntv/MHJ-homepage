@@ -5,9 +5,8 @@ import Link from 'next/link';
 import type { Blog } from '@/lib/types';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Daily: '#F59E0B', School: '#3B82F6', Kids: '#EC4899',
-  Travel: '#10B981', Food: '#EF4444', Immigration: '#8B5CF6',
-  Bilingual: '#06B6D4', Home: '#F97316', Wellness: '#14B8A6',
+  Education: '#3B82F6', Settlement: '#8B5CF6', Girls: '#EC4899',
+  Locals: '#EF4444', Life: '#F59E0B', Travel: '#10B981',
 };
 
 export default function RelatedCard({ blog }: { blog: Blog }) {

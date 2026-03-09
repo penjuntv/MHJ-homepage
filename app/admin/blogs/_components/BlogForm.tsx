@@ -17,7 +17,7 @@ interface Props {
   initial?: Blog;
 }
 
-const CATEGORIES: Blog['category'][] = ['Daily', 'School', 'Kids', 'Travel', 'Food', 'Immigration', 'Bilingual', 'Home', 'Wellness'];
+const CATEGORIES: Blog['category'][] = ['Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
 
 function slugify(text: string) {
   return text
@@ -34,7 +34,7 @@ export default function BlogForm({ initial }: Props) {
   const isEdit = !!initial;
 
   const [form, setForm] = useState<BlogInput>({
-    category: initial?.category ?? 'Daily',
+    category: initial?.category ?? 'Life',
     title: initial?.title ?? '',
     author: initial?.author ?? 'Heejong Jo',
     date: initial?.date ?? new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace('.', '.'),

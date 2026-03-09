@@ -22,14 +22,15 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const BLOG_CATEGORIES = ['Daily', 'School', 'Kids', 'Travel', 'Food'] as const;
+const BLOG_CATEGORIES = ['Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'] as const;
 
 const FALLBACK_CATEGORY_BLOGS: Record<string, Blog> = {
-  Daily: { id: 301, category: 'Daily', title: '오클랜드의 첫 장보기', author: 'Heejong Jo', date: '2026.01.19', image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800', content: '카운트다운과 뉴월드 사이에서 방황하던 초보 정착민 시절의 이야기입니다.', slug: 'first-grocery', published: true },
-  School: { id: 302, category: 'School', title: '매시대학교 석사의 무게', author: 'Heejong Jo', date: '2026.03.05', image_url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800', content: '사회복지사 석사 과정은 끊임없는 읽기와 쓰기의 연속입니다.', slug: 'massey-masters', published: true },
-  Kids: { id: 303, category: 'Kids', title: '아이들의 언어 적응기', author: 'Heejong Jo', date: '2026.02.20', image_url: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=800', content: '처음 학교에 갔을 때 멍하니 서 있던 유민이와 유현이가 이제는 친구들과 수다를 떨며 집에 옵니다.', slug: 'kids-language', published: true },
+  Education: { id: 302, category: 'Education', title: '매시대학교 석사의 무게', author: 'Heejong Jo', date: '2026.03.05', image_url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800', content: '사회복지사 석사 과정은 끊임없는 읽기와 쓰기의 연속입니다.', slug: 'massey-masters', published: true },
+  Settlement: { id: 305, category: 'Settlement', title: '오클랜드의 첫 장보기', author: 'Heejong Jo', date: '2026.01.19', image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800', content: '카운트다운과 뉴월드 사이에서 방황하던 초보 정착민 시절의 이야기입니다.', slug: 'first-grocery', published: true },
+  Girls: { id: 303, category: 'Girls', title: '아이들의 언어 적응기', author: 'Heejong Jo', date: '2026.02.20', image_url: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=800', content: '처음 학교에 갔을 때 멍하니 서 있던 유민이와 유현이가 이제는 친구들과 수다를 떨며 집에 옵니다.', slug: 'kids-language', published: true },
+  Locals: { id: 301, category: 'Locals', title: '마이랑이 마켓의 아보카도', author: 'Heejong Jo', date: '2026.03.12', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800', content: '뉴질랜드 아보카도는 정말 크고 고소해요.', slug: 'mairangi-avocado', published: true },
+  Life: { id: 310, category: 'Life', title: '비 오는 날의 서재', author: 'Heejong Jo', date: '2025.07.05', image_url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800', content: '겨울비가 내리는 오클랜드. 서재에 앉아 따뜻한 차 한 잔을 마시며 책을 읽는 시간은 저에게 가장 귀한 여유입니다.', slug: 'rainy-library', published: true },
   Travel: { id: 304, category: 'Travel', title: '노스쇼어의 보석 같은 해변', author: 'Heejong Jo', date: '2026.01.25', image_url: 'https://images.unsplash.com/photo-1506929113675-b9299d39c1b2?w=800', content: '집에서 10분만 걸어가면 마주하는 마이랑이 베이.', slug: 'northshore-beaches', published: true },
-  Food: { id: 305, category: 'Food', title: '마이랑이 마켓의 아보카도', author: 'Heejong Jo', date: '2026.03.12', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800', content: '뉴질랜드 아보카도는 정말 크고 고소해요.', slug: 'mairangi-avocado', published: true },
 };
 
 const FALLBACK_RECENT_BLOGS: Blog[] = Object.values(FALLBACK_CATEGORY_BLOGS);

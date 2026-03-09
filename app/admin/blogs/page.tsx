@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import { Plus, Search, Pencil, Trash2, Eye, EyeOff, Star } from 'lucide-react';
 
-const CATEGORIES = ['All', 'Daily', 'School', 'Kids', 'Travel', 'Food'];
+const CATEGORIES = ['All', 'Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
 
 export default function AdminBlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);

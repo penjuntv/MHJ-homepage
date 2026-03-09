@@ -6,11 +6,12 @@ import { ArrowRight } from 'lucide-react';
 import type { Blog, Magazine } from '@/lib/types';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Daily: '#F59E0B',
-  School: '#3B82F6',
-  Kids: '#EC4899',
+  Education: '#3B82F6',
+  Settlement: '#8B5CF6',
+  Girls: '#EC4899',
+  Locals: '#EF4444',
+  Life: '#F59E0B',
   Travel: '#10B981',
-  Food: '#EF4444',
 };
 
 interface Props {
@@ -227,7 +228,7 @@ function WhoWeAreSection({ familyImg, introDescription }: { familyImg: string; i
 
 function WhatYoullFindSection({ categoryBlogs }: { categoryBlogs: Record<string, Blog> }) {
   const { ref, visible } = useSlideUp();
-  const categories = ['Daily', 'School', 'Kids', 'Travel', 'Food'];
+  const categories = ['Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
 
   return (
     <section
