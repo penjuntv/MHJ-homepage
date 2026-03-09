@@ -342,3 +342,50 @@
   from { opacity: 1; transform: translateX(0); }
   to   { opacity: 0; transform: translateX(-20px); }
 }
+
+/* ─── B-1 Landing 리파인: hover 효과 ─── */
+
+/* Intro 이미지 hover: scale + 그림자 */
+.intro-img-wrap {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.7s;
+}
+.intro-img-wrap:hover {
+  transform: scale(1.02);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.2) !important;
+}
+
+/* About 카드 화살표 hover */
+.about-card-link .about-arrow {
+  transition: transform 0.3s;
+}
+.about-card-link:hover .about-arrow {
+  transform: translateX(6px);
+}
+.about-card-link {
+  transition: background 0.3s, border-color 0.3s;
+}
+.about-card-link:hover {
+  border-color: #e2e8f0 !important;
+  background: var(--bg-surface) !important;
+}
+
+/* Most Read 카드 hover */
+.most-read-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+}
+.most-read-card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.12) !important;
+  text-decoration: none;
+}
+.most-read-card:hover .most-read-img {
+  transform: scale(1.05);
+}
+.most-read-img {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* 다크 모드 Most Read */
+.dark .most-read-card:hover {
+  box-shadow: 0 30px 60px rgba(0,0,0,0.35) !important;
+}

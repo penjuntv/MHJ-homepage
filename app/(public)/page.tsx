@@ -99,18 +99,19 @@ export default async function LandingPage() {
       {/* Hero Carousel */}
       <HeroCarousel items={blogs} heroLabel={s.hero_label} />
 
-      {/* Intro Section */}
+      {/* Intro Section — 흰 배경 */}
       <section style={{
         padding: 'clamp(40px, 8vw, 128px) clamp(24px, 4vw, 40px)',
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))',
         gap: 80,
         alignItems: 'center',
+        background: 'var(--bg)',
       }}>
 
         {/* 좌측: 이미지 */}
         <div
-          className="group"
+          className="group intro-img-wrap"
           style={{
             aspectRatio: '4/5',
             borderRadius: 40,
@@ -194,16 +195,16 @@ export default async function LandingPage() {
           {/* About 링크 카드 */}
           <Link
             href="/about"
+            className="about-card-link"
             style={{
               padding: 32,
-              border: '1px solid #f1f5f9',
+              border: '1px solid var(--border)',
               borderRadius: 24,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               cursor: 'pointer',
               background: 'var(--bg)',
-              transition: 'background 0.3s',
               textDecoration: 'none',
               boxSizing: 'border-box',
             }}
@@ -214,7 +215,7 @@ export default async function LandingPage() {
                 fontWeight: 900,
                 letterSpacing: 3,
                 textTransform: 'uppercase',
-                color: '#cbd5e1',
+                color: 'var(--text-tertiary)',
                 display: 'block',
                 marginBottom: 8,
               }}>
@@ -225,21 +226,21 @@ export default async function LandingPage() {
                 fontWeight: 900,
                 textTransform: 'uppercase',
                 letterSpacing: -1,
-                color: '#1a1a1a',
+                color: 'var(--text)',
               }}>
                 About Mairangi Family
               </span>
             </div>
-            <ArrowRight size={24} style={{ color: '#cbd5e1', flexShrink: 0 }} />
+            <ArrowRight size={24} className="about-arrow" style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
           </Link>
         </div>
 
       </section>
 
-      {/* Most Read Section */}
+      {/* Most Read Section — #f8fafc 배경 */}
       <MostReadSection blogs={mostRead} />
 
-      {/* StoryPress Section */}
+      {/* StoryPress Section — #fff 배경 */}
       <StoryPressSection
         title={s.storypress_title}
         description={s.storypress_description}
@@ -267,6 +268,7 @@ function MostReadSection({ blogs }: { blogs: Blog[] }) {
       padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 80px)',
       background: 'var(--bg-surface)',
     }}>
+      {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
@@ -277,73 +279,112 @@ function MostReadSection({ blogs }: { blogs: Blog[] }) {
           </h2>
         </div>
         <Link
-          href="/blog?category=Popular"
+          href="/blog"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             fontSize: '11px', fontWeight: 900, letterSpacing: '3px',
             textTransform: 'uppercase', color: '#4F46E5', textDecoration: 'none',
           }}
         >
-          All Popular <ArrowRight size={14} />
+          All Stories <ArrowRight size={14} />
         </Link>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* 카드 그리드 */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
+        gap: '48px',
+      }}>
         {blogs.map((blog, i) => {
           const color = CATEGORY_COLORS[blog.category] || '#4F46E5';
           return (
             <Link
               key={blog.id}
               href={`/blog/${blog.slug}`}
+              className="most-read-card"
               style={{
-                display: 'flex', alignItems: 'center', gap: '24px',
-                padding: '20px 0', borderBottom: '1px solid var(--border)',
                 textDecoration: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                background: 'var(--bg)',
+                borderRadius: '24px',
+                overflow: 'hidden',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+                position: 'relative',
               }}
             >
-              {/* 랭크 번호 */}
-              <span className="font-display font-black" style={{
-                fontSize: 'clamp(28px, 4vw, 48px)', letterSpacing: '-2px',
-                color: i < 3 ? color : 'var(--border-medium)',
-                minWidth: '56px', fontStyle: 'italic', flexShrink: 0,
-              }}>
-                {String(i + 1).padStart(2, '0')}
-              </span>
-
-              {/* 썸네일 */}
+              {/* 랭크 뱃지 */}
               <div style={{
-                width: '72px', height: '72px', borderRadius: '16px',
-                overflow: 'hidden', flexShrink: 0, position: 'relative',
+                position: 'absolute',
+                top: 16, left: 16,
+                zIndex: 5,
+                width: 36, height: 36,
+                borderRadius: '50%',
+                background: i < 3 ? color : 'rgba(0,0,0,0.5)',
+                backdropFilter: 'blur(8px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <SafeImage src={blog.image_url} alt={blog.title} fill className="object-cover" />
+                <span className="font-display font-black" style={{
+                  fontSize: '13px', color: 'white', fontStyle: 'italic',
+                  lineHeight: 1,
+                }}>
+                  {i + 1}
+                </span>
               </div>
 
-              {/* 메타 */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              {/* 이미지 */}
+              <div style={{
+                aspectRatio: '4/3',
+                overflow: 'hidden',
+                position: 'relative',
+                background: '#f1f5f9',
+              }}>
+                <SafeImage
+                  src={blog.image_url}
+                  alt={blog.title}
+                  fill
+                  className="object-cover most-read-img"
+                />
+              </div>
+
+              {/* 콘텐츠 */}
+              <div style={{ padding: '20px 24px 24px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {/* 카테고리 + 날짜 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span style={{
                     padding: '3px 10px', borderRadius: '999px',
-                    background: color + '20', color,
+                    background: color + '18', color,
                     fontSize: '9px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase',
                   }}>
                     {blog.category}
                   </span>
-                  <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{blog.date}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 700 }}>
+                    {blog.date}
+                  </span>
                 </div>
+
+                {/* 제목 */}
                 <p style={{
-                  fontSize: 'clamp(14px, 1.5vw, 17px)', fontWeight: 700, color: 'var(--text)',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  fontSize: 'clamp(15px, 1.8vw, 18px)', fontWeight: 900,
+                  color: 'var(--text)', lineHeight: 1.3,
+                  flex: 1,
                 }}>
                   {blog.title}
                 </p>
-                {typeof blog.view_count === 'number' && (
-                  <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '4px' }}>
-                    {blog.view_count.toLocaleString()} views
-                  </p>
-                )}
-              </div>
 
-              <ArrowRight size={18} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
+                {/* 저자 + 뷰 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 700 }}>
+                    {blog.author}
+                  </span>
+                  {typeof blog.view_count === 'number' && blog.view_count > 0 && (
+                    <span style={{ fontSize: '10px', color: color, fontWeight: 900, letterSpacing: '1px' }}>
+                      {blog.view_count.toLocaleString()} views
+                    </span>
+                  )}
+                </div>
+              </div>
             </Link>
           );
         })}
