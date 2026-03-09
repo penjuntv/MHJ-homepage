@@ -77,6 +77,7 @@ export default function Footer({
               { label: 'About', href: '/about' },
               { label: 'Magazine', href: '/magazine' },
               { label: 'Blog', href: '/blog' },
+              { label: 'StoryPress', href: '/storypress' },
             ].map((link) => (
               <Link
                 key={link.href}

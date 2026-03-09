@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 
 interface Props {
@@ -122,6 +123,23 @@ export default function StoryPressSection({ title, description, ctaUrl, ctaText 
             }}>
               Currently in development. Be the first to know when we launch.
             </p>
+            <Link
+              href="/storypress"
+              style={{
+                display: 'inline-block',
+                marginTop: 20,
+                fontSize: 11,
+                fontWeight: 900,
+                letterSpacing: 3,
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.45)',
+                textDecoration: 'none',
+                borderBottom: '1px solid rgba(255,255,255,0.15)',
+                paddingBottom: 2,
+              }}
+            >
+              Learn More →
+            </Link>
           </div>
 
           {/* CTA: 외부 URL이 있으면 링크, 없으면 이메일 폼 */}
