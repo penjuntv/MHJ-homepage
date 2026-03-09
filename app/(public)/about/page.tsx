@@ -137,7 +137,7 @@ export default async function AboutPage() {
             }}
           >
             <SafeImage
-              src="https://picsum.photos/seed/about/800/1200"
+              src={s.about_hero_image_url || 'https://picsum.photos/seed/about/800/1200'}
               alt="Family"
               fill
               className="object-cover"
