@@ -10,6 +10,7 @@ import ViewTracker from './ViewTracker';
 import RelatedCard from './RelatedCard';
 import ShareButton from '@/components/ShareButton';
 import CommentSection from './CommentSection';
+import AiInsight from '@/components/AiInsight';
 
 export const dynamic = 'force-dynamic';
 
@@ -322,6 +323,11 @@ export default async function BlogDetailPage({
                 className="object-cover"
                 priority
               />
+            </div>
+
+            {/* AI Insight */}
+            <div style={{ marginBottom: 40 }}>
+              <AiInsight title={blog.title} content={plainText} />
             </div>
 
             {/* 태그 */}
