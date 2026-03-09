@@ -22,6 +22,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
   const [form, setForm] = useState({ name: '', email: '', content: '' });
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState('');
+  const [focused, setFocused] = useState<string | null>(null);
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
@@ -52,29 +53,43 @@ export default function CommentSection({ blogId }: { blogId: number }) {
     }
   }
 
-  const inputStyle: React.CSSProperties = {
+  const inputBase: React.CSSProperties = {
     width: '100%',
     padding: '14px 18px',
-    borderRadius: 16,
-    border: '1px solid var(--border)',
-    background: 'var(--bg-card)',
+    borderRadius: 12,
     fontSize: 14,
     color: 'var(--text)',
     outline: 'none',
     fontFamily: 'inherit',
     boxSizing: 'border-box',
+    background: 'var(--bg)',
+    transition: 'border-color 0.2s',
   };
+
+  const inputStyle = (field: string): React.CSSProperties => ({
+    ...inputBase,
+    border: focused === field
+      ? '1.5px solid #4F46E5'
+      : '1px solid var(--border-medium)',
+  });
 
   return (
     <section style={{
       padding: 'clamp(60px, 8vw, 100px) clamp(24px, 4vw, 80px)',
       background: 'var(--bg)',
     }}>
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto' }}>
 
         {/* 섹션 제목 */}
         <div style={{ marginBottom: 48 }}>
-          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 12 }}>
+          <p style={{
+            fontSize: 10,
+            fontWeight: 900,
+            letterSpacing: 5,
+            color: 'var(--text-tertiary)',
+            textTransform: 'uppercase',
+            marginBottom: 12,
+          }}>
             Conversation
           </p>
           <h2 className="font-display font-black" style={{
@@ -88,67 +103,99 @@ export default function CommentSection({ blogId }: { blogId: number }) {
           </h2>
         </div>
 
-        {/* 입력 폼 */}
+        {/* 6) 입력 폼 */}
         <form onSubmit={handleSubmit} style={{
           background: 'var(--bg-surface)',
-          borderRadius: 32,
+          borderRadius: 24,
           padding: 'clamp(24px, 4vw, 40px)',
-          marginBottom: 48,
+          marginBottom: 56,
+          border: '1px solid var(--border)',
         }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 10, fontWeight: 900, letterSpacing: 3, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8 }}>
+              <label style={{
+                display: 'block',
+                fontSize: 10,
+                fontWeight: 900,
+                letterSpacing: 3,
+                color: 'var(--text-tertiary)',
+                textTransform: 'uppercase',
+                marginBottom: 8,
+              }}>
                 이름 *
               </label>
               <input
                 value={form.name}
                 onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                onFocus={() => setFocused('name')}
+                onBlur={() => setFocused(null)}
                 placeholder="Your name"
                 required
-                style={inputStyle}
+                style={inputStyle('name')}
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 10, fontWeight: 900, letterSpacing: 3, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8 }}>
+              <label style={{
+                display: 'block',
+                fontSize: 10,
+                fontWeight: 900,
+                letterSpacing: 3,
+                color: 'var(--text-tertiary)',
+                textTransform: 'uppercase',
+                marginBottom: 8,
+              }}>
                 이메일 *
               </label>
               <input
                 type="email"
                 value={form.email}
                 onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                onFocus={() => setFocused('email')}
+                onBlur={() => setFocused(null)}
                 placeholder="your@email.com"
                 required
-                style={inputStyle}
+                style={inputStyle('email')}
               />
             </div>
           </div>
 
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: 10, fontWeight: 900, letterSpacing: 3, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div style={{ marginBottom: 24 }}>
+            <label style={{
+              display: 'block',
+              fontSize: 10,
+              fontWeight: 900,
+              letterSpacing: 3,
+              color: 'var(--text-tertiary)',
+              textTransform: 'uppercase',
+              marginBottom: 8,
+            }}>
               댓글 *
             </label>
             <textarea
               value={form.content}
               onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
+              onFocus={() => setFocused('content')}
+              onBlur={() => setFocused(null)}
               placeholder="Share your thoughts..."
               required
-              rows={4}
-              style={{ ...inputStyle, resize: 'vertical' }}
+              rows={5}
+              style={{ ...inputStyle('content'), resize: 'vertical' }}
             />
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="font-black uppercase"
             style={{
-              background: '#000',
-              color: '#fff',
+              background: 'var(--text)',
+              color: 'var(--bg)',
               border: 'none',
               borderRadius: 999,
               padding: '16px 40px',
-              fontSize: 12,
+              fontSize: 11,
+              fontWeight: 900,
               letterSpacing: 3,
+              textTransform: 'uppercase',
               cursor: submitting ? 'not-allowed' : 'pointer',
               opacity: submitting ? 0.7 : 1,
               transition: 'opacity 0.2s',
@@ -161,7 +208,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
             <p style={{
               marginTop: 16,
               padding: '14px 20px',
-              background: 'var(--accent-light, #EEF2FF)',
+              background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
               color: '#4F46E5',
               borderRadius: 12,
               fontSize: 13,
@@ -172,28 +219,83 @@ export default function CommentSection({ blogId }: { blogId: number }) {
           )}
         </form>
 
-        {/* 댓글 목록 */}
+        {/* 6) 댓글 목록: border-bottom 구분 */}
         {loading ? (
-          <p style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', padding: '32px 0' }}>Loading comments...</p>
+          <p style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', padding: '32px 0' }}>
+            Loading comments...
+          </p>
         ) : comments.length === 0 ? (
-          <p style={{ fontSize: 16, color: 'var(--text-secondary)', textAlign: 'center', padding: '40px 0', fontStyle: 'italic' }}>
+          <p style={{
+            fontSize: 16,
+            color: 'var(--text-secondary)',
+            textAlign: 'center',
+            padding: '40px 0',
+            fontStyle: 'italic',
+          }}>
             Be the first to share your thoughts.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {comments.map(c => (
-              <div key={c.id} style={{
-                background: 'var(--bg-surface)',
-                borderRadius: 24,
-                padding: '28px 32px',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-                  <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--text)', margin: 0 }}>{c.name}</p>
-                  <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: 0, fontWeight: 600, letterSpacing: 1 }}>
+          <div>
+            {comments.map((c, i) => (
+              <div
+                key={c.id}
+                style={{
+                  padding: '32px 0',
+                  borderBottom: i < comments.length - 1
+                    ? '1px solid var(--border)'
+                    : 'none',
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginBottom: 14,
+                  flexWrap: 'wrap',
+                  gap: 8,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {/* 아바타 이니셜 */}
+                    <div style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <span style={{
+                        fontSize: 13,
+                        fontWeight: 900,
+                        color: 'white',
+                        textTransform: 'uppercase',
+                      }}>
+                        {c.name.charAt(0)}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
+                      {c.name}
+                    </p>
+                  </div>
+                  <p style={{
+                    fontSize: 11,
+                    color: 'var(--text-tertiary)',
+                    margin: 0,
+                    fontWeight: 600,
+                    letterSpacing: 1,
+                  }}>
                     {timeAgo(c.created_at)}
                   </p>
                 </div>
-                <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>
+                <p style={{
+                  fontSize: 15,
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.75,
+                  margin: '0 0 0 48px',
+                  whiteSpace: 'pre-wrap',
+                }}>
                   {c.content}
                 </p>
               </div>

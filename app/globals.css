@@ -421,3 +421,53 @@
   border-color: var(--text) !important;
   transform: translateY(-2px);
 }
+
+/* ─── B-4 블로그 상세 리파인 ─── */
+
+/* Back to Library 링크 hover */
+.blog-back-link:hover {
+  background: var(--bg-surface) !important;
+  color: var(--text) !important;
+}
+
+/* AI Insight 다크 모드 */
+.dark .ai-insight-card {
+  background: linear-gradient(
+    135deg,
+    rgba(79,70,229,0.15) 0%,
+    rgba(109,40,217,0.1) 60%,
+    rgba(147,51,234,0.08) 100%
+  ) !important;
+}
+.dark .ai-insight-card p:last-of-type {
+  color: #A5B4FC !important;
+}
+.dark .ai-insight-card .font-display {
+  color: #C7D2FE !important;
+}
+
+/* 블로그 본문 다크 모드 */
+.dark .blog-content {
+  color: var(--text);
+}
+.dark .blog-content > p:first-child::first-letter {
+  color: #818CF8;
+}
+.dark .blog-content blockquote {
+  border-left-color: #6366F1;
+  color: var(--text-secondary);
+}
+.dark .blog-content h2,
+.dark .blog-content h3 {
+  color: var(--text);
+}
+.dark .blog-content a {
+  color: #818CF8;
+}
+
+/* 모바일: 댓글 그리드 1컬럼 */
+@media (max-width: 640px) {
+  .comment-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
