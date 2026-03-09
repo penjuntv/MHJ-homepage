@@ -102,26 +102,51 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
                   background: '#1a1a1a',
                 }}
               >
-                {/* 배경 이미지 */}
+                {/* 배경 이미지 or 그라디언트 폴백 */}
                 <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-                  <SafeImage
-                    src={item.image_url}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                    style={{
-                      filter: isActive
-                        ? 'saturate(1.8) contrast(1.05)'
-                        : 'saturate(1.2)',
-                      transition: 'filter 0.6s',
-                    }}
-                  />
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: isActive ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.6)',
-                    transition: 'all 0.7s',
-                  }} />
+                  {item.image_url ? (
+                    <>
+                      <SafeImage
+                        src={item.image_url}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
+                        style={{
+                          filter: isActive
+                            ? 'saturate(1.8) contrast(1.05)'
+                            : 'saturate(1.2)',
+                          transition: 'filter 0.6s',
+                        }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: isActive ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.6)',
+                        transition: 'all 0.7s',
+                      }} />
+                    </>
+                  ) : (
+                    /* 이미지 없을 때: 인디고 그라디언트 배경 */
+                    <>
+                      <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: isActive
+                          ? 'linear-gradient(160deg, #4F46E5 0%, #312E81 60%, #1e1b4b 100%)'
+                          : 'linear-gradient(160deg, #3730a3 0%, #1e1b4b 100%)',
+                        transition: 'background 0.7s',
+                      }} />
+                      {/* 장식용 원형 패턴 */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '-30%', right: '-20%',
+                        width: '80%', height: '60%',
+                        borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.04)',
+                        pointerEvents: 'none',
+                      }} />
+                    </>
+                  )}
                 </div>
 
                 {/* 컨텐츠 레이어 */}

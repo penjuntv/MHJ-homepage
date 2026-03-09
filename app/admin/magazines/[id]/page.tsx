@@ -80,9 +80,10 @@ export default function MagazineDetailPage() {
 
   /* 이슈 정보 편집 */
   const [editingMag, setEditingMag] = useState(false);
-  const [magForm, setMagForm] = useState({ title: '', editor: '', year: '', month_name: '', pdf_url: '' });
+  const [magForm, setMagForm] = useState({ title: '', editor: '', year: '', month_name: '', pdf_url: '', image_url: '' });
   const [savingMag, setSavingMag] = useState(false);
   const [uploadingMagPdf, setUploadingMagPdf] = useState(false);
+  const [uploadingMagCover, setUploadingMagCover] = useState(false);
 
   /* 기사 모달 */
   const [modalOpen, setModalOpen] = useState(false);
@@ -97,6 +98,7 @@ export default function MagazineDetailPage() {
   const [reordering, setReordering] = useState(false);
 
   const magPdfRef    = useRef<HTMLInputElement>(null);
+  const magCoverRef  = useRef<HTMLInputElement>(null);
   const coverImgRef  = useRef<HTMLInputElement>(null);
   const contentRef   = useRef<HTMLInputElement>(null);
 
@@ -109,7 +111,7 @@ export default function MagazineDetailPage() {
     ]);
     setMagazine(mag);
     setArticles(arts ?? []);
-    if (mag) setMagForm({ title: mag.title, editor: mag.editor, year: mag.year, month_name: mag.month_name, pdf_url: mag.pdf_url ?? '' });
+    if (mag) setMagForm({ title: mag.title, editor: mag.editor, year: mag.year, month_name: mag.month_name, pdf_url: mag.pdf_url ?? '', image_url: mag.image_url ?? '' });
     setLoading(false);
   }, [id]);
 
@@ -133,14 +135,27 @@ export default function MagazineDetailPage() {
     setUploadingMagPdf(false);
   }
 
+  /* ─── 매거진 표지 이미지 업로드 ─── */
+  async function uploadMagCover(file: File) {
+    setUploadingMagCover(true);
+    const ext = file.name.split('.').pop();
+    const path = `magazines/${id}/cover_${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    if (error) { showToast('업로드 실패: ' + error.message); setUploadingMagCover(false); return; }
+    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+    setMagForm(p => ({ ...p, image_url: publicUrl }));
+    setUploadingMagCover(false);
+  }
+
   /* ─── 매거진 정보 저장 ─── */
   async function saveMagazine() {
     if (!magazine) return;
     setSavingMag(true);
-    const payload = { title: magForm.title, editor: magForm.editor, year: magForm.year, month_name: magForm.month_name, pdf_url: magForm.pdf_url || null };
-    const { error } = await supabase.from('magazines').update(payload).eq('id', magazine.id);
+    const dbPayload = { title: magForm.title, editor: magForm.editor, year: magForm.year, month_name: magForm.month_name, pdf_url: magForm.pdf_url || null, image_url: magForm.image_url || null };
+    const { error } = await supabase.from('magazines').update(dbPayload).eq('id', magazine.id);
     if (error) { showToast('저장 실패: ' + error.message); } else {
-      setMagazine(p => p ? { ...p, ...payload } : p);
+      // 상태 업데이트: image_url은 string 타입 유지
+      setMagazine(p => p ? { ...p, title: magForm.title, editor: magForm.editor, year: magForm.year, month_name: magForm.month_name, pdf_url: magForm.pdf_url || null, image_url: magForm.image_url || p.image_url } : p);
       setEditingMag(false);
       showToast('이슈 정보가 저장되었습니다.');
     }
@@ -378,6 +393,33 @@ export default function MagazineDetailPage() {
               <label style={labelStyle}>이슈 제목</label>
               <input value={magForm.title} onChange={e => setMagForm(p => ({ ...p, title: e.target.value }))} style={inputStyle} />
             </div>
+
+            {/* 표지 이미지 */}
+            <div>
+              <label style={labelStyle}>표지 이미지 (서가 커버)</label>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                {/* 미리보기 */}
+                <div style={{ width: '80px', height: '107px', borderRadius: '8px', overflow: 'hidden', background: '#F1F5F9', flexShrink: 0, position: 'relative' }}>
+                  {magForm.image_url
+                    ? <SafeImage src={magForm.image_url} alt="" fill style={{ objectFit: 'cover' }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={20} color="#CBD5E1" /></div>
+                  }
+                </div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <input value={magForm.image_url} onChange={e => setMagForm(p => ({ ...p, image_url: e.target.value }))} placeholder="이미지 URL 직접 입력" style={inputStyle} />
+                  <button
+                    type="button"
+                    onClick={() => magCoverRef.current?.click()}
+                    disabled={uploadingMagCover}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', background: '#F8FAFC', border: '1px solid #F1F5F9', borderRadius: '12px', fontSize: '12px', fontWeight: 700, color: '#64748B', cursor: 'pointer' }}
+                  >
+                    {uploadingMagCover ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={13} />}
+                    {uploadingMagCover ? '업로드 중...' : '이미지 업로드'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={saveMagazine} disabled={savingMag}
@@ -454,6 +496,10 @@ export default function MagazineDetailPage() {
         <input ref={magPdfRef} type="file" accept=".pdf,image/*" style={{ display: 'none' }}
           onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagPdf(f); e.target.value = ''; }} />
       </div>
+
+      {/* magCoverRef — 섹션 1 표지 이미지용 */}
+      <input ref={magCoverRef} type="file" accept="image/*" style={{ display: 'none' }}
+        onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagCover(f); e.target.value = ''; }} />
 
       {/* ═══════════════════════════════
           섹션 3: 개별 기사 편집
