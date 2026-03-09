@@ -30,7 +30,22 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
   const tag = decodeURIComponent(params.tag);
   const blogs = await getBlogsByTag(tag);
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://mymairangi.com/blog' },
+      { '@type': 'ListItem', position: 3, name: `Tag: ${tag}` },
+    ],
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px clamp(24px, 4vw, 80px)' }}>
 
@@ -112,5 +127,6 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
         )}
       </div>
     </div>
+    </>
   );
 }

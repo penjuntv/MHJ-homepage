@@ -41,6 +41,23 @@ export const metadata: Metadata = {
   alternates: { canonical: BASE_URL },
 };
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mymairangi.com';
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'MY MAIRANGI',
+  url: SITE_URL,
+  description: 'A family life magazine from Mairangi Bay, Auckland',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Mairangi Bay',
+    addressRegion: 'Auckland',
+    addressCountry: 'NZ',
+  },
+  sameAs: [],
+};
+
 // FOUC 방지 인라인 스크립트 — React hydration 전에 실행되어 dark 클래스를 즉시 적용
 const themeScript = `
 (function(){
@@ -59,6 +76,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <link
           rel="alternate"
           type="application/rss+xml"

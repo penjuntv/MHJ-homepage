@@ -36,6 +36,8 @@ export interface Blog {
   publish_at?: string | null;
   is_sponsored?: boolean;
   sponsor_name?: string | null;
+  is_hero?: boolean;
+  hero_order?: number;
   created_at?: string;
 }
 

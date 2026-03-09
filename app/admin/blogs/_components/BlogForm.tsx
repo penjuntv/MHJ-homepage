@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import { Upload, Loader2 } from 'lucide-react';
+import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
@@ -138,20 +139,24 @@ export default function BlogForm({ initial }: Props) {
       blogId = data?.id;
     }
 
-    // 뉴스레터 발송
+    // 뉴스레터 발송 (카드뉴스 템플릿)
     if (sendAsNewsletter && form.published && blogId) {
-      const plain = form.content.replace(/<[^>]*>/g, '').slice(0, 200);
-      const url = `https://mymairangi.com/blog/${form.slug}`;
-      const newsletterContent = `
-        <p>${plain}...</p>
-        <p style="margin-top:24px;">
-          <a href="${url}" style="background:#000;color:#fff;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:2px;">Read More →</a>
-        </p>
-      `;
       await fetch('/api/send-newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject: form.title, content: newsletterContent }),
+        body: JSON.stringify({
+          subject: form.title,
+          content: form.content,
+          blogPost: {
+            title: form.title,
+            image_url: form.image_url,
+            slug: form.slug,
+            category: form.category,
+            date: form.date,
+            author: form.author,
+            meta_description: form.meta_description,
+          },
+        }),
       });
     }
 
@@ -251,20 +256,15 @@ export default function BlogForm({ initial }: Props) {
           <div
             onClick={() => fileRef.current?.click()}
             style={{
-              border: '2px dashed #F1F5F9', borderRadius: '20px', padding: '32px',
+              border: '2px dashed #F1F5F9', borderRadius: '20px', padding: '28px',
               textAlign: 'center', cursor: 'pointer', background: '#F8FAFC',
               transition: 'all 0.3s',
             }}
           >
-            {form.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={form.image_url} alt="" style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '12px' }} />
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', color: '#94A3B8' }}>
-                {uploading ? <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={24} />}
-                <p style={{ fontSize: '12px', fontWeight: 700 }}>{uploading ? '업로드 중...' : '클릭해서 이미지 업로드'}</p>
-              </div>
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', color: '#94A3B8' }}>
+              {uploading ? <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={24} />}
+              <p style={{ fontSize: '12px', fontWeight: 700 }}>{uploading ? '업로드 중...' : '클릭해서 이미지 업로드'}</p>
+            </div>
           </div>
           <input
             ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
@@ -275,6 +275,15 @@ export default function BlogForm({ initial }: Props) {
             onChange={e => set('image_url', e.target.value)}
             placeholder="또는 이미지 URL 직접 입력"
             style={{ ...inputStyle, marginTop: '8px' }}
+          />
+          {/* 비율별 미리보기 탭 */}
+          <ImagePreviewTabs
+            imageUrl={form.image_url}
+            tabs={[
+              { id: 'card',   label: 'Card',   ratio: '1:1',   description: 'Blog Library 카드 — 정사각형으로 잘립니다' },
+              { id: 'hero',   label: 'Hero',   ratio: '16:9',  description: 'Landing 히어로 캐러셀 — 좌우 여백 없이 꽉 채웁니다' },
+              { id: 'detail', label: 'Detail', ratio: '21:9',  description: '글 상세 하단 이미지 — 위아래가 많이 잘립니다' },
+            ]}
           />
         </div>
 

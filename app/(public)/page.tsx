@@ -32,6 +32,18 @@ const FALLBACK_HERO_BLOGS: Blog[] = [
 ];
 
 async function getRecentBlogs(): Promise<Blog[]> {
+  // 히어로 지정 글 우선 조회
+  const { data: heroData } = await supabase
+    .from('blogs')
+    .select('*')
+    .eq('published', true)
+    .eq('is_hero', true)
+    .order('hero_order', { ascending: true })
+    .limit(7);
+
+  if (heroData && heroData.length > 0) return heroData;
+
+  // fallback: 최신 5개
   const { data } = await supabase
     .from('blogs')
     .select('*')

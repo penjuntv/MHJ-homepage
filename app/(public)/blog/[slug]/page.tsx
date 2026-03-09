@@ -103,6 +103,16 @@ export default async function BlogDetailPage({
   const firstChar = plainText.charAt(0);
   const restContent = isHtml ? '' : blog.content.slice(1);
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://mymairangi.com/blog' },
+      { '@type': 'ListItem', position: 3, name: blog.title },
+    ],
+  };
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -126,6 +136,10 @@ export default async function BlogDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       <ViewTracker slug={blog.slug} />
@@ -240,13 +254,29 @@ export default async function BlogDetailPage({
                     .blog-content p { margin: 16px 0; }
                     .blog-content h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 800; margin: 40px 0 16px; letter-spacing: -0.5px; }
                     .blog-content h3 { font-size: clamp(20px, 2.5vw, 28px); font-weight: 700; margin: 28px 0 12px; }
-                    .blog-content img { max-width: 100%; height: auto; border-radius: 16px; margin: 32px 0; }
                     .blog-content blockquote { border-left: 3px solid #cbd5e1; padding-left: 24px; margin: 32px 0; color: #64748b; font-style: italic; }
                     .blog-content strong { font-weight: 700; }
                     .blog-content em { font-style: italic; }
                     .blog-content ul { padding-left: 24px; margin: 16px 0; }
                     .blog-content li { margin: 8px 0; }
                     .blog-content a { color: #4f46e5; text-decoration: underline; }
+                    /* 이미지 기본 */
+                    .blog-content img { max-width: 100%; height: auto; border-radius: 16px; margin: 32px 0; display: block; }
+                    /* 정렬 */
+                    .blog-content img[data-align="left"]   { float: left;  margin: 8px 24px 16px 0; display: inline; }
+                    .blog-content img[data-align="right"]  { float: right; margin: 8px 0 16px 24px; display: inline; }
+                    .blog-content img[data-align="center"] { margin-left: auto; margin-right: auto; }
+                    /* 크기 */
+                    .blog-content img[data-width="25%"]  { width: 25%; }
+                    .blog-content img[data-width="50%"]  { width: 50%; }
+                    .blog-content img[data-width="75%"]  { width: 75%; }
+                    .blog-content img[data-width="100%"] { width: 100%; }
+                    /* clearfix — float 이미지 다음 단락이 밀리지 않도록 */
+                    .blog-content p { clear: none; }
+                    /* 모바일: float 해제 */
+                    @media (max-width: 640px) {
+                      .blog-content img { float: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+                    }
                   `}</style>
                   <div
                     className="blog-content"

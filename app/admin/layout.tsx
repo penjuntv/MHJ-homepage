@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { LayoutDashboard, FileText, BookOpen, Settings, Palette, LogOut, ExternalLink, Mail, Images, MessageCircle, Send } from 'lucide-react';
+import { LayoutDashboard, FileText, BookOpen, Settings, Palette, LogOut, ExternalLink, Mail, Images, MessageCircle, Send, FileImage, SearchCheck, Star } from 'lucide-react';
 
 const NAV = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard, exact: true },
   { href: '/admin/blogs', label: '블로그', icon: FileText, exact: false },
+  { href: '/admin/hero', label: '히어로 캐러셀', icon: Star, exact: false },
   { href: '/admin/magazines', label: '매거진', icon: BookOpen, exact: false },
   { href: '/admin/gallery', label: '갤러리', icon: Images, exact: false },
+  { href: '/admin/media', label: '미디어', icon: FileImage, exact: false },
+  { href: '/admin/seo', label: 'SEO', icon: SearchCheck, exact: false },
   { href: '/admin/comments', label: '댓글', icon: MessageCircle, exact: false },
   { href: '/admin/newsletter', label: '뉴스레터', icon: Send, exact: false },
   { href: '/admin/subscribers', label: '구독자', icon: Mail, exact: false },

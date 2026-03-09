@@ -87,6 +87,15 @@ export default async function WelcomePage() {
   // fallback으로 빈 카테고리 채우기
   const categoryBlogs: Record<string, Blog> = { ...FALLBACK_CATEGORY_BLOGS, ...categoryBlogsRaw };
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 2, name: 'Welcome' },
+    ],
+  };
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
@@ -107,6 +116,10 @@ export default async function WelcomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <WelcomeClient
         heroImageUrl={s.welcome_hero_image_url || s.intro_image_url || ''}

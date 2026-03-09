@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -203,10 +204,8 @@ export default function MagazineDetailPage() {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
               }}>
                 {/* 썸네일 */}
-                <div style={{ width: '64px', height: '64px', borderRadius: '12px', overflow: 'hidden', background: '#F8FAFC', flexShrink: 0 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={article.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <div style={{ width: '64px', height: '64px', borderRadius: '12px', overflow: 'hidden', background: '#F8FAFC', flexShrink: 0, position: 'relative' }}>
+                  <Image src={article.image_url} alt="" fill style={{ objectFit: 'cover' }} />
                 </div>
                 {/* 정보 */}
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -317,8 +316,9 @@ function ArticleFormFields({
           style={{ border: '2px dashed #F1F5F9', borderRadius: '16px', padding: '20px', textAlign: 'center', cursor: 'pointer', background: '#F8FAFC' }}
         >
           {form.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={form.image_url} alt="" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px' }} />
+            <div style={{ position: 'relative', width: '100%', height: '120px', borderRadius: '8px', overflow: 'hidden' }}>
+              <Image src={form.image_url} alt="" fill style={{ objectFit: 'cover' }} />
+            </div>
           ) : (
             <div style={{ color: '#94A3B8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               {uploading ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={20} />}

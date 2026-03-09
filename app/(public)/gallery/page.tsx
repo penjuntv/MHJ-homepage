@@ -30,11 +30,26 @@ async function getGallery(): Promise<GalleryItem[]> {
 export default async function GalleryPage() {
   const [items, s] = await Promise.all([getGallery(), getSiteSettings()]);
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 2, name: 'Gallery' },
+    ],
+  };
+
   return (
-    <GalleryClient
-      items={items}
-      title={s.gallery_title}
-      description={s.gallery_description}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <GalleryClient
+        items={items}
+        title={s.gallery_title}
+        description={s.gallery_description}
+      />
+    </>
   );
 }

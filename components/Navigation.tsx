@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Search, Sun, Moon } from 'lucide-react';
+import { Search, Sun, Moon, Instagram, Youtube, Mail } from 'lucide-react';
 import SearchOverlay from './SearchOverlay';
 import { useTheme } from './ThemeProvider';
 
@@ -18,9 +18,12 @@ const NAV_LINKS = [
 interface NavProps {
   siteName?: string;
   siteSubtitle?: string;
+  socialInstagram?: string;
+  socialYoutube?: string;
+  contactEmail?: string;
 }
 
-export default function Navigation({ siteName, siteSubtitle }: NavProps) {
+export default function Navigation({ siteName, siteSubtitle, socialInstagram, socialYoutube, contactEmail }: NavProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -99,6 +102,22 @@ export default function Navigation({ siteName, siteSubtitle }: NavProps) {
 
             {/* 아이콘 버튼들 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {/* 소셜 아이콘 (설정된 경우만 표시) */}
+              {socialInstagram && (
+                <NavSocialBtn href={socialInstagram} label="Instagram" isDark={isDark}>
+                  <Instagram size={17} />
+                </NavSocialBtn>
+              )}
+              {socialYoutube && (
+                <NavSocialBtn href={socialYoutube} label="YouTube" isDark={isDark}>
+                  <Youtube size={17} />
+                </NavSocialBtn>
+              )}
+              {contactEmail && (
+                <NavSocialBtn href={`mailto:${contactEmail}`} label="Email" isDark={isDark}>
+                  <Mail size={17} />
+                </NavSocialBtn>
+              )}
               {/* 검색 */}
               <IconBtn onClick={openSearch} label="검색" isDark={isDark}>
                 <Search size={17} />
@@ -187,5 +206,35 @@ function IconBtn({ onClick, label, isDark, children }: {
     >
       {children}
     </button>
+  );
+}
+
+function NavSocialBtn({ href, label, isDark, children }: {
+  href: string; label: string; isDark: boolean; children: React.ReactNode;
+}) {
+  const isExternal = !href.startsWith('mailto:');
+  return (
+    <a
+      href={href}
+      aria-label={label}
+      target={isExternal ? '_blank' : undefined}
+      rel={isExternal ? 'noopener noreferrer' : undefined}
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--text)', padding: '8px', borderRadius: '8px',
+        textDecoration: 'none',
+        transition: 'color 0.2s, background 0.2s',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.color = '#4F46E5';
+        e.currentTarget.style.background = isDark ? 'rgba(79,70,229,0.15)' : '#EEF2FF';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.color = 'var(--text)';
+        e.currentTarget.style.background = 'none';
+      }}
+    >
+      {children}
+    </a>
   );
 }

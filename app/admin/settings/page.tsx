@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { DEFAULT_SETTINGS, SETTING_DESCRIPTIONS } from '@/lib/site-settings';
-import { Loader2, Save, RotateCcw } from 'lucide-react';
+import { Loader2, Save, RotateCcw, Instagram, Facebook, Youtube } from 'lucide-react';
 
 // 표시 순서
 const SETTING_KEYS = [
@@ -17,8 +17,30 @@ const SETTING_KEYS = [
   'contact_location', 'contact_email',
 ];
 
+const SOCIAL_KEYS = ['social_instagram', 'social_facebook', 'social_youtube'] as const;
+
 // 여러 줄 입력이 필요한 키
 const MULTILINE_KEYS = new Set(['intro_description', 'about_vision_description', 'blog_description', 'storypress_description', 'footer_description']);
+
+const SOCIAL_META: Record<string, { label: string; icon: React.ReactNode; placeholder: string }> = {
+  social_instagram: {
+    label: 'Instagram',
+    icon: <Instagram size={16} />,
+    placeholder: 'https://www.instagram.com/yourhandle',
+  },
+  social_facebook: {
+    label: 'Facebook',
+    icon: <Facebook size={16} />,
+    placeholder: 'https://www.facebook.com/yourpage',
+  },
+  social_youtube: {
+    label: 'YouTube',
+    icon: <Youtube size={16} />,
+    placeholder: 'https://www.youtube.com/@yourchannel',
+  },
+};
+
+const ALL_KEYS = [...SETTING_KEYS, ...SOCIAL_KEYS];
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -26,9 +48,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
+  useEffect(() => { loadSettings(); }, []);
 
   async function loadSettings() {
     setLoading(true);
@@ -48,9 +68,9 @@ export default function SettingsPage() {
   async function handleSave() {
     setSaving(true);
     setMessage('');
-    const rows = SETTING_KEYS.map(key => ({
+    const rows = ALL_KEYS.map(key => ({
       key,
-      value: settings[key] ?? DEFAULT_SETTINGS[key],
+      value: settings[key] ?? DEFAULT_SETTINGS[key] ?? '',
       description: SETTING_DESCRIPTIONS[key] ?? null,
     }));
 
@@ -70,23 +90,15 @@ export default function SettingsPage() {
 
   const labelStyle = {
     display: 'block' as const,
-    fontSize: '10px',
-    fontWeight: 900,
-    letterSpacing: '3px',
-    color: '#94A3B8',
-    textTransform: 'uppercase' as const,
-    marginBottom: '6px',
+    fontSize: '10px', fontWeight: 900,
+    letterSpacing: '3px', color: '#94A3B8',
+    textTransform: 'uppercase' as const, marginBottom: '6px',
   };
   const inputStyle = {
-    width: '100%',
-    padding: '14px 16px',
-    borderRadius: '16px',
-    border: '1px solid #F1F5F9',
-    background: '#F8FAFC',
-    fontSize: '14px',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-    fontFamily: 'inherit',
+    width: '100%', padding: '14px 16px', borderRadius: '16px',
+    border: '1px solid #F1F5F9', background: '#F8FAFC',
+    fontSize: '14px', outline: 'none',
+    boxSizing: 'border-box' as const, fontFamily: 'inherit',
   };
 
   if (loading) {
@@ -110,6 +122,64 @@ export default function SettingsPage() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+        {/* ── 소셜 미디어 섹션 ── */}
+        <div style={{
+          background: 'white', borderRadius: '24px',
+          border: '1px solid #F1F5F9', overflow: 'hidden',
+        }}>
+          <div style={{
+            padding: '20px 28px', borderBottom: '1px solid #F1F5F9',
+            display: 'flex', alignItems: 'center', gap: '12px',
+          }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Instagram size={16} style={{ color: '#E1306C' }} />
+              <Facebook  size={16} style={{ color: '#1877F2' }} />
+              <Youtube   size={16} style={{ color: '#FF0000' }} />
+            </div>
+            <div>
+              <p style={{ fontSize: '12px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#1A1A1A', margin: 0 }}>
+                소셜 미디어
+              </p>
+              <p style={{ fontSize: '11px', color: '#94A3B8', margin: '2px 0 0' }}>
+                URL이 비어있으면 아이콘이 숨겨집니다
+              </p>
+            </div>
+          </div>
+
+          <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {SOCIAL_KEYS.map(key => {
+              const meta = SOCIAL_META[key];
+              return (
+                <div key={key}>
+                  <label style={labelStyle}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {meta.icon} {meta.label}
+                    </span>
+                  </label>
+                  <input
+                    type="url"
+                    value={settings[key] ?? ''}
+                    onChange={e => set(key, e.target.value)}
+                    placeholder={meta.placeholder}
+                    style={inputStyle}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── 일반 설정 ── */}
+        <div style={{
+          padding: '4px 0 0',
+          borderTop: '1px solid #F1F5F9',
+        }}>
+          <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '4px', textTransform: 'uppercase', color: '#CBD5E1', marginBottom: '20px' }}>
+            텍스트 설정
+          </p>
+        </div>
+
         {SETTING_KEYS.map(key => (
           <div key={key}>
             <label style={labelStyle}>{SETTING_DESCRIPTIONS[key] || key}</label>
@@ -133,9 +203,7 @@ export default function SettingsPage() {
         {/* 메시지 */}
         {message && (
           <p style={{
-            fontSize: '14px',
-            padding: '16px',
-            borderRadius: '12px',
+            fontSize: '14px', padding: '16px', borderRadius: '12px',
             background: message.includes('실패') ? '#FEF2F2' : '#F0FDF4',
             color: message.includes('실패') ? '#EF4444' : '#16A34A',
           }}>

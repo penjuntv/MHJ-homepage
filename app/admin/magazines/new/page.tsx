@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Upload, Loader2 } from 'lucide-react';
+import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -121,19 +122,14 @@ export default function NewMagazinePage() {
           <div
             onClick={() => fileRef.current?.click()}
             style={{
-              border: '2px dashed #F1F5F9', borderRadius: '20px', padding: '32px',
+              border: '2px dashed #F1F5F9', borderRadius: '20px', padding: '28px',
               textAlign: 'center', cursor: 'pointer', background: '#F8FAFC',
             }}
           >
-            {form.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={form.image_url} alt="" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '12px' }} />
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', color: '#94A3B8' }}>
-                {uploading ? <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={24} />}
-                <p style={{ fontSize: '12px', fontWeight: 700 }}>{uploading ? '업로드 중...' : '클릭해서 커버 이미지 업로드'}</p>
-              </div>
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', color: '#94A3B8' }}>
+              {uploading ? <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={24} />}
+              <p style={{ fontSize: '12px', fontWeight: 700 }}>{uploading ? '업로드 중...' : '클릭해서 커버 이미지 업로드'}</p>
+            </div>
           </div>
           <input
             ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
@@ -144,6 +140,14 @@ export default function NewMagazinePage() {
             onChange={e => set('image_url', e.target.value)}
             placeholder="또는 이미지 URL 직접 입력"
             style={{ ...inputStyle, marginTop: '8px' }}
+          />
+          {/* 비율별 미리보기 탭 */}
+          <ImagePreviewTabs
+            imageUrl={form.image_url}
+            tabs={[
+              { id: 'spine', label: 'Spine', ratio: 'spine', description: '서가 책등 — 세로로 좁게 잘립니다' },
+              { id: 'cover', label: 'Cover', ratio: '3:4',   description: '마우스 오버 시 확장 커버 — 세로형으로 표시됩니다' },
+            ]}
           />
         </div>
 

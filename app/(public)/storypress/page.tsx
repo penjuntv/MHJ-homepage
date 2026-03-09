@@ -25,6 +25,15 @@ export const metadata: Metadata = {
 export default async function StoryPressPage() {
   const s = await getSiteSettings();
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 2, name: 'StoryPress' },
+    ],
+  };
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
@@ -43,6 +52,10 @@ export default async function StoryPressPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <StoryPressClient
         title={s.storypress_title || 'StoryPress'}

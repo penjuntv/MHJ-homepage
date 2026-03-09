@@ -3,7 +3,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Eye } from 'lucide-react';
+import { generateNewsletterHTML } from '@/lib/newsletter-template';
+import { Loader2, Eye, X } from 'lucide-react';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
@@ -51,7 +52,6 @@ export default function NewNewsletterPage() {
 
     setSending(true); setError('');
 
-    // 먼저 DB에 저장
     let nlId = editId ? Number(editId) : null;
     if (!nlId) {
       const { data } = await supabase.from('newsletters')
@@ -84,6 +84,8 @@ export default function NewNewsletterPage() {
     fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
   };
 
+  const previewHtml = generateNewsletterHTML(subject || '(제목 없음)', content || '<p>내용이 없습니다.</p>');
+
   return (
     <div style={{ padding: 48, maxWidth: 800, margin: '0 auto' }}>
       <div style={{ marginBottom: 40 }}>
@@ -113,19 +115,28 @@ export default function NewNewsletterPage() {
           <label style={{ display: 'block', fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', marginBottom: 8 }}>
             내용 *
           </label>
-          <Suspense fallback={<div style={{ ...inputStyle, minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8' }}><Loader2 size={20} style={{ animation: 'spin 1s linear infinite', marginRight: 8 }} />로딩 중...</div>}>
+          <Suspense fallback={
+            <div style={{ ...inputStyle, minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8' }}>
+              <Loader2 size={20} style={{ animation: 'spin 1s linear infinite', marginRight: 8 }} />로딩 중...
+            </div>
+          }>
             <TipTapEditor content={content} onChange={setContent} placeholder="뉴스레터 내용을 입력하세요..." />
           </Suspense>
         </div>
 
         {/* 미리보기 버튼 */}
-        <button onClick={() => setPreview(true)} style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          padding: '12px 24px', borderRadius: 999,
-          background: '#F8FAFC', border: '1px solid #F1F5F9',
-          fontSize: 12, fontWeight: 700, cursor: 'pointer', alignSelf: 'flex-start',
-        }}>
-          <Eye size={14} /> 미리보기
+        <button
+          type="button"
+          onClick={() => setPreview(true)}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '12px 24px', borderRadius: 999,
+            background: '#F8FAFC', border: '1px solid #F1F5F9',
+            fontSize: 12, fontWeight: 700, cursor: 'pointer', alignSelf: 'flex-start',
+            color: '#64748B',
+          }}
+        >
+          <Eye size={14} /> 이메일 미리보기
         </button>
 
         {error && (
@@ -172,31 +183,68 @@ export default function NewNewsletterPage() {
         </div>
       </div>
 
-      {/* 미리보기 모달 */}
+      {/* 이메일 미리보기 모달 (iframe) */}
       {preview && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-          zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 24,
-        }} onClick={() => setPreview(false)}>
-          <div style={{
-            background: 'white', borderRadius: 24, padding: '40px',
-            maxWidth: 640, width: '100%', maxHeight: '80vh', overflowY: 'auto',
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily: 'Georgia, serif', maxWidth: 560, margin: '0 auto' }}>
-              <h2 style={{ fontSize: 11, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: '#CBD5E1', marginBottom: 24 }}>
-                MY MAIRANGI
-              </h2>
-              <h3 style={{ fontSize: 24, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 20 }}>{subject || '(제목 없음)'}</h3>
-              <div style={{ fontSize: 15, lineHeight: 1.8, color: '#374151' }} dangerouslySetInnerHTML={{ __html: content || '<p>내용이 없습니다.</p>' }} />
-            </div>
-            <button onClick={() => setPreview(false)} style={{
-              marginTop: 32, padding: '12px 28px', borderRadius: 999,
-              background: '#000', color: '#fff', border: 'none',
-              fontSize: 11, fontWeight: 900, letterSpacing: 2, cursor: 'pointer',
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+            zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 24,
+          }}
+          onClick={() => setPreview(false)}
+        >
+          <div
+            style={{
+              background: 'white', borderRadius: 24,
+              maxWidth: 680, width: '100%', maxHeight: '90vh',
+              display: 'flex', flexDirection: 'column',
+              overflow: 'hidden',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.3)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* 모달 헤더 */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderBottom: '1px solid #F1F5F9',
+              background: '#F8FAFC',
+              flexShrink: 0,
             }}>
-              닫기
-            </button>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: '#94A3B8', margin: 0 }}>
+                  Email Preview
+                </p>
+                <p style={{ fontSize: 12, color: '#64748B', margin: '2px 0 0', fontWeight: 600 }}>
+                  실제 이메일에서 보이는 모습입니다
+                </p>
+              </div>
+              <button
+                onClick={() => setPreview(false)}
+                style={{
+                  width: 32, height: 32, borderRadius: 999, border: 'none',
+                  background: '#F1F5F9', cursor: 'pointer', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', color: '#64748B',
+                  flexShrink: 0,
+                }}
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* 이메일 렌더링 iframe */}
+            <iframe
+              srcDoc={previewHtml}
+              title="이메일 미리보기"
+              style={{
+                width: '100%',
+                flex: 1,
+                border: 'none',
+                background: '#F1F5F9',
+                minHeight: 500,
+              }}
+              sandbox="allow-same-origin"
+            />
           </div>
         </div>
       )}

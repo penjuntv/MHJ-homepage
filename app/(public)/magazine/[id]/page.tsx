@@ -73,6 +73,16 @@ export default async function MagazineIssuePage({ params }: Props) {
 
   const articles = await getArticles(params.id);
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 2, name: 'Magazine', item: 'https://mymairangi.com/magazine' },
+      { '@type': 'ListItem', position: 3, name: magazine.title },
+    ],
+  };
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'PublicationIssue',
@@ -99,6 +109,10 @@ export default async function MagazineIssuePage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
     <div
       className="animate-fade-in"

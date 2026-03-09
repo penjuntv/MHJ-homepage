@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Rss } from 'lucide-react';
+import { Rss, Instagram, Facebook, Youtube, Mail } from 'lucide-react';
 
 interface FooterProps {
   siteName?: string;
@@ -7,6 +7,9 @@ interface FooterProps {
   footerDescription?: string;
   contactLocation?: string;
   contactEmail?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
+  socialYoutube?: string;
 }
 
 export default function Footer({
@@ -15,8 +18,18 @@ export default function Footer({
   footerDescription = '뉴질랜드 오클랜드 노스쇼어\n마이랑이 베이에서 기록하는\n우리 가족의 이야기',
   contactLocation = 'Mairangi Bay, Auckland',
   contactEmail,
+  socialInstagram,
+  socialFacebook,
+  socialYoutube,
 }: FooterProps) {
   const descLines = footerDescription.split('\n');
+
+  const socials = [
+    { href: socialInstagram,                                  icon: <Instagram size={16} />, label: 'Instagram' },
+    { href: socialFacebook,                                   icon: <Facebook  size={16} />, label: 'Facebook'  },
+    { href: socialYoutube,                                    icon: <Youtube   size={16} />, label: 'YouTube'   },
+    { href: contactEmail ? `mailto:${contactEmail}` : '',     icon: <Mail      size={16} />, label: 'Email'     },
+  ].filter(s => !!s.href);
 
   return (
     <footer style={{ background: '#000', padding: '96px 40px 48px' }}>
@@ -57,6 +70,17 @@ export default function Footer({
               <span key={i}>{line}{i < descLines.length - 1 && <br />}</span>
             ))}
           </p>
+
+          {/* 소셜 아이콘 */}
+          {socials.length > 0 && (
+            <div style={{ display: 'flex', gap: '10px', marginTop: '28px', flexWrap: 'wrap' }}>
+              {socials.map(s => (
+                <SocialBtn key={s.label} href={s.href!} label={s.label}>
+                  {s.icon}
+                </SocialBtn>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Explore */}
@@ -74,10 +98,10 @@ export default function Footer({
           </div>
           <div className="flex flex-col" style={{ gap: '12px' }}>
             {[
-              { label: 'About', href: '/about' },
-              { label: 'Magazine', href: '/magazine' },
-              { label: 'Blog', href: '/blog' },
-              { label: 'StoryPress', href: '/storypress' },
+              { label: 'About',     href: '/about'      },
+              { label: 'Magazine',  href: '/magazine'   },
+              { label: 'Blog',      href: '/blog'       },
+              { label: 'StoryPress',href: '/storypress' },
             ].map((link) => (
               <Link
                 key={link.href}
@@ -110,25 +134,20 @@ export default function Footer({
             Contact
           </div>
           <div className="flex flex-col" style={{ gap: '8px' }}>
-            <p
-              className="font-bold"
-              style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}
-            >
+            <p className="font-bold" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
               Auckland, New Zealand
             </p>
-            <p
-              className="font-bold"
-              style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}
-            >
+            <p className="font-bold" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
               {contactLocation}
             </p>
             {contactEmail && (
-              <p
+              <a
+                href={`mailto:${contactEmail}`}
                 className="font-bold"
-                style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}
+                style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}
               >
                 {contactEmail}
-              </p>
+              </a>
             )}
           </div>
         </div>
@@ -142,6 +161,8 @@ export default function Footer({
           margin: '64px auto 0',
           paddingTop: '32px',
           borderTop: '1px solid rgba(255,255,255,0.1)',
+          flexWrap: 'wrap',
+          gap: '16px',
         }}
       >
         <p
@@ -157,15 +178,51 @@ export default function Footer({
           >
             {siteSubtitle}
           </p>
-          <Link
-            href="/feed.xml"
-            title="RSS Feed"
-            className="rss-icon-link"
-          >
+          <Link href="/feed.xml" title="RSS Feed" className="rss-icon-link">
             <Rss size={14} />
           </Link>
         </div>
       </div>
     </footer>
+  );
+}
+
+/* ── 소셜 아이콘 버튼 ── */
+function SocialBtn({
+  href, label, children,
+}: {
+  href: string; label: string; children: React.ReactNode;
+}) {
+  const isExternal = !href.startsWith('mailto:');
+  return (
+    <a
+      href={href}
+      aria-label={label}
+      target={isExternal ? '_blank' : undefined}
+      rel={isExternal ? 'noopener noreferrer' : undefined}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%',
+        background: 'rgba(255,255,255,0.08)',
+        color: 'rgba(255,255,255,0.55)',
+        textDecoration: 'none',
+        transition: 'background 0.2s, color 0.2s',
+        flexShrink: 0,
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.18)';
+        e.currentTarget.style.color = '#fff';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+        e.currentTarget.style.color = 'rgba(255,255,255,0.55)';
+      }}
+    >
+      {children}
+    </a>
   );
 }

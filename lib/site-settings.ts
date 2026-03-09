@@ -34,6 +34,9 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   welcome_description: 'A Korean family\'s life archive from Mairangi Bay, Auckland',
   welcome_hero_image_url: '',
   default_theme: 'system',
+  social_instagram: '',
+  social_facebook: '',
+  social_youtube: '',
 };
 
 // 설명 매핑
@@ -64,6 +67,9 @@ export const SETTING_DESCRIPTIONS: Record<string, string> = {
   welcome_description: 'Welcome 페이지 설명',
   welcome_hero_image_url: 'Welcome 히어로 이미지 URL',
   default_theme: '기본 테마 (light/dark/system)',
+  social_instagram: 'Instagram URL (비워두면 숨김)',
+  social_facebook: 'Facebook URL (비워두면 숨김)',
+  social_youtube: 'YouTube URL (비워두면 숨김)',
 };
 
 export async function getSiteSettings(): Promise<Record<string, string>> {
