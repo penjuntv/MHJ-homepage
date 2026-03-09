@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import FallbackImage from '@/components/FallbackImage';
+import SafeImage from '@/components/SafeImage';
 import { ArrowRight, MousePointer2 } from 'lucide-react';
 import type { Magazine } from '@/lib/types';
 
@@ -104,7 +104,7 @@ export default function MagazineShelf({ magazines, magazineTitle = 'Magazine She
               >
                 {/* 배경 이미지 */}
                 <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-                  <FallbackImage
+                  <SafeImage
                     src={item.image_url}
                     alt={item.title}
                     fill

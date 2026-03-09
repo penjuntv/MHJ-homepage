@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import FallbackImage from '@/components/FallbackImage';
+import SafeImage from '@/components/SafeImage';
 import type { Blog } from '@/lib/types';
 
 interface Props {
@@ -31,7 +31,7 @@ export default function BlogCard({ blog, onClick, staggerIndex }: Props) {
       }}
     >
       {/* 이미지 */}
-      <FallbackImage
+      <SafeImage
         src={blog.image_url}
         alt={blog.title}
         fill

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import FallbackImage from '@/components/FallbackImage';
+import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
@@ -119,7 +119,7 @@ export default async function LandingPage() {
             position: 'relative',
           }}
         >
-          <FallbackImage
+          <SafeImage
             src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1000"
             alt="Mairangi Family"
             fill
@@ -315,7 +315,7 @@ function MostReadSection({ blogs }: { blogs: Blog[] }) {
                 width: '72px', height: '72px', borderRadius: '16px',
                 overflow: 'hidden', flexShrink: 0, position: 'relative',
               }}>
-                <FallbackImage src={blog.image_url} alt={blog.title} fill className="object-cover" />
+                <SafeImage src={blog.image_url} alt={blog.title} fill className="object-cover" />
               </div>
 
               {/* 메타 */}

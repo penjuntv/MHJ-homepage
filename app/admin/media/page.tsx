@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import FallbackImage from '@/components/FallbackImage';
+import SafeImage from '@/components/SafeImage';
 import { supabase } from '@/lib/supabase';
 import { Copy, Grid2x2, List, Loader2, Trash2, Upload, X, Check } from 'lucide-react';
 
@@ -257,7 +257,7 @@ export default function AdminMediaPage() {
             >
               {/* 썸네일 */}
               <div style={{ position: 'relative', aspectRatio: '1', background: '#F8FAFC' }}>
-                <FallbackImage
+                <SafeImage
                   src={f.publicUrl}
                   alt={f.name}
                   fill
@@ -313,7 +313,7 @@ export default function AdminMediaPage() {
             >
               {/* 썸네일 */}
               <div style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', position: 'relative', background: '#F8FAFC' }}>
-                <FallbackImage src={f.publicUrl} alt={f.name} fill style={{ objectFit: 'cover' }} sizes="36px" />
+                <SafeImage src={f.publicUrl} alt={f.name} fill style={{ objectFit: 'cover' }} sizes="36px" />
               </div>
               {/* 파일명 */}
               <p style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 12 }}>
@@ -374,7 +374,7 @@ export default function AdminMediaPage() {
           >
             {/* 이미지 */}
             <div style={{ position: 'relative', aspectRatio: '16/10', background: '#F8FAFC' }}>
-              <FallbackImage
+              <SafeImage
                 src={preview.publicUrl}
                 alt={preview.name}
                 fill

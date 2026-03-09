@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 const PLACEHOLDER = '/placeholder.svg';
 
-export default function FallbackImage({ src, ...props }: ImageProps) {
+export default function SafeImage({ src, ...props }: ImageProps) {
   const [imgSrc, setImgSrc] = useState(src);
 
   return (

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import FallbackImage from '@/components/FallbackImage';
+import SafeImage from '@/components/SafeImage';
 import { supabase } from '@/lib/supabase';
 import type { FamilyMember } from '@/lib/types';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -136,7 +136,7 @@ export default async function AboutPage() {
               position: 'relative',
             }}
           >
-            <FallbackImage
+            <SafeImage
               src="https://picsum.photos/seed/about/800/1200"
               alt="Family"
               fill
@@ -206,7 +206,7 @@ export default async function AboutPage() {
                   cursor: 'pointer',
                 }}
               >
-                <FallbackImage
+                <SafeImage
                   src={m.image_url}
                   alt={m.name}
                   fill

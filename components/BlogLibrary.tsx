@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import FallbackImage from './FallbackImage';
+import SafeImage from './SafeImage';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -214,7 +214,7 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
       }}
     >
       {/* 이미지 */}
-      <FallbackImage
+      <SafeImage
         src={blog.image_url}
         alt={blog.title}
         fill
