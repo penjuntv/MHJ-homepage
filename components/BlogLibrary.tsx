@@ -226,8 +226,8 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription }: Props
           {/* 일반 카드 그리드 */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))',
-            gap: 40,
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))',
+            gap: 28,
           }}>
             {(showFeatured ? rest : filtered).map((b, i) => (
               <BlogCard
@@ -404,117 +404,96 @@ interface CardProps {
 
 function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
   const [hovered, setHovered] = useState(false);
+  const color = CATEGORY_COLORS[blog.category] || '#4F46E5';
 
   return (
     <div
-      className={`animate-slide-up ${staggerClass} blog-card`}
+      className={`animate-slide-up ${staggerClass}`}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'relative',
-        aspectRatio: '1',
-        overflow: 'hidden',
-        borderRadius: 40,
-        background: '#1a1a2e',
+        borderRadius: 24,
+        background: 'var(--bg-card, #fff)',
+        border: '1px solid var(--border, #F1F5F9)',
         cursor: 'pointer',
-        boxShadow: hovered ? '0 30px 60px rgba(0,0,0,0.18)' : '0 4px 16px rgba(0,0,0,0.06)',
-        transform: hovered ? 'translateY(-16px)' : 'translateY(0)',
-        transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s',
+        boxShadow: hovered ? '0 20px 48px rgba(0,0,0,0.12)' : '0 2px 8px rgba(0,0,0,0.04)',
+        transform: hovered ? 'translateY(-8px)' : 'translateY(0)',
+        transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s',
+        overflow: 'hidden',
       }}
     >
-      {/* 이미지 — vivid-hover */}
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+      {/* 이미지 영역 — 순수 사진, 텍스트 없음 */}
+      <div style={{ aspectRatio: '4/3', position: 'relative', overflow: 'hidden' }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
           fill
-          className="object-cover blog-card-img"
+          className="object-cover"
           style={{
-            filter: hovered ? 'saturate(2.2) contrast(1.1) brightness(1.04)' : 'saturate(1.3) contrast(1.02)',
-            transform: hovered ? 'scale(1.06)' : 'scale(1)',
+            filter: hovered ? 'saturate(2.0) contrast(1.08)' : 'saturate(1.2)',
+            transform: hovered ? 'scale(1.05)' : 'scale(1)',
             transition: 'filter 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
+        {/* 인기 순위 뱃지 */}
+        {showRank !== undefined && (
+          <div style={{
+            position: 'absolute', top: 14, right: 14, zIndex: 2,
+            background: showRank <= 3 ? '#4F46E5' : 'rgba(0,0,0,0.45)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: '50%', width: 36, height: 36,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <span className="font-display font-black" style={{ color: 'white', fontSize: 12, fontStyle: 'italic' }}>{showRank}</span>
+          </div>
+        )}
+        {/* 스폰서 라벨 */}
+        {blog.is_sponsored && (
+          <div style={{ position: 'absolute', top: 14, left: 14, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', borderRadius: 999, padding: '4px 10px', zIndex: 2 }}>
+            <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: 'white' }}>Sponsored</span>
+          </div>
+        )}
       </div>
 
-      {/* 그라디언트 오버레이 */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)',
-        transition: 'opacity 0.5s',
-      }} />
-
-      {/* 스폰서 라벨 */}
-      {blog.is_sponsored && (
-        <div style={{ position: 'absolute', top: 20, left: 20, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', borderRadius: 999, padding: '5px 12px', zIndex: 2 }}>
-          <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: 'white' }}>Sponsored</span>
-        </div>
-      )}
-
-      {/* 인기 순위 뱃지 */}
-      {showRank !== undefined && (
-        <div style={{
-          position: 'absolute', top: 20, right: 20, zIndex: 2,
-          background: showRank <= 3 ? '#4F46E5' : 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(8px)',
-          borderRadius: '50%', width: 40, height: 40,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <span className="font-display font-black" style={{ color: 'white', fontSize: 13, fontStyle: 'italic' }}>{showRank}</span>
-        </div>
-      )}
-
-      {/* 텍스트 */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        padding: 'clamp(24px, 3vw, 40px)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-      }}>
-        {/* 메타 — 카테고리 pill + 날짜 (소형, 제목 바로 위) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+      {/* 텍스트 영역 — 이미지 아래 분리 */}
+      <div style={{ padding: '16px 20px 20px' }}>
+        {/* 카테고리 + 날짜 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
           <span style={{
-            background: CATEGORY_COLORS[blog.category] || '#4F46E5',
-            borderRadius: 999,
-            padding: '3px 10px',
             fontSize: 9,
             fontWeight: 900,
-            letterSpacing: 3,
+            letterSpacing: 2,
             textTransform: 'uppercase',
-            color: 'white',
+            color: color,
           }}>
             {blog.category}
           </span>
+          <span style={{ width: 3, height: 3, borderRadius: '50%', background: '#CBD5E1', flexShrink: 0 }} />
           <span style={{
-            fontSize: 9,
-            fontWeight: 700,
-            letterSpacing: 2,
-            color: 'rgba(255,255,255,0.45)',
-            textTransform: 'uppercase',
+            fontSize: 10,
+            fontWeight: 600,
+            color: 'var(--text-secondary, #64748B)',
           }}>
             {blog.date}
           </span>
           {typeof blog.view_count === 'number' && blog.view_count > 0 && (
-            <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.25)', letterSpacing: 2 }}>
+            <span style={{ fontSize: 9, color: '#94A3B8', marginLeft: 2 }}>
               · {blog.view_count.toLocaleString()} views
             </span>
           )}
         </div>
 
-        {/* 제목 — 2줄 제한, underline 슬라이드 애니메이션 */}
+        {/* 제목 */}
         <h3
-          className="blog-card-title"
           style={{
-            fontSize: 'clamp(20px, 2.5vw, 36px)',
-            fontWeight: 900,
-            color: 'white',
-            letterSpacing: -1,
-            textTransform: 'uppercase',
-            lineHeight: 0.95,
+            fontSize: 'clamp(16px, 1.8vw, 20px)',
+            fontWeight: 800,
+            color: 'var(--text, #1A1A1A)',
+            letterSpacing: -0.4,
+            lineHeight: 1.35,
+            margin: '0 0 6px',
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
@@ -523,6 +502,11 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
         >
           {blog.title}
         </h3>
+
+        {/* 저자 */}
+        <p style={{ fontSize: 11, color: 'var(--text-secondary, #94A3B8)', margin: 0, fontWeight: 500 }}>
+          {blog.author}
+        </p>
       </div>
     </div>
   );

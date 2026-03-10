@@ -22,12 +22,12 @@ export default function PdfViewer({ url, currentPage, onLoadSuccess, width = 800
       loading={
         <div style={{
           aspectRatio: '3/4',
-          background: '#111',
+          background: '#F8FAFC',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 700, letterSpacing: 4, textTransform: 'uppercase' }}>
+          <p style={{ color: '#94A3B8', fontSize: 12, fontWeight: 700, letterSpacing: 4, textTransform: 'uppercase' }}>
             Loading PDF...
           </p>
         </div>
@@ -35,7 +35,7 @@ export default function PdfViewer({ url, currentPage, onLoadSuccess, width = 800
       error={
         <div style={{
           aspectRatio: '3/4',
-          background: '#1a0000',
+          background: '#FEF2F2',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

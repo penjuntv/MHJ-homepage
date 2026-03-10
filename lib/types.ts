@@ -21,6 +21,8 @@ export interface Article {
   pdf_url?: string | null;          // 이미지/PDF 콘텐츠 URL
   article_type?: 'cover' | 'contents' | 'article' | null;
   sort_order?: number | null;
+  page_start?: number | null;       // 통합 PDF 내 시작 페이지
+  page_end?: number | null;         // 통합 PDF 내 끝 페이지
   created_at?: string;
 }
 
