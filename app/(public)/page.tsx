@@ -38,6 +38,7 @@ async function getRecentBlogs(): Promise<Blog[]> {
     .select('*')
     .eq('published', true)
     .eq('is_hero', true)
+    .gt('hero_order', 0)
     .order('hero_order', { ascending: true })
     .limit(7);
 
