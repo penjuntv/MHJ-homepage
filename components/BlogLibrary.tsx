@@ -475,14 +475,13 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
         flexDirection: 'column',
         justifyContent: 'flex-end',
       }}>
-        {/* 메타 — 카테고리 뱃지 + 날짜 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-          {/* 카테고리 뱃지 */}
+        {/* 메타 — 카테고리 pill + 날짜 (소형, 제목 바로 위) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
           <span style={{
             background: CATEGORY_COLORS[blog.category] || '#4F46E5',
             borderRadius: 999,
-            padding: '5px 14px',
-            fontSize: 10,
+            padding: '3px 10px',
+            fontSize: 9,
             fontWeight: 900,
             letterSpacing: 3,
             textTransform: 'uppercase',
@@ -490,37 +489,36 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
           }}>
             {blog.category}
           </span>
-          {/* 날짜 */}
           <span style={{
-            background: 'rgba(255,255,255,0.12)',
-            backdropFilter: 'blur(8px)',
-            borderRadius: 999,
-            padding: '5px 14px',
-            fontSize: 10,
-            fontWeight: 900,
+            fontSize: 9,
+            fontWeight: 700,
             letterSpacing: 2,
+            color: 'rgba(255,255,255,0.45)',
             textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.75)',
           }}>
             {blog.date}
           </span>
           {typeof blog.view_count === 'number' && blog.view_count > 0 && (
-            <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 2 }}>
-              {blog.view_count.toLocaleString()} views
+            <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.25)', letterSpacing: 2 }}>
+              · {blog.view_count.toLocaleString()} views
             </span>
           )}
         </div>
 
-        {/* 제목 — underline 슬라이드 애니메이션 */}
+        {/* 제목 — 2줄 제한, underline 슬라이드 애니메이션 */}
         <h3
           className="blog-card-title"
           style={{
-            fontSize: 'clamp(22px, 2.8vw, 40px)',
+            fontSize: 'clamp(20px, 2.5vw, 36px)',
             fontWeight: 900,
             color: 'white',
             letterSpacing: -1,
             textTransform: 'uppercase',
-            lineHeight: 0.92,
+            lineHeight: 0.95,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
           }}
         >
           {blog.title}
