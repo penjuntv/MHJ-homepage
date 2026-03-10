@@ -70,7 +70,7 @@ export default function InstagramFeed({ instagramUrl }: Props) {
   const onTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null || posts.length <= VISIBLE) return;
     const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) { diff > 0 ? next() : prev(); }
+    if (Math.abs(diff) > 40) { if (diff > 0) next(); else prev(); }
     touchStartX.current = null;
   };
 
