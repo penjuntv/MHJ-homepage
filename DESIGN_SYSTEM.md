@@ -135,14 +135,34 @@
 
 ## 3. 공간과 레이아웃 (Spacing & Layout)
 
+### ⚠️ 8px 그리드 시스템 (2026.03 기준 — 최우선 원칙)
+
+**CSS 변수 (`:root`):**
+```css
+--section-v:   clamp(64px, 8vw, 96px)   /* 섹션 수직 패딩 */
+--section-h:   clamp(24px, 4vw, 80px)   /* 섹션 수평 패딩 */
+--content-max: 1280px                    /* 최대 콘텐츠 폭 */
+--text-max:    720px                     /* 본문 텍스트 최대 폭 */
+--card-radius: 24px                      /* 카드 기본 radius */
+--card-pad:    clamp(16px, 2vw, 24px)   /* 카드 내부 패딩 */
+```
+
+**비례 원칙:**
+- 히어로: 80~85vh (가장 큼)
+- 일반 섹션: 50~70vh 이하
+- 보조 섹션 (Explore, Latest Issues): 히어로의 40~60%
+- 카드: 화면 높이의 50% 이하
+
+**간격 단위:** 8의 배수 (8, 16, 24, 32, 48, 64, 96px)
+**섹션 간격 (데스크탑):** 64~96px | **모바일:** 48~64px
+
 ### 섹션 padding
 | 패턴 | 사용처 |
 |------|--------|
-| `clamp(40px, 8vw, 128px) clamp(24px, 4vw, 40px)` | Landing Intro, 일반 섹션 |
-| `clamp(60px, 10vw, 128px) clamp(24px, 4vw, 40px)` | About Vision 섹션 |
-| `clamp(60px, 10vw, 160px) clamp(24px, 4vw, 40px)` | About Members 섹션 |
-| `clamp(40px, 6vw, 80px) clamp(24px, 4vw, 40px)` | Magazine Issue |
-| `clamp(20px, 4vw, 40px) clamp(24px, 4vw, 40px)` | Blog Library |
+| `var(--section-v) var(--section-h)` | **표준** — 모든 신규 섹션 |
+| `clamp(64px, 8vw, 96px) clamp(24px, 4vw, 80px)` | 동등 표기 |
+| `clamp(40px, 8vw, 128px) clamp(24px, 4vw, 40px)` | Landing Intro (레거시) |
+| `clamp(60px, 10vw, 128px) clamp(24px, 4vw, 40px)` | About Vision (레거시) |
 | `96px 32px` (모바일) / `96px 96px` (데스크톱) | 모달 내부 |
 | `40px 24px` | Magazine Shelf 헤더 |
 | `96px 40px` | 푸터 |
