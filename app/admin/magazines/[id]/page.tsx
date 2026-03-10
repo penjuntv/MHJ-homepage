@@ -9,7 +9,7 @@ import type { Magazine, Article } from '@/lib/types';
 import {
   ChevronLeft, Plus, Pencil, Trash2, X, Upload, Loader2, Check,
   ChevronUp, ChevronDown, ExternalLink, BookOpen, AlertCircle,
-  FileText, Image as ImageIcon, Save,
+  FileText, Image as ImageIcon,
 } from 'lucide-react';
 
 /* ─── 타입 ─── */
