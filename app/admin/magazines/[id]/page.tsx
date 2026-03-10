@@ -473,14 +473,14 @@ export default function MagazineDetailPage() {
             </button>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <button
               onClick={saveMagazine}
               disabled={savingMag}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '999px', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', cursor: 'pointer', textTransform: 'uppercase', opacity: savingMag ? 0.7 : 1 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 32px', background: '#1A1A1A', color: 'white', border: 'none', borderRadius: '999px', fontSize: '13px', fontWeight: 900, letterSpacing: '3px', cursor: 'pointer', textTransform: 'uppercase', opacity: savingMag ? 0.6 : 1, boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}
             >
-              {savingMag ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Save size={12} />}
-              PDF URL 저장
+              {savingMag ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <BookOpen size={14} />}
+              {savingMag ? '발행 중...' : '이슈 발행하기'}
             </button>
             {hasPdf && (
               <button
