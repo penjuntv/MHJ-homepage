@@ -512,6 +512,20 @@
   transition: filter 0.5s ease;
 }
 
+/* ─── Instagram Feed 그리드 ─── */
+.instagram-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+@media (max-width: 900px) {
+  .instagram-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  /* 모바일에서 4~6번째 포스트 숨기기 */
+  .instagram-grid > *:nth-child(n+4) {
+    display: none;
+  }
+}
+
 /* 모바일: 댓글 그리드 1컬럼 */
 @media (max-width: 640px) {
   .comment-form-grid {

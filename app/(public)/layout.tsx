@@ -1,5 +1,6 @@
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import InstagramFeed from '@/components/InstagramFeed';
 import { getSiteSettings } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,7 @@ export default async function PublicLayout({
         contactEmail={s.contact_email}
       />
       <main>{children}</main>
+      <InstagramFeed instagramUrl={s.social_instagram || ''} />
       <Footer
         siteName={s.site_name}
         siteSubtitle={s.site_subtitle}
