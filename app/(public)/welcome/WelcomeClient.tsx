@@ -45,30 +45,42 @@ export default function WelcomeClient({
   heroImageUrl, welcomeTitle, welcomeDescription,
   introDescription, categoryBlogs, recentBlogs, magazines,
 }: Props) {
+  const [heroImgError, setHeroImgError] = useState(false);
   const [heroLoaded, setHeroLoaded] = useState(false);
   useEffect(() => { setHeroLoaded(true); }, []);
 
   const HERO_IMG = heroImageUrl || 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1600';
   const FAMILY_IMG = 'https://images.unsplash.com/photo-1511895426328-dc8714191011?q=80&w=1000';
+  const showHeroImg = !heroImgError;
 
   return (
     <div>
       {/* ─── 1. HERO ─── */}
       <section style={{ position: 'relative', height: 'clamp(480px, 70vh, 800px)', overflow: 'hidden' }}>
-        <img
-          src={HERO_IMG}
-          alt="Welcome hero"
-          style={{
-            position: 'absolute', inset: 0, width: '100%', height: '100%',
-            objectFit: 'cover',
-            filter: heroLoaded ? 'saturate(1.3)' : 'saturate(0)',
-            transition: 'filter 1.2s ease',
-          }}
-        />
+        {/* 그라디언트 배경 (이미지 로드 실패 시 fallback) */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 40%, #0d1a2e 100%)',
+        }} />
+        {showHeroImg && (
+          <img
+            src={HERO_IMG}
+            alt="Welcome hero"
+            onError={() => setHeroImgError(true)}
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover',
+              filter: heroLoaded ? 'saturate(1.3)' : 'saturate(0)',
+              transition: 'filter 1.2s ease',
+            }}
+          />
+        )}
         {/* 그라디언트 오버레이 */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.6) 100%)',
+          background: showHeroImg
+            ? 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.6) 100%)'
+            : 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%)',
         }} />
         {/* 텍스트 */}
         <div style={{

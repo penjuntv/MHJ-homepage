@@ -3,7 +3,7 @@ import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import type { Blog } from '@/lib/types';
+import type { Blog, HeroSlide } from '@/lib/types';
 import HeroCarousel from '@/components/HeroCarousel';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import StoryPressSection from '@/components/StoryPressSection';
@@ -54,6 +54,19 @@ async function getRecentBlogs(): Promise<Blog[]> {
   return data?.length ? data : FALLBACK_HERO_BLOGS;
 }
 
+async function getHeroSlides(): Promise<HeroSlide[]> {
+  try {
+    const { data } = await supabase
+      .from('hero_slides')
+      .select('*')
+      .eq('is_visible', true)
+      .order('sort_order', { ascending: true });
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
 async function getMostReadBlogs(): Promise<Blog[]> {
   const { data } = await supabase
     .from('blogs')
@@ -68,7 +81,7 @@ async function getMostReadBlogs(): Promise<Blog[]> {
 }
 
 export default async function LandingPage() {
-  const [blogs, mostRead, s] = await Promise.all([getRecentBlogs(), getMostReadBlogs(), getSiteSettings()]);
+  const [blogs, mostRead, heroSlides, s] = await Promise.all([getRecentBlogs(), getMostReadBlogs(), getHeroSlides(), getSiteSettings()]);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -98,7 +111,7 @@ export default async function LandingPage() {
     <div className="animate-fade-in">
 
       {/* Hero Carousel */}
-      <HeroCarousel items={blogs} heroLabel={s.hero_label} />
+      <HeroCarousel items={blogs} slides={heroSlides} heroLabel={s.hero_label} />
 
       {/* Intro Section — 흰 배경 */}
       <section style={{

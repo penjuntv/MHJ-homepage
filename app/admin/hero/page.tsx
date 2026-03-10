@@ -1,15 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import type { Blog } from '@/lib/types';
-import { ChevronUp, ChevronDown, Star, X, ArrowLeft, Info, Eye, EyeOff, Zap } from 'lucide-react';
+import type { Blog, HeroSlide } from '@/lib/types';
+import { ChevronUp, ChevronDown, Star, X, ArrowLeft, Info, Eye, EyeOff, Zap, Plus, Upload, Loader2, Save } from 'lucide-react';
+
+const BLANK_SLIDE: Omit<HeroSlide, 'id' | 'created_at'> = {
+  title: '', subtitle: '', image_url: '', link_url: '', sort_order: 0, is_visible: true,
+};
 
 export default function HeroManagePage() {
   const [heroes, setHeroes] = useState<Blog[]>([]);
   const [autoBlogs, setAutoBlogs] = useState<Blog[]>([]);
+  const [customSlides, setCustomSlides] = useState<HeroSlide[]>([]);
+  const [showSlideForm, setShowSlideForm] = useState(false);
+  const [editingSlide, setEditingSlide] = useState<typeof BLANK_SLIDE & { id?: number }>(BLANK_SLIDE);
+  const [slideSaving, setSlideSaving] = useState(false);
+  const [slideUploading, setSlideUploading] = useState(false);
+  const slideFileRef = useRef<HTMLInputElement>(null);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -17,22 +28,14 @@ export default function HeroManagePage() {
   /* ─── 데이터 로드 ─── */
   async function fetchHeroes() {
     setLoading(true);
-    // is_hero=true 전체 (숨김 포함)
-    const { data } = await supabase
-      .from('blogs')
-      .select('*')
-      .eq('is_hero', true)
-      .order('hero_order', { ascending: false }); // hero_order DESC: 0(숨김) 맨 아래
-    setHeroes(data ?? []);
-
-    // 자동 모드 미리보기: 최신 5개
-    const { data: auto } = await supabase
-      .from('blogs')
-      .select('*')
-      .eq('published', true)
-      .order('created_at', { ascending: false })
-      .limit(5);
-    setAutoBlogs(auto ?? []);
+    const [heroRes, autoRes, slidesRes] = await Promise.all([
+      supabase.from('blogs').select('*').eq('is_hero', true).order('hero_order', { ascending: false }),
+      supabase.from('blogs').select('*').eq('published', true).order('created_at', { ascending: false }).limit(5),
+      supabase.from('hero_slides').select('*').order('sort_order', { ascending: true }),
+    ]);
+    setHeroes(heroRes.data ?? []);
+    setAutoBlogs(autoRes.data ?? []);
+    setCustomSlides(slidesRes.data ?? []);
     setLoading(false);
   }
 
@@ -89,6 +92,61 @@ export default function HeroManagePage() {
     const reordered = visible.map((b, i) => ({ ...b, hero_order: i + 1 }));
     setHeroes([...reordered, ...hidden]);
     if (reordered.length > 0) await saveOrder(reordered);
+  }
+
+  /* ─── 커스텀 슬라이드 이미지 업로드 ─── */
+  async function handleSlideImageUpload(file: File) {
+    setSlideUploading(true);
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const path = `hero-slides/slide-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    if (error) { alert('업로드 실패: ' + error.message); setSlideUploading(false); return; }
+    const { data } = supabase.storage.from('images').getPublicUrl(path);
+    setEditingSlide(prev => ({ ...prev, image_url: data.publicUrl }));
+    setSlideUploading(false);
+  }
+
+  /* ─── 커스텀 슬라이드 저장/수정 ─── */
+  async function saveSlide() {
+    if (!editingSlide.title || !editingSlide.image_url) {
+      alert('제목과 이미지는 필수입니다.');
+      return;
+    }
+    setSlideSaving(true);
+    const payload = {
+      title: editingSlide.title,
+      subtitle: editingSlide.subtitle || null,
+      image_url: editingSlide.image_url,
+      link_url: editingSlide.link_url || null,
+      sort_order: customSlides.length,
+      is_visible: true,
+    };
+    if (editingSlide.id) {
+      await supabase.from('hero_slides').update(payload).eq('id', editingSlide.id);
+      setCustomSlides(prev => prev.map(s => s.id === editingSlide.id ? { ...s, ...payload } : s));
+    } else {
+      const { data } = await supabase.from('hero_slides').insert(payload).select().single();
+      if (data) setCustomSlides(prev => [...prev, data]);
+    }
+    setSlideSaving(false);
+    setShowSlideForm(false);
+    setEditingSlide(BLANK_SLIDE);
+    setMessage('슬라이드가 저장되었습니다.');
+    setTimeout(() => setMessage(''), 2000);
+  }
+
+  /* ─── 커스텀 슬라이드 삭제 ─── */
+  async function deleteSlide(id: number) {
+    if (!confirm('이 슬라이드를 삭제하시겠습니까?')) return;
+    await supabase.from('hero_slides').delete().eq('id', id);
+    setCustomSlides(prev => prev.filter(s => s.id !== id));
+  }
+
+  /* ─── 커스텀 슬라이드 숨기기/보이기 ─── */
+  async function toggleSlideVisible(slide: HeroSlide) {
+    const next = !slide.is_visible;
+    await supabase.from('hero_slides').update({ is_visible: next }).eq('id', slide.id);
+    setCustomSlides(prev => prev.map(s => s.id === slide.id ? { ...s, is_visible: next } : s));
   }
 
   const visibleHeroes = heroes.filter(h => (h.hero_order ?? 0) > 0);
@@ -336,6 +394,221 @@ export default function HeroManagePage() {
           )}
         </>
       )}
+
+      {/* ════════════════════════════════
+          커스텀 슬라이드 섹션
+          ════════════════════════════════ */}
+      <div style={{ marginTop: 56 }}>
+        {/* 구분선 */}
+        <div style={{ height: 1, background: '#F1F5F9', marginBottom: 40 }} />
+
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24, gap: 12 }}>
+          <div>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: '#94A3B8', marginBottom: 6 }}>
+              Custom Slides
+            </p>
+            <h2 style={{ margin: 0, fontSize: 24, fontWeight: 900, letterSpacing: -1 }}>커스텀 슬라이드</h2>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: '#64748B' }}>
+              블로그 글이 아닌 공지, About 홍보 등 자유 슬라이드. 히어로 캐러셀 맨 앞에 표시됩니다.
+            </p>
+          </div>
+          <button
+            onClick={() => { setEditingSlide(BLANK_SLIDE); setShowSlideForm(true); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              padding: '10px 20px', borderRadius: 999,
+              background: '#000', color: '#fff', border: 'none',
+              fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase',
+              cursor: 'pointer', flexShrink: 0,
+            }}
+          >
+            <Plus size={13} /> 슬라이드 추가
+          </button>
+        </div>
+
+        {/* 슬라이드 추가/수정 폼 */}
+        {showSlideForm && (
+          <div style={{
+            background: 'white', borderRadius: 20, padding: 28,
+            border: '1px solid #E2E8F0', marginBottom: 20,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.07)',
+          }}>
+            <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: '#64748B', marginBottom: 20 }}>
+              {editingSlide.id ? '슬라이드 수정' : '새 슬라이드'}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+              {/* 이미지 업로드 */}
+              <div>
+                <label style={formLabel}>배경 이미지 *</label>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  {editingSlide.image_url && (
+                    <div style={{ width: 100, height: 64, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: '#F8FAFC' }}>
+                      <SafeImage src={editingSlide.image_url} alt="preview" fill style={{ objectFit: 'cover' }} sizes="100px" />
+                    </div>
+                  )}
+                  <input
+                    ref={slideFileRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) handleSlideImageUpload(file);
+                      e.target.value = '';
+                    }}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+                    <button
+                      onClick={() => slideFileRef.current?.click()}
+                      disabled={slideUploading}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px',
+                        borderRadius: 10, background: '#EEF2FF', border: '1px solid #C7D2FE',
+                        color: '#4F46E5', fontSize: 11, fontWeight: 900, cursor: slideUploading ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      {slideUploading
+                        ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> 업로드 중...</>
+                        : <><Upload size={12} /> 이미지 업로드</>}
+                    </button>
+                    <input
+                      value={editingSlide.image_url}
+                      onChange={e => setEditingSlide(prev => ({ ...prev, image_url: e.target.value }))}
+                      placeholder="또는 URL 직접 입력"
+                      style={formInput}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 제목 */}
+              <div>
+                <label style={formLabel}>제목 * (대형 텍스트)</label>
+                <input
+                  value={editingSlide.title}
+                  onChange={e => setEditingSlide(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="ABOUT OUR FAMILY"
+                  style={formInput}
+                />
+              </div>
+
+              {/* 부제 */}
+              <div>
+                <label style={formLabel}>부제 (날짜 위치에 표시)</label>
+                <input
+                  value={editingSlide.subtitle || ''}
+                  onChange={e => setEditingSlide(prev => ({ ...prev, subtitle: e.target.value }))}
+                  placeholder="뉴질랜드 마이랑이 베이 가족 이야기"
+                  style={formInput}
+                />
+              </div>
+
+              {/* 링크 URL */}
+              <div>
+                <label style={formLabel}>링크 URL (Learn More 버튼 연결)</label>
+                <input
+                  value={editingSlide.link_url || ''}
+                  onChange={e => setEditingSlide(prev => ({ ...prev, link_url: e.target.value }))}
+                  placeholder="/about 또는 https://external.com"
+                  style={formInput}
+                />
+              </div>
+
+              {/* 버튼 */}
+              <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
+                <button
+                  onClick={saveSlide}
+                  disabled={slideSaving}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 7,
+                    padding: '11px 24px', borderRadius: 999,
+                    background: '#000', color: '#fff', border: 'none',
+                    fontSize: 11, fontWeight: 900, cursor: slideSaving ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {slideSaving
+                    ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> 저장 중...</>
+                    : <><Save size={12} /> 저장</>}
+                </button>
+                <button
+                  onClick={() => { setShowSlideForm(false); setEditingSlide(BLANK_SLIDE); }}
+                  style={{
+                    padding: '11px 20px', borderRadius: 999,
+                    background: 'white', border: '1px solid #E2E8F0',
+                    color: '#64748B', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 커스텀 슬라이드 목록 */}
+        {customSlides.length === 0 ? (
+          <div style={{
+            textAlign: 'center', padding: '40px', background: 'white',
+            borderRadius: 16, border: '2px dashed #F1F5F9', color: '#CBD5E1',
+            fontSize: 13, fontWeight: 700,
+          }}>
+            커스텀 슬라이드가 없습니다
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {customSlides.map(slide => (
+              <div key={slide.id} style={{
+                background: slide.is_visible ? 'white' : '#FAFAFA',
+                borderRadius: 14, padding: '14px 18px',
+                border: slide.is_visible ? '1px solid #F8FAFC' : '1px dashed #E2E8F0',
+                display: 'flex', alignItems: 'center', gap: 12,
+                boxShadow: slide.is_visible ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
+                opacity: slide.is_visible ? 1 : 0.65,
+              }}>
+                {slide.image_url && (
+                  <div style={{ width: 52, height: 52, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+                    <SafeImage src={slide.image_url} alt={slide.title} fill style={{ objectFit: 'cover', filter: slide.is_visible ? 'none' : 'grayscale(1)' }} sizes="52px" />
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 3px', color: slide.is_visible ? '#1A1A1A' : '#94A3B8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {slide.title}
+                  </p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {slide.subtitle && <span style={{ fontSize: 11, color: '#94A3B8' }}>{slide.subtitle}</span>}
+                    {slide.link_url && <span style={{ fontSize: 9, fontWeight: 700, color: '#6366F1', letterSpacing: 2 }}>→ {slide.link_url}</span>}
+                  </div>
+                </div>
+                {/* 수정 */}
+                <button
+                  onClick={() => { setEditingSlide({ ...slide }); setShowSlideForm(true); }}
+                  style={{ ...iconBtn, color: '#475569' }}
+                  title="수정"
+                >
+                  <Save size={12} />
+                </button>
+                {/* 숨기기/보이기 */}
+                <button
+                  onClick={() => toggleSlideVisible(slide)}
+                  style={{ ...iconBtn, color: slide.is_visible ? '#94A3B8' : '#10B981', background: slide.is_visible ? 'white' : '#ECFDF5', border: `1px solid ${slide.is_visible ? '#F1F5F9' : '#D1FAE5'}` }}
+                  title={slide.is_visible ? '숨기기' : '표시하기'}
+                >
+                  {slide.is_visible ? <EyeOff size={12} /> : <Eye size={12} />}
+                </button>
+                {/* 삭제 */}
+                <button
+                  onClick={() => deleteSlide(slide.id)}
+                  style={{ ...iconBtn, color: '#EF4444', border: '1px solid #FEE2E2' }}
+                  title="삭제"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -476,3 +749,22 @@ function arrowBtnStyle(disabled: boolean): React.CSSProperties {
     opacity: disabled ? 0.4 : 1,
   };
 }
+
+const formLabel: React.CSSProperties = {
+  display: 'block', fontSize: 10, fontWeight: 900, letterSpacing: 3,
+  textTransform: 'uppercase', color: '#94A3B8', marginBottom: 7,
+};
+
+const formInput: React.CSSProperties = {
+  width: '100%', padding: '11px 14px', borderRadius: 10,
+  border: '1.5px solid #E2E8F0', background: '#F8FAFC',
+  fontSize: 13, fontWeight: 500, boxSizing: 'border-box',
+  outline: 'none',
+};
+
+const iconBtn: React.CSSProperties = {
+  width: 30, height: 30, borderRadius: 8, border: '1px solid #F1F5F9',
+  background: 'white', cursor: 'pointer',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  flexShrink: 0,
+};

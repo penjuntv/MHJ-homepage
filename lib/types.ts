@@ -71,6 +71,32 @@ export type DetailItem = (Article | Blog) & {
   category?: string;
 };
 
+export interface HeroSlide {
+  id: number;
+  title: string;
+  subtitle?: string | null;
+  image_url: string;
+  link_url?: string | null;
+  sort_order: number;
+  is_visible: boolean;
+  created_at?: string;
+}
+
+// HeroCarousel에서 사용하는 통합 타입
+export interface HeroCarouselItem {
+  id: string;           // blog:{id} or slide:{id}
+  title: string;
+  subtitle?: string;
+  image_url: string;
+  category?: string;
+  author?: string;
+  date?: string;
+  content?: string;
+  slug?: string;        // 블로그: /blog/{slug}
+  link_url?: string;    // 커스텀 슬라이드: 임의 링크
+  is_custom?: boolean;
+}
+
 export interface GalleryItem {
   id: number;
   image_url: string;

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { DEFAULT_SETTINGS, SETTING_DESCRIPTIONS } from '@/lib/site-settings';
-import { Loader2, Save, RotateCcw, Instagram, Facebook, Youtube } from 'lucide-react';
+import { Loader2, Save, RotateCcw, Instagram, Facebook, Youtube, Upload, Image as ImageIcon, X } from 'lucide-react';
+import SafeImage from '@/components/SafeImage';
 
 // 표시 순서
 const SETTING_KEYS = [
@@ -18,6 +19,14 @@ const SETTING_KEYS = [
 ];
 
 const SOCIAL_KEYS = ['social_instagram', 'social_facebook', 'social_youtube'] as const;
+
+// 이미지 업로드 키 정의
+const IMAGE_KEYS = [
+  { key: 'welcome_hero_image_url', label: 'Welcome 히어로 이미지', hint: '/welcome 페이지 상단 대형 배경 이미지', folder: 'site/welcome-hero' },
+  { key: 'about_image_url', label: 'About 가족사진 (메인)', hint: '/about 비전 섹션 우측 가족사진', folder: 'site/about-main' },
+  { key: 'about_hero_image_url', label: 'About 가족사진 (레거시)', hint: 'about_image_url가 비어있을 때 사용', folder: 'site/about-hero' },
+  { key: 'storypress_hero_image_url', label: 'StoryPress 히어로 이미지', hint: 'StoryPress 섹션 배경 이미지', folder: 'site/storypress' },
+] as const;
 
 // 여러 줄 입력이 필요한 키
 const MULTILINE_KEYS = new Set(['intro_description', 'about_vision_description', 'blog_description', 'storypress_description', 'footer_description']);
@@ -40,13 +49,15 @@ const SOCIAL_META: Record<string, { label: string; icon: React.ReactNode; placeh
   },
 };
 
-const ALL_KEYS = [...SETTING_KEYS, ...SOCIAL_KEYS];
+const ALL_KEYS = [...SETTING_KEYS, ...SOCIAL_KEYS, ...IMAGE_KEYS.map(i => i.key)];
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [uploading, setUploading] = useState<string | null>(null);
+  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => { loadSettings(); }, []);
 
@@ -86,6 +97,28 @@ export default function SettingsPage() {
 
   function handleReset() {
     setSettings({ ...DEFAULT_SETTINGS });
+  }
+
+  async function handleImageUpload(imageKey: string, folder: string, file: File) {
+    setUploading(imageKey);
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const path = `${folder}-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    if (error) {
+      alert('업로드 실패: ' + error.message);
+      setUploading(null);
+      return;
+    }
+    const { data } = supabase.storage.from('images').getPublicUrl(path);
+    set(imageKey, data.publicUrl);
+    setUploading(null);
+    // 즉시 DB에도 저장
+    await supabase.from('site_settings').upsert(
+      [{ key: imageKey, value: data.publicUrl, description: SETTING_DESCRIPTIONS[imageKey] ?? null }],
+      { onConflict: 'key' }
+    );
+    setMessage('이미지가 업로드되었습니다.');
+    setTimeout(() => setMessage(''), 2000);
   }
 
   const labelStyle = {
@@ -164,6 +197,99 @@ export default function SettingsPage() {
                     placeholder={meta.placeholder}
                     style={inputStyle}
                   />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── 이미지 설정 섹션 ── */}
+        <div style={{
+          background: 'white', borderRadius: '24px',
+          border: '1px solid #F1F5F9', overflow: 'hidden',
+        }}>
+          <div style={{
+            padding: '20px 28px', borderBottom: '1px solid #F1F5F9',
+            display: 'flex', alignItems: 'center', gap: '12px',
+          }}>
+            <ImageIcon size={18} style={{ color: '#6366F1' }} />
+            <div>
+              <p style={{ fontSize: '12px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#1A1A1A', margin: 0 }}>
+                이미지 설정
+              </p>
+              <p style={{ fontSize: '11px', color: '#94A3B8', margin: '2px 0 0' }}>
+                파일 업로드 또는 URL 직접 입력
+              </p>
+            </div>
+          </div>
+          <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            {IMAGE_KEYS.map(({ key, label, hint, folder }) => {
+              const currentUrl = settings[key] ?? '';
+              const isUploading = uploading === key;
+              return (
+                <div key={key}>
+                  <label style={labelStyle}>{label}</label>
+                  <p style={{ fontSize: '11px', color: '#CBD5E1', marginBottom: '10px' }}>{hint}</p>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', alignItems: 'start' }}>
+                    {/* URL 입력 */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <input
+                        value={currentUrl}
+                        onChange={e => set(key, e.target.value)}
+                        placeholder="이미지 URL (업로드 후 자동 입력)"
+                        style={{ ...inputStyle, fontSize: '12px' }}
+                      />
+                      {currentUrl && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <div style={{ width: 80, height: 50, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: '#F8FAFC' }}>
+                            <SafeImage src={currentUrl} alt={label} fill style={{ objectFit: 'cover' }} sizes="80px" />
+                          </div>
+                          <button
+                            onClick={() => set(key, '')}
+                            style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid #FEE2E2', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EF4444', flexShrink: 0 }}
+                            title="이미지 제거"
+                          >
+                            <X size={11} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 업로드 버튼 */}
+                    <div>
+                      <input
+                        ref={el => { fileRefs.current[key] = el; }}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(key, folder, file);
+                          e.target.value = '';
+                        }}
+                      />
+                      <button
+                        onClick={() => fileRefs.current[key]?.click()}
+                        disabled={isUploading}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '6px',
+                          padding: '12px 18px', borderRadius: '12px',
+                          background: isUploading ? '#F8FAFC' : '#EEF2FF',
+                          border: '1px solid #C7D2FE',
+                          color: isUploading ? '#94A3B8' : '#4F46E5',
+                          fontSize: '11px', fontWeight: 900, letterSpacing: '2px',
+                          textTransform: 'uppercase', cursor: isUploading ? 'not-allowed' : 'pointer',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {isUploading
+                          ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> 업로드 중...</>
+                          : <><Upload size={13} /> 파일 업로드</>
+                        }
+                      </button>
+                    </div>
+                  </div>
                 </div>
               );
             })}
