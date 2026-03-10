@@ -16,6 +16,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 interface Props {
   heroImageUrl: string;
+  familyImageUrl: string;      // "The Mairangi Family" 섹션 좌측 이미지
   welcomeTitle: string;
   welcomeDescription: string;
   introDescription: string;
@@ -42,16 +43,16 @@ function useSlideUp() {
 }
 
 export default function WelcomeClient({
-  heroImageUrl, welcomeTitle, welcomeDescription,
+  heroImageUrl, familyImageUrl, welcomeTitle, welcomeDescription,
   introDescription, categoryBlogs, recentBlogs, magazines,
 }: Props) {
   const [heroImgError, setHeroImgError] = useState(false);
   const [heroLoaded, setHeroLoaded] = useState(false);
   useEffect(() => { setHeroLoaded(true); }, []);
 
-  const HERO_IMG = heroImageUrl || 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1600';
-  const FAMILY_IMG = 'https://images.unsplash.com/photo-1511895426328-dc8714191011?q=80&w=1000';
-  const showHeroImg = !heroImgError;
+  const HERO_IMG = heroImageUrl || '';
+  const FAMILY_IMG = familyImageUrl || '';
+  const showHeroImg = !!HERO_IMG && !heroImgError;
 
   return (
     <div>
@@ -178,6 +179,8 @@ export default function WelcomeClient({
 
 function WhoWeAreSection({ familyImg, introDescription }: { familyImg: string; introDescription: string }) {
   const { ref, visible } = useSlideUp();
+  const [imgError, setImgError] = useState(false);
+
   return (
     <section
       ref={ref}
@@ -197,14 +200,33 @@ function WhoWeAreSection({ familyImg, introDescription }: { familyImg: string; i
       <div style={{
         aspectRatio: '4/5', borderRadius: '40px', overflow: 'hidden',
         boxShadow: '0 24px 60px rgba(0,0,0,0.12)', position: 'relative',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)',
       }}>
-        <img
-          src={familyImg}
-          alt="Mairangi Family"
-          style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(1.2)', transition: 'filter 0.5s', display: 'block' }}
-          onMouseEnter={e => (e.currentTarget.style.filter = 'saturate(2.2)')}
-          onMouseLeave={e => (e.currentTarget.style.filter = 'saturate(1.2)')}
-        />
+        {familyImg && !imgError ? (
+          <img
+            src={familyImg}
+            alt="Mairangi Family"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(1.2)', transition: 'filter 0.5s', display: 'block' }}
+            onError={() => setImgError(true)}
+            onMouseEnter={e => (e.currentTarget.style.filter = 'saturate(2.2)')}
+            onMouseLeave={e => (e.currentTarget.style.filter = 'saturate(1.2)')}
+          />
+        ) : (
+          /* 이미지 없을 때 그라디언트 fallback */
+          <div style={{
+            width: '100%', height: '100%',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            gap: 12,
+          }}>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 6, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase' }}>
+              MY MAIRANGI
+            </p>
+            <p style={{ fontSize: 'clamp(48px, 8vw, 80px)', fontWeight: 900, color: 'rgba(255,255,255,0.06)', letterSpacing: -3, lineHeight: 1, textAlign: 'center', margin: 0 }}>
+              FAMILY
+            </p>
+          </div>
+        )}
       </div>
 
       {/* 텍스트 */}

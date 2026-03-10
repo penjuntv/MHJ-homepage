@@ -123,7 +123,8 @@ export default async function WelcomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <WelcomeClient
-        heroImageUrl={s.welcome_hero_image_url || s.intro_image_url || ''}
+        heroImageUrl={s.welcome_hero_image_url || ''}
+        familyImageUrl={s.about_image_url || s.about_hero_image_url || ''}
         welcomeTitle={s.welcome_title}
         welcomeDescription={s.welcome_description}
         introDescription={s.intro_description}
