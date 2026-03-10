@@ -72,6 +72,21 @@ export default function PdfViewer({ url, currentPage, onLoadSuccess }: Props) {
             width={containerWidth}
             renderAnnotationLayer
             renderTextLayer
+            error={
+              <div style={{
+                aspectRatio: '3/4',
+                background: '#FEF2F2',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                <p style={{ color: '#ef4444', fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', margin: 0 }}>
+                  Page not found
+                </p>
+                <p style={{ color: '#9C8B7A', fontSize: 11, margin: 0 }}>
+                  This page may not exist in the PDF
+                </p>
+              </div>
+            }
           />
         </Document>
       )}

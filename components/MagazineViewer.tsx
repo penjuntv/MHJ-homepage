@@ -140,12 +140,15 @@ export default function MagazineViewer({ magazine, articles }: Props) {
   /* 기사 클릭: PDF 모드면 해당 page_start로 이동, 아니면 팝업 */
   const handleArticleClick = useCallback((article: Article) => {
     if (mode === 'pdf' && article.page_start != null) {
-      setCurrentPage(article.page_start as number); // 직접 setState (goTo 우회)
+      // totalPdfPages가 확정된 경우 범위 내로 클램프 (초과 페이지 에러 방지)
+      const targetPage = article.page_start as number;
+      const safePage = totalPdfPages > 0 ? Math.min(targetPage, totalPdfPages) : targetPage;
+      setCurrentPage(safePage);
       setSidebarOpen(false);
     } else {
       setSelectedArticle(article);
     }
-  }, [mode]);
+  }, [mode, totalPdfPages]);
 
   /* 키보드 */
   useEffect(() => {
