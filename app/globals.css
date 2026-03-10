@@ -25,6 +25,14 @@
   --overlay-bg:     rgba(255,255,255,0.95);
   --modal-bg:       rgba(255,255,255,0.4);
   --drop-cap-color: #F1F5F9;
+
+  /* ── 8px 그리드 디자인 베이스라인 ── */
+  --section-v:      clamp(64px, 8vw, 96px);
+  --section-h:      clamp(24px, 4vw, 80px);
+  --content-max:    1280px;
+  --text-max:       720px;
+  --card-radius:    24px;
+  --card-pad:       clamp(16px, 2vw, 24px);
 }
 
 .dark {
@@ -463,6 +471,36 @@
 }
 .dark .blog-content a {
   color: #818CF8;
+}
+
+/* ─── Landing — Explore 2-Panel ─── */
+.explore-panel {
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s;
+  min-height: 320px;
+}
+.explore-panel:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 28px 60px rgba(0,0,0,0.16) !important;
+}
+.explore-panel:hover .explore-img {
+  filter: saturate(2.0) !important;
+}
+.explore-img {
+  filter: saturate(1.2);
+  transition: filter 0.5s ease;
+}
+
+/* ─── Landing — Reader Favorites 리스트 ─── */
+.most-read-row {
+  transition: background 0.2s, border-color 0.2s, transform 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+.most-read-row:hover {
+  background: var(--bg-surface) !important;
+  border-color: var(--border-medium) !important;
+  transform: translateX(6px) !important;
+}
+.most-read-row:hover .most-read-img {
+  transform: scale(1.08) !important;
 }
 
 /* ─── Landing — Explore by Category + Latest Issues ─── */

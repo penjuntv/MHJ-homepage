@@ -67,39 +67,11 @@ async function getHeroSlides(): Promise<HeroSlide[]> {
   }
 }
 
-const BLOG_CATEGORIES = ['Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'] as const;
-
-const FALLBACK_CATEGORY_BLOGS: Record<string, Blog> = {
-  Education: { id: 302, category: 'Education', title: '매시대학교 석사의 무게', author: 'Heejong Jo', date: '2026.03.05', image_url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800', content: '', slug: 'massey-masters', published: true },
-  Settlement: { id: 305, category: 'Settlement', title: '오클랜드의 첫 장보기', author: 'Heejong Jo', date: '2026.01.19', image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800', content: '', slug: 'first-grocery', published: true },
-  Girls: { id: 303, category: 'Girls', title: '아이들의 언어 적응기', author: 'Heejong Jo', date: '2026.02.20', image_url: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=800', content: '', slug: 'kids-language', published: true },
-  Locals: { id: 301, category: 'Locals', title: '마이랑이 마켓의 아보카도', author: 'Heejong Jo', date: '2026.03.12', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800', content: '', slug: 'mairangi-avocado', published: true },
-  Life: { id: 310, category: 'Life', title: '비 오는 날의 서재', author: 'Heejong Jo', date: '2025.07.05', image_url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800', content: '', slug: 'rainy-library', published: true },
-  Travel: { id: 304, category: 'Travel', title: '노스쇼어의 보석 같은 해변', author: 'Heejong Jo', date: '2026.01.25', image_url: 'https://images.unsplash.com/photo-1506929113675-b9299d39c1b2?w=800', content: '', slug: 'northshore-beaches', published: true },
-};
-
 const FALLBACK_MAGAZINES: Magazine[] = [
   { id: '2026-03', year: '2026', month_name: 'Mar', title: 'The Beginning', editor: 'Sangmok Jo', image_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' },
   { id: '2026-02', year: '2026', month_name: 'Feb', title: 'Summer Haze', editor: 'Sangmok Jo', image_url: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800' },
   { id: '2026-01', year: '2026', month_name: 'Jan', title: 'New Roots', editor: 'Sangmok Jo', image_url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800' },
 ];
-
-async function getCategoryBlogs(): Promise<Record<string, Blog>> {
-  const results: Record<string, Blog> = {};
-  await Promise.all(
-    BLOG_CATEGORIES.map(async (cat) => {
-      const { data } = await supabase
-        .from('blogs')
-        .select('*')
-        .eq('published', true)
-        .eq('category', cat)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      if (data?.[0]) results[cat] = data[0];
-    })
-  );
-  return results;
-}
 
 async function getRecentMagazines(): Promise<Magazine[]> {
   const { data } = await supabase
@@ -124,10 +96,9 @@ async function getMostReadBlogs(): Promise<Blog[]> {
 }
 
 export default async function LandingPage() {
-  const [blogs, mostRead, heroSlides, categoryBlogsRaw, magazines, s] = await Promise.all([
-    getRecentBlogs(), getMostReadBlogs(), getHeroSlides(), getCategoryBlogs(), getRecentMagazines(), getSiteSettings(),
+  const [blogs, mostRead, heroSlides, magazines, s] = await Promise.all([
+    getRecentBlogs(), getMostReadBlogs(), getHeroSlides(), getRecentMagazines(), getSiteSettings(),
   ]);
-  const categoryBlogs: Record<string, Blog> = { ...FALLBACK_CATEGORY_BLOGS, ...categoryBlogsRaw };
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -308,8 +279,8 @@ export default async function LandingPage() {
         ctaText={s.storypress_cta_text}
       />
 
-      {/* Explore by Category — 3×2 그리드 */}
-      <ExploreByCategorySection categoryBlogs={categoryBlogs} />
+      {/* Explore — Blog + Magazine 2분할 */}
+      <ExploreSplitSection latestBlog={mostRead[0] ?? null} latestMagazine={magazines[0] ?? null} />
 
       {/* Latest Issues — 매거진 2~3개 */}
       <LatestIssuesSection magazines={magazines} />
@@ -322,69 +293,82 @@ export default async function LandingPage() {
   );
 }
 
-/* ─── Explore by Category 섹션 ─── */
-const CATEGORY_COLORS_MAP: Record<string, string> = {
-  Education: '#3B82F6', Settlement: '#8B5CF6', Girls: '#EC4899',
-  Locals: '#EF4444', Life: '#F59E0B', Travel: '#10B981',
-};
-const BLOG_CATEGORIES_LIST = ['Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
-
-function ExploreByCategorySection({ categoryBlogs }: { categoryBlogs: Record<string, Blog> }) {
+/* ─── Explore 2분할 섹션 ─── */
+function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog | null; latestMagazine: Magazine | null }) {
   return (
-    <section style={{ padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 80px)', background: 'var(--bg)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
-            WHAT YOU&apos;LL FIND HERE
-          </p>
-          <h2 className="font-display font-black" style={{ fontSize: 'clamp(36px, 5vw, 72px)', letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic', color: 'var(--text)' }}>
-            Explore by Category
-          </h2>
+    <section style={{ padding: 'var(--section-v) var(--section-h)', background: 'var(--bg)' }}>
+      <div style={{ maxWidth: 'var(--content-max)', margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 5, color: 'var(--text-tertiary)', marginBottom: 16 }}>
+              WHAT WE WRITE
+            </p>
+            <h2 className="font-display font-black" style={{ fontSize: 'clamp(32px, 5vw, 64px)', letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic', color: 'var(--text)' }}>
+              Explore Our Content
+            </h2>
+          </div>
         </div>
-        <Link
-          href="/blog"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#4F46E5', textDecoration: 'none' }}
-        >
-          All Stories <ArrowRight size={14} />
-        </Link>
-      </div>
 
-      <div className="category-grid">
-        {BLOG_CATEGORIES_LIST.map((cat) => {
-          const blog = categoryBlogs[cat];
-          const color = CATEGORY_COLORS_MAP[cat] || '#4F46E5';
-          if (!blog) return null;
-          return (
-            <Link
-              key={cat}
-              href={`/blog/${blog.slug}`}
-              className="cat-card"
-              style={{
-                display: 'block', borderRadius: '28px', overflow: 'hidden',
-                textDecoration: 'none', position: 'relative',
-                aspectRatio: '3/4',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              }}
-            >
-              <SafeImage
-                src={blog.image_url}
-                alt={blog.title}
-                fill
-                className="cat-img object-cover"
-              />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.08) 50%)' }} />
-              <div style={{ position: 'absolute', top: '16px', left: '16px', padding: '5px 14px', borderRadius: '999px', background: color, color: 'white', fontSize: '9px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>
-                {cat}
-              </div>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px' }}>
-                <p style={{ color: 'white', fontSize: '15px', fontWeight: 700, lineHeight: 1.4, marginBottom: '6px' }}>
-                  {blog.title}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))', gap: 24 }}>
+          {/* Blog Panel */}
+          <Link
+            href="/blog"
+            className="explore-panel"
+            style={{ display: 'block', borderRadius: 32, overflow: 'hidden', textDecoration: 'none', position: 'relative', aspectRatio: '16/9', boxShadow: '0 4px 24px rgba(0,0,0,0.09)' }}
+          >
+            {latestBlog && (
+              <SafeImage src={latestBlog.image_url} alt="Blog" fill className="explore-img object-cover" />
+            )}
+            {!latestBlog && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #1e293b, #334155)' }} />}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)' }} />
+            <div style={{ position: 'absolute', top: 24, left: 24 }}>
+              <span style={{ padding: '6px 18px', borderRadius: 999, background: '#4F46E5', color: 'white', fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase' }}>Blog</span>
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px 28px 32px' }}>
+              <h3 style={{ color: 'white', fontSize: 'clamp(20px, 2.5vw, 28px)', fontWeight: 900, letterSpacing: -1, lineHeight: 1.2, marginBottom: 8 }}>
+                {latestBlog?.title || 'Daily Life & Stories'}
+              </h3>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, lineHeight: 1.5, marginBottom: 16 }}>
+                사회복지 석사 과정과 뉴질랜드 일상을 기록하는 희종의 개인 서재
+              </p>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase' }}>
+                Explore Blog <ArrowRight size={12} />
+              </span>
+            </div>
+          </Link>
+
+          {/* Magazine Panel */}
+          <Link
+            href="/magazine"
+            className="explore-panel"
+            style={{ display: 'block', borderRadius: 32, overflow: 'hidden', textDecoration: 'none', position: 'relative', aspectRatio: '16/9', boxShadow: '0 4px 24px rgba(0,0,0,0.09)' }}
+          >
+            {latestMagazine && (
+              <SafeImage src={latestMagazine.image_url} alt="Magazine" fill className="explore-img object-cover" />
+            )}
+            {!latestMagazine && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #0f172a, #1e3a5f)' }} />}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)' }} />
+            <div style={{ position: 'absolute', top: 24, left: 24 }}>
+              <span style={{ padding: '6px 18px', borderRadius: 999, background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', backdropFilter: 'blur(8px)' }}>Magazine</span>
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px 28px 32px' }}>
+              {latestMagazine && (
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', marginBottom: 6 }}>
+                  {latestMagazine.year} · {latestMagazine.month_name}
                 </p>
-                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>{blog.date}</p>
-              </div>
-            </Link>
-          );
-        })}
+              )}
+              <h3 style={{ color: 'white', fontSize: 'clamp(20px, 2.5vw, 28px)', fontWeight: 900, letterSpacing: -1, lineHeight: 1.2, marginBottom: 8 }}>
+                {latestMagazine?.title || 'Monthly Journal'}
+              </h3>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, lineHeight: 1.5, marginBottom: 16 }}>
+                가족의 매달을 아카이브하는 감성 포토 매거진
+              </p>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase' }}>
+                Browse Issues <ArrowRight size={12} />
+              </span>
+            </div>
+          </Link>
+        </div>
       </div>
     </section>
   );
@@ -454,7 +438,7 @@ function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
   );
 }
 
-/* ─── Most Read 섹션 ─── */
+/* ─── Most Read 섹션 — 중앙정렬 리스트 ─── */
 const CATEGORY_COLORS: Record<string, string> = {
   Education: '#3B82F6', Settlement: '#8B5CF6', Girls: '#EC4899',
   Locals: '#EF4444', Life: '#F59E0B', Travel: '#10B981',
@@ -462,130 +446,81 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 function MostReadSection({ blogs }: { blogs: Blog[] }) {
   return (
-    <section style={{
-      padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 80px)',
-      background: 'var(--bg-surface)',
-    }}>
-      {/* 헤더 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
+    <section style={{ padding: 'var(--section-v) var(--section-h)', background: 'var(--bg-surface)' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+        {/* 헤더 — 중앙 */}
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 5, color: 'var(--text-tertiary)', marginBottom: 16 }}>
             MOST READ
           </p>
-          <h2 className="font-display font-black" style={{ fontSize: 'clamp(36px, 5vw, 72px)', letterSpacing: '-2px', lineHeight: 1, color: 'var(--text)', fontStyle: 'italic' }}>
+          <h2 className="font-display font-black" style={{ fontSize: 'clamp(32px, 5vw, 64px)', letterSpacing: '-2px', lineHeight: 1, color: 'var(--text)', fontStyle: 'italic' }}>
             Reader Favorites
           </h2>
         </div>
-        <Link
-          href="/blog"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            fontSize: '11px', fontWeight: 900, letterSpacing: '3px',
-            textTransform: 'uppercase', color: '#4F46E5', textDecoration: 'none',
-          }}
-        >
-          All Stories <ArrowRight size={14} />
-        </Link>
-      </div>
 
-      {/* 카드 그리드 */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
-        gap: '48px',
-      }}>
-        {blogs.map((blog, i) => {
-          const color = CATEGORY_COLORS[blog.category] || '#4F46E5';
-          return (
-            <Link
-              key={blog.id}
-              href={`/blog/${blog.slug}`}
-              className="most-read-card"
-              style={{
-                textDecoration: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                background: 'var(--bg)',
-                borderRadius: '24px',
-                overflow: 'hidden',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-                position: 'relative',
-              }}
-            >
-              {/* 랭크 뱃지 */}
-              <div style={{
-                position: 'absolute',
-                top: 16, left: 16,
-                zIndex: 5,
-                width: 36, height: 36,
-                borderRadius: '50%',
-                background: i < 3 ? color : 'rgba(0,0,0,0.5)',
-                backdropFilter: 'blur(8px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span className="font-display font-black" style={{
-                  fontSize: '13px', color: 'white', fontStyle: 'italic',
-                  lineHeight: 1,
+        {/* 리스트 */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {blogs.map((blog, i) => {
+            const color = CATEGORY_COLORS[blog.category] || '#4F46E5';
+            return (
+              <Link
+                key={blog.id}
+                href={`/blog/${blog.slug}`}
+                className="most-read-row"
+                style={{
+                  display: 'flex', gap: 20, alignItems: 'center',
+                  padding: '16px 20px',
+                  background: 'var(--bg)',
+                  borderRadius: 20,
+                  textDecoration: 'none',
+                  border: '1px solid var(--border)',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* 랭크 */}
+                <div style={{
+                  width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                  background: i < 3 ? color : 'var(--bg-surface)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  {i + 1}
-                </span>
-              </div>
-
-              {/* 이미지 */}
-              <div style={{
-                aspectRatio: '4/3',
-                overflow: 'hidden',
-                position: 'relative',
-                background: '#f1f5f9',
-              }}>
-                <SafeImage
-                  src={blog.image_url}
-                  alt={blog.title}
-                  fill
-                  className="object-cover most-read-img"
-                />
-              </div>
-
-              {/* 콘텐츠 */}
-              <div style={{ padding: '20px 24px 24px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {/* 카테고리 + 날짜 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{
-                    padding: '3px 10px', borderRadius: '999px',
-                    background: color + '18', color,
-                    fontSize: '9px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase',
-                  }}>
-                    {blog.category}
-                  </span>
-                  <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 700 }}>
-                    {blog.date}
+                  <span className="font-display" style={{ fontSize: 13, fontWeight: 900, fontStyle: 'italic', color: i < 3 ? 'white' : 'var(--text-tertiary)', lineHeight: 1 }}>
+                    {i + 1}
                   </span>
                 </div>
 
-                {/* 제목 */}
-                <p style={{
-                  fontSize: 'clamp(15px, 1.8vw, 18px)', fontWeight: 900,
-                  color: 'var(--text)', lineHeight: 1.3,
-                  flex: 1,
-                }}>
-                  {blog.title}
-                </p>
+                {/* 썸네일 */}
+                <div style={{ width: 120, height: 90, borderRadius: 14, overflow: 'hidden', position: 'relative', flexShrink: 0, background: 'var(--bg-surface)' }}>
+                  <SafeImage src={blog.image_url} alt={blog.title} fill className="object-cover most-read-img" />
+                </div>
 
-                {/* 저자 + 뷰 */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 700 }}>
-                    {blog.author}
-                  </span>
-                  {typeof blog.view_count === 'number' && blog.view_count > 0 && (
-                    <span style={{ fontSize: '10px', color: color, fontWeight: 900, letterSpacing: '1px' }}>
-                      {blog.view_count.toLocaleString()} views
+                {/* 텍스트 */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                    <span style={{ padding: '2px 10px', borderRadius: 999, background: color + '18', color, fontSize: 9, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase' }}>
+                      {blog.category}
                     </span>
-                  )}
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 700 }}>
+                      {blog.date}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 'clamp(14px, 1.8vw, 17px)', fontWeight: 900, color: 'var(--text)', lineHeight: 1.3, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
+                    {blog.title}
+                  </p>
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{blog.author}</span>
                 </div>
-              </div>
-            </Link>
-          );
-        })}
+
+                <ArrowRight size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* All Posts — 하단 중앙 */}
+        <div style={{ textAlign: 'center', marginTop: 40 }}>
+          <Link href="/blog" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', borderRadius: 999, border: '1px solid var(--border-medium)', fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--text)', textDecoration: 'none' }}>
+            All Stories <ArrowRight size={14} />
+          </Link>
+        </div>
       </div>
     </section>
   );
