@@ -25,7 +25,7 @@ async function getBlogs(): Promise<Blog[]> {
     .select('*')
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('created_at', { ascending: false });
+    .order('date', { ascending: false });
   return data ?? [];
 }
 

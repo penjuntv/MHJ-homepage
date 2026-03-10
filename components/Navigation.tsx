@@ -8,11 +8,11 @@ import SearchOverlay from './SearchOverlay';
 import { useTheme } from './ThemeProvider';
 
 const NAV_LINKS = [
-  { label: 'Welcome', href: '/welcome' },
   { label: 'About', href: '/about' },
   { label: 'Magazine', href: '/magazine' },
   { label: 'Gallery', href: '/gallery' },
   { label: 'Blog', href: '/blog' },
+  { label: 'StoryPress', href: '/storypress' },
 ];
 
 interface NavProps {
@@ -32,6 +32,7 @@ export default function Navigation({ siteName, siteSubtitle, socialInstagram, so
 
   const isActive = (href: string) => {
     if (href === '/magazine') return pathname.startsWith('/magazine');
+    if (href === '/storypress') return pathname.startsWith('/storypress');
     return pathname === href;
   };
 
