@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { X, ChevronLeft, ChevronRight, Download, BookOpen, List } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Download, List } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article } from '@/lib/types';
 
@@ -12,7 +12,10 @@ const PdfViewer = dynamic(() => import('./PdfViewer'), {
   ssr: false,
   loading: () => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '70vh' }}>
-      <p style={{ color: '#94A3B8', fontSize: 12, fontWeight: 700, letterSpacing: 4, textTransform: 'uppercase' }}>Loading PDF...</p>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 40, height: 40, border: '3px solid #E2D9D0', borderTopColor: '#8B7355', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+        <p style={{ color: '#9C8B7A', fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase' }}>Loading...</p>
+      </div>
     </div>
   ),
 });
@@ -24,14 +27,13 @@ interface Props {
   articles: Article[];
 }
 
-/* ─── 헬퍼 ─── */
 function getMode(magazine: Magazine, articles: Article[]): ViewerMode {
   if (magazine.pdf_url) return 'pdf';
   if (articles.length > 0) return 'articles';
   return 'empty';
 }
 
-/* ─── 뉴질랜드 기준 계절 테마 ─── */
+/* ─── 뉴질랜드 계절 테마 (Empty 모드) ─── */
 const SEASON_THEMES: Record<string, { bg: string; accent: string; label: string }> = {
   Jan: { bg: 'linear-gradient(135deg, #0a1628 0%, #1a2a0a 100%)', accent: '#4ade80', label: 'Summer' },
   Feb: { bg: 'linear-gradient(135deg, #1a0a28 0%, #0a1628 100%)', accent: '#60a5fa', label: 'Summer' },
@@ -47,86 +49,47 @@ const SEASON_THEMES: Record<string, { bg: string; accent: string; label: string 
   Dec: { bg: 'linear-gradient(135deg, #0a1428 0%, #001a28 100%)', accent: '#38bdf8', label: 'Summer' },
 };
 
-/* ─── 빈 이슈 (계절 테마) ─── */
 function EmptyPage({ magazine }: { magazine: Magazine }) {
-  const theme = SEASON_THEMES[magazine.month_name] ?? {
-    bg: 'linear-gradient(135deg, #0f0f1a 0%, #1a0f2e 100%)',
-    accent: 'rgba(255,255,255,0.4)',
-    label: '',
-  };
-
+  const theme = SEASON_THEMES[magazine.month_name] ?? { bg: 'linear-gradient(135deg, #0f0f1a 0%, #1a0f2e 100%)', accent: 'rgba(255,255,255,0.4)', label: '' };
   return (
-    <div style={{
-      minHeight: '60vh',
-      background: theme.bg,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 20,
-      padding: 40,
-    }}>
-      {theme.label && (
-        <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 6, textTransform: 'uppercase', color: theme.accent, opacity: 0.7 }}>
-          {theme.label} {magazine.year}
-        </span>
-      )}
-      <p style={{ fontSize: 'clamp(48px, 10vw, 96px)', fontWeight: 900, letterSpacing: -3, textTransform: 'uppercase', color: 'rgba(255,255,255,0.08)', lineHeight: 1, textAlign: 'center', margin: 0 }}>
-        {magazine.month_name}
-      </p>
-      <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', textAlign: 'center', margin: 0 }}>
-        Coming Soon
-      </p>
-      <p style={{ color: theme.accent, fontSize: 12, opacity: 0.5, margin: 0, textAlign: 'center' }}>
-        {magazine.title}
-      </p>
+    <div style={{ minHeight: '60vh', background: theme.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, padding: 40 }}>
+      {theme.label && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 6, textTransform: 'uppercase', color: theme.accent, opacity: 0.7 }}>{theme.label} {magazine.year}</span>}
+      <p style={{ fontSize: 'clamp(48px, 10vw, 96px)', fontWeight: 900, letterSpacing: -3, textTransform: 'uppercase', color: 'rgba(255,255,255,0.08)', lineHeight: 1, textAlign: 'center', margin: 0 }}>{magazine.month_name}</p>
+      <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', textAlign: 'center', margin: 0 }}>Coming Soon</p>
+      <p style={{ color: theme.accent, fontSize: 12, opacity: 0.5, margin: 0, textAlign: 'center' }}>{magazine.title}</p>
     </div>
   );
 }
 
-/* ─── 기사 팝업 모달 (Articles 모드용) ─── */
+/* ─── 기사 팝업 (Articles 모드용) ─── */
 function ArticlePopup({ article, onClose }: { article: Article; onClose: () => void }) {
   const isImage = !!article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf');
   const isPdf = !!article.pdf_url && article.pdf_url.toLowerCase().includes('.pdf');
-
   return (
-    <div
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
-    >
-      <div style={{ background: 'var(--modal-bg, #fff)', borderRadius: 16, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border, #F1F5F9)', flexShrink: 0 }}>
+    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #F1F5F9', flexShrink: 0 }}>
           <div>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 3px' }}>
-              {article.article_type || 'Article'} · {article.date}
-            </p>
-            <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--text, #1A1A1A)', margin: 0, lineHeight: 1.2 }}>
-              {article.title}
-            </p>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, color: '#9C8B7A', textTransform: 'uppercase', margin: '0 0 3px' }}>{article.article_type || 'Article'} · {article.author}</p>
+            <p style={{ fontSize: 15, fontWeight: 900, color: '#1A1A1A', margin: 0 }}>{article.title}</p>
           </div>
-          <button onClick={onClose} style={popupBtnStyle} title="닫기"><X size={15} /></button>
+          <button onClick={onClose} style={{ background: '#F5F0EB', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center' }}><X size={15} color="#6B5B4E" /></button>
         </div>
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {isPdf && (
-            <iframe src={article.pdf_url!} style={{ width: '100%', height: '70vh', border: 'none', display: 'block' }} title={article.title} />
-          )}
+          {isPdf && <iframe src={article.pdf_url!} style={{ width: '100%', height: '70vh', border: 'none', display: 'block' }} title={article.title} />}
           {isImage && article.pdf_url && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '70vh', objectFit: 'contain', background: '#f8fafc' }} />
+            <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '70vh', objectFit: 'contain', background: '#F5F0EB' }} />
           )}
           {!article.pdf_url && (
             <div style={{ padding: 32 }}>
               {article.image_url && (
-                <div style={{ aspectRatio: '16/9', position: 'relative', borderRadius: 8, overflow: 'hidden', marginBottom: 24 }}>
+                <div style={{ aspectRatio: '16/9', position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
                   <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
                 </div>
               )}
-              <p style={{ color: 'var(--text-secondary, #64748B)', lineHeight: 1.7, fontSize: 15, margin: 0 }}>
-                {article.content.replace(/<[^>]+>/g, '')}
-              </p>
-              <p style={{ color: '#94A3B8', fontSize: 12, marginTop: 16, fontStyle: 'italic' }}>
-                — {article.author}
-              </p>
+              <p style={{ color: '#4A3F35', lineHeight: 1.8, fontSize: 15, margin: 0 }}>{article.content.replace(/<[^>]+>/g, '')}</p>
+              <p style={{ color: '#9C8B7A', fontSize: 13, marginTop: 20, fontStyle: 'italic' }}>— {article.author}</p>
             </div>
           )}
         </div>
@@ -135,12 +98,13 @@ function ArticlePopup({ article, onClose }: { article: Article; onClose: () => v
   );
 }
 
-/* ─── 메인 MagazineViewer ─── */
+/* ════════════════════════════════════════════
+   메인 MagazineViewer
+   ════════════════════════════════════════════ */
 export default function MagazineViewer({ magazine, articles }: Props) {
   const router = useRouter();
   const mode = getMode(magazine, articles);
   const touchStartX = useRef<number | null>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
 
   const sortedArticles = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const coverItems = sortedArticles.filter(a => a.article_type === 'cover' || a.article_type === 'contents');
@@ -148,35 +112,42 @@ export default function MagazineViewer({ magazine, articles }: Props) {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPdfPages, setTotalPdfPages] = useState(0);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null); // articles 모드용
-  const [sidebarOpen, setSidebarOpen] = useState(false); // 모바일 사이드바
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const pageCount = mode === 'pdf' ? totalPdfPages : 0;
+  const pageCount = totalPdfPages;
 
-  /* 현재 페이지 기준으로 활성 기사 파악 */
+  /* 현재 페이지 기준 활성 기사 */
   const activeArticle = sortedArticles.find(a =>
     a.page_start != null && a.page_end != null &&
-    currentPage >= (a.page_start ?? 0) && currentPage <= (a.page_end ?? 0)
+    currentPage >= (a.page_start as number) && currentPage <= (a.page_end as number)
   ) ?? null;
 
+  /* ─── Bug fix: goTo는 pageCount 제한 없이 직접 setState
+      (pageCount가 0이어도 나중에 PDF가 올바른 페이지를 표시함) ─── */
   const goTo = useCallback((page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, pageCount || 999)));
-  }, [pageCount]);
+    setCurrentPage(Math.max(1, page));
+  }, []);
 
-  const goToPrev = useCallback(() => { if (currentPage > 1) goTo(currentPage - 1); }, [currentPage, goTo]);
-  const goToNext = useCallback(() => { if (currentPage < pageCount) goTo(currentPage + 1); }, [currentPage, pageCount, goTo]);
+  const goToPrev = useCallback(() => {
+    if (currentPage > 1) setCurrentPage(p => p - 1);
+  }, [currentPage]);
 
-  /* ─── 사이드바 기사 클릭 → PDF 해당 페이지로 이동 ─── */
+  const goToNext = useCallback(() => {
+    if (pageCount === 0 || currentPage < pageCount) setCurrentPage(p => p + 1);
+  }, [currentPage, pageCount]);
+
+  /* 기사 클릭: PDF 모드면 해당 page_start로 이동, 아니면 팝업 */
   const handleArticleClick = useCallback((article: Article) => {
     if (mode === 'pdf' && article.page_start != null) {
-      goTo(article.page_start);
+      setCurrentPage(article.page_start as number); // 직접 setState (goTo 우회)
       setSidebarOpen(false);
     } else {
       setSelectedArticle(article);
     }
-  }, [mode, goTo]);
+  }, [mode]);
 
-  /* ─── 키보드 ─── */
+  /* 키보드 */
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (selectedArticle) { if (e.key === 'Escape') setSelectedArticle(null); return; }
@@ -190,7 +161,7 @@ export default function MagazineViewer({ magazine, articles }: Props) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [goToPrev, goToNext, router, mode, selectedArticle]);
 
-  /* ─── 터치 스와이프 (PDF 모드) ─── */
+  /* 터치 스와이프 */
   const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
   const onTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null || mode !== 'pdf') return;
@@ -199,132 +170,119 @@ export default function MagazineViewer({ magazine, articles }: Props) {
     touchStartX.current = null;
   };
 
+  /* 페이지 수 계산 helper */
+  const articlePageCount = (a: Article) => {
+    if (a.page_start != null && a.page_end != null) return (a.page_end as number) - (a.page_start as number) + 1;
+    return null;
+  };
+
   return (
     <>
       <div
-        style={{
-          minHeight: '100vh',
-          background: 'var(--bg, #F8FAFC)',
-          display: 'flex',
-          flexDirection: 'column',
-          color: 'var(--text, #1A1A1A)',
-        }}
+        style={{ minHeight: '100vh', background: '#F5F0EB', display: 'flex', flexDirection: 'column', color: '#2C1F14' }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
         {/* ─── 상단 바 ─── */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '14px 20px',
-          borderBottom: '1px solid var(--border, #E2E8F0)',
-          background: 'var(--bg, #fff)',
-          flexShrink: 0,
-          gap: 12,
-          position: 'sticky',
-          top: 0,
-          zIndex: 30,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '12px 20px',
+          borderBottom: '1px solid #E8DDD4',
+          background: '#FAF7F4',
+          flexShrink: 0, gap: 12,
+          position: 'sticky', top: 0, zIndex: 30,
         }}>
           <div style={{ minWidth: 0 }}>
-            <span style={{ display: 'block', fontSize: 9, fontWeight: 900, letterSpacing: 4, color: '#94A3B8', textTransform: 'uppercase', marginBottom: 2 }}>
+            <span style={{ display: 'block', fontSize: 9, fontWeight: 900, letterSpacing: 4, color: '#9C8B7A', textTransform: 'uppercase', marginBottom: 2 }}>
               {magazine.year} · {magazine.month_name}
             </span>
-            <h1 style={{ margin: 0, fontSize: 14, fontWeight: 900, color: 'var(--text, #1A1A1A)', letterSpacing: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <h1 style={{ margin: 0, fontSize: 14, fontWeight: 900, color: '#2C1F14', letterSpacing: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {magazine.title}
             </h1>
           </div>
 
           {mode === 'pdf' && pageCount > 0 && (
-            <div style={{ color: '#94A3B8', fontSize: 12, fontWeight: 700, letterSpacing: 2, flexShrink: 0 }}>
+            <div style={{ color: '#9C8B7A', fontSize: 12, fontWeight: 700, letterSpacing: 1, flexShrink: 0 }}>
               {currentPage} / {pageCount}
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-            {/* 모바일: 목차 토글 */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="magazine-mobile-toc-btn"
-              style={{ ...iconBtn, display: 'none' }}
-              title="목차"
-            >
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="mag-mobile-btn" style={{ ...topBtn, display: 'none' }} title="목차">
               <List size={15} />
             </button>
             {mode === 'pdf' && magazine.pdf_url && (
-              <a href={magazine.pdf_url} download target="_blank" rel="noopener noreferrer" title="전체 PDF 다운로드" style={{ ...iconBtn, textDecoration: 'none' }}>
+              <a href={magazine.pdf_url} download target="_blank" rel="noopener noreferrer" title="전체 PDF 다운로드" style={{ ...topBtn, textDecoration: 'none' }}>
                 <Download size={15} />
               </a>
             )}
-            <button onClick={() => router.push('/magazine')} title="서가로 돌아가기" style={iconBtn}>
+            <button onClick={() => router.push('/magazine')} title="서가로 돌아가기" style={topBtn}>
               <X size={15} />
             </button>
           </div>
         </div>
 
         {/* ══════════════════════════════════════════════
-            PDF 모드: 좌측 PDF뷰어 + 우측 기사 목록
+            PDF 모드 — 2단 레이아웃
             ══════════════════════════════════════════════ */}
         {mode === 'pdf' && (
-          <div className="magazine-pdf-layout">
-            {/* 좌: PDF 뷰어 */}
-            <div className="magazine-flipbook-panel">
-              {/* PDF 뷰어 영역 */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', padding: '32px 16px 24px', position: 'relative' }}>
+          <div className="mag-layout">
+
+            {/* 좌: PDF 뷰어 (책이 테이블에 놓인 느낌) */}
+            <div className="mag-book-panel">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '85vh', padding: '40px 20px 28px', position: 'relative' }}>
+
                 {/* 이전 버튼 */}
-                <button
-                  onClick={goToPrev}
-                  disabled={currentPage <= 1}
-                  style={navBtn(currentPage <= 1, 'left')}
-                  aria-label="이전 페이지"
-                >
-                  <ChevronLeft size={22} />
+                <button onClick={goToPrev} disabled={currentPage <= 1} style={navBtn(currentPage <= 1, 'left')} aria-label="이전 페이지">
+                  <ChevronLeft size={20} />
                 </button>
 
-                {/* PDF 페이지 */}
+                {/* ━━ Bug 1 fix: key={magazine.pdf_url} → URL 변경 시 PdfViewer 강제 재마운트
+                    Bug 2 fix: currentPage를 직접 setState로 관리, key는 애니메이션용만 ━━ */}
                 <div
-                  key={`${magazine.id}-${currentPage}`}
+                  key={currentPage} // 페이지 전환 애니메이션용
                   style={{
-                    maxWidth: 620,
-                    width: 'calc(100% - 110px)',
-                    boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
-                    borderRadius: 4,
+                    maxWidth: 540,
+                    width: 'calc(100% - 100px)',
+                    /* 책이 테이블에 놓인 느낌 */
+                    boxShadow: '0 2px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.08), 0 24px 60px rgba(0,0,0,0.14)',
+                    borderRadius: '2px 8px 8px 2px',
                     overflow: 'hidden',
                     background: '#fff',
-                    animation: 'pageIn 0.35s ease',
+                    animation: 'bookPageIn 0.3s ease',
+                    position: 'relative',
                   }}
                 >
-                  <PdfViewer url={magazine.pdf_url!} currentPage={currentPage} onLoadSuccess={setTotalPdfPages} />
+                  {/* 바인딩 선 효과 */}
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'linear-gradient(to right, rgba(0,0,0,0.12), transparent)', zIndex: 1, pointerEvents: 'none' }} />
+
+                  {/* Bug 1 핵심 fix: key={magazine.pdf_url} → 다른 매거진 열면 PDF 완전 재로드 */}
+                  <PdfViewer
+                    key={magazine.pdf_url || magazine.id}
+                    url={magazine.pdf_url!}
+                    currentPage={currentPage}
+                    onLoadSuccess={setTotalPdfPages}
+                  />
                 </div>
 
                 {/* 다음 버튼 */}
-                <button
-                  onClick={goToNext}
-                  disabled={currentPage >= pageCount}
-                  style={navBtn(currentPage >= pageCount, 'right')}
-                  aria-label="다음 페이지"
-                >
-                  <ChevronRight size={22} />
+                <button onClick={goToNext} disabled={pageCount > 0 && currentPage >= pageCount} style={navBtn(pageCount > 0 && currentPage >= pageCount, 'right')} aria-label="다음 페이지">
+                  <ChevronRight size={20} />
                 </button>
               </div>
 
-              {/* 페이지 도트 인디케이터 */}
-              {pageCount > 1 && pageCount <= 30 && (
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 5, padding: '8px 24px 16px', flexWrap: 'wrap' }}>
+              {/* 도트 인디케이터 */}
+              {pageCount > 1 && pageCount <= 24 && (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 5, padding: '0 24px 16px', flexWrap: 'wrap' }}>
                   {Array.from({ length: pageCount }).map((_, i) => (
                     <button
                       key={i}
                       onClick={() => goTo(i + 1)}
                       style={{
-                        width: i === currentPage - 1 ? 22 : 6,
-                        height: 6,
-                        borderRadius: 3,
-                        background: i === currentPage - 1 ? '#6366F1' : '#CBD5E1',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 0,
-                        transition: 'all 0.3s ease',
-                        flexShrink: 0,
+                        width: i === currentPage - 1 ? 20 : 5, height: 5, borderRadius: 3,
+                        background: i === currentPage - 1 ? '#8B7355' : '#D4C9BD',
+                        border: 'none', cursor: 'pointer', padding: 0,
+                        transition: 'all 0.3s ease', flexShrink: 0,
                       }}
                       aria-label={`${i + 1}페이지`}
                     />
@@ -332,171 +290,130 @@ export default function MagazineViewer({ magazine, articles }: Props) {
                 </div>
               )}
 
-              <div style={{ textAlign: 'center', padding: '4px 0 20px', color: '#CBD5E1', fontSize: 10, letterSpacing: 3, fontWeight: 700, textTransform: 'uppercase' }}>
+              <p style={{ textAlign: 'center', padding: '2px 0 20px', color: '#C4B8AB', fontSize: 9, letterSpacing: 3, fontWeight: 700, textTransform: 'uppercase' }}>
                 ← → 키보드 · 스와이프
-              </div>
+              </p>
             </div>
 
             {/* 우: 기사 목록 사이드바 */}
-            <div
-              ref={sidebarRef}
-              className={`magazine-sidebar-panel${sidebarOpen ? ' magazine-sidebar-open' : ''}`}
-              style={{ background: 'var(--bg-surface, #fff)', borderLeft: '1px solid var(--border, #E2E8F0)', overflowY: 'auto' }}
-            >
-              <div style={{ padding: '24px 20px' }}>
-                {/* 매거진 정보 */}
-                <div style={{ marginBottom: 20 }}>
-                  {magazine.image_url && (
-                    <div style={{ aspectRatio: '3/4', position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 14 }}>
-                      <SafeImage src={magazine.image_url} alt={magazine.title} fill className="object-cover" />
-                    </div>
-                  )}
-                  <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#6366F1', display: 'block', marginBottom: 4 }}>
-                    {magazine.year} {magazine.month_name}
-                  </span>
-                  <h2 style={{ fontSize: 16, fontWeight: 900, letterSpacing: -0.5, color: 'var(--text, #1A1A1A)', margin: '0 0 3px' }}>
-                    {magazine.title}
-                  </h2>
-                  <p style={{ fontSize: 11, color: '#94A3B8', margin: '0 0 14px' }}>
-                    Editor: {magazine.editor}
-                  </p>
+            <div className={`mag-sidebar${sidebarOpen ? ' mag-sidebar-open' : ''}`}>
+              <div style={{ padding: '28px 20px 32px' }}>
 
-                  {/* 전체 보기 버튼 */}
-                  <button
-                    onClick={() => goTo(1)}
-                    style={{
-                      width: '100%',
-                      padding: '9px 14px',
-                      background: currentPage === 1 && activeArticle === null ? '#6366F1' : 'var(--bg, #F8FAFC)',
-                      color: currentPage === 1 && activeArticle === null ? '#fff' : 'var(--text, #1A1A1A)',
-                      border: '1.5px solid',
-                      borderColor: currentPage === 1 && activeArticle === null ? '#6366F1' : 'var(--border, #E2E8F0)',
-                      borderRadius: 10,
-                      cursor: 'pointer',
-                      fontSize: 11,
-                      fontWeight: 700,
-                      letterSpacing: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <BookOpen size={13} />
-                    전체 보기
-                  </button>
-                </div>
-
-                {/* 목차 구분선 */}
-                <div style={{ height: 1, background: 'var(--border, #E2E8F0)', marginBottom: 14 }} />
-                <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: '#94A3B8', margin: '0 0 10px' }}>
-                  In This Issue
-                </p>
-
-                {/* Cover / Contents (작게 표시) */}
-                {coverItems.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 10 }}>
-                    {coverItems.map(article => (
-                      <button
-                        key={article.id}
-                        onClick={() => handleArticleClick(article)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8,
-                          background: activeArticle?.id === article.id ? '#EEF2FF' : 'transparent',
-                          border: 'none',
-                          borderRadius: 8,
-                          padding: '7px 10px',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          width: '100%',
-                          transition: 'background 0.15s',
-                        }}
-                        onMouseEnter={e => { if (activeArticle?.id !== article.id) (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg, #F8FAFC)'; }}
-                        onMouseLeave={e => { if (activeArticle?.id !== article.id) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-                      >
-                        <span style={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: 6,
-                          background: activeArticle?.id === article.id ? '#6366F1' : '#E2E8F0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 9,
-                          fontWeight: 900,
-                          color: activeArticle?.id === article.id ? '#fff' : '#94A3B8',
-                          flexShrink: 0,
-                          letterSpacing: 0,
-                        }}>
-                          {article.page_start ?? '—'}
-                        </span>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: activeArticle?.id === article.id ? '#6366F1' : '#64748B', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {article.title}
-                        </span>
-                        <span style={{ fontSize: 9, color: '#CBD5E1', fontWeight: 700, textTransform: 'uppercase', flexShrink: 0 }}>
-                          {article.article_type}
-                        </span>
-                      </button>
-                    ))}
+                {/* 매거진 커버 */}
+                {magazine.image_url && (
+                  <div style={{ aspectRatio: '3/4', position: 'relative', borderRadius: 10, overflow: 'hidden', marginBottom: 16, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+                    <SafeImage src={magazine.image_url} alt={magazine.title} fill className="object-cover" />
                   </div>
                 )}
 
-                {/* 구분 */}
+                {/* 매거진 메타 */}
+                <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#8B7355', display: 'block', marginBottom: 4 }}>
+                  {magazine.year} · {magazine.month_name}
+                </span>
+                <h2 style={{ fontSize: 17, fontWeight: 900, letterSpacing: -0.5, color: '#2C1F14', margin: '0 0 2px', lineHeight: 1.2 }}>
+                  {magazine.title}
+                </h2>
+                <p style={{ fontSize: 11, color: '#9C8B7A', margin: '0 0 20px', fontStyle: 'italic' }}>
+                  Editor — {magazine.editor}
+                </p>
+
+                {/* 구분선 */}
+                <div style={{ height: 1, background: '#E8DDD4', marginBottom: 16 }} />
+                <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#B5A89A', margin: '0 0 12px' }}>
+                  Contents
+                </p>
+
+                {/* Cover / Contents — 소형 행 */}
+                {coverItems.map(a => {
+                  const isActive = activeArticle?.id === a.id;
+                  return (
+                    <button
+                      key={a.id}
+                      onClick={() => handleArticleClick(a)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        background: isActive ? '#EDE4D9' : 'transparent',
+                        border: 'none', borderRadius: 7,
+                        padding: '6px 8px', cursor: 'pointer',
+                        textAlign: 'left', width: '100%', marginBottom: 3,
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = '#EDE4D9'; }}
+                      onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                    >
+                      <span style={{ fontSize: 9, color: isActive ? '#8B7355' : '#B5A89A', fontWeight: 700, width: 18, textAlign: 'right', flexShrink: 0 }}>
+                        {a.page_start ?? '—'}
+                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: isActive ? '#5C3D1E' : '#7A6958', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {a.title}
+                      </span>
+                      <span style={{ fontSize: 8, color: '#C4B8AB', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, flexShrink: 0 }}>
+                        {a.article_type}
+                      </span>
+                    </button>
+                  );
+                })}
+
                 {coverItems.length > 0 && mainArticles.length > 0 && (
-                  <div style={{ height: 1, background: 'var(--border, #E2E8F0)', marginBottom: 10 }} />
+                  <div style={{ height: 1, background: '#E8DDD4', margin: '10px 0 12px' }} />
                 )}
 
-                {/* 주요 기사 카드 */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {mainArticles.map(article => {
-                    const isActive = activeArticle?.id === article.id;
-                    const pageRange = article.page_start != null
-                      ? article.page_start === article.page_end
-                        ? `p.${article.page_start}`
-                        : `p.${article.page_start}–${article.page_end}`
-                      : null;
+                {/* 주요 기사 — 카드형 */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {mainArticles.map(a => {
+                    const isActive = activeArticle?.id === a.id;
+                    const pgCount = articlePageCount(a);
                     return (
                       <button
-                        key={article.id}
-                        onClick={() => handleArticleClick(article)}
+                        key={a.id}
+                        onClick={() => handleArticleClick(a)}
                         style={{
-                          display: 'flex',
-                          alignItems: 'flex-start',
-                          gap: 10,
-                          background: isActive ? '#EEF2FF' : 'var(--bg, #F8FAFC)',
-                          border: `1.5px solid ${isActive ? '#C7D2FE' : 'var(--border, #E2E8F0)'}`,
-                          borderRadius: 12,
-                          padding: '10px 12px',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          width: '100%',
+                          display: 'flex', alignItems: 'flex-start', gap: 10,
+                          background: isActive ? '#EDE4D9' : '#FAF7F4',
+                          border: `1.5px solid ${isActive ? '#C9A97A' : '#E8DDD4'}`,
+                          borderRadius: 12, padding: '10px 12px',
+                          cursor: 'pointer', textAlign: 'left', width: '100%',
                           transition: 'all 0.2s',
                         }}
-                        onMouseEnter={e => { if (!isActive) { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = '#C7D2FE'; el.style.background = '#F5F3FF'; } }}
-                        onMouseLeave={e => { if (!isActive) { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = 'var(--border, #E2E8F0)'; el.style.background = 'var(--bg, #F8FAFC)'; } }}
+                        onMouseEnter={e => { if (!isActive) { const el = e.currentTarget as HTMLButtonElement; el.style.background = '#EDE4D9'; el.style.borderColor = '#C9A97A'; } }}
+                        onMouseLeave={e => { if (!isActive) { const el = e.currentTarget as HTMLButtonElement; el.style.background = '#FAF7F4'; el.style.borderColor = '#E8DDD4'; } }}
                       >
                         {/* 썸네일 */}
-                        <div style={{ width: 44, height: 54, borderRadius: 6, overflow: 'hidden', position: 'relative', flexShrink: 0, background: '#E2E8F0' }}>
-                          {article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf') ? (
+                        <div style={{ width: 44, height: 54, borderRadius: 6, overflow: 'hidden', position: 'relative', flexShrink: 0, background: '#E8DDD4' }}>
+                          {a.pdf_url && !a.pdf_url.toLowerCase().includes('.pdf') ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={article.pdf_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={a.pdf_url} alt={a.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
-                            <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" sizes="44px" />
+                            <SafeImage src={a.image_url} alt={a.title} fill className="object-cover" sizes="44px" />
                           )}
                         </div>
 
                         {/* 텍스트 */}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: 12, fontWeight: 800, color: isActive ? '#4F46E5' : 'var(--text, #1A1A1A)', margin: '0 0 3px', lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                            {article.title}
+                          <p style={{
+                            fontSize: 12, fontWeight: 800,
+                            color: isActive ? '#5C3D1E' : '#2C1F14',
+                            margin: '0 0 4px', lineHeight: 1.3,
+                            overflow: 'hidden', display: '-webkit-box',
+                            WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                          }}>
+                            {a.title}
                           </p>
-                          <p style={{ fontSize: 10, color: '#94A3B8', margin: 0, fontWeight: 600 }}>
-                            {article.author}
-                            {pageRange && <span style={{ marginLeft: 6, color: '#CBD5E1' }}>{pageRange}</span>}
+                          {/* "HYUN · 3 pages" 형식 */}
+                          <p style={{ fontSize: 10, color: '#9C8B7A', margin: 0, fontWeight: 600 }}>
+                            {a.author}
+                            {pgCount != null && (
+                              <span style={{ color: '#C4B8AB', marginLeft: 5 }}>· {pgCount} {pgCount === 1 ? 'page' : 'pages'}</span>
+                            )}
                           </p>
                         </div>
+
+                        {/* 페이지 번호 */}
+                        {a.page_start != null && (
+                          <span style={{ fontSize: 10, color: isActive ? '#8B7355' : '#B5A89A', fontWeight: 700, flexShrink: 0, alignSelf: 'center' }}>
+                            p.{a.page_start}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -510,90 +427,82 @@ export default function MagazineViewer({ magazine, articles }: Props) {
             Articles 모드 (과월호): 사진 그리드
             ══════════════════════════════════════════════ */}
         {mode === 'articles' && (
-          <div style={{ flex: 1, background: 'var(--bg, #F8FAFC)', padding: 'clamp(48px, 6vw, 80px) clamp(24px, 4vw, 48px)' }}>
+          <div style={{ flex: 1, padding: 'clamp(48px, 6vw, 80px) clamp(24px, 4vw, 48px)' }}>
             <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-              <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#6366F1', display: 'block', marginBottom: 10 }}>Past Issue</span>
-              <h2 style={{ margin: 0, fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 900, letterSpacing: -1.5, textTransform: 'uppercase', marginBottom: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#8B7355', display: 'block', marginBottom: 10 }}>Past Issue</span>
+              <h2 style={{ margin: 0, fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 900, letterSpacing: -1.5, textTransform: 'uppercase', marginBottom: 8, color: '#2C1F14' }}>
                 {magazine.title}
               </h2>
-              <p style={{ margin: '0 0 40px', fontSize: 14, color: '#64748B', fontWeight: 500 }}>
+              <p style={{ margin: '0 0 40px', fontSize: 14, color: '#7A6958', fontWeight: 500 }}>
                 {magazine.year} {magazine.month_name} · Editor: {magazine.editor} · {sortedArticles.length} Articles
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: 24 }}>
-                {sortedArticles.map(article => (
-                  <ArticleGridCard key={article.id} article={article} onOpen={() => setSelectedArticle(article)} />
+                {sortedArticles.map(a => (
+                  <ArticleGridCard key={a.id} article={a} onOpen={() => setSelectedArticle(a)} />
                 ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* ══════════════════════════════════════════════
-            Empty 모드 (계절 테마)
-            ══════════════════════════════════════════════ */}
-        {mode === 'empty' && (
-          <div style={{ flex: 1 }}>
-            <EmptyPage magazine={magazine} />
-          </div>
-        )}
+        {/* Empty 모드 */}
+        {mode === 'empty' && <div style={{ flex: 1 }}><EmptyPage magazine={magazine} /></div>}
       </div>
 
-      {/* 기사 팝업 (Articles 모드) */}
-      {selectedArticle && (
-        <ArticlePopup article={selectedArticle} onClose={() => setSelectedArticle(null)} />
-      )}
+      {/* Articles 모드 팝업 */}
+      {selectedArticle && <ArticlePopup article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
 
       {/* 모바일 사이드바 오버레이 */}
       {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="magazine-sidebar-overlay"
-          style={{ display: 'none', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40 }}
-        />
+        <div onClick={() => setSidebarOpen(false)} className="mag-overlay" style={{ display: 'none', position: 'fixed', inset: 0, background: 'rgba(44,31,20,0.45)', zIndex: 40 }} />
       )}
 
       <style>{`
-        @keyframes pageIn {
-          from { opacity: 0; transform: scale(0.98); }
-          to   { opacity: 1; transform: scale(1); }
+        @keyframes bookPageIn {
+          from { opacity: 0; transform: translateX(8px) scale(0.99); }
+          to   { opacity: 1; transform: translateX(0) scale(1); }
         }
-        .magazine-pdf-layout {
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        .mag-layout {
           display: flex;
           flex-direction: row;
           flex: 1;
           min-height: 0;
         }
-        .magazine-flipbook-panel {
+        .mag-book-panel {
           flex: 1 1 0;
           min-width: 0;
         }
-        .magazine-sidebar-panel {
-          flex: 0 0 320px;
-          max-height: calc(100vh - 53px);
+        .mag-sidebar {
+          flex: 0 0 300px;
+          background: #FAF7F4;
+          border-left: 1px solid #E8DDD4;
+          overflow-y: auto;
+          max-height: calc(100vh - 49px);
           position: sticky;
-          top: 53px;
+          top: 49px;
         }
-        @media (max-width: 900px) {
-          .magazine-mobile-toc-btn {
+        @media (max-width: 860px) {
+          .mag-mobile-btn {
             display: flex !important;
           }
-          .magazine-sidebar-panel {
+          .mag-sidebar {
             position: fixed;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 300px;
+            right: 0; top: 0; bottom: 0;
+            width: 280px;
             max-width: 85vw;
             max-height: 100vh;
             z-index: 50;
             transform: translateX(100%);
-            transition: transform 0.3s ease;
-            box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+            box-shadow: -8px 0 32px rgba(44,31,20,0.15);
           }
-          .magazine-sidebar-panel.magazine-sidebar-open {
+          .mag-sidebar.mag-sidebar-open {
             transform: translateX(0);
           }
-          .magazine-sidebar-overlay {
+          .mag-overlay {
             display: block !important;
           }
         }
@@ -602,17 +511,17 @@ export default function MagazineViewer({ magazine, articles }: Props) {
   );
 }
 
-/* ─── 기사 그리드 카드 (Articles 모드) ─── */
+/* ─── Articles 모드 그리드 카드 ─── */
 function ArticleGridCard({ article, onOpen }: { article: Article; onOpen: () => void }) {
   const isImageFile = !!article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf');
   return (
     <div
       onClick={onOpen}
-      style={{ borderRadius: 16, overflow: 'hidden', background: 'var(--bg-card, #fff)', border: '1.5px solid var(--border, #F1F5F9)', cursor: 'pointer', transition: 'transform 0.25s ease, box-shadow 0.25s ease' }}
-      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 12px 32px rgba(0,0,0,0.1)'; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; }}
+      style={{ borderRadius: 16, overflow: 'hidden', background: '#fff', border: '1px solid #E8DDD4', cursor: 'pointer', transition: 'transform 0.25s ease, box-shadow 0.25s ease', boxShadow: '0 2px 8px rgba(44,31,20,0.06)' }}
+      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 16px 40px rgba(44,31,20,0.12)'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(44,31,20,0.06)'; }}
     >
-      <div style={{ aspectRatio: '4/3', position: 'relative', overflow: 'hidden', background: '#F8FAFC' }}>
+      <div style={{ aspectRatio: '4/3', position: 'relative', overflow: 'hidden', background: '#EDE4D9' }}>
         {isImageFile && article.pdf_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={article.pdf_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -620,16 +529,16 @@ function ArticleGridCard({ article, onOpen }: { article: Article; onOpen: () => 
           <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
         )}
         {article.article_type && (
-          <span style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(255,255,255,0.92)', color: '#475569', fontSize: 8, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4 }}>
+          <span style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(250,247,244,0.92)', color: '#7A6958', fontSize: 8, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4 }}>
             {article.article_type}
           </span>
         )}
       </div>
       <div style={{ padding: '14px 16px 16px' }}>
-        <p style={{ margin: '0 0 5px', fontSize: 9, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: '#94A3B8' }}>
-          {article.date} · {article.author}
+        <p style={{ margin: '0 0 5px', fontSize: 9, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: '#9C8B7A' }}>
+          {article.author} · {article.date}
         </p>
-        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 900, lineHeight: 1.3, color: 'var(--text, #1A1A1A)', letterSpacing: -0.3 }}>
+        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 900, lineHeight: 1.3, color: '#2C1F14', letterSpacing: -0.3 }}>
           {article.title}
         </h3>
       </div>
@@ -638,47 +547,32 @@ function ArticleGridCard({ article, onOpen }: { article: Article; onOpen: () => 
 }
 
 /* ─── 스타일 헬퍼 ─── */
-const iconBtn: React.CSSProperties = {
-  background: 'var(--bg, rgba(0,0,0,0.04))',
-  border: '1px solid var(--border, #E2E8F0)',
+const topBtn: React.CSSProperties = {
+  background: '#EDE4D9',
+  border: '1px solid #D4C9BD',
   borderRadius: 8,
   padding: 8,
-  color: 'var(--text-secondary, #475569)',
+  color: '#6B5B4E',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'background 0.2s',
+  transition: 'background 0.15s',
 };
 
 function navBtn(disabled: boolean, side: 'left' | 'right'): React.CSSProperties {
   return {
     position: 'absolute',
-    [side]: 8,
+    [side]: 6,
     zIndex: 10,
-    width: 44,
-    height: 44,
+    width: 40, height: 40,
     borderRadius: '50%',
-    background: disabled ? '#F1F5F9' : '#fff',
-    boxShadow: disabled ? 'none' : '0 2px 12px rgba(0,0,0,0.1)',
-    border: '1px solid var(--border, #E2E8F0)',
-    color: disabled ? '#CBD5E1' : '#475569',
+    background: disabled ? '#EDE4D9' : '#fff',
+    boxShadow: disabled ? 'none' : '0 2px 12px rgba(44,31,20,0.12)',
+    border: `1px solid ${disabled ? '#D4C9BD' : '#E8DDD4'}`,
+    color: disabled ? '#C4B8AB' : '#6B5B4E',
     cursor: disabled ? 'not-allowed' : 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
     transition: 'all 0.2s',
   };
 }
-
-const popupBtnStyle: React.CSSProperties = {
-  background: 'var(--bg, rgba(0,0,0,0.04))',
-  border: '1px solid var(--border, #E2E8F0)',
-  borderRadius: 8,
-  padding: 8,
-  color: 'var(--text-secondary, #475569)',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
