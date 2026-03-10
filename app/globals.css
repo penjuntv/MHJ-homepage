@@ -465,6 +465,53 @@
   color: #818CF8;
 }
 
+/* ─── Landing — Explore by Category + Latest Issues ─── */
+
+/* 카테고리 3×2 그리드 */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 900px) {
+  .category-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .category-grid { grid-template-columns: 1fr; }
+}
+
+/* 카테고리 카드 hover */
+.cat-card {
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s;
+}
+.cat-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 32px 64px rgba(0,0,0,0.16) !important;
+}
+.cat-card:hover .cat-img {
+  filter: saturate(2.2) !important;
+}
+.cat-img {
+  filter: saturate(1.2);
+  transition: filter 0.5s ease;
+}
+
+/* 매거진 카드 hover */
+.mag-card {
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s;
+}
+.mag-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 32px 64px rgba(0,0,0,0.18) !important;
+}
+.mag-card:hover .mag-img {
+  filter: saturate(2.2) !important;
+}
+.mag-img {
+  filter: saturate(1.2);
+  transition: filter 0.5s ease;
+}
+
 /* 모바일: 댓글 그리드 1컬럼 */
 @media (max-width: 640px) {
   .comment-form-grid {

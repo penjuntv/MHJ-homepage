@@ -3,7 +3,7 @@ import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import type { Blog, HeroSlide } from '@/lib/types';
+import type { Blog, HeroSlide, Magazine } from '@/lib/types';
 import HeroCarousel from '@/components/HeroCarousel';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import StoryPressSection from '@/components/StoryPressSection';
@@ -67,6 +67,49 @@ async function getHeroSlides(): Promise<HeroSlide[]> {
   }
 }
 
+const BLOG_CATEGORIES = ['Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'] as const;
+
+const FALLBACK_CATEGORY_BLOGS: Record<string, Blog> = {
+  Education: { id: 302, category: 'Education', title: '매시대학교 석사의 무게', author: 'Heejong Jo', date: '2026.03.05', image_url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800', content: '', slug: 'massey-masters', published: true },
+  Settlement: { id: 305, category: 'Settlement', title: '오클랜드의 첫 장보기', author: 'Heejong Jo', date: '2026.01.19', image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800', content: '', slug: 'first-grocery', published: true },
+  Girls: { id: 303, category: 'Girls', title: '아이들의 언어 적응기', author: 'Heejong Jo', date: '2026.02.20', image_url: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=800', content: '', slug: 'kids-language', published: true },
+  Locals: { id: 301, category: 'Locals', title: '마이랑이 마켓의 아보카도', author: 'Heejong Jo', date: '2026.03.12', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800', content: '', slug: 'mairangi-avocado', published: true },
+  Life: { id: 310, category: 'Life', title: '비 오는 날의 서재', author: 'Heejong Jo', date: '2025.07.05', image_url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800', content: '', slug: 'rainy-library', published: true },
+  Travel: { id: 304, category: 'Travel', title: '노스쇼어의 보석 같은 해변', author: 'Heejong Jo', date: '2026.01.25', image_url: 'https://images.unsplash.com/photo-1506929113675-b9299d39c1b2?w=800', content: '', slug: 'northshore-beaches', published: true },
+};
+
+const FALLBACK_MAGAZINES: Magazine[] = [
+  { id: '2026-03', year: '2026', month_name: 'Mar', title: 'The Beginning', editor: 'Sangmok Jo', image_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' },
+  { id: '2026-02', year: '2026', month_name: 'Feb', title: 'Summer Haze', editor: 'Sangmok Jo', image_url: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800' },
+  { id: '2026-01', year: '2026', month_name: 'Jan', title: 'New Roots', editor: 'Sangmok Jo', image_url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800' },
+];
+
+async function getCategoryBlogs(): Promise<Record<string, Blog>> {
+  const results: Record<string, Blog> = {};
+  await Promise.all(
+    BLOG_CATEGORIES.map(async (cat) => {
+      const { data } = await supabase
+        .from('blogs')
+        .select('*')
+        .eq('published', true)
+        .eq('category', cat)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (data?.[0]) results[cat] = data[0];
+    })
+  );
+  return results;
+}
+
+async function getRecentMagazines(): Promise<Magazine[]> {
+  const { data } = await supabase
+    .from('magazines')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(3);
+  return data?.length ? data : FALLBACK_MAGAZINES;
+}
+
 async function getMostReadBlogs(): Promise<Blog[]> {
   const { data } = await supabase
     .from('blogs')
@@ -81,7 +124,10 @@ async function getMostReadBlogs(): Promise<Blog[]> {
 }
 
 export default async function LandingPage() {
-  const [blogs, mostRead, heroSlides, s] = await Promise.all([getRecentBlogs(), getMostReadBlogs(), getHeroSlides(), getSiteSettings()]);
+  const [blogs, mostRead, heroSlides, categoryBlogsRaw, magazines, s] = await Promise.all([
+    getRecentBlogs(), getMostReadBlogs(), getHeroSlides(), getCategoryBlogs(), getRecentMagazines(), getSiteSettings(),
+  ]);
+  const categoryBlogs: Record<string, Blog> = { ...FALLBACK_CATEGORY_BLOGS, ...categoryBlogsRaw };
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -262,11 +308,149 @@ export default async function LandingPage() {
         ctaText={s.storypress_cta_text}
       />
 
+      {/* Explore by Category — 3×2 그리드 */}
+      <ExploreByCategorySection categoryBlogs={categoryBlogs} />
+
+      {/* Latest Issues — 매거진 2~3개 */}
+      <LatestIssuesSection magazines={magazines} />
+
       {/* Newsletter CTA */}
       <NewsletterCTA />
 
     </div>
     </>
+  );
+}
+
+/* ─── Explore by Category 섹션 ─── */
+const CATEGORY_COLORS_MAP: Record<string, string> = {
+  Education: '#3B82F6', Settlement: '#8B5CF6', Girls: '#EC4899',
+  Locals: '#EF4444', Life: '#F59E0B', Travel: '#10B981',
+};
+const BLOG_CATEGORIES_LIST = ['Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
+
+function ExploreByCategorySection({ categoryBlogs }: { categoryBlogs: Record<string, Blog> }) {
+  return (
+    <section style={{ padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 80px)', background: 'var(--bg)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
+            WHAT YOU&apos;LL FIND HERE
+          </p>
+          <h2 className="font-display font-black" style={{ fontSize: 'clamp(36px, 5vw, 72px)', letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic', color: 'var(--text)' }}>
+            Explore by Category
+          </h2>
+        </div>
+        <Link
+          href="/blog"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#4F46E5', textDecoration: 'none' }}
+        >
+          All Stories <ArrowRight size={14} />
+        </Link>
+      </div>
+
+      <div className="category-grid">
+        {BLOG_CATEGORIES_LIST.map((cat) => {
+          const blog = categoryBlogs[cat];
+          const color = CATEGORY_COLORS_MAP[cat] || '#4F46E5';
+          if (!blog) return null;
+          return (
+            <Link
+              key={cat}
+              href={`/blog/${blog.slug}`}
+              className="cat-card"
+              style={{
+                display: 'block', borderRadius: '28px', overflow: 'hidden',
+                textDecoration: 'none', position: 'relative',
+                aspectRatio: '3/4',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+              }}
+            >
+              <SafeImage
+                src={blog.image_url}
+                alt={blog.title}
+                fill
+                className="cat-img object-cover"
+              />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.08) 50%)' }} />
+              <div style={{ position: 'absolute', top: '16px', left: '16px', padding: '5px 14px', borderRadius: '999px', background: color, color: 'white', fontSize: '9px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>
+                {cat}
+              </div>
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px' }}>
+                <p style={{ color: 'white', fontSize: '15px', fontWeight: 700, lineHeight: 1.4, marginBottom: '6px' }}>
+                  {blog.title}
+                </p>
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>{blog.date}</p>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ─── Latest Issues 섹션 ─── */
+function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
+  return (
+    <section style={{ padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 80px)', background: 'var(--bg-surface)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
+            THE MAGAZINE
+          </p>
+          <h2 className="font-display font-black" style={{ fontSize: 'clamp(36px, 5vw, 72px)', letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic', color: 'var(--text)' }}>
+            Latest Issues
+          </h2>
+        </div>
+        <Link
+          href="/magazine"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#4F46E5', textDecoration: 'none' }}
+        >
+          All Issues <ArrowRight size={14} />
+        </Link>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '24px' }}>
+        {magazines.map((mag) => (
+          <Link
+            key={mag.id}
+            href={`/magazine/${mag.id}`}
+            className="mag-card"
+            style={{
+              display: 'block', borderRadius: '28px', overflow: 'hidden',
+              textDecoration: 'none', position: 'relative',
+              aspectRatio: '3/4',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+            }}
+          >
+            <SafeImage
+              src={mag.image_url}
+              alt={mag.title}
+              fill
+              className="mag-img object-cover"
+            />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.1) 55%)' }} />
+            <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
+              <p className="font-black uppercase" style={{ fontSize: '9px', letterSpacing: '4px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>
+                {mag.year}
+              </p>
+              <p style={{ color: 'white', fontSize: '22px', fontWeight: 900, letterSpacing: '-1px', lineHeight: 1 }}>
+                {mag.month_name}
+              </p>
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px' }}>
+              <p style={{ color: 'white', fontSize: '18px', fontWeight: 900, letterSpacing: '-0.5px', lineHeight: 1.3, marginBottom: '12px' }}>
+                {mag.title}
+              </p>
+              <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.3)', padding: '6px 14px', borderRadius: '999px' }}>
+                Open Edition
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 
