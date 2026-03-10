@@ -89,115 +89,104 @@ export default function StoryPressClient({ title }: Props) {
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
 
-      {/* ─── 히어로 ─── */}
+      {/* ─── 히어로 — 2컬럼 ─── */}
       <section style={{
-        minHeight: '92vh',
-        display: 'flex',
-        flexDirection: 'column',
+        minHeight: '80vh',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))',
         alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: 'clamp(80px, 10vw, 140px) clamp(24px, 4vw, 80px) clamp(60px, 8vw, 100px)',
-        background: 'linear-gradient(135deg, #FFF4EE 0%, #F0F4FF 40%, #F0FDF9 100%)',
+        gap: 'clamp(40px, 6vw, 80px)',
+        padding: 'clamp(64px, 8vw, 112px) clamp(24px, 4vw, 80px)',
+        background: 'linear-gradient(135deg, #FFF4EE 0%, #F0F4FF 50%, #F0FDF9 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}>
         {/* 배경 장식 원 */}
-        <div style={{
-          position: 'absolute', top: '-10%', right: '-5%',
-          width: 'clamp(200px, 40vw, 500px)', height: 'clamp(200px, 40vw, 500px)',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(253,186,116,0.25) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-5%', left: '-5%',
-          width: 'clamp(150px, 30vw, 400px)', height: 'clamp(150px, 30vw, 400px)',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(167,243,208,0.3) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
+        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 'clamp(200px, 35vw, 480px)', height: 'clamp(200px, 35vw, 480px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(253,186,116,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-5%', left: '-5%', width: 'clamp(120px, 25vw, 320px)', height: 'clamp(120px, 25vw, 320px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(167,243,208,0.25) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-        <div style={{ position: 'relative', maxWidth: 800 }}>
-          {/* 라벨 */}
-          <p style={{
-            fontSize: 10, fontWeight: 900, letterSpacing: 5,
-            textTransform: 'uppercase', color: '#F59E42',
-            marginBottom: 28,
-          }}>
+        {/* 좌: 텍스트 */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#F59E42', marginBottom: 24 }}>
             From Our Family · ESOL · Ages 5–12
           </p>
-
-          {/* 대형 제목 */}
           <h1
             className="font-display"
-            style={{
-              fontSize: 'clamp(64px, 14vw, 160px)',
-              fontWeight: 900,
-              fontStyle: 'italic',
-              letterSpacing: -5,
-              lineHeight: 0.85,
-              color: '#1A1A1A',
-              marginBottom: 40,
-            }}
+            style={{ fontSize: 'clamp(56px, 10vw, 120px)', fontWeight: 900, fontStyle: 'italic', letterSpacing: -4, lineHeight: 0.88, color: '#1A1A1A', marginBottom: 28 }}
           >
             {title}
           </h1>
-
-          {/* 서브타이틀 */}
-          <p style={{
-            fontSize: 'clamp(18px, 2.5vw, 26px)',
-            fontWeight: 500,
-            color: '#64748B',
-            lineHeight: 1.6,
-            marginBottom: 56,
-            maxWidth: 560,
-            margin: '0 auto 56px',
-          }}>
+          <p style={{ fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 500, color: '#64748B', lineHeight: 1.65, marginBottom: 40, maxWidth: 480 }}>
             A gentle way to learn English,{' '}
-            <span style={{ fontWeight: 900, color: '#F59E42' }}>4 words at a time</span>
+            <span style={{ fontWeight: 900, color: '#F59E42' }}>4 words at a time.</span>{' '}
+            Built for bilingual families navigating two languages.
           </p>
-
-          {/* CTA 버튼 */}
-          <a
-            href="#storypress-signup"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: 'clamp(16px, 2vw, 22px) clamp(32px, 4vw, 52px)',
-              borderRadius: 999,
-              background: '#1A1A1A',
-              color: '#fff',
-              fontSize: 13,
-              fontWeight: 900,
-              letterSpacing: 3,
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-            }}
-          >
-            Join the Waitlist
-          </a>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <a
+              href="#storypress-signup"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', borderRadius: 999, background: '#1A1A1A', color: '#fff', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 16px 32px rgba(0,0,0,0.15)' }}
+            >
+              Join the Waitlist
+            </a>
+            <a
+              href="#why-storypress"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '16px 32px', borderRadius: 999, background: 'rgba(255,255,255,0.7)', color: '#1A1A1A', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', border: '1px solid rgba(0,0,0,0.1)' }}
+            >
+              Learn More <ChevronDown size={14} />
+            </a>
+          </div>
         </div>
 
-        {/* 스크롤 힌트 */}
-        <div style={{
-          position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-          opacity: 0.35,
-        }}>
-          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase' }}>Scroll</p>
-          <ChevronDown size={16} />
+        {/* 우: 앱 목업 카드 */}
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '100%', maxWidth: 360, background: 'white', borderRadius: 40, padding: 32, boxShadow: '0 32px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06)', position: 'relative' }}>
+            {/* 앱 상단 바 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #F59E42, #F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <BookOpen size={20} color="white" />
+              </div>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 900, color: '#1A1A1A', margin: 0, letterSpacing: -0.5 }}>StoryPress</p>
+                <p style={{ fontSize: 10, color: '#94A3B8', margin: 0, fontWeight: 600, letterSpacing: 1 }}>TODAY&apos;S LESSON</p>
+              </div>
+            </div>
+            {/* 단어 카드들 */}
+            {[
+              { word: 'Curious', korean: '호기심 많은', color: '#FFF7ED', border: '#FED7AA' },
+              { word: 'Discover', korean: '발견하다', color: '#F0F4FF', border: '#C7D2FE' },
+              { word: 'Journey', korean: '여정', color: '#ECFDF5', border: '#A7F3D0' },
+              { word: 'Wonder', korean: '경이로움', color: '#FDF2F8', border: '#FBCFE8' },
+            ].map((item, i) => (
+              <div key={i} style={{ background: item.color, border: `1px solid ${item.border}`, borderRadius: 16, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <p style={{ fontSize: 15, fontWeight: 900, color: '#1A1A1A', margin: 0, letterSpacing: -0.3 }}>{item.word}</p>
+                  <p style={{ fontSize: 11, color: '#64748B', margin: 0, fontWeight: 600 }}>{item.korean}</p>
+                </div>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                  <span style={{ fontSize: 13 }}>▶</span>
+                </div>
+              </div>
+            ))}
+            {/* 진행 바 */}
+            <div style={{ marginTop: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#64748B', letterSpacing: 1, textTransform: 'uppercase' }}>Progress</span>
+                <span style={{ fontSize: 10, fontWeight: 900, color: '#F59E42' }}>4 / 4 words</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 999, background: '#F1F5F9', overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #F59E42, #F97316)', width: '100%', transition: 'width 0.5s ease' }} />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ─── Features ─── */}
       <section
+        id="why-storypress"
         ref={featuresAnim.ref}
         style={{
-          padding: 'clamp(60px, 8vw, 120px) clamp(24px, 4vw, 80px)',
+          padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           maxWidth: 1200, margin: '0 auto',
           opacity: featuresAnim.visible ? 1 : 0,
           transform: featuresAnim.visible ? 'none' : 'translateY(40px)',
@@ -262,7 +251,7 @@ export default function StoryPressClient({ title }: Props) {
       <section
         ref={stepsAnim.ref}
         style={{
-          padding: 'clamp(60px, 8vw, 120px) clamp(24px, 4vw, 80px)',
+          padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           background: 'linear-gradient(135deg, #FFF7ED 0%, #F0F4FF 100%)',
           opacity: stepsAnim.visible ? 1 : 0,
           transform: stepsAnim.visible ? 'none' : 'translateY(40px)',
@@ -341,7 +330,7 @@ export default function StoryPressClient({ title }: Props) {
       <section
         ref={quoteAnim.ref}
         style={{
-          padding: 'clamp(80px, 10vw, 140px) clamp(24px, 4vw, 80px)',
+          padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           textAlign: 'center',
           opacity: quoteAnim.visible ? 1 : 0,
           transform: quoteAnim.visible ? 'none' : 'translateY(40px)',
@@ -390,7 +379,7 @@ export default function StoryPressClient({ title }: Props) {
         id="storypress-signup"
         ref={formAnim.ref}
         style={{
-          padding: 'clamp(80px, 10vw, 140px) clamp(24px, 4vw, 80px)',
+          padding: 'clamp(64px, 7vw, 96px) clamp(24px, 4vw, 80px)',
           background: '#0A0A0A',
           opacity: formAnim.visible ? 1 : 0,
           transform: formAnim.visible ? 'none' : 'translateY(40px)',
