@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { X, ChevronLeft, ChevronRight, Download, List } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Download, List, BookOpen, Image as ImageIcon, AlignLeft } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article } from '@/lib/types';
 
@@ -371,22 +371,15 @@ export default function MagazineViewer({ magazine, articles }: Props) {
                           display: 'flex', alignItems: 'flex-start', gap: 10,
                           background: isActive ? '#EDE4D9' : '#FAF7F4',
                           border: `1.5px solid ${isActive ? '#C9A97A' : '#E8DDD4'}`,
-                          borderRadius: 12, padding: '10px 12px',
+                          borderRadius: 12, padding: '12px 14px',
                           cursor: 'pointer', textAlign: 'left', width: '100%',
                           transition: 'all 0.2s',
                         }}
                         onMouseEnter={e => { if (!isActive) { const el = e.currentTarget as HTMLButtonElement; el.style.background = '#EDE4D9'; el.style.borderColor = '#C9A97A'; } }}
                         onMouseLeave={e => { if (!isActive) { const el = e.currentTarget as HTMLButtonElement; el.style.background = '#FAF7F4'; el.style.borderColor = '#E8DDD4'; } }}
                       >
-                        {/* 썸네일 */}
-                        <div style={{ width: 44, height: 54, borderRadius: 6, overflow: 'hidden', position: 'relative', flexShrink: 0, background: '#E8DDD4' }}>
-                          {a.pdf_url && !a.pdf_url.toLowerCase().includes('.pdf') ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={a.pdf_url} alt={a.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          ) : (
-                            <SafeImage src={a.image_url} alt={a.title} fill className="object-cover" sizes="44px" />
-                          )}
-                        </div>
+                        {/* 썸네일 — 이미지 없으면 아이콘 플레이스홀더 */}
+                        <ArticleThumbnail article={a} isActive={isActive} />
 
                         {/* 텍스트 */}
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -575,4 +568,48 @@ function navBtn(disabled: boolean, side: 'left' | 'right'): React.CSSProperties 
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     transition: 'all 0.2s',
   };
+}
+
+/* ─── 사이드바 기사 썸네일 ───
+   이미지 있으면 표시, 없으면 article_type별 아이콘 플레이스홀더 */
+function ArticleThumbnail({ article, isActive }: { article: Article; isActive: boolean }) {
+  const [imgError, setImgError] = useState(false);
+
+  // pdf_url이 이미지 파일인 경우 우선 사용
+  const imgSrc = article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf')
+    ? article.pdf_url
+    : article.image_url;
+
+  const hasValidImg = !!imgSrc && !imgError;
+
+  // article_type별 아이콘 + 배경
+  const iconMap: Record<string, { icon: React.ReactNode; bg: string; color: string }> = {
+    cover:    { icon: <ImageIcon size={18} />,  bg: '#D4C9BD', color: '#6B5B4E' },
+    contents: { icon: <AlignLeft size={18} />,  bg: '#E8DDD4', color: '#7A6958' },
+    article:  { icon: <BookOpen size={18} />,   bg: '#EDE4D9', color: '#8B7355' },
+  };
+  const fallback = iconMap[article.article_type ?? 'article'] ?? iconMap.article;
+
+  return (
+    <div style={{
+      width: 48, height: 60, borderRadius: 8, overflow: 'hidden',
+      position: 'relative', flexShrink: 0,
+      background: isActive ? '#C9A97A' : fallback.bg,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      {hasValidImg ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imgSrc}
+          alt={article.title}
+          onError={() => setImgError(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      ) : (
+        <span style={{ color: isActive ? '#fff' : fallback.color, opacity: 0.7 }}>
+          {fallback.icon}
+        </span>
+      )}
+    </div>
+  );
 }
