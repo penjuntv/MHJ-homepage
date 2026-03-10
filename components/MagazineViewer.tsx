@@ -358,8 +358,8 @@ export default function MagazineViewer({ magazine, articles }: Props) {
                   <div style={{ height: 1, background: '#E8DDD4', margin: '10px 0 12px' }} />
                 )}
 
-                {/* 주요 기사 — 카드형 */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {/* 주요 기사 — 카드형 (세련된 리스트) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {mainArticles.map(a => {
                     const isActive = activeArticle?.id === a.id;
                     const pgCount = articlePageCount(a);
@@ -368,44 +368,66 @@ export default function MagazineViewer({ magazine, articles }: Props) {
                         key={a.id}
                         onClick={() => handleArticleClick(a)}
                         style={{
-                          display: 'flex', alignItems: 'flex-start', gap: 10,
-                          background: isActive ? '#EDE4D9' : '#FAF7F4',
-                          border: `1.5px solid ${isActive ? '#C9A97A' : '#E8DDD4'}`,
-                          borderRadius: 12, padding: '12px 14px',
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          background: isActive ? '#FDFBF8' : '#fff',
+                          border: '1px solid #EDE4D9',
+                          borderLeft: `3px solid ${isActive ? '#4F46E5' : 'transparent'}`,
+                          borderRadius: '0 12px 12px 0',
+                          padding: '12px 14px 12px 12px',
                           cursor: 'pointer', textAlign: 'left', width: '100%',
-                          transition: 'all 0.2s',
+                          transition: 'all 0.18s',
+                          boxShadow: isActive ? '0 2px 12px rgba(79,70,229,0.08)' : 'none',
                         }}
-                        onMouseEnter={e => { if (!isActive) { const el = e.currentTarget as HTMLButtonElement; el.style.background = '#EDE4D9'; el.style.borderColor = '#C9A97A'; } }}
-                        onMouseLeave={e => { if (!isActive) { const el = e.currentTarget as HTMLButtonElement; el.style.background = '#FAF7F4'; el.style.borderColor = '#E8DDD4'; } }}
+                        onMouseEnter={e => {
+                          if (!isActive) {
+                            const el = e.currentTarget as HTMLButtonElement;
+                            el.style.background = '#FAF7F4';
+                            el.style.borderLeftColor = '#C9A97A';
+                            el.style.boxShadow = '0 2px 8px rgba(44,31,20,0.06)';
+                          }
+                        }}
+                        onMouseLeave={e => {
+                          if (!isActive) {
+                            const el = e.currentTarget as HTMLButtonElement;
+                            el.style.background = '#fff';
+                            el.style.borderLeftColor = 'transparent';
+                            el.style.boxShadow = 'none';
+                          }
+                        }}
                       >
-                        {/* 썸네일 — 이미지 없으면 아이콘 플레이스홀더 */}
+                        {/* 썸네일 */}
                         <ArticleThumbnail article={a} isActive={isActive} />
 
                         {/* 텍스트 */}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{
                             fontSize: 12, fontWeight: 800,
-                            color: isActive ? '#5C3D1E' : '#2C1F14',
-                            margin: '0 0 4px', lineHeight: 1.3,
+                            color: isActive ? '#1A1A1A' : '#2C1F14',
+                            margin: '0 0 3px', lineHeight: 1.35,
                             overflow: 'hidden', display: '-webkit-box',
                             WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                           }}>
                             {a.title}
                           </p>
-                          {/* "HYUN · 3 pages" 형식 */}
-                          <p style={{ fontSize: 10, color: '#9C8B7A', margin: 0, fontWeight: 600 }}>
+                          <p style={{ fontSize: 10, color: '#9C8B7A', margin: 0, fontWeight: 600, letterSpacing: 0.3 }}>
                             {a.author}
                             {pgCount != null && (
-                              <span style={{ color: '#C4B8AB', marginLeft: 5 }}>· {pgCount} {pgCount === 1 ? 'page' : 'pages'}</span>
+                              <span style={{ color: '#C4B8AB', marginLeft: 4 }}>· {pgCount}p</span>
                             )}
                           </p>
                         </div>
 
-                        {/* 페이지 번호 */}
+                        {/* 페이지 번호 뱃지 */}
                         {a.page_start != null && (
-                          <span style={{ fontSize: 10, color: isActive ? '#8B7355' : '#B5A89A', fontWeight: 700, flexShrink: 0, alignSelf: 'center' }}>
-                            p.{a.page_start}
-                          </span>
+                          <div style={{
+                            flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+                            background: isActive ? '#4F46E5' : '#EDE4D9',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            <span style={{ fontSize: 9, color: isActive ? '#fff' : '#8B7355', fontWeight: 900, letterSpacing: 0.5 }}>
+                              {a.page_start}
+                            </span>
+                          </div>
                         )}
                       </button>
                     );
@@ -584,17 +606,17 @@ function ArticleThumbnail({ article, isActive }: { article: Article; isActive: b
 
   // article_type별 아이콘 + 배경
   const iconMap: Record<string, { icon: React.ReactNode; bg: string; color: string }> = {
-    cover:    { icon: <ImageIcon size={18} />,  bg: '#D4C9BD', color: '#6B5B4E' },
-    contents: { icon: <AlignLeft size={18} />,  bg: '#E8DDD4', color: '#7A6958' },
-    article:  { icon: <BookOpen size={18} />,   bg: '#EDE4D9', color: '#8B7355' },
+    cover:    { icon: <ImageIcon size={16} />,  bg: '#C7D2FE', color: '#4F46E5' },
+    contents: { icon: <AlignLeft size={16} />,  bg: '#DDD6FE', color: '#7C3AED' },
+    article:  { icon: <BookOpen size={16} />,   bg: '#E0E7FF', color: '#4F46E5' },
   };
   const fallback = iconMap[article.article_type ?? 'article'] ?? iconMap.article;
 
   return (
     <div style={{
-      width: 48, height: 60, borderRadius: 8, overflow: 'hidden',
+      width: 52, height: 64, borderRadius: 10, overflow: 'hidden',
       position: 'relative', flexShrink: 0,
-      background: isActive ? '#C9A97A' : fallback.bg,
+      background: isActive ? '#4F46E5' : fallback.bg,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       {hasValidImg ? (
@@ -606,7 +628,7 @@ function ArticleThumbnail({ article, isActive }: { article: Article; isActive: b
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ) : (
-        <span style={{ color: isActive ? '#fff' : fallback.color, opacity: 0.7 }}>
+        <span style={{ color: isActive ? 'rgba(255,255,255,0.9)' : fallback.color }}>
           {fallback.icon}
         </span>
       )}
