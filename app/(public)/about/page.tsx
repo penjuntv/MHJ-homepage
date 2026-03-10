@@ -59,6 +59,8 @@ const STAGGER = ['stagger-1', 'stagger-2', 'stagger-3', 'stagger-4'];
 export default async function AboutPage() {
   const [members, s] = await Promise.all([getFamilyMembers(), getSiteSettings()]);
 
+  const familyImg = s.about_image_url || s.about_hero_image_url || '';
+
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -76,10 +78,72 @@ export default async function AboutPage() {
       />
     <div className="animate-fade-in">
 
-      {/* ─── Vision Section ─── */}
+      {/* ─── 1. Who We Are Section ─── */}
+      <section style={{
+        padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 80px)',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(360px, 100%), 1fr))',
+        gap: '64px',
+        alignItems: 'center',
+        background: 'var(--bg-surface)',
+      }}>
+        {/* 가족사진 */}
+        <div
+          className="animate-slide-up"
+          style={{
+            aspectRatio: '4/5',
+            borderRadius: '40px',
+            overflow: 'hidden',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.12)',
+            position: 'relative',
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)',
+          }}
+        >
+          {familyImg ? (
+            <SafeImage
+              src={familyImg}
+              alt="Mairangi Family"
+              fill
+              className="object-cover vivid-hover"
+            />
+          ) : (
+            <div style={{
+              width: '100%', height: '100%',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              gap: 12,
+            }}>
+              <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 6, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase' }}>
+                MY MAIRANGI
+              </p>
+              <p style={{ fontSize: 'clamp(48px, 8vw, 80px)', fontWeight: 900, color: 'rgba(255,255,255,0.06)', letterSpacing: -3, lineHeight: 1, textAlign: 'center', margin: 0 }}>
+                FAMILY
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* 텍스트 */}
+        <div className="animate-slide-up stagger-2">
+          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '20px' }}>
+            WHO WE ARE
+          </p>
+          <h1 className="font-display font-black" style={{ fontSize: 'clamp(36px, 5vw, 64px)', letterSpacing: '-2px', lineHeight: 1, marginBottom: '32px', fontStyle: 'italic', color: 'var(--text)' }}>
+            The Mairangi Family
+          </h1>
+          <p style={{ fontSize: '17px', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '16px' }}>
+            {s.intro_description}
+          </p>
+          <p style={{ fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+            뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에 자리 잡은 우리 가족의 두 번째 챕터입니다. 기자 출신 아빠 조상목, 사회복지 석사 과정 중인 엄마 유희종, 그리고 세 딸 유민·유현·유진이 함께합니다.
+          </p>
+        </div>
+      </section>
+
+      {/* ─── 2. Vision & Values Section ─── */}
       <section style={{
         padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 40px)',
-        background: 'var(--bg-surface)',
+        background: 'var(--bg)',
       }}>
         <div style={{
           maxWidth: 1100,
@@ -110,6 +174,7 @@ export default async function AboutPage() {
               lineHeight: 0.85,
               textTransform: 'uppercase',
               marginBottom: 40,
+              color: 'var(--text)',
             }}>
               {s.about_vision_title.includes(' ') ? (
                 <>{s.about_vision_title.split(' ').slice(0, -1).join(' ')} <br /> {s.about_vision_title.split(' ').slice(-1)[0]}</>
@@ -125,7 +190,7 @@ export default async function AboutPage() {
             </p>
           </div>
 
-          {/* 가족 사진 */}
+          {/* 가족 사진 (Vision 이미지) */}
           <div
             className="animate-slide-up stagger-2"
             style={{
@@ -147,8 +212,8 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* ─── Three Daughters Section ─── */}
-      <section style={{ padding: 'clamp(60px, 10vw, 160px) clamp(24px, 4vw, 40px)' }}>
+      {/* ─── 3. Three Daughters Section ─── */}
+      <section style={{ padding: 'clamp(60px, 10vw, 160px) clamp(24px, 4vw, 40px)', background: 'var(--bg-surface)' }}>
 
         {/* 헤더 */}
         <div style={{ textAlign: 'center', marginBottom: 'clamp(48px, 8vw, 128px)' }}>
@@ -169,6 +234,7 @@ export default async function AboutPage() {
             letterSpacing: -2,
             textTransform: 'uppercase',
             lineHeight: 1,
+            color: 'var(--text)',
           }}>
             THE THREE{' '}
             <span
@@ -220,6 +286,7 @@ export default async function AboutPage() {
                 letterSpacing: -1,
                 textTransform: 'uppercase',
                 marginBottom: 8,
+                color: 'var(--text)',
               }}>
                 {m.name}
               </h3>
