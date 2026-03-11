@@ -3,10 +3,25 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2, Plus, Minus, ChevronDown, ChevronUp } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const AUTHORS = ['PeNnY', '유민', '유현', '유진'];
+
+type SlotItem = { author: string; title: string };
+
+const INITIAL_SLOTS: SlotItem[] = [
+  { author: 'PeNnY', title: '' },
+  { author: '유민', title: '' },
+  { author: '유현', title: '' },
+  { author: '유진', title: '' },
+];
+
+const TODAY = new Date()
+  .toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
+  .replace(/\. /g, '.')
+  .replace(/\.$/, '');
 
 export default function NewMagazinePage() {
   const router = useRouter();
@@ -21,12 +36,29 @@ export default function NewMagazinePage() {
     editor: 'PeNnY',
     image_url: '',
   });
+
+  const [slots, setSlots] = useState<SlotItem[]>(INITIAL_SLOTS);
+  const [showSlots, setShowSlots] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
   function set(key: string, value: string) {
     setForm(prev => ({ ...prev, [key]: value }));
+  }
+
+  function addSlot() {
+    if (slots.length >= 8) return;
+    setSlots(prev => [...prev, { author: 'PeNnY', title: '' }]);
+  }
+
+  function removeSlot(idx: number) {
+    if (slots.length <= 1) return;
+    setSlots(prev => prev.filter((_, i) => i !== idx));
+  }
+
+  function updateSlot(idx: number, key: keyof SlotItem, value: string) {
+    setSlots(prev => prev.map((s, i) => i === idx ? { ...s, [key]: value } : s));
   }
 
   async function uploadImage(file: File) {
@@ -45,8 +77,27 @@ export default function NewMagazinePage() {
     if (!form.title) { setError('제목은 필수입니다.'); return; }
     setSaving(true);
     setError('');
+
+    // 1. 매거진 이슈 생성
     const { error: insertErr } = await supabase.from('magazines').insert(form);
     if (insertErr) { setError(insertErr.message); setSaving(false); return; }
+
+    // 2. 아티클 슬롯 일괄 생성
+    if (slots.length > 0) {
+      const articleRows = slots.map((slot, idx) => ({
+        magazine_id: form.id,
+        title: slot.title.trim() || `${slot.author}의 글`,
+        author: slot.author,
+        date: TODAY,
+        image_url: '',
+        content: '',
+        pdf_url: null,
+        article_type: 'article',
+        sort_order: idx + 1,
+      }));
+      await supabase.from('articles').insert(articleRows);
+    }
+
     router.push(`/admin/magazines/${form.id}`);
   }
 
@@ -75,7 +126,7 @@ export default function NewMagazinePage() {
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-        {/* 연도 + 월 */}
+        {/* 연도 + 월 + ID */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>연도</label>
@@ -141,7 +192,6 @@ export default function NewMagazinePage() {
             placeholder="또는 이미지 URL 직접 입력"
             style={{ ...inputStyle, marginTop: '8px' }}
           />
-          {/* 비율별 미리보기 탭 */}
           <ImagePreviewTabs
             imageUrl={form.image_url}
             tabs={[
@@ -149,6 +199,125 @@ export default function NewMagazinePage() {
               { id: 'cover', label: 'Cover', ratio: '3:4',   description: '마우스 오버 시 확장 커버 — 세로형으로 표시됩니다' },
             ]}
           />
+        </div>
+
+        {/* ── 아티클 슬롯 ── */}
+        <div style={{ background: 'white', borderRadius: 20, border: '1px solid #F1F5F9', overflow: 'hidden' }}>
+          {/* 헤더 토글 */}
+          <button
+            type="button"
+            onClick={() => setShowSlots(p => !p)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '18px 24px', background: 'none', border: 'none', cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 800, color: '#1A1A1A', margin: 0, marginBottom: 2 }}>
+                아티클 슬롯 미리 생성
+              </p>
+              <p style={{ fontSize: 11, color: '#94A3B8', margin: 0 }}>
+                이슈 생성 시 {slots.length}개의 빈 기사 슬롯이 자동으로 추가됩니다
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <span style={{
+                fontSize: 10, fontWeight: 900, letterSpacing: 2, padding: '4px 10px',
+                borderRadius: 6, background: '#EEF2FF', color: '#4F46E5',
+              }}>
+                {slots.length}개
+              </span>
+              {showSlots ? <ChevronUp size={16} color="#94A3B8" /> : <ChevronDown size={16} color="#94A3B8" />}
+            </div>
+          </button>
+
+          {showSlots && (
+            <div style={{ padding: '0 24px 24px', borderTop: '1px solid #F8FAFC' }}>
+              {/* 안내 */}
+              <p style={{ fontSize: 11, color: '#94A3B8', marginBottom: 16, marginTop: 16 }}>
+                저자와 제목(선택)을 설정하면 이슈 생성 후 바로 본문 편집을 시작할 수 있습니다.
+              </p>
+
+              {/* 슬롯 목록 */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+                {slots.map((slot, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'grid', gridTemplateColumns: '28px 160px 1fr 36px',
+                      gap: 10, alignItems: 'center',
+                      padding: '12px 14px', background: '#F8FAFC',
+                      borderRadius: 12, border: '1px solid #F1F5F9',
+                    }}
+                  >
+                    {/* 순서 번호 */}
+                    <span style={{ fontSize: 11, fontWeight: 900, color: '#CBD5E1', textAlign: 'center' }}>
+                      {idx + 1}
+                    </span>
+
+                    {/* 저자 선택 */}
+                    <select
+                      value={slot.author}
+                      onChange={e => updateSlot(idx, 'author', e.target.value)}
+                      style={{
+                        padding: '8px 10px', borderRadius: 10, border: '1px solid #E2E8F0',
+                        background: 'white', fontSize: 13, fontWeight: 700, color: '#1A1A1A',
+                        outline: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                      }}
+                    >
+                      {AUTHORS.map(a => <option key={a} value={a}>{a}</option>)}
+                    </select>
+
+                    {/* 제목 입력 */}
+                    <input
+                      value={slot.title}
+                      onChange={e => updateSlot(idx, 'title', e.target.value)}
+                      placeholder={`${slot.author}의 글 (선택)`}
+                      style={{
+                        padding: '8px 12px', borderRadius: 10, border: '1px solid #E2E8F0',
+                        background: 'white', fontSize: 13, outline: 'none', fontFamily: 'inherit',
+                        width: '100%', boxSizing: 'border-box',
+                      }}
+                    />
+
+                    {/* 삭제 */}
+                    <button
+                      type="button"
+                      onClick={() => removeSlot(idx)}
+                      disabled={slots.length <= 1}
+                      style={{
+                        width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: 8, border: '1px solid #FEE2E2', background: 'white',
+                        color: '#EF4444', cursor: slots.length <= 1 ? 'not-allowed' : 'pointer',
+                        opacity: slots.length <= 1 ? 0.3 : 1, flexShrink: 0,
+                      }}
+                    >
+                      <Minus size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* 슬롯 추가 */}
+              <button
+                type="button"
+                onClick={addSlot}
+                disabled={slots.length >= 8}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '10px 16px', borderRadius: 999,
+                  border: '1.5px dashed #E2E8F0', background: 'white',
+                  fontSize: 12, fontWeight: 700, color: '#64748B',
+                  cursor: slots.length >= 8 ? 'not-allowed' : 'pointer',
+                  opacity: slots.length >= 8 ? 0.4 : 1,
+                }}
+              >
+                <Plus size={13} />
+                슬롯 추가 ({slots.length}/8)
+              </button>
+            </div>
+          )}
         </div>
 
         {error && (
@@ -183,6 +352,7 @@ export default function NewMagazinePage() {
           </button>
         </div>
       </form>
+      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
     </div>
   );
 }

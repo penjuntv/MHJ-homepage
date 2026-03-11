@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, lazy, Suspense } from 'react';
 import SafeImage from '@/components/SafeImage';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -11,6 +11,8 @@ import {
   ChevronUp, ChevronDown, ExternalLink, BookOpen, AlertCircle,
   FileText, Image as ImageIcon,
 } from 'lucide-react';
+
+const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
 /* ─── 타입 ─── */
 type ArticleType = 'cover' | 'contents' | 'article';
@@ -863,13 +865,18 @@ function ArticleModal({
               텍스트 본문
               <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}> (콘텐츠 파일이 없을 경우 표시)</span>
             </label>
-            <textarea
-              value={form.content}
-              onChange={e => setForm({ content: e.target.value })}
-              placeholder="기사 텍스트 내용... 이미지나 PDF를 업로드한 경우 비워도 됩니다."
-              rows={4}
-              style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.6' }}
-            />
+            <Suspense fallback={
+              <div style={{ ...inputStyle, minHeight: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1', gap: 8 }}>
+                <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                에디터 로딩 중...
+              </div>
+            }>
+              <TipTapEditor
+                content={form.content}
+                onChange={(html) => setForm({ content: html })}
+                placeholder="기사 텍스트 내용... 이미지나 PDF를 업로드한 경우 비워도 됩니다."
+              />
+            </Suspense>
           </div>
 
           {error && (

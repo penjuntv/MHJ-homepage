@@ -205,13 +205,13 @@ export default async function BlogDetailPage({
             {blog.title}
           </h1>
 
-          {/* 1) 저자 · 날짜 · 카테고리 한 줄 */}
+          {/* 1) 저자 · 날짜 · 카테고리 · AI Insight 버튼 한 줄 */}
           <div className="slide-up stagger-2" style={{
             display: 'flex',
             alignItems: 'center',
             gap: 16,
             flexWrap: 'wrap',
-            marginBottom: 64,
+            marginBottom: 48,
           }}>
             <span style={{
               fontSize: 12,
@@ -239,6 +239,10 @@ export default async function BlogDetailPage({
             >
               {blog.category}
             </Link>
+            {/* AI Insight 버튼 — 참고: REFERENCE_DESIGN DetailModal 위치 */}
+            <div style={{ marginLeft: 'auto' }}>
+              <AiInsight title={blog.title} content={plainText} />
+            </div>
           </div>
         </div>
 
@@ -327,7 +331,7 @@ export default async function BlogDetailPage({
                   .blog-content ul, .blog-content ol { padding-left: 28px; margin: 0 0 2em; }
                   .blog-content li { margin: 0.5em 0; line-height: 1.7; }
                   .blog-content a { color: #4F46E5; text-decoration: underline; text-underline-offset: 3px; }
-                  .blog-content img { max-width: 100%; height: auto; border-radius: 16px; margin: 2em 0; display: block; }
+                  .blog-content img { max-width: 100%; height: auto; border-radius: 12px; margin: 2em 0; display: block; }
                   .blog-content img[data-align="left"]   { float: left;  margin: 8px 24px 16px 0; display: inline; }
                   .blog-content img[data-align="right"]  { float: right; margin: 8px 0 16px 24px; display: inline; }
                   .blog-content img[data-align="center"] { margin-left: auto; margin-right: auto; }
@@ -335,8 +339,28 @@ export default async function BlogDetailPage({
                   .blog-content img[data-width="50%"]  { width: 50%; }
                   .blog-content img[data-width="75%"]  { width: 75%; }
                   .blog-content img[data-width="100%"] { width: 100%; }
+                  .blog-content a { color: #4F46E5; text-decoration: underline; text-underline-offset: 4px; }
+                  /* 이미지 그리드 */
+                  .blog-content .image-grid { display: grid; gap: 8px; margin: 24px 0; }
+                  .blog-content .grid-2 { grid-template-columns: 1fr 1fr; }
+                  .blog-content .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+                  .blog-content .grid-1-2 { grid-template-columns: 1fr 1fr; }
+                  .blog-content .grid-1-2 > img:first-child { grid-row: span 2; }
+                  .blog-content .image-grid img { margin: 0; border-radius: 12px; width: 100%; height: 100%; object-fit: cover; }
+                  /* CTA 버튼 */
+                  .blog-content .blog-cta { text-align: center; margin: 32px 0; }
+                  .blog-content .blog-cta a { color: white; text-decoration: none; }
+                  /* Google Maps */
+                  .blog-content .blog-map { margin: 32px 0; border-radius: 16px; overflow: hidden; }
+                  /* Callout */
+                  .blog-content .blog-callout { padding: 24px; background: #EEF2FF; border-left: 3px solid #4F46E5; border-radius: 0 12px 12px 0; margin: 24px 0; }
+                  /* YouTube */
+                  .blog-content .blog-youtube { margin: 32px 0; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; }
+                  .blog-content .blog-youtube iframe { width: 100%; height: 100%; border: none; display: block; }
                   @media (max-width: 640px) {
                     .blog-content img { float: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+                    .blog-content .grid-2, .blog-content .grid-3, .blog-content .grid-1-2 { grid-template-columns: 1fr !important; }
+                    .blog-content .grid-1-2 > img:first-child { grid-row: auto; }
                     .blog-content > p:first-child::first-letter { font-size: clamp(48px, 12vw, 72px); }
                   }
                 `}</style>
@@ -366,11 +390,6 @@ export default async function BlogDetailPage({
                 {restContent}
               </p>
             )}
-
-            {/* 5) AI Insight */}
-            <div style={{ marginTop: 'clamp(48px, 6vw, 80px)', marginBottom: 48 }}>
-              <AiInsight title={blog.title} content={plainText} />
-            </div>
 
             {/* 태그 */}
             {blog.tags && blog.tags.length > 0 && (

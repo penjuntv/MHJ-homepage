@@ -4,27 +4,53 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { LayoutDashboard, FileText, BookOpen, Settings, Palette, LogOut, ExternalLink, Mail, Images, MessageCircle, Send, FileImage, SearchCheck, Star, Users } from 'lucide-react';
+import {
+  LayoutDashboard, FileText, BookOpen, Settings, Palette,
+  LogOut, ExternalLink, Images, MessageCircle, Users,
+  SearchCheck, LayoutList, Menu,
+} from 'lucide-react';
 
-const NAV = [
-  { href: '/admin', label: '대시보드', icon: LayoutDashboard, exact: true },
-  { href: '/admin/blogs', label: '블로그', icon: FileText, exact: false },
-  { href: '/admin/hero', label: '히어로 캐러셀', icon: Star, exact: false },
-  { href: '/admin/magazines', label: '매거진', icon: BookOpen, exact: false },
-  { href: '/admin/family', label: '패밀리', icon: Users, exact: false },
-  { href: '/admin/gallery', label: '갤러리', icon: Images, exact: false },
-  { href: '/admin/media', label: '미디어', icon: FileImage, exact: false },
-  { href: '/admin/seo', label: 'SEO', icon: SearchCheck, exact: false },
-  { href: '/admin/comments', label: '댓글', icon: MessageCircle, exact: false },
-  { href: '/admin/newsletter', label: '뉴스레터', icon: Send, exact: false },
-  { href: '/admin/subscribers', label: '구독자', icon: Mail, exact: false },
-  { href: '/admin/settings', label: '설정', icon: Settings, exact: false },
-  { href: '/admin/design-kit', label: '디자인 키트', icon: Palette, exact: false },
+type NavItem = { type: 'item'; href: string; label: string; icon: React.ElementType; exact?: boolean; badge?: 'comments' | 'blogs' };
+type NavGroup = { type: 'group'; label: string };
+type NavEntry = NavItem | NavGroup;
+
+const NAV: NavEntry[] = [
+  { type: 'item', href: '/admin', label: '대시보드', icon: LayoutDashboard, exact: true },
+
+  { type: 'group', label: '콘텐츠' },
+  { type: 'item', href: '/admin/blogs', label: '블로그', icon: FileText, badge: 'blogs' },
+  { type: 'item', href: '/admin/magazines', label: '매거진', icon: BookOpen },
+  { type: 'item', href: '/admin/gallery', label: '갤러리', icon: Images },
+  { type: 'item', href: '/admin/seo', label: 'SEO', icon: SearchCheck },
+
+  { type: 'group', label: '페이지' },
+  { type: 'item', href: '/admin/pages', label: '페이지 관리', icon: LayoutList },
+  { type: 'item', href: '/admin/navigation', label: '내비게이션', icon: Menu },
+
+  { type: 'group', label: '커뮤니티' },
+  { type: 'item', href: '/admin/comments', label: '댓글', icon: MessageCircle, badge: 'comments' },
+  { type: 'item', href: '/admin/subscribers', label: '구독자', icon: Users },
+
+  { type: 'group', label: '설정' },
+  { type: 'item', href: '/admin/family', label: '패밀리', icon: Users },
+  { type: 'item', href: '/admin/settings', label: '사이트 설정', icon: Settings },
+  { type: 'item', href: '/admin/design-kit', label: '디자인 키트', icon: Palette },
 ];
+
+const GROUP_LABEL_STYLE: React.CSSProperties = {
+  fontSize: 9,
+  fontWeight: 800,
+  letterSpacing: 3,
+  textTransform: 'uppercase',
+  color: 'rgba(255,255,255,0.22)',
+  padding: '18px 14px 6px',
+  display: 'block',
+};
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [pendingComments, setPendingComments] = useState(0);
+  const [blogCount, setBlogCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
   const isLogin = pathname === '/admin/login';
@@ -36,8 +62,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       } else {
         setReady(true);
         if (session) {
-          supabase.from('comments').select('*', { count: 'exact', head: true }).eq('approved', false)
-            .then(({ count }) => setPendingComments(count ?? 0));
+          Promise.all([
+            supabase.from('comments').select('*', { count: 'exact', head: true }).eq('approved', false),
+            supabase.from('blogs').select('*', { count: 'exact', head: true }),
+          ]).then(([{ count: pc }, { count: bc }]) => {
+            setPendingComments(pc ?? 0);
+            setBlogCount(bc ?? 0);
+          });
         }
       }
     });
@@ -68,24 +99,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         position: 'fixed',
         top: 0, left: 0, bottom: 0,
         zIndex: 50,
+        overflowY: 'auto',
       }}>
         {/* 브랜드 */}
-        <div style={{ padding: '28px 20px 20px' }}>
+        <div style={{ padding: '28px 20px 20px', flexShrink: 0 }}>
           <h1 style={{ fontSize: 15, fontWeight: 900, fontStyle: 'italic', letterSpacing: -0.5, color: 'white', margin: 0 }}>MY MAIRANGI</h1>
           <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.25)', letterSpacing: 4, textTransform: 'uppercase', display: 'block', marginTop: 4 }}>CMS Admin</span>
         </div>
 
-        <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 20px' }} />
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 20px', flexShrink: 0 }} />
 
         {/* 네비 */}
-        <nav style={{ flex: 1, padding: '12px 10px' }}>
-          {NAV.map(({ href, label, icon: Icon, exact }) => {
+        <nav style={{ flex: 1, padding: '8px 10px' }}>
+          {NAV.map((entry, idx) => {
+            if (entry.type === 'group') {
+              return (
+                <span key={`group-${idx}`} style={GROUP_LABEL_STYLE}>
+                  {entry.label}
+                </span>
+              );
+            }
+
+            const { href, label, icon: Icon, exact, badge } = entry;
             const active = exact ? pathname === href : pathname.startsWith(href);
-            const isComments = href === '/admin/comments';
+            const badgeCount = badge === 'comments' ? pendingComments : badge === 'blogs' ? blogCount : 0;
+
             return (
               <Link key={href} href={href} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
-                padding: '11px 14px', borderRadius: 10, marginBottom: 2,
+                padding: '10px 14px', borderRadius: 10, marginBottom: 1,
                 textDecoration: 'none',
                 background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
                 color: active ? 'white' : 'rgba(255,255,255,0.4)',
@@ -94,13 +136,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               }}>
                 <Icon size={15} />
                 <span style={{ flex: 1 }}>{label}</span>
-                {isComments && pendingComments > 0 && (
+                {badgeCount > 0 && (
                   <span style={{
-                    background: '#EF4444', color: '#fff',
+                    background: badge === 'comments' ? '#EF4444' : 'rgba(255,255,255,0.15)',
+                    color: '#fff',
                     borderRadius: 999, padding: '2px 7px',
                     fontSize: 10, fontWeight: 900, lineHeight: '16px',
                   }}>
-                    {pendingComments}
+                    {badgeCount}
                   </span>
                 )}
               </Link>
@@ -109,7 +152,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* 하단 */}
-        <div style={{ padding: '12px 10px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ padding: '12px 10px 24px', display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 4px 8px' }} />
           <Link href="/" target="_blank" style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 14px', borderRadius: 10, textDecoration: 'none',

@@ -4,7 +4,7 @@ import { useState, useRef, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2, Sparkles } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
@@ -18,6 +18,61 @@ interface Props {
 }
 
 const CATEGORIES: Blog['category'][] = ['Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
+
+/* ── 발행 전 체크리스트 ── */
+function PublishChecklist({ form }: { form: Omit<Blog, 'id' | 'created_at'> }) {
+  const plainText = form.content.replace(/<[^>]*>/g, '').trim();
+  const checks = [
+    { label: '제목 입력', required: true, ok: form.title.trim().length > 0 },
+    { label: '본문 50자 이상', required: true, ok: plainText.length >= 50 },
+    { label: '커버 이미지', required: true, ok: form.image_url.trim().length > 0 },
+    { label: '카테고리 선택', required: true, ok: true },
+    { label: 'SEO 메타 설명', required: false, ok: (form.meta_description ?? '').trim().length > 0 },
+    { label: '본문 이미지 포함', required: false, ok: form.content.includes('<img') },
+  ];
+  const allRequired = checks.filter(c => c.required).every(c => c.ok);
+  const allOk = checks.every(c => c.ok);
+
+  return (
+    <div style={{
+      padding: '20px 24px', background: 'white', borderRadius: 20,
+      border: `1.5px solid ${allRequired ? (allOk ? '#D1FAE5' : '#FEF3C7') : '#FEE2E2'}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <p style={{ fontSize: 13, fontWeight: 800, color: '#1a1a1a', margin: 0 }}>발행 전 체크리스트</p>
+        <span style={{
+          fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase',
+          padding: '4px 10px', borderRadius: 8,
+          background: allRequired ? (allOk ? '#D1FAE5' : '#FEF3C7') : '#FEE2E2',
+          color: allRequired ? (allOk ? '#065F46' : '#92400E') : '#B91C1C',
+        }}>
+          {allOk ? '준비됨' : allRequired ? '권장 항목 미완료' : '필수 항목 미완료'}
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {checks.map(c => (
+          <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: c.ok ? '#10B981' : (c.required ? '#EF4444' : '#F59E0B'),
+              color: 'white', fontSize: 10, fontWeight: 900,
+            }}>
+              {c.ok ? '✓' : '!'}
+            </div>
+            <span style={{ fontSize: 13, color: c.ok ? '#64748B' : '#1A1A1A', fontWeight: c.ok ? 500 : 700 }}>
+              {c.label}
+              {!c.required && <span style={{ fontSize: 10, color: '#94A3B8', marginLeft: 6, fontWeight: 500 }}>권장</span>}
+            </span>
+            {!c.ok && !c.required && (
+              <span style={{ fontSize: 10, color: '#F59E0B', fontWeight: 700, marginLeft: 'auto' }}>미완료</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function slugify(text: string) {
   return text
@@ -62,6 +117,27 @@ export default function BlogForm({ initial }: Props) {
       : ''
   );
   const [sendAsNewsletter, setSendAsNewsletter] = useState(false);
+  const [aiSeoLoading, setAiSeoLoading] = useState(false);
+
+  async function generateSeoWithAI() {
+    if (!form.title) { setError('AI 생성을 위해 제목을 먼저 입력하세요.'); return; }
+    setAiSeoLoading(true);
+    setError('');
+    try {
+      const plainText = form.content.replace(/<[^>]*>/g, '').trim();
+      const res = await fetch('/api/ai-seo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: form.title, content: plainText }),
+      });
+      const data = await res.json();
+      if (data.meta_description) set('meta_description', data.meta_description);
+      else setError('AI 생성 실패: ' + (data.error ?? '알 수 없는 오류'));
+    } catch {
+      setError('AI 생성 요청 실패');
+    }
+    setAiSeoLoading(false);
+  }
 
   function set(key: keyof BlogInput, value: string | boolean) {
     setForm(prev => {
@@ -304,17 +380,130 @@ export default function BlogForm({ initial }: Props) {
           </Suspense>
         </div>
 
-        {/* 메타 설명 */}
-        <div>
-          <label style={labelStyle}>메타 설명 (SEO)</label>
-          <textarea
-            value={form.meta_description ?? ''}
-            onChange={e => set('meta_description', e.target.value)}
-            placeholder="검색 결과에 표시될 설명 (150자 내외)"
-            rows={3}
-            style={{ ...inputStyle, resize: 'vertical' }}
-          />
-        </div>
+        {/* ── SEO 섹션 ── */}
+        {(() => {
+          const titleLen = form.title.length;
+          const metaLen = (form.meta_description ?? '').length;
+          const titleColor = titleLen > 60 ? '#EF4444' : titleLen > 50 ? '#F59E0B' : '#10B981';
+          const metaColor = metaLen > 160 ? '#EF4444' : metaLen > 140 ? '#F59E0B' : '#64748B';
+          return (
+            <div style={{ background: 'white', borderRadius: 20, padding: '24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>
+                SEO 최적화
+              </p>
+
+              {/* 검색 제목 글자 수 */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>검색 제목 (글 제목 기준)</label>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: titleColor }}>
+                    {titleLen}<span style={{ color: '#CBD5E1', fontWeight: 500 }}>/60</span>
+                  </span>
+                </div>
+                <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden', marginBottom: 6 }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${Math.min(titleLen / 60 * 100, 100)}%`,
+                    background: titleColor,
+                    transition: 'width 0.2s, background 0.2s',
+                    borderRadius: 2,
+                  }} />
+                </div>
+                <p style={{ fontSize: 11, color: '#94A3B8' }}>글 제목이 Google 검색 결과 제목으로 사용됩니다. 60자 이내를 권장합니다.</p>
+              </div>
+
+              {/* 메타 설명 + AI 버튼 */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>메타 설명</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: metaColor }}>
+                      {metaLen}<span style={{ color: '#CBD5E1', fontWeight: 500 }}>/160</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={generateSeoWithAI}
+                      disabled={aiSeoLoading}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        padding: '6px 12px', borderRadius: 999,
+                        background: aiSeoLoading ? '#F8FAFC' : '#4F46E5',
+                        color: aiSeoLoading ? '#94A3B8' : 'white',
+                        border: 'none', fontSize: 10, fontWeight: 900,
+                        letterSpacing: 1.5, textTransform: 'uppercase',
+                        cursor: aiSeoLoading ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {aiSeoLoading
+                        ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
+                        : <Sparkles size={11} />}
+                      {aiSeoLoading ? '생성 중...' : 'AI로 자동 생성'}
+                    </button>
+                  </div>
+                </div>
+                <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${Math.min(metaLen / 160 * 100, 100)}%`,
+                    background: metaColor,
+                    transition: 'width 0.2s, background 0.2s',
+                    borderRadius: 2,
+                  }} />
+                </div>
+                <textarea
+                  value={form.meta_description ?? ''}
+                  onChange={e => set('meta_description', e.target.value)}
+                  placeholder="검색 결과에 표시될 설명 (120~155자 권장)"
+                  rows={3}
+                  style={{ ...inputStyle, resize: 'vertical' }}
+                />
+              </div>
+
+              {/* Google 검색 미리보기 */}
+              <div>
+                <p style={{ ...labelStyle, marginBottom: 10 }}>Google 검색 미리보기</p>
+                <div style={{
+                  border: '1px solid #E2E8F0', borderRadius: 12,
+                  padding: '16px 20px', background: '#FAFAFA',
+                  fontFamily: 'Arial, sans-serif',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <div style={{
+                      width: 22, height: 22, borderRadius: 4,
+                      background: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <span style={{ color: 'white', fontSize: 11, fontWeight: 900, letterSpacing: -0.5 }}>M</span>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, color: '#202124', lineHeight: 1.2 }}>MY MAIRANGI JOURNAL</div>
+                      <div style={{ fontSize: 11, color: '#4D5156', lineHeight: 1.2 }}>
+                        mairangijournal.com › blog › {form.slug || 'slug'}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{
+                    fontSize: 18, color: '#1A0DAB', fontWeight: 400,
+                    marginBottom: 4, lineHeight: 1.3,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {form.title || '글 제목'}
+                  </div>
+                  <div style={{
+                    fontSize: 13, color: '#4D5156', lineHeight: 1.5,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical' as const,
+                    overflow: 'hidden',
+                  }}>
+                    {form.meta_description || '메타 설명이 없으면 글 본문에서 자동 추출됩니다.'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* 태그 */}
         <div>
@@ -480,6 +669,9 @@ export default function BlogForm({ initial }: Props) {
             />
           )}
         </div>
+
+        {/* ── 발행 전 체크리스트 ── */}
+        <PublishChecklist form={form} />
 
         {error && (
           <p style={{ color: '#EF4444', fontSize: '14px', padding: '16px', background: '#FEF2F2', borderRadius: '12px' }}>
