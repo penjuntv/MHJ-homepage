@@ -7,32 +7,32 @@ export default function TextOnlyTemplate({ article, accentColor = '#1A1A1A', bgC
   const content = article.content || '<p>에세이 본문을 작성해 주세요. 첫 글자는 자동으로 드롭캡으로 표시됩니다. 텍스트만으로 이루어진 에세이 형식의 레이아웃입니다.</p>';
 
   return (
-    <div style={{ width: '100%', aspectRatio: '210/297', overflow: 'hidden', borderRadius: '8px', background: bgColor, display: 'flex', flexDirection: 'column', padding: '9% 10%', boxSizing: 'border-box' }}>
+    <div style={{ width: '420px', height: '594px', overflow: 'hidden', borderRadius: '8px', background: bgColor, display: 'flex', flexDirection: 'column', padding: '36px 36px', boxSizing: 'border-box', flexShrink: 0 }}>
       <style>{`
         .essay-${uid} { overflow: hidden; }
-        .essay-${uid} p { margin: 0 0 0.6em; font-size: clamp(5.5px,2%,10px); line-height: 1.7; color: ${accentColor}CC; }
+        .essay-${uid} p { margin: 0 0 10px; font-size: 13px; line-height: 1.72; color: ${accentColor}CC; }
         .essay-${uid} strong { font-weight: 800; color: ${accentColor}; }
         .essay-${uid} em { font-style: italic; }
-        .essay-${uid} blockquote { border-left: 2px solid ${accentColor}40; padding-left: 4%; margin: 0.5em 0; opacity: 0.8; }
+        .essay-${uid} blockquote { border-left: 2px solid ${accentColor}40; padding-left: 14px; margin: 8px 0; opacity: 0.8; }
         .essay-${uid} p:first-of-type::first-letter {
           float: left;
           font-family: var(--font-display,"Playfair Display",serif);
           font-weight: 900;
-          font-size: clamp(22px,8.5%,42px);
+          font-size: 48px;
           color: ${accentColor};
-          line-height: 0.8;
-          margin-right: 2%;
-          margin-top: 1%;
+          line-height: 0.82;
+          margin-right: 6px;
+          margin-top: 4px;
         }
       `}</style>
 
       {/* Essay 라벨 */}
-      <div style={{ flexShrink: 0, fontSize: 'clamp(4px,1.4%,7px)', fontWeight: 900, letterSpacing: '4px', color: accentColor + '80', textTransform: 'uppercase', marginBottom: '4%', paddingBottom: '3%', borderBottom: `1.5px solid ${accentColor}20` }}>
+      <div style={{ flexShrink: 0, fontSize: '10px', fontWeight: 900, letterSpacing: '4px', color: accentColor + '80', textTransform: 'uppercase', marginBottom: '16px', paddingBottom: '12px', borderBottom: `1.5px solid ${accentColor}20` }}>
         Essay
       </div>
 
       {/* 제목 */}
-      <div style={{ flexShrink: 0, fontFamily: 'var(--font-display,"Playfair Display",serif)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(13px,5%,26px)', color: accentColor, lineHeight: 1.05, marginBottom: '6%', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+      <div style={{ flexShrink: 0, fontFamily: 'var(--font-display,"Playfair Display",serif)', fontWeight: 900, fontStyle: 'italic', fontSize: '24px', color: accentColor, lineHeight: 1.1, marginBottom: '20px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
         {article.title || 'Essay Title'}
       </div>
 
@@ -42,11 +42,11 @@ export default function TextOnlyTemplate({ article, accentColor = '#1A1A1A', bgC
       </div>
 
       {/* 하단 바 */}
-      <div style={{ marginTop: '5%', paddingTop: '3%', borderTop: `1px solid ${accentColor}15`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-        <span style={{ fontSize: 'clamp(4px,1.4%,7px)', fontWeight: 700, letterSpacing: '2px', color: accentColor + '70', textTransform: 'uppercase' }}>
+      <div style={{ marginTop: '16px', paddingTop: '10px', borderTop: `1px solid ${accentColor}15`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+        <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: accentColor + '70', textTransform: 'uppercase' }}>
           {article.author || 'Author'}
         </span>
-        <span style={{ fontFamily: 'var(--font-display,"Playfair Display",serif)', fontWeight: 900, fontSize: 'clamp(6px,2%,10px)', color: accentColor + '40' }}>
+        <span style={{ fontFamily: 'var(--font-display,"Playfair Display",serif)', fontWeight: 900, fontSize: '14px', color: accentColor + '40' }}>
           The MHJ
         </span>
       </div>

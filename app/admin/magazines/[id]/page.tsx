@@ -153,12 +153,10 @@ export default function MagazineDetailPage() {
   /* ─── 정렬 ─── */
   const [reordering, setReordering] = useState(false);
 
-  /* ─── 줌 (Tab 3) ─── */
-  const [zoom, setZoom] = useState(100);
-
   /* ─── 스프레드 모달 ─── */
   type SpreadModalItem = { label: string; content: React.ReactNode };
   const [spreadModal, setSpreadModal] = useState<{ pages: SpreadModalItem[]; idx: number } | null>(null);
+  const [modalZoom, setModalZoom] = useState(100);
 
   /* ─── refs ─── */
   const magPdfRef       = useRef<HTMLInputElement>(null);
@@ -758,7 +756,7 @@ export default function MagazineDetailPage() {
           탭 3: 전체 미리보기
           ══════════════════════════════════════════ */}
       {tab === 'spread' && (() => {
-        const pageWidth = Math.max(140, Math.round(280 * zoom / 100));
+        const pageWidth = 420;
 
         // 스프레드 페이지 목록 (모달용)
         const spreadPages: { label: string; content: React.ReactNode; artId?: number }[] = [
@@ -802,18 +800,6 @@ export default function MagazineDetailPage() {
 
         return (
           <div style={{ padding: '0 clamp(24px,4vw,48px)' }}>
-            {/* 줌 컨트롤 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-              <button onClick={() => setZoom(p => Math.max(30, p - 10))} style={zoomBtn}><ZoomOut size={14} /></button>
-              <input type="range" min={30} max={200} value={zoom} onChange={e => setZoom(Number(e.target.value))}
-                style={{ width: '140px', accentColor: '#4F46E5', cursor: 'pointer' }} />
-              <button onClick={() => setZoom(p => Math.min(200, p + 10))} style={zoomBtn}><ZoomIn size={14} /></button>
-              <span style={{ fontSize: '12px', fontWeight: 900, color: '#94A3B8', minWidth: '44px' }}>{zoom}%</span>
-              {[50, 75, 100, 150].map(v => (
-                <button key={v} onClick={() => setZoom(v)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #F1F5F9', background: zoom === v ? '#4F46E5' : 'white', color: zoom === v ? 'white' : '#94A3B8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>{v}%</button>
-              ))}
-            </div>
-
             {/* 스프레드 (가로 스크롤) */}
             <div style={{ overflowX: 'auto', paddingBottom: '24px' }}>
               <div style={{ display: 'flex', gap: '16px', width: 'max-content' }}>
@@ -838,7 +824,7 @@ export default function MagazineDetailPage() {
       {/* ─── 스프레드 풀스크린 모달 ─── */}
       {spreadModal && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 9000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
           onClick={() => setSpreadModal(null)}
         >
           <style>{`@keyframes fadeInScale { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }`}</style>
@@ -852,12 +838,22 @@ export default function MagazineDetailPage() {
               <button onClick={() => setSpreadModal(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', padding: '8px 14px', color: 'white', cursor: 'pointer', fontSize: '12px', fontWeight: 700 }}>ESC · 닫기</button>
             </div>
           </div>
-          {/* 페이지 */}
-          <div style={{ width: 'min(480px, 85vw)', animation: 'fadeInScale 0.2s ease' }} onClick={e => e.stopPropagation()}>
+          {/* 줌 컨트롤 */}
+          <div style={{ position: 'absolute', top: '56px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px' }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setModalZoom(p => Math.max(40, p - 10))} style={{ ...zoomBtn, background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none' }}><ZoomOut size={13} /></button>
+            <input type="range" min={40} max={200} value={modalZoom} onChange={e => setModalZoom(Number(e.target.value))} style={{ width: '120px', accentColor: '#4F46E5', cursor: 'pointer' }} />
+            <button onClick={() => setModalZoom(p => Math.min(200, p + 10))} style={{ ...zoomBtn, background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none' }}><ZoomIn size={13} /></button>
+            <span style={{ fontSize: '11px', fontWeight: 900, color: 'rgba(255,255,255,0.5)', minWidth: '40px' }}>{modalZoom}%</span>
+            {[50, 75, 100].map(v => (
+              <button key={v} onClick={() => setModalZoom(v)} style={{ padding: '3px 8px', borderRadius: '6px', border: 'none', background: modalZoom === v ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)', color: 'white', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>{v}%</button>
+            ))}
+          </div>
+          {/* 페이지 (줌 적용) */}
+          <div style={{ animation: 'fadeInScale 0.2s ease', transform: `scale(${modalZoom / 100})`, transformOrigin: 'center center', transition: 'transform 0.15s ease' }} onClick={e => e.stopPropagation()}>
             {spreadModal.pages[spreadModal.idx].content}
           </div>
           {/* 화살표 */}
-          <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }} onClick={e => e.stopPropagation()}>
+          <div style={{ position: 'absolute', bottom: '32px', display: 'flex', gap: '16px' }} onClick={e => e.stopPropagation()}>
             <button onClick={() => setSpreadModal(p => p && p.idx > 0 ? { ...p, idx: p.idx - 1 } : p)}
               disabled={spreadModal.idx === 0}
               style={{ padding: '10px 20px', background: spreadModal.idx === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '999px', color: 'white', cursor: spreadModal.idx === 0 ? 'default' : 'pointer', fontSize: '12px', fontWeight: 700, opacity: spreadModal.idx === 0 ? 0.3 : 1 }}>

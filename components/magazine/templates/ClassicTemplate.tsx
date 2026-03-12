@@ -8,25 +8,25 @@ export default function ClassicTemplate({ article, accentColor = '#1A1A1A', bgCo
   const content = article.content || '<p>본문을 작성해 주세요. 첫 글자는 드롭캡으로 표시됩니다.</p>';
 
   return (
-    <div style={{ width: '100%', aspectRatio: '210/297', overflow: 'hidden', borderRadius: '8px', background: bgColor, display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
+    <div style={{ width: '420px', height: '594px', overflow: 'hidden', borderRadius: '8px', background: bgColor, display: 'flex', flexDirection: 'column', boxSizing: 'border-box', flexShrink: 0 }}>
       <style>{`
-        .classic-${uid} p { margin: 0 0 0.5em; font-size: clamp(5px,1.8%,9px); line-height: 1.65; color: #4B5563; }
+        .classic-${uid} p { margin: 0 0 7px; font-size: 13px; line-height: 1.65; color: #4B5563; }
         .classic-${uid} strong { font-weight: 800; color: #1A1A1A; }
         .classic-${uid} em { font-style: italic; }
         .classic-${uid} p:first-of-type::first-letter {
           float: left;
           font-family: var(--font-display,"Playfair Display",serif);
           font-weight: 900;
-          font-size: clamp(20px,8%,40px);
+          font-size: 48px;
           color: ${accentColor};
-          line-height: 0.8;
-          margin-right: 2%;
-          margin-top: 1%;
+          line-height: 0.82;
+          margin-right: 6px;
+          margin-top: 4px;
         }
       `}</style>
 
-      {/* 상단 40%: 사진 */}
-      <div style={{ height: '40%', flexShrink: 0, overflow: 'hidden', position: 'relative', background: `${accentColor}22` }}>
+      {/* 상단: 사진 */}
+      <div style={{ height: '210px', flexShrink: 0, overflow: 'hidden', position: 'relative', background: `${accentColor}22` }}>
         {slot.src ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={slot.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: slot.pos }} />
@@ -36,25 +36,21 @@ export default function ClassicTemplate({ article, accentColor = '#1A1A1A', bgCo
       </div>
 
       {/* 하단: 텍스트 */}
-      <div style={{ flex: 1, padding: '5% 7%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Article 라벨 */}
-        <div style={{ fontSize: 'clamp(4px,1.4%,7px)', fontWeight: 900, letterSpacing: '3px', color: accentColor, textTransform: 'uppercase', marginBottom: '3%', flexShrink: 0 }}>
+      <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '3px', color: accentColor, textTransform: 'uppercase', marginBottom: '10px', flexShrink: 0 }}>
           Article
         </div>
-        {/* 제목 */}
-        <div style={{ fontFamily: 'var(--font-display,\"Playfair Display\",serif)', fontWeight: 900, fontSize: 'clamp(10px,4%,20px)', color: accentColor, lineHeight: 1.1, marginBottom: '4%', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', flexShrink: 0 }}>
+        <div style={{ fontFamily: 'var(--font-display,"Playfair Display",serif)', fontWeight: 900, fontSize: '24px', color: accentColor, lineHeight: 1.1, marginBottom: '14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', flexShrink: 0 }}>
           {article.title || 'Article Title'}
         </div>
-        {/* 드롭캡 본문 */}
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <div className={`classic-${uid}`} dangerouslySetInnerHTML={{ __html: content }} />
         </div>
-        {/* 푸터 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4%', paddingTop: '3%', borderTop: `1px solid ${accentColor}20`, flexShrink: 0 }}>
-          <span style={{ fontSize: 'clamp(4px,1.4%,7px)', fontWeight: 700, color: accentColor + '80', letterSpacing: '1px', textTransform: 'uppercase' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '10px', borderTop: `1px solid ${accentColor}20`, flexShrink: 0 }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: accentColor + '80', letterSpacing: '1px', textTransform: 'uppercase' }}>
             {article.author || 'Author'}
           </span>
-          <span style={{ fontSize: 'clamp(4px,1.4%,7px)', fontWeight: 900, color: accentColor + '60', letterSpacing: '1px', fontFamily: 'var(--font-display,\"Playfair Display\",serif)' }}>
+          <span style={{ fontSize: '14px', fontWeight: 900, color: accentColor + '60', fontFamily: 'var(--font-display,"Playfair Display",serif)' }}>
             The MHJ
           </span>
         </div>

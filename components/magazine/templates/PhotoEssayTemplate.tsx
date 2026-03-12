@@ -8,7 +8,7 @@ function PhotoSlot({ src, pos, idx }: { src: string | null; pos: string; idx: nu
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: pos }} />
       ) : (
-        <span style={{ fontSize: 'clamp(4px,1.3%,6.5px)', color: 'rgba(255,255,255,0.3)', fontWeight: 700, letterSpacing: '2px' }}>사진 {idx + 1}</span>
+        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 700, letterSpacing: '2px' }}>사진 {idx + 1}</span>
       )}
     </div>
   );
@@ -18,30 +18,27 @@ export default function PhotoEssayTemplate({ article, accentColor = '#1A1A1A' }:
   const slots = getImageSlots(article, 4);
 
   return (
-    <div style={{ width: '100%', aspectRatio: '210/297', overflow: 'hidden', borderRadius: '8px', background: '#1A1A1A', display: 'flex', flexDirection: 'column', padding: '6% 7%', boxSizing: 'border-box' }}>
+    <div style={{ width: '420px', height: '594px', overflow: 'hidden', borderRadius: '8px', background: '#1A1A1A', display: 'flex', flexDirection: 'column', padding: '28px 24px', boxSizing: 'border-box', flexShrink: 0 }}>
 
       {/* 헤더 */}
-      <div style={{ flexShrink: 0, marginBottom: '4%' }}>
-        <div style={{ fontSize: 'clamp(4px,1.4%,7px)', fontWeight: 900, letterSpacing: '3px', color: accentColor, textTransform: 'uppercase', marginBottom: '3%' }}>
+      <div style={{ flexShrink: 0, marginBottom: '16px' }}>
+        <div style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '3px', color: accentColor, textTransform: 'uppercase', marginBottom: '10px' }}>
           Photo Essay
         </div>
-        <div style={{ fontFamily: 'var(--font-display,"Playfair Display",serif)', fontWeight: 900, fontSize: 'clamp(10px,4%,20px)', color: 'white', lineHeight: 1.05, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        <div style={{ fontFamily: 'var(--font-display,"Playfair Display",serif)', fontWeight: 900, fontSize: '24px', color: 'white', lineHeight: 1.1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {article.title || 'Photo Essay'}
         </div>
       </div>
 
       {/* 사진 그리드 */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '3%', minHeight: 0 }}>
-        {/* 좌측 대형 (row span 2) */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '10px', minHeight: 0 }}>
         <div style={{ gridRow: '1 / 3' }}>
           <PhotoSlot src={slots[0].src} pos={slots[0].pos} idx={0} />
         </div>
-        {/* 우상단 */}
         <div>
           <PhotoSlot src={slots[1].src} pos={slots[1].pos} idx={1} />
         </div>
-        {/* 우하단: 2장 나란히 */}
-        <div style={{ display: 'flex', gap: '6%' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <div style={{ flex: 1, position: 'relative' }}>
             <PhotoSlot src={slots[2].src} pos={slots[2].pos} idx={2} />
           </div>
@@ -52,7 +49,7 @@ export default function PhotoEssayTemplate({ article, accentColor = '#1A1A1A' }:
       </div>
 
       {/* 저자 */}
-      <div style={{ marginTop: '4%', flexShrink: 0, fontSize: 'clamp(4px,1.4%,7px)', fontWeight: 700, letterSpacing: '2px', color: accentColor, textTransform: 'uppercase' }}>
+      <div style={{ marginTop: '14px', flexShrink: 0, fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: accentColor, textTransform: 'uppercase' }}>
         {article.author || 'Author'}
       </div>
     </div>

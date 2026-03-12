@@ -8,14 +8,14 @@ interface CoverPreviewProps {
   year: string;
   month_name: string;
   editor?: string;
-  cover_copy?: string;        // 표지 카피
-  cover_subtitle?: string;    // 레거시 backward compat
+  cover_copy?: string;
+  cover_subtitle?: string;
   contributors?: string[];
-  image_url?: string;         // 기본/서가용 이미지
-  cover_images?: string[];    // 캐러셀 이미지 배열
-  accent_color?: string;      // 액센트 색상 (hex)
-  bg_color?: string;          // 배경색 (hex)
-  cover_filter?: string;      // 사진 필터 키
+  image_url?: string;
+  cover_images?: string[];
+  accent_color?: string;
+  bg_color?: string;
+  cover_filter?: string;
   issue_number?: string | number;
 }
 
@@ -34,7 +34,6 @@ export default function CoverPreview({
   cover_filter = 'none',
   issue_number,
 }: CoverPreviewProps) {
-  // 캐러셀 이미지: cover_images 우선, 없으면 image_url 단독
   const allImages = cover_images.filter(Boolean).length > 0
     ? cover_images.filter(Boolean)
     : image_url ? [image_url] : [];
@@ -55,11 +54,10 @@ export default function CoverPreview({
   }, [isCarousel, allImages.length]);
 
   return (
-    /* A4 비율 210:297 */
     <div style={{
       position: 'relative',
-      width: '100%',
-      aspectRatio: '210 / 297',
+      width: '420px',
+      height: '594px',
       overflow: 'hidden',
       borderRadius: '8px',
       background: bg_color,
@@ -68,43 +66,36 @@ export default function CoverPreview({
       display: 'flex',
       flexDirection: 'column',
       boxSizing: 'border-box',
+      flexShrink: 0,
     }}>
 
-      {/* ── 상단: 브랜딩 ── */}
-      <div style={{
-        textAlign: 'center',
-        paddingTop: '5%',
-        paddingBottom: '2%',
-        flexShrink: 0,
-      }}>
-        {/* "the" */}
+      {/* 상단: 브랜딩 */}
+      <div style={{ textAlign: 'center', paddingTop: '28px', paddingBottom: '10px', flexShrink: 0 }}>
         <div style={{
           fontFamily: 'var(--font-display, "Playfair Display", serif)',
           fontStyle: 'italic',
           fontWeight: 400,
-          fontSize: 'clamp(6px, 2.2%, 11px)',
+          fontSize: '14px',
           color: '#8B7D6B',
           letterSpacing: '1px',
           lineHeight: 1,
-          marginBottom: '1%',
+          marginBottom: '4px',
         }}>
           the
         </div>
-        {/* "MHJ" */}
         <div style={{
           fontFamily: 'var(--font-display, "Playfair Display", serif)',
           fontWeight: 900,
-          fontSize: 'clamp(22px, 9%, 46px)',
+          fontSize: '72px',
           color: accentHex,
-          letterSpacing: '-1px',
-          lineHeight: 0.9,
-          marginBottom: '2%',
+          letterSpacing: '-2px',
+          lineHeight: 0.85,
+          marginBottom: '8px',
         }}>
           MHJ
         </div>
-        {/* MY MAIRANGI JOURNAL */}
         <div style={{
-          fontSize: 'clamp(4px, 1.4%, 7px)',
+          fontSize: '8px',
           fontWeight: 700,
           letterSpacing: '5px',
           color: '#8B7D6B',
@@ -114,19 +105,18 @@ export default function CoverPreview({
         </div>
       </div>
 
-      {/* ── 사진 프레임 ── */}
+      {/* 사진 프레임 */}
       <div style={{
         position: 'relative',
         flex: 1,
-        marginLeft: '6%',
-        marginRight: '6%',
+        marginLeft: '24px',
+        marginRight: '24px',
         borderRadius: '3px',
         overflow: 'hidden',
         border: '1px solid #E8E0D6',
         background: '#E8E0D6',
         minHeight: 0,
       }}>
-        {/* 캐러셀 이미지들 */}
         {allImages.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -146,7 +136,6 @@ export default function CoverPreview({
           />
         ))}
 
-        {/* 이미지 없을 때 플레이스홀더 */}
         {allImages.length === 0 && (
           <div style={{
             position: 'absolute', inset: 0,
@@ -156,7 +145,7 @@ export default function CoverPreview({
             <div style={{
               fontFamily: 'var(--font-display, "Playfair Display", serif)',
               fontStyle: 'italic',
-              fontSize: 'clamp(8px, 2.5%, 13px)',
+              fontSize: '13px',
               color: '#BDB0A0',
               letterSpacing: '2px',
             }}>
@@ -165,28 +154,23 @@ export default function CoverPreview({
           </div>
         )}
 
-        {/* 이슈 번호 배지 (우상단) */}
         {issue_number && (
           <div style={{
-            position: 'absolute', top: '6%', right: '6%',
-            width: 'clamp(20px, 6.5%, 32px)',
-            height: 'clamp(20px, 6.5%, 32px)',
+            position: 'absolute', top: '12px', right: '12px',
+            width: '32px', height: '32px',
             borderRadius: '50%',
             background: accentHex,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 'clamp(6px, 2%, 10px)',
-            fontWeight: 900,
-            color: 'white',
+            fontSize: '11px', fontWeight: 900, color: 'white',
             boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
           }}>
             {issue_number}
           </div>
         )}
 
-        {/* 캐러셀 인디케이터 도트 */}
         {isCarousel && (
           <div style={{
-            position: 'absolute', bottom: '5%', left: '50%', transform: 'translateX(-50%)',
+            position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)',
             display: 'flex', gap: '5px', alignItems: 'center',
           }}>
             {allImages.map((_, i) => (
@@ -194,10 +178,9 @@ export default function CoverPreview({
                 key={i}
                 onClick={(e) => { e.stopPropagation(); setActiveIdx(i); }}
                 style={{
-                  border: 'none', cursor: 'pointer',
-                  padding: 0, outline: 'none',
-                  width: i === activeIdx ? 'clamp(10px, 3%, 14px)' : 'clamp(4px, 1.4%, 7px)',
-                  height: 'clamp(4px, 1.4%, 7px)',
+                  border: 'none', cursor: 'pointer', padding: 0, outline: 'none',
+                  width: i === activeIdx ? '14px' : '6px',
+                  height: '6px',
                   borderRadius: '999px',
                   background: i === activeIdx ? 'white' : 'rgba(255,255,255,0.5)',
                   transition: 'all 0.3s ease',
@@ -209,24 +192,23 @@ export default function CoverPreview({
         )}
       </div>
 
-      {/* ── 하단 콘텐츠 ── */}
+      {/* 하단 콘텐츠 */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        padding: '3% 6% 3%',
+        padding: '12px 24px 12px',
         flexShrink: 0,
-        gap: '4%',
+        gap: '16px',
       }}>
-        {/* 좌: 이슈 제목 + 카피 */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontFamily: 'var(--font-display, "Playfair Display", serif)',
             fontWeight: 900,
-            fontSize: 'clamp(9px, 3.2%, 17px)',
+            fontSize: '28px',
             color: accentHex,
-            letterSpacing: '0.5px',
-            lineHeight: 1.1,
+            letterSpacing: '-0.5px',
+            lineHeight: 1.05,
             textTransform: 'uppercase',
             overflow: 'hidden',
             display: '-webkit-box',
@@ -237,9 +219,9 @@ export default function CoverPreview({
           </div>
           {copyText && (
             <div style={{
-              fontSize: 'clamp(4px, 1.4%, 7px)',
+              fontSize: '11px',
               color: '#8B7D6B',
-              marginTop: '3%',
+              marginTop: '6px',
               lineHeight: 1.4,
               overflow: 'hidden',
               display: '-webkit-box',
@@ -250,58 +232,48 @@ export default function CoverPreview({
             </div>
           )}
           {contributors.length > 0 && (
-            <div style={{ marginTop: '4%', display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+            <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
               {contributors.map(c => (
-                <span key={c} style={{
-                  fontSize: 'clamp(3.5px, 1.2%, 6px)', fontWeight: 700,
-                  color: '#8B7D6B', letterSpacing: '0.5px',
-                }}>
+                <span key={c} style={{ fontSize: '10px', fontWeight: 700, color: '#8B7D6B', letterSpacing: '0.5px' }}>
                   {c}
                 </span>
               )).reduce((acc: React.ReactNode[], el, i, arr) => {
                 acc.push(el);
-                if (i < arr.length - 1) acc.push(<span key={`sep-${i}`} style={{ fontSize: 'clamp(3.5px,1.2%,6px)', color: '#C4B9AC' }}> · </span>);
+                if (i < arr.length - 1) acc.push(<span key={`sep-${i}`} style={{ fontSize: '10px', color: '#C4B9AC' }}> · </span>);
                 return acc;
               }, [])}
             </div>
           )}
         </div>
 
-        {/* 우: 월 + 년도 */}
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
           <div style={{
-            fontSize: 'clamp(4px, 1.4%, 7px)',
-            fontWeight: 900,
-            letterSpacing: '3px',
-            color: '#8B7D6B',
-            textTransform: 'uppercase',
+            fontSize: '10px', fontWeight: 900, letterSpacing: '3px',
+            color: '#8B7D6B', textTransform: 'uppercase',
           }}>
             {month_name}
           </div>
           <div style={{
             fontFamily: 'var(--font-display, "Playfair Display", serif)',
-            fontWeight: 900,
-            fontSize: 'clamp(8px, 3%, 16px)',
-            color: accentHex,
-            lineHeight: 1,
+            fontWeight: 900, fontSize: '20px', color: accentHex, lineHeight: 1,
           }}>
             {year}
           </div>
           {editor && (
-            <div style={{ fontSize: 'clamp(3.5px, 1.2%, 6px)', color: '#8B7D6B', marginTop: '4%', fontWeight: 700 }}>
+            <div style={{ fontSize: '10px', color: '#8B7D6B', marginTop: '4px', fontWeight: 700 }}>
               Ed. {editor}
             </div>
           )}
         </div>
       </div>
 
-      {/* ── 푸터 ── */}
-      <div style={{ padding: '0 6% 4%', flexShrink: 0 }}>
+      {/* 푸터 */}
+      <div style={{ padding: '0 24px 14px', flexShrink: 0 }}>
         <div style={{
           borderTop: '1px solid #C4B9AC',
-          paddingTop: '3%',
+          paddingTop: '10px',
           textAlign: 'center',
-          fontSize: 'clamp(3.5px, 1.2%, 6px)',
+          fontSize: '8px',
           fontWeight: 700,
           letterSpacing: '3px',
           color: '#8B7D6B',
