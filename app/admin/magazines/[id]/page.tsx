@@ -460,8 +460,8 @@ export default function MagazineDetailPage() {
           탭 1: 표지 & 설정
           ══════════════════════════════════════════ */}
       {tab === 'cover' && (
-        <div style={{ padding: '0 clamp(24px,4vw,48px)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: '32px', alignItems: 'start' }}>
+        <div style={{ padding: '0 24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '60% 40%', gap: '32px', alignItems: 'start', minWidth: 0 }}>
 
             {/* ─── 좌: 폼 ─── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -617,7 +617,7 @@ export default function MagazineDetailPage() {
             </div>
 
             {/* ─── 우: 스티키 프리뷰 ─── */}
-            <div style={{ position: 'sticky', top: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', maxHeight: 'calc(100vh - 100px)', minWidth: 0 }}>
               <div>
                 <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', marginBottom: '8px' }}>Cover</p>
                 <CoverPreview
@@ -646,10 +646,10 @@ export default function MagazineDetailPage() {
           탭 2: 기사 편집
           ══════════════════════════════════════════ */}
       {tab === 'articles' && (
-        <div style={{ padding: '0 clamp(24px,4vw,48px)', display: 'grid', gridTemplateColumns: '420px 1fr', gap: '24px', alignItems: 'start' }}>
+        <div style={{ padding: '0 24px', display: 'grid', gridTemplateColumns: '45% 55%', gap: '24px', alignItems: 'start', minWidth: 0 }}>
 
           {/* ─── 좌: 기사 목록 + 인라인 폼 ─── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0', minWidth: 0 }}>
 
             {/* 목록 헤더 */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -737,7 +737,7 @@ export default function MagazineDetailPage() {
           </div>
 
           {/* ─── 우: 실시간 프리뷰 (스티키) ─── */}
-          <div style={{ position: 'sticky', top: '24px' }}>
+          <div style={{ position: 'sticky', top: '80px', overflowY: 'auto', maxHeight: 'calc(100vh - 100px)', minWidth: 0 }}>
             {inlineForm ? (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -771,8 +771,6 @@ export default function MagazineDetailPage() {
           탭 3: 전체 미리보기
           ══════════════════════════════════════════ */}
       {tab === 'spread' && (() => {
-        const pageWidth = 420;
-
         // 스프레드 페이지 목록 (모달용)
         const spreadPages: { label: string; content: React.ReactNode; artId?: number }[] = [
           {
@@ -814,23 +812,20 @@ export default function MagazineDetailPage() {
         ];
 
         return (
-          <div style={{ padding: '0 clamp(24px,4vw,48px)' }}>
-            {/* 스프레드 (가로 스크롤) */}
-            <div ref={spreadScrollRef} style={{ overflowX: 'auto', paddingBottom: '24px', paddingRight: '48px' }}>
-              <div style={{ display: 'flex', gap: '16px', width: 'max-content' }}>
-                {spreadPages.map((page, pi) => (
-                  <SpreadPage
-                    key={pi}
-                    label={page.label}
-                    filename={`TheMHJ_${magazine.month_name}${magazine.year}_${page.label.replace(/[^a-zA-Z0-9]/g, '_')}`}
-                    pageWidth={pageWidth}
-                    onEdit={page.artId !== undefined ? () => { setTab('articles'); selectArticle(articles.find(a => a.id === page.artId)!); } : page.label === 'Cover' ? () => setTab('cover') : undefined}
-                    onPreview={() => setSpreadModal({ pages: spreadPages, idx: pi })}
-                  >
-                    {page.content}
-                  </SpreadPage>
-                ))}
-              </div>
+          <div style={{ padding: '0 24px' }}>
+            {/* 스프레드 (줄바꿈 그리드) */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', overflowY: 'auto' }}>
+              {spreadPages.map((page, pi) => (
+                <SpreadPage
+                  key={pi}
+                  label={page.label}
+                  filename={`TheMHJ_${magazine.month_name}${magazine.year}_${page.label.replace(/[^a-zA-Z0-9]/g, '_')}`}
+                  onEdit={page.artId !== undefined ? () => { setTab('articles'); selectArticle(articles.find(a => a.id === page.artId)!); } : page.label === 'Cover' ? () => setTab('cover') : undefined}
+                  onPreview={() => setSpreadModal({ pages: spreadPages, idx: pi })}
+                >
+                  {page.content}
+                </SpreadPage>
+              ))}
             </div>
           </div>
         );
@@ -856,10 +851,10 @@ export default function MagazineDetailPage() {
             {/* 줌 컨트롤 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}>
               <button onClick={() => setModalZoom(p => Math.max(40, p - 10))} style={{ ...zoomBtn, background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none' }}><ZoomOut size={13} /></button>
-              <input type="range" min={40} max={200} value={modalZoom} onChange={e => setModalZoom(Number(e.target.value))} style={{ width: '100px', accentColor: '#4F46E5', cursor: 'pointer' }} />
-              <button onClick={() => setModalZoom(p => Math.min(200, p + 10))} style={{ ...zoomBtn, background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none' }}><ZoomIn size={13} /></button>
+              <input type="range" min={40} max={250} value={modalZoom} onChange={e => setModalZoom(Number(e.target.value))} style={{ width: '100px', accentColor: '#4F46E5', cursor: 'pointer' }} />
+              <button onClick={() => setModalZoom(p => Math.min(250, p + 10))} style={{ ...zoomBtn, background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none' }}><ZoomIn size={13} /></button>
               <span style={{ fontSize: '11px', fontWeight: 900, color: 'rgba(255,255,255,0.5)', minWidth: '36px' }}>{modalZoom}%</span>
-              {[50, 75, 100].map(v => (
+              {[50, 75, 100, 150, 200, 250].map(v => (
                 <button key={v} onClick={() => setModalZoom(v)} style={{ padding: '3px 8px', borderRadius: '6px', border: 'none', background: modalZoom === v ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)', color: 'white', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>{v}%</button>
               ))}
             </div>
@@ -937,17 +932,23 @@ const zoomBtn: React.CSSProperties = {
 };
 
 /* ─── SpreadPage: 스프레드 뷰 아이템 ─── */
-function SpreadPage({ label, children, filename, pageWidth, onEdit, onPreview }: {
+const SPREAD_SCALE = 0.7;
+const SPREAD_PAGE_W = 420;
+const SPREAD_PAGE_H = 594;
+const SPREAD_SCALED_W = Math.round(SPREAD_PAGE_W * SPREAD_SCALE);  // 294
+const SPREAD_SCALED_H = Math.round(SPREAD_PAGE_H * SPREAD_SCALE);  // 416
+
+function SpreadPage({ label, children, filename, onEdit, onPreview }: {
   label: string;
   children: React.ReactNode;
   filename: string;
-  pageWidth: number;
+  pageWidth?: number; // kept for compat but unused in spread view
   onEdit?: () => void;
   onPreview: () => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   return (
-    <div style={{ width: `${pageWidth}px`, flexShrink: 0 }}>
+    <div style={{ width: `${SPREAD_SCALED_W}px`, flexShrink: 0 }}>
       {/* 라벨 + 버튼 행 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
         <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '2px', color: '#CBD5E1', textTransform: 'uppercase', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
@@ -957,7 +958,12 @@ function SpreadPage({ label, children, filename, pageWidth, onEdit, onPreview }:
         {onEdit && <button onClick={onEdit} title="편집" style={{ padding: '3px 7px', background: 'white', border: '1px solid #F1F5F9', borderRadius: '6px', cursor: 'pointer', fontSize: '9px', fontWeight: 700, color: '#4F46E5', whiteSpace: 'nowrap' }}>✏️</button>}
         <DownloadBtn targetRef={wrapRef as React.RefObject<HTMLElement>} filename={filename} size="sm" />
       </div>
-      <div ref={wrapRef}>{children}</div>
+      {/* 스케일 클립 박스: 시각적으로 축소 표시, wrapRef는 원본 크기에 연결 */}
+      <div style={{ width: `${SPREAD_SCALED_W}px`, height: `${SPREAD_SCALED_H}px`, overflow: 'hidden', flexShrink: 0 }}>
+        <div style={{ transform: `scale(${SPREAD_SCALE})`, transformOrigin: 'top left', width: `${SPREAD_PAGE_W}px` }}>
+          <div ref={wrapRef}>{children}</div>
+        </div>
+      </div>
     </div>
   );
 }

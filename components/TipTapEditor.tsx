@@ -24,32 +24,6 @@ import {
   MapPin, Youtube, MessageSquare, MousePointer2,
 } from 'lucide-react';
 
-/* ════════════════════════════════════════
-   COLOR PALETTES
-════════════════════════════════════════ */
-const TEXT_COLORS = [
-  { label: '기본', value: '' },
-  { label: '검정', value: '#1A1A1A' },
-  { label: '인디고', value: '#4F46E5' },
-  { label: '회색', value: '#64748B' },
-  { label: '빨강', value: '#EF4444' },
-  { label: '주황', value: '#F97316' },
-  { label: '노랑', value: '#EAB308' },
-  { label: '초록', value: '#22C55E' },
-  { label: '파랑', value: '#3B82F6' },
-  { label: '핑크', value: '#EC4899' },
-  { label: '보라', value: '#A855F7' },
-];
-
-const HIGHLIGHT_COLORS = [
-  { label: '없음', value: '' },
-  { label: '노랑', value: '#FEF08A' },
-  { label: '초록', value: '#BBF7D0' },
-  { label: '파랑', value: '#BAE6FD' },
-  { label: '핑크', value: '#FBCFE8' },
-  { label: '보라', value: '#E9D5FF' },
-  { label: '인디고', value: '#C7D2FE' },
-];
 
 /* ════════════════════════════════════════
    CUSTOM NODE EXTENSIONS
@@ -456,20 +430,18 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
   const [insertModal, setInsertModal] = useState<InsertModalType>(null);
   const [insertData, setInsertData] = useState({ text: '', url: '', address: '' });
 
-  // Dropdowns
-  const [colorDropdown, setColorDropdown] = useState<'color' | 'highlight' | null>(null);
-  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const colorBtnRef = useRef<HTMLDivElement>(null);
-  const highlightBtnRef = useRef<HTMLDivElement>(null);
+  // Native color pickers
+  const colorInputRef = useRef<HTMLInputElement>(null);
+  const highlightInputRef = useRef<HTMLInputElement>(null);
   const [showInsertMenu, setShowInsertMenu] = useState(false);
 
-  // Close dropdowns on outside click
+  // Close insert menu on outside click
   useEffect(() => {
-    if (!colorDropdown && !showInsertMenu) return;
-    const h = () => { setColorDropdown(null); setShowInsertMenu(false); };
+    if (!showInsertMenu) return;
+    const h = () => setShowInsertMenu(false);
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
-  }, [colorDropdown, showInsertMenu]);
+  }, [showInsertMenu]);
 
   const uploadAndInsert = useCallback(async (file: File) => {
     if (!editor) return;
@@ -605,84 +577,37 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
         <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} style={btn(editor.isActive('heading', { level: 3 }))} title="제목3"><Heading3 size={15} /></button>
         {sep}
 
-        {/* Text Color */}
-        <div ref={colorBtnRef} style={{ position: 'relative' }} onMouseDown={e => e.stopPropagation()}>
+        {/* Text Color — 네이티브 컬러 피커 */}
+        <div style={{ position: 'relative' }}>
           <button type="button" title="글자 색상"
-            onClick={() => {
-              if (colorDropdown === 'color') { setColorDropdown(null); return; }
-              const rect = colorBtnRef.current?.getBoundingClientRect();
-              if (rect) setDropdownPos({ top: rect.bottom + 4, left: rect.left });
-              setColorDropdown('color');
-            }}
+            onClick={() => colorInputRef.current?.click()}
             style={{ ...btn(false), flexDirection: 'column', gap: 1, padding: '5px 8px' }}>
             <span style={{ fontSize: 13, fontWeight: 800, color: currentColor || '#1a1a1a', lineHeight: 1 }}>A</span>
             <div style={{ width: 14, height: 3, borderRadius: 2, background: currentColor || '#1a1a1a' }} />
           </button>
-          {colorDropdown === 'color' && (
-            <div style={{
-              position: 'fixed', top: dropdownPos.top, left: dropdownPos.left, zIndex: 99999,
-              background: 'white', borderRadius: 12, padding: 8,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.18)', border: '1px solid #f1f5f9',
-              display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4, minWidth: 160,
-            }}>
-              {TEXT_COLORS.map(c => (
-                <button key={c.value} type="button"
-                  onClick={() => {
-                    if (c.value) editor.chain().focus().setColor(c.value).run();
-                    else editor.chain().focus().unsetColor().run();
-                    setColorDropdown(null);
-                  }}
-                  style={{
-                    width: 32, height: 32, borderRadius: 8, border: currentColor === c.value ? '2px solid #4F46E5' : '1px solid #f1f5f9',
-                    background: c.value || 'white', cursor: 'pointer',
-                    position: 'relative',
-                  }}
-                  title={c.label}
-                >
-                  {!c.value && <span style={{ fontSize: 16, color: '#cbd5e1', lineHeight: 1 }}>∅</span>}
-                </button>
-              ))}
-            </div>
-          )}
+          <input
+            ref={colorInputRef}
+            type="color"
+            defaultValue={currentColor || '#1a1a1a'}
+            style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 0, height: 0 }}
+            onChange={e => editor.chain().focus().setColor(e.target.value).run()}
+          />
         </div>
 
-        {/* Highlight */}
-        <div ref={highlightBtnRef} style={{ position: 'relative' }} onMouseDown={e => e.stopPropagation()}>
+        {/* Highlight — 네이티브 컬러 피커 */}
+        <div style={{ position: 'relative' }}>
           <button type="button" title="형광펜"
-            onClick={() => {
-              if (colorDropdown === 'highlight') { setColorDropdown(null); return; }
-              const rect = highlightBtnRef.current?.getBoundingClientRect();
-              if (rect) setDropdownPos({ top: rect.bottom + 4, left: rect.left });
-              setColorDropdown('highlight');
-            }}
+            onClick={() => highlightInputRef.current?.click()}
             style={{ ...btn(editor.isActive('highlight')), padding: '5px 8px' }}>
             <Highlighter size={15} />
           </button>
-          {colorDropdown === 'highlight' && (
-            <div style={{
-              position: 'fixed', top: dropdownPos.top, left: dropdownPos.left, zIndex: 99999,
-              background: 'white', borderRadius: 12, padding: 8,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.18)', border: '1px solid #f1f5f9',
-              display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4, minWidth: 160,
-            }}>
-              {HIGHLIGHT_COLORS.map(c => (
-                <button key={c.value} type="button"
-                  onClick={() => {
-                    if (c.value) editor.chain().focus().toggleHighlight({ color: c.value }).run();
-                    else editor.chain().focus().unsetHighlight().run();
-                    setColorDropdown(null);
-                  }}
-                  style={{
-                    width: 32, height: 32, borderRadius: 8, border: currentHighlight === c.value ? '2px solid #4F46E5' : '1px solid #f1f5f9',
-                    background: c.value || 'white', cursor: 'pointer',
-                  }}
-                  title={c.label}
-                >
-                  {!c.value && <span style={{ fontSize: 16, color: '#cbd5e1', lineHeight: 1 }}>∅</span>}
-                </button>
-              ))}
-            </div>
-          )}
+          <input
+            ref={highlightInputRef}
+            type="color"
+            defaultValue={currentHighlight || '#FEF08A'}
+            style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 0, height: 0 }}
+            onChange={e => editor.chain().focus().toggleHighlight({ color: e.target.value }).run()}
+          />
         </div>
         {sep}
 
