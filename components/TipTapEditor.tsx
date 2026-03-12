@@ -458,6 +458,9 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
 
   // Dropdowns
   const [colorDropdown, setColorDropdown] = useState<'color' | 'highlight' | null>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const colorBtnRef = useRef<HTMLDivElement>(null);
+  const highlightBtnRef = useRef<HTMLDivElement>(null);
   const [showInsertMenu, setShowInsertMenu] = useState(false);
 
   // Close dropdowns on outside click
@@ -603,18 +606,23 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
         {sep}
 
         {/* Text Color */}
-        <div style={{ position: 'relative' }} onMouseDown={e => e.stopPropagation()}>
+        <div ref={colorBtnRef} style={{ position: 'relative' }} onMouseDown={e => e.stopPropagation()}>
           <button type="button" title="글자 색상"
-            onClick={() => setColorDropdown(colorDropdown === 'color' ? null : 'color')}
+            onClick={() => {
+              if (colorDropdown === 'color') { setColorDropdown(null); return; }
+              const rect = colorBtnRef.current?.getBoundingClientRect();
+              if (rect) setDropdownPos({ top: rect.bottom + 4, left: rect.left });
+              setColorDropdown('color');
+            }}
             style={{ ...btn(false), flexDirection: 'column', gap: 1, padding: '5px 8px' }}>
             <span style={{ fontSize: 13, fontWeight: 800, color: currentColor || '#1a1a1a', lineHeight: 1 }}>A</span>
             <div style={{ width: 14, height: 3, borderRadius: 2, background: currentColor || '#1a1a1a' }} />
           </button>
           {colorDropdown === 'color' && (
             <div style={{
-              position: 'absolute', top: '100%', left: 0, marginTop: 4, zIndex: 200,
+              position: 'fixed', top: dropdownPos.top, left: dropdownPos.left, zIndex: 99999,
               background: 'white', borderRadius: 12, padding: 8,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)', border: '1px solid #f1f5f9',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.18)', border: '1px solid #f1f5f9',
               display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4, minWidth: 160,
             }}>
               {TEXT_COLORS.map(c => (
@@ -639,17 +647,22 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
         </div>
 
         {/* Highlight */}
-        <div style={{ position: 'relative' }} onMouseDown={e => e.stopPropagation()}>
+        <div ref={highlightBtnRef} style={{ position: 'relative' }} onMouseDown={e => e.stopPropagation()}>
           <button type="button" title="형광펜"
-            onClick={() => setColorDropdown(colorDropdown === 'highlight' ? null : 'highlight')}
+            onClick={() => {
+              if (colorDropdown === 'highlight') { setColorDropdown(null); return; }
+              const rect = highlightBtnRef.current?.getBoundingClientRect();
+              if (rect) setDropdownPos({ top: rect.bottom + 4, left: rect.left });
+              setColorDropdown('highlight');
+            }}
             style={{ ...btn(editor.isActive('highlight')), padding: '5px 8px' }}>
             <Highlighter size={15} />
           </button>
           {colorDropdown === 'highlight' && (
             <div style={{
-              position: 'absolute', top: '100%', left: 0, marginTop: 4, zIndex: 200,
+              position: 'fixed', top: dropdownPos.top, left: dropdownPos.left, zIndex: 99999,
               background: 'white', borderRadius: 12, padding: 8,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)', border: '1px solid #f1f5f9',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.18)', border: '1px solid #f1f5f9',
               display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4, minWidth: 160,
             }}>
               {HIGHLIGHT_COLORS.map(c => (
