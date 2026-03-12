@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { BookOpen, RefreshCw, Users, Sparkles, ChevronDown } from 'lucide-react';
+import StoryPressFAQ from '@/components/StoryPressFAQ';
 
 interface Props {
   title: string;
@@ -373,6 +374,9 @@ export default function StoryPressClient({ title }: Props) {
           </blockquote>
         </div>
       </section>
+
+      {/* ─── FAQ ─── */}
+      <StoryPressFAQ />
 
       {/* ─── 대기자 등록 폼 ─── */}
       <section

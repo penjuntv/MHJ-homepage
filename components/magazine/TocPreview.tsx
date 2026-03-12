@@ -10,6 +10,7 @@ interface TocPreviewProps {
   articles: Article[];
   color_theme?: string;       // 레거시
   accent_color?: string;      // 신규 (hex, 우선 적용)
+  bg_color?: string;          // 배경색
 }
 
 export default function TocPreview({
@@ -19,11 +20,12 @@ export default function TocPreview({
   articles,
   color_theme = 'slate',
   accent_color,
+  bg_color,
 }: TocPreviewProps) {
   const baseTheme = MAGAZINE_THEMES[(color_theme as ThemeKey)] ?? MAGAZINE_THEMES.slate;
   const theme = accent_color
-    ? { primary: accent_color, secondary: '#8B7D6B', bg: '#F5F0EA', name: 'Custom' }
-    : baseTheme;
+    ? { primary: accent_color, secondary: '#8B7D6B', bg: bg_color || '#F5F0EA', name: 'Custom' }
+    : { ...baseTheme, bg: bg_color || baseTheme.bg };
 
   // article 타입만 목차에 포함 (cover/contents 제외)
   const tocItems = articles

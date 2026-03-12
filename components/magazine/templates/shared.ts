@@ -24,6 +24,7 @@ export interface ArticlePreviewData {
   author: string;
   content: string; // HTML
   article_images?: string[];
+  image_positions?: string[];
   image_url?: string;
   template?: string;
 }
@@ -31,6 +32,7 @@ export interface ArticlePreviewData {
 export interface NewTemplateProps {
   article: ArticlePreviewData;
   accentColor?: string;
+  bgColor?: string;
 }
 
 export const TEMPLATE_PHOTO_COUNT: Record<string, number> = {
@@ -46,4 +48,14 @@ export function getImages(article: ArticlePreviewData, count: number): (string |
   const imgs = [...(article.article_images ?? []).filter(Boolean)];
   if (imgs.length === 0 && article.image_url) imgs.push(article.image_url);
   return Array.from({ length: count }, (_, i) => imgs[i] ?? null);
+}
+
+export function getImageSlots(article: ArticlePreviewData, count: number): { src: string | null; pos: string }[] {
+  const imgs = [...(article.article_images ?? []).filter(Boolean)];
+  if (imgs.length === 0 && article.image_url) imgs.push(article.image_url);
+  const positions = article.image_positions ?? [];
+  return Array.from({ length: count }, (_, i) => ({
+    src: imgs[i] ?? null,
+    pos: positions[i] || 'center',
+  }));
 }

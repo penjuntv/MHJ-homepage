@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useRef, lazy, Suspense } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
-import { Upload, Loader2, Sparkles } from 'lucide-react';
+import { Upload, Loader2, Sparkles, Eye } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
 type BlogInput = Omit<Blog, 'id' | 'created_at'>;
-
 type ScheduleMode = 'now' | 'schedule';
 
 interface Props {
@@ -87,6 +87,7 @@ export default function BlogForm({ initial }: Props) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const isEdit = !!initial;
+  const draftKey = `blog-draft-${initial?.id ?? 'new'}`;
 
   const [form, setForm] = useState<BlogInput>({
     category: initial?.category ?? 'Life',
@@ -119,10 +120,84 @@ export default function BlogForm({ initial }: Props) {
   const [sendAsNewsletter, setSendAsNewsletter] = useState(false);
   const [aiSeoLoading, setAiSeoLoading] = useState(false);
 
+  /* ── 슬러그 중복 검사 ── */
+  const [slugError, setSlugError] = useState('');
+  const [slugChecking, setSlugChecking] = useState(false);
+  const slugCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const slug = form.slug;
+    if (!slug) { setSlugError(''); return; }
+    if (slugCheckTimer.current) clearTimeout(slugCheckTimer.current);
+    slugCheckTimer.current = setTimeout(async () => {
+      setSlugChecking(true);
+      let query = supabase.from('blogs').select('id', { count: 'exact', head: true }).eq('slug', slug);
+      if (isEdit) query = query.neq('id', initial!.id);
+      const { count } = await query;
+      setSlugError(count && count > 0 ? '이미 사용 중인 URL입니다.' : '');
+      setSlugChecking(false);
+    }, 500);
+  }, [form.slug]); // eslint-disable-line
+
+  /* ── Auto-save ── */
+  const [showRestoreBanner, setShowRestoreBanner] = useState(false);
+  const [autoSaveLabel, setAutoSaveLabel] = useState('');
+  const autoSaveLabelTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 최신 상태를 ref로 추적 (interval이 stale closure를 참조하지 않도록)
+  const stateRef = useRef({ form, tags, scheduleMode, scheduleAt });
+  useEffect(() => {
+    stateRef.current = { form, tags, scheduleMode, scheduleAt };
+  }, [form, tags, scheduleMode, scheduleAt]);
+
+  // 마운트 시 임시저장 확인
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(draftKey);
+      if (saved) setShowRestoreBanner(true);
+    } catch { /* sessionStorage 접근 불가 환경 무시 */ }
+  }, []); // eslint-disable-line
+
+  // 30초마다 자동저장
+  useEffect(() => {
+    const id = setInterval(() => {
+      try {
+        const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa } = stateRef.current;
+        sessionStorage.setItem(draftKey, JSON.stringify({ form: f, tags: t, scheduleMode: sm, scheduleAt: sa }));
+        const now = new Date();
+        const hm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        setAutoSaveLabel(`임시저장됨 ${hm}`);
+        if (autoSaveLabelTimer.current) clearTimeout(autoSaveLabelTimer.current);
+        autoSaveLabelTimer.current = setTimeout(() => setAutoSaveLabel(''), 1000);
+      } catch { /* sessionStorage 접근 불가 환경 무시 */ }
+    }, 30_000);
+    return () => clearInterval(id);
+  }, [draftKey]); // eslint-disable-line
+
+  function restoreDraft() {
+    try {
+      const saved = sessionStorage.getItem(draftKey);
+      if (!saved) return;
+      const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa } = JSON.parse(saved);
+      if (f) setForm(f);
+      if (t) setTags(t);
+      if (sm) setScheduleMode(sm);
+      if (sa !== undefined) setScheduleAt(sa);
+      setShowRestoreBanner(false);
+      toast.success('임시저장된 글을 복원했습니다.');
+    } catch {
+      setShowRestoreBanner(false);
+    }
+  }
+
+  function dismissDraft() {
+    try { sessionStorage.removeItem(draftKey); } catch { /* ignore */ }
+    setShowRestoreBanner(false);
+  }
+
   async function generateSeoWithAI() {
-    if (!form.title) { setError('AI 생성을 위해 제목을 먼저 입력하세요.'); return; }
+    if (!form.title) { toast.error('AI 생성을 위해 제목을 먼저 입력하세요.'); return; }
     setAiSeoLoading(true);
-    setError('');
     try {
       const plainText = form.content.replace(/<[^>]*>/g, '').trim();
       const res = await fetch('/api/ai-seo', {
@@ -131,10 +206,14 @@ export default function BlogForm({ initial }: Props) {
         body: JSON.stringify({ title: form.title, content: plainText }),
       });
       const data = await res.json();
-      if (data.meta_description) set('meta_description', data.meta_description);
-      else setError('AI 생성 실패: ' + (data.error ?? '알 수 없는 오류'));
+      if (data.meta_description) {
+        set('meta_description', data.meta_description);
+        toast.success('SEO 설명이 생성되었습니다.');
+      } else {
+        toast.error('AI 생성 실패: ' + (data.error ?? '알 수 없는 오류'));
+      }
     } catch {
-      setError('AI 생성 요청 실패');
+      toast.error('AI 생성 요청 실패');
     }
     setAiSeoLoading(false);
   }
@@ -155,12 +234,13 @@ export default function BlogForm({ initial }: Props) {
     const path = `blogs/${Date.now()}.${ext}`;
     const { error: upErr } = await supabase.storage.from('images').upload(path, file);
     if (upErr) {
-      setError('이미지 업로드 실패: ' + upErr.message);
+      toast.error('이미지 업로드 실패: ' + upErr.message);
       setUploading(false);
       return;
     }
     const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
     set('image_url', publicUrl);
+    toast.success('이미지가 업로드되었습니다.');
     setUploading(false);
   }
 
@@ -194,7 +274,6 @@ export default function BlogForm({ initial }: Props) {
     let publishAt: string | null = null;
     let shouldPublish = form.published;
     if (scheduleMode === 'schedule' && scheduleAt) {
-      // NZ 시간 → UTC 변환
       const nzDate = new Date(scheduleAt + ':00').toISOString();
       publishAt = nzDate;
       shouldPublish = true;
@@ -215,7 +294,7 @@ export default function BlogForm({ initial }: Props) {
       blogId = data?.id;
     }
 
-    // 뉴스레터 발송 (카드뉴스 템플릿)
+    // 뉴스레터 발송
     if (sendAsNewsletter && form.published && blogId) {
       await fetch('/api/send-newsletter', {
         method: 'POST',
@@ -236,6 +315,9 @@ export default function BlogForm({ initial }: Props) {
       });
     }
 
+    // 임시저장 삭제 + 토스트
+    try { sessionStorage.removeItem(draftKey); } catch { /* ignore */ }
+    toast.success(shouldPublish ? '글이 발행되었습니다.' : '글이 저장되었습니다.');
     router.push('/admin/blogs');
     router.refresh();
   }
@@ -262,6 +344,28 @@ export default function BlogForm({ initial }: Props) {
           {isEdit ? '블로그 글 수정' : '새 블로그 글 작성'}
         </p>
       </div>
+
+      {/* ── 임시저장 복원 배너 ── */}
+      {showRestoreBanner && (
+        <div style={{
+          marginBottom: 28, padding: '16px 24px', background: '#FEF3C7', borderRadius: 16,
+          border: '1px solid #FDE68A', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+        }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: 0 }}>
+            임시저장된 글이 있습니다. 복원하시겠습니까?
+          </p>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button
+              type="button" onClick={restoreDraft}
+              style={{ padding: '8px 18px', borderRadius: 999, background: '#92400E', color: 'white', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+            >복원</button>
+            <button
+              type="button" onClick={dismissDraft}
+              style={{ padding: '8px 18px', borderRadius: 999, background: 'white', color: '#92400E', border: '1px solid #FDE68A', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+            >무시</button>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
@@ -307,11 +411,23 @@ export default function BlogForm({ initial }: Props) {
             onChange={e => set('slug', e.target.value)}
             placeholder="url-friendly-slug"
             required
-            style={inputStyle}
+            style={{ ...inputStyle, borderColor: slugError ? '#FCA5A5' : '#F1F5F9' }}
           />
-          <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>
-            URL: /blog/{form.slug || 'slug'}
-          </p>
+          {slugChecking && (
+            <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Loader2 size={10} style={{ animation: 'spin 1s linear infinite' }} /> 확인 중...
+            </p>
+          )}
+          {!slugChecking && slugError && (
+            <p style={{ fontSize: '11px', color: '#EF4444', marginTop: '6px', fontWeight: 700 }}>
+              ⚠ {slugError}
+            </p>
+          )}
+          {!slugChecking && !slugError && (
+            <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>
+              URL: /blog/{form.slug || 'slug'}
+            </p>
+          )}
         </div>
 
         {/* 저자 + 날짜 */}
@@ -352,7 +468,6 @@ export default function BlogForm({ initial }: Props) {
             placeholder="또는 이미지 URL 직접 입력"
             style={{ ...inputStyle, marginTop: '8px' }}
           />
-          {/* 비율별 미리보기 탭 */}
           <ImagePreviewTabs
             imageUrl={form.image_url}
             tabs={[
@@ -363,7 +478,7 @@ export default function BlogForm({ initial }: Props) {
           />
         </div>
 
-        {/* 내용 (TipTap 리치 텍스트 에디터) */}
+        {/* 내용 */}
         <div>
           <label style={labelStyle}>내용 *</label>
           <Suspense fallback={
@@ -392,7 +507,6 @@ export default function BlogForm({ initial }: Props) {
                 SEO 최적화
               </p>
 
-              {/* 검색 제목 글자 수 */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                   <label style={{ ...labelStyle, marginBottom: 0 }}>검색 제목 (글 제목 기준)</label>
@@ -412,7 +526,6 @@ export default function BlogForm({ initial }: Props) {
                 <p style={{ fontSize: 11, color: '#94A3B8' }}>글 제목이 Google 검색 결과 제목으로 사용됩니다. 60자 이내를 권장합니다.</p>
               </div>
 
-              {/* 메타 설명 + AI 버튼 */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                   <label style={{ ...labelStyle, marginBottom: 0 }}>메타 설명</label>
@@ -460,7 +573,6 @@ export default function BlogForm({ initial }: Props) {
                 />
               </div>
 
-              {/* Google 검색 미리보기 */}
               <div>
                 <p style={{ ...labelStyle, marginBottom: 10 }}>Google 검색 미리보기</p>
                 <div style={{
@@ -680,20 +792,40 @@ export default function BlogForm({ initial }: Props) {
         )}
 
         {/* 버튼 */}
-        <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
+        <div style={{ display: 'flex', gap: '12px', paddingTop: '8px', flexWrap: 'wrap' }}>
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || !!slugError}
             className="font-black uppercase"
             style={{
               background: '#000', color: '#fff', border: 'none',
               borderRadius: '999px', padding: '16px 40px',
-              fontSize: '12px', letterSpacing: '3px', cursor: saving ? 'not-allowed' : 'pointer',
-              opacity: saving ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '8px',
+              fontSize: '12px', letterSpacing: '3px',
+              cursor: (saving || !!slugError) ? 'not-allowed' : 'pointer',
+              opacity: (saving || !!slugError) ? 0.5 : 1,
+              display: 'flex', alignItems: 'center', gap: '8px',
             }}
           >
             {saving && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />}
             {saving ? '저장 중...' : (isEdit ? '수정 완료' : '발행하기')}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!form.slug) { toast.error('슬러그를 입력해야 미리보기가 가능합니다.'); return; }
+              const url = form.published
+                ? `/blog/${form.slug}`
+                : `/blog/${form.slug}?preview=true`;
+              window.open(url, '_blank');
+            }}
+            style={{
+              background: 'white', color: '#4F46E5', border: '1px solid #C7D2FE',
+              borderRadius: '999px', padding: '16px 28px', fontSize: '12px',
+              fontWeight: 700, letterSpacing: '2px', cursor: 'pointer', textTransform: 'uppercase',
+              display: 'flex', alignItems: 'center', gap: '8px',
+            }}
+          >
+            <Eye size={14} /> 미리보기
           </button>
           <button
             type="button"
@@ -708,6 +840,19 @@ export default function BlogForm({ initial }: Props) {
           </button>
         </div>
       </form>
+
+      {/* ── 자동저장 레이블 (우하단 고정) ── */}
+      {autoSaveLabel && (
+        <div style={{
+          position: 'fixed', bottom: 24, right: 24, zIndex: 200,
+          fontSize: 11, fontWeight: 700, color: '#64748B',
+          background: 'white', padding: '8px 16px',
+          borderRadius: 999, boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+          border: '1px solid #F1F5F9',
+        }}>
+          {autoSaveLabel}
+        </div>
+      )}
     </div>
   );
 }

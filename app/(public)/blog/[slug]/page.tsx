@@ -12,6 +12,15 @@ import ShareButton from '@/components/ShareButton';
 import CommentSection from './CommentSection';
 import AiInsight from '@/components/AiInsight';
 
+async function getBlogForPreview(slug: string): Promise<Blog | null> {
+  const { data } = await supabase
+    .from('blogs')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+  return data;
+}
+
 export const dynamic = 'force-dynamic';
 
 async function getRelatedBlogs(category: string, currentSlug: string): Promise<Blog[]> {
@@ -56,10 +65,13 @@ async function getBlog(slug: string): Promise<Blog | null> {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: { preview?: string };
 }): Promise<Metadata> {
-  const blog = await getBlog(params.slug);
+  const isPreview = searchParams?.preview === 'true';
+  const blog = isPreview ? await getBlogForPreview(params.slug) : await getBlog(params.slug);
   if (!blog) return { title: 'Not Found — MY MAIRANGI' };
 
   const plainText = blog.content.replace(/<[^>]*>/g, '');
@@ -89,10 +101,13 @@ export async function generateMetadata({
 
 export default async function BlogDetailPage({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: { preview?: string };
 }) {
-  const blog = await getBlog(params.slug);
+  const isPreview = searchParams?.preview === 'true';
+  const blog = isPreview ? await getBlogForPreview(params.slug) : await getBlog(params.slug);
   if (!blog) notFound();
 
   const relatedBlogs = await getRelatedBlogs(blog.category, blog.slug);
@@ -143,6 +158,36 @@ export default async function BlogDetailPage({
 
       <ViewTracker slug={blog.slug} />
       <div className="animate-fade-in">
+
+        {/* ── 미리보기 배너 ── */}
+        {isPreview && (
+          <div style={{
+            background: '#FEF3C7',
+            borderBottom: '1px solid #FDE68A',
+            padding: '14px clamp(24px, 4vw, 48px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap',
+          }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: 0 }}>
+              미리보기 모드 — 이 글은 아직 공개되지 않았습니다
+            </p>
+            <Link
+              href="/admin/blogs"
+              style={{
+                fontSize: 11, fontWeight: 900, color: '#92400E',
+                textDecoration: 'none', letterSpacing: 2,
+                textTransform: 'uppercase', flexShrink: 0,
+                border: '1px solid #FCD34D', borderRadius: 999,
+                padding: '6px 14px', background: 'rgba(255,255,255,0.5)',
+              }}
+            >
+              ← 어드민으로 돌아가기
+            </Link>
+          </div>
+        )}
 
         {/* ── 1) 헤더: Back + 제목 + 메타 ── */}
         <div style={{

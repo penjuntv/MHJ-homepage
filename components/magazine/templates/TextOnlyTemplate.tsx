@@ -2,12 +2,12 @@
 import { useId } from 'react';
 import type { NewTemplateProps } from './shared';
 
-export default function TextOnlyTemplate({ article, accentColor = '#1A1A1A' }: NewTemplateProps) {
+export default function TextOnlyTemplate({ article, accentColor = '#1A1A1A', bgColor = '#F5F0EA' }: NewTemplateProps) {
   const uid = useId().replace(/:/g, 'd');
   const content = article.content || '<p>에세이 본문을 작성해 주세요. 첫 글자는 자동으로 드롭캡으로 표시됩니다. 텍스트만으로 이루어진 에세이 형식의 레이아웃입니다.</p>';
 
   return (
-    <div style={{ width: '100%', aspectRatio: '210/297', overflow: 'hidden', borderRadius: '8px', background: '#F5F0EA', display: 'flex', flexDirection: 'column', padding: '9% 10%', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', aspectRatio: '210/297', overflow: 'hidden', borderRadius: '8px', background: bgColor, display: 'flex', flexDirection: 'column', padding: '9% 10%', boxSizing: 'border-box' }}>
       <style>{`
         .essay-${uid} { overflow: hidden; }
         .essay-${uid} p { margin: 0 0 0.6em; font-size: clamp(5.5px,2%,10px); line-height: 1.7; color: ${accentColor}CC; }

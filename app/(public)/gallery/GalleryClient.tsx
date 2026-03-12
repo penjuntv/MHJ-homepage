@@ -14,7 +14,7 @@ const FALLBACK: GalleryItem[] = [
   { id: 5, image_url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800', caption: '우리 집 정원', category: 'Home', date: '2026.01', sort_order: 4 },
   { id: 6, image_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800', caption: '주말 점심', category: 'Food', date: '2026.01', sort_order: 5 },
   { id: 7, image_url: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800', caption: '해변의 황혼', category: 'Beach', date: '2026.01', sort_order: 6 },
-  { id: 8, image_url: 'https://images.unsplash.com/photo-1511895426328-dc8714191011?w=800', caption: '세 자매', category: 'Family', date: '2026.01', sort_order: 7 },
+  { id: 8, image_url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800', caption: '세 자매', category: 'Family', date: '2026.01', sort_order: 7 },
   { id: 9, image_url: 'https://images.unsplash.com/photo-1623428454614-abaf00244e52?w=800', caption: '홈스쿨 시간', category: 'School', date: '2025.12', sort_order: 8 },
 ];
 

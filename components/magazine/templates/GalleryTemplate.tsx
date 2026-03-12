@@ -1,12 +1,11 @@
 'use client';
-import { getImages, type NewTemplateProps } from './shared';
+import { getImageSlots, type NewTemplateProps } from './shared';
 
-export default function GalleryTemplate({ article, accentColor = '#1A1A1A' }: NewTemplateProps) {
-  const [img0, img1, img2] = getImages(article, 3);
-  const images = [img0, img1, img2];
+export default function GalleryTemplate({ article, accentColor = '#1A1A1A', bgColor = '#F9F6F1' }: NewTemplateProps) {
+  const slots = getImageSlots(article, 3);
 
   return (
-    <div style={{ width: '100%', aspectRatio: '210/297', overflow: 'hidden', borderRadius: '8px', background: '#F9F6F1', display: 'flex', flexDirection: 'column', padding: '6% 7%', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', aspectRatio: '210/297', overflow: 'hidden', borderRadius: '8px', background: bgColor, display: 'flex', flexDirection: 'column', padding: '6% 7%', boxSizing: 'border-box' }}>
 
       {/* 헤더 */}
       <div style={{ flexShrink: 0, marginBottom: '4%' }}>
@@ -20,11 +19,11 @@ export default function GalleryTemplate({ article, accentColor = '#1A1A1A' }: Ne
 
       {/* 3장 세로 스트립 */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '3%', minHeight: 0 }}>
-        {images.map((src, i) => (
+        {slots.map((slot, i) => (
           <div key={i} style={{ flex: 1, borderRadius: '4px', overflow: 'hidden', background: `${accentColor}${i === 0 ? '30' : i === 1 ? '20' : '10'}`, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {src ? (
+            {slot.src ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: i === 0 ? 1 : i === 1 ? 0.82 : 0.65 }} />
+              <img src={slot.src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: slot.pos, opacity: i === 0 ? 1 : i === 1 ? 0.82 : 0.65 }} />
             ) : (
               <span style={{ fontSize: 'clamp(4px,1.3%,6.5px)', color: accentColor + '50', fontWeight: 700, letterSpacing: '2px' }}>사진 {i + 1}</span>
             )}

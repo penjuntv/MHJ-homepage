@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { GalleryItem } from '@/lib/types';
 import { Plus, Trash2, Loader2, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
 const CATEGORIES = ['Family', 'Beach', 'School', 'Travel', 'Home', 'Food'];
 
@@ -38,7 +39,7 @@ export default function AdminGalleryPage() {
         .from('images')
         .upload(filename, file, { cacheControl: '3600', upsert: false });
 
-      if (upErr) { console.error(upErr); continue; }
+      if (upErr) { toast.error('업로드 실패: ' + upErr.message); continue; }
 
       const { data: urlData } = supabase.storage.from('images').getPublicUrl(filename);
       const image_url = urlData.publicUrl;
@@ -51,6 +52,7 @@ export default function AdminGalleryPage() {
 
     await fetchItems();
     setUploading(false);
+    toast.success('이미지가 업로드되었습니다.');
   }
 
   async function deleteItem(id: number, image_url: string) {
@@ -64,6 +66,7 @@ export default function AdminGalleryPage() {
     } catch {}
     setItems(prev => prev.filter(i => i.id !== id));
     setDeleting(null);
+    toast.success('삭제되었습니다.');
   }
 
   async function updateItem(id: number, field: string, value: string) {

@@ -1,10 +1,10 @@
 'use client';
 import { useId } from 'react';
-import { getImages, type NewTemplateProps } from './shared';
+import { getImageSlots, type NewTemplateProps } from './shared';
 
-export default function SplitTemplate({ article, accentColor = '#1A1A1A' }: NewTemplateProps) {
+export default function SplitTemplate({ article, accentColor = '#1A1A1A', bgColor = 'white' }: NewTemplateProps) {
   const uid = useId().replace(/:/g, 'd');
-  const [img] = getImages(article, 1);
+  const [slot] = getImageSlots(article, 1);
   const content = article.content || '<p>본문을 작성해 주세요.</p>';
 
   return (
@@ -17,9 +17,9 @@ export default function SplitTemplate({ article, accentColor = '#1A1A1A' }: NewT
 
       {/* 좌 42%: 사진 */}
       <div style={{ flex: '0 0 42%', position: 'relative', overflow: 'hidden', background: accentColor }}>
-        {img ? (
+        {slot.src ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={slot.src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: slot.pos }} />
         ) : (
           <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${accentColor}, ${accentColor}AA)` }} />
         )}
@@ -30,7 +30,7 @@ export default function SplitTemplate({ article, accentColor = '#1A1A1A' }: NewT
       </div>
 
       {/* 우 58%: 텍스트 */}
-      <div style={{ flex: 1, background: 'white', padding: '8% 7%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, background: bgColor, padding: '8% 7%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Story 라벨 */}
         <div style={{ fontSize: 'clamp(4px,1.4%,7px)', fontWeight: 900, letterSpacing: '3px', color: accentColor, textTransform: 'uppercase', marginBottom: '5%', flexShrink: 0 }}>
           Story

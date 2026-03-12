@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { DEFAULT_SETTINGS } from '@/lib/site-settings';
 import { ArrowLeft, Save, Loader2, Upload, ExternalLink } from 'lucide-react';
+import { toast } from 'sonner';
 
 /* ── 페이지별 편집 가능 섹션 설정 ── */
 type FieldType = 'text' | 'textarea' | 'image' | 'url';
@@ -127,7 +128,7 @@ function ImageField({ fieldKey, label, value, hint, onChange }: {
     const ext = file.name.split('.').pop();
     const path = `site/${fieldKey}-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
-    if (error) { alert('업로드 실패: ' + error.message); setUploading(false); return; }
+    if (error) { toast.error('업로드 실패: ' + error.message); setUploading(false); return; }
     const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
     onChange(fieldKey, publicUrl);
     setUploading(false);
@@ -213,6 +214,7 @@ export default function PageEditorPage() {
       await supabase.from('site_settings').upsert({ key, value }, { onConflict: 'key' });
     }
     setSaving(false);
+    toast.success('설정이 저장되었습니다.');
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   }

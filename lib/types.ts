@@ -16,6 +16,7 @@ export interface Magazine {
   cover_copy?: string | null;       // 표지 카피 문구
   cover_images?: string[] | null;   // 추가 표지 이미지 배열
   issue_number?: string | null;     // 이슈 번호 ('01', '02', ...)
+  bg_color?: string | null;         // 배경색 (hex)
   created_at?: string;
 }
 
@@ -35,6 +36,7 @@ export interface Article {
   // Phase 2 new fields
   template?: string | null;         // 기사 템플릿 키 (classic/split/photo-hero/...)
   article_images?: string[] | null; // 추가 기사 이미지 배열
+  image_positions?: string[] | null; // 각 이미지의 object-position
   article_status?: 'draft' | 'complete' | 'published' | null;
   created_at?: string;
 }

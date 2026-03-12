@@ -14,6 +14,7 @@ interface CoverPreviewProps {
   image_url?: string;         // 기본/서가용 이미지
   cover_images?: string[];    // 캐러셀 이미지 배열
   accent_color?: string;      // 액센트 색상 (hex)
+  bg_color?: string;          // 배경색 (hex)
   cover_filter?: string;      // 사진 필터 키
   issue_number?: string | number;
 }
@@ -29,6 +30,7 @@ export default function CoverPreview({
   image_url = '',
   cover_images = [],
   accent_color = '#1A1A1A',
+  bg_color = '#F5F0EA',
   cover_filter = 'none',
   issue_number,
 }: CoverPreviewProps) {
@@ -60,7 +62,7 @@ export default function CoverPreview({
       aspectRatio: '210 / 297',
       overflow: 'hidden',
       borderRadius: '8px',
-      background: '#F5F0EA',
+      background: bg_color,
       fontFamily: 'inherit',
       boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
       display: 'flex',

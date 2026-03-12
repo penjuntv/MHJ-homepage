@@ -1,6 +1,6 @@
 'use client';
 
-import {
+import React, {
   useEffect, useState, useRef, useCallback, lazy, Suspense,
 } from 'react';
 import SafeImage from '@/components/SafeImage';
@@ -46,6 +46,7 @@ type ArticleInput = {
   template: string;
   article_status: ArticleStatus;
   article_images: string[];
+  image_positions: string[];
 };
 
 /* ─── 상수 ─── */
@@ -78,7 +79,7 @@ const EMPTY_FORM = (magazineId: string, nextOrder: number): ArticleInput => ({
   magazine_id: magazineId, title: '', author: '', date: TODAY,
   image_url: '', content: '', pdf_url: '',
   article_type: 'article', sort_order: nextOrder,
-  template: 'classic', article_status: 'draft', article_images: [],
+  template: 'classic', article_status: 'draft', article_images: [], image_positions: [],
 });
 
 /* ─── 공통 스타일 ─── */
@@ -99,8 +100,9 @@ function renderTemplate(
   tpl: string,
   artData: ArticlePreviewData,
   accentColor: string,
+  bgColor?: string,
 ) {
-  const props = { article: artData, accentColor };
+  const props = { article: artData, accentColor, bgColor };
   switch (tpl) {
     case 'photo-hero':  return <PhotoHeroTemplate  {...props} />;
     case 'photo-essay': return <PhotoEssayTemplate {...props} />;
@@ -130,7 +132,7 @@ export default function MagazineDetailPage() {
   const [magForm, setMagForm] = useState({
     title: '', editor: '', year: '', month_name: '', pdf_url: '', image_url: '',
     color_theme: 'ocean', cover_subtitle: '', contributors: [] as string[],
-    accent_color: '#1A1A1A', cover_filter: 'none', cover_copy: '',
+    accent_color: '#1A1A1A', bg_color: '#F5F0EA', cover_filter: 'none', cover_copy: '',
     cover_images: [] as string[], issue_number: '01',
   });
   const [savingMag, setSavingMag]               = useState(false);
@@ -145,7 +147,6 @@ export default function MagazineDetailPage() {
   const [inlineIsNew, setInlineIsNew]      = useState(false);
   const [savingArticle, setSavingArticle]  = useState(false);
   const [formError, setFormError]          = useState('');
-  const [uploadingCover, setUploadingCover]   = useState(false);
   const [uploadingContent, setUploadingContent] = useState(false);
   const [uploadingSlotIdx, setUploadingSlotIdx] = useState<number | null>(null);
 
@@ -155,11 +156,14 @@ export default function MagazineDetailPage() {
   /* ─── 줌 (Tab 3) ─── */
   const [zoom, setZoom] = useState(100);
 
+  /* ─── 스프레드 모달 ─── */
+  type SpreadModalItem = { label: string; content: React.ReactNode };
+  const [spreadModal, setSpreadModal] = useState<{ pages: SpreadModalItem[]; idx: number } | null>(null);
+
   /* ─── refs ─── */
   const magPdfRef       = useRef<HTMLInputElement>(null);
   const magCoverRef     = useRef<HTMLInputElement>(null);
   const extraImgRef     = useRef<HTMLInputElement>(null);
-  const coverImgRef     = useRef<HTMLInputElement>(null);
   const contentFileRef  = useRef<HTMLInputElement>(null);
   const slotImgRef      = useRef<HTMLInputElement>(null);
   const pendingSlot     = useRef<number>(0);
@@ -183,6 +187,7 @@ export default function MagazineDetailPage() {
       cover_subtitle: mag.cover_subtitle ?? '',
       contributors: mag.contributors ?? [],
       accent_color: mag.accent_color ?? '#1A1A1A',
+      bg_color: mag.bg_color ?? '#F5F0EA',
       cover_filter: mag.cover_filter ?? 'none',
       cover_copy: mag.cover_copy ?? '',
       cover_images: mag.cover_images ?? [],
@@ -205,7 +210,8 @@ export default function MagazineDetailPage() {
       month_name: magForm.month_name, pdf_url: magForm.pdf_url || null,
       image_url: magForm.image_url || null, color_theme: magForm.color_theme,
       cover_subtitle: magForm.cover_subtitle, contributors: magForm.contributors,
-      accent_color: magForm.accent_color, cover_filter: magForm.cover_filter,
+      accent_color: magForm.accent_color, bg_color: magForm.bg_color,
+      cover_filter: magForm.cover_filter,
       cover_copy: magForm.cover_copy, cover_images: magForm.cover_images,
       issue_number: magForm.issue_number,
     }).eq('id', magazine.id);
@@ -249,17 +255,6 @@ export default function MagazineDetailPage() {
   }
 
   /* ─── 기사 이미지 업로드 ─── */
-  async function uploadCoverImage(file: File) {
-    setUploadingCover(true);
-    const path = `articles/${Date.now()}_cover.${file.name.split('.').pop()}`;
-    const { error } = await supabase.storage.from('images').upload(path, file);
-    if (error) { setFormError('이미지 업로드 실패: ' + error.message); } else {
-      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
-      setInlineForm(p => p ? { ...p, image_url: publicUrl } : p);
-    }
-    setUploadingCover(false);
-  }
-
   async function uploadContentFile(file: File) {
     setUploadingContent(true);
     const path = `articles/${Date.now()}_content.${file.name.split('.').pop()}`;
@@ -293,14 +288,17 @@ export default function MagazineDetailPage() {
     if (!inlineForm.title) { setFormError('제목은 필수입니다.'); return; }
     setSavingArticle(true);
     setFormError('');
+    // 기사 사진 첫 번째를 대표 image_url로 자동 설정
+    const firstImg = (inlineForm.article_images ?? []).filter(Boolean)[0] ?? inlineForm.image_url ?? '';
+    const formToSave = { ...inlineForm, image_url: firstImg };
 
     if (!inlineIsNew && selectedArtId) {
-      const { error } = await supabase.from('articles').update(inlineForm).eq('id', selectedArtId);
+      const { error } = await supabase.from('articles').update(formToSave).eq('id', selectedArtId);
       if (error) { setFormError(error.message); setSavingArticle(false); return; }
-      setArticles(prev => prev.map(a => a.id === selectedArtId ? { ...a, ...inlineForm } : a));
+      setArticles(prev => prev.map(a => a.id === selectedArtId ? { ...a, ...formToSave } : a));
       showToast('기사가 저장되었습니다.');
     } else {
-      const { data, error } = await supabase.from('articles').insert(inlineForm).select().single();
+      const { data, error } = await supabase.from('articles').insert(formToSave).select().single();
       if (error) { setFormError(error.message); setSavingArticle(false); return; }
       if (data) { setArticles(prev => [...prev, data]); setSelectedArtId(data.id); setInlineIsNew(false); }
       showToast('기사가 추가되었습니다.');
@@ -353,6 +351,7 @@ export default function MagazineDetailPage() {
       template: (article as Article & { template?: string }).template ?? 'classic',
       article_status: ((article as Article & { article_status?: string }).article_status as ArticleStatus) ?? 'draft',
       article_images: (article as Article & { article_images?: string[] }).article_images ?? [],
+      image_positions: (article as Article & { image_positions?: string[] }).image_positions ?? [],
     });
   }
 
@@ -387,9 +386,12 @@ export default function MagazineDetailPage() {
   const previewArtData: ArticlePreviewData = inlineForm ? {
     title: inlineForm.title, author: inlineForm.author,
     content: inlineForm.content, image_url: inlineForm.image_url,
-    article_images: inlineForm.article_images, template: inlineForm.template,
+    article_images: inlineForm.article_images,
+    image_positions: inlineForm.image_positions,
+    template: inlineForm.template,
   } : { title: '', author: '', content: '', image_url: '' };
   const photoCount = inlineForm ? (TEMPLATE_PHOTO_COUNT[inlineForm.template] ?? 0) : 0;
+  const bgCol = magazine?.bg_color ?? '#F5F0EA';
 
   return (
     <div style={{ paddingBottom: '80px' }}>
@@ -519,7 +521,7 @@ export default function MagazineDetailPage() {
                 </div>
               </div>
 
-              {/* 액센트 컬러 */}
+              {/* 액센트 컬러 + 배경색 */}
               <div style={{ background: 'white', borderRadius: '20px', padding: '24px', border: '1px solid #F1F5F9' }}>
                 <p style={sectionTitle}>액센트 컬러</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
@@ -531,6 +533,17 @@ export default function MagazineDetailPage() {
                     <button key={preset.value} type="button" onClick={() => setMagForm(p => ({ ...p, accent_color: preset.value }))} title={preset.label}
                       style={{ width: '26px', height: '26px', borderRadius: '50%', cursor: 'pointer', border: 'none', background: preset.value, outline: magForm.accent_color === preset.value ? `3px solid ${preset.value}` : 'none', outlineOffset: '2px', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
                   ))}
+                </div>
+                <p style={sectionTitle}>배경색</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                  <input type="color" value={magForm.bg_color} onChange={e => setMagForm(p => ({ ...p, bg_color: e.target.value }))} style={{ width: '40px', height: '40px', borderRadius: '8px', border: '1px solid #F1F5F9', cursor: 'pointer', padding: '2px', flexShrink: 0 }} />
+                  <input value={magForm.bg_color} onChange={e => setMagForm(p => ({ ...p, bg_color: e.target.value }))} style={{ ...inputStyle, width: '130px', fontFamily: 'monospace' }} />
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {['#F5F0EA', '#FFFFFF', '#1A1A1A', '#F0F4FF', '#FFF9F0', '#F0FAF4'].map(c => (
+                      <button key={c} type="button" onClick={() => setMagForm(p => ({ ...p, bg_color: c }))} title={c}
+                        style={{ width: '22px', height: '22px', borderRadius: '50%', cursor: 'pointer', border: 'none', background: c, outline: magForm.bg_color === c ? `3px solid #4F46E5` : '2px solid #E2E8F0', outlineOffset: '1px' }} />
+                    ))}
+                  </div>
                 </div>
                 <p style={sectionTitle}>사진 필터</p>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -599,6 +612,7 @@ export default function MagazineDetailPage() {
                   editor={magForm.editor} cover_copy={magForm.cover_copy}
                   contributors={magForm.contributors} image_url={magForm.image_url}
                   cover_images={magForm.cover_images} accent_color={magForm.accent_color}
+                  bg_color={magForm.bg_color}
                   cover_filter={magForm.cover_filter} issue_number={magForm.issue_number}
                 />
               </div>
@@ -607,6 +621,7 @@ export default function MagazineDetailPage() {
                 <TocPreview
                   title={magForm.title} year={magForm.year} month_name={magForm.month_name}
                   articles={sortedArticles} accent_color={magForm.accent_color}
+                  bg_color={magForm.bg_color}
                 />
               </div>
             </div>
@@ -674,11 +689,10 @@ export default function MagazineDetailPage() {
                         form={inlineForm} setForm={v => setInlineForm(p => p ? { ...p, ...v } : p)}
                         accentColor={accentCol} photoCount={photoCount}
                         saving={savingArticle} error={formError} isNew={false}
-                        uploadingCover={uploadingCover} uploadingContent={uploadingContent}
+                        uploadingContent={uploadingContent}
                         uploadingSlotIdx={uploadingSlotIdx}
                         onSave={saveArticle}
                         onDelete={() => deleteArticle(article.id)}
-                        onCoverUpload={() => coverImgRef.current?.click()}
                         onContentUpload={() => contentFileRef.current?.click()}
                         onSlotUpload={(idx) => { pendingSlot.current = idx; slotImgRef.current?.click(); }}
                       />
@@ -697,11 +711,10 @@ export default function MagazineDetailPage() {
                     form={inlineForm} setForm={v => setInlineForm(p => p ? { ...p, ...v } : p)}
                     accentColor={accentCol} photoCount={photoCount}
                     saving={savingArticle} error={formError} isNew={true}
-                    uploadingCover={uploadingCover} uploadingContent={uploadingContent}
+                    uploadingContent={uploadingContent}
                     uploadingSlotIdx={uploadingSlotIdx}
                     onSave={saveArticle}
                     onDelete={() => { setInlineIsNew(false); setInlineForm(null); }}
-                    onCoverUpload={() => coverImgRef.current?.click()}
                     onContentUpload={() => contentFileRef.current?.click()}
                     onSlotUpload={(idx) => { pendingSlot.current = idx; slotImgRef.current?.click(); }}
                   />
@@ -725,7 +738,7 @@ export default function MagazineDetailPage() {
                   />
                 </div>
                 <div ref={previewDivRef}>
-                  {renderTemplate(inlineForm.template, previewArtData, accentCol)}
+                  {renderTemplate(inlineForm.template, previewArtData, accentCol, bgCol)}
                 </div>
                 <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: accentCol, display: 'inline-block' }} />
@@ -744,65 +757,117 @@ export default function MagazineDetailPage() {
       {/* ══════════════════════════════════════════
           탭 3: 전체 미리보기
           ══════════════════════════════════════════ */}
-      {tab === 'spread' && (
-        <div style={{ padding: '0 clamp(24px,4vw,48px)' }}>
+      {tab === 'spread' && (() => {
+        const pageWidth = Math.max(140, Math.round(280 * zoom / 100));
 
-          {/* 줌 컨트롤 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-            <button onClick={() => setZoom(p => Math.max(40, p - 10))} style={zoomBtn}><ZoomOut size={14} /></button>
-            <input type="range" min={40} max={200} value={zoom} onChange={e => setZoom(Number(e.target.value))}
-              style={{ width: '140px', accentColor: '#4F46E5', cursor: 'pointer' }} />
-            <button onClick={() => setZoom(p => Math.min(200, p + 10))} style={zoomBtn}><ZoomIn size={14} /></button>
-            <span style={{ fontSize: '12px', fontWeight: 900, color: '#94A3B8', minWidth: '44px' }}>{zoom}%</span>
-            {[50, 75, 100, 150].map(v => (
-              <button key={v} onClick={() => setZoom(v)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #F1F5F9', background: zoom === v ? '#4F46E5' : 'white', color: zoom === v ? 'white' : '#94A3B8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>{v}%</button>
-            ))}
-          </div>
+        // 스프레드 페이지 목록 (모달용)
+        const spreadPages: { label: string; content: React.ReactNode; artId?: number }[] = [
+          {
+            label: 'Cover',
+            content: <CoverPreview
+              title={magazine.title} year={magazine.year} month_name={magazine.month_name}
+              editor={magazine.editor} cover_copy={magazine.cover_copy ?? ''}
+              contributors={magazine.contributors ?? []} image_url={magazine.image_url}
+              cover_images={magazine.cover_images ?? []}
+              accent_color={magazine.accent_color ?? '#1A1A1A'}
+              bg_color={magazine.bg_color ?? '#F5F0EA'}
+              cover_filter={magazine.cover_filter ?? 'none'}
+              issue_number={magazine.issue_number ?? ''}
+            />,
+          },
+          {
+            label: 'Contents',
+            content: <TocPreview
+              title={magazine.title} year={magazine.year} month_name={magazine.month_name}
+              articles={sortedArticles} accent_color={magazine.accent_color ?? '#1A1A1A'}
+              bg_color={magazine.bg_color ?? '#F5F0EA'}
+            />,
+          },
+          ...sortedArticles.filter(a => a.article_type === 'article' || !a.article_type).map((article, idx) => {
+            const tpl = (article as Article & { template?: string }).template ?? 'classic';
+            const artData: ArticlePreviewData = {
+              title: article.title, author: article.author,
+              content: article.content, image_url: article.image_url,
+              article_images: (article as Article & { article_images?: string[] }).article_images ?? [],
+              image_positions: (article as Article & { image_positions?: string[] }).image_positions ?? [],
+              template: tpl,
+            };
+            return {
+              label: `P.${idx + 1} · ${article.author}`,
+              artId: article.id,
+              content: renderTemplate(tpl, artData, accentCol, bgCol),
+            };
+          }),
+        ];
 
-          {/* 스프레드 */}
-          <div style={{ overflowX: 'auto', paddingBottom: '24px' }}>
-            <div style={{
-              display: 'flex', gap: '16px', width: 'max-content',
-              transform: `scale(${zoom / 100})`, transformOrigin: 'top left',
-              transition: 'transform 0.2s ease',
-            }}>
-              {/* 표지 */}
-              <SpreadPage label="Cover" filename={`TheMHJ_${magazine.month_name}${magazine.year}_Cover`}>
-                <CoverPreview
-                  title={magazine.title} year={magazine.year} month_name={magazine.month_name}
-                  editor={magazine.editor} cover_copy={magazine.cover_copy ?? ''}
-                  contributors={magazine.contributors ?? []} image_url={magazine.image_url}
-                  cover_images={magazine.cover_images ?? []}
-                  accent_color={magazine.accent_color ?? '#1A1A1A'}
-                  cover_filter={magazine.cover_filter ?? 'none'}
-                  issue_number={magazine.issue_number ?? ''}
-                />
-              </SpreadPage>
-
-              {/* 목차 */}
-              <SpreadPage label="Contents" filename={`TheMHJ_${magazine.month_name}${magazine.year}_Contents`}>
-                <TocPreview
-                  title={magazine.title} year={magazine.year} month_name={magazine.month_name}
-                  articles={sortedArticles} accent_color={magazine.accent_color ?? '#1A1A1A'}
-                />
-              </SpreadPage>
-
-              {/* 개별 기사 */}
-              {sortedArticles.filter(a => a.article_type === 'article' || !a.article_type).map((article, idx) => {
-                const tpl = (article as Article & { template?: string }).template ?? 'classic';
-                const artData: ArticlePreviewData = {
-                  title: article.title, author: article.author,
-                  content: article.content, image_url: article.image_url,
-                  article_images: (article as Article & { article_images?: string[] }).article_images ?? [],
-                  template: tpl,
-                };
-                return (
-                  <SpreadPage key={article.id} label={`P.${idx + 1} · ${article.author}`} filename={`TheMHJ_${magazine.month_name}${magazine.year}_${article.title.slice(0, 20)}`}>
-                    {renderTemplate(tpl, artData, accentCol)}
-                  </SpreadPage>
-                );
-              })}
+        return (
+          <div style={{ padding: '0 clamp(24px,4vw,48px)' }}>
+            {/* 줌 컨트롤 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+              <button onClick={() => setZoom(p => Math.max(30, p - 10))} style={zoomBtn}><ZoomOut size={14} /></button>
+              <input type="range" min={30} max={200} value={zoom} onChange={e => setZoom(Number(e.target.value))}
+                style={{ width: '140px', accentColor: '#4F46E5', cursor: 'pointer' }} />
+              <button onClick={() => setZoom(p => Math.min(200, p + 10))} style={zoomBtn}><ZoomIn size={14} /></button>
+              <span style={{ fontSize: '12px', fontWeight: 900, color: '#94A3B8', minWidth: '44px' }}>{zoom}%</span>
+              {[50, 75, 100, 150].map(v => (
+                <button key={v} onClick={() => setZoom(v)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #F1F5F9', background: zoom === v ? '#4F46E5' : 'white', color: zoom === v ? 'white' : '#94A3B8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>{v}%</button>
+              ))}
             </div>
+
+            {/* 스프레드 (가로 스크롤) */}
+            <div style={{ overflowX: 'auto', paddingBottom: '24px' }}>
+              <div style={{ display: 'flex', gap: '16px', width: 'max-content' }}>
+                {spreadPages.map((page, pi) => (
+                  <SpreadPage
+                    key={pi}
+                    label={page.label}
+                    filename={`TheMHJ_${magazine.month_name}${magazine.year}_${page.label.replace(/[^a-zA-Z0-9]/g, '_')}`}
+                    pageWidth={pageWidth}
+                    onEdit={page.artId !== undefined ? () => { setTab('articles'); selectArticle(articles.find(a => a.id === page.artId)!); } : page.label === 'Cover' ? () => setTab('cover') : undefined}
+                    onPreview={() => setSpreadModal({ pages: spreadPages, idx: pi })}
+                  >
+                    {page.content}
+                  </SpreadPage>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ─── 스프레드 풀스크린 모달 ─── */}
+      {spreadModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setSpreadModal(null)}
+        >
+          <style>{`@keyframes fadeInScale { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }`}</style>
+          {/* 헤더 */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px' }} onClick={e => e.stopPropagation()}>
+            <span style={{ fontSize: '11px', fontWeight: 900, letterSpacing: '3px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>
+              {spreadModal.pages[spreadModal.idx].label}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{spreadModal.idx + 1} / {spreadModal.pages.length}</span>
+              <button onClick={() => setSpreadModal(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', padding: '8px 14px', color: 'white', cursor: 'pointer', fontSize: '12px', fontWeight: 700 }}>ESC · 닫기</button>
+            </div>
+          </div>
+          {/* 페이지 */}
+          <div style={{ width: 'min(480px, 85vw)', animation: 'fadeInScale 0.2s ease' }} onClick={e => e.stopPropagation()}>
+            {spreadModal.pages[spreadModal.idx].content}
+          </div>
+          {/* 화살표 */}
+          <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSpreadModal(p => p && p.idx > 0 ? { ...p, idx: p.idx - 1 } : p)}
+              disabled={spreadModal.idx === 0}
+              style={{ padding: '10px 20px', background: spreadModal.idx === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '999px', color: 'white', cursor: spreadModal.idx === 0 ? 'default' : 'pointer', fontSize: '12px', fontWeight: 700, opacity: spreadModal.idx === 0 ? 0.3 : 1 }}>
+              ← 이전
+            </button>
+            <button onClick={() => setSpreadModal(p => p && p.idx < p.pages.length - 1 ? { ...p, idx: p.idx + 1 } : p)}
+              disabled={spreadModal.idx === spreadModal.pages.length - 1}
+              style={{ padding: '10px 20px', background: spreadModal.idx === spreadModal.pages.length - 1 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '999px', color: 'white', cursor: spreadModal.idx === spreadModal.pages.length - 1 ? 'default' : 'pointer', fontSize: '12px', fontWeight: 700, opacity: spreadModal.idx === spreadModal.pages.length - 1 ? 0.3 : 1 }}>
+              다음 →
+            </button>
           </div>
         </div>
       )}
@@ -811,7 +876,6 @@ export default function MagazineDetailPage() {
       <input ref={magPdfRef} type="file" accept=".pdf,image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagPdf(f); e.target.value = ''; }} />
       <input ref={magCoverRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagCover(f); e.target.value = ''; }} />
       <input ref={extraImgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadExtraCoverImage(f); e.target.value = ''; }} />
-      <input ref={coverImgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadCoverImage(f); e.target.value = ''; }} />
       <input ref={contentFileRef} type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadContentFile(f); e.target.value = ''; }} />
       <input ref={slotImgRef} type="file" accept="image/*" style={{ display: 'none' }}
         onChange={e => { const f = e.target.files?.[0]; if (f) uploadArticleSlotImage(f, pendingSlot.current); e.target.value = ''; }} />
@@ -843,19 +907,25 @@ const zoomBtn: React.CSSProperties = {
   borderRadius: '8px', cursor: 'pointer', color: '#64748B',
 };
 
-/* ─── SpreadPage: 스프레드 뷰 아이템 (자체 ref 보유) ─── */
-function SpreadPage({ label, children, filename }: {
+/* ─── SpreadPage: 스프레드 뷰 아이템 ─── */
+function SpreadPage({ label, children, filename, pageWidth, onEdit, onPreview }: {
   label: string;
   children: React.ReactNode;
   filename: string;
+  pageWidth: number;
+  onEdit?: () => void;
+  onPreview: () => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   return (
-    <div style={{ width: '200px', flexShrink: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-        <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '2px', color: '#CBD5E1', textTransform: 'uppercase', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: '6px' }}>
+    <div style={{ width: `${pageWidth}px`, flexShrink: 0 }}>
+      {/* 라벨 + 버튼 행 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
+        <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '2px', color: '#CBD5E1', textTransform: 'uppercase', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
           {label}
         </p>
+        <button onClick={onPreview} title="미리보기" style={{ padding: '3px 7px', background: 'white', border: '1px solid #F1F5F9', borderRadius: '6px', cursor: 'pointer', fontSize: '9px', fontWeight: 700, color: '#64748B', whiteSpace: 'nowrap' }}>🔍</button>
+        {onEdit && <button onClick={onEdit} title="편집" style={{ padding: '3px 7px', background: 'white', border: '1px solid #F1F5F9', borderRadius: '6px', cursor: 'pointer', fontSize: '9px', fontWeight: 700, color: '#4F46E5', whiteSpace: 'nowrap' }}>✏️</button>}
         <DownloadBtn targetRef={wrapRef as React.RefObject<HTMLElement>} filename={filename} size="sm" />
       </div>
       <div ref={wrapRef}>{children}</div>
@@ -869,8 +939,8 @@ function SpreadPage({ label, children, filename }: {
 function InlineForm({
   form, setForm, accentColor, photoCount,
   saving, error, isNew,
-  uploadingCover, uploadingContent, uploadingSlotIdx,
-  onSave, onDelete, onCoverUpload, onContentUpload, onSlotUpload,
+  uploadingContent, uploadingSlotIdx,
+  onSave, onDelete, onContentUpload, onSlotUpload,
 }: {
   form: ArticleInput;
   setForm: (patch: Partial<ArticleInput>) => void;
@@ -879,12 +949,10 @@ function InlineForm({
   saving: boolean;
   error: string;
   isNew: boolean;
-  uploadingCover: boolean;
   uploadingContent: boolean;
   uploadingSlotIdx: number | null;
   onSave: () => void;
   onDelete: () => void;
-  onCoverUpload: () => void;
   onContentUpload: () => void;
   onSlotUpload: (idx: number) => void;
 }) {
@@ -976,16 +1044,19 @@ function InlineForm({
           <label style={labelStyle}>
             기사 사진 <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}>({(form.article_images ?? []).filter(Boolean).length}/{photoCount}장)</span>
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: photoCount === 1 ? '1fr' : 'repeat(2, 1fr)', gap: '6px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: photoCount === 1 ? '1fr' : 'repeat(2, 1fr)', gap: '8px' }}>
             {Array.from({ length: photoCount }, (_, i) => {
               const src = form.article_images?.[i] ?? '';
+              const pos = form.image_positions?.[i] ?? 'center';
               const isUp = uploadingSlotIdx === i;
+              const POS_LABELS: Record<string, string> = { 'top left': '좌상', 'top': '상', 'top right': '우상', 'left': '좌', 'center': '중', 'right': '우', 'bottom left': '좌하', 'bottom': '하', 'bottom right': '우하' };
+              const POS_GRID = ['top left','top','top right','left','center','right','bottom left','bottom','bottom right'];
               return (
-                <div key={i}>
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <div onClick={() => !isUp && onSlotUpload(i)} style={{ border: '2px dashed #F1F5F9', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', background: '#F8FAFC', aspectRatio: '4/3', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {src
                       // eslint-disable-next-line @next/next/no-img-element
-                      ? <img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ? <img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: pos }} />
                       : <div style={{ color: '#CBD5E1', textAlign: 'center' }}>{isUp ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={14} />}<p style={{ fontSize: '9px', fontWeight: 700, margin: '3px 0 0' }}>사진 {i + 1}</p></div>
                     }
                     {src && (
@@ -995,24 +1066,23 @@ function InlineForm({
                       </button>
                     )}
                   </div>
+                  {/* 포지션 3×3 그리드 */}
+                  {src && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px' }}>
+                      {POS_GRID.map(p => (
+                        <button key={p} type="button" onClick={() => { const positions = [...(form.image_positions ?? [])]; positions[i] = p; setForm({ image_positions: positions }); }}
+                          style={{ padding: '3px 2px', border: pos === p ? '1.5px solid #4F46E5' : '1px solid #F1F5F9', borderRadius: '4px', background: pos === p ? '#EEF2FF' : 'white', cursor: 'pointer', fontSize: '8px', fontWeight: 700, color: pos === p ? '#4F46E5' : '#CBD5E1', lineHeight: 1 }}>
+                          {POS_LABELS[p]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
       )}
-
-      {/* 커버 이미지 */}
-      <div>
-        <label style={labelStyle}>커버 이미지 (대표 사진)</label>
-        <div onClick={onCoverUpload} style={{ border: '2px dashed #F1F5F9', borderRadius: '10px', padding: '10px', textAlign: 'center', cursor: 'pointer', background: '#F8FAFC', marginBottom: '6px' }}>
-          {form.image_url
-            ? <div style={{ height: '80px', borderRadius: '6px', overflow: 'hidden' }}><img src={form.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div> // eslint-disable-line @next/next/no-img-element
-            : <div style={{ color: '#CBD5E1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '6px 0' }}>{uploadingCover ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={16} />}<p style={{ fontSize: '10px', fontWeight: 700, margin: 0 }}>{uploadingCover ? '업로드 중...' : '이미지 업로드'}</p></div>
-          }
-        </div>
-        <input value={form.image_url} onChange={e => setForm({ image_url: e.target.value })} placeholder="또는 URL 입력" style={{ ...inputStyle, fontSize: '12px' }} />
-      </div>
 
       {/* 본문 TipTap */}
       <div>

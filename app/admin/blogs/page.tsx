@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import { Plus, Search, Pencil, Trash2, Eye, EyeOff, Star, LayoutGrid, List, TrendingUp } from 'lucide-react';
+import { toast } from 'sonner';
 
 const CATEGORIES = ['All', 'Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
 type StatusFilter = 'all' | 'published' | 'draft';
@@ -50,8 +51,10 @@ export default function AdminBlogsPage() {
   useEffect(() => { fetchBlogs(); }, [category, search, statusFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function togglePublish(blog: Blog) {
-    await supabase.from('blogs').update({ published: !blog.published }).eq('id', blog.id);
-    setBlogs(prev => prev.map(b => b.id === blog.id ? { ...b, published: !b.published } : b));
+    const next = !blog.published;
+    await supabase.from('blogs').update({ published: next }).eq('id', blog.id);
+    setBlogs(prev => prev.map(b => b.id === blog.id ? { ...b, published: next } : b));
+    toast.success(next ? '글이 발행되었습니다.' : '글이 비공개로 변경되었습니다.');
   }
 
   async function toggleHero(blog: Blog) {
@@ -71,6 +74,7 @@ export default function AdminBlogsPage() {
     await supabase.from('blogs').delete().eq('id', id);
     setBlogs(prev => prev.filter(b => b.id !== id));
     setDeleting(null);
+    toast.success('글이 삭제되었습니다.');
   }
 
   const heroCount = blogs.filter(b => b.is_hero).length;

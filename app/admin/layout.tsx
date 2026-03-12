@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { Toaster } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import {
   LayoutDashboard, FileText, BookOpen, Settings, Palette,
@@ -51,9 +52,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [ready, setReady] = useState(false);
   const [pendingComments, setPendingComments] = useState(0);
   const [blogCount, setBlogCount] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const isLogin = pathname === '/admin/login';
+
+  useEffect(() => {
+    function check() { setIsMobile(window.innerWidth < 768); }
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -90,6 +100,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F8FAFC' }}>
 
+      {/* ─── 모바일 햄버거 버튼 ─── */}
+      {isMobile && !mobileOpen && (
+        <button
+          onClick={() => setMobileOpen(true)}
+          style={{
+            position: 'fixed', top: 16, left: 16, zIndex: 100,
+            width: 40, height: 40, borderRadius: 10,
+            background: '#0A0A0A', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+          }}
+        >
+          <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {[0, 1, 2].map(i => (
+              <span key={i} style={{ display: 'block', width: 16, height: 1.5, background: 'white', borderRadius: 2 }} />
+            ))}
+          </span>
+        </button>
+      )}
+
+      {/* ─── 모바일 배경 오버레이 ─── */}
+      {isMobile && mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 49,
+            background: 'rgba(0,0,0,0.5)',
+          }}
+        />
+      )}
+
       {/* ─── 사이드바 ─── */}
       <aside style={{
         width: 220,
@@ -97,9 +138,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         display: 'flex',
         flexDirection: 'column',
         position: 'fixed',
-        top: 0, left: 0, bottom: 0,
+        top: 0, left: isMobile ? (mobileOpen ? 0 : -220) : 0, bottom: 0,
         zIndex: 50,
         overflowY: 'auto',
+        transition: 'left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
       }}>
         {/* 브랜드 */}
         <div style={{ padding: '28px 20px 20px', flexShrink: 0 }}>
@@ -125,7 +167,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             const badgeCount = badge === 'comments' ? pendingComments : badge === 'blogs' ? blogCount : 0;
 
             return (
-              <Link key={href} href={href} style={{
+              <Link key={href} href={href} onClick={() => isMobile && setMobileOpen(false)} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '10px 14px', borderRadius: 10, marginBottom: 1,
                 textDecoration: 'none',
@@ -173,10 +215,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ─── 메인 ─── */}
-      <main style={{ flex: 1, marginLeft: 220, minHeight: '100vh', background: '#F8FAFC' }}>
+      <main style={{ flex: 1, marginLeft: isMobile ? 0 : 220, minHeight: '100vh', background: '#F8FAFC', paddingTop: isMobile ? 64 : 0 }}>
         {children}
       </main>
 
+      <Toaster position="bottom-right" richColors closeButton />
     </div>
   );
 }

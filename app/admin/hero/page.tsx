@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { Blog, HeroSlide } from '@/lib/types';
 import { ChevronUp, ChevronDown, Star, X, ArrowLeft, Info, Eye, EyeOff, Zap, Plus, Upload, Loader2, Save } from 'lucide-react';
+import { toast } from 'sonner';
 
 const BLANK_SLIDE: Omit<HeroSlide, 'id' | 'created_at'> = {
   title: '', subtitle: '', image_url: '', link_url: '', sort_order: 0, is_visible: true,
@@ -23,7 +24,6 @@ export default function HeroManagePage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
 
   /* ─── 데이터 로드 ─── */
   async function fetchHeroes() {
@@ -49,8 +49,7 @@ export default function HeroManagePage() {
     );
     await Promise.all(updates);
     setSaving(false);
-    setMessage('순서가 저장되었습니다.');
-    setTimeout(() => setMessage(''), 2000);
+    toast.success('순서가 저장되었습니다.');
   }
 
   /* ─── 위/아래 이동 (보이는 항목만) ─── */
@@ -79,8 +78,7 @@ export default function HeroManagePage() {
     await supabase.from('blogs').update({ hero_order: newOrder }).eq('id', blog.id);
     setHeroes(prev => prev.map(h => h.id === blog.id ? { ...h, hero_order: newOrder } : h));
     setSaving(false);
-    setMessage(isHidden ? '슬라이드가 표시됩니다.' : '슬라이드가 숨겨졌습니다.');
-    setTimeout(() => setMessage(''), 2000);
+    toast.success(isHidden ? '슬라이드가 표시됩니다.' : '슬라이드가 숨겨졌습니다.');
   }
 
   /* ─── 히어로에서 완전 제거 ─── */
@@ -100,7 +98,7 @@ export default function HeroManagePage() {
     const ext = file.name.split('.').pop() ?? 'jpg';
     const path = `hero-slides/slide-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
-    if (error) { alert('업로드 실패: ' + error.message); setSlideUploading(false); return; }
+    if (error) { toast.error('업로드 실패: ' + error.message); setSlideUploading(false); return; }
     const { data } = supabase.storage.from('images').getPublicUrl(path);
     setEditingSlide(prev => ({ ...prev, image_url: data.publicUrl }));
     setSlideUploading(false);
@@ -109,7 +107,7 @@ export default function HeroManagePage() {
   /* ─── 커스텀 슬라이드 저장/수정 ─── */
   async function saveSlide() {
     if (!editingSlide.title || !editingSlide.image_url) {
-      alert('제목과 이미지는 필수입니다.');
+      toast.error('제목과 이미지는 필수입니다.');
       return;
     }
     setSlideSaving(true);
@@ -131,8 +129,7 @@ export default function HeroManagePage() {
     setSlideSaving(false);
     setShowSlideForm(false);
     setEditingSlide(BLANK_SLIDE);
-    setMessage('슬라이드가 저장되었습니다.');
-    setTimeout(() => setMessage(''), 2000);
+    toast.success('슬라이드가 저장되었습니다.');
   }
 
   /* ─── 커스텀 슬라이드 삭제 ─── */
@@ -187,7 +184,6 @@ export default function HeroManagePage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {saving && <span style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8' }}>저장 중...</span>}
-            {message && !saving && <span style={{ fontSize: 12, fontWeight: 700, color: '#10B981' }}>{message}</span>}
             <Link
               href="/admin/blogs"
               style={{

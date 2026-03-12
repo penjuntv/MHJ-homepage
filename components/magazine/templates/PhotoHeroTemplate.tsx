@@ -1,10 +1,10 @@
 'use client';
 import { useId } from 'react';
-import { getImages, type NewTemplateProps } from './shared';
+import { getImageSlots, type NewTemplateProps } from './shared';
 
 export default function PhotoHeroTemplate({ article, accentColor = '#1A1A1A' }: NewTemplateProps) {
   const uid = useId().replace(/:/g, 'd');
-  const [img] = getImages(article, 1);
+  const [slot] = getImageSlots(article, 1);
   const content = article.content || '<p>본문을 작성해 주세요.</p>';
 
   return (
@@ -17,9 +17,9 @@ export default function PhotoHeroTemplate({ article, accentColor = '#1A1A1A' }: 
 
       {/* 상단 60%: 풀블리드 사진 */}
       <div style={{ height: '60%', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-        {img ? (
+        {slot.src ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={slot.src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: slot.pos }} />
         ) : (
           <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${accentColor}88, ${accentColor}CC)` }} />
         )}
@@ -36,7 +36,7 @@ export default function PhotoHeroTemplate({ article, accentColor = '#1A1A1A' }: 
       {/* 하단 40%: 제목 + 본문 + 저자 */}
       <div style={{ flex: 1, padding: '5% 7%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* 제목 */}
-        <div style={{ fontFamily: 'var(--font-display,"Playfair Display",serif)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(10px,4.2%,21px)', color: 'white', lineHeight: 1.05, marginBottom: '4%', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', flexShrink: 0 }}>
+        <div style={{ fontFamily: 'var(--font-display,\"Playfair Display\",serif)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(10px,4.2%,21px)', color: 'white', lineHeight: 1.05, marginBottom: '4%', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', flexShrink: 0 }}>
           {article.title || 'Photo Story'}
         </div>
         {/* 본문 */}

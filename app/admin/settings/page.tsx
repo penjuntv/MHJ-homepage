@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { DEFAULT_SETTINGS, SETTING_DESCRIPTIONS } from '@/lib/site-settings';
 import { Loader2, Save, RotateCcw, Instagram, Facebook, Youtube, Upload, Image as ImageIcon, X } from 'lucide-react';
+import { toast } from 'sonner';
 import SafeImage from '@/components/SafeImage';
 
 // 표시 순서
@@ -55,7 +56,6 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -78,7 +78,6 @@ export default function SettingsPage() {
 
   async function handleSave() {
     setSaving(true);
-    setMessage('');
     const rows = ALL_KEYS.map(key => ({
       key,
       value: settings[key] ?? DEFAULT_SETTINGS[key] ?? '',
@@ -87,12 +86,11 @@ export default function SettingsPage() {
 
     const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'key' });
     if (error) {
-      setMessage('저장 실패: ' + error.message);
+      toast.error('저장 실패: ' + error.message);
     } else {
-      setMessage('설정이 저장되었습니다.');
+      toast.success('설정이 저장되었습니다.');
     }
     setSaving(false);
-    setTimeout(() => setMessage(''), 3000);
   }
 
   function handleReset() {
@@ -105,7 +103,7 @@ export default function SettingsPage() {
     const path = `${folder}-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
     if (error) {
-      alert('업로드 실패: ' + error.message);
+      toast.error('업로드 실패: ' + error.message);
       setUploading(null);
       return;
     }
@@ -117,8 +115,7 @@ export default function SettingsPage() {
       [{ key: imageKey, value: data.publicUrl, description: SETTING_DESCRIPTIONS[imageKey] ?? null }],
       { onConflict: 'key' }
     );
-    setMessage('이미지가 업로드되었습니다.');
-    setTimeout(() => setMessage(''), 2000);
+    toast.success('이미지가 업로드되었습니다.');
   }
 
   const labelStyle = {
@@ -325,17 +322,6 @@ export default function SettingsPage() {
             )}
           </div>
         ))}
-
-        {/* 메시지 */}
-        {message && (
-          <p style={{
-            fontSize: '14px', padding: '16px', borderRadius: '12px',
-            background: message.includes('실패') ? '#FEF2F2' : '#F0FDF4',
-            color: message.includes('실패') ? '#EF4444' : '#16A34A',
-          }}>
-            {message}
-          </p>
-        )}
 
         {/* 버튼 */}
         <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>

@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
   },
   alternates: { canonical: BASE_URL },
+  icons: {
+    icon: '/icon',
+  },
 };
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mymairangi.com';

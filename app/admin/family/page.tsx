@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Loader2, Upload, Save, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import SafeImage from '@/components/SafeImage';
 
 interface Member {
@@ -38,9 +39,10 @@ export default function AdminFamilyPage() {
     const ext = file.name.split('.').pop() ?? 'jpg';
     const path = `family/member-${id}-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
-    if (error) { alert('업로드 실패: ' + error.message); setUploading(null); return; }
+    if (error) { toast.error('업로드 실패: ' + error.message); setUploading(null); return; }
     const { data } = supabase.storage.from('images').getPublicUrl(path);
     update(id, 'image_url', data.publicUrl);
+    toast.success('사진이 업로드되었습니다.');
     setUploading(null);
   }
 
@@ -53,7 +55,8 @@ export default function AdminFamilyPage() {
       image_url: member.image_url,
     }).eq('id', member.id);
     setSaving(null);
-    if (error) { alert('저장 실패: ' + error.message); return; }
+    if (error) { toast.error('저장 실패: ' + error.message); return; }
+    toast.success('저장되었습니다.');
     setSaved(member.id);
     setTimeout(() => setSaved(null), 2000);
   }
