@@ -5,8 +5,17 @@ export interface Magazine {
   title: string;
   editor: string;
   image_url: string;
-  pdf_url?: string | null;   // 통합 PDF (매거진 전체)
-  article_count?: number;    // 개별 기사 수 (서가 UI 뱃지용)
+  pdf_url?: string | null;          // 통합 PDF (매거진 전체)
+  article_count?: number;           // 개별 기사 수 (서가 UI 뱃지용)
+  color_theme?: string | null;      // 레거시 컬러 테마 키 (ocean, forest, ...)
+  cover_subtitle?: string | null;   // 표지 부제목
+  contributors?: string[] | null;   // 기여자 목록
+  // Phase 2 new fields
+  accent_color?: string | null;     // 커스텀 액센트 색상 (hex)
+  cover_filter?: string | null;     // 사진 필터 (none/warm/cool/bw/vivid/muted)
+  cover_copy?: string | null;       // 표지 카피 문구
+  cover_images?: string[] | null;   // 추가 표지 이미지 배열
+  issue_number?: string | null;     // 이슈 번호 ('01', '02', ...)
   created_at?: string;
 }
 
@@ -23,7 +32,20 @@ export interface Article {
   sort_order?: number | null;
   page_start?: number | null;       // 통합 PDF 내 시작 페이지
   page_end?: number | null;         // 통합 PDF 내 끝 페이지
+  // Phase 2 new fields
+  template?: string | null;         // 기사 템플릿 키 (classic/split/photo-hero/...)
+  article_images?: string[] | null; // 추가 기사 이미지 배열
+  article_status?: 'draft' | 'complete' | 'published' | null;
   created_at?: string;
+}
+
+export interface ArticleReaction {
+  id: number;
+  article_id: number;
+  type: 'like' | 'comment';
+  content?: string | null;
+  author_name: string;
+  created_at: string;
 }
 
 export interface Blog {

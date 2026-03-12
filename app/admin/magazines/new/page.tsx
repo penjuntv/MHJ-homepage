@@ -5,9 +5,12 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Upload, Loader2, Plus, Minus, ChevronDown, ChevronUp } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
+import { MAGAZINE_THEMES, type ThemeKey } from '@/lib/magazine-themes';
+import CoverPreview from '@/components/magazine/CoverPreview';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const AUTHORS = ['PeNnY', '유민', '유현', '유진'];
+const CONTRIBUTORS_OPTIONS = ['PeNnY', '유민', '유현', '유진'];
 
 type SlotItem = { author: string; title: string };
 
@@ -35,7 +38,14 @@ export default function NewMagazinePage() {
     title: '',
     editor: 'PeNnY',
     image_url: '',
+    color_theme: 'ocean' as ThemeKey,
+    cover_subtitle: '',
+    accent_color: '#1A1A1A',
+    cover_filter: 'none',
+    cover_copy: '',
+    issue_number: '01',
   });
+  const [contributors, setContributors] = useState<string[]>(['PeNnY', '유민', '유현', '유진']);
 
   const [slots, setSlots] = useState<SlotItem[]>(INITIAL_SLOTS);
   const [showSlots, setShowSlots] = useState(true);
@@ -79,7 +89,7 @@ export default function NewMagazinePage() {
     setError('');
 
     // 1. 매거진 이슈 생성
-    const { error: insertErr } = await supabase.from('magazines').insert(form);
+    const { error: insertErr } = await supabase.from('magazines').insert({ ...form, contributors });
     if (insertErr) { setError(insertErr.message); setSaving(false); return; }
 
     // 2. 아티클 슬롯 일괄 생성
@@ -114,7 +124,7 @@ export default function NewMagazinePage() {
   };
 
   return (
-    <div style={{ padding: '48px', maxWidth: '700px', margin: '0 auto' }}>
+    <div style={{ padding: '48px', maxWidth: '960px', margin: '0 auto' }}>
       <div style={{ marginBottom: '40px' }}>
         <h1 className="font-display font-black uppercase" style={{ fontSize: '48px', letterSpacing: '-2px' }}>
           New Issue
@@ -124,6 +134,7 @@ export default function NewMagazinePage() {
         </p>
       </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '48px', alignItems: 'start' }}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
         {/* 연도 + 월 + ID */}
@@ -165,6 +176,70 @@ export default function NewMagazinePage() {
         <div>
           <label style={labelStyle}>편집장</label>
           <input value={form.editor} onChange={e => set('editor', e.target.value)} style={inputStyle} />
+        </div>
+
+        {/* 컬러 테마 */}
+        <div>
+          <label style={labelStyle}>컬러 테마</label>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
+            {(Object.entries(MAGAZINE_THEMES) as [ThemeKey, typeof MAGAZINE_THEMES[ThemeKey]][]).map(([key, t]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => set('color_theme', key)}
+                title={t.name}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  padding: '8px 14px', borderRadius: '999px',
+                  border: form.color_theme === key ? `2px solid ${t.primary}` : '2px solid #F1F5F9',
+                  background: form.color_theme === key ? t.bg : 'white',
+                  cursor: 'pointer', transition: 'all 0.15s',
+                }}
+              >
+                <span style={{ width: 14, height: 14, borderRadius: '50%', background: t.primary, display: 'inline-block', flexShrink: 0 }} />
+                <span style={{ width: 14, height: 14, borderRadius: '50%', background: t.secondary, display: 'inline-block', flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: form.color_theme === key ? t.primary : '#94A3B8' }}>{t.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 부제목 */}
+        <div>
+          <label style={labelStyle}>표지 부제목 <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}>(선택)</span></label>
+          <input
+            value={form.cover_subtitle}
+            onChange={e => set('cover_subtitle', e.target.value)}
+            placeholder="이번 호 특집 한 줄 소개..."
+            style={inputStyle}
+          />
+        </div>
+
+        {/* 기여자 */}
+        <div>
+          <label style={labelStyle}>기여자</label>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {CONTRIBUTORS_OPTIONS.map(name => {
+              const checked = contributors.includes(name);
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => setContributors(prev => checked ? prev.filter(c => c !== name) : [...prev, name])}
+                  style={{
+                    padding: '8px 16px', borderRadius: '999px', cursor: 'pointer',
+                    border: checked ? '2px solid #4F46E5' : '2px solid #F1F5F9',
+                    background: checked ? '#EEF2FF' : 'white',
+                    fontSize: 13, fontWeight: 700,
+                    color: checked ? '#4F46E5' : '#94A3B8',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* 커버 이미지 */}
@@ -351,8 +426,28 @@ export default function NewMagazinePage() {
             취소
           </button>
         </div>
+        <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
       </form>
-      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+
+      {/* 우측: 표지 프리뷰 */}
+      <div style={{ position: 'sticky', top: '24px' }}>
+        <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', marginBottom: '12px' }}>
+          Cover Preview
+        </p>
+        <CoverPreview
+          title={form.title}
+          year={form.year}
+          month_name={form.month_name}
+          editor={form.editor}
+          cover_copy={form.cover_copy}
+          contributors={contributors}
+          image_url={form.image_url}
+          accent_color={form.accent_color}
+          cover_filter={form.cover_filter}
+          issue_number={form.issue_number}
+        />
+      </div>
+      </div>
     </div>
   );
 }

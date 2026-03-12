@@ -1,21 +1,38 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, lazy, Suspense } from 'react';
+import {
+  useEffect, useState, useRef, useCallback, lazy, Suspense,
+} from 'react';
 import SafeImage from '@/components/SafeImage';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
 import {
-  ChevronLeft, Plus, Pencil, Trash2, X, Upload, Loader2, Check,
+  ChevronLeft, Plus, Trash2, X, Upload, Loader2, Check,
   ChevronUp, ChevronDown, ExternalLink, BookOpen, AlertCircle,
-  FileText, Image as ImageIcon,
+  FileText, Image as ImageIcon, ZoomIn, ZoomOut,
 } from 'lucide-react';
+import { ACCENT_PRESETS, COVER_FILTERS, DEFAULT_CONTRIBUTORS } from '@/lib/magazine-themes';
+import CoverPreview from '@/components/magazine/CoverPreview';
+import TocPreview from '@/components/magazine/TocPreview';
+import DownloadBtn from '@/components/DownloadBtn';
+import PhotoHeroTemplate   from '@/components/magazine/templates/PhotoHeroTemplate';
+import ClassicTemplate     from '@/components/magazine/templates/ClassicTemplate';
+import PhotoEssayTemplate  from '@/components/magazine/templates/PhotoEssayTemplate';
+import GalleryTemplate     from '@/components/magazine/templates/GalleryTemplate';
+import TextOnlyTemplate    from '@/components/magazine/templates/TextOnlyTemplate';
+import SplitTemplate       from '@/components/magazine/templates/SplitTemplate';
+import type { ArticlePreviewData } from '@/components/magazine/templates/shared';
+import { TEMPLATE_PHOTO_COUNT } from '@/components/magazine/templates/shared';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
 /* ─── 타입 ─── */
-type ArticleType = 'cover' | 'contents' | 'article';
+type ArticleType   = 'cover' | 'contents' | 'article';
+type ArticleStatus = 'draft' | 'complete' | 'published';
+type TabKey        = 'cover' | 'articles' | 'spread';
+
 type ArticleInput = {
   magazine_id: string;
   title: string;
@@ -26,48 +43,73 @@ type ArticleInput = {
   pdf_url: string;
   article_type: ArticleType;
   sort_order: number;
+  template: string;
+  article_status: ArticleStatus;
+  article_images: string[];
 };
 
-const TODAY = new Date()
-  .toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
-  .replace(/\. /g, '.')
-  .replace(/\.$/, '');
+/* ─── 상수 ─── */
+const TEMPLATE_META: { key: string; label: string; desc: string; photos: number }[] = [
+  { key: 'photo-hero',   label: 'Photo Hero',   desc: '풀블리드 사진',    photos: 1 },
+  { key: 'classic',      label: 'Classic',      desc: '상단 사진+드롭캡', photos: 1 },
+  { key: 'photo-essay',  label: 'Photo Essay',  desc: '다크 사진 그리드', photos: 4 },
+  { key: 'gallery',      label: 'Gallery',      desc: '사진 3장 스트립',  photos: 3 },
+  { key: 'text-only',    label: 'Essay',        desc: '사진 없는 에세이', photos: 0 },
+  { key: 'split',        label: 'Split',        desc: '좌우 분할',        photos: 1 },
+];
 
-const EMPTY_ARTICLE = (magazineId: string, nextOrder: number): ArticleInput => ({
-  magazine_id: magazineId,
-  title: '',
-  author: '',
-  date: TODAY,
-  image_url: '',
-  content: '',
-  pdf_url: '',
-  article_type: 'article',
-  sort_order: nextOrder,
-});
+const STATUS_CONFIG: Record<ArticleStatus, { label: string; bg: string; color: string }> = {
+  draft:     { label: '초안',   bg: '#F1F5F9', color: '#64748B' },
+  complete:  { label: '완료',   bg: '#FEF9C3', color: '#A16207' },
+  published: { label: '발행됨', bg: '#DCFCE7', color: '#16A34A' },
+};
 
-/* ─── 뱃지 색상 ─── */
 const TYPE_CONFIG: Record<ArticleType, { label: string; bg: string; color: string }> = {
   cover:    { label: 'COVER',    bg: '#F59E0B', color: 'white' },
   contents: { label: 'CONTENTS', bg: '#4F46E5', color: 'white' },
   article:  { label: 'ARTICLE',  bg: '#94A3B8', color: 'white' },
 };
 
+const TODAY = new Date()
+  .toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
+  .replace(/\. /g, '.').replace(/\.$/, '');
+
+const EMPTY_FORM = (magazineId: string, nextOrder: number): ArticleInput => ({
+  magazine_id: magazineId, title: '', author: '', date: TODAY,
+  image_url: '', content: '', pdf_url: '',
+  article_type: 'article', sort_order: nextOrder,
+  template: 'classic', article_status: 'draft', article_images: [],
+});
+
 /* ─── 공통 스타일 ─── */
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '12px 14px', borderRadius: '12px',
+  width: '100%', padding: '11px 14px', borderRadius: '12px',
   border: '1px solid #F1F5F9', background: '#F8FAFC',
-  fontSize: '14px', outline: 'none', boxSizing: 'border-box',
+  fontSize: '13px', outline: 'none', boxSizing: 'border-box',
   fontFamily: 'inherit', color: '#1A1A1A',
 };
 const labelStyle: React.CSSProperties = {
   display: 'block', fontSize: '10px', fontWeight: 900,
   letterSpacing: '3px', color: '#94A3B8', textTransform: 'uppercase',
-  marginBottom: '6px',
+  marginBottom: '5px',
 };
-const sectionCard: React.CSSProperties = {
-  background: 'white', borderRadius: '24px', padding: '28px 32px',
-  border: '1px solid #F1F5F9', marginBottom: '24px',
-};
+
+/* ─── 템플릿 렌더 헬퍼 ─── */
+function renderTemplate(
+  tpl: string,
+  artData: ArticlePreviewData,
+  accentColor: string,
+) {
+  const props = { article: artData, accentColor };
+  switch (tpl) {
+    case 'photo-hero':  return <PhotoHeroTemplate  {...props} />;
+    case 'photo-essay': return <PhotoEssayTemplate {...props} />;
+    case 'gallery':     return <GalleryTemplate    {...props} />;
+    case 'text-only':   return <TextOnlyTemplate   {...props} />;
+    case 'split':       return <SplitTemplate      {...props} />;
+    default:            return <ClassicTemplate    {...props} />;
+  }
+}
 
 /* ════════════════════════════════════════════
    메인 페이지
@@ -75,34 +117,55 @@ const sectionCard: React.CSSProperties = {
 export default function MagazineDetailPage() {
   const { id } = useParams<{ id: string }>();
 
+  /* ─── 기본 데이터 ─── */
   const [magazine, setMagazine] = useState<Magazine | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState('');
+  const [toast, setToast]     = useState('');
 
-  /* 이슈 정보 편집 */
-  const [editingMag, setEditingMag] = useState(false);
-  const [magForm, setMagForm] = useState({ title: '', editor: '', year: '', month_name: '', pdf_url: '', image_url: '' });
-  const [savingMag, setSavingMag] = useState(false);
-  const [uploadingMagPdf, setUploadingMagPdf] = useState(false);
+  /* ─── 탭 ─── */
+  const [tab, setTab] = useState<TabKey>('cover');
+
+  /* ─── 이슈 정보 ─── */
+  const [magForm, setMagForm] = useState({
+    title: '', editor: '', year: '', month_name: '', pdf_url: '', image_url: '',
+    color_theme: 'ocean', cover_subtitle: '', contributors: [] as string[],
+    accent_color: '#1A1A1A', cover_filter: 'none', cover_copy: '',
+    cover_images: [] as string[], issue_number: '01',
+  });
+  const [savingMag, setSavingMag]               = useState(false);
+  const [uploadingMagPdf, setUploadingMagPdf]   = useState(false);
   const [uploadingMagCover, setUploadingMagCover] = useState(false);
+  const [uploadingExtraImg, setUploadingExtraImg] = useState(false);
+  const [newContributor, setNewContributor]      = useState('');
 
-  /* 기사 모달 */
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
-  const [formData, setFormData] = useState<ArticleInput | null>(null);
-  const [savingArticle, setSavingArticle] = useState(false);
-  const [formError, setFormError] = useState('');
-  const [uploadingCover, setUploadingCover] = useState(false);
+  /* ─── 인라인 기사 편집 ─── */
+  const [selectedArtId, setSelectedArtId]  = useState<number | null>(null);
+  const [inlineForm, setInlineForm]        = useState<ArticleInput | null>(null);
+  const [inlineIsNew, setInlineIsNew]      = useState(false);
+  const [savingArticle, setSavingArticle]  = useState(false);
+  const [formError, setFormError]          = useState('');
+  const [uploadingCover, setUploadingCover]   = useState(false);
   const [uploadingContent, setUploadingContent] = useState(false);
+  const [uploadingSlotIdx, setUploadingSlotIdx] = useState<number | null>(null);
 
-  /* 정렬 중 */
+  /* ─── 정렬 ─── */
   const [reordering, setReordering] = useState(false);
 
-  const magPdfRef    = useRef<HTMLInputElement>(null);
-  const magCoverRef  = useRef<HTMLInputElement>(null);
-  const coverImgRef  = useRef<HTMLInputElement>(null);
-  const contentRef   = useRef<HTMLInputElement>(null);
+  /* ─── 줌 (Tab 3) ─── */
+  const [zoom, setZoom] = useState(100);
+
+  /* ─── refs ─── */
+  const magPdfRef       = useRef<HTMLInputElement>(null);
+  const magCoverRef     = useRef<HTMLInputElement>(null);
+  const extraImgRef     = useRef<HTMLInputElement>(null);
+  const coverImgRef     = useRef<HTMLInputElement>(null);
+  const contentFileRef  = useRef<HTMLInputElement>(null);
+  const slotImgRef      = useRef<HTMLInputElement>(null);
+  const pendingSlot     = useRef<number>(0);
+
+  /* ─── Tab 2 live preview ref ─── */
+  const previewDivRef = useRef<HTMLDivElement>(null);
 
   /* ─── 데이터 로드 ─── */
   const fetchData = useCallback(async () => {
@@ -113,81 +176,156 @@ export default function MagazineDetailPage() {
     ]);
     setMagazine(mag);
     setArticles(arts ?? []);
-    if (mag) setMagForm({ title: mag.title, editor: mag.editor, year: mag.year, month_name: mag.month_name, pdf_url: mag.pdf_url ?? '', image_url: mag.image_url ?? '' });
+    if (mag) setMagForm({
+      title: mag.title, editor: mag.editor, year: mag.year,
+      month_name: mag.month_name, pdf_url: mag.pdf_url ?? '',
+      image_url: mag.image_url ?? '', color_theme: mag.color_theme ?? 'ocean',
+      cover_subtitle: mag.cover_subtitle ?? '',
+      contributors: mag.contributors ?? [],
+      accent_color: mag.accent_color ?? '#1A1A1A',
+      cover_filter: mag.cover_filter ?? 'none',
+      cover_copy: mag.cover_copy ?? '',
+      cover_images: mag.cover_images ?? [],
+      issue_number: mag.issue_number ?? '01',
+    });
     setLoading(false);
   }, [id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
   /* ─── 토스트 ─── */
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(''), 3000);
-  }
+  function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(''), 3000); }
 
-  /* ─── 매거진 PDF 업로드 ─── */
-  async function uploadMagPdf(file: File) {
-    setUploadingMagPdf(true);
-    const ext = file.name.split('.').pop();
-    const path = `magazines/${id}/magazine_${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
-    if (error) { showToast('업로드 실패: ' + error.message); setUploadingMagPdf(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
-    setMagForm(p => ({ ...p, pdf_url: publicUrl }));
-    setUploadingMagPdf(false);
-  }
-
-  /* ─── 매거진 표지 이미지 업로드 ─── */
-  async function uploadMagCover(file: File) {
-    setUploadingMagCover(true);
-    const ext = file.name.split('.').pop();
-    const path = `magazines/${id}/cover_${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
-    if (error) { showToast('업로드 실패: ' + error.message); setUploadingMagCover(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
-    setMagForm(p => ({ ...p, image_url: publicUrl }));
-    setUploadingMagCover(false);
-  }
-
-  /* ─── 매거진 정보 저장 ─── */
+  /* ─── 이슈 정보 저장 ─── */
   async function saveMagazine() {
     if (!magazine) return;
     setSavingMag(true);
-    const dbPayload = { title: magForm.title, editor: magForm.editor, year: magForm.year, month_name: magForm.month_name, pdf_url: magForm.pdf_url || null, image_url: magForm.image_url || null };
-    const { error } = await supabase.from('magazines').update(dbPayload).eq('id', magazine.id);
-    if (error) { showToast('저장 실패: ' + error.message); } else {
-      // 상태 업데이트: image_url은 string 타입 유지
-      setMagazine(p => p ? { ...p, title: magForm.title, editor: magForm.editor, year: magForm.year, month_name: magForm.month_name, pdf_url: magForm.pdf_url || null, image_url: magForm.image_url || p.image_url } : p);
-      setEditingMag(false);
-      showToast('이슈 정보가 저장되었습니다.');
-    }
+    const { error } = await supabase.from('magazines').update({
+      title: magForm.title, editor: magForm.editor, year: magForm.year,
+      month_name: magForm.month_name, pdf_url: magForm.pdf_url || null,
+      image_url: magForm.image_url || null, color_theme: magForm.color_theme,
+      cover_subtitle: magForm.cover_subtitle, contributors: magForm.contributors,
+      accent_color: magForm.accent_color, cover_filter: magForm.cover_filter,
+      cover_copy: magForm.cover_copy, cover_images: magForm.cover_images,
+      issue_number: magForm.issue_number,
+    }).eq('id', magazine.id);
+    if (error) showToast('저장 실패: ' + error.message);
+    else { showToast('표지 정보가 저장되었습니다.'); await fetchData(); }
     setSavingMag(false);
   }
 
-  /* ─── 통합 PDF 삭제 ─── */
-  async function removeMagPdf() {
-    if (!magazine || !confirm('통합 PDF를 삭제하시겠습니까?')) return;
-    const { error } = await supabase.from('magazines').update({ pdf_url: null }).eq('id', magazine.id);
-    if (!error) {
-      setMagazine(p => p ? { ...p, pdf_url: null } : p);
-      setMagForm(p => ({ ...p, pdf_url: '' }));
-      showToast('통합 PDF가 삭제되었습니다.');
+  /* ─── PDF 관련 업로드 ─── */
+  async function uploadMagPdf(file: File) {
+    setUploadingMagPdf(true);
+    const path = `magazines/${id}/magazine_${Date.now()}.${file.name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    if (error) { showToast('업로드 실패: ' + error.message); } else {
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      setMagForm(p => ({ ...p, pdf_url: publicUrl }));
     }
+    setUploadingMagPdf(false);
+  }
+
+  async function uploadMagCover(file: File) {
+    setUploadingMagCover(true);
+    const path = `magazines/${id}/cover_${Date.now()}.${file.name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    if (error) { showToast('업로드 실패: ' + error.message); } else {
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      setMagForm(p => ({ ...p, image_url: publicUrl }));
+    }
+    setUploadingMagCover(false);
+  }
+
+  async function uploadExtraCoverImage(file: File) {
+    setUploadingExtraImg(true);
+    const path = `magazines/${id}/extra_${Date.now()}.${file.name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    if (error) { showToast('업로드 실패: ' + error.message); } else {
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      setMagForm(p => ({ ...p, cover_images: [...(p.cover_images ?? []), publicUrl] }));
+    }
+    setUploadingExtraImg(false);
+  }
+
+  /* ─── 기사 이미지 업로드 ─── */
+  async function uploadCoverImage(file: File) {
+    setUploadingCover(true);
+    const path = `articles/${Date.now()}_cover.${file.name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, file);
+    if (error) { setFormError('이미지 업로드 실패: ' + error.message); } else {
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      setInlineForm(p => p ? { ...p, image_url: publicUrl } : p);
+    }
+    setUploadingCover(false);
+  }
+
+  async function uploadContentFile(file: File) {
+    setUploadingContent(true);
+    const path = `articles/${Date.now()}_content.${file.name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, file);
+    if (error) { setFormError('파일 업로드 실패: ' + error.message); } else {
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      setInlineForm(p => p ? { ...p, pdf_url: publicUrl } : p);
+    }
+    setUploadingContent(false);
+  }
+
+  async function uploadArticleSlotImage(file: File, slotIdx: number) {
+    setUploadingSlotIdx(slotIdx);
+    const path = `articles/${Date.now()}_slot${slotIdx}.${file.name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, file);
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      setInlineForm(p => {
+        if (!p) return p;
+        const imgs = [...(p.article_images ?? [])];
+        imgs[slotIdx] = publicUrl;
+        return { ...p, article_images: imgs };
+      });
+    }
+    setUploadingSlotIdx(null);
+  }
+
+  /* ─── 기사 저장 ─── */
+  async function saveArticle() {
+    if (!inlineForm) return;
+    if (!inlineForm.title) { setFormError('제목은 필수입니다.'); return; }
+    setSavingArticle(true);
+    setFormError('');
+
+    if (!inlineIsNew && selectedArtId) {
+      const { error } = await supabase.from('articles').update(inlineForm).eq('id', selectedArtId);
+      if (error) { setFormError(error.message); setSavingArticle(false); return; }
+      setArticles(prev => prev.map(a => a.id === selectedArtId ? { ...a, ...inlineForm } : a));
+      showToast('기사가 저장되었습니다.');
+    } else {
+      const { data, error } = await supabase.from('articles').insert(inlineForm).select().single();
+      if (error) { setFormError(error.message); setSavingArticle(false); return; }
+      if (data) { setArticles(prev => [...prev, data]); setSelectedArtId(data.id); setInlineIsNew(false); }
+      showToast('기사가 추가되었습니다.');
+    }
+    setSavingArticle(false);
+  }
+
+  /* ─── 기사 삭제 ─── */
+  async function deleteArticle(artId: number) {
+    if (!confirm('이 기사를 삭제하시겠습니까?')) return;
+    await supabase.from('articles').delete().eq('id', artId);
+    setArticles(prev => prev.filter(a => a.id !== artId));
+    if (selectedArtId === artId) { setSelectedArtId(null); setInlineForm(null); }
+    showToast('기사가 삭제되었습니다.');
   }
 
   /* ─── 기사 순서 변경 ─── */
-  async function moveArticle(articleId: number, dir: 'up' | 'down') {
+  async function moveArticle(artId: number, dir: 'up' | 'down') {
     const sorted = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-    const idx = sorted.findIndex(a => a.id === articleId);
+    const idx = sorted.findIndex(a => a.id === artId);
     const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
     if (swapIdx < 0 || swapIdx >= sorted.length) return;
-
     setReordering(true);
-    const a = sorted[idx];
-    const b = sorted[swapIdx];
-    const aOrder = a.sort_order ?? idx;
-    const bOrder = b.sort_order ?? swapIdx;
-
+    const a = sorted[idx]; const b = sorted[swapIdx];
+    const aOrder = a.sort_order ?? idx; const bOrder = b.sort_order ?? swapIdx;
     await Promise.all([
       supabase.from('articles').update({ sort_order: bOrder }).eq('id', a.id),
       supabase.from('articles').update({ sort_order: aOrder }).eq('id', b.id),
@@ -200,116 +338,36 @@ export default function MagazineDetailPage() {
     setReordering(false);
   }
 
-  /* ─── 기사 삭제 ─── */
-  async function deleteArticle(articleId: number) {
-    if (!confirm('이 기사를 삭제하시겠습니까?')) return;
-    await supabase.from('articles').delete().eq('id', articleId);
-    setArticles(prev => prev.filter(a => a.id !== articleId));
-    showToast('기사가 삭제되었습니다.');
-  }
-
-  /* ─── 커버 이미지 업로드 ─── */
-  async function uploadCoverImage(file: File) {
-    setUploadingCover(true);
-    const ext = file.name.split('.').pop();
-    const path = `articles/${Date.now()}_cover.${ext}`;
-    const { error } = await supabase.storage.from('images').upload(path, file);
-    if (error) { setFormError('이미지 업로드 실패: ' + error.message); setUploadingCover(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
-    setFormData(p => p ? { ...p, image_url: publicUrl } : p);
-    setUploadingCover(false);
-  }
-
-  /* ─── 콘텐츠 파일 업로드 (이미지 또는 PDF) ─── */
-  async function uploadContentFile(file: File) {
-    setUploadingContent(true);
-    const ext = file.name.split('.').pop();
-    const path = `articles/${Date.now()}_content.${ext}`;
-    const { error } = await supabase.storage.from('images').upload(path, file);
-    if (error) { setFormError('파일 업로드 실패: ' + error.message); setUploadingContent(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
-    setFormData(p => p ? { ...p, pdf_url: publicUrl } : p);
-    setUploadingContent(false);
-  }
-
-  /* ─── 기사 저장 ─── */
-  async function saveArticle(e: React.FormEvent) {
-    e.preventDefault();
-    if (!formData) return;
-    if (!formData.title) { setFormError('제목은 필수입니다.'); return; }
-    if (!formData.content && !formData.pdf_url && !formData.image_url) {
-      setFormError('커버 이미지, 콘텐츠 파일, 텍스트 내용 중 하나는 필요합니다.'); return;
-    }
-    setSavingArticle(true);
+  /* ─── 기사 선택 ─── */
+  function selectArticle(article: Article) {
+    setSelectedArtId(article.id);
+    setInlineIsNew(false);
     setFormError('');
-
-    if (editingArticle) {
-      const { error } = await supabase.from('articles').update(formData).eq('id', editingArticle.id);
-      if (error) { setFormError(error.message); setSavingArticle(false); return; }
-      setArticles(prev => prev.map(a => a.id === editingArticle.id ? { ...editingArticle, ...formData } : a));
-      // 커버 타입이면 매거진 표지 자동 업데이트
-      if (formData.article_type === 'cover' && formData.image_url && magazine) {
-        await supabase.from('magazines').update({ image_url: formData.image_url }).eq('id', magazine.id);
-        setMagazine(p => p ? { ...p, image_url: formData.image_url } : p);
-        showToast('기사가 저장되었습니다. 매거진 표지도 자동 업데이트되었습니다.');
-      } else {
-        showToast('기사가 저장되었습니다.');
-      }
-    } else {
-      const { data, error } = await supabase.from('articles').insert(formData).select().single();
-      if (error) { setFormError(error.message); setSavingArticle(false); return; }
-      if (data) {
-        setArticles(prev => [...prev, data]);
-        if (formData.article_type === 'cover' && formData.image_url && magazine) {
-          await supabase.from('magazines').update({ image_url: formData.image_url }).eq('id', magazine.id);
-          setMagazine(p => p ? { ...p, image_url: formData.image_url } : p);
-          showToast('기사가 추가되었습니다. 매거진 표지도 자동 업데이트되었습니다.');
-        } else {
-          showToast('기사가 추가되었습니다.');
-        }
-      }
-    }
-
-    setSavingArticle(false);
-    closeModal();
-  }
-
-  function openAddModal() {
-    const nextOrder = articles.length > 0
-      ? Math.max(...articles.map(a => a.sort_order ?? 0)) + 1
-      : 1;
-    setFormData(EMPTY_ARTICLE(id, nextOrder));
-    setEditingArticle(null);
-    setFormError('');
-    setModalOpen(true);
-  }
-
-  function openEditModal(article: Article) {
-    setFormData({
+    setInlineForm({
       magazine_id: article.magazine_id,
-      title: article.title,
-      author: article.author,
-      date: article.date,
-      image_url: article.image_url,
-      content: article.content,
-      pdf_url: article.pdf_url ?? '',
+      title: article.title, author: article.author, date: article.date,
+      image_url: article.image_url, content: article.content,
+      pdf_url: (article as Article & { pdf_url?: string }).pdf_url ?? '',
       article_type: (article.article_type as ArticleType) ?? 'article',
       sort_order: article.sort_order ?? 0,
+      template: (article as Article & { template?: string }).template ?? 'classic',
+      article_status: ((article as Article & { article_status?: string }).article_status as ArticleStatus) ?? 'draft',
+      article_images: (article as Article & { article_images?: string[] }).article_images ?? [],
     });
-    setEditingArticle(article);
-    setFormError('');
-    setModalOpen(true);
   }
 
-  function closeModal() {
-    setModalOpen(false);
-    setEditingArticle(null);
-    setFormData(null);
+  function openNewArticle() {
+    const nextOrder = articles.length > 0
+      ? Math.max(...articles.map(a => a.sort_order ?? 0)) + 1 : 1;
+    setSelectedArtId(null);
+    setInlineIsNew(true);
+    setInlineForm(EMPTY_FORM(id, nextOrder));
     setFormError('');
   }
 
   const sortedArticles = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const hasPdf = !!(magazine?.pdf_url);
+  const accentCol = magazine?.accent_color ?? '#1A1A1A';
 
   /* ─── 로딩 ─── */
   if (loading) return (
@@ -325,376 +383,442 @@ export default function MagazineDetailPage() {
     </div>
   );
 
-  return (
-    <div style={{ padding: 'clamp(24px, 4vw, 48px)', maxWidth: '960px', margin: '0 auto', paddingBottom: '80px' }}>
+  /* ─── 인라인 프리뷰 데이터 ─── */
+  const previewArtData: ArticlePreviewData = inlineForm ? {
+    title: inlineForm.title, author: inlineForm.author,
+    content: inlineForm.content, image_url: inlineForm.image_url,
+    article_images: inlineForm.article_images, template: inlineForm.template,
+  } : { title: '', author: '', content: '', image_url: '' };
+  const photoCount = inlineForm ? (TEMPLATE_PHOTO_COUNT[inlineForm.template] ?? 0) : 0;
 
-      {/* ─── 상단 내비 ─── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
-        <Link
-          href="/admin/magazines"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: '#94A3B8', textDecoration: 'none' }}
-        >
-          <ChevronLeft size={14} /> 매거진 목록
-        </Link>
-        {/* 미리보기 버튼 */}
-        <a
-          href={`/magazine/${id}`}
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            background: '#1A1A1A', color: 'white', borderRadius: '999px',
-            padding: '10px 20px', fontSize: '11px', fontWeight: 900,
-            letterSpacing: '2px', textDecoration: 'none', textTransform: 'uppercase',
-          }}
-        >
-          <ExternalLink size={13} /> 뷰어로 미리보기
+  return (
+    <div style={{ paddingBottom: '80px' }}>
+
+      {/* ─── 전역 스타일 ─── */}
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideRight { from { transform: translateX(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+      `}</style>
+
+      {/* ─── 상단 바 ─── */}
+      <div style={{ padding: '20px clamp(24px,4vw,48px) 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <Link href="/admin/magazines" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: '#94A3B8', textDecoration: 'none' }}>
+            <ChevronLeft size={14} /> 매거진 목록
+          </Link>
+          <div>
+            <span style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '4px', color: '#CBD5E1', textTransform: 'uppercase', display: 'block' }}>Magazine Issue</span>
+            <h1 className="font-display font-black" style={{ fontSize: 'clamp(20px, 3vw, 32px)', letterSpacing: '-1px', margin: 0, lineHeight: 1 }}>
+              {magazine.title}
+            </h1>
+          </div>
+        </div>
+        <a href={`/magazine/${id}`} target="_blank" rel="noreferrer"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#1A1A1A', color: 'white', borderRadius: '999px', padding: '10px 20px', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', textDecoration: 'none', textTransform: 'uppercase' }}>
+          <ExternalLink size={13} /> 뷰어로 보기
         </a>
       </div>
 
-      {/* ═══════════════════════════════
-          섹션 1: 이슈 정보
-          ═══════════════════════════════ */}
-      <div style={sectionCard}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: editingMag ? '24px' : '0', gap: '12px' }}>
-          <div>
-            <span style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '4px', color: '#CBD5E1', textTransform: 'uppercase' }}>Magazine Issue</span>
-            <h1 className="font-display font-black" style={{ fontSize: 'clamp(28px, 4vw, 40px)', letterSpacing: '-2px', margin: '4px 0 4px', lineHeight: 0.9 }}>
-              {magazine.title}
-            </h1>
-            <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0 }}>
-              {magazine.year} {magazine.month_name} · Editor: {magazine.editor}
-            </p>
-          </div>
-          <button
-            onClick={() => setEditingMag(p => !p)}
-            style={{ padding: '8px 16px', borderRadius: '999px', border: '1px solid #F1F5F9', background: 'white', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', color: '#64748B', cursor: 'pointer', flexShrink: 0, textTransform: 'uppercase' }}
-          >
-            <Pencil size={12} style={{ display: 'inline', marginRight: 6 }} />
-            정보 수정
-          </button>
+      {/* ─── 탭 네비게이션 ─── */}
+      <div style={{ padding: '0 clamp(24px,4vw,48px)', borderBottom: '1px solid #F1F5F9', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          {([
+            { key: 'cover',    label: '📋 표지 & 설정' },
+            { key: 'articles', label: '✍️ 기사 편집' },
+            { key: 'spread',   label: '🔍 전체 미리보기' },
+          ] as { key: TabKey; label: string }[]).map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)} style={{
+              padding: '12px 20px', fontSize: '12px', fontWeight: 900, letterSpacing: '1px',
+              border: 'none', cursor: 'pointer', borderRadius: '12px 12px 0 0',
+              background: tab === t.key ? 'white' : 'transparent',
+              color: tab === t.key ? '#1A1A1A' : '#94A3B8',
+              borderBottom: tab === t.key ? '2px solid #4F46E5' : '2px solid transparent',
+              transition: 'all 0.15s',
+            }}>
+              {t.label}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {editingMag && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '8px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-              <div>
-                <label style={labelStyle}>연도</label>
-                <input value={magForm.year} onChange={e => setMagForm(p => ({ ...p, year: e.target.value }))} style={inputStyle} />
-              </div>
-              <div>
-                <label style={labelStyle}>월 (Jan, Feb...)</label>
-                <input value={magForm.month_name} onChange={e => setMagForm(p => ({ ...p, month_name: e.target.value }))} style={inputStyle} />
-              </div>
-              <div>
-                <label style={labelStyle}>에디터</label>
-                <input value={magForm.editor} onChange={e => setMagForm(p => ({ ...p, editor: e.target.value }))} style={inputStyle} />
-              </div>
-            </div>
-            <div>
-              <label style={labelStyle}>이슈 제목</label>
-              <input value={magForm.title} onChange={e => setMagForm(p => ({ ...p, title: e.target.value }))} style={inputStyle} />
-            </div>
+      {/* ══════════════════════════════════════════
+          탭 1: 표지 & 설정
+          ══════════════════════════════════════════ */}
+      {tab === 'cover' && (
+        <div style={{ padding: '0 clamp(24px,4vw,48px)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: '32px', alignItems: 'start' }}>
 
-            {/* 표지 이미지 */}
-            <div>
-              <label style={labelStyle}>표지 이미지 (서가 커버)</label>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                {/* 미리보기 */}
-                <div style={{ width: '80px', height: '107px', borderRadius: '8px', overflow: 'hidden', background: '#F1F5F9', flexShrink: 0, position: 'relative' }}>
-                  {magForm.image_url
-                    ? <SafeImage src={magForm.image_url} alt="" fill style={{ objectFit: 'cover' }} />
-                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={20} color="#CBD5E1" /></div>
-                  }
+            {/* ─── 좌: 폼 ─── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+              {/* 기본 정보 */}
+              <div style={{ background: 'white', borderRadius: '20px', padding: '24px', border: '1px solid #F1F5F9' }}>
+                <p style={sectionTitle}>기본 정보</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div>
+                    <label style={labelStyle}>이슈 제목</label>
+                    <input value={magForm.title} onChange={e => setMagForm(p => ({ ...p, title: e.target.value }))} style={inputStyle} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                    <div><label style={labelStyle}>연도</label><input value={magForm.year} onChange={e => setMagForm(p => ({ ...p, year: e.target.value }))} style={inputStyle} /></div>
+                    <div><label style={labelStyle}>월</label><input value={magForm.month_name} onChange={e => setMagForm(p => ({ ...p, month_name: e.target.value }))} style={inputStyle} /></div>
+                    <div><label style={labelStyle}>이슈 번호</label><input value={magForm.issue_number} onChange={e => setMagForm(p => ({ ...p, issue_number: e.target.value }))} style={inputStyle} /></div>
+                  </div>
+                  <div><label style={labelStyle}>에디터</label><input value={magForm.editor} onChange={e => setMagForm(p => ({ ...p, editor: e.target.value }))} style={inputStyle} /></div>
+                  <div>
+                    <label style={labelStyle}>표지 카피</label>
+                    <textarea value={magForm.cover_copy} onChange={e => setMagForm(p => ({ ...p, cover_copy: e.target.value }))} rows={2} placeholder="이번 호 한 줄 카피..." style={{ ...inputStyle, resize: 'vertical' }} />
+                  </div>
                 </div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <input value={magForm.image_url} onChange={e => setMagForm(p => ({ ...p, image_url: e.target.value }))} placeholder="이미지 URL 직접 입력" style={inputStyle} />
-                  <button
-                    type="button"
-                    onClick={() => magCoverRef.current?.click()}
-                    disabled={uploadingMagCover}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', background: '#F8FAFC', border: '1px solid #F1F5F9', borderRadius: '12px', fontSize: '12px', fontWeight: 700, color: '#64748B', cursor: 'pointer' }}
-                  >
-                    {uploadingMagCover ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={13} />}
-                    {uploadingMagCover ? '업로드 중...' : '이미지 업로드'}
+              </div>
+
+              {/* 커버 이미지 캐러셀 */}
+              <div style={{ background: 'white', borderRadius: '20px', padding: '24px', border: '1px solid #F1F5F9' }}>
+                <p style={sectionTitle}>커버 이미지 목록</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '10px' }}>
+                  {(magForm.cover_images ?? []).map((url, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '40px', height: '52px', borderRadius: '4px', overflow: 'hidden', background: '#F1F5F9', flexShrink: 0, position: 'relative' }}>
+                        {url ? <SafeImage src={url} alt="" fill style={{ objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: '#E2E8F0' }} />}
+                      </div>
+                      <input value={url} onChange={e => { const imgs = [...(magForm.cover_images ?? [])]; imgs[idx] = e.target.value; setMagForm(p => ({ ...p, cover_images: imgs })); }} placeholder="이미지 URL" style={{ ...inputStyle, flex: 1 }} />
+                      <button type="button" onClick={() => setMagForm(p => ({ ...p, cover_images: (p.cover_images ?? []).filter((_, i) => i !== idx) }))} style={{ padding: '7px', background: 'white', border: '1px solid #FEE2E2', borderRadius: '8px', color: '#EF4444', cursor: 'pointer', flexShrink: 0, display: 'flex' }}>
+                        <X size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <button type="button" onClick={() => extraImgRef.current?.click()} disabled={uploadingExtraImg} style={ghostBtn}>
+                    {uploadingExtraImg ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} /> : <Plus size={11} />}
+                    이미지 업로드
+                  </button>
+                  <button type="button" onClick={() => setMagForm(p => ({ ...p, cover_images: [...(p.cover_images ?? []), ''] }))} style={ghostBtn}>
+                    <Plus size={11} /> URL 입력
+                  </button>
+                  {(magForm.cover_images ?? []).filter(Boolean).length >= 2 && (
+                    <span style={{ fontSize: '10px', color: '#16A34A', fontWeight: 700, background: '#DCFCE7', padding: '3px 10px', borderRadius: '999px' }}>자동 전환됨</span>
+                  )}
+                </div>
+              </div>
+
+              {/* 표지 이미지 (서가용) */}
+              <div style={{ background: 'white', borderRadius: '20px', padding: '24px', border: '1px solid #F1F5F9' }}>
+                <p style={sectionTitle}>표지 이미지 (서가 커버)</p>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <div style={{ width: '72px', height: '96px', borderRadius: '8px', overflow: 'hidden', background: '#F1F5F9', flexShrink: 0, position: 'relative' }}>
+                    {magForm.image_url ? <SafeImage src={magForm.image_url} alt="" fill style={{ objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={18} color="#CBD5E1" /></div>}
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <input value={magForm.image_url} onChange={e => setMagForm(p => ({ ...p, image_url: e.target.value }))} placeholder="이미지 URL" style={inputStyle} />
+                    <button type="button" onClick={() => magCoverRef.current?.click()} disabled={uploadingMagCover} style={ghostBtn}>
+                      {uploadingMagCover ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={11} />}
+                      이미지 업로드
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 액센트 컬러 */}
+              <div style={{ background: 'white', borderRadius: '20px', padding: '24px', border: '1px solid #F1F5F9' }}>
+                <p style={sectionTitle}>액센트 컬러</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <input type="color" value={magForm.accent_color} onChange={e => setMagForm(p => ({ ...p, accent_color: e.target.value }))} style={{ width: '40px', height: '40px', borderRadius: '8px', border: '1px solid #F1F5F9', cursor: 'pointer', padding: '2px', flexShrink: 0 }} />
+                  <input value={magForm.accent_color} onChange={e => setMagForm(p => ({ ...p, accent_color: e.target.value }))} style={{ ...inputStyle, width: '130px', fontFamily: 'monospace' }} />
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                  {ACCENT_PRESETS.map(preset => (
+                    <button key={preset.value} type="button" onClick={() => setMagForm(p => ({ ...p, accent_color: preset.value }))} title={preset.label}
+                      style={{ width: '26px', height: '26px', borderRadius: '50%', cursor: 'pointer', border: 'none', background: preset.value, outline: magForm.accent_color === preset.value ? `3px solid ${preset.value}` : 'none', outlineOffset: '2px', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                  ))}
+                </div>
+                <p style={sectionTitle}>사진 필터</p>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {COVER_FILTERS.map(f => (
+                    <button key={f.key} type="button" onClick={() => setMagForm(p => ({ ...p, cover_filter: f.key }))}
+                      style={{ padding: '6px 14px', borderRadius: '999px', cursor: 'pointer', transition: 'all 0.15s', border: magForm.cover_filter === f.key ? `2px solid ${magForm.accent_color}` : '2px solid #F1F5F9', background: magForm.cover_filter === f.key ? `${magForm.accent_color}15` : 'white', fontSize: '11px', fontWeight: 700, color: magForm.cover_filter === f.key ? magForm.accent_color : '#94A3B8' }}>
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 기여자 */}
+              <div style={{ background: 'white', borderRadius: '20px', padding: '24px', border: '1px solid #F1F5F9' }}>
+                <p style={sectionTitle}>기여자</p>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                  {Array.from(new Set([...DEFAULT_CONTRIBUTORS, ...magForm.contributors])).map(name => {
+                    const checked = magForm.contributors.includes(name);
+                    return (
+                      <button key={name} type="button" onClick={() => setMagForm(p => ({ ...p, contributors: checked ? p.contributors.filter(c => c !== name) : [...p.contributors, name] }))}
+                        style={{ padding: '6px 14px', borderRadius: '999px', cursor: 'pointer', border: checked ? '2px solid #4F46E5' : '2px solid #F1F5F9', background: checked ? '#EEF2FF' : 'white', fontSize: 12, fontWeight: 700, color: checked ? '#4F46E5' : '#94A3B8', transition: 'all 0.15s' }}>
+                        {name}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input value={newContributor} onChange={e => setNewContributor(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = newContributor.trim(); if (v && !magForm.contributors.includes(v)) setMagForm(p => ({ ...p, contributors: [...p.contributors, v] })); setNewContributor(''); } }}
+                    placeholder="새 기여자 이름 (Enter)" style={{ ...inputStyle, flex: 1 }} />
+                </div>
+              </div>
+
+              {/* 통합 PDF */}
+              <div style={{ background: 'white', borderRadius: '20px', padding: '24px', border: '1px solid #F1F5F9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <BookOpen size={16} color="#4F46E5" />
+                  <p style={{ ...sectionTitle, margin: 0 }}>통합 PDF</p>
+                  {hasPdf && <span style={{ background: '#DCFCE7', color: '#16A34A', borderRadius: '999px', padding: '2px 10px', fontSize: '10px', fontWeight: 900 }}>등록됨</span>}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input value={magForm.pdf_url} onChange={e => setMagForm(p => ({ ...p, pdf_url: e.target.value }))} placeholder="PDF URL..." style={{ ...inputStyle, flex: 1 }} />
+                  <button onClick={() => magPdfRef.current?.click()} disabled={uploadingMagPdf} style={ghostBtn}>
+                    {uploadingMagPdf ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={11} />}
+                    업로드
                   </button>
                 </div>
               </div>
+
+              {/* 저장 버튼 */}
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={saveMagazine} disabled={savingMag}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '999px', padding: '14px 32px', fontSize: '12px', fontWeight: 900, letterSpacing: '2px', cursor: 'pointer', textTransform: 'uppercase', opacity: savingMag ? 0.7 : 1 }}>
+                  {savingMag ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={13} />}
+                  {savingMag ? '저장 중...' : '표지 저장'}
+                </button>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={saveMagazine} disabled={savingMag}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '999px', padding: '10px 24px', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', cursor: 'pointer', textTransform: 'uppercase', opacity: savingMag ? 0.7 : 1 }}
-              >
-                {savingMag ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={12} />}
-                저장
-              </button>
-              <button onClick={() => setEditingMag(false)} style={{ padding: '10px 20px', borderRadius: '999px', border: '1px solid #F1F5F9', background: 'white', fontSize: '11px', fontWeight: 700, color: '#64748B', cursor: 'pointer' }}>
-                취소
-              </button>
+            {/* ─── 우: 스티키 프리뷰 ─── */}
+            <div style={{ position: 'sticky', top: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', marginBottom: '8px' }}>Cover</p>
+                <CoverPreview
+                  title={magForm.title} year={magForm.year} month_name={magForm.month_name}
+                  editor={magForm.editor} cover_copy={magForm.cover_copy}
+                  contributors={magForm.contributors} image_url={magForm.image_url}
+                  cover_images={magForm.cover_images} accent_color={magForm.accent_color}
+                  cover_filter={magForm.cover_filter} issue_number={magForm.issue_number}
+                />
+              </div>
+              <div>
+                <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', marginBottom: '8px' }}>Contents</p>
+                <TocPreview
+                  title={magForm.title} year={magForm.year} month_name={magForm.month_name}
+                  articles={sortedArticles} accent_color={magForm.accent_color}
+                />
+              </div>
             </div>
           </div>
-        )}
-      </div>
-
-      {/* ═══════════════════════════════
-          섹션 2: 통합 PDF
-          ═══════════════════════════════ */}
-      <div style={sectionCard}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-          <BookOpen size={18} color="#4F46E5" />
-          <h2 style={{ fontSize: '14px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', color: '#1A1A1A', margin: 0 }}>
-            통합 PDF
-          </h2>
-          {hasPdf && (
-            <span style={{ background: '#DCFCE7', color: '#16A34A', borderRadius: '999px', padding: '2px 10px', fontSize: '10px', fontWeight: 900, letterSpacing: '2px' }}>
-              등록됨
-            </span>
-          )}
         </div>
-        <p style={{ fontSize: '12px', color: '#94A3B8', marginBottom: '16px' }}>
-          완성된 매거진 전체를 하나의 PDF로 업로드하면 뷰어에서 페이지별로 렌더링됩니다.
-        </p>
+      )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <input
-              value={magForm.pdf_url}
-              onChange={e => setMagForm(p => ({ ...p, pdf_url: e.target.value }))}
-              placeholder="PDF URL 직접 입력 (https://...)"
-              style={{ ...inputStyle, flex: 1 }}
-            />
-            <button
-              onClick={() => magPdfRef.current?.click()}
-              disabled={uploadingMagPdf}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', background: '#F8FAFC', border: '1px solid #F1F5F9', borderRadius: '12px', fontSize: '12px', fontWeight: 700, color: '#64748B', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
-            >
-              {uploadingMagPdf ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={14} />}
-              {uploadingMagPdf ? '업로드 중...' : 'PDF 업로드'}
-            </button>
+      {/* ══════════════════════════════════════════
+          탭 2: 기사 편집
+          ══════════════════════════════════════════ */}
+      {tab === 'articles' && (
+        <div style={{ padding: '0 clamp(24px,4vw,48px)', display: 'grid', gridTemplateColumns: '420px 1fr', gap: '24px', alignItems: 'start' }}>
+
+          {/* ─── 좌: 기사 목록 + 인라인 폼 ─── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+
+            {/* 목록 헤더 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <p style={{ fontSize: '12px', fontWeight: 900, color: '#94A3B8', margin: 0 }}>
+                {sortedArticles.length}개 기사
+              </p>
+              <button onClick={openNewArticle} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '999px', padding: '8px 16px', fontSize: '11px', fontWeight: 900, letterSpacing: '1px', cursor: 'pointer' }}>
+                <Plus size={12} /> 기사 추가
+              </button>
+            </div>
+
+            {/* 기사 카드 목록 */}
+            {sortedArticles.length === 0 && !inlineIsNew && (
+              <div style={{ textAlign: 'center', padding: '32px', color: '#CBD5E1', background: '#F8FAFC', borderRadius: '16px' }}>
+                <FileText size={28} style={{ marginBottom: '10px', opacity: 0.5 }} />
+                <p style={{ fontSize: '11px', fontWeight: 900, letterSpacing: '3px' }}>기사가 없습니다</p>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {sortedArticles.map((article, idx) => {
+                const isSelected = article.id === selectedArtId && !inlineIsNew;
+                const typeCfg = TYPE_CONFIG[(article.article_type as ArticleType) ?? 'article'];
+                const artStatus = ((article as Article & { article_status?: string }).article_status as ArticleStatus) ?? 'draft';
+                const statusCfg = STATUS_CONFIG[artStatus];
+                return (
+                  <div key={article.id}>
+                    <div onClick={() => selectArticle(article)} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', background: isSelected ? '#F0F4FF' : '#F8FAFC', border: isSelected ? '1.5px solid #4F46E5' : '1px solid #F1F5F9', cursor: 'pointer', transition: 'all 0.15s' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 900, color: '#CBD5E1', width: '20px', textAlign: 'center', flexShrink: 0 }}>{idx + 1}</span>
+                      <div style={{ width: '40px', height: '54px', borderRadius: '6px', overflow: 'hidden', background: '#E2E8F0', flexShrink: 0, position: 'relative' }}>
+                        {article.image_url ? <SafeImage src={article.image_url} alt="" fill style={{ objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={14} color="#CBD5E1" /></div>}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '3px', flexWrap: 'wrap' }}>
+                          <span style={{ background: typeCfg.bg, color: typeCfg.color, borderRadius: '3px', padding: '1px 6px', fontSize: '8px', fontWeight: 900, letterSpacing: '1px' }}>{typeCfg.label}</span>
+                          <span style={{ background: statusCfg.bg, color: statusCfg.color, borderRadius: '3px', padding: '1px 6px', fontSize: '8px', fontWeight: 900 }}>{statusCfg.label}</span>
+                        </div>
+                        <p style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{article.title || '(제목 없음)'}</p>
+                        <p style={{ fontSize: '10px', color: '#94A3B8', margin: 0 }}>{article.author}</p>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
+                        <button onClick={e => { e.stopPropagation(); moveArticle(article.id, 'up'); }} disabled={idx === 0 || reordering} style={{ padding: '3px', border: '1px solid #F1F5F9', borderRadius: '5px', background: 'white', cursor: 'pointer', color: '#94A3B8', display: 'flex', opacity: idx === 0 ? 0.3 : 1 }}><ChevronUp size={11} /></button>
+                        <button onClick={e => { e.stopPropagation(); moveArticle(article.id, 'down'); }} disabled={idx === sortedArticles.length - 1 || reordering} style={{ padding: '3px', border: '1px solid #F1F5F9', borderRadius: '5px', background: 'white', cursor: 'pointer', color: '#94A3B8', display: 'flex', opacity: idx === sortedArticles.length - 1 ? 0.3 : 1 }}><ChevronDown size={11} /></button>
+                      </div>
+                    </div>
+
+                    {/* ─── 인라인 편집 폼 (선택된 기사) ─── */}
+                    {isSelected && inlineForm && (
+                      <InlineForm
+                        form={inlineForm} setForm={v => setInlineForm(p => p ? { ...p, ...v } : p)}
+                        accentColor={accentCol} photoCount={photoCount}
+                        saving={savingArticle} error={formError} isNew={false}
+                        uploadingCover={uploadingCover} uploadingContent={uploadingContent}
+                        uploadingSlotIdx={uploadingSlotIdx}
+                        onSave={saveArticle}
+                        onDelete={() => deleteArticle(article.id)}
+                        onCoverUpload={() => coverImgRef.current?.click()}
+                        onContentUpload={() => contentFileRef.current?.click()}
+                        onSlotUpload={(idx) => { pendingSlot.current = idx; slotImgRef.current?.click(); }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* ─── 인라인 폼: 새 기사 ─── */}
+              {inlineIsNew && inlineForm && (
+                <div style={{ border: '1.5px dashed #4F46E5', borderRadius: '12px', overflow: 'hidden', marginTop: '4px' }}>
+                  <div style={{ background: '#EEF2FF', padding: '8px 12px' }}>
+                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '2px', color: '#4F46E5', margin: 0 }}>+ 새 기사</p>
+                  </div>
+                  <InlineForm
+                    form={inlineForm} setForm={v => setInlineForm(p => p ? { ...p, ...v } : p)}
+                    accentColor={accentCol} photoCount={photoCount}
+                    saving={savingArticle} error={formError} isNew={true}
+                    uploadingCover={uploadingCover} uploadingContent={uploadingContent}
+                    uploadingSlotIdx={uploadingSlotIdx}
+                    onSave={saveArticle}
+                    onDelete={() => { setInlineIsNew(false); setInlineForm(null); }}
+                    onCoverUpload={() => coverImgRef.current?.click()}
+                    onContentUpload={() => contentFileRef.current?.click()}
+                    onSlotUpload={(idx) => { pendingSlot.current = idx; slotImgRef.current?.click(); }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button
-              onClick={saveMagazine}
-              disabled={savingMag}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 32px', background: '#1A1A1A', color: 'white', border: 'none', borderRadius: '999px', fontSize: '13px', fontWeight: 900, letterSpacing: '3px', cursor: 'pointer', textTransform: 'uppercase', opacity: savingMag ? 0.6 : 1, boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}
-            >
-              {savingMag ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <BookOpen size={14} />}
-              {savingMag ? '발행 중...' : '이슈 발행하기'}
-            </button>
-            {hasPdf && (
-              <button
-                onClick={removeMagPdf}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', border: '1px solid #FEE2E2', background: 'white', color: '#EF4444', borderRadius: '999px', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', cursor: 'pointer', textTransform: 'uppercase' }}
-              >
-                <Trash2 size={12} /> PDF 삭제
-              </button>
+          {/* ─── 우: 실시간 프리뷰 (스티키) ─── */}
+          <div style={{ position: 'sticky', top: '24px' }}>
+            {inlineForm ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', margin: 0 }}>
+                    Live Preview · {TEMPLATE_META.find(t => t.key === inlineForm.template)?.label ?? 'Classic'}
+                  </p>
+                  <DownloadBtn
+                    targetRef={previewDivRef as React.RefObject<HTMLElement>}
+                    filename={`TheMHJ_${magazine.month_name}${magazine.year}_${inlineForm.title.slice(0, 20)}`}
+                    size="sm"
+                  />
+                </div>
+                <div ref={previewDivRef}>
+                  {renderTemplate(inlineForm.template, previewArtData, accentCol)}
+                </div>
+                <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: accentCol, display: 'inline-block' }} />
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#94A3B8' }}>Accent: {accentCol}</span>
+                </div>
+              </>
+            ) : (
+              <div style={{ aspectRatio: '210/297', background: '#F8FAFC', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #F1F5F9' }}>
+                <p style={{ fontSize: '11px', color: '#CBD5E1', fontWeight: 700, textAlign: 'center' }}>기사를 선택하면<br />미리보기가 표시됩니다</p>
+              </div>
             )}
           </div>
         </div>
+      )}
 
-        <input ref={magPdfRef} type="file" accept=".pdf,image/*" style={{ display: 'none' }}
-          onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagPdf(f); e.target.value = ''; }} />
-      </div>
+      {/* ══════════════════════════════════════════
+          탭 3: 전체 미리보기
+          ══════════════════════════════════════════ */}
+      {tab === 'spread' && (
+        <div style={{ padding: '0 clamp(24px,4vw,48px)' }}>
 
-      {/* magCoverRef — 섹션 1 표지 이미지용 */}
-      <input ref={magCoverRef} type="file" accept="image/*" style={{ display: 'none' }}
-        onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagCover(f); e.target.value = ''; }} />
+          {/* 줌 컨트롤 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+            <button onClick={() => setZoom(p => Math.max(40, p - 10))} style={zoomBtn}><ZoomOut size={14} /></button>
+            <input type="range" min={40} max={200} value={zoom} onChange={e => setZoom(Number(e.target.value))}
+              style={{ width: '140px', accentColor: '#4F46E5', cursor: 'pointer' }} />
+            <button onClick={() => setZoom(p => Math.min(200, p + 10))} style={zoomBtn}><ZoomIn size={14} /></button>
+            <span style={{ fontSize: '12px', fontWeight: 900, color: '#94A3B8', minWidth: '44px' }}>{zoom}%</span>
+            {[50, 75, 100, 150].map(v => (
+              <button key={v} onClick={() => setZoom(v)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #F1F5F9', background: zoom === v ? '#4F46E5' : 'white', color: zoom === v ? 'white' : '#94A3B8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>{v}%</button>
+            ))}
+          </div>
 
-      {/* ═══════════════════════════════
-          섹션 3: 개별 기사 편집
-          ═══════════════════════════════ */}
-      <div style={{ ...sectionCard, opacity: hasPdf ? 0.6 : 1, position: 'relative' }}>
-        {/* 비활성화 오버레이 */}
-        {hasPdf && (
-          <div style={{
-            position: 'absolute', inset: 0, borderRadius: '24px', zIndex: 5,
-            background: 'rgba(248,250,252,0.85)', backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '24px',
-          }}>
-            <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-              <AlertCircle size={32} color="#CBD5E1" style={{ marginBottom: '12px' }} />
-              <p style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', lineHeight: 1.6 }}>
-                통합 PDF가 등록되어 있습니다.<br />
-                개별 기사 편집은 통합 PDF를 삭제한 후 가능합니다.
-              </p>
+          {/* 스프레드 */}
+          <div style={{ overflowX: 'auto', paddingBottom: '24px' }}>
+            <div style={{
+              display: 'flex', gap: '16px', width: 'max-content',
+              transform: `scale(${zoom / 100})`, transformOrigin: 'top left',
+              transition: 'transform 0.2s ease',
+            }}>
+              {/* 표지 */}
+              <SpreadPage label="Cover" filename={`TheMHJ_${magazine.month_name}${magazine.year}_Cover`}>
+                <CoverPreview
+                  title={magazine.title} year={magazine.year} month_name={magazine.month_name}
+                  editor={magazine.editor} cover_copy={magazine.cover_copy ?? ''}
+                  contributors={magazine.contributors ?? []} image_url={magazine.image_url}
+                  cover_images={magazine.cover_images ?? []}
+                  accent_color={magazine.accent_color ?? '#1A1A1A'}
+                  cover_filter={magazine.cover_filter ?? 'none'}
+                  issue_number={magazine.issue_number ?? ''}
+                />
+              </SpreadPage>
+
+              {/* 목차 */}
+              <SpreadPage label="Contents" filename={`TheMHJ_${magazine.month_name}${magazine.year}_Contents`}>
+                <TocPreview
+                  title={magazine.title} year={magazine.year} month_name={magazine.month_name}
+                  articles={sortedArticles} accent_color={magazine.accent_color ?? '#1A1A1A'}
+                />
+              </SpreadPage>
+
+              {/* 개별 기사 */}
+              {sortedArticles.filter(a => a.article_type === 'article' || !a.article_type).map((article, idx) => {
+                const tpl = (article as Article & { template?: string }).template ?? 'classic';
+                const artData: ArticlePreviewData = {
+                  title: article.title, author: article.author,
+                  content: article.content, image_url: article.image_url,
+                  article_images: (article as Article & { article_images?: string[] }).article_images ?? [],
+                  template: tpl,
+                };
+                return (
+                  <SpreadPage key={article.id} label={`P.${idx + 1} · ${article.author}`} filename={`TheMHJ_${magazine.month_name}${magazine.year}_${article.title.slice(0, 20)}`}>
+                    {renderTemplate(tpl, artData, accentCol)}
+                  </SpreadPage>
+                );
+              })}
             </div>
           </div>
-        )}
-
-        {/* 헤더 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <div>
-            <h2 style={{ fontSize: '14px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 4px', color: '#1A1A1A' }}>
-              개별 기사 목록
-            </h2>
-            <p style={{ fontSize: '11px', color: '#94A3B8', margin: 0 }}>
-              {sortedArticles.length}개 기사 · sort_order 순서로 뷰어에 표시됩니다
-            </p>
-          </div>
-          <button
-            onClick={openAddModal}
-            disabled={hasPdf}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              background: '#4F46E5', color: '#fff', border: 'none', borderRadius: '999px',
-              padding: '12px 24px', fontSize: '11px', fontWeight: 900,
-              letterSpacing: '2px', cursor: 'pointer', textTransform: 'uppercase',
-              opacity: hasPdf ? 0.4 : 1,
-            }}
-          >
-            <Plus size={13} /> 기사 추가
-          </button>
         </div>
-
-        {/* 기사 없음 */}
-        {sortedArticles.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '48px 24px', color: '#CBD5E1', background: '#F8FAFC', borderRadius: '16px' }}>
-            <FileText size={32} style={{ marginBottom: '12px', opacity: 0.5 }} />
-            <p style={{ fontSize: '11px', fontWeight: 900, letterSpacing: '4px', marginBottom: '8px' }}>기사가 없습니다</p>
-            <p style={{ fontSize: '13px' }}>+ 기사 추가 버튼을 눌러 시작하세요</p>
-          </div>
-        )}
-
-        {/* 기사 카드 목록 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {sortedArticles.map((article, idx) => {
-            const typeCfg = TYPE_CONFIG[(article.article_type as ArticleType) ?? 'article'];
-            const isFirst = idx === 0;
-            const isLast = idx === sortedArticles.length - 1;
-
-            return (
-              <div
-                key={article.id}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '16px',
-                  background: '#F8FAFC', borderRadius: '16px', padding: '14px 16px',
-                  border: '1px solid #F1F5F9',
-                  transition: 'box-shadow 0.2s',
-                }}
-              >
-                {/* 순서 번호 */}
-                <div style={{
-                  width: '32px', height: '32px', borderRadius: '8px',
-                  background: 'white', border: '1px solid #F1F5F9',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '12px', fontWeight: 900, color: '#CBD5E1', flexShrink: 0,
-                }}>
-                  {idx + 1}
-                </div>
-
-                {/* 3:4 썸네일 */}
-                <div style={{
-                  width: '54px', height: '72px', borderRadius: '8px',
-                  overflow: 'hidden', background: '#E2E8F0', flexShrink: 0, position: 'relative',
-                }}>
-                  {article.image_url
-                    ? <SafeImage src={article.image_url} alt="" fill style={{ objectFit: 'cover' }} />
-                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={16} color="#CBD5E1" /></div>
-                  }
-                </div>
-
-                {/* 정보 */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                    <span style={{
-                      background: typeCfg.bg, color: typeCfg.color,
-                      borderRadius: '4px', padding: '2px 8px',
-                      fontSize: '8px', fontWeight: 900, letterSpacing: '2px',
-                    }}>
-                      {typeCfg.label}
-                    </span>
-                    {article.pdf_url && (
-                      <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 700 }}>
-                        {article.pdf_url.toLowerCase().endsWith('.pdf') ? '📄 PDF' : '🖼️ 이미지'}
-                      </span>
-                    )}
-                  </div>
-                  <p style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {article.title}
-                  </p>
-                  <p style={{ fontSize: '11px', color: '#94A3B8', margin: 0 }}>
-                    {article.author} · {article.date}
-                  </p>
-                </div>
-
-                {/* 순서 변경 버튼 */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
-                  <button
-                    onClick={() => moveArticle(article.id, 'up')}
-                    disabled={isFirst || reordering}
-                    style={{ padding: '4px', background: isFirst ? '#F8FAFC' : 'white', border: '1px solid #F1F5F9', borderRadius: '6px', cursor: isFirst ? 'not-allowed' : 'pointer', color: isFirst ? '#E2E8F0' : '#64748B', display: 'flex', opacity: reordering ? 0.5 : 1 }}
-                  >
-                    <ChevronUp size={14} />
-                  </button>
-                  <button
-                    onClick={() => moveArticle(article.id, 'down')}
-                    disabled={isLast || reordering}
-                    style={{ padding: '4px', background: isLast ? '#F8FAFC' : 'white', border: '1px solid #F1F5F9', borderRadius: '6px', cursor: isLast ? 'not-allowed' : 'pointer', color: isLast ? '#E2E8F0' : '#64748B', display: 'flex', opacity: reordering ? 0.5 : 1 }}
-                  >
-                    <ChevronDown size={14} />
-                  </button>
-                </div>
-
-                {/* 수정/삭제 버튼 */}
-                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                  <button
-                    onClick={() => openEditModal(article)}
-                    style={{ padding: '8px', borderRadius: '10px', border: '1px solid #F1F5F9', background: 'white', cursor: 'pointer', color: '#64748B', display: 'flex' }}
-                  >
-                    <Pencil size={14} />
-                  </button>
-                  <button
-                    onClick={() => deleteArticle(article.id)}
-                    style={{ padding: '8px', borderRadius: '10px', border: '1px solid #FEE2E2', background: 'white', cursor: 'pointer', color: '#EF4444', display: 'flex' }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ─── 공유 file inputs ─── */}
-      <input ref={coverImgRef} type="file" accept="image/*" style={{ display: 'none' }}
-        onChange={e => { const f = e.target.files?.[0]; if (f) uploadCoverImage(f); e.target.value = ''; }} />
-      <input ref={contentRef} type="file" accept="image/*,.pdf" style={{ display: 'none' }}
-        onChange={e => { const f = e.target.files?.[0]; if (f) uploadContentFile(f); e.target.value = ''; }} />
-
-      {/* ═══════════════════════════════
-          기사 추가/수정 모달
-          ═══════════════════════════════ */}
-      {modalOpen && formData && (
-        <ArticleModal
-          form={formData}
-          setForm={(patch) => setFormData(p => p ? { ...p, ...patch } : p)}
-          isEditing={!!editingArticle}
-          saving={savingArticle}
-          uploadingCover={uploadingCover}
-          uploadingContent={uploadingContent}
-          error={formError}
-          onSubmit={saveArticle}
-          onClose={closeModal}
-          onCoverUpload={() => coverImgRef.current?.click()}
-          onContentUpload={() => contentRef.current?.click()}
-        />
       )}
+
+      {/* ─── Hidden file inputs ─── */}
+      <input ref={magPdfRef} type="file" accept=".pdf,image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagPdf(f); e.target.value = ''; }} />
+      <input ref={magCoverRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagCover(f); e.target.value = ''; }} />
+      <input ref={extraImgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadExtraCoverImage(f); e.target.value = ''; }} />
+      <input ref={coverImgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadCoverImage(f); e.target.value = ''; }} />
+      <input ref={contentFileRef} type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadContentFile(f); e.target.value = ''; }} />
+      <input ref={slotImgRef} type="file" accept="image/*" style={{ display: 'none' }}
+        onChange={e => { const f = e.target.files?.[0]; if (f) uploadArticleSlotImage(f, pendingSlot.current); e.target.value = ''; }} />
 
       {/* ─── 토스트 ─── */}
       {toast && (
-        <div style={{
-          position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
-          background: '#1A1A1A', color: 'white', borderRadius: '999px',
-          padding: '12px 24px', fontSize: '13px', fontWeight: 700,
-          boxShadow: '0 10px 40px rgba(0,0,0,0.2)', zIndex: 9999,
-          animation: 'slideUp 0.3s ease',
-          whiteSpace: 'nowrap',
-        }}>
+        <div style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', background: '#1A1A1A', color: 'white', borderRadius: '999px', padding: '12px 24px', fontSize: '13px', fontWeight: 700, boxShadow: '0 10px 40px rgba(0,0,0,0.2)', zIndex: 9999, whiteSpace: 'nowrap' }}>
           <Check size={14} style={{ display: 'inline', marginRight: 8, color: '#4ADE80' }} />
           {toast}
         </div>
@@ -703,210 +827,229 @@ export default function MagazineDetailPage() {
   );
 }
 
+/* ─── 스타일 헬퍼 ─── */
+const sectionTitle: React.CSSProperties = {
+  fontSize: '10px', fontWeight: 900, letterSpacing: '3px',
+  color: '#94A3B8', textTransform: 'uppercase', marginBottom: '14px', marginTop: 0,
+};
+const ghostBtn: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: '6px',
+  padding: '7px 14px', background: '#F8FAFC', border: '1px dashed #CBD5E1',
+  borderRadius: '10px', fontSize: '11px', fontWeight: 700, color: '#64748B', cursor: 'pointer',
+};
+const zoomBtn: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  padding: '6px', background: 'white', border: '1px solid #F1F5F9',
+  borderRadius: '8px', cursor: 'pointer', color: '#64748B',
+};
+
+/* ─── SpreadPage: 스프레드 뷰 아이템 (자체 ref 보유) ─── */
+function SpreadPage({ label, children, filename }: {
+  label: string;
+  children: React.ReactNode;
+  filename: string;
+}) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  return (
+    <div style={{ width: '200px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+        <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '2px', color: '#CBD5E1', textTransform: 'uppercase', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: '6px' }}>
+          {label}
+        </p>
+        <DownloadBtn targetRef={wrapRef as React.RefObject<HTMLElement>} filename={filename} size="sm" />
+      </div>
+      <div ref={wrapRef}>{children}</div>
+    </div>
+  );
+}
+
 /* ════════════════════════════════════════════
-   기사 추가/수정 모달
+   인라인 편집 폼 컴포넌트
    ════════════════════════════════════════════ */
-function ArticleModal({
-  form, setForm, isEditing, saving, uploadingCover, uploadingContent, error,
-  onSubmit, onClose, onCoverUpload, onContentUpload,
+function InlineForm({
+  form, setForm, accentColor, photoCount,
+  saving, error, isNew,
+  uploadingCover, uploadingContent, uploadingSlotIdx,
+  onSave, onDelete, onCoverUpload, onContentUpload, onSlotUpload,
 }: {
   form: ArticleInput;
   setForm: (patch: Partial<ArticleInput>) => void;
-  isEditing: boolean;
+  accentColor: string;
+  photoCount: number;
   saving: boolean;
+  error: string;
+  isNew: boolean;
   uploadingCover: boolean;
   uploadingContent: boolean;
-  error: string;
-  onSubmit: (e: React.FormEvent) => void;
-  onClose: () => void;
+  uploadingSlotIdx: number | null;
+  onSave: () => void;
+  onDelete: () => void;
   onCoverUpload: () => void;
   onContentUpload: () => void;
+  onSlotUpload: (idx: number) => void;
 }) {
-  const TYPE_OPTIONS: { value: ArticleType; label: string; desc: string; color: string }[] = [
-    { value: 'cover',    label: 'COVER',    desc: '표지 페이지', color: '#F59E0B' },
-    { value: 'contents', label: 'CONTENTS', desc: '목차 페이지', color: '#4F46E5' },
-    { value: 'article',  label: 'ARTICLE',  desc: '일반 기사',   color: '#94A3B8' },
+  const TYPE_OPTIONS = [
+    { value: 'cover' as ArticleType,    label: 'COVER',    color: '#F59E0B' },
+    { value: 'contents' as ArticleType, label: 'CONTENTS', color: '#4F46E5' },
+    { value: 'article' as ArticleType,  label: 'ARTICLE',  color: '#94A3B8' },
   ];
 
   return (
-    /* 백드롭 */
-    <div
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end' }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      {/* 패널 */}
-      <div style={{
-        width: '100%', maxWidth: '560px', height: '100vh',
-        background: 'white', overflowY: 'auto', padding: '32px',
-        animation: 'slideRight 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-      }}>
-        {/* 헤더 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
-          <div>
-            <span style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '4px', color: '#CBD5E1', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
-              {isEditing ? 'Edit Article' : 'New Article'}
-            </span>
-            <h2 style={{ fontSize: '22px', fontWeight: 900, letterSpacing: '-1px', margin: 0 }}>
-              기사 {isEditing ? '수정' : '추가'}
-            </h2>
-          </div>
-          <button onClick={onClose} style={{ background: '#F8FAFC', border: '1px solid #F1F5F9', borderRadius: '50%', padding: '8px', cursor: 'pointer', color: '#64748B', display: 'flex' }}>
-            <X size={18} />
-          </button>
+    <div style={{ background: 'white', borderRadius: '12px', padding: '16px', border: '1px solid #F1F5F9', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+      {/* 타입 */}
+      <div>
+        <label style={labelStyle}>기사 타입</label>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {TYPE_OPTIONS.map(opt => (
+            <button key={opt.value} type="button" onClick={() => setForm({ article_type: opt.value })}
+              style={{ flex: 1, padding: '8px 4px', borderRadius: '10px', cursor: 'pointer', border: form.article_type === opt.value ? `2px solid ${opt.color}` : '2px solid #F1F5F9', background: form.article_type === opt.value ? `${opt.color}15` : 'white', fontSize: '10px', fontWeight: 900, letterSpacing: '1px', color: form.article_type === opt.value ? opt.color : '#CBD5E1', textTransform: 'uppercase', transition: 'all 0.15s' }}>
+              {opt.label}
+            </button>
+          ))}
         </div>
+      </div>
 
-        <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* 상태 */}
+      <div>
+        <label style={labelStyle}>상태</label>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {(Object.entries(STATUS_CONFIG) as [ArticleStatus, typeof STATUS_CONFIG[ArticleStatus]][]).map(([key, cfg]) => (
+            <button key={key} type="button" onClick={() => setForm({ article_status: key })}
+              style={{ flex: 1, padding: '7px 4px', borderRadius: '10px', cursor: 'pointer', fontSize: '10px', fontWeight: 900, transition: 'all 0.15s', border: form.article_status === key ? `2px solid ${cfg.color}` : '2px solid #F1F5F9', background: form.article_status === key ? cfg.bg : 'white', color: form.article_status === key ? cfg.color : '#CBD5E1' }}>
+              {cfg.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-          {/* 기사 타입 선택 */}
-          <div>
-            <label style={labelStyle}>기사 타입 *</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {TYPE_OPTIONS.map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setForm({ article_type: opt.value })}
-                  style={{
-                    flex: 1, padding: '10px 8px', borderRadius: '12px', cursor: 'pointer',
-                    border: form.article_type === opt.value ? `2px solid ${opt.color}` : '2px solid #F1F5F9',
-                    background: form.article_type === opt.value ? `${opt.color}15` : 'white',
-                    textAlign: 'center', transition: 'all 0.2s',
-                  }}
-                >
-                  <div style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '2px', color: form.article_type === opt.value ? opt.color : '#94A3B8', marginBottom: '2px' }}>
-                    {opt.label}
+      {/* 템플릿 선택 */}
+      {form.article_type === 'article' && (
+        <div>
+          <label style={labelStyle}>템플릿</label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+            {TEMPLATE_META.map(t => {
+              const miniArt: ArticlePreviewData = { title: form.title, author: form.author, content: form.content, image_url: form.image_url, article_images: form.article_images };
+              return (
+                <button key={t.key} type="button" onClick={() => setForm({ template: t.key })}
+                  style={{ padding: 0, borderRadius: '8px', cursor: 'pointer', overflow: 'hidden', border: form.template === t.key ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: 'white', transition: 'all 0.15s' }}>
+                  <div style={{ height: '72px', overflow: 'hidden', position: 'relative', background: '#F8FAFC' }}>
+                    <div style={{ transform: 'scale(0.3)', transformOrigin: 'top left', width: '333%', pointerEvents: 'none' }}>
+                      {renderTemplate(t.key, miniArt, accentColor)}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '10px', color: '#CBD5E1', fontWeight: 700 }}>{opt.desc}</div>
+                  <div style={{ padding: '4px 6px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '8px', fontWeight: 900, color: form.template === t.key ? accentColor : '#94A3B8', margin: 0, textTransform: 'uppercase' }}>{t.label}</p>
+                    <p style={{ fontSize: '7px', color: '#CBD5E1', margin: 0 }}>사진 {t.photos}장</p>
+                  </div>
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
+        </div>
+      )}
 
-          {/* 제목 */}
-          <div>
-            <label style={labelStyle}>제목 *</label>
-            <input value={form.title} onChange={e => setForm({ title: e.target.value })} placeholder="기사 제목" required style={inputStyle} />
-          </div>
+      {/* 제목 */}
+      <div>
+        <label style={labelStyle}>제목 *</label>
+        <input value={form.title} onChange={e => setForm({ title: e.target.value })} placeholder="기사 제목" style={inputStyle} />
+      </div>
 
-          {/* 저자 + 날짜 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label style={labelStyle}>저자</label>
-              <input value={form.author} onChange={e => setForm({ author: e.target.value })} placeholder="저자명" style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>날짜</label>
-              <input value={form.date} onChange={e => setForm({ date: e.target.value })} placeholder="2026.03.08" style={inputStyle} />
-            </div>
-          </div>
+      {/* 저자 + 날짜 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+        <div>
+          <label style={labelStyle}>저자</label>
+          <select value={form.author} onChange={e => setForm({ author: e.target.value })} style={{ ...inputStyle, cursor: 'pointer' }}>
+            <option value="">선택...</option>
+            {['PeNnY', '유민', '유현', '유진'].map(a => <option key={a} value={a}>{a}</option>)}
+          </select>
+        </div>
+        <div>
+          <label style={labelStyle}>날짜</label>
+          <input value={form.date} onChange={e => setForm({ date: e.target.value })} style={inputStyle} />
+        </div>
+      </div>
 
-          {/* 커버 이미지 (썸네일) */}
-          <div>
-            <label style={labelStyle}>
-              커버 이미지 (서가/목록 썸네일)
-              {form.article_type === 'cover' && (
-                <span style={{ color: '#F59E0B', fontStyle: 'normal', fontWeight: 700 }}> → 매거진 표지 자동 설정</span>
-              )}
-            </label>
-            <div
-              onClick={onCoverUpload}
-              style={{ border: '2px dashed #F1F5F9', borderRadius: '12px', padding: '16px', textAlign: 'center', cursor: 'pointer', background: '#F8FAFC', marginBottom: '8px' }}
-            >
-              {form.image_url ? (
-                <div style={{ position: 'relative', height: '120px', borderRadius: '8px', overflow: 'hidden' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={form.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-              ) : (
-                <div style={{ color: '#CBD5E1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', padding: '8px 0' }}>
-                  {uploadingCover ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={20} />}
-                  <p style={{ fontSize: '12px', fontWeight: 700 }}>{uploadingCover ? '업로드 중...' : '이미지 업로드'}</p>
-                </div>
-              )}
-            </div>
-            <input value={form.image_url} onChange={e => setForm({ image_url: e.target.value })} placeholder="또는 이미지 URL 직접 입력" style={{ ...inputStyle, fontSize: '12px' }} />
-          </div>
-
-          {/* 콘텐츠 파일 (뷰어에 보이는 이미지/PDF) */}
-          <div>
-            <label style={labelStyle}>콘텐츠 파일 (뷰어 표시용 이미지 or PDF)</label>
-            <p style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '10px', lineHeight: 1.5 }}>
-              캔바에서 디자인한 페이지를 이미지(JPG/PNG)나 PDF로 내보낸 뒤 업로드하세요. 없으면 텍스트 본문이 표시됩니다.
-            </p>
-            <div
-              onClick={onContentUpload}
-              style={{ border: '2px dashed #F1F5F9', borderRadius: '12px', padding: '16px', textAlign: 'center', cursor: 'pointer', background: '#F8FAFC', marginBottom: '8px' }}
-            >
-              {form.pdf_url ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '4px', textAlign: 'left' }}>
-                  <FileText size={28} color="#4F46E5" style={{ flexShrink: 0 }} />
-                  <div>
-                    <p style={{ fontSize: '12px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px' }}>
-                      {form.pdf_url.split('/').pop()?.slice(0, 40) ?? '파일'}
-                    </p>
-                    <p style={{ fontSize: '10px', color: '#94A3B8', margin: 0 }}>
-                      {form.pdf_url.toLowerCase().endsWith('.pdf') ? 'PDF 파일' : '이미지 파일'} · 클릭하여 변경
-                    </p>
+      {/* 기사 사진 슬롯 */}
+      {form.article_type === 'article' && photoCount > 0 && (
+        <div>
+          <label style={labelStyle}>
+            기사 사진 <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}>({(form.article_images ?? []).filter(Boolean).length}/{photoCount}장)</span>
+          </label>
+          <div style={{ display: 'grid', gridTemplateColumns: photoCount === 1 ? '1fr' : 'repeat(2, 1fr)', gap: '6px' }}>
+            {Array.from({ length: photoCount }, (_, i) => {
+              const src = form.article_images?.[i] ?? '';
+              const isUp = uploadingSlotIdx === i;
+              return (
+                <div key={i}>
+                  <div onClick={() => !isUp && onSlotUpload(i)} style={{ border: '2px dashed #F1F5F9', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', background: '#F8FAFC', aspectRatio: '4/3', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {src
+                      // eslint-disable-next-line @next/next/no-img-element
+                      ? <img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <div style={{ color: '#CBD5E1', textAlign: 'center' }}>{isUp ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={14} />}<p style={{ fontSize: '9px', fontWeight: 700, margin: '3px 0 0' }}>사진 {i + 1}</p></div>
+                    }
+                    {src && (
+                      <button type="button" onClick={e => { e.stopPropagation(); const imgs = [...(form.article_images ?? [])]; imgs[i] = ''; setForm({ article_images: imgs }); }}
+                        style={{ position: 'absolute', top: '3px', right: '3px', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer', color: 'white', display: 'flex' }}>
+                        <X size={10} />
+                      </button>
+                    )}
                   </div>
                 </div>
-              ) : (
-                <div style={{ color: '#CBD5E1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', padding: '8px 0' }}>
-                  {uploadingContent ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={20} />}
-                  <p style={{ fontSize: '12px', fontWeight: 700 }}>{uploadingContent ? '업로드 중...' : '이미지 또는 PDF 업로드'}</p>
-                </div>
-              )}
-            </div>
-            <input value={form.pdf_url} onChange={e => setForm({ pdf_url: e.target.value })} placeholder="또는 URL 직접 입력 (이미지 또는 PDF)" style={{ ...inputStyle, fontSize: '12px' }} />
+              );
+            })}
           </div>
+        </div>
+      )}
 
-          {/* 텍스트 본문 */}
-          <div>
-            <label style={labelStyle}>
-              텍스트 본문
-              <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}> (콘텐츠 파일이 없을 경우 표시)</span>
-            </label>
-            <Suspense fallback={
-              <div style={{ ...inputStyle, minHeight: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1', gap: 8 }}>
-                <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                에디터 로딩 중...
-              </div>
-            }>
-              <TipTapEditor
-                content={form.content}
-                onChange={(html) => setForm({ content: html })}
-                placeholder="기사 텍스트 내용... 이미지나 PDF를 업로드한 경우 비워도 됩니다."
-              />
-            </Suspense>
-          </div>
+      {/* 커버 이미지 */}
+      <div>
+        <label style={labelStyle}>커버 이미지 (대표 사진)</label>
+        <div onClick={onCoverUpload} style={{ border: '2px dashed #F1F5F9', borderRadius: '10px', padding: '10px', textAlign: 'center', cursor: 'pointer', background: '#F8FAFC', marginBottom: '6px' }}>
+          {form.image_url
+            ? <div style={{ height: '80px', borderRadius: '6px', overflow: 'hidden' }}><img src={form.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div> // eslint-disable-line @next/next/no-img-element
+            : <div style={{ color: '#CBD5E1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '6px 0' }}>{uploadingCover ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={16} />}<p style={{ fontSize: '10px', fontWeight: 700, margin: 0 }}>{uploadingCover ? '업로드 중...' : '이미지 업로드'}</p></div>
+          }
+        </div>
+        <input value={form.image_url} onChange={e => setForm({ image_url: e.target.value })} placeholder="또는 URL 입력" style={{ ...inputStyle, fontSize: '12px' }} />
+      </div>
 
-          {error && (
-            <div style={{ color: '#EF4444', fontSize: '13px', padding: '12px 16px', background: '#FEF2F2', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertCircle size={14} style={{ flexShrink: 0 }} />
-              {error}
-            </div>
-          )}
+      {/* 본문 TipTap */}
+      <div>
+        <label style={labelStyle}>텍스트 본문</label>
+        <Suspense fallback={<div style={{ ...inputStyle, minHeight: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1' }}><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /></div>}>
+          <TipTapEditor content={form.content} onChange={html => setForm({ content: html })} placeholder="기사 텍스트..." />
+        </Suspense>
+      </div>
 
-          <div style={{ display: 'flex', gap: '10px', paddingTop: '4px' }}>
-            <button
-              type="submit" disabled={saving}
-              style={{
-                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                background: '#4F46E5', color: 'white', border: 'none', borderRadius: '999px',
-                padding: '14px 24px', fontSize: '12px', fontWeight: 900, letterSpacing: '2px',
-                cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, textTransform: 'uppercase',
-              }}
-            >
-              {saving ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={13} />}
-              {saving ? '저장 중...' : isEditing ? '수정 완료' : '기사 추가'}
-            </button>
-            <button
-              type="button" onClick={onClose}
-              style={{ padding: '14px 20px', background: 'white', color: '#64748B', border: '1px solid #F1F5F9', borderRadius: '999px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
-            >
-              취소
-            </button>
-          </div>
-        </form>
+      {/* 콘텐츠 파일 */}
+      <div>
+        <label style={labelStyle}>콘텐츠 파일 <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}>(이미지 or PDF)</span></label>
+        <div onClick={onContentUpload} style={{ border: '2px dashed #F1F5F9', borderRadius: '10px', padding: '10px', textAlign: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
+          {form.pdf_url
+            ? <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px' }}><FileText size={20} color="#4F46E5" style={{ flexShrink: 0 }} /><p style={{ fontSize: '11px', fontWeight: 700, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.pdf_url.split('/').pop()?.slice(0, 30)}</p></div>
+            : <div style={{ color: '#CBD5E1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '6px 0' }}>{uploadingContent ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={16} />}<p style={{ fontSize: '10px', fontWeight: 700, margin: 0 }}>{uploadingContent ? '업로드 중...' : '파일 업로드'}</p></div>
+          }
+        </div>
+      </div>
+
+      {/* 에러 */}
+      {error && (
+        <div style={{ color: '#EF4444', fontSize: '12px', padding: '10px 14px', background: '#FEF2F2', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <AlertCircle size={13} style={{ flexShrink: 0 }} />{error}
+        </div>
+      )}
+
+      {/* 저장/삭제 버튼 */}
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button onClick={onSave} disabled={saving}
+          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '999px', padding: '11px 16px', fontSize: '11px', fontWeight: 900, letterSpacing: '1px', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, textTransform: 'uppercase' }}>
+          {saving ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={12} />}
+          {saving ? '저장 중...' : isNew ? '기사 추가' : '저장'}
+        </button>
+        <button onClick={onDelete} style={{ padding: '11px 16px', background: 'white', color: '#EF4444', border: '1px solid #FEE2E2', borderRadius: '999px', fontSize: '11px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Trash2 size={12} />{isNew ? '취소' : '삭제'}
+        </button>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { X, ChevronLeft, ChevronRight, Download, List, BookOpen, Image as ImageIcon, AlignLeft } from 'lucide-react';
+import DownloadBtn from '@/components/DownloadBtn';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article } from '@/lib/types';
 
@@ -456,7 +457,7 @@ export default function MagazineViewer({ magazine, articles }: Props) {
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: 24 }}>
                 {sortedArticles.map(a => (
-                  <ArticleGridCard key={a.id} article={a} onOpen={() => setSelectedArticle(a)} />
+                  <ArticleGridCard key={a.id} article={a} onOpen={() => setSelectedArticle(a)} magazineLabel={`${magazine.month_name}${magazine.year}`} />
                 ))}
               </div>
             </div>
@@ -530,10 +531,13 @@ export default function MagazineViewer({ magazine, articles }: Props) {
 }
 
 /* ─── Articles 모드 그리드 카드 ─── */
-function ArticleGridCard({ article, onOpen }: { article: Article; onOpen: () => void }) {
+function ArticleGridCard({ article, onOpen, magazineLabel }: { article: Article; onOpen: () => void; magazineLabel: string }) {
   const isImageFile = !!article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf');
+  const cardRef = useRef<HTMLDivElement>(null);
   return (
+    <div style={{ position: 'relative' }}>
     <div
+      ref={cardRef}
       onClick={onOpen}
       style={{ borderRadius: 16, overflow: 'hidden', background: '#fff', border: '1px solid #E8DDD4', cursor: 'pointer', transition: 'transform 0.25s ease, box-shadow 0.25s ease', boxShadow: '0 2px 8px rgba(44,31,20,0.06)' }}
       onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 16px 40px rgba(44,31,20,0.12)'; }}
@@ -560,6 +564,15 @@ function ArticleGridCard({ article, onOpen }: { article: Article; onOpen: () => 
           {article.title}
         </h3>
       </div>
+    </div>
+    {/* 다운로드 버튼 오버레이 */}
+    <div style={{ position: 'absolute', bottom: '12px', right: '12px' }} onClick={e => e.stopPropagation()}>
+      <DownloadBtn
+        targetRef={cardRef as React.RefObject<HTMLElement>}
+        filename={`TheMHJ_${magazineLabel}_${article.title.slice(0, 20)}`}
+        size="sm"
+      />
+    </div>
     </div>
   );
 }
