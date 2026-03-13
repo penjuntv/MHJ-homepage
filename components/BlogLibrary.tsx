@@ -9,6 +9,11 @@ import type { Blog } from '@/lib/types';
 import NewsletterCTA from './NewsletterCTA';
 import { ArrowRight } from 'lucide-react';
 
+const READER_CATEGORY_COLORS: Record<string, string> = {
+  Education: '#3B82F6', Settlement: '#8B5CF6', Girls: '#EC4899',
+  Locals: '#EF4444', Life: '#F59E0B', Travel: '#10B981',
+};
+
 const CATS = ['All', 'Popular', 'Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'] as const;
 type Cat = typeof CATS[number];
 
@@ -36,9 +41,10 @@ interface Props {
   blogs: Blog[];
   blogTitle?: string;
   blogDescription?: string;
+  readerFavorites?: Blog[];
 }
 
-export default function BlogLibrary({ blogs, blogTitle, blogDescription }: Props) {
+export default function BlogLibrary({ blogs, blogTitle, blogDescription, readerFavorites }: Props) {
   const displayBlogs = blogs.length ? blogs : FALLBACK_BLOGS;
   const [activeCategory, setActiveCategory] = useState<Cat>('All');
   const [popularBlogs, setPopularBlogs] = useState<Blog[]>([]);
@@ -85,13 +91,15 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription }: Props
     : displayBlogs.filter(b => b.category === activeCategory);
 
   const [featured, ...rest] = filtered;
-  const showFeatured = activeCategory === 'All' && filtered.length > 0;
+  const showFeatured = (activeCategory === 'All' || activeCategory === 'Popular') && filtered.length > 0;
+  const mediumCards = showFeatured ? rest.slice(0, 2) : [];
+  const smallCards  = showFeatured ? rest.slice(2)  : [];
 
   return (
     <div
       className="animate-fade-in"
       style={{
-        padding: 'clamp(20px, 4vw, 40px) clamp(24px, 4vw, 80px)',
+        padding: 'clamp(60px, 10vw, 120px) clamp(24px, 5vw, 80px)',
         minHeight: '100vh',
       }}
     >
@@ -101,7 +109,7 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription }: Props
         flexWrap: 'wrap',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        marginBottom: 80,
+        marginBottom: 120,
         gap: 40,
       }}>
         {/* 타이틀 */}
@@ -110,13 +118,9 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription }: Props
             Blog Library
           </p>
           <h1
-            className="font-display font-black"
+            className="font-display font-black type-display"
             style={{
-              fontSize: 'clamp(64px, 10vw, 128px)',
-              fontWeight: 900,
-              letterSpacing: -4,
               textTransform: 'uppercase',
-              lineHeight: 0.85,
               fontStyle: 'italic',
               color: 'var(--text)',
               marginBottom: 24,
@@ -124,11 +128,8 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription }: Props
           >
             {blogTitle || 'The Library'}
           </h1>
-          <p style={{
-            fontSize: 'clamp(16px, 2vw, 22px)',
+          <p className="type-body" style={{
             color: 'var(--text-secondary)',
-            fontWeight: 500,
-            lineHeight: 1.6,
             maxWidth: 480,
           }}>
             {blogDescription || '사회복지사 석사 과정과 일상을 기록하는 희종의 개인 서재입니다.'}
@@ -213,40 +214,90 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription }: Props
           No posts yet
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
 
-          {/* 피처드 카드 (All 탭의 첫 번째 글) */}
-          {showFeatured && featured && (
-            <FeaturedCard
-              blog={featured}
-              onClick={() => router.push(`/blog/${featured.slug}`)}
-            />
+          {showFeatured ? (
+            <>
+              {/* ① 피처드 카드 — 1번째 글 (2분할 레이아웃) */}
+              {featured && (
+                <FeaturedCard
+                  blog={featured}
+                  rank={activeCategory === 'Popular' ? 1 : undefined}
+                  onClick={() => router.push(`/blog/${featured.slug}`)}
+                />
+              )}
+
+              {/* ② 미디엄 카드 — 2~3번째 글 (2컬럼, 3:4 세로형) */}
+              {mediumCards.length > 0 && (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))',
+                  gap: 32,
+                }}>
+                  {mediumCards.map((b, i) => (
+                    <BlogCard
+                      key={b.id}
+                      blog={b}
+                      imageRatio="3/4"
+                      staggerClass={`stagger-${i + 1}`}
+                      showRank={activeCategory === 'Popular' ? i + 2 : undefined}
+                      onClick={() => router.push(`/blog/${b.slug}`)}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* ③ 소형 카드 — 4번째 이후 (3컬럼, 4:3 가로형) */}
+              {smallCards.length > 0 && (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))',
+                  gap: 48,
+                }}>
+                  {smallCards.map((b, i) => (
+                    <BlogCard
+                      key={b.id}
+                      blog={b}
+                      imageRatio="4/3"
+                      size="small"
+                      staggerClass={`stagger-${Math.min(i + 1, 4)}`}
+                      showRank={activeCategory === 'Popular' ? i + 3 : undefined}
+                      onClick={() => router.push(`/blog/${b.slug}`)}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            /* 카테고리 필터 활성 시 — 3컬럼 균일 그리드 */
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              style={{ gap: 48 }}
+            >
+              {filtered.map((b, i) => (
+                <BlogCard
+                  key={b.id}
+                  blog={b}
+                  imageRatio="4/3"
+                  staggerClass={`stagger-${Math.min(i + 1, 4)}`}
+                  onClick={() => router.push(`/blog/${b.slug}`)}
+                />
+              ))}
+            </div>
           )}
-
-          {/* 일반 카드 그리드 */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))',
-            gap: 28,
-          }}>
-            {(showFeatured ? rest : filtered).map((b, i) => (
-              <BlogCard
-                key={b.id}
-                blog={b}
-                staggerClass={`stagger-${Math.min(i + 1, 4)}`}
-                showRank={activeCategory === 'Popular' ? i + 1 : undefined}
-                onClick={() => router.push(`/blog/${b.slug}`)}
-              />
-            ))}
-          </div>
         </div>
       )}
 
       {/* Popular Tags */}
       <PopularTags blogs={displayBlogs} />
 
+      {/* Reader Favorites */}
+      {readerFavorites && readerFavorites.length > 0 && (
+        <ReaderFavoritesSection blogs={readerFavorites} />
+      )}
+
       {/* Newsletter CTA */}
-      <div style={{ margin: '96px calc(-1 * clamp(24px, 4vw, 80px)) -40px' }}>
+      <div style={{ margin: '140px calc(-1 * clamp(24px, 5vw, 80px)) -40px' }}>
         <NewsletterCTA />
       </div>
     </div>
@@ -254,11 +305,12 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription }: Props
 }
 
 /* ════════════════════════════════════════════
-   Featured Card — 최신 글 (2열 너비)
+   Featured Card — 1번째 글 (좌우 2분할)
    ════════════════════════════════════════════ */
-function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
+function FeaturedCard({ blog, rank, onClick }: { blog: Blog; rank?: number; onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
   const color = CATEGORY_COLORS[blog.category] || '#4F46E5';
+  const excerpt = blog.content.replace(/<[^>]+>/g, '').slice(0, 160);
 
   return (
     <div
@@ -266,126 +318,111 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        position: 'relative',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(420px, 100%), 1fr))',
+        borderRadius: 36,
         overflow: 'hidden',
-        borderRadius: 40,
         cursor: 'pointer',
-        boxShadow: hovered ? '0 40px 80px rgba(0,0,0,0.2)' : '0 8px 32px rgba(0,0,0,0.08)',
-        transform: hovered ? 'translateY(-8px)' : 'translateY(0)',
+        background: 'var(--bg-card, #fff)',
+        border: '1px solid var(--border)',
+        boxShadow: hovered ? '0 32px 64px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.06)',
+        transform: hovered ? 'translateY(-6px)' : 'translateY(0)',
         transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s',
       }}
     >
-      {/* 이미지 */}
-      <div style={{ aspectRatio: '16/7', position: 'relative', overflow: 'hidden' }}>
+      {/* 왼쪽: 이미지 (16:9) */}
+      <div style={{ aspectRatio: '16/9', position: 'relative', overflow: 'hidden', minHeight: 280 }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
           fill
           className="object-cover"
+          priority
           style={{
-            filter: hovered
-              ? 'saturate(2.2) contrast(1.1) brightness(1.02)'
-              : 'saturate(1.4) contrast(1.05)',
-            transform: hovered ? 'scale(1.04)' : 'scale(1)',
+            filter: hovered ? 'saturate(1.4) contrast(1.05) brightness(1.05)' : 'saturate(1.1) contrast(1.02) brightness(1.02)',
+            transform: hovered ? 'scale(1.03)' : 'scale(1)',
             transition: 'filter 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
-          priority
         />
-        {/* 그라디언트 오버레이 */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 40%, transparent 80%)',
-        }} />
-
-        {/* Featured 라벨 */}
-        <div style={{ position: 'absolute', top: 28, left: 28, zIndex: 2 }}>
-          <span style={{
-            background: 'rgba(255,255,255,0.15)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.25)',
-            borderRadius: 999,
-            padding: '6px 16px',
-            fontSize: 9,
-            fontWeight: 900,
-            letterSpacing: 4,
-            color: 'white',
-            textTransform: 'uppercase',
+        {/* 에디토리얼 오버레이 */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.08))', pointerEvents: 'none', zIndex: 1 }} />
+        {/* 순위 뱃지 (Popular 탭) */}
+        {rank !== undefined && (
+          <div style={{
+            position: 'absolute', top: 16, left: 16, zIndex: 2,
+            background: '#4F46E5', borderRadius: '50%', width: 40, height: 40,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
+            <span className="font-display" style={{ color: 'white', fontSize: 14, fontWeight: 900, fontStyle: 'italic' }}>{rank}</span>
+          </div>
+        )}
+      </div>
+
+      {/* 오른쪽: 텍스트 */}
+      <div style={{
+        padding: 'clamp(32px, 5vw, 64px)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        gap: 20,
+      }}>
+        {/* 카테고리 + 날짜 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span style={{
+            padding: '4px 14px', borderRadius: 999,
+            background: color, color: 'white',
+            fontSize: 9, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase',
+          }}>
+            {blog.category}
+          </span>
+          <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
             Latest Story
           </span>
         </div>
 
-        {/* 카테고리 뱃지 */}
-        <div style={{ position: 'absolute', top: 28, right: 28, zIndex: 2 }}>
-          <span style={{
-            background: color,
-            borderRadius: 999,
-            padding: '6px 16px',
-            fontSize: 9,
+        {/* 제목 */}
+        <h2
+          className="font-display"
+          style={{
+            fontSize: 'clamp(28px, 3.5vw, 48px)',
             fontWeight: 900,
-            letterSpacing: 4,
-            color: 'white',
-            textTransform: 'uppercase',
-          }}>
-            {blog.category}
-          </span>
+            letterSpacing: -2,
+            lineHeight: 0.95,
+            color: 'var(--text)',
+            fontStyle: 'italic',
+          }}
+        >
+          {blog.title}
+        </h2>
+
+        {/* 발췌 */}
+        <p style={{
+          fontSize: 15,
+          color: 'var(--text-secondary)',
+          lineHeight: 1.65,
+          overflow: 'hidden',
+          display: '-webkit-box',
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical' as const,
+        }}>
+          {excerpt}
+        </p>
+
+        {/* 저자 + 날짜 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>{blog.author}</span>
+          <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>{blog.date}</span>
         </div>
 
-        {/* 콘텐츠 */}
+        {/* CTA */}
         <div style={{
-          position: 'absolute',
-          inset: 0,
-          padding: 'clamp(28px, 4vw, 48px)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
+          display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 4,
+          fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase',
+          color: '#4F46E5',
         }}>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: 3, display: 'block', marginBottom: 12 }}>
-            {blog.date} · {blog.author}
-          </span>
-          <h2
-            style={{
-              fontSize: 'clamp(28px, 4vw, 56px)',
-              fontWeight: 900,
-              color: 'white',
-              letterSpacing: -2,
-              lineHeight: 0.9,
-              textTransform: 'uppercase',
-              marginBottom: 20,
-              transition: 'color 0.3s',
-            }}
-          >
-            <span className={`featured-title${hovered ? ' featured-title-hovered' : ''}`}>
-              {blog.title}
-            </span>
-          </h2>
-          <p style={{
-            fontSize: 14,
-            color: 'rgba(255,255,255,0.65)',
-            lineHeight: 1.6,
-            maxWidth: 640,
-            overflow: 'hidden',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            marginBottom: 28,
-          }}>
-            {blog.content.replace(/<[^>]+>/g, '')}
-          </p>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 10,
-            fontSize: 11,
-            fontWeight: 900,
-            letterSpacing: 3,
-            textTransform: 'uppercase',
-            color: 'white',
-          }}>
-            <span style={{ borderBottom: '1px solid rgba(255,255,255,0.4)', paddingBottom: 4 }}>Read More</span>
-            <ArrowRight size={14} style={{ transition: 'transform 0.3s', transform: hovered ? 'translateX(4px)' : 'translateX(0)' }} />
-          </div>
+          Read Story
+          <ArrowRight size={13} style={{ transition: 'transform 0.3s', transform: hovered ? 'translateX(4px)' : 'translateX(0)' }} />
         </div>
       </div>
     </div>
@@ -393,18 +430,21 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
 }
 
 /* ════════════════════════════════════════════
-   Blog Card — 일반 카드
+   Blog Card — 미디엄 / 소형 카드
    ════════════════════════════════════════════ */
 interface CardProps {
   blog: Blog;
   staggerClass: string;
   onClick: () => void;
   showRank?: number;
+  imageRatio?: '4/3' | '3/4';
+  size?: 'small';
 }
 
-function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
+function BlogCard({ blog, staggerClass, onClick, showRank, imageRatio = '4/3', size }: CardProps) {
   const [hovered, setHovered] = useState(false);
   const color = CATEGORY_COLORS[blog.category] || '#4F46E5';
+  const titleSize = size === 'small' ? 'clamp(14px, 1.6vw, 18px)' : 'clamp(16px, 1.8vw, 22px)';
 
   return (
     <div
@@ -414,7 +454,7 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'relative',
-        borderRadius: 24,
+        borderRadius: size === 'small' ? 20 : 24,
         background: 'var(--bg-card, #fff)',
         border: '1px solid var(--border, #F1F5F9)',
         cursor: 'pointer',
@@ -424,19 +464,21 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
         overflow: 'hidden',
       }}
     >
-      {/* 이미지 영역 — 순수 사진, 텍스트 없음 */}
-      <div style={{ aspectRatio: '4/3', position: 'relative', overflow: 'hidden' }}>
+      {/* 이미지 영역 */}
+      <div style={{ aspectRatio: imageRatio, position: 'relative', overflow: 'hidden' }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
           fill
           className="object-cover"
           style={{
-            filter: hovered ? 'saturate(2.0) contrast(1.08)' : 'saturate(1.2)',
+            filter: hovered ? 'saturate(1.4) contrast(1.05) brightness(1.05)' : 'saturate(1.1) contrast(1.02) brightness(1.02)',
             transform: hovered ? 'scale(1.05)' : 'scale(1)',
             transition: 'filter 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
+        {/* 에디토리얼 오버레이 */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.08))', pointerEvents: 'none', zIndex: 1 }} />
         {/* 인기 순위 뱃지 */}
         {showRank !== undefined && (
           <div style={{
@@ -488,7 +530,7 @@ function BlogCard({ blog, staggerClass, onClick, showRank }: CardProps) {
         {/* 제목 */}
         <h3
           style={{
-            fontSize: 'clamp(16px, 1.8vw, 20px)',
+            fontSize: titleSize,
             fontWeight: 800,
             color: 'var(--text, #1A1A1A)',
             letterSpacing: -0.4,
@@ -531,15 +573,12 @@ function PopularTags({ blogs }: { blogs: Blog[] }) {
     maxCount === minCount ? 16 : 13 + ((count - minCount) / (maxCount - minCount)) * 10;
 
   return (
-    <section style={{ marginTop: 96 }}>
-      <div style={{ marginBottom: 32 }}>
-        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 12 }}>
+    <section style={{ marginTop: 140 }}>
+      <div style={{ marginBottom: 40 }}>
+        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
           Tags
         </p>
-        <h2 className="font-display font-black" style={{
-          fontSize: 'clamp(28px, 4vw, 48px)',
-          letterSpacing: -1, lineHeight: 1, fontStyle: 'italic', color: 'var(--text)',
-        }}>
+        <h2 className="font-display font-black type-h2" style={{ fontStyle: 'italic', color: 'var(--text)' }}>
           Popular Tags
         </h2>
       </div>
@@ -569,6 +608,72 @@ function PopularTags({ blogs }: { blogs: Blog[] }) {
             <span style={{ fontSize: 10, opacity: 0.45, fontWeight: 700 }}>{count}</span>
           </Link>
         ))}
+      </div>
+    </section>
+  );
+}
+
+/* ════════════════════════════════════════════
+   Reader Favorites — 인기 글 리스트
+   ════════════════════════════════════════════ */
+function ReaderFavoritesSection({ blogs }: { blogs: Blog[] }) {
+  return (
+    <section style={{ marginTop: 140 }}>
+      <div style={{ textAlign: 'center', marginBottom: 64 }}>
+        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
+          MOST READ
+        </p>
+        <h2 className="font-display font-black type-h1" style={{ color: 'var(--text)', fontStyle: 'italic' }}>
+          Reader Favorites
+        </h2>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 900, margin: '0 auto' }}>
+        {blogs.map((blog, i) => {
+          const color = READER_CATEGORY_COLORS[blog.category] || '#4F46E5';
+          return (
+            <Link
+              key={blog.id}
+              href={`/blog/${blog.slug}`}
+              className="most-read-row"
+              style={{
+                display: 'flex', gap: 20, alignItems: 'center',
+                padding: '16px 20px',
+                background: 'var(--bg)',
+                borderRadius: 20,
+                textDecoration: 'none',
+                border: '1px solid var(--border)',
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{
+                width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                background: i < 3 ? color : 'var(--bg-surface)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <span className="font-display" style={{ fontSize: 13, fontWeight: 900, fontStyle: 'italic', color: i < 3 ? 'white' : 'var(--text-tertiary)', lineHeight: 1 }}>
+                  {i + 1}
+                </span>
+              </div>
+              <div style={{ width: 120, height: 90, borderRadius: 14, overflow: 'hidden', position: 'relative', flexShrink: 0, background: 'var(--bg-surface)' }}>
+                <SafeImage src={blog.image_url} alt={blog.title} fill className="object-cover most-read-img" />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                  <span style={{ padding: '2px 10px', borderRadius: 999, background: color + '18', color, fontSize: 9, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase' }}>
+                    {blog.category}
+                  </span>
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 700 }}>{blog.date}</span>
+                </div>
+                <p style={{ fontSize: 'clamp(14px, 1.8vw, 17px)', fontWeight: 900, color: 'var(--text)', lineHeight: 1.3, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
+                  {blog.title}
+                </p>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{blog.author}</span>
+              </div>
+              <ArrowRight size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
