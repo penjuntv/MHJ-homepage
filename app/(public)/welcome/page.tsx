@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: `${s.welcome_title} — MY MAIRANGI`,
       description: s.welcome_description,
       url: 'https://mymairangi.com/welcome',
-      images: [{ url: s.welcome_hero_image_url || 'https://mymairangi.com/og-default.jpg', width: 1200, height: 630 }],
+      images: [{ url: 'https://mymairangi.com/og-default.jpg', width: 1200, height: 630 }],
     },
     alternates: { canonical: 'https://mymairangi.com/welcome' },
   };
@@ -123,8 +123,8 @@ export default async function WelcomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <WelcomeClient
-        heroImageUrl={s.welcome_hero_image_url || ''}
-        familyImageUrl={s.about_image_url || s.about_hero_image_url || ''}
+        heroImageUrl={''}
+        familyImageUrl={s.about_image_url || ''}
         welcomeTitle={s.welcome_title}
         welcomeDescription={s.welcome_description}
         introDescription={s.intro_description}

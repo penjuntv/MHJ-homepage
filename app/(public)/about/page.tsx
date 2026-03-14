@@ -57,7 +57,10 @@ async function getFamilyMembers(): Promise<FamilyMember[]> {
 const STAGGER = ['stagger-1', 'stagger-2', 'stagger-3', 'stagger-4'];
 
 export default async function AboutPage() {
-  const [members, s] = await Promise.all([getFamilyMembers(), getSiteSettings()]);
+  const [allMembers, s] = await Promise.all([getFamilyMembers(), getSiteSettings()]);
+
+  const parents = allMembers.filter(m => m.sort_order < 0);
+  const daughters = allMembers.filter(m => m.sort_order > 0);
 
   const whoImage = s.about_who_image_url || s.about_image_url || '';
   const visionImage = s.about_image_url || '';
@@ -203,7 +206,119 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* ─── 3. Three Daughters Section ─── */}
+      {/* ─── 3. The Parents Section ─── */}
+      {parents.length > 0 && (
+        <section style={{ padding: 'clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px)', background: 'var(--bg)' }}>
+
+          {/* 헤더 */}
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(48px, 8vw, 128px)' }}>
+            <p className="type-caption" style={{
+              color: '#cbd5e1',
+              fontStyle: 'italic',
+              letterSpacing: 6,
+              marginBottom: 16,
+            }}>
+              The Family
+            </p>
+            <p className="type-h1" style={{
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              lineHeight: 1,
+              color: 'var(--text)',
+            }}>
+              THE{' '}
+              <span
+                className="font-display"
+                style={{ fontStyle: 'italic', fontWeight: 300, color: '#94a3b8' }}
+              >
+                PARENTS
+              </span>
+            </p>
+          </div>
+
+          {/* 프로필 그리드 */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
+            gap: 80,
+            maxWidth: 900,
+            margin: '0 auto',
+          }}>
+            {parents.map((m, i) => (
+              <div
+                key={m.id}
+                className={`animate-slide-up ${STAGGER[i] ?? 'stagger-2'}`}
+                style={{ textAlign: 'center' }}
+              >
+                {/* 프로필 이미지 */}
+                <div
+                  style={{
+                    aspectRatio: '4/5',
+                    borderRadius: 40,
+                    overflow: 'hidden',
+                    marginBottom: 40,
+                    boxShadow: '0 15px 40px rgba(0,0,0,0.08)',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
+                  }}
+                >
+                  {m.image_url ? (
+                    <SafeImage
+                      src={m.image_url}
+                      alt={m.name}
+                      fill
+                      className="object-cover grayscale-hover"
+                    />
+                  ) : (
+                    <div style={{
+                      width: '100%', height: '100%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <span style={{
+                        fontSize: 'clamp(48px, 8vw, 80px)',
+                        fontWeight: 900,
+                        color: 'rgba(148, 163, 184, 0.4)',
+                        letterSpacing: -2,
+                        lineHeight: 1,
+                      }}>
+                        {m.name.split(' ').map(w => w[0]).join('')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <h3 className="type-h2" style={{
+                  textTransform: 'uppercase',
+                  marginBottom: 8,
+                  color: 'var(--text)',
+                }}>
+                  {m.name}
+                </h3>
+                <span className="type-caption" style={{
+                  color: '#6366f1',
+                  fontWeight: 700,
+                  display: 'block',
+                  marginBottom: 24,
+                  letterSpacing: 3,
+                }}>
+                  {m.role}
+                </span>
+                <p className="type-body" style={{
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.7,
+                  padding: '0 16px',
+                }}>
+                  {m.bio}
+                </p>
+              </div>
+            ))}
+          </div>
+
+        </section>
+      )}
+
+      {/* ─── 4. Three Daughters Section ─── */}
       <section style={{ padding: 'clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px)', background: 'var(--bg-surface)' }}>
 
         {/* 헤더 */}
@@ -240,7 +355,7 @@ export default async function AboutPage() {
           maxWidth: 1200,
           margin: '0 auto',
         }}>
-          {members.map((m, i) => (
+          {daughters.map((m, i) => (
             <div
               key={m.id}
               className={`animate-slide-up ${STAGGER[i] ?? 'stagger-4'}`}

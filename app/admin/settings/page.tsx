@@ -23,9 +23,6 @@ const SOCIAL_KEYS = ['social_instagram', 'social_facebook', 'social_youtube'] as
 
 // 이미지 업로드 키 정의
 const IMAGE_KEYS = [
-  { key: 'welcome_hero_image_url', label: 'Welcome 히어로 이미지', hint: '/welcome 페이지 상단 대형 배경 이미지', folder: 'site/welcome-hero' },
-  { key: 'about_image_url', label: '가족사진 (메인)', hint: '/welcome "The Mairangi Family" 섹션 + /about 비전 섹션에 공통 사용', folder: 'site/about-main' },
-  { key: 'about_hero_image_url', label: 'About 가족사진 (레거시)', hint: 'about_image_url가 비어있을 때 사용', folder: 'site/about-hero' },
   { key: 'storypress_hero_image_url', label: 'StoryPress 히어로 이미지', hint: 'StoryPress 섹션 배경 이미지', folder: 'site/storypress' },
 ] as const;
 
