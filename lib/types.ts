@@ -123,9 +123,30 @@ export interface HeroCarouselItem {
   is_custom?: boolean;
 }
 
+// 새 HeroCarousel 슬라이드 타입 (5-slide showcase)
+export interface CarouselSlide {
+  key: string;
+  type: 'blog' | 'magazine' | 'storypress';
+  label: string;
+  title: string;
+  subtitle?: string;
+  image_url?: string;
+  cta_text: string;
+  blog?: Blog;
+  link_url?: string;
+}
+
 export interface GalleryItem {
   id: number;
   image_url: string;
+  // 신규 필드 (photographer exhibition)
+  title?: string | null;
+  comment?: string | null;
+  photographer?: string | null;   // 'Yumin' | 'Yuhyeon' | 'Yujin'
+  taken_date?: string | null;
+  location?: string | null;
+  published?: boolean;
+  // 레거시 필드
   caption?: string | null;
   category?: string | null;
   date?: string | null;
