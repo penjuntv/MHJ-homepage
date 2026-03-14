@@ -126,8 +126,8 @@ export default function SettingsPage() {
   };
   const inputStyle = {
     width: '100%', padding: '14px 16px', borderRadius: '16px',
-    border: '1px solid #F1F5F9', background: '#F8FAFC',
-    fontSize: '14px', outline: 'none',
+    border: '1px solid #E2E8F0', background: '#F8FAFC',
+    fontSize: '14px', color: '#1A1A1A', outline: 'none',
     boxSizing: 'border-box' as const, fontFamily: 'inherit',
   };
 

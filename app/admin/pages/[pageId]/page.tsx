@@ -20,12 +20,12 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
     path: '/',
     sections: [
       {
-        heading: '히어로 / 인트로 섹션',
+        heading: 'StoryPress 섹션 (랜딩)',
         fields: [
-          { key: 'hero_label', label: '캐러셀 라벨', type: 'text', hint: '슬라이드 상단 레이블 (예: Featured Story)' },
-          { key: 'intro_title', label: '인트로 대형 타이틀', type: 'text', hint: '화면 왼쪽 대형 타이포 (예: MAIRANGI)' },
-          { key: 'intro_subtitle', label: '인트로 서브타이틀', type: 'text', hint: '타이틀 아래 두 번째 줄 (예: JOURNAL)' },
-          { key: 'intro_description', label: '인트로 소개 텍스트', type: 'textarea', hint: '우측 텍스트 블록 소개문' },
+          { key: 'storypress_title', label: 'StoryPress 제목', type: 'text', hint: '랜딩 페이지 StoryPress 섹션 제목' },
+          { key: 'storypress_description', label: 'StoryPress 설명', type: 'textarea', hint: '랜딩 페이지 StoryPress 섹션 설명문' },
+          { key: 'storypress_cta_text', label: 'CTA 버튼 텍스트', type: 'text', hint: '예: Join the Waitlist' },
+          { key: 'storypress_cta_url', label: 'CTA 버튼 URL', type: 'url', hint: '비워두면 /storypress로 이동' },
         ],
       },
     ],
@@ -35,25 +35,20 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
     path: '/about',
     sections: [
       {
-        heading: '비전 섹션',
+        heading: 'WHO WE ARE 섹션',
+        fields: [
+          { key: 'about_who_title', label: '섹션 제목', type: 'text', hint: '예: The Mairangi Family' },
+          { key: 'about_who_description_en', label: '영문 소개', type: 'textarea', hint: '첫 번째 문단 (영문)' },
+          { key: 'about_who_description_kr', label: '한글 소개', type: 'textarea', hint: '두 번째 문단 (한글)' },
+          { key: 'about_who_image_url', label: 'WHO WE ARE 대형 사진', type: 'image', hint: '좌측 4:5 비율 가족 사진' },
+        ],
+      },
+      {
+        heading: 'VISION & VALUES 섹션',
         fields: [
           { key: 'about_vision_title', label: '비전 대형 타이틀', type: 'text', hint: '예: START TO GLOW' },
           { key: 'about_vision_description', label: '비전 설명 텍스트', type: 'textarea' },
-          { key: 'about_image_url', label: '가족 사진 (메인)', type: 'image', hint: '비전 섹션 + Welcome 페이지 공통 사용' },
-        ],
-      },
-    ],
-  },
-  welcome: {
-    label: 'Welcome',
-    path: '/welcome',
-    sections: [
-      {
-        heading: '환영 섹션',
-        fields: [
-          { key: 'welcome_title', label: '환영 제목', type: 'text' },
-          { key: 'welcome_description', label: '환영 부제', type: 'text' },
-          { key: 'welcome_hero_image_url', label: '히어로 배경 이미지', type: 'image', hint: '상단 대형 배경 이미지' },
+          { key: 'about_image_url', label: '비전 섹션 사진', type: 'image', hint: '우측 3:4 비율 이미지' },
         ],
       },
     ],
@@ -63,13 +58,13 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
     path: '/storypress',
     sections: [
       {
-        heading: 'StoryPress 섹션',
+        heading: 'StoryPress 기본 정보',
         fields: [
           { key: 'storypress_title', label: '제목', type: 'text', hint: '예: StoryPress' },
           { key: 'storypress_description', label: '설명', type: 'textarea' },
-          { key: 'storypress_hero_image_url', label: '히어로 이미지', type: 'image' },
           { key: 'storypress_cta_text', label: 'CTA 버튼 텍스트', type: 'text', hint: '예: Join the Waitlist' },
-          { key: 'storypress_cta_url', label: 'CTA 버튼 URL', type: 'url', hint: '비워두면 뉴스레터 폼이 표시됩니다' },
+          { key: 'storypress_cta_url', label: 'CTA 버튼 URL', type: 'url', hint: '비워두면 /storypress로 이동' },
+          { key: 'storypress_hero_image_url', label: '히어로 이미지', type: 'image' },
         ],
       },
     ],
@@ -81,7 +76,7 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
       {
         heading: '매거진 페이지 텍스트',
         fields: [
-          { key: 'magazine_title', label: '페이지 제목', type: 'text' },
+          { key: 'magazine_title', label: '페이지 제목', type: 'text', hint: '예: Magazine Shelf' },
           { key: 'magazine_hint', label: '스크롤 힌트 텍스트', type: 'text', hint: '서가 아래 안내 문구 (예: Scroll to explore)' },
         ],
       },
@@ -135,7 +130,7 @@ function ImageField({ fieldKey, label, value, hint, onChange }: {
   }
 
   const labelStyle = { display: 'block' as const, fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase' as const, marginBottom: 8 };
-  const inputStyle = { width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #F1F5F9', background: '#F8FAFC', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
+  const inputStyle = { width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 13, color: '#1a1a1a', outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
 
   return (
     <div>
@@ -148,7 +143,7 @@ function ImageField({ fieldKey, label, value, hint, onChange }: {
         </div>
       )}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <input value={value} onChange={e => onChange(fieldKey, e.target.value)} placeholder="이미지 URL" style={{ ...inputStyle, flex: 1 }} />
+        <input className="admin-input" value={value} onChange={e => onChange(fieldKey, e.target.value)} placeholder="이미지 URL" style={{ ...inputStyle, flex: 1 }} />
         <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '12px 16px', borderRadius: 12, border: '1px solid #e2e8f0',
@@ -220,10 +215,14 @@ export default function PageEditorPage() {
   }
 
   const labelStyle = { display: 'block' as const, fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase' as const, marginBottom: 8 };
-  const inputStyle = { width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #F1F5F9', background: '#F8FAFC', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
+  const inputStyle = { width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 13, color: '#1a1a1a', outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
 
   return (
     <div style={{ padding: '40px 48px', maxWidth: 800, margin: '0 auto' }}>
+      <style>{`
+        .admin-input::placeholder { color: #94a3b8 !important; opacity: 1; }
+        .admin-input:focus { border-color: #4F46E5 !important; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+      `}</style>
 
       {/* 헤더 */}
       <div style={{ marginBottom: 36 }}>
@@ -287,9 +286,11 @@ export default function PageEditorPage() {
                       <div>
                         <label style={labelStyle}>{field.label}</label>
                         <textarea
+                          className="admin-input"
                           value={settings[field.key] ?? ''}
                           onChange={e => set(field.key, e.target.value)}
                           rows={4}
+                          placeholder={field.hint}
                           style={{ ...inputStyle, resize: 'vertical' as const }}
                         />
                         {field.hint && <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>{field.hint}</p>}
@@ -298,6 +299,7 @@ export default function PageEditorPage() {
                       <div>
                         <label style={labelStyle}>{field.label}</label>
                         <input
+                          className="admin-input"
                           type={field.type === 'url' ? 'url' : 'text'}
                           value={settings[field.key] ?? ''}
                           onChange={e => set(field.key, e.target.value)}

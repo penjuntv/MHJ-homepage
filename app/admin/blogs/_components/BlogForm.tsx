@@ -263,10 +263,26 @@ export default function BlogForm({ initial }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title || !form.content || !form.slug) {
-      setError('제목, 내용, 슬러그는 필수입니다.');
+
+    // ── 발행 전 체크리스트 유효성 검사 ──
+    const plainText = form.content.replace(/<[^>]*>/g, '').trim();
+    const failedRequired: string[] = [];
+    if (!form.title.trim()) failedRequired.push('제목');
+    if (plainText.length < 50) failedRequired.push('본문 50자 이상');
+    if (!form.image_url.trim()) failedRequired.push('커버 이미지');
+    if (!form.slug.trim()) failedRequired.push('슬러그');
+
+    if (failedRequired.length > 0) {
+      toast.error(`필수 항목 미완료: ${failedRequired.join(', ')}`);
+      setError(`필수 항목을 채워주세요: ${failedRequired.join(', ')}`);
       return;
     }
+
+    // 권장 항목 경고 (차단 안 함)
+    if (!(form.meta_description ?? '').trim()) {
+      toast.warning('SEO 메타 설명이 없습니다. 검색 노출에 불리할 수 있습니다.');
+    }
+
     setSaving(true);
     setError('');
 
@@ -324,8 +340,8 @@ export default function BlogForm({ initial }: Props) {
 
   const inputStyle = {
     width: '100%', padding: '14px 16px', borderRadius: '16px',
-    border: '1px solid #F1F5F9', background: '#F8FAFC',
-    fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const,
+    border: '1px solid #E2E8F0', background: '#F8FAFC',
+    fontSize: '14px', color: '#1A1A1A', outline: 'none', boxSizing: 'border-box' as const,
     fontFamily: 'inherit',
   };
   const labelStyle = {

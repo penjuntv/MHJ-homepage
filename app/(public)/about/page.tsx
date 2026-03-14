@@ -59,7 +59,8 @@ const STAGGER = ['stagger-1', 'stagger-2', 'stagger-3', 'stagger-4'];
 export default async function AboutPage() {
   const [members, s] = await Promise.all([getFamilyMembers(), getSiteSettings()]);
 
-  const familyImg = s.about_image_url || s.about_hero_image_url || '';
+  const whoImage = s.about_who_image_url || s.about_image_url || '';
+  const visionImage = s.about_image_url || '';
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -80,10 +81,10 @@ export default async function AboutPage() {
 
       {/* ─── 1. Who We Are Section ─── */}
       <section style={{
-        padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 80px)',
+        padding: 'clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px)',
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(min(360px, 100%), 1fr))',
-        gap: '64px',
+        gap: '80px',
         alignItems: 'center',
         background: 'var(--bg-surface)',
       }}>
@@ -99,9 +100,9 @@ export default async function AboutPage() {
             background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)',
           }}
         >
-          {familyImg ? (
+          {whoImage ? (
             <SafeImage
-              src={familyImg}
+              src={whoImage}
               alt="Mairangi Family"
               fill
               className="object-cover vivid-hover"
@@ -125,66 +126,56 @@ export default async function AboutPage() {
 
         {/* 텍스트 */}
         <div className="animate-slide-up stagger-2">
-          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '20px' }}>
+          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '24px' }}>
             WHO WE ARE
           </p>
-          <h1 className="font-display font-black" style={{ fontSize: 'clamp(36px, 5vw, 64px)', letterSpacing: '-2px', lineHeight: 1, marginBottom: '32px', fontStyle: 'italic', color: 'var(--text)' }}>
-            The Mairangi Family
+          <h1 className="font-display font-black type-h1" style={{ marginBottom: '40px', fontStyle: 'italic', color: 'var(--text)' }}>
+            {s.about_who_title}
           </h1>
-          <p style={{ fontSize: '17px', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '16px' }}>
-            {s.intro_description}
+          <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '24px' }}>
+            {s.about_who_description_en}
           </p>
-          <p style={{ fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-            뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에 자리 잡은 우리 가족의 두 번째 챕터입니다. 기자 출신 아빠 조상목, 사회복지 석사 과정 중인 엄마 유희종, 그리고 세 딸 유민·유현·유진이 함께합니다.
+          <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+            {s.about_who_description_kr}
           </p>
         </div>
       </section>
 
       {/* ─── 2. Vision & Values Section ─── */}
       <section style={{
-        padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 40px)',
+        padding: 'clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px)',
         background: 'var(--bg)',
       }}>
         <div style={{
-          maxWidth: 1100,
+          maxWidth: 1200,
           margin: '0 auto',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
-          gap: 80,
+          gap: 96,
           alignItems: 'center',
         }}>
 
           {/* 텍스트 */}
           <div className="animate-slide-up">
-            <span style={{
+            <span className="type-caption" style={{
               color: '#4f46e5',
-              fontSize: 12,
-              fontWeight: 900,
-              letterSpacing: 6,
-              textTransform: 'uppercase',
               display: 'block',
-              marginBottom: 32,
+              marginBottom: 40,
+              letterSpacing: 6,
             }}>
               Vision & Values
             </span>
-            <h2 style={{
-              fontSize: 'clamp(48px, 8vw, 96px)',
-              fontWeight: 900,
-              letterSpacing: -3,
-              lineHeight: 0.85,
+            <h2 className="type-display" style={{
               textTransform: 'uppercase',
-              marginBottom: 40,
+              marginBottom: 48,
               color: 'var(--text)',
             }}>
               {s.about_vision_title.includes(' ') ? (
                 <>{s.about_vision_title.split(' ').slice(0, -1).join(' ')} <br /> {s.about_vision_title.split(' ').slice(-1)[0]}</>
               ) : s.about_vision_title}
             </h2>
-            <p style={{
-              fontSize: 'clamp(18px, 2vw, 24px)',
+            <p className="type-body" style={{
               color: 'var(--text-secondary)',
-              fontWeight: 500,
-              lineHeight: 1.6,
             }}>
               {s.about_vision_description}
             </p>
@@ -202,7 +193,7 @@ export default async function AboutPage() {
             }}
           >
             <SafeImage
-              src={s.about_image_url || s.about_hero_image_url || 'https://picsum.photos/seed/about/800/1200'}
+              src={visionImage || 'https://picsum.photos/seed/about/800/1200'}
               alt="Family"
               fill
               className="object-cover"
@@ -213,25 +204,20 @@ export default async function AboutPage() {
       </section>
 
       {/* ─── 3. Three Daughters Section ─── */}
-      <section style={{ padding: 'clamp(60px, 10vw, 160px) clamp(24px, 4vw, 40px)', background: 'var(--bg-surface)' }}>
+      <section style={{ padding: 'clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px)', background: 'var(--bg-surface)' }}>
 
         {/* 헤더 */}
         <div style={{ textAlign: 'center', marginBottom: 'clamp(48px, 8vw, 128px)' }}>
-          <h2 style={{
-            fontSize: 14,
-            fontWeight: 900,
+          <p className="type-caption" style={{
             color: '#cbd5e1',
-            letterSpacing: 6,
-            textTransform: 'uppercase',
             fontStyle: 'italic',
+            letterSpacing: 6,
             marginBottom: 16,
           }}>
             The Members
-          </h2>
-          <p style={{
-            fontSize: 'clamp(36px, 5vw, 56px)',
+          </p>
+          <p className="type-h1" style={{
             fontWeight: 900,
-            letterSpacing: -2,
             textTransform: 'uppercase',
             lineHeight: 1,
             color: 'var(--text)',
@@ -250,7 +236,7 @@ export default async function AboutPage() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
-          gap: 64,
+          gap: 80,
           maxWidth: 1200,
           margin: '0 auto',
         }}>
@@ -280,30 +266,24 @@ export default async function AboutPage() {
                 />
               </div>
 
-              <h3 style={{
-                fontSize: 28,
-                fontWeight: 900,
-                letterSpacing: -1,
+              <h3 className="type-h2" style={{
                 textTransform: 'uppercase',
                 marginBottom: 8,
                 color: 'var(--text)',
               }}>
                 {m.name}
               </h3>
-              <span style={{
-                fontSize: 12,
-                fontWeight: 700,
+              <span className="type-caption" style={{
                 color: '#6366f1',
-                letterSpacing: 3,
-                textTransform: 'uppercase',
+                fontWeight: 700,
                 display: 'block',
                 marginBottom: 24,
+                letterSpacing: 3,
               }}>
                 {m.role}
               </span>
-              <p style={{
+              <p className="type-body" style={{
                 color: 'var(--text-secondary)',
-                fontWeight: 500,
                 lineHeight: 1.7,
                 padding: '0 16px',
               }}>

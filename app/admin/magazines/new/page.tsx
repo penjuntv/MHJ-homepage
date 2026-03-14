@@ -113,8 +113,8 @@ export default function NewMagazinePage() {
 
   const inputStyle = {
     width: '100%', padding: '14px 16px', borderRadius: '16px',
-    border: '1px solid #F1F5F9', background: '#F8FAFC',
-    fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const,
+    border: '1px solid #E2E8F0', background: '#F8FAFC',
+    fontSize: '14px', color: '#1A1A1A', outline: 'none', boxSizing: 'border-box' as const,
     fontFamily: 'inherit',
   };
   const labelStyle = {
@@ -351,7 +351,7 @@ export default function NewMagazinePage() {
                       placeholder={`${slot.author}의 글 (선택)`}
                       style={{
                         padding: '8px 12px', borderRadius: 10, border: '1px solid #E2E8F0',
-                        background: 'white', fontSize: 13, outline: 'none', fontFamily: 'inherit',
+                        background: 'white', fontSize: 13, color: '#1A1A1A', outline: 'none', fontFamily: 'inherit',
                         width: '100%', boxSizing: 'border-box',
                       }}
                     />

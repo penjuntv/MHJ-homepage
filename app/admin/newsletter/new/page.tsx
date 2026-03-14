@@ -80,8 +80,8 @@ export default function NewNewsletterPage() {
 
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '14px 16px', borderRadius: 16,
-    border: '1px solid #F1F5F9', background: '#F8FAFC',
-    fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
+    border: '1px solid #E2E8F0', background: '#F8FAFC',
+    fontSize: 14, color: '#1A1A1A', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
   };
 
   const previewHtml = generateNewsletterHTML(subject || '(제목 없음)', content || '<p>내용이 없습니다.</p>');

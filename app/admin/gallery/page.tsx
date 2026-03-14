@@ -3,10 +3,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { GalleryItem } from '@/lib/types';
-import { Plus, Trash2, Loader2, Upload } from 'lucide-react';
+import { Plus, Trash2, Loader2, Upload, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
-const CATEGORIES = ['Family', 'Beach', 'School', 'Travel', 'Home', 'Food'];
+const PHOTOGRAPHERS = ['Yumin', 'Yuhyeon', 'Yujin'];
+
+const PHOTOGRAPHER_COLOR: Record<string, string> = {
+  Yumin: '#FB923C',
+  Yuhyeon: '#818CF8',
+  Yujin: '#34D399',
+};
 
 export default function AdminGalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -47,6 +53,7 @@ export default function AdminGalleryPage() {
       await supabase.from('gallery').insert({
         image_url,
         sort_order: items.length,
+        published: true,
       });
     }
 
@@ -59,7 +66,6 @@ export default function AdminGalleryPage() {
     if (!confirm('삭제하시겠습니까?')) return;
     setDeleting(id);
     await supabase.from('gallery').delete().eq('id', id);
-    // Storage 파일도 삭제 시도 (URL에서 경로 추출)
     try {
       const path = image_url.split('/images/')[1];
       if (path) await supabase.storage.from('images').remove([path]);
@@ -69,9 +75,15 @@ export default function AdminGalleryPage() {
     toast.success('삭제되었습니다.');
   }
 
-  async function updateItem(id: number, field: string, value: string) {
+  async function updateItem(id: number, field: string, value: string | boolean | number) {
     setItems(prev => prev.map(i => i.id === id ? { ...i, [field]: value } : i));
     await supabase.from('gallery').update({ [field]: value }).eq('id', id);
+  }
+
+  async function togglePublished(item: GalleryItem) {
+    const next = !item.published;
+    await updateItem(item.id, 'published', next);
+    toast.success(next ? '공개되었습니다.' : '비공개로 변경되었습니다.');
   }
 
   return (
@@ -82,8 +94,8 @@ export default function AdminGalleryPage() {
           <h1 className="font-display font-black uppercase" style={{ fontSize: '48px', letterSpacing: '-2px' }}>
             Gallery
           </h1>
-          <p className="font-black uppercase text-mhj-text-tertiary" style={{ fontSize: '10px', letterSpacing: '4px', marginTop: '8px' }}>
-            사진 갤러리 관리
+          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '4px', marginTop: '8px', color: '#CBD5E1' }}>
+            아이들 사진전 관리
           </p>
         </div>
         <button
@@ -133,6 +145,30 @@ export default function AdminGalleryPage() {
         </p>
       </div>
 
+      {/* 통계 */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 32, flexWrap: 'wrap' }}>
+        {(['all', ...PHOTOGRAPHERS] as const).map(p => {
+          const count = p === 'all' ? items.length : items.filter(i => i.photographer === p).length;
+          const color = p !== 'all' ? PHOTOGRAPHER_COLOR[p] : '#1A1A1A';
+          return (
+            <div key={p} style={{
+              padding: '10px 20px', borderRadius: 999,
+              background: p === 'all' ? '#F8FAFC' : color + '15',
+              border: `1px solid ${p === 'all' ? '#F1F5F9' : color + '40'}`,
+              display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              {p !== 'all' && (
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, flexShrink: 0 }} />
+              )}
+              <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1, color: p === 'all' ? '#64748B' : color }}>
+                {p === 'all' ? 'All' : p}
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#CBD5E1' }}>{count}</span>
+            </div>
+          );
+        })}
+      </div>
+
       {/* 목록 */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '80px', color: '#CBD5E1', fontSize: '11px', fontWeight: 900, letterSpacing: '4px' }}>
@@ -143,7 +179,7 @@ export default function AdminGalleryPage() {
           <p style={{ fontSize: '11px', fontWeight: 900, letterSpacing: '4px' }}>사진이 없습니다</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
           {items.map(item => (
             <GalleryAdminCard
               key={item.id}
@@ -151,6 +187,7 @@ export default function AdminGalleryPage() {
               deleting={deleting === item.id}
               onDelete={() => deleteItem(item.id, item.image_url)}
               onUpdate={(field, value) => updateItem(item.id, field, value)}
+              onTogglePublished={() => togglePublished(item)}
             />
           ))}
         </div>
@@ -164,92 +201,175 @@ export default function AdminGalleryPage() {
 }
 
 function GalleryAdminCard({
-  item, deleting, onDelete, onUpdate,
+  item, deleting, onDelete, onUpdate, onTogglePublished,
 }: {
   item: GalleryItem;
   deleting: boolean;
   onDelete: () => void;
-  onUpdate: (field: string, value: string) => void;
+  onUpdate: (field: string, value: string | boolean | number) => void;
+  onTogglePublished: () => void;
 }) {
+  const photographerColor = item.photographer ? PHOTOGRAPHER_COLOR[item.photographer] : undefined;
+
+  const inputStyle = {
+    width: '100%', padding: '9px 13px', borderRadius: '10px',
+    border: '1px solid #F1F5F9', fontSize: '13px', fontWeight: 500,
+    outline: 'none', boxSizing: 'border-box' as const, background: 'white',
+    color: '#1A1A1A',
+  };
+
   return (
     <div style={{
-      background: 'white', borderRadius: '24px',
+      background: 'white', borderRadius: '20px',
       overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+      border: item.published ? 'none' : '2px solid #FEE2E2',
+      opacity: item.published ? 1 : 0.75,
     }}>
       {/* 이미지 */}
       <div style={{ position: 'relative', paddingTop: '66%', background: '#F8FAFC' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={item.image_url}
-          alt={item.caption || ''}
-          style={{
-            position: 'absolute', inset: 0, width: '100%', height: '100%',
-            objectFit: 'cover',
-          }}
+          alt={item.title || item.caption || ''}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
         />
-        <button
-          onClick={onDelete}
-          disabled={deleting}
-          style={{
-            position: 'absolute', top: '12px', right: '12px',
-            background: 'rgba(239,68,68,0.9)', color: 'white', border: 'none',
-            borderRadius: '10px', padding: '8px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          <Trash2 size={14} />
-        </button>
+
+        {/* 촬영자 뱃지 */}
+        {item.photographer && (
+          <div style={{
+            position: 'absolute', top: 10, left: 10,
+            padding: '4px 10px', borderRadius: 999,
+            background: (photographerColor ?? '#4F46E5') + 'dd',
+            fontSize: 9, fontWeight: 900, letterSpacing: 2,
+            textTransform: 'uppercase', color: 'white',
+          }}>
+            {item.photographer}
+          </div>
+        )}
+
+        {/* 액션 버튼 */}
+        <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
+          <button
+            onClick={onTogglePublished}
+            title={item.published ? '비공개로 전환' : '공개로 전환'}
+            style={{
+              background: item.published ? 'rgba(34,197,94,0.9)' : 'rgba(100,116,139,0.9)',
+              color: 'white', border: 'none', borderRadius: '10px',
+              padding: '8px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            {item.published ? <Eye size={14} /> : <EyeOff size={14} />}
+          </button>
+          <button
+            onClick={onDelete}
+            disabled={deleting}
+            style={{
+              background: 'rgba(239,68,68,0.9)', color: 'white', border: 'none',
+              borderRadius: '10px', padding: '8px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            {deleting ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Trash2 size={14} />}
+          </button>
+        </div>
       </div>
 
       {/* 메타 편집 */}
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {/* 제목 */}
         <input
-          defaultValue={item.caption || ''}
-          placeholder="캡션 입력..."
-          onBlur={e => onUpdate('caption', e.target.value)}
+          key={`title-${item.id}`}
+          defaultValue={item.title || ''}
+          placeholder="사진 제목 (예: Mairangi Bay Morning)"
+          onBlur={e => onUpdate('title', e.target.value)}
+          style={inputStyle}
+        />
+
+        {/* 코멘트 */}
+        <textarea
+          key={`comment-${item.id}`}
+          defaultValue={item.comment || ''}
+          placeholder="아이의 코멘트 (예: I like the way...)"
+          onBlur={e => onUpdate('comment', e.target.value)}
+          rows={2}
           style={{
-            width: '100%', padding: '10px 14px', borderRadius: '12px',
-            border: '1px solid #F1F5F9', fontSize: '13px', fontWeight: 600,
-            outline: 'none', boxSizing: 'border-box',
+            ...inputStyle, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5,
           }}
         />
+
+        {/* 촬영자 + 장소 */}
         <div style={{ display: 'flex', gap: '8px' }}>
           <select
-            defaultValue={item.category || ''}
-            onChange={e => onUpdate('category', e.target.value)}
+            key={`photographer-${item.id}`}
+            defaultValue={item.photographer || ''}
+            onChange={e => onUpdate('photographer', e.target.value)}
             style={{
-              flex: 1, padding: '10px 14px', borderRadius: '12px',
-              border: '1px solid #F1F5F9', fontSize: '12px', fontWeight: 700,
+              flex: 1, padding: '9px 13px', borderRadius: '10px',
+              border: `2px solid ${photographerColor ?? '#F1F5F9'}`,
+              fontSize: '12px', fontWeight: 700,
               outline: 'none', cursor: 'pointer', background: 'white',
-              color: item.category ? '#1A1A1A' : '#CBD5E1',
+              color: photographerColor ?? '#CBD5E1',
             }}
           >
-            <option value="">카테고리</option>
-            {CATEGORIES.map(c => (
-              <option key={c} value={c}>{c}</option>
+            <option value="">촬영자 선택</option>
+            {PHOTOGRAPHERS.map(p => (
+              <option key={p} value={p}>{p}</option>
             ))}
           </select>
           <input
-            defaultValue={item.date || ''}
-            placeholder="날짜 (2026.03)"
-            onBlur={e => onUpdate('date', e.target.value)}
-            style={{
-              flex: 1, padding: '10px 14px', borderRadius: '12px',
-              border: '1px solid #F1F5F9', fontSize: '12px',
-              outline: 'none', boxSizing: 'border-box',
-            }}
+            key={`location-${item.id}`}
+            defaultValue={item.location || ''}
+            placeholder="장소"
+            onBlur={e => onUpdate('location', e.target.value)}
+            style={{ ...inputStyle, flex: 1 }}
           />
         </div>
-        <input
-          type="number"
-          defaultValue={item.sort_order}
-          placeholder="정렬 순서"
-          onBlur={e => onUpdate('sort_order', e.target.value)}
-          style={{
-            width: '100%', padding: '10px 14px', borderRadius: '12px',
-            border: '1px solid #F1F5F9', fontSize: '12px',
-            outline: 'none', boxSizing: 'border-box',
-          }}
-        />
+
+        {/* 날짜 + 정렬 */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <input
+            key={`taken_date-${item.id}`}
+            defaultValue={item.taken_date || ''}
+            placeholder="촬영일 (2026.03)"
+            onBlur={e => onUpdate('taken_date', e.target.value)}
+            style={{ ...inputStyle, flex: 1 }}
+          />
+          <input
+            key={`sort-${item.id}`}
+            type="number"
+            defaultValue={item.sort_order}
+            placeholder="순서"
+            onBlur={e => onUpdate('sort_order', parseInt(e.target.value) || 0)}
+            style={{ ...inputStyle, width: '80px', flex: 'none' }}
+          />
+        </div>
+
+        {/* 공개 상태 표시 */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '8px 12px', borderRadius: 10,
+          background: item.published ? '#F0FDF4' : '#FEF2F2',
+        }}>
+          <div style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: item.published ? '#22C55E' : '#EF4444',
+          }} />
+          <span style={{ fontSize: 11, fontWeight: 700, color: item.published ? '#16A34A' : '#DC2626' }}>
+            {item.published ? '공개 중' : '비공개'}
+          </span>
+          <button
+            onClick={onTogglePublished}
+            style={{
+              marginLeft: 'auto', fontSize: 10, fontWeight: 900,
+              letterSpacing: 1, textTransform: 'uppercase',
+              color: item.published ? '#DC2626' : '#16A34A',
+              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            }}
+          >
+            {item.published ? '비공개로' : '공개로'}
+          </button>
+        </div>
       </div>
     </div>
   );

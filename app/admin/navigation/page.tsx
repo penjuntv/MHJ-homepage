@@ -104,8 +104,8 @@ export default function NavigationAdminPage() {
   }
 
   const inputStyle = {
-    padding: '8px 12px', borderRadius: 10, border: '1px solid #f1f5f9',
-    background: '#f8fafc', fontSize: 13, outline: 'none', fontFamily: 'inherit',
+    padding: '8px 12px', borderRadius: 10, border: '1px solid #e2e8f0',
+    background: '#f8fafc', fontSize: 13, color: '#1a1a1a', outline: 'none', fontFamily: 'inherit',
     boxSizing: 'border-box' as const,
   };
 

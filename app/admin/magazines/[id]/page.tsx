@@ -1061,11 +1061,54 @@ function InlineForm({
       {/* 저자 + 날짜 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
         <div>
-          <label style={labelStyle}>저자</label>
-          <select value={form.author} onChange={e => setForm({ author: e.target.value })} style={{ ...inputStyle, cursor: 'pointer' }}>
-            <option value="">선택...</option>
-            {['PeNnY', '유민', '유현', '유진'].map(a => <option key={a} value={a}>{a}</option>)}
-          </select>
+          <label style={labelStyle}>저자 (복수 선택 가능)</label>
+          {/* 체크박스 다중 선택 */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '6px' }}>
+            {['PeNnY', 'Yussi', 'Yumin', 'Yuhyun', 'Yujin'].map(name => {
+              const selected = form.author.split(',').map(s => s.trim()).filter(Boolean).includes(name);
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => {
+                    const current = form.author.split(',').map(s => s.trim()).filter(Boolean);
+                    const next = selected ? current.filter(n => n !== name) : [...current, name];
+                    setForm({ author: next.join(', ') });
+                  }}
+                  style={{
+                    padding: '5px 11px', borderRadius: '999px', cursor: 'pointer',
+                    fontSize: '11px', fontWeight: 700,
+                    border: selected ? '1.5px solid #4F46E5' : '1.5px solid #F1F5F9',
+                    background: selected ? '#EEF2FF' : '#F8FAFC',
+                    color: selected ? '#4F46E5' : '#94A3B8',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
+          {/* 기타 직접 입력 */}
+          <input
+            placeholder="기타 이름 입력 후 Enter"
+            style={{ ...inputStyle, fontSize: '12px', padding: '8px 12px' }}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = (e.currentTarget as HTMLInputElement).value.trim();
+                if (!val) return;
+                const current = form.author.split(',').map(s => s.trim()).filter(Boolean);
+                if (!current.includes(val)) setForm({ author: [...current, val].join(', ') });
+                (e.currentTarget as HTMLInputElement).value = '';
+              }
+            }}
+          />
+          {form.author && (
+            <p style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px', marginBottom: 0 }}>
+              선택됨: <strong style={{ color: '#4F46E5' }}>{form.author}</strong>
+            </p>
+          )}
         </div>
         <div>
           <label style={labelStyle}>날짜</label>

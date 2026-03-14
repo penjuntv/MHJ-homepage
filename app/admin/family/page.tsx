@@ -64,7 +64,7 @@ export default function AdminFamilyPage() {
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '10px 14px',
     border: '1.5px solid #E2E8F0', borderRadius: 10,
-    fontSize: 14, fontWeight: 600, background: '#fff',
+    fontSize: 14, fontWeight: 600, color: '#1A1A1A', background: '#fff',
     outline: 'none', boxSizing: 'border-box',
   };
 
