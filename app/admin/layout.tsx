@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 import {
   LayoutDashboard, FileText, BookOpen, Settings, Palette,
   LogOut, ExternalLink, Images, MessageCircle, Users,
-  SearchCheck, LayoutList, Menu,
+  SearchCheck, LayoutList, Menu, Layers,
 } from 'lucide-react';
 
 type NavItem = { type: 'item'; href: string; label: string; icon: React.ElementType; exact?: boolean; badge?: 'comments' | 'blogs' };
@@ -22,6 +22,7 @@ const NAV: NavEntry[] = [
   { type: 'item', href: '/admin/blogs', label: '블로그', icon: FileText, badge: 'blogs' },
   { type: 'item', href: '/admin/magazines', label: '매거진', icon: BookOpen },
   { type: 'item', href: '/admin/gallery', label: '갤러리', icon: Images },
+  { type: 'item', href: '/admin/hero', label: '히어로 슬라이드', icon: Layers },
   { type: 'item', href: '/admin/seo', label: 'SEO', icon: SearchCheck },
 
   { type: 'group', label: '페이지' },
