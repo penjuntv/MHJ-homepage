@@ -8,7 +8,7 @@ import type { Blog } from '@/lib/types';
 import { Plus, Search, Pencil, Trash2, Eye, EyeOff, Star, LayoutGrid, List, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 
-const CATEGORIES = ['All', 'Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
+const CATEGORIES = ['All', 'Daily', 'School', 'Kids', 'Travel', 'Food'];
 type StatusFilter = 'all' | 'published' | 'draft';
 type ViewMode = 'list' | 'card';
 

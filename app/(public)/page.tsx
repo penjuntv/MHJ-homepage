@@ -3,7 +3,7 @@ import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import type { Blog, HeroSlide, Magazine } from '@/lib/types';
+import type { Blog, Magazine, CarouselSlide } from '@/lib/types';
 import HeroCarousel from '@/components/HeroCarousel';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import StoryPressSection from '@/components/StoryPressSection';
@@ -31,40 +31,119 @@ const FALLBACK_HERO_BLOGS: Blog[] = [
   { id: 205, category: 'Life', title: '오클랜드의 첫 장보기', author: 'Heejong Jo', date: '2026.01.19', image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200', content: '카운트다운과 뉴월드 사이에서 방황하던 초보 정착민 시절의 이야기입니다.', slug: 'first-grocery', published: true },
 ];
 
-async function getRecentBlogs(): Promise<Blog[]> {
-  // 히어로 지정 글 우선 조회
-  const { data: heroData } = await supabase
-    .from('blogs')
-    .select('*')
-    .eq('published', true)
-    .eq('is_hero', true)
-    .gt('hero_order', 0)
-    .order('hero_order', { ascending: true })
-    .limit(7);
+async function buildHeroSlides(s: Record<string, string>): Promise<CarouselSlide[]> {
+  const featuredId = parseInt(s.featured_post_id || '') || null;
 
-  if (heroData && heroData.length > 0) return heroData;
-
-  // fallback: 최신 5개
-  const { data } = await supabase
-    .from('blogs')
-    .select('*')
-    .eq('published', true)
-    .order('created_at', { ascending: false })
-    .limit(5);
-  return data?.length ? data : FALLBACK_HERO_BLOGS;
-}
-
-async function getHeroSlides(): Promise<HeroSlide[]> {
-  try {
-    const { data } = await supabase
-      .from('hero_slides')
+  // 최신 3개 블로그 + 최신 매거진(pdf 있는 것) 병렬 fetch
+  const [latestRes, magRes] = await Promise.all([
+    supabase
+      .from('blogs')
       .select('*')
-      .eq('is_visible', true)
-      .order('sort_order', { ascending: true });
-    return data ?? [];
-  } catch {
-    return [];
+      .eq('published', true)
+      .or('publish_at.is.null,publish_at.lte.now()')
+      .order('created_at', { ascending: false })
+      .limit(3),
+    supabase
+      .from('magazines')
+      .select('*')
+      .not('pdf_url', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1),
+  ]);
+
+  const latest = (latestRes.data ?? []) as Blog[];
+  const latestMagazine = ((magRes.data ?? []) as Magazine[])[0] ?? null;
+
+  // Featured 글 확정 (지정 ID → 최신 1번째 fallback)
+  let featuredBlog: Blog | null = null;
+  if (featuredId) {
+    featuredBlog = latest.find(b => b.id === featuredId) ?? null;
+    if (!featuredBlog) {
+      const { data } = await supabase
+        .from('blogs')
+        .select('*')
+        .eq('id', featuredId)
+        .eq('published', true)
+        .maybeSingle();
+      featuredBlog = data as Blog | null;
+    }
   }
+  if (!featuredBlog) featuredBlog = latest[0] ?? null;
+
+  // Featured 제외한 최신 2개 (슬라이드 2-3)
+  const otherBlogs = latest.filter(b => b.id !== featuredBlog?.id).slice(0, 2);
+
+  const slides: CarouselSlide[] = [];
+
+  // 1번 슬라이드: EDITOR'S PICK
+  if (featuredBlog) {
+    slides.push({
+      key: `featured-${featuredBlog.id}`,
+      type: 'blog',
+      label: "EDITOR'S PICK",
+      title: featuredBlog.title,
+      subtitle: featuredBlog.date,
+      image_url: featuredBlog.image_url,
+      cta_text: 'Discover More',
+      blog: featuredBlog,
+    });
+  }
+
+  // 2-3번 슬라이드: 최신 블로그
+  for (const blog of otherBlogs) {
+    slides.push({
+      key: `blog-${blog.id}`,
+      type: 'blog',
+      label: 'LATEST STORY',
+      title: blog.title,
+      subtitle: blog.date,
+      image_url: blog.image_url,
+      cta_text: 'Discover More',
+      blog,
+    });
+  }
+
+  // 4번 슬라이드: 최신 매거진
+  if (latestMagazine) {
+    slides.push({
+      key: `mag-${latestMagazine.id}`,
+      type: 'magazine',
+      label: 'LATEST EDITION',
+      title: latestMagazine.title.toUpperCase(),
+      subtitle: `${latestMagazine.year} ${latestMagazine.month_name} Issue`,
+      image_url: latestMagazine.image_url,
+      cta_text: 'Open Edition',
+      link_url: `/magazine/${latestMagazine.id}`,
+    });
+  }
+
+  // 5번 슬라이드: StoryPress (고정)
+  slides.push({
+    key: 'storypress',
+    type: 'storypress',
+    label: 'OUR PROJECT',
+    title: 'StoryPress',
+    subtitle: 'Stories that teach. Words that stay.',
+    cta_text: 'Learn More',
+    link_url: '/storypress',
+  });
+
+  // 블로그 슬라이드가 전혀 없으면 fallback 데이터 사용
+  if (slides.every(s => s.type !== 'blog')) {
+    const fallbacks: CarouselSlide[] = FALLBACK_HERO_BLOGS.slice(0, 3).map((b, i) => ({
+      key: `fallback-${b.id}`,
+      type: 'blog' as const,
+      label: i === 0 ? "EDITOR'S PICK" : 'LATEST STORY',
+      title: b.title,
+      subtitle: b.date,
+      image_url: b.image_url,
+      cta_text: 'Discover More',
+      blog: b,
+    }));
+    return [...fallbacks, ...slides.filter(s => s.type !== 'blog')];
+  }
+
+  return slides;
 }
 
 const FALLBACK_MAGAZINES: Magazine[] = [
@@ -76,10 +155,15 @@ const FALLBACK_MAGAZINES: Magazine[] = [
 async function getRecentMagazines(): Promise<Magazine[]> {
   const { data } = await supabase
     .from('magazines')
-    .select('*')
+    .select('*, articles(count)')
     .order('created_at', { ascending: false })
-    .limit(3);
-  return data?.length ? data : FALLBACK_MAGAZINES;
+    .limit(10);
+  if (!data?.length) return FALLBACK_MAGAZINES;
+  // Coming Soon (pdf 없고 articles 0) 제외
+  return data
+    .map(m => ({ ...m, article_count: (m.articles as { count: number }[])?.[0]?.count ?? 0, articles: undefined }))
+    .filter(m => m.pdf_url || (m.article_count ?? 0) > 0)
+    .slice(0, 3);
 }
 
 async function getMostReadBlogs(): Promise<Blog[]> {
@@ -96,8 +180,9 @@ async function getMostReadBlogs(): Promise<Blog[]> {
 }
 
 export default async function LandingPage() {
-  const [blogs, mostRead, heroSlides, magazines, s] = await Promise.all([
-    getRecentBlogs(), getMostReadBlogs(), getHeroSlides(), getRecentMagazines(), getSiteSettings(),
+  const s = await getSiteSettings();
+  const [carouselSlides, mostRead, magazines] = await Promise.all([
+    buildHeroSlides(s), getMostReadBlogs(), getRecentMagazines(),
   ]);
 
   const jsonLd = {
@@ -128,150 +213,9 @@ export default async function LandingPage() {
     <div className="animate-fade-in">
 
       {/* Hero Carousel */}
-      <HeroCarousel items={blogs} slides={heroSlides} heroLabel={s.hero_label} />
+      <HeroCarousel slides={carouselSlides} />
 
-      {/* Intro Section — 흰 배경 */}
-      <section style={{
-        padding: 'clamp(40px, 8vw, 128px) clamp(24px, 4vw, 40px)',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))',
-        gap: 80,
-        alignItems: 'center',
-        background: 'var(--bg)',
-      }}>
-
-        {/* 좌측: 이미지 */}
-        <div
-          className="group intro-img-wrap"
-          style={{
-            aspectRatio: '4/5',
-            borderRadius: 40,
-            overflow: 'hidden',
-            boxShadow: '0 25px 60px rgba(0,0,0,0.12)',
-            position: 'relative',
-          }}
-        >
-          <SafeImage
-            src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1000"
-            alt="Mairangi Family"
-            fill
-            className="object-cover vivid-hover"
-          />
-          <div
-            className="intro-gradient"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              padding: 48,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <h3
-              className="font-display"
-              style={{
-                color: 'white',
-                fontSize: 'clamp(32px, 4vw, 48px)',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                letterSpacing: -2,
-                fontStyle: 'italic',
-                marginBottom: 16,
-              }}
-            >
-              Start to Glow
-            </h3>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 18, lineHeight: 1.6, maxWidth: 360 }}>
-              뉴질랜드의 햇살 아래, 우리 가족의 두 번째 챕터가 시작됩니다.
-            </p>
-          </div>
-        </div>
-
-        {/* 우측: 텍스트 */}
-        <div>
-          <h2 style={{
-            fontSize: 'clamp(40px, 6vw, 72px)',
-            fontWeight: 900,
-            letterSpacing: -3,
-            textTransform: 'uppercase',
-            lineHeight: 0.85,
-            marginBottom: 48,
-          }}>
-            {s.intro_title}{' '}
-            <br />
-            <span
-              className="font-display"
-              style={{
-                fontStyle: 'italic',
-                fontWeight: 300,
-                color: '#cbd5e1',
-                textDecoration: 'underline',
-                textDecorationColor: '#c7d2fe',
-              }}
-            >
-              {s.intro_subtitle}
-            </span>
-          </h2>
-          <p style={{
-            fontSize: 'clamp(18px, 2vw, 24px)',
-            color: 'var(--text-secondary)',
-            fontWeight: 500,
-            lineHeight: 1.6,
-            marginBottom: 48,
-          }}>
-            {s.intro_description}
-          </p>
-
-          {/* About 링크 카드 */}
-          <Link
-            href="/about"
-            className="about-card-link"
-            style={{
-              padding: 32,
-              border: '1px solid var(--border)',
-              borderRadius: 24,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              cursor: 'pointer',
-              background: 'var(--bg)',
-              textDecoration: 'none',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div>
-              <span style={{
-                fontSize: 10,
-                fontWeight: 900,
-                letterSpacing: 3,
-                textTransform: 'uppercase',
-                color: 'var(--text-tertiary)',
-                display: 'block',
-                marginBottom: 8,
-              }}>
-                Our Story
-              </span>
-              <span style={{
-                fontSize: 'clamp(18px, 2vw, 24px)',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                letterSpacing: -1,
-                color: 'var(--text)',
-              }}>
-                About Mairangi Family
-              </span>
-            </div>
-            <ArrowRight size={24} className="about-arrow" style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
-          </Link>
-        </div>
-
-      </section>
-
-      {/* Most Read Section — #f8fafc 배경 */}
-      <MostReadSection blogs={mostRead} />
-
-      {/* StoryPress Section — #fff 배경 */}
+      {/* StoryPress Section */}
       <StoryPressSection
         title={s.storypress_title}
         description={s.storypress_description}
@@ -281,9 +225,6 @@ export default async function LandingPage() {
 
       {/* Explore — Blog + Magazine 2분할 */}
       <ExploreSplitSection latestBlog={mostRead[0] ?? null} latestMagazine={magazines[0] ?? null} />
-
-      {/* Latest Issues — 매거진 2~3개 */}
-      <LatestIssuesSection magazines={magazines} />
 
       {/* Newsletter CTA */}
       <NewsletterCTA />
@@ -298,18 +239,18 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
   return (
     <section style={{ padding: 'var(--section-v) var(--section-h)', background: 'var(--bg)' }}>
       <div style={{ maxWidth: 'var(--content-max)', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 56, flexWrap: 'wrap', gap: 16 }}>
           <div>
             <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 5, color: 'var(--text-tertiary)', marginBottom: 16 }}>
               WHAT WE WRITE
             </p>
-            <h2 className="font-display font-black" style={{ fontSize: 'clamp(32px, 5vw, 64px)', letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic', color: 'var(--text)' }}>
+            <h2 className="font-display font-black type-h1" style={{ fontStyle: 'italic', color: 'var(--text)' }}>
               Explore Our Content
             </h2>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))', gap: 32 }}>
           {/* Blog Panel */}
           <Link
             href="/blog"
@@ -320,6 +261,7 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
               <SafeImage src={latestBlog.image_url} alt="Blog" fill className="explore-img object-cover" />
             )}
             {!latestBlog && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #1e293b, #334155)' }} />}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.08))', pointerEvents: 'none', zIndex: 1 }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)' }} />
             <div style={{ position: 'absolute', top: 24, left: 24 }}>
               <span style={{ padding: '6px 18px', borderRadius: 999, background: '#4F46E5', color: 'white', fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase' }}>Blog</span>
@@ -347,6 +289,7 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
               <SafeImage src={latestMagazine.image_url} alt="Magazine" fill className="explore-img object-cover" />
             )}
             {!latestMagazine && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #0f172a, #1e3a5f)' }} />}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.08))', pointerEvents: 'none', zIndex: 1 }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)' }} />
             <div style={{ position: 'absolute', top: 24, left: 24 }}>
               <span style={{ padding: '6px 18px', borderRadius: 999, background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', backdropFilter: 'blur(8px)' }}>Magazine</span>
@@ -374,154 +317,3 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
   );
 }
 
-/* ─── Latest Issues 섹션 ─── */
-function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
-  return (
-    <section style={{ padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 80px)', background: 'var(--bg-surface)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
-            THE MAGAZINE
-          </p>
-          <h2 className="font-display font-black" style={{ fontSize: 'clamp(36px, 5vw, 72px)', letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic', color: 'var(--text)' }}>
-            Latest Issues
-          </h2>
-        </div>
-        <Link
-          href="/magazine"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#4F46E5', textDecoration: 'none' }}
-        >
-          All Issues <ArrowRight size={14} />
-        </Link>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '24px' }}>
-        {magazines.map((mag) => (
-          <Link
-            key={mag.id}
-            href={`/magazine/${mag.id}`}
-            className="mag-card"
-            style={{
-              display: 'block', borderRadius: '28px', overflow: 'hidden',
-              textDecoration: 'none', position: 'relative',
-              aspectRatio: '3/4',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
-            }}
-          >
-            <SafeImage
-              src={mag.image_url}
-              alt={mag.title}
-              fill
-              className="mag-img object-cover"
-            />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.1) 55%)' }} />
-            <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
-              <p className="font-black uppercase" style={{ fontSize: '9px', letterSpacing: '4px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>
-                {mag.year}
-              </p>
-              <p style={{ color: 'white', fontSize: '22px', fontWeight: 900, letterSpacing: '-1px', lineHeight: 1 }}>
-                {mag.month_name}
-              </p>
-            </div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px' }}>
-              <p style={{ color: 'white', fontSize: '18px', fontWeight: 900, letterSpacing: '-0.5px', lineHeight: 1.3, marginBottom: '12px' }}>
-                {mag.title}
-              </p>
-              <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.3)', padding: '6px 14px', borderRadius: '999px' }}>
-                Open Edition
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ─── Most Read 섹션 — 중앙정렬 리스트 ─── */
-const CATEGORY_COLORS: Record<string, string> = {
-  Education: '#3B82F6', Settlement: '#8B5CF6', Girls: '#EC4899',
-  Locals: '#EF4444', Life: '#F59E0B', Travel: '#10B981',
-};
-
-function MostReadSection({ blogs }: { blogs: Blog[] }) {
-  return (
-    <section style={{ padding: 'var(--section-v) var(--section-h)', background: 'var(--bg-surface)' }}>
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
-        {/* 헤더 — 중앙 */}
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 5, color: 'var(--text-tertiary)', marginBottom: 16 }}>
-            MOST READ
-          </p>
-          <h2 className="font-display font-black" style={{ fontSize: 'clamp(32px, 5vw, 64px)', letterSpacing: '-2px', lineHeight: 1, color: 'var(--text)', fontStyle: 'italic' }}>
-            Reader Favorites
-          </h2>
-        </div>
-
-        {/* 리스트 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {blogs.map((blog, i) => {
-            const color = CATEGORY_COLORS[blog.category] || '#4F46E5';
-            return (
-              <Link
-                key={blog.id}
-                href={`/blog/${blog.slug}`}
-                className="most-read-row"
-                style={{
-                  display: 'flex', gap: 20, alignItems: 'center',
-                  padding: '16px 20px',
-                  background: 'var(--bg)',
-                  borderRadius: 20,
-                  textDecoration: 'none',
-                  border: '1px solid var(--border)',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* 랭크 */}
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                  background: i < 3 ? color : 'var(--bg-surface)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <span className="font-display" style={{ fontSize: 13, fontWeight: 900, fontStyle: 'italic', color: i < 3 ? 'white' : 'var(--text-tertiary)', lineHeight: 1 }}>
-                    {i + 1}
-                  </span>
-                </div>
-
-                {/* 썸네일 */}
-                <div style={{ width: 120, height: 90, borderRadius: 14, overflow: 'hidden', position: 'relative', flexShrink: 0, background: 'var(--bg-surface)' }}>
-                  <SafeImage src={blog.image_url} alt={blog.title} fill className="object-cover most-read-img" />
-                </div>
-
-                {/* 텍스트 */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                    <span style={{ padding: '2px 10px', borderRadius: 999, background: color + '18', color, fontSize: 9, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase' }}>
-                      {blog.category}
-                    </span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 700 }}>
-                      {blog.date}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: 'clamp(14px, 1.8vw, 17px)', fontWeight: 900, color: 'var(--text)', lineHeight: 1.3, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
-                    {blog.title}
-                  </p>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{blog.author}</span>
-                </div>
-
-                <ArrowRight size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* All Posts — 하단 중앙 */}
-        <div style={{ textAlign: 'center', marginTop: 40 }}>
-          <Link href="/blog" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', borderRadius: 999, border: '1px solid var(--border-medium)', fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--text)', textDecoration: 'none' }}>
-            All Stories <ArrowRight size={14} />
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
-import { TrendingUp, BookOpen, Users, BarChart2, MessageCircle, Plus, Upload, FileText, Clock, UserPlus } from 'lucide-react';
+import { TrendingUp, BookOpen, Users, BarChart2, MessageCircle, Plus, Upload, FileText, Clock, UserPlus, Eye, Star } from 'lucide-react';
 
 interface RecentBlog {
   id: number;
@@ -33,9 +33,14 @@ export default function AdminDashboard() {
   const [magazineCount, setMagazineCount] = useState<number | null>(null);
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
   const [pendingComments, setPendingComments] = useState<number | null>(null);
+  const [totalViews, setTotalViews] = useState<number | null>(null);
   const [popularBlogs, setPopularBlogs] = useState<Blog[]>([]);
   const [recentBlogs, setRecentBlogs] = useState<RecentBlog[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [publishedBlogs, setPublishedBlogs] = useState<{ id: number; title: string; category: string }[]>([]);
+  const [selectedFeaturedId, setSelectedFeaturedId] = useState<string>('');
+  const [savingFeatured, setSavingFeatured] = useState(false);
+  const [savedFeaturedId, setSavedFeaturedId] = useState<string>('');
 
   useEffect(() => {
     // 유저 이름
@@ -56,6 +61,7 @@ export default function AdminDashboard() {
         .order('view_count', { ascending: false }).limit(5),
       supabase.from('blogs').select('id, title, category, date, image_url, published, author')
         .order('created_at', { ascending: false }).limit(6),
+      supabase.from('blogs').select('view_count'),
     ]).then(([
       { count: bc },
       { count: pc },
@@ -64,6 +70,7 @@ export default function AdminDashboard() {
       { count: cc },
       { data: popular },
       { data: recent },
+      { data: views },
     ]) => {
       setBlogCount(bc ?? 0);
       setPublishedCount(pc ?? 0);
@@ -72,6 +79,19 @@ export default function AdminDashboard() {
       setPendingComments(cc ?? 0);
       setPopularBlogs((popular as Blog[]) ?? []);
       setRecentBlogs((recent as RecentBlog[]) ?? []);
+      const vsum = (views ?? []).reduce((acc: number, r: { view_count: number | null }) => acc + (r.view_count ?? 0), 0);
+      setTotalViews(vsum);
+    });
+
+    // Featured Story 설정 로드
+    Promise.all([
+      supabase.from('site_settings').select('value').eq('key', 'featured_post_id').maybeSingle(),
+      supabase.from('blogs').select('id, title, category').eq('published', true).order('created_at', { ascending: false }).limit(50),
+    ]).then(([{ data: featData }, { data: blogsData }]) => {
+      const val = featData?.value || '';
+      setSelectedFeaturedId(val);
+      setSavedFeaturedId(val);
+      setPublishedBlogs((blogsData ?? []) as { id: number; title: string; category: string }[]);
     });
 
     // 최근 활동 (최근 블로그 + 구독자)
@@ -121,6 +141,19 @@ export default function AdminDashboard() {
     return '방금';
   };
 
+  async function saveFeaturedPost() {
+    setSavingFeatured(true);
+    try {
+      await supabase.from('site_settings').upsert(
+        { key: 'featured_post_id', value: selectedFeaturedId, description: 'Featured Story (히어로 캐러셀 1번 슬라이드)' },
+        { onConflict: 'key' }
+      );
+      setSavedFeaturedId(selectedFeaturedId);
+    } finally {
+      setSavingFeatured(false);
+    }
+  }
+
   const STAT_CARDS = [
     {
       label: '블로그 글',
@@ -147,12 +180,12 @@ export default function AdminDashboard() {
       href: '/admin/subscribers',
     },
     {
-      label: '미승인 댓글',
-      value: pendingComments,
-      sub: '검토 필요',
-      icon: MessageCircle,
-      color: pendingComments && pendingComments > 0 ? '#ef4444' : '#94a3b8',
-      href: '/admin/comments',
+      label: '총 조회수',
+      value: totalViews,
+      sub: pendingComments && pendingComments > 0 ? `미승인 댓글 ${pendingComments}건` : '누적 페이지뷰',
+      icon: Eye,
+      color: '#f59e0b',
+      href: '/admin/blogs',
     },
   ];
 
@@ -252,6 +285,76 @@ export default function AdminDashboard() {
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* ── Featured Story 선택 ── */}
+      <div style={{
+        background: 'white', borderRadius: 24, padding: '24px 28px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9',
+        marginBottom: 36,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <Star size={18} color="#f59e0b" />
+          <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 3, color: '#f59e0b', margin: 0 }}>
+            Featured Story — 히어로 캐러셀 1번 슬라이드 (Editor&apos;s Pick)
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <label style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', letterSpacing: 1, display: 'block', marginBottom: 8 }}>
+              대표 글 선택
+            </label>
+            <select
+              value={selectedFeaturedId}
+              onChange={e => setSelectedFeaturedId(e.target.value)}
+              style={{
+                width: '100%', padding: '11px 14px', borderRadius: 12,
+                border: '1.5px solid #e2e8f0', fontSize: 13, color: '#1a1a1a',
+                background: 'white', outline: 'none', cursor: 'pointer',
+                boxSizing: 'border-box' as const,
+              }}
+            >
+              <option value="">— 최신 글 자동 선택 (기본) —</option>
+              {publishedBlogs.map(blog => (
+                <option key={blog.id} value={String(blog.id)}>
+                  [{blog.category}] {blog.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            onClick={saveFeaturedPost}
+            disabled={savingFeatured}
+            style={{
+              padding: '11px 24px', borderRadius: 999,
+              background: '#4F46E5', color: 'white',
+              border: 'none', fontSize: 12, fontWeight: 700, letterSpacing: 1,
+              cursor: savingFeatured ? 'not-allowed' : 'pointer',
+              opacity: savingFeatured ? 0.7 : 1,
+              whiteSpace: 'nowrap' as const,
+              flexShrink: 0,
+            }}
+          >
+            {savingFeatured ? '저장 중...' : '저장'}
+          </button>
+        </div>
+        {savedFeaturedId && publishedBlogs.find(b => String(b.id) === savedFeaturedId) && (
+          <div style={{
+            marginTop: 12, padding: '8px 14px',
+            background: '#eef2ff', borderRadius: 10,
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <Star size={11} color="#4F46E5" />
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#4F46E5' }}>
+              현재 지정: {publishedBlogs.find(b => String(b.id) === savedFeaturedId)?.title}
+            </span>
+          </div>
+        )}
+        {!savedFeaturedId && (
+          <p style={{ marginTop: 10, fontSize: 12, color: '#94a3b8' }}>
+            현재 자동 모드 — 최신 발행 글이 1번 슬라이드로 표시됩니다.
+          </p>
+        )}
       </div>
 
       {/* ── 2컬럼: 인기 글 TOP 5 + 최근 활동 ── */}

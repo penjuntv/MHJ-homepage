@@ -16,8 +16,8 @@ interface InstagramPost {
 // Supabase Admin client (서버사이드 전용)
 function getSupabaseAdmin() {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://placeholder.supabase.co',
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? 'placeholder'
   );
 }
 

@@ -3,10 +3,20 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { X, ChevronLeft, ChevronRight, Download, List, BookOpen, Image as ImageIcon, AlignLeft } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Download, List, BookOpen, Image as ImageIcon, AlignLeft, Heart, MessageCircle, Send } from 'lucide-react';
 import DownloadBtn from '@/components/DownloadBtn';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
+
+interface ArticleReaction {
+  id: number;
+  article_id: number;
+  type: 'like' | 'comment';
+  content?: string;
+  author_name?: string;
+  created_at: string;
+}
 
 /* ─── Dynamic import: react-pdf (SSR 비활성화 필수) ─── */
 const PdfViewer = dynamic(() => import('./PdfViewer'), {
@@ -63,24 +73,81 @@ function EmptyPage({ magazine }: { magazine: Magazine }) {
 }
 
 /* ─── 기사 팝업 (Articles 모드용) ─── */
-function ArticlePopup({ article, onClose }: { article: Article; onClose: () => void }) {
+function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
+  article: Article; onClose: () => void;
+  liked: boolean; likeCount: number; onLike: () => void;
+}) {
   const isImage = !!article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf');
   const isPdf = !!article.pdf_url && article.pdf_url.toLowerCase().includes('.pdf');
+
+  const [comments, setComments] = useState<ArticleReaction[]>([]);
+  const [authorName, setAuthorName] = useState('');
+  const [commentText, setCommentText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const loadComments = useCallback(async () => {
+    const { data } = await supabase.from('article_reactions').select('*')
+      .eq('article_id', article.id).eq('type', 'comment')
+      .order('created_at', { ascending: false });
+    setComments((data ?? []) as ArticleReaction[]);
+  }, [article.id]);
+
+  useEffect(() => { loadComments(); }, [loadComments]);
+
+  async function submitComment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!authorName.trim() || !commentText.trim()) return;
+    setSubmitting(true);
+    await supabase.from('article_reactions').insert({
+      article_id: article.id, type: 'comment',
+      content: commentText.trim(), author_name: authorName.trim(),
+    });
+    await loadComments();
+    setCommentText('');
+    setSubmitting(false);
+  }
+
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+
+        {/* 헤더 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #F1F5F9', flexShrink: 0 }}>
           <div>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, color: '#9C8B7A', textTransform: 'uppercase', margin: '0 0 3px' }}>{article.article_type || 'Article'} · {article.author}</p>
             <p style={{ fontSize: 15, fontWeight: 900, color: '#1A1A1A', margin: 0 }}>{article.title}</p>
           </div>
-          <button onClick={onClose} style={{ background: '#F5F0EB', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center' }}><X size={15} color="#6B5B4E" /></button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* 좋아요 버튼 */}
+            <button onClick={onLike} style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '6px 12px', borderRadius: 999,
+              border: `1px solid ${liked ? '#FCA5A5' : '#E8DDD4'}`,
+              background: liked ? '#FFF5F5' : '#FAF7F4',
+              cursor: liked ? 'default' : 'pointer',
+              fontSize: 12, fontWeight: 700,
+              color: liked ? '#EF4444' : '#9C8B7A', transition: 'all 0.2s',
+            }}>
+              <Heart size={13} fill={liked ? '#EF4444' : 'none'} color={liked ? '#EF4444' : '#9C8B7A'} />
+              {likeCount > 0 && <span>{likeCount}</span>}
+            </button>
+            {/* 댓글 수 */}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#9C8B7A', fontWeight: 600 }}>
+              <MessageCircle size={13} />
+              {comments.length > 0 && <span>{comments.length}</span>}
+            </span>
+            <button onClick={onClose} style={{ background: '#F5F0EB', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <X size={15} color="#6B5B4E" />
+            </button>
+          </div>
         </div>
+
+        {/* 본문 */}
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {isPdf && <iframe src={article.pdf_url!} style={{ width: '100%', height: '70vh', border: 'none', display: 'block' }} title={article.title} />}
+          {isPdf && <iframe src={article.pdf_url!} style={{ width: '100%', height: '55vh', border: 'none', display: 'block' }} title={article.title} />}
           {isImage && article.pdf_url && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '70vh', objectFit: 'contain', background: '#F5F0EB' }} />
+            <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '55vh', objectFit: 'contain', background: '#F5F0EB' }} />
           )}
           {!article.pdf_url && (
             <div style={{ padding: 32 }}>
@@ -93,6 +160,57 @@ function ArticlePopup({ article, onClose }: { article: Article; onClose: () => v
               <p style={{ color: '#9C8B7A', fontSize: 13, marginTop: 20, fontStyle: 'italic' }}>— {article.author}</p>
             </div>
           )}
+
+          {/* 댓글 섹션 */}
+          <div style={{ padding: '24px 28px 28px', borderTop: '1px solid #F1F5F9' }}>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: '#9C8B7A', marginBottom: 16 }}>
+              댓글{comments.length > 0 ? ` (${comments.length})` : ''}
+            </p>
+
+            {comments.length === 0 ? (
+              <p style={{ fontSize: 13, color: '#C4B8AB', marginBottom: 20 }}>아직 댓글이 없습니다. 첫 댓글을 남겨보세요.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                {comments.map(c => (
+                  <div key={c.id} style={{ padding: '12px 16px', background: '#FAF7F4', borderRadius: 12 }}>
+                    <div style={{ display: 'flex', gap: 10, marginBottom: 5, alignItems: 'center' }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: '#2C1F14' }}>{c.author_name}</span>
+                      <span style={{ fontSize: 11, color: '#C4B8AB' }}>{new Date(c.created_at).toLocaleDateString('ko-KR')}</span>
+                    </div>
+                    <p style={{ fontSize: 13, color: '#4A3F35', lineHeight: 1.6, margin: 0 }}>{c.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 댓글 작성 폼 */}
+            <form onSubmit={submitComment} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <input
+                value={authorName}
+                onChange={e => setAuthorName(e.target.value)}
+                placeholder="닉네임"
+                required
+                style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #E8DDD4', background: '#FAF7F4', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
+              />
+              <textarea
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                placeholder="댓글을 남겨주세요..."
+                required
+                rows={3}
+                style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #E8DDD4', background: '#FAF7F4', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
+              />
+              <button type="submit" disabled={submitting} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                padding: '10px 20px', borderRadius: 999, alignSelf: 'flex-end',
+                background: '#2C1F14', color: 'white', border: 'none',
+                fontSize: 12, fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer',
+                opacity: submitting ? 0.6 : 1,
+              }}>
+                <Send size={12} /> {submitting ? '등록 중...' : '댓글 등록'}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -105,6 +223,11 @@ function ArticlePopup({ article, onClose }: { article: Article; onClose: () => v
 export default function MagazineViewer({ magazine, articles }: Props) {
   const router = useRouter();
   const mode = getMode(magazine, articles);
+  const hasBothModes = !!magazine.pdf_url && articles.length > 0;
+  const [activeTab, setActiveTab] = useState<'articles' | 'pdf'>('articles');
+  const showPdf = hasBothModes ? activeTab === 'pdf' : mode === 'pdf';
+  const showArticles = hasBothModes ? activeTab === 'articles' : mode === 'articles';
+  const showEmpty = mode === 'empty';
   const touchStartX = useRef<number | null>(null);
 
   const sortedArticles = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
@@ -115,6 +238,45 @@ export default function MagazineViewer({ magazine, articles }: Props) {
   const [totalPdfPages, setTotalPdfPages] = useState(0);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  /* ── 좋아요/댓글 카운트 ── */
+  const [reactionCounts, setReactionCounts] = useState<Record<number, { likes: number; comments: number }>>({});
+  const [likedArticles, setLikedArticles] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    const ids = sortedArticles.map(a => a.id);
+    if (!ids.length) return;
+    // sessionStorage에서 좋아요한 기사 ID 로드
+    try {
+      const saved = JSON.parse(sessionStorage.getItem('mag_liked') ?? '[]') as number[];
+      setLikedArticles(new Set(saved));
+    } catch { /* ignore */ }
+    // 반응 카운트 fetch
+    supabase.from('article_reactions').select('article_id, type').in('article_id', ids)
+      .then(({ data }) => {
+        const counts: Record<number, { likes: number; comments: number }> = {};
+        ids.forEach(id => { counts[id] = { likes: 0, comments: 0 }; });
+        (data ?? []).forEach(r => {
+          if (!counts[r.article_id]) counts[r.article_id] = { likes: 0, comments: 0 };
+          if (r.type === 'like') counts[r.article_id].likes++;
+          else if (r.type === 'comment') counts[r.article_id].comments++;
+        });
+        setReactionCounts(counts);
+      });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleLike = useCallback(async (articleId: number) => {
+    if (likedArticles.has(articleId)) return;
+    await supabase.from('article_reactions').insert({ article_id: articleId, type: 'like' });
+    const next = new Set(likedArticles);
+    next.add(articleId);
+    setLikedArticles(next);
+    try { sessionStorage.setItem('mag_liked', JSON.stringify(Array.from(next))); } catch { /* ignore */ }
+    setReactionCounts(prev => ({
+      ...prev,
+      [articleId]: { ...(prev[articleId] ?? { likes: 0, comments: 0 }), likes: (prev[articleId]?.likes ?? 0) + 1 },
+    }));
+  }, [likedArticles]);
 
   const pageCount = totalPdfPages;
 
@@ -140,7 +302,7 @@ export default function MagazineViewer({ magazine, articles }: Props) {
 
   /* 기사 클릭: PDF 모드면 해당 page_start로 이동, 아니면 팝업 */
   const handleArticleClick = useCallback((article: Article) => {
-    if (mode === 'pdf' && article.page_start != null) {
+    if (showPdf && article.page_start != null) {
       // totalPdfPages가 확정된 경우 범위 내로 클램프 (초과 페이지 에러 방지)
       const targetPage = article.page_start as number;
       const safePage = totalPdfPages > 0 ? Math.min(targetPage, totalPdfPages) : targetPage;
@@ -149,13 +311,13 @@ export default function MagazineViewer({ magazine, articles }: Props) {
     } else {
       setSelectedArticle(article);
     }
-  }, [mode, totalPdfPages]);
+  }, [showPdf, totalPdfPages]);
 
   /* 키보드 */
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (selectedArticle) { if (e.key === 'Escape') setSelectedArticle(null); return; }
-      if (mode === 'pdf') {
+      if (showPdf) {
         if (e.key === 'ArrowLeft') goToPrev();
         else if (e.key === 'ArrowRight') goToNext();
       }
@@ -163,12 +325,12 @@ export default function MagazineViewer({ magazine, articles }: Props) {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [goToPrev, goToNext, router, mode, selectedArticle]);
+  }, [goToPrev, goToNext, router, showPdf, selectedArticle]);
 
   /* 터치 스와이프 */
   const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
   const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null || mode !== 'pdf') return;
+    if (touchStartX.current === null || !showPdf) return;
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) { if (diff > 0) goToNext(); else goToPrev(); }
     touchStartX.current = null;
@@ -205,7 +367,7 @@ export default function MagazineViewer({ magazine, articles }: Props) {
             </h1>
           </div>
 
-          {mode === 'pdf' && pageCount > 0 && (
+          {showPdf && pageCount > 0 && (
             <div style={{ color: '#9C8B7A', fontSize: 12, fontWeight: 700, letterSpacing: 1, flexShrink: 0 }}>
               {currentPage} / {pageCount}
             </div>
@@ -215,7 +377,7 @@ export default function MagazineViewer({ magazine, articles }: Props) {
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="mag-mobile-btn" style={{ ...topBtn, display: 'none' }} title="목차">
               <List size={15} />
             </button>
-            {mode === 'pdf' && magazine.pdf_url && (
+            {showPdf && magazine.pdf_url && (
               <a href={magazine.pdf_url} download target="_blank" rel="noopener noreferrer" title="전체 PDF 다운로드" style={{ ...topBtn, textDecoration: 'none' }}>
                 <Download size={15} />
               </a>
@@ -226,10 +388,40 @@ export default function MagazineViewer({ magazine, articles }: Props) {
           </div>
         </div>
 
+        {/* ─── 탭 전환 (PDF + Articles 둘 다 있을 때만) ─── */}
+        {hasBothModes && (
+          <div style={{
+            display: 'flex', gap: 4,
+            padding: '10px 20px',
+            background: '#FAF7F4',
+            borderBottom: '1px solid #E8DDD4',
+            flexShrink: 0,
+          }}>
+            {(['articles', 'pdf'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  padding: '7px 18px',
+                  borderRadius: 999,
+                  border: activeTab === tab ? 'none' : '1px solid #E8DDD4',
+                  background: activeTab === tab ? '#2C1F14' : 'transparent',
+                  color: activeTab === tab ? 'white' : '#9C8B7A',
+                  fontSize: 10, fontWeight: 900, letterSpacing: 3,
+                  textTransform: 'uppercase', cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {tab === 'articles' ? 'Articles' : 'Full Issue (PDF)'}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* ══════════════════════════════════════════════
             PDF 모드 — 2단 레이아웃
             ══════════════════════════════════════════════ */}
-        {mode === 'pdf' && (
+        {showPdf && (
           <div className="mag-layout">
 
             {/* 좌: PDF 뷰어 (책이 테이블에 놓인 느낌) */}
@@ -445,7 +637,7 @@ export default function MagazineViewer({ magazine, articles }: Props) {
         {/* ══════════════════════════════════════════════
             Articles 모드 (과월호): 사진 그리드
             ══════════════════════════════════════════════ */}
-        {mode === 'articles' && (
+        {showArticles && (
           <div style={{ flex: 1, padding: 'clamp(48px, 6vw, 80px) clamp(24px, 4vw, 48px)' }}>
             <div style={{ maxWidth: 1100, margin: '0 auto' }}>
               <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#8B7355', display: 'block', marginBottom: 10 }}>Past Issue</span>
@@ -455,9 +647,18 @@ export default function MagazineViewer({ magazine, articles }: Props) {
               <p style={{ margin: '0 0 40px', fontSize: 14, color: '#7A6958', fontWeight: 500 }}>
                 {magazine.year} {magazine.month_name} · Editor: {magazine.editor} · {sortedArticles.length} Articles
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: 24 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: 48 }}>
                 {sortedArticles.map(a => (
-                  <ArticleGridCard key={a.id} article={a} onOpen={() => setSelectedArticle(a)} magazineLabel={`${magazine.month_name}${magazine.year}`} />
+                  <ArticleGridCard
+                    key={a.id}
+                    article={a}
+                    onOpen={() => setSelectedArticle(a)}
+                    magazineLabel={`${magazine.month_name}${magazine.year}`}
+                    liked={likedArticles.has(a.id)}
+                    likeCount={reactionCounts[a.id]?.likes ?? 0}
+                    commentCount={reactionCounts[a.id]?.comments ?? 0}
+                    onLike={e => { e.stopPropagation(); handleLike(a.id); }}
+                  />
                 ))}
               </div>
             </div>
@@ -465,11 +666,19 @@ export default function MagazineViewer({ magazine, articles }: Props) {
         )}
 
         {/* Empty 모드 */}
-        {mode === 'empty' && <div style={{ flex: 1 }}><EmptyPage magazine={magazine} /></div>}
+        {showEmpty && <div style={{ flex: 1 }}><EmptyPage magazine={magazine} /></div>}
       </div>
 
       {/* Articles 모드 팝업 */}
-      {selectedArticle && <ArticlePopup article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
+      {selectedArticle && (
+        <ArticlePopup
+          article={selectedArticle}
+          onClose={() => setSelectedArticle(null)}
+          liked={likedArticles.has(selectedArticle.id)}
+          likeCount={reactionCounts[selectedArticle.id]?.likes ?? 0}
+          onLike={() => handleLike(selectedArticle.id)}
+        />
+      )}
 
       {/* 모바일 사이드바 오버레이 */}
       {sidebarOpen && (
@@ -531,48 +740,75 @@ export default function MagazineViewer({ magazine, articles }: Props) {
 }
 
 /* ─── Articles 모드 그리드 카드 ─── */
-function ArticleGridCard({ article, onOpen, magazineLabel }: { article: Article; onOpen: () => void; magazineLabel: string }) {
+function ArticleGridCard({ article, onOpen, magazineLabel, liked, likeCount, commentCount, onLike }: {
+  article: Article; onOpen: () => void; magazineLabel: string;
+  liked: boolean; likeCount: number; commentCount: number;
+  onLike: (e: React.MouseEvent) => void;
+}) {
   const isImageFile = !!article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf');
   const cardRef = useRef<HTMLDivElement>(null);
   return (
     <div style={{ position: 'relative' }}>
-    <div
-      ref={cardRef}
-      onClick={onOpen}
-      style={{ borderRadius: 16, overflow: 'hidden', background: '#fff', border: '1px solid #E8DDD4', cursor: 'pointer', transition: 'transform 0.25s ease, box-shadow 0.25s ease', boxShadow: '0 2px 8px rgba(44,31,20,0.06)' }}
-      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 16px 40px rgba(44,31,20,0.12)'; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(44,31,20,0.06)'; }}
-    >
-      <div style={{ aspectRatio: '4/3', position: 'relative', overflow: 'hidden', background: '#EDE4D9' }}>
-        {isImageFile && article.pdf_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={article.pdf_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        ) : (
-          <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
-        )}
-        {article.article_type && (
-          <span style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(250,247,244,0.92)', color: '#7A6958', fontSize: 8, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4 }}>
-            {article.article_type}
-          </span>
-        )}
+      <div
+        ref={cardRef}
+        onClick={onOpen}
+        style={{ borderRadius: 16, overflow: 'hidden', background: '#fff', border: '1px solid #E8DDD4', cursor: 'pointer', transition: 'transform 0.25s ease, box-shadow 0.25s ease', boxShadow: '0 2px 8px rgba(44,31,20,0.06)' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 16px 40px rgba(44,31,20,0.12)'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(44,31,20,0.06)'; }}
+      >
+        <div style={{ aspectRatio: '4/3', position: 'relative', overflow: 'hidden', background: '#EDE4D9' }}>
+          {isImageFile && article.pdf_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={article.pdf_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
+          )}
+          {article.article_type && (
+            <span style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(250,247,244,0.92)', color: '#7A6958', fontSize: 8, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4 }}>
+              {article.article_type}
+            </span>
+          )}
+        </div>
+        <div style={{ padding: '14px 16px 12px' }}>
+          <p style={{ margin: '0 0 5px', fontSize: 9, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: '#9C8B7A' }}>
+            {article.author} · {article.date}
+          </p>
+          <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 900, lineHeight: 1.3, color: '#2C1F14', letterSpacing: -0.3 }}>
+            {article.title}
+          </h3>
+          {/* 좋아요 / 댓글 수 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button
+              onClick={onLike}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '5px 10px', borderRadius: 999,
+                border: `1px solid ${liked ? '#FCA5A5' : '#E8DDD4'}`,
+                background: liked ? '#FFF5F5' : 'transparent',
+                cursor: liked ? 'default' : 'pointer',
+                fontSize: 11, fontWeight: 700,
+                color: liked ? '#EF4444' : '#9C8B7A', transition: 'all 0.2s',
+              }}
+            >
+              <Heart size={11} fill={liked ? '#EF4444' : 'none'} color={liked ? '#EF4444' : '#9C8B7A'} />
+              {likeCount > 0 ? likeCount : '좋아요'}
+            </button>
+            {commentCount > 0 && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#9C8B7A', fontWeight: 600 }}>
+                <MessageCircle size={11} /> {commentCount}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
-      <div style={{ padding: '14px 16px 16px' }}>
-        <p style={{ margin: '0 0 5px', fontSize: 9, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: '#9C8B7A' }}>
-          {article.author} · {article.date}
-        </p>
-        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 900, lineHeight: 1.3, color: '#2C1F14', letterSpacing: -0.3 }}>
-          {article.title}
-        </h3>
+      {/* 다운로드 버튼 오버레이 */}
+      <div style={{ position: 'absolute', bottom: '52px', right: '12px' }} onClick={e => e.stopPropagation()}>
+        <DownloadBtn
+          targetRef={cardRef as React.RefObject<HTMLElement>}
+          filename={`TheMHJ_${magazineLabel}_${article.title.slice(0, 20)}`}
+          size="sm"
+        />
       </div>
-    </div>
-    {/* 다운로드 버튼 오버레이 */}
-    <div style={{ position: 'absolute', bottom: '12px', right: '12px' }} onClick={e => e.stopPropagation()}>
-      <DownloadBtn
-        targetRef={cardRef as React.RefObject<HTMLElement>}
-        filename={`TheMHJ_${magazineLabel}_${article.title.slice(0, 20)}`}
-        size="sm"
-      />
-    </div>
     </div>
   );
 }

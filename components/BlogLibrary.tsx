@@ -44,11 +44,14 @@ interface Props {
   readerFavorites?: Blog[];
 }
 
+const PAGE_SIZE = 12;
+
 export default function BlogLibrary({ blogs, blogTitle, blogDescription, readerFavorites }: Props) {
   const displayBlogs = blogs.length ? blogs : FALLBACK_BLOGS;
   const [activeCategory, setActiveCategory] = useState<Cat>('All');
   const [popularBlogs, setPopularBlogs] = useState<Blog[]>([]);
   const [popularLoading, setPopularLoading] = useState(false);
+  const [page, setPage] = useState(1);
   const router = useRouter();
 
   /* ─── 슬라이딩 인디케이터 ─── */
@@ -67,6 +70,9 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription, readerF
     setIndicator({ left: bRect.left - cRect.left, width: bRect.width, opacity: 1 });
     setTransitioning(true);
   }, [activeCategory]);
+
+  /* ─── 카테고리 변경 시 페이지 리셋 ─── */
+  useEffect(() => { setPage(1); }, [activeCategory]);
 
   /* ─── Popular 로드 ─── */
   useEffect(() => {
@@ -90,8 +96,11 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription, readerF
     : activeCategory === 'Popular' ? popularBlogs
     : displayBlogs.filter(b => b.category === activeCategory);
 
-  const [featured, ...rest] = filtered;
-  const showFeatured = (activeCategory === 'All' || activeCategory === 'Popular') && filtered.length > 0;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pagedFiltered = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const [featured, ...rest] = pagedFiltered;
+  const showFeatured = (activeCategory === 'All' || activeCategory === 'Popular') && pagedFiltered.length > 0;
   const mediumCards = showFeatured ? rest.slice(0, 2) : [];
   const smallCards  = showFeatured ? rest.slice(2)  : [];
 
@@ -274,7 +283,7 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription, readerF
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
               style={{ gap: 48 }}
             >
-              {filtered.map((b, i) => (
+              {pagedFiltered.map((b, i) => (
                 <BlogCard
                   key={b.id}
                   blog={b}
@@ -285,6 +294,72 @@ export default function BlogLibrary({ blogs, blogTitle, blogDescription, readerF
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* 페이지네이션 */}
+      {totalPages > 1 && !popularLoading && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 8,
+          marginTop: 80,
+        }}>
+          <button
+            onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            disabled={page === 1}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 999,
+              border: '1px solid var(--border)',
+              background: 'transparent',
+              color: page === 1 ? 'var(--text-tertiary)' : 'var(--text)',
+              cursor: page === 1 ? 'default' : 'pointer',
+              fontSize: 12,
+              fontWeight: 900,
+              transition: 'all 0.2s',
+            }}
+          >
+            «
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+            <button
+              key={p}
+              onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 999,
+                border: '1px solid var(--border)',
+                background: p === page ? 'var(--text)' : 'transparent',
+                color: p === page ? 'var(--bg)' : 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: 900,
+                transition: 'all 0.2s',
+              }}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            disabled={page === totalPages}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 999,
+              border: '1px solid var(--border)',
+              background: 'transparent',
+              color: page === totalPages ? 'var(--text-tertiary)' : 'var(--text)',
+              cursor: page === totalPages ? 'default' : 'pointer',
+              fontSize: 12,
+              fontWeight: 900,
+              transition: 'all 0.2s',
+            }}
+          >
+            »
+          </button>
         </div>
       )}
 
@@ -500,7 +575,7 @@ function BlogCard({ blog, staggerClass, onClick, showRank, imageRatio = '4/3', s
       </div>
 
       {/* 텍스트 영역 — 이미지 아래 분리 */}
-      <div style={{ padding: '16px 20px 20px' }}>
+      <div style={{ padding: '12px 0 16px' }}>
         {/* 카테고리 + 날짜 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
           <span style={{
@@ -637,8 +712,8 @@ function ReaderFavoritesSection({ blogs }: { blogs: Blog[] }) {
               href={`/blog/${blog.slug}`}
               className="most-read-row"
               style={{
-                display: 'flex', gap: 20, alignItems: 'center',
-                padding: '16px 20px',
+                display: 'flex', gap: 14, alignItems: 'center',
+                padding: '11px 14px',
                 background: 'var(--bg)',
                 borderRadius: 20,
                 textDecoration: 'none',
@@ -647,15 +722,15 @@ function ReaderFavoritesSection({ blogs }: { blogs: Blog[] }) {
               }}
             >
               <div style={{
-                width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
                 background: i < 3 ? color : 'var(--bg-surface)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <span className="font-display" style={{ fontSize: 13, fontWeight: 900, fontStyle: 'italic', color: i < 3 ? 'white' : 'var(--text-tertiary)', lineHeight: 1 }}>
+                <span className="font-display" style={{ fontSize: 10, fontWeight: 900, fontStyle: 'italic', color: i < 3 ? 'white' : 'var(--text-tertiary)', lineHeight: 1 }}>
                   {i + 1}
                 </span>
               </div>
-              <div style={{ width: 120, height: 90, borderRadius: 14, overflow: 'hidden', position: 'relative', flexShrink: 0, background: 'var(--bg-surface)' }}>
+              <div style={{ width: 84, height: 63, borderRadius: 10, overflow: 'hidden', position: 'relative', flexShrink: 0, background: 'var(--bg-surface)' }}>
                 <SafeImage src={blog.image_url} alt={blog.title} fill className="object-cover most-read-img" />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -665,7 +740,7 @@ function ReaderFavoritesSection({ blogs }: { blogs: Blog[] }) {
                   </span>
                   <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 700 }}>{blog.date}</span>
                 </div>
-                <p style={{ fontSize: 'clamp(14px, 1.8vw, 17px)', fontWeight: 900, color: 'var(--text)', lineHeight: 1.3, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
+                <p style={{ fontSize: 'clamp(12px, 1.5vw, 15px)', fontWeight: 900, color: 'var(--text)', lineHeight: 1.3, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
                   {blog.title}
                 </p>
                 <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{blog.author}</span>

@@ -4,28 +4,28 @@ import { useState } from 'react';
 
 const FAQS = [
   {
-    q: 'StoryPress가 뭔가요?',
-    a: 'StoryPress는 이중언어 가정의 아이들을 위한 영어 어휘 학습 앱입니다. 하루 4단어씩, 스토리 기반으로 자연스럽게 영어를 익힐 수 있도록 설계되었습니다. 뉴질랜드 오클랜드에 사는 한국인 가족의 실제 경험에서 탄생했습니다.',
+    q: 'What is StoryPress?',
+    a: 'StoryPress is a vocabulary-building app designed for bilingual children aged 5–12. It teaches just 4 words a day through stories, so learning feels natural — not like a chore. Born from our own bilingual family experience in Auckland, New Zealand.',
   },
   {
-    q: '어떤 아이들에게 맞나요?',
-    a: '만 5세~12세(Year 1~Year 8)의 이중언어 환경 아이들에게 가장 효과적입니다. 특히 영어가 제2언어인 가정, 해외 이민·유학 가정, 국제학교 재학생에게 맞춤화되어 있습니다.',
+    q: 'Who is it for?',
+    a: 'StoryPress is made for children aged 5–12 (Year 1–8) who are growing up with two languages. It works especially well for ESOL families, overseas families, and children attending international schools.',
   },
   {
-    q: '어떻게 학습하나요?',
-    a: '매일 4개의 단어를 원어민 발음으로 듣고 → 짧은 스토리 안에서 맥락으로 이해하고 → 간단한 게임으로 연습합니다. 다음 날 자동으로 복습이 예약되어 기억이 오래 지속됩니다.',
+    q: 'How does it work?',
+    a: 'Each day, children hear 4 words with native pronunciation → understand them in a short story → practise with a simple game. The next day, words are reviewed automatically so they stay in long-term memory.',
   },
   {
-    q: '가격은 얼마인가요?',
-    a: '현재 개발 중이며 정식 출시 전까지 대기자 명단에 등록하신 분들께는 얼리버드 혜택이 제공됩니다. 지금 바로 무료로 대기자 명단에 등록하세요.',
+    q: 'How much does it cost?',
+    a: 'StoryPress is currently in development. Join the waitlist for free — early subscribers will receive special launch benefits when we go live.',
   },
   {
-    q: '다른 영어 앱과 뭐가 다른가요?',
-    a: '대부분의 앱은 단순 반복·암기 방식입니다. StoryPress는 이야기 속 맥락으로 단어를 배우기 때문에 뜻만이 아니라 쓰임새까지 자연스럽게 익힙니다. 또한 이중언어 가정의 특수한 상황(한국어·영어 혼용 환경)을 이해하고 설계된 유일한 앱입니다.',
+    q: 'How is it different from other apps?',
+    a: 'Most apps focus on rote repetition. StoryPress teaches words inside stories, so children learn both meaning and natural usage. It\'s also the only app built specifically for bilingual families navigating two languages and two cultures.',
   },
   {
-    q: '부모 대시보드가 있나요?',
-    a: '네, 부모님이 아이의 학습 진도를 확인하고 오늘 배운 단어를 함께 복습할 수 있는 대시보드가 제공됩니다. 가족이 함께 배움을 나눌 수 있도록 설계되었습니다.',
+    q: 'Is there a parent dashboard?',
+    a: 'Yes. Parents can track their child\'s progress and review today\'s words together. We designed it so learning becomes a shared family moment — not just screen time.',
   },
 ];
 
@@ -57,7 +57,7 @@ export default function StoryPressFAQ() {
               color: '#1A1A1A',
             }}
           >
-            자주 묻는 질문
+            Frequently Asked Questions
           </h2>
         </div>
 
@@ -123,7 +123,7 @@ export default function StoryPressFAQ() {
                   </span>
                 </button>
 
-                {/* 답변 (grid-template-rows 애니메이션) */}
+                {/* 답변 */}
                 <div
                   id={`faq-answer-${idx}`}
                   role="region"

@@ -32,41 +32,50 @@ const FEATURES = [
     icon: Sparkles,
     color: '#F59E42',
     bg: '#FFF7ED',
-    title: '하루 4단어',
+    highlight: '4',
+    highlightSub: 'Words a Day',
+    title: '4 Words a Day',
     desc: 'Just 4 words a day — no overwhelm, just steady progress your child can feel.',
   },
   {
     icon: BookOpen,
     color: '#6D7AFA',
     bg: '#EEF2FF',
-    title: '스토리 기반 학습',
+    highlight: null,
+    highlightSub: null,
+    title: 'Story-Based Learning',
     desc: 'Words come alive through stories children love — context makes them stick.',
   },
   {
     icon: RefreshCw,
     color: '#10B981',
     bg: '#ECFDF5',
-    title: '스마트 반복',
+    highlight: null,
+    highlightSub: null,
+    title: 'Smart Repetition',
     desc: 'Smart repetition that sticks without boring drills or pressure.',
   },
   {
     icon: Users,
     color: '#EC4899',
     bg: '#FDF2F8',
-    title: '이중언어 가족을 위해',
+    highlight: null,
+    highlightSub: null,
+    title: 'For Bilingual Families',
     desc: 'Built for bilingual families navigating two languages, two worlds.',
   },
 ];
 
 const STEPS = [
-  { num: '01', label: 'Listen', desc: '원어민 발음으로 단어를 듣고 뜻을 이해해요.' },
-  { num: '02', label: 'Practice', desc: '따라 말하고 작은 게임으로 즐겁게 연습해요.' },
-  { num: '03', label: 'Review', desc: '다음 날 자연스럽게 복습하며 기억을 굳혀요.' },
+  { num: '01', label: 'Listen', desc: 'Hear each word with native pronunciation and understand its meaning in context.' },
+  { num: '02', label: 'Practice', desc: 'Repeat and practise through short, enjoyable games — no pressure, just play.' },
+  { num: '03', label: 'Review', desc: 'Smart review the next day reinforces memory and makes words stick for good.' },
 ];
 
 export default function StoryPressClient({ title }: Props) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
+  const [hoverFeature, setHoverFeature] = useState<number | null>(null);
 
   const featuresAnim = useSlideUp();
   const stepsAnim = useSlideUp();
@@ -153,15 +162,15 @@ export default function StoryPressClient({ title }: Props) {
             </div>
             {/* 단어 카드들 */}
             {[
-              { word: 'Curious', korean: '호기심 많은', color: '#FFF7ED', border: '#FED7AA' },
-              { word: 'Discover', korean: '발견하다', color: '#F0F4FF', border: '#C7D2FE' },
-              { word: 'Journey', korean: '여정', color: '#ECFDF5', border: '#A7F3D0' },
-              { word: 'Wonder', korean: '경이로움', color: '#FDF2F8', border: '#FBCFE8' },
+              { word: 'Curious', korean: 'feeling eager to know', color: '#FFF7ED', border: '#FED7AA' },
+              { word: 'Discover', korean: 'to find something new', color: '#F0F4FF', border: '#C7D2FE' },
+              { word: 'Journey', korean: 'a long trip or adventure', color: '#ECFDF5', border: '#A7F3D0' },
+              { word: 'Wonder', korean: 'a feeling of amazement', color: '#FDF2F8', border: '#FBCFE8' },
             ].map((item, i) => (
               <div key={i} style={{ background: item.color, border: `1px solid ${item.border}`, borderRadius: 16, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ fontSize: 15, fontWeight: 900, color: '#1A1A1A', margin: 0, letterSpacing: -0.3 }}>{item.word}</p>
-                  <p style={{ fontSize: 11, color: '#64748B', margin: 0, fontWeight: 600 }}>{item.korean}</p>
+                  <p style={{ fontSize: 11, color: '#64748B', margin: 0, fontWeight: 500 }}>{item.korean}</p>
                 </div>
                 <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                   <span style={{ fontSize: 13 }}>▶</span>
@@ -214,31 +223,76 @@ export default function StoryPressClient({ title }: Props) {
         }}>
           {FEATURES.map((f, i) => {
             const Icon = f.icon;
+            const isHovered = hoverFeature === i;
             return (
               <div
                 key={i}
+                onMouseEnter={() => setHoverFeature(i)}
+                onMouseLeave={() => setHoverFeature(null)}
                 style={{
                   background: 'var(--bg-surface)',
                   borderRadius: 32,
                   padding: 'clamp(28px, 3vw, 40px)',
+                  cursor: 'default',
                   opacity: featuresAnim.visible ? 1 : 0,
-                  transform: featuresAnim.visible ? 'none' : 'translateY(30px)',
-                  transition: `all 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s`,
+                  transform: isHovered
+                    ? 'translateY(-8px)'
+                    : featuresAnim.visible ? 'none' : 'translateY(30px)',
+                  boxShadow: isHovered
+                    ? '0 20px 48px rgba(0,0,0,0.12)'
+                    : '0 2px 8px rgba(0,0,0,0.04)',
+                  transition: isHovered
+                    ? 'transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s'
+                    : `all 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s`,
                 }}
               >
                 <div style={{
                   width: 52, height: 52, borderRadius: 16,
                   background: f.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: 24,
+                  marginBottom: 20,
                 }}>
                   <Icon size={24} color={f.color} />
                 </div>
-                <h3 style={{
-                  fontSize: 18, fontWeight: 900, color: 'var(--text)',
-                  letterSpacing: '-0.5px', marginBottom: 12,
-                }}>
-                  {f.title}
-                </h3>
+
+                {/* 숫자 강조 (첫 번째 카드) */}
+                {f.highlight ? (
+                  <div style={{ marginBottom: 12 }}>
+                    <span
+                      className="font-display"
+                      style={{
+                        fontSize: 'clamp(48px, 6vw, 64px)',
+                        fontWeight: 900,
+                        fontStyle: 'italic',
+                        letterSpacing: -3,
+                        lineHeight: 1,
+                        color: f.color,
+                        display: 'inline',
+                      }}
+                    >
+                      {f.highlight}
+                    </span>
+                    {f.highlightSub && (
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 900,
+                        letterSpacing: 3,
+                        textTransform: 'uppercase',
+                        color: f.color,
+                        marginLeft: 8,
+                        verticalAlign: 'middle',
+                      }}>
+                        {f.highlightSub}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <h3 style={{
+                    fontSize: 18, fontWeight: 900, color: 'var(--text)',
+                    letterSpacing: '-0.5px', marginBottom: 12,
+                  }}>
+                    {f.title}
+                  </h3>
+                )}
                 <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
                   {f.desc}
                 </p>
@@ -327,7 +381,7 @@ export default function StoryPressClient({ title }: Props) {
         </div>
       </section>
 
-      {/* ─── 사회적 증명 (인용문) ─── */}
+      {/* ─── 인용문 ─── */}
       <section
         ref={quoteAnim.ref}
         style={{
@@ -339,7 +393,6 @@ export default function StoryPressClient({ title }: Props) {
         }}
       >
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
-          {/* 큰 따옴표 */}
           <div className="font-display" style={{
             fontSize: 'clamp(80px, 14vw, 160px)',
             fontWeight: 900,
@@ -361,8 +414,8 @@ export default function StoryPressClient({ title }: Props) {
               color: 'var(--text)',
               marginBottom: 32,
             }}>
-              우리 아이가 매일 4단어씩 배우며<br />
-              자신감을 찾아가고 있어요.
+              My child picks up 4 new words every day —<br />
+              and their confidence keeps growing.
             </p>
             <cite style={{
               fontSize: 12, fontWeight: 900, letterSpacing: 3,
@@ -422,7 +475,7 @@ export default function StoryPressClient({ title }: Props) {
               border: '1px solid rgba(255,255,255,0.1)',
             }}>
               <p style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
-                You&apos;re on the list! 🎉<br />
+                You&apos;re on the list!<br />
                 <span style={{ fontWeight: 500, fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
                   We&apos;ll let you know when StoryPress launches.
                 </span>

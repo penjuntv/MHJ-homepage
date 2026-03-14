@@ -34,7 +34,7 @@ export default function Footer({
   ].filter(s => !!s.href);
 
   return (
-    <footer style={{ background: '#000', padding: '96px 40px 48px' }}>
+    <footer style={{ background: '#111111', padding: '96px 40px 48px' }}>
       <div
         style={{
           display: 'grid',
@@ -49,9 +49,8 @@ export default function Footer({
         {/* 브랜드 */}
         <div>
           <div
-            className="font-display font-black uppercase"
+            className="font-display font-black uppercase type-h2"
             style={{
-              fontSize: '28px',
               fontStyle: 'italic',
               color: 'rgba(255,255,255,0.9)',
               letterSpacing: '-2px',
@@ -136,9 +135,6 @@ export default function Footer({
             Contact
           </div>
           <div className="flex flex-col" style={{ gap: '8px' }}>
-            <p className="font-bold" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
-              Auckland, New Zealand
-            </p>
             <p className="font-bold" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
               {contactLocation}
             </p>

@@ -68,6 +68,19 @@
 | 700 | 라벨, 푸터 링크, 날짜/카테고리, 푸터 연락처 |
 | 900 | 제목, 네비게이션, 버튼, 서브헤딩, 대부분의 UI 라벨 |
 
+### Typography Scale (5단계 — CSS 변수, 2026.03 정의)
+
+| 단계 | CSS 변수 | 값 | 용도 | 클래스 |
+|------|---------|-----|------|--------|
+| **Display** | `--fs-display` | `clamp(56px, 8vw, 96px)` | 페이지 타이틀 ("The Library", "START TO GLOW") | `.type-display` — fw900, ls-3px, lh0.85 |
+| **H1** | `--fs-h1` | `clamp(36px, 5vw, 56px)` | 섹션 타이틀 ("Reader Favorites", "Explore Our Content") | `.type-h1` — fw900, ls-2px, lh0.9 |
+| **H2** | `--fs-h2` | `clamp(24px, 3vw, 36px)` | 카드 제목, 아티클 제목, 멤버 이름 | `.type-h2` — fw900, ls-1px, lh1.1 |
+| **Body** | `--fs-body` | `clamp(16px, 1.5vw, 18px)` | 본문 텍스트, 설명 텍스트 | `.type-body` — fw500, lh1.6 |
+| **Caption** | `--fs-caption` | `11px` | 날짜·카테고리·저자·라벨 | `.type-caption` — fw900, ls3px, uppercase |
+
+> ⚠️ 새 텍스트 요소 추가 시 반드시 이 5단계 중 하나를 사용할 것.
+> 매거진 에디터(`/admin`) 폰트는 예외 — 본문 13px, 제목 24px 고정.
+
 ### font-size 패턴 (큰 → 작은)
 | 크기 | 용도 |
 |------|------|

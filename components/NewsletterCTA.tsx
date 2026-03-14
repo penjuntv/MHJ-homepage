@@ -32,7 +32,8 @@ export default function NewsletterCTA() {
   return (
     <section style={{
       padding: 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)',
-      background: '#0A0A0A',
+      background: '#F8FAFC',
+      borderTop: '1px solid #F1F5F9',
     }}>
       <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
 
@@ -42,7 +43,7 @@ export default function NewsletterCTA() {
           fontWeight: 900,
           letterSpacing: 5,
           textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.3)',
+          color: '#CBD5E1',
           display: 'block',
           marginBottom: 24,
         }}>
@@ -57,7 +58,7 @@ export default function NewsletterCTA() {
             fontWeight: 900,
             fontStyle: 'italic',
             letterSpacing: -2,
-            color: 'white',
+            color: '#1A1A1A',
             lineHeight: 1,
             marginBottom: 20,
           }}
@@ -68,7 +69,7 @@ export default function NewsletterCTA() {
 
         <p style={{
           fontSize: 16,
-          color: 'rgba(255,255,255,0.4)',
+          color: '#64748B',
           fontWeight: 500,
           lineHeight: 1.6,
           marginBottom: 48,
@@ -81,14 +82,14 @@ export default function NewsletterCTA() {
           <div style={{
             padding: '24px 40px',
             borderRadius: 999,
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: '#F1F5F9',
+            border: '1px solid #E2E8F0',
             display: 'inline-block',
           }}>
             <span style={{
               fontSize: 14,
               fontWeight: 700,
-              color: 'rgba(255,255,255,0.8)',
+              color: '#374151',
               letterSpacing: 1,
             }}>
               Welcome aboard — see you in your inbox.
@@ -105,9 +106,9 @@ export default function NewsletterCTA() {
               style={{
                 padding: '18px 28px',
                 borderRadius: 999,
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.05)',
-                color: 'white',
+                border: '1px solid #E2E8F0',
+                background: 'white',
+                color: '#1A1A1A',
                 fontSize: 15,
                 fontWeight: 500,
                 outline: 'none',
@@ -128,9 +129,9 @@ export default function NewsletterCTA() {
                   flex: 1,
                   padding: '18px 28px',
                   borderRadius: 999,
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: 'white',
+                  border: '1px solid #E2E8F0',
+                  background: 'white',
+                  color: '#1A1A1A',
                   fontSize: 15,
                   fontWeight: 500,
                   outline: 'none',
@@ -143,9 +144,9 @@ export default function NewsletterCTA() {
                 style={{
                   padding: '18px 32px',
                   borderRadius: 999,
-                  background: status === 'loading' ? 'rgba(255,255,255,0.6)' : 'white',
+                  background: status === 'loading' ? 'rgba(0,0,0,0.4)' : '#1A1A1A',
                   border: 'none',
-                  color: '#0A0A0A',
+                  color: '#fff',
                   fontSize: 13,
                   fontWeight: 900,
                   letterSpacing: 2,
@@ -162,12 +163,12 @@ export default function NewsletterCTA() {
 
             {/* 피드백 메시지 */}
             {status === 'duplicate' && (
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+              <p style={{ fontSize: 13, color: '#94A3B8', textAlign: 'center' }}>
                 You&apos;re already subscribed — thank you!
               </p>
             )}
             {status === 'error' && (
-              <p style={{ fontSize: 13, color: '#f87171', textAlign: 'center' }}>
+              <p style={{ fontSize: 13, color: '#ef4444', textAlign: 'center' }}>
                 Something went wrong. Please try again.
               </p>
             )}

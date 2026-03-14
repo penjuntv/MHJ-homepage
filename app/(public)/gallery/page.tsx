@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
+import { getSiteSettings } from '@/lib/site-settings';
 import type { GalleryItem } from '@/lib/types';
 import GalleryClient from './GalleryClient';
-import { getSiteSettings } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,13 +22,14 @@ async function getGallery(): Promise<GalleryItem[]> {
   const { data } = await supabase
     .from('gallery')
     .select('*')
+    .eq('published', true)
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false });
   return data ?? [];
 }
 
 export default async function GalleryPage() {
-  const [items, s] = await Promise.all([getGallery(), getSiteSettings()]);
+  const [items, settings] = await Promise.all([getGallery(), getSiteSettings()]);
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -47,8 +48,8 @@ export default async function GalleryPage() {
       />
       <GalleryClient
         items={items}
-        title={s.gallery_title}
-        description={s.gallery_description}
+        galleryTitle={settings.gallery_title}
+        galleryDescription={settings.gallery_description}
       />
     </>
   );

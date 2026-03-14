@@ -375,19 +375,19 @@ function OurFavoritesSection({ blogs }: { blogs: Blog[] }) {
     <section
       ref={ref}
       style={{
-        padding: 'clamp(60px, 10vw, 128px) clamp(24px, 4vw, 80px)',
+        padding: 'clamp(48px, 7vw, 96px) clamp(24px, 4vw, 80px)',
         background: 'var(--bg-surface)',
         opacity: visible ? 1 : 0,
         transform: visible ? 'none' : 'translateY(40px)',
         transition: 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '36px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: '#CBD5E1', marginBottom: '16px' }}>
+          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: '#CBD5E1', marginBottom: '12px' }}>
             MOST READ
           </p>
-          <h2 className="font-display font-black" style={{ fontSize: 'clamp(36px, 5vw, 72px)', letterSpacing: '-2px', lineHeight: 1 }}>
+          <h2 className="font-display font-black" style={{ fontSize: 'clamp(32px, 4vw, 60px)', letterSpacing: '-2px', lineHeight: 1 }}>
             Reader Favorites
           </h2>
         </div>
@@ -399,90 +399,106 @@ function OurFavoritesSection({ blogs }: { blogs: Blog[] }) {
             textTransform: 'uppercase', color: '#4F46E5', textDecoration: 'none',
           }}
         >
-          All Posts <ArrowRight size={14} />
+          All Stories <ArrowRight size={14} />
         </Link>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+      {/* 데스크톱: 5열 가로 그리드 / 모바일: 1열 세로 */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: '16px',
+      }}
+        className="favorites-grid"
+      >
         {blogs.slice(0, 5).map((blog, i) => (
-          <FavoriteRow key={blog.id} blog={blog} index={i + 1} delay={i * 0.06} visible={visible} />
+          <FavoriteCard key={blog.id} blog={blog} index={i + 1} delay={i * 0.07} visible={visible} />
         ))}
       </div>
+
+      <style>{`
+        @media (max-width: 767px) {
+          .favorites-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }
 
-function FavoriteRow({ blog, index, delay, visible }: { blog: Blog; index: number; delay: number; visible: boolean }) {
+function FavoriteCard({ blog, index, delay, visible }: { blog: Blog; index: number; delay: number; visible: boolean }) {
   const [hovered, setHovered] = useState(false);
   const color = CATEGORY_COLORS[blog.category] || '#4F46E5';
   return (
     <Link
-      href={`/blog`}
+      href="/blog"
       style={{
-        display: 'flex', alignItems: 'center', gap: '24px',
-        padding: '20px 0',
-        borderBottom: '1px solid #F1F5F9',
-        textDecoration: 'none',
+        display: 'block', textDecoration: 'none',
+        borderRadius: '20px', overflow: 'hidden',
+        background: 'white',
+        boxShadow: hovered ? '0 24px 48px rgba(0,0,0,0.12)' : '0 2px 12px rgba(0,0,0,0.06)',
+        transform: visible
+          ? (hovered ? 'translateY(-8px)' : 'translateY(0)')
+          : 'translateY(28px)',
         opacity: visible ? 1 : 0,
-        transform: visible ? 'none' : 'translateX(-20px)',
-        transition: `opacity 0.6s ${delay}s ease, transform 0.6s ${delay}s ease`,
+        transition: `transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, opacity 0.6s ${delay}s cubic-bezier(0.16,1,0.3,1)`,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* 번호 */}
-      <span className="font-display font-black" style={{
-        fontSize: 'clamp(28px, 4vw, 48px)', letterSpacing: '-2px',
-        color: hovered ? color : '#F1F5F9',
-        minWidth: '56px', transition: 'color 0.2s ease', fontStyle: 'italic',
-      }}>
-        {String(index).padStart(2, '0')}
-      </span>
-
-      {/* 썸네일 */}
-      <div style={{
-        width: '72px', height: '72px', borderRadius: '16px', overflow: 'hidden', flexShrink: 0,
-        transform: hovered ? 'scale(1.05)' : 'scale(1)',
-        transition: 'transform 0.3s ease',
-      }}>
+      {/* 이미지 + 순번 배지 */}
+      <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', background: '#F1F5F9' }}>
         <img
           src={blog.image_url}
           alt={blog.title}
           style={{
             width: '100%', height: '100%', objectFit: 'cover',
-            filter: hovered ? 'saturate(2.2)' : 'saturate(1)',
-            transition: 'filter 0.4s ease',
+            transform: hovered ? 'scale(1.05)' : 'scale(1)',
+            filter: hovered ? 'saturate(1.8)' : 'saturate(1.1)',
+            transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1), filter 0.4s ease',
           }}
         />
+        {/* 골드 순번 배지 */}
+        <div style={{
+          position: 'absolute', top: '10px', left: '10px',
+          width: '32px', height: '32px', borderRadius: '50%',
+          background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+          flexShrink: 0,
+        }}>
+          <span style={{ fontSize: '12px', fontWeight: 900, color: 'white', lineHeight: 1 }}>
+            {index}
+          </span>
+        </div>
+        {/* 카테고리 배지 */}
+        <div style={{
+          position: 'absolute', bottom: '10px', left: '10px',
+          padding: '4px 10px', borderRadius: '999px',
+          background: color, color: 'white',
+          fontSize: '8px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase',
+        }}>
+          {blog.category}
+        </div>
       </div>
 
-      {/* 메타 */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-          <span style={{
-            padding: '3px 10px', borderRadius: '999px',
-            background: color + '20', color: color,
-            fontSize: '9px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase',
-          }}>
-            {blog.category}
-          </span>
-          <span style={{ fontSize: '11px', color: '#CBD5E1' }}>{blog.date}</span>
-        </div>
+      {/* 텍스트 */}
+      <div style={{ padding: '14px 16px 16px' }}>
         <p style={{
-          fontSize: 'clamp(14px, 1.5vw, 17px)', fontWeight: 700, color: hovered ? '#1A1A1A' : '#334155',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          fontSize: '14px', fontWeight: 700, lineHeight: 1.4,
+          color: hovered ? '#1A1A1A' : '#334155',
+          marginBottom: '6px',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
           transition: 'color 0.2s ease',
         }}>
           {blog.title}
         </p>
-        {typeof blog.view_count === 'number' && blog.view_count > 0 && (
-          <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '3px' }}>
-            {blog.view_count.toLocaleString()} views
-          </p>
-        )}
+        <p style={{ fontSize: '11px', color: '#CBD5E1', margin: 0 }}>{blog.date}</p>
       </div>
-
-      <ArrowRight size={18} style={{ color: hovered ? color : '#CBD5E1', flexShrink: 0, transition: 'color 0.2s ease' }} />
     </Link>
   );
 }

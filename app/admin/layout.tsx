@@ -196,7 +196,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* 하단 */}
         <div style={{ padding: '12px 10px 24px', display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
           <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 4px 8px' }} />
-          <Link href="/" target="_blank" style={{
+          <Link href="https://mhj-homepage.vercel.app" target="_blank" rel="noopener noreferrer" style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 14px', borderRadius: 10, textDecoration: 'none',
             color: 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 700,

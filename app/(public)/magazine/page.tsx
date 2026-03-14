@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Magazine } from '@/lib/types';
 import MagazineShelf from '@/components/MagazineShelf';
+import SafeImage from '@/components/SafeImage';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
 
@@ -68,7 +71,95 @@ export default async function MagazinePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <MagazineShelf magazines={magazines} magazineTitle={s.magazine_title} magazineHint={s.magazine_hint} />
+      <LatestIssuesSection magazines={magazines} />
       <NewsletterCTA />
     </>
+  );
+}
+
+/* ─── Latest Issues 섹션 (pdf_url 이슈만, 최대 3개) ─── */
+function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
+  const pdfIssues = magazines.filter((m) => m.pdf_url).slice(0, 3);
+  if (!pdfIssues.length) return null;
+
+  return (
+    <section style={{ padding: 'clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px)', background: 'var(--bg-surface)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '64px', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
+            THE MAGAZINE
+          </p>
+          <h2 className="font-display font-black type-h1" style={{ fontStyle: 'italic', color: 'var(--text)' }}>
+            Latest Issues
+          </h2>
+        </div>
+        <Link
+          href="/magazine"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#4F46E5', textDecoration: 'none' }}
+        >
+          All Issues <ArrowRight size={14} />
+        </Link>
+      </div>
+
+      {/* 3컬럼 그리드, 모바일 1컬럼 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '32px' }}>
+        {pdfIssues.map((mag) => (
+          <Link
+            key={mag.id}
+            href={`/magazine/${mag.id}`}
+            className="mag-card"
+            style={{
+              display: 'block', borderRadius: '24px', overflow: 'hidden',
+              textDecoration: 'none', background: 'var(--bg-card)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            {/* 커버 이미지 — 16:9 가로 */}
+            <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden' }}>
+              <SafeImage src={mag.image_url} alt={mag.title} fill className="mag-img img-editorial object-cover" />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.5) 100%)' }} />
+              {/* 연도·월 뱃지 */}
+              <div style={{ position: 'absolute', top: '16px', left: '16px' }}>
+                <span style={{
+                  background: 'rgba(255,255,255,0.15)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  padding: '4px 12px', borderRadius: '999px',
+                  fontSize: '9px', fontWeight: 900, letterSpacing: '3px',
+                  textTransform: 'uppercase', color: 'white',
+                }}>
+                  {mag.year} {mag.month_name}
+                </span>
+              </div>
+            </div>
+
+            {/* 텍스트 패널 */}
+            <div style={{ padding: '20px 24px 24px' }}>
+              <p style={{
+                fontSize: '18px', fontWeight: 900, letterSpacing: '-0.5px',
+                lineHeight: 1.3, color: 'var(--text)', marginBottom: '12px',
+              }}>
+                {mag.title}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{
+                  fontSize: '9px', fontWeight: 900, letterSpacing: '3px',
+                  textTransform: 'uppercase', color: 'var(--text-tertiary)',
+                  border: '1px solid var(--border-medium)',
+                  padding: '5px 12px', borderRadius: '999px',
+                }}>
+                  📖 PDF
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', color: '#4F46E5' }}>
+                  Open Edition <ArrowRight size={12} />
+                </span>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }

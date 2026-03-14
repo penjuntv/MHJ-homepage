@@ -4,13 +4,7 @@ import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import type { Blog } from '@/lib/types';
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Education: '#3B82F6', Settlement: '#8B5CF6', Girls: '#EC4899',
-  Locals: '#EF4444', Life: '#F59E0B', Travel: '#10B981',
-};
-
 export default function RelatedCard({ blog }: { blog: Blog }) {
-  const color = CATEGORY_COLORS[blog.category] || '#4F46E5';
 
   return (
     <Link
@@ -56,8 +50,8 @@ export default function RelatedCard({ blog }: { blog: Blog }) {
           display: 'inline-block',
           padding: '3px 10px',
           borderRadius: 999,
-          background: color + '30',
-          color,
+          background: 'rgba(0,0,0,0.6)',
+          color: 'white',
           fontSize: 9,
           fontWeight: 900,
           letterSpacing: 2,

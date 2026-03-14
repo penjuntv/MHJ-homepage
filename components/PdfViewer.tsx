@@ -5,8 +5,8 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-// CDN worker — pdfjs 5.x
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// 로컬 worker (public 폴더에 복사된 파일 사용 → CDN 의존 없음)
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 interface Props {
   url: string;

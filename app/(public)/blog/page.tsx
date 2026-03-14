@@ -29,8 +29,18 @@ async function getBlogs(): Promise<Blog[]> {
   return data ?? [];
 }
 
+async function getMostReadBlogs(): Promise<Blog[]> {
+  const { data } = await supabase
+    .from('blogs')
+    .select('id, title, author, date, image_url, category, slug, view_count')
+    .eq('published', true)
+    .order('view_count', { ascending: false })
+    .limit(5);
+  return (data ?? []) as Blog[];
+}
+
 export default async function BlogPage() {
-  const [blogs, s] = await Promise.all([getBlogs(), getSiteSettings()]);
+  const [blogs, mostRead, s] = await Promise.all([getBlogs(), getMostReadBlogs(), getSiteSettings()]);
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -72,7 +82,7 @@ export default async function BlogPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      <BlogLibrary blogs={blogs} blogTitle={s.blog_title} blogDescription={s.blog_description} />
+      <BlogLibrary blogs={blogs} blogTitle={s.blog_title} blogDescription={s.blog_description} readerFavorites={mostRead} />
     </>
   );
 }

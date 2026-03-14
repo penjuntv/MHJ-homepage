@@ -27,12 +27,19 @@
   --drop-cap-color: #F1F5F9;
 
   /* ── 8px 그리드 디자인 베이스라인 ── */
-  --section-v:      clamp(64px, 8vw, 96px);
-  --section-h:      clamp(24px, 4vw, 80px);
-  --content-max:    1280px;
-  --text-max:       720px;
+  --section-v:      clamp(80px, 12vw, 160px);
+  --section-h:      clamp(24px, 5vw, 80px);
+  --content-max:    1200px;
+  --text-max:       680px;
   --card-radius:    24px;
   --card-pad:       clamp(16px, 2vw, 24px);
+
+  /* ── Typography Scale (5단계) ── */
+  --fs-display: clamp(56px, 8vw, 96px);   /* 페이지 타이틀 — font-display, italic 권장 */
+  --fs-h1:      clamp(36px, 5vw, 56px);   /* 섹션 타이틀 */
+  --fs-h2:      clamp(24px, 3vw, 36px);   /* 카드 제목, 아티클 제목 */
+  --fs-body:    clamp(16px, 1.5vw, 18px); /* 본문 */
+  --fs-caption: 11px;                     /* 날짜·카테고리·저자·라벨 */
 }
 
 .dark {
@@ -89,6 +96,37 @@
   .vertical-text {
     writing-mode: vertical-rl;
     text-orientation: mixed;
+  }
+
+  /* ── Typography Scale 유틸리티 ── */
+  .type-display {
+    font-size: var(--fs-display);
+    font-weight: 900;
+    letter-spacing: -3px;
+    line-height: 0.85;
+  }
+  .type-h1 {
+    font-size: var(--fs-h1);
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 0.9;
+  }
+  .type-h2 {
+    font-size: var(--fs-h2);
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+  .type-body {
+    font-size: var(--fs-body);
+    font-weight: 500;
+    line-height: 1.6;
+  }
+  .type-caption {
+    font-size: var(--fs-caption);
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
   }
 
   /* vivid-hover: 이미지 채도 강화 */
@@ -202,15 +240,15 @@
 
 /* ─── 섹션 패딩 유틸리티 ─── */
 .section-pad {
-  padding: clamp(40px, 8vw, 128px) clamp(24px, 4vw, 40px);
+  padding: clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px);
 }
 
 .section-pad-lg {
-  padding: clamp(60px, 10vw, 128px) clamp(24px, 4vw, 40px);
+  padding: clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px);
 }
 
 .section-pad-xl {
-  padding: clamp(60px, 10vw, 160px) clamp(24px, 4vw, 40px);
+  padding: clamp(100px, 14vw, 200px) clamp(24px, 5vw, 80px);
 }
 
 /* ─── AI Insight 반사 카드 ─── */
@@ -233,6 +271,20 @@
 }
 .dark .ai-reflection-text {
   color: #a5b4fc;
+}
+
+/* ─── 에디토리얼 이미지 톤 유틸리티 ─── */
+/* 다양한 소스(Unsplash·Supabase·framerusercontent)의 이미지를 통일된 톤으로 */
+.img-editorial {
+  filter: saturate(1.1) contrast(1.02) brightness(1.02);
+  transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.img-editorial-hover {
+  filter: saturate(1.4) contrast(1.05) brightness(1.05);
+}
+.img-hero {
+  filter: saturate(1.4) contrast(1.05);
+  transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ─── grayscale → color 전환 (About 프로필) ─── */
@@ -483,11 +535,11 @@
   box-shadow: 0 28px 60px rgba(0,0,0,0.16) !important;
 }
 .explore-panel:hover .explore-img {
-  filter: saturate(2.0) !important;
+  filter: saturate(1.4) contrast(1.05) brightness(1.05) !important;
 }
 .explore-img {
-  filter: saturate(1.2);
-  transition: filter 0.5s ease;
+  filter: saturate(1.1) contrast(1.02) brightness(1.02);
+  transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ─── Landing — Reader Favorites 리스트 ─── */
@@ -527,11 +579,11 @@
   box-shadow: 0 32px 64px rgba(0,0,0,0.16) !important;
 }
 .cat-card:hover .cat-img {
-  filter: saturate(2.2) !important;
+  filter: saturate(1.4) contrast(1.05) brightness(1.05) !important;
 }
 .cat-img {
-  filter: saturate(1.2);
-  transition: filter 0.5s ease;
+  filter: saturate(1.1) contrast(1.02) brightness(1.02);
+  transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* 매거진 카드 hover */
@@ -543,11 +595,11 @@
   box-shadow: 0 32px 64px rgba(0,0,0,0.18) !important;
 }
 .mag-card:hover .mag-img {
-  filter: saturate(2.2) !important;
+  filter: saturate(1.4) contrast(1.05) brightness(1.05) !important;
 }
 .mag-img {
-  filter: saturate(1.2);
-  transition: filter 0.5s ease;
+  filter: saturate(1.1) contrast(1.02) brightness(1.02);
+  transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ─── Instagram Feed 그리드 ─── */

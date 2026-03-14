@@ -434,11 +434,18 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
   const colorInputRef = useRef<HTMLInputElement>(null);
   const highlightInputRef = useRef<HTMLInputElement>(null);
   const [showInsertMenu, setShowInsertMenu] = useState(false);
+  const insertMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close insert menu on outside click
+  // Close insert menu on outside click — ref.contains 방식 사용 (stopPropagation 방식은
+  // document 레벨 네이티브 리스너와 React 합성 이벤트 실행 순서 경합으로 드롭다운 항목
+  // 클릭 시 click 이벤트가 소실되는 버그 발생)
   useEffect(() => {
     if (!showInsertMenu) return;
-    const h = () => setShowInsertMenu(false);
+    const h = (e: MouseEvent) => {
+      if (insertMenuRef.current && !insertMenuRef.current.contains(e.target as HTMLElement)) {
+        setShowInsertMenu(false);
+      }
+    };
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
   }, [showInsertMenu]);
@@ -588,8 +595,8 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
           <input
             ref={colorInputRef}
             type="color"
-            defaultValue={currentColor || '#1a1a1a'}
-            style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 0, height: 0 }}
+            value={currentColor || '#1a1a1a'}
+            style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 1, height: 1, top: 0, left: 0, padding: 0, border: 'none' }}
             onChange={e => editor.chain().focus().setColor(e.target.value).run()}
           />
         </div>
@@ -604,9 +611,9 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
           <input
             ref={highlightInputRef}
             type="color"
-            defaultValue={currentHighlight || '#FEF08A'}
-            style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 0, height: 0 }}
-            onChange={e => editor.chain().focus().toggleHighlight({ color: e.target.value }).run()}
+            value={currentHighlight || '#FEF08A'}
+            style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 1, height: 1, top: 0, left: 0, padding: 0, border: 'none' }}
+            onChange={e => editor.chain().focus().setHighlight({ color: e.target.value }).run()}
           />
         </div>
         {sep}
@@ -643,7 +650,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
         {sep}
 
         {/* Insert Dropdown */}
-        <div style={{ position: 'relative' }} onMouseDown={e => e.stopPropagation()}>
+        <div ref={insertMenuRef} style={{ position: 'relative' }}>
           <button type="button"
             onClick={() => setShowInsertMenu(!showInsertMenu)}
             style={{ ...btn(false), gap: 4, padding: '7px 10px', fontSize: 11, fontWeight: 700 }}>
@@ -681,6 +688,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
               <div style={{ height: 1, background: '#f1f5f9', margin: '4px 6px' }} />
               <button type="button"
                 onClick={() => {
+                  if (!editor) return;
                   editor.chain().focus().insertContent({ type: 'calloutBlock', content: [{ type: 'text', text: '이 부분에 강조할 내용을 입력하세요.' }] }).run();
                   setShowInsertMenu(false);
                 }}
@@ -850,8 +858,17 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
                 <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0 }}>YouTube 임베드</h2>
               </div>
               <input
+                autoFocus
                 value={insertData.url}
                 onChange={e => setInsertData(d => ({ ...d, url: e.target.value }))}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    const embedSrc = youtubeToEmbed(insertData.url.trim());
+                    if (!embedSrc || !editor) return;
+                    editor.chain().focus().insertContent({ type: 'youtubeEmbed', attrs: { src: embedSrc } }).run();
+                    setInsertModal(null);
+                  }
+                }}
                 placeholder="https://www.youtube.com/watch?v=..."
                 style={{ width: '100%', padding: '13px 16px', borderRadius: 12, border: '1px solid #f1f5f9', fontSize: 14, outline: 'none', background: '#f8fafc', boxSizing: 'border-box', marginBottom: 20 }}
               />
@@ -859,7 +876,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
                 <button type="button"
                   onClick={() => {
                     const embedSrc = youtubeToEmbed(insertData.url.trim());
-                    if (!embedSrc) return;
+                    if (!embedSrc || !editor) return;
                     editor.chain().focus().insertContent({ type: 'youtubeEmbed', attrs: { src: embedSrc } }).run();
                     setInsertModal(null);
                   }}
@@ -881,15 +898,23 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
                 <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0 }}>Google Maps</h2>
               </div>
               <input
+                autoFocus
                 value={insertData.address}
                 onChange={e => setInsertData(d => ({ ...d, address: e.target.value }))}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    if (!insertData.address.trim() || !editor) return;
+                    editor.chain().focus().insertContent({ type: 'mapEmbed', attrs: { address: insertData.address.trim() } }).run();
+                    setInsertModal(null);
+                  }
+                }}
                 placeholder="주소 또는 장소명 (예: Auckland Sky Tower)"
                 style={{ width: '100%', padding: '13px 16px', borderRadius: 12, border: '1px solid #f1f5f9', fontSize: 14, outline: 'none', background: '#f8fafc', boxSizing: 'border-box', marginBottom: 20 }}
               />
               <div style={{ display: 'flex', gap: 10 }}>
                 <button type="button"
                   onClick={() => {
-                    if (!insertData.address.trim()) return;
+                    if (!insertData.address.trim() || !editor) return;
                     editor.chain().focus().insertContent({ type: 'mapEmbed', attrs: { address: insertData.address.trim() } }).run();
                     setInsertModal(null);
                   }}
@@ -912,6 +937,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
                 <input
+                  autoFocus
                   value={insertData.text}
                   onChange={e => setInsertData(d => ({ ...d, text: e.target.value }))}
                   placeholder="버튼 텍스트 (예: 더 보기)"
@@ -937,7 +963,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
               <div style={{ display: 'flex', gap: 10 }}>
                 <button type="button"
                   onClick={() => {
-                    if (!insertData.text.trim()) return;
+                    if (!insertData.text.trim() || !editor) return;
                     editor.chain().focus().insertContent({
                       type: 'ctaButton',
                       attrs: { text: insertData.text.trim(), href: insertData.url.trim() || '#', newTab: true },

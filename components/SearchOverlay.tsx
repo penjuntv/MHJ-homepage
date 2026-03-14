@@ -110,7 +110,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
           cursor: 'pointer', color: 'var(--text-secondary)',
           transition: 'border-color 0.2s, color 0.2s',
         }}
-        aria-label="검색 닫기"
+        aria-label="Close search"
       >
         <X size={18} />
       </button>
@@ -132,7 +132,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
               ref={inputRef}
               value={query}
               onChange={handleChange}
-              placeholder="검색어를 입력하세요..."
+              placeholder="Search articles..."
               style={{
                 width: '100%',
                 paddingLeft: '48px',
@@ -167,7 +167,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
           {searched && results.length > 0 && (
             <div>
               <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '4px', color: '#CBD5E1', marginBottom: '24px' }}>
-                {results.length}개 결과
+                {results.length} results found
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {results.map((item, i) => (
@@ -184,7 +184,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
                 No results found
               </p>
               <p style={{ fontSize: '15px', color: '#94A3B8', marginBottom: '40px' }}>
-                &ldquo;{query}&rdquo;에 대한 결과가 없습니다. 다른 검색어를 시도해보세요.
+                No results found for &ldquo;{query}&rdquo;. Try a different keyword.
               </p>
               <QuickLinks onClose={onClose} />
             </div>

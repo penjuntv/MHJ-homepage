@@ -23,6 +23,35 @@ async function getBlogForPreview(slug: string): Promise<Blog | null> {
 
 export const dynamic = 'force-dynamic';
 
+async function getAdjacentBlogs(currentId: number): Promise<{
+  prev: { id: number; title: string; slug: string } | null;
+  next: { id: number; title: string; slug: string } | null;
+}> {
+  const now = new Date().toISOString();
+  const [{ data: prevData }, { data: nextData }] = await Promise.all([
+    supabase
+      .from('blogs')
+      .select('id, title, slug')
+      .eq('published', true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .lt('id', currentId)
+      .order('id', { ascending: false })
+      .limit(1),
+    supabase
+      .from('blogs')
+      .select('id, title, slug')
+      .eq('published', true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .gt('id', currentId)
+      .order('id', { ascending: true })
+      .limit(1),
+  ]);
+  return {
+    prev: prevData?.[0] ?? null,
+    next: nextData?.[0] ?? null,
+  };
+}
+
 async function getRelatedBlogs(category: string, currentSlug: string): Promise<Blog[]> {
   const now = new Date().toISOString();
   const { data: sameCategory } = await supabase
@@ -110,7 +139,10 @@ export default async function BlogDetailPage({
   const blog = isPreview ? await getBlogForPreview(params.slug) : await getBlog(params.slug);
   if (!blog) notFound();
 
-  const relatedBlogs = await getRelatedBlogs(blog.category, blog.slug);
+  const [relatedBlogs, adjacent] = await Promise.all([
+    getRelatedBlogs(blog.category, blog.slug),
+    getAdjacentBlogs(blog.id),
+  ]);
 
   const isHtml = blog.content.includes('<') && blog.content.includes('>');
   const plainText = blog.content.replace(/<[^>]*>/g, '');
@@ -335,9 +367,9 @@ export default async function BlogDetailPage({
                 <style>{`
                   .blog-content {
                     font-size: clamp(17px, 2vw, 20px);
-                    color: var(--text);
-                    font-weight: 500;
-                    line-height: 1.9;
+                    color: #374151;
+                    font-weight: 400;
+                    line-height: 1.8;
                   }
                   .blog-content p { margin: 0 0 2em; }
                   .blog-content > p:first-child::first-letter {
@@ -397,11 +429,14 @@ export default async function BlogDetailPage({
                   .blog-content .blog-cta a { color: white; text-decoration: none; }
                   /* Google Maps */
                   .blog-content .blog-map { margin: 32px 0; border-radius: 16px; overflow: hidden; }
+                  .blog-content .blog-map iframe { width: 100%; height: 300px; border: none; display: block; }
                   /* Callout */
                   .blog-content .blog-callout { padding: 24px; background: #EEF2FF; border-left: 3px solid #4F46E5; border-radius: 0 12px 12px 0; margin: 24px 0; }
                   /* YouTube */
-                  .blog-content .blog-youtube { margin: 32px 0; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; }
-                  .blog-content .blog-youtube iframe { width: 100%; height: 100%; border: none; display: block; }
+                  .blog-content .blog-youtube,
+                  .blog-content .blog-video { margin: 32px 0; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; }
+                  .blog-content .blog-youtube iframe,
+                  .blog-content .blog-video iframe { width: 100%; height: 100%; border: none; display: block; }
                   @media (max-width: 640px) {
                     .blog-content img { float: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
                     .blog-content .grid-2, .blog-content .grid-3, .blog-content .grid-1-2 { grid-template-columns: 1fr !important; }
@@ -417,9 +452,9 @@ export default async function BlogDetailPage({
             ) : (
               <p style={{
                 fontSize: 'clamp(17px, 2vw, 20px)',
-                color: 'var(--text)',
-                fontWeight: 500,
-                lineHeight: 1.9,
+                color: '#374151',
+                fontWeight: 400,
+                lineHeight: 1.8,
               }}>
                 <span style={{
                   fontSize: 'clamp(56px, 8vw, 88px)',
@@ -462,7 +497,7 @@ export default async function BlogDetailPage({
               </div>
             )}
 
-            {/* 푸터: Back + Share + 저자 */}
+            {/* 푸터: Back + Share */}
             <footer style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -470,7 +505,7 @@ export default async function BlogDetailPage({
               alignItems: 'center',
               borderTop: '1px solid var(--border)',
               paddingTop: 56,
-              paddingBottom: 80,
+              paddingBottom: 48,
               gap: 24,
             }}>
               <Link
@@ -497,30 +532,85 @@ export default async function BlogDetailPage({
                 url={`https://mymairangi.com/blog/${blog.slug}`}
                 description={blog.meta_description || plainText.slice(0, 160)}
               />
-
-              <div style={{ textAlign: 'right' }}>
-                <span style={{
-                  fontSize: 10,
-                  fontWeight: 900,
-                  color: 'var(--text-tertiary)',
-                  textTransform: 'uppercase',
-                  letterSpacing: 4,
-                  marginBottom: 6,
-                  display: 'block',
-                  fontStyle: 'italic',
-                }}>
-                  Written By
-                </span>
-                <p style={{
-                  fontSize: 'clamp(18px, 2.5vw, 28px)',
-                  fontWeight: 900,
-                  color: 'var(--text)',
-                  margin: 0,
-                }}>
-                  {blog.author}
-                </p>
-              </div>
             </footer>
+
+            {/* 이전/다음 글 네비게이션 */}
+            {(adjacent.prev || adjacent.next) && (
+              <nav style={{
+                borderTop: '1px solid var(--border)',
+                paddingTop: 48,
+                paddingBottom: 80,
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 32,
+              }}>
+                {adjacent.prev ? (
+                  <Link
+                    href={`/blog/${adjacent.prev.slug}`}
+                    style={{ textDecoration: 'none', flex: 1, maxWidth: '45%' }}
+                  >
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 900,
+                      letterSpacing: 4,
+                      textTransform: 'uppercase',
+                      color: 'var(--text-tertiary)',
+                      display: 'block',
+                      marginBottom: 10,
+                    }}>
+                      ← Previous
+                    </span>
+                    <p style={{
+                      fontSize: 'clamp(16px, 2vw, 22px)',
+                      fontWeight: 900,
+                      color: 'var(--text)',
+                      letterSpacing: -0.5,
+                      lineHeight: 1.2,
+                      margin: 0,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}>
+                      {adjacent.prev.title}
+                    </p>
+                  </Link>
+                ) : <div />}
+
+                {adjacent.next ? (
+                  <Link
+                    href={`/blog/${adjacent.next.slug}`}
+                    style={{ textDecoration: 'none', flex: 1, maxWidth: '45%', textAlign: 'right' }}
+                  >
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 900,
+                      letterSpacing: 4,
+                      textTransform: 'uppercase',
+                      color: 'var(--text-tertiary)',
+                      display: 'block',
+                      marginBottom: 10,
+                    }}>
+                      Next →
+                    </span>
+                    <p style={{
+                      fontSize: 'clamp(16px, 2vw, 22px)',
+                      fontWeight: 900,
+                      color: 'var(--text)',
+                      letterSpacing: -0.5,
+                      lineHeight: 1.2,
+                      margin: 0,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}>
+                      {adjacent.next.title}
+                    </p>
+                  </Link>
+                ) : <div />}
+              </nav>
+            )}
           </article>
         </div>
 

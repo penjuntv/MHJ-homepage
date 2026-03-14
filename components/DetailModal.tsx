@@ -60,7 +60,7 @@ export default function DetailModal({ item, onClose }: Props) {
           borderLeft: '1px solid var(--border)',
         }}
       >
-        <div className="modal-inner-pad" style={{ padding: '96px 32px' }}>
+        <div className="modal-inner-pad" style={{ padding: 'clamp(48px, 8vw, 96px) clamp(20px, 4vw, 32px)' }}>
 
           {/* 닫기 버튼 */}
           <button
@@ -114,7 +114,7 @@ export default function DetailModal({ item, onClose }: Props) {
               <h2
                 className="font-display"
                 style={{
-                  fontSize: 'clamp(40px, 8vw, 120px)',
+                  fontSize: 'clamp(28px, 5vw, 56px)',
                   fontWeight: 900,
                   letterSpacing: -3,
                   lineHeight: 0.8,
@@ -131,7 +131,7 @@ export default function DetailModal({ item, onClose }: Props) {
                 <div>
                   {/* 드롭캡 (첫 글자) */}
                   <span style={{
-                    fontSize: 'clamp(48px, 8vw, 140px)',
+                    fontSize: 'clamp(40px, 6vw, 96px)',
                     fontWeight: 900,
                     float: 'left',
                     marginRight: 16,
@@ -164,7 +164,7 @@ export default function DetailModal({ item, onClose }: Props) {
                   lineHeight: 1.5,
                 }}>
                   <span style={{
-                    fontSize: 'clamp(48px, 8vw, 140px)',
+                    fontSize: 'clamp(40px, 6vw, 96px)',
                     fontWeight: 900,
                     float: 'left',
                     marginRight: 16,
