@@ -3,7 +3,7 @@ import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import type { Blog, Magazine, CarouselSlide } from '@/lib/types';
+import type { Blog, Magazine, CarouselSlide, HeroSlide } from '@/lib/types';
 import HeroCarousel from '@/components/HeroCarousel';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import StoryPressSection from '@/components/StoryPressSection';
@@ -31,18 +31,22 @@ const FALLBACK_HERO_BLOGS: Blog[] = [
   { id: 205, category: 'Life', title: '오클랜드의 첫 장보기', author: 'Heejong Jo', date: '2026.01.19', image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200', content: '카운트다운과 뉴월드 사이에서 방황하던 초보 정착민 시절의 이야기입니다.', slug: 'first-grocery', published: true },
 ];
 
-async function buildHeroSlides(s: Record<string, string>): Promise<CarouselSlide[]> {
-  const featuredId = parseInt(s.featured_post_id || '') || null;
-
-  // 최신 3개 블로그 + 최신 매거진(pdf 있는 것) 병렬 fetch
-  const [latestRes, magRes] = await Promise.all([
+async function buildHeroSlides(): Promise<CarouselSlide[]> {
+  // 병렬 fetch: 수동 지정 블로그 + 커스텀 슬라이드 + 최신 매거진
+  const [heroRes, customRes, magRes] = await Promise.all([
     supabase
       .from('blogs')
       .select('*')
       .eq('published', true)
-      .or('publish_at.is.null,publish_at.lte.now()')
-      .order('created_at', { ascending: false })
-      .limit(3),
+      .eq('is_hero', true)
+      .gt('hero_order', 0)
+      .order('hero_order', { ascending: true })
+      .limit(5),
+    supabase
+      .from('hero_slides')
+      .select('*')
+      .eq('is_visible', true)
+      .order('sort_order', { ascending: true }),
     supabase
       .from('magazines')
       .select('*')
@@ -51,59 +55,55 @@ async function buildHeroSlides(s: Record<string, string>): Promise<CarouselSlide
       .limit(1),
   ]);
 
-  const latest = (latestRes.data ?? []) as Blog[];
+  const heroBlogs = (heroRes.data ?? []) as Blog[];
+  const customSlides = (customRes.data ?? []) as HeroSlide[];
   const latestMagazine = ((magRes.data ?? []) as Magazine[])[0] ?? null;
 
-  // Featured 글 확정 (지정 ID → 최신 1번째 fallback)
-  let featuredBlog: Blog | null = null;
-  if (featuredId) {
-    featuredBlog = latest.find(b => b.id === featuredId) ?? null;
-    if (!featuredBlog) {
-      const { data } = await supabase
-        .from('blogs')
-        .select('*')
-        .eq('id', featuredId)
-        .eq('published', true)
-        .maybeSingle();
-      featuredBlog = data as Blog | null;
-    }
+  // 수동 지정 없으면 최신 3개 자동 모드
+  let blogSlides = heroBlogs;
+  if (blogSlides.length === 0) {
+    const { data } = await supabase
+      .from('blogs')
+      .select('*')
+      .eq('published', true)
+      .or('publish_at.is.null,publish_at.lte.now()')
+      .order('created_at', { ascending: false })
+      .limit(3);
+    blogSlides = (data ?? []) as Blog[];
   }
-  if (!featuredBlog) featuredBlog = latest[0] ?? null;
-
-  // Featured 제외한 최신 2개 (슬라이드 2-3)
-  const otherBlogs = latest.filter(b => b.id !== featuredBlog?.id).slice(0, 2);
 
   const slides: CarouselSlide[] = [];
 
-  // 1번 슬라이드: EDITOR'S PICK
-  if (featuredBlog) {
+  // 1. 커스텀 슬라이드 (맨 앞 — Admin에서 직접 추가한 것)
+  for (const cs of customSlides) {
     slides.push({
-      key: `featured-${featuredBlog.id}`,
-      type: 'blog',
-      label: "EDITOR'S PICK",
-      title: featuredBlog.title,
-      subtitle: featuredBlog.date,
-      image_url: featuredBlog.image_url,
-      cta_text: 'Discover More',
-      blog: featuredBlog,
+      key: `custom-${cs.id}`,
+      type: 'magazine',
+      label: 'FEATURED',
+      title: cs.title,
+      subtitle: cs.subtitle ?? undefined,
+      image_url: cs.image_url,
+      cta_text: 'Learn More',
+      link_url: cs.link_url ?? undefined,
     });
   }
 
-  // 2-3번 슬라이드: 최신 블로그
-  for (const blog of otherBlogs) {
+  // 2. 블로그 슬라이드 (수동 지정 or 자동)
+  const isManual = heroBlogs.length > 0;
+  blogSlides.forEach((blog, i) => {
     slides.push({
       key: `blog-${blog.id}`,
       type: 'blog',
-      label: 'LATEST STORY',
+      label: i === 0 && !isManual ? "EDITOR'S PICK" : isManual ? 'FEATURED STORY' : 'LATEST STORY',
       title: blog.title,
       subtitle: blog.date,
       image_url: blog.image_url,
       cta_text: 'Discover More',
       blog,
     });
-  }
+  });
 
-  // 4번 슬라이드: 최신 매거진
+  // 3. 최신 매거진
   if (latestMagazine) {
     slides.push({
       key: `mag-${latestMagazine.id}`,
@@ -117,7 +117,7 @@ async function buildHeroSlides(s: Record<string, string>): Promise<CarouselSlide
     });
   }
 
-  // 5번 슬라이드: StoryPress (고정)
+  // 4. StoryPress (고정)
   slides.push({
     key: 'storypress',
     type: 'storypress',
@@ -128,7 +128,7 @@ async function buildHeroSlides(s: Record<string, string>): Promise<CarouselSlide
     link_url: '/storypress',
   });
 
-  // 블로그 슬라이드가 전혀 없으면 fallback 데이터 사용
+  // 블로그가 전혀 없으면 fallback
   if (slides.every(s => s.type !== 'blog')) {
     const fallbacks: CarouselSlide[] = FALLBACK_HERO_BLOGS.slice(0, 3).map((b, i) => ({
       key: `fallback-${b.id}`,
@@ -182,7 +182,7 @@ async function getMostReadBlogs(): Promise<Blog[]> {
 export default async function LandingPage() {
   const s = await getSiteSettings();
   const [carouselSlides, mostRead, magazines] = await Promise.all([
-    buildHeroSlides(s), getMostReadBlogs(), getRecentMagazines(),
+    buildHeroSlides(), getMostReadBlogs(), getRecentMagazines(),
   ]);
 
   const jsonLd = {
