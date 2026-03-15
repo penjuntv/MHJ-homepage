@@ -12,6 +12,15 @@ export default async function PublicLayout({
 }) {
   const s = await getSiteSettings();
 
+  let navigationItems: { label: string; path: string; visible: boolean; order: number }[] = [];
+  if (s.navigation_items) {
+    try {
+      navigationItems = JSON.parse(s.navigation_items);
+    } catch {
+      navigationItems = [];
+    }
+  }
+
   return (
     <>
       <Navigation
@@ -20,6 +29,7 @@ export default async function PublicLayout({
         socialInstagram={s.social_instagram}
         socialYoutube={s.social_youtube}
         contactEmail={s.contact_email}
+        navigationItems={navigationItems}
       />
       <main>{children}</main>
       <InstagramFeed instagramUrl={s.social_instagram || ''} />

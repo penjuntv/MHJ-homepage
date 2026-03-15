@@ -72,7 +72,7 @@ const STEPS = [
   { num: '03', label: 'Review', desc: 'Smart review the next day reinforces memory and makes words stick for good.' },
 ];
 
-export default function StoryPressClient({ title }: Props) {
+export default function StoryPressClient({ title, description, heroImageUrl }: Props) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
   const [hoverFeature, setHoverFeature] = useState<number | null>(null);
@@ -127,9 +127,7 @@ export default function StoryPressClient({ title }: Props) {
             {title}
           </h1>
           <p style={{ fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 500, color: '#64748B', lineHeight: 1.65, marginBottom: 40, maxWidth: 480 }}>
-            A gentle way to learn English,{' '}
-            <span style={{ fontWeight: 900, color: '#F59E42' }}>4 words at a time.</span>{' '}
-            Built for bilingual families navigating two languages.
+            {description || (<>A gentle way to learn English,{' '}<span style={{ fontWeight: 900, color: '#F59E42' }}>4 words at a time.</span>{' '}Built for bilingual families navigating two languages.</>)}
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a
@@ -147,8 +145,25 @@ export default function StoryPressClient({ title }: Props) {
           </div>
         </div>
 
-        {/* 우: 앱 목업 카드 */}
+        {/* 우: 히어로 이미지(있으면) 또는 앱 목업 카드 */}
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'center' }}>
+          {heroImageUrl ? (
+            <div style={{
+              width: '100%', maxWidth: 420,
+              aspectRatio: '4/5',
+              borderRadius: 40,
+              overflow: 'hidden',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.14)',
+              position: 'relative',
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroImageUrl}
+                alt="StoryPress"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+          ) : (
           <div style={{ width: '100%', maxWidth: 360, background: 'white', borderRadius: 40, padding: 32, boxShadow: '0 32px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06)', position: 'relative' }}>
             {/* 앱 상단 바 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
@@ -188,6 +203,7 @@ export default function StoryPressClient({ title }: Props) {
               </div>
             </div>
           </div>
+          )}
         </div>
       </section>
 

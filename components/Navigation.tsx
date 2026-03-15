@@ -15,20 +15,35 @@ const NAV_LINKS = [
   { label: 'StoryPress', href: '/storypress' },
 ];
 
+interface NavItem {
+  label: string;
+  path: string;
+  visible: boolean;
+  order: number;
+}
+
 interface NavProps {
   siteName?: string;
   siteSubtitle?: string;
   socialInstagram?: string;
   socialYoutube?: string;
   contactEmail?: string;
+  navigationItems?: NavItem[];
 }
 
-export default function Navigation({ siteName, siteSubtitle, socialInstagram, socialYoutube, contactEmail }: NavProps) {
+export default function Navigation({ siteName, siteSubtitle, socialInstagram, socialYoutube, contactEmail, navigationItems }: NavProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+
+  const effectiveLinks = (navigationItems && navigationItems.length > 0)
+    ? navigationItems
+        .filter(item => item.visible)
+        .sort((a, b) => a.order - b.order)
+        .map(item => ({ label: item.label, href: item.path }))
+    : NAV_LINKS;
 
   const isActive = (href: string) => {
     if (href === '/magazine') return pathname.startsWith('/magazine');
@@ -86,7 +101,7 @@ export default function Navigation({ siteName, siteSubtitle, socialInstagram, so
 
           {/* 데스크톱 메뉴 */}
           <div className="desktop-nav flex items-center" style={{ gap: '36px' }}>
-            {NAV_LINKS.map((link) => (
+            {effectiveLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

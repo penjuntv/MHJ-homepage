@@ -9,8 +9,7 @@ import SafeImage from '@/components/SafeImage';
 
 // 표시 순서
 const SETTING_KEYS = [
-  'site_name', 'site_subtitle', 'hero_label',
-  'intro_title', 'intro_subtitle', 'intro_description',
+  'site_name', 'site_subtitle',
   'about_vision_title', 'about_vision_description',
   'blog_title', 'blog_description',
   'magazine_title', 'magazine_hint',
@@ -27,7 +26,7 @@ const IMAGE_KEYS = [
 ] as const;
 
 // 여러 줄 입력이 필요한 키
-const MULTILINE_KEYS = new Set(['intro_description', 'about_vision_description', 'blog_description', 'storypress_description', 'footer_description']);
+const MULTILINE_KEYS = new Set(['about_vision_description', 'blog_description', 'storypress_description', 'footer_description']);
 
 const SOCIAL_META: Record<string, { label: string; icon: React.ReactNode; placeholder: string }> = {
   social_instagram: {

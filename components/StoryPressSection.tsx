@@ -10,8 +10,9 @@ interface Props {
   ctaText: string;
 }
 
-export default function StoryPressSection({ title, ctaUrl }: Props) {
+export default function StoryPressSection({ title, description, ctaUrl, ctaText }: Props) {
   const href = ctaUrl.trim() || '/storypress';
+  const buttonLabel = ctaText?.trim() || 'Learn More →';
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -83,7 +84,7 @@ export default function StoryPressSection({ title, ctaUrl }: Props) {
           maxWidth: 440,
           margin: '0 auto 52px',
         }}>
-          An English learning app for ESOL children, born from our bilingual family journey.
+          {description || 'An English learning app for ESOL children, born from our bilingual family journey.'}
         </p>
 
         {/* CTA 버튼 */}
@@ -108,7 +109,7 @@ export default function StoryPressSection({ title, ctaUrl }: Props) {
             transition: 'background 0.25s, color 0.25s, border-color 0.25s',
           }}
         >
-          Learn More →
+          {buttonLabel}
         </Link>
       </div>
     </section>
