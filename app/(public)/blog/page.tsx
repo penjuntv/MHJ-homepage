@@ -6,42 +6,131 @@ import { getSiteSettings } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Blog Library',
-  description: '유희종(Heejong Jo)의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
-  openGraph: {
-    title: 'Blog Library — MY MAIRANGI',
-    description: '유희종의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
-    url: 'https://mymairangi.com/blog',
-    images: [{ url: 'https://mymairangi.com/og-blog.jpg', width: 1200, height: 630 }],
-  },
-  alternates: { canonical: 'https://mymairangi.com/blog' },
-};
+const PAGE_SIZE = 9;
+const VALID_CATEGORIES = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
 
-async function getBlogs(): Promise<Blog[]> {
+interface Props {
+  searchParams: Promise<{ page?: string; category?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
+  const category = params.category && VALID_CATEGORIES.includes(params.category) ? params.category : null;
+
+  const suffix = [
+    category ? category : null,
+    page > 1 ? `Page ${page}` : null,
+  ].filter(Boolean).join(' — ');
+
+  const title = suffix ? `Blog — ${suffix}` : 'Blog Library';
+  const canonical = new URL('https://mymairangi.com/blog');
+  if (category) canonical.searchParams.set('category', category);
+  if (page > 1) canonical.searchParams.set('page', String(page));
+
+  return {
+    title,
+    description: '유희종(Heejong Jo)의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
+    openGraph: {
+      title: `${title} — MY MAIRANGI`,
+      description: '유희종의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
+      url: canonical.toString(),
+      images: [{ url: 'https://mymairangi.com/og-blog.jpg', width: 1200, height: 630 }],
+    },
+    alternates: { canonical: canonical.toString() },
+  };
+}
+
+async function getFeaturedBlog(category: string | null): Promise<Blog | null> {
   const now = new Date().toISOString();
-  const { data } = await supabase
+  // 1) featured=true인 글 중 최신
+  let q = supabase
+    .from('blogs')
+    .select('*')
+    .eq('published', true)
+    .eq('featured', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
+    .order('date', { ascending: false })
+    .limit(1);
+  if (category) q = q.eq('category', category);
+  const { data: featuredData } = await q;
+  if (featuredData && featuredData.length > 0) return featuredData[0];
+
+  // 2) featured 글이 없으면 최신 1개
+  let q2 = supabase
     .from('blogs')
     .select('*')
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('date', { ascending: false });
-  return data ?? [];
+    .order('date', { ascending: false })
+    .limit(1);
+  if (category) q2 = q2.eq('category', category);
+  const { data: latestData } = await q2;
+  return latestData?.[0] ?? null;
+}
+
+async function getRecentBlogs(category: string | null, excludeId: number | null): Promise<Blog[]> {
+  const now = new Date().toISOString();
+  let q = supabase
+    .from('blogs')
+    .select('*')
+    .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
+    .order('date', { ascending: false })
+    .limit(excludeId ? 5 : 4);
+  if (category) q = q.eq('category', category);
+  const { data } = await q;
+  const all = data ?? [];
+  return (excludeId ? all.filter(b => b.id !== excludeId) : all).slice(0, 4);
 }
 
 async function getMostReadBlogs(): Promise<Blog[]> {
   const { data } = await supabase
     .from('blogs')
-    .select('id, title, author, date, image_url, category, slug, view_count')
+    .select('id, title, author, date, image_url, category, slug, view_count, meta_description, content, published, og_image_url')
     .eq('published', true)
     .order('view_count', { ascending: false })
     .limit(5);
   return (data ?? []) as Blog[];
 }
 
-export default async function BlogPage() {
-  const [blogs, mostRead, s] = await Promise.all([getBlogs(), getMostReadBlogs(), getSiteSettings()]);
+async function getPaginatedBlogs(
+  page: number,
+  category: string | null,
+): Promise<{ blogs: Blog[]; totalCount: number }> {
+  const now = new Date().toISOString();
+  const offset = (page - 1) * PAGE_SIZE;
 
+  let q = supabase
+    .from('blogs')
+    .select('*', { count: 'exact' })
+    .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
+    .order('date', { ascending: false })
+    .range(offset, offset + PAGE_SIZE - 1);
+
+  if (category) q = q.eq('category', category);
+  const { data, count } = await q;
+  return { blogs: data ?? [], totalCount: count ?? 0 };
+}
+
+export default async function BlogPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
+  const category = params.category && VALID_CATEGORIES.includes(params.category) ? params.category : null;
+
+  const [featured, paginated, mostRead, s] = await Promise.all([
+    getFeaturedBlog(category),
+    getPaginatedBlogs(page, category),
+    getMostReadBlogs(),
+    getSiteSettings(),
+  ]);
+
+  const recent = await getRecentBlogs(category, featured?.id ?? null);
+
+  const totalPages = Math.ceil(paginated.totalCount / PAGE_SIZE);
+
+  // JSON-LD
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -60,7 +149,7 @@ export default async function BlogPage() {
     inLanguage: 'ko',
     author: { '@type': 'Person', name: '유희종 (Heejong Jo)' },
     publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: 'https://mymairangi.com' },
-    blogPost: blogs.slice(0, 10).map((b) => ({
+    blogPost: paginated.blogs.slice(0, 10).map((b) => ({
       '@type': 'BlogPosting',
       headline: b.title,
       author: { '@type': 'Person', name: b.author },
@@ -72,8 +161,26 @@ export default async function BlogPage() {
     })),
   };
 
+  // prev/next links
+  const canonical = new URL('https://mymairangi.com/blog');
+  if (category) canonical.searchParams.set('category', category);
+
+  const prevUrl = page > 1 ? (() => {
+    const u = new URL(canonical);
+    if (page > 2) u.searchParams.set('page', String(page - 1));
+    return u.toString();
+  })() : null;
+
+  const nextUrl = page < totalPages ? (() => {
+    const u = new URL(canonical);
+    u.searchParams.set('page', String(page + 1));
+    return u.toString();
+  })() : null;
+
   return (
     <>
+      {prevUrl && <link rel="prev" href={prevUrl} />}
+      {nextUrl && <link rel="next" href={nextUrl} />}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -82,7 +189,18 @@ export default async function BlogPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      <BlogLibrary blogs={blogs} blogTitle={s.blog_title} blogDescription={s.blog_description} readerFavorites={mostRead} />
+      <BlogLibrary
+        featuredBlog={featured}
+        recentBlogs={recent}
+        blogs={paginated.blogs}
+        totalCount={paginated.totalCount}
+        currentPage={page}
+        totalPages={totalPages}
+        activeCategory={category}
+        readerFavorites={mostRead}
+        blogTitle={s.blog_title}
+        blogDescription={s.blog_description}
+      />
     </>
   );
 }

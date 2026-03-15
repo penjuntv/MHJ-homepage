@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
-import { Plus, Search, Pencil, Trash2, Eye, EyeOff, Star, LayoutGrid, List, TrendingUp } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Eye, EyeOff, Star, LayoutGrid, List, TrendingUp, Award } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CATEGORIES = ['All', 'Daily', 'School', 'Kids', 'Travel', 'Food'];
@@ -66,6 +66,13 @@ export default function AdminBlogsPage() {
     }
     await supabase.from('blogs').update({ is_hero: next, hero_order: next ? heroOrder : 0 }).eq('id', blog.id);
     setBlogs(prev => prev.map(b => b.id === blog.id ? { ...b, is_hero: next, hero_order: next ? heroOrder : 0 } : b));
+  }
+
+  async function toggleFeatured(blog: Blog) {
+    const next = !blog.featured;
+    await supabase.from('blogs').update({ featured: next }).eq('id', blog.id);
+    setBlogs(prev => prev.map(b => b.id === blog.id ? { ...b, featured: next } : b));
+    toast.success(next ? '피처드로 설정되었습니다.' : '피처드가 해제되었습니다.');
   }
 
   async function deleteBlog(id: number) {
@@ -213,12 +220,11 @@ export default function AdminBlogsPage() {
                     {blog.published ? '발행' : '비공개'}
                   </span>
                 </div>
-                {/* 히어로 별 */}
-                {blog.is_hero && (
-                  <div style={{ position: 'absolute', bottom: 10, left: 10 }}>
-                    <Star size={14} fill="#F59E0B" color="#F59E0B" />
-                  </div>
-                )}
+                {/* 히어로 별 + 피처드 */}
+                <div style={{ position: 'absolute', bottom: 10, left: 10, display: 'flex', gap: 6 }}>
+                  {blog.is_hero && <Star size={14} fill="#F59E0B" color="#F59E0B" />}
+                  {blog.featured && <Award size={14} fill="#4F46E5" color="#4F46E5" />}
+                </div>
               </div>
 
               {/* 정보 */}
@@ -245,6 +251,12 @@ export default function AdminBlogsPage() {
                     background: blog.is_hero ? '#FFFBEB' : 'white', cursor: 'pointer', display: 'flex', alignItems: 'center',
                   }}>
                     <Star size={13} fill={blog.is_hero ? '#F59E0B' : 'none'} color={blog.is_hero ? '#F59E0B' : '#CBD5E1'} />
+                  </button>
+                  <button onClick={() => toggleFeatured(blog)} title="피처드 토글" style={{
+                    padding: '7px', borderRadius: 8, border: `1px solid ${blog.featured ? '#C7D2FE' : '#f1f5f9'}`,
+                    background: blog.featured ? '#EEF2FF' : 'white', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                  }}>
+                    <Award size={13} fill={blog.featured ? '#4F46E5' : 'none'} color={blog.featured ? '#4F46E5' : '#CBD5E1'} />
                   </button>
                   <button onClick={() => togglePublish(blog)} title={blog.published ? '비공개' : '발행'} style={{
                     padding: '7px', borderRadius: 8, border: '1px solid #f1f5f9',
@@ -276,7 +288,7 @@ export default function AdminBlogsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#fafafa', borderBottom: '1px solid #f1f5f9' }}>
-                {['', '글', '카테고리', '저자', '날짜', '상태', '조회', ''].map((h, i) => (
+                {['', '', '글', '카테고리', '저자', '날짜', '상태', '조회', ''].map((h, i) => (
                   <th key={i} style={{ padding: '12px 14px', textAlign: 'left', fontSize: 9, fontWeight: 800, letterSpacing: 3, textTransform: 'uppercase', color: '#94a3b8' }}>{h}</th>
                 ))}
               </tr>
@@ -296,6 +308,15 @@ export default function AdminBlogsPage() {
                       <Star size={13} fill={blog.is_hero ? '#F59E0B' : 'none'} color={blog.is_hero ? '#F59E0B' : '#CBD5E1'} />
                     </button>
                   </td>
+                  {/* 피처드 */}
+                  <td style={{ padding: '12px 4px', width: 32 }}>
+                    <button onClick={() => toggleFeatured(blog)} title="피처드 토글" style={{
+                      padding: '5px', borderRadius: 7, border: 'none',
+                      background: 'none', cursor: 'pointer', display: 'flex',
+                    }}>
+                      <Award size={13} fill={blog.featured ? '#4F46E5' : 'none'} color={blog.featured ? '#4F46E5' : '#CBD5E1'} />
+                    </button>
+                  </td>
                   {/* 글 (썸네일 + 제목) */}
                   <td style={{ padding: '10px 14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -304,6 +325,7 @@ export default function AdminBlogsPage() {
                       </div>
                       <p style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 240 }}>
                         {blog.is_hero && <span style={{ fontSize: 9, fontWeight: 900, color: '#F59E0B', letterSpacing: 2, marginRight: 6, textTransform: 'uppercase' }}>HERO</span>}
+                        {blog.featured && <span style={{ fontSize: 9, fontWeight: 900, color: '#4F46E5', letterSpacing: 2, marginRight: 6, textTransform: 'uppercase' }}>FEATURED</span>}
                         {blog.title}
                       </p>
                     </div>
