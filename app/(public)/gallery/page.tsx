@@ -12,10 +12,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Photo Gallery — MY MAIRANGI',
     description: '마이랑이 베이에서 담아낸 우리 가족의 순간들.',
-    url: 'https://mymairangi.com/gallery',
-    images: [{ url: 'https://mymairangi.com/og-gallery.jpg', width: 1200, height: 630 }],
+    url: 'https://mhj-homepage.vercel.app/gallery',
+    images: [{ url: 'https://mhj-homepage.vercel.app/og-gallery.jpg', width: 1200, height: 630 }],
   },
-  alternates: { canonical: 'https://mymairangi.com/gallery' },
+  alternates: { canonical: 'https://mhj-homepage.vercel.app/gallery' },
 };
 
 async function getGallery(): Promise<GalleryItem[]> {
@@ -35,7 +35,7 @@ export default async function GalleryPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
       { '@type': 'ListItem', position: 2, name: 'Gallery' },
     ],
   };

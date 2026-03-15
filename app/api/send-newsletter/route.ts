@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
   // Resend 배치 발송
   const emails = subscribers.map((s) => ({
-    from: 'MY MAIRANGI <newsletter@mymairangi.com>',
+    from: 'MY MAIRANGI <onboarding@resend.dev>',
     to: s.email,
     subject,
     html: htmlBody,

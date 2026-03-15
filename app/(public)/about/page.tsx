@@ -13,10 +13,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'About — MY MAIRANGI',
     description: '뉴질랜드 마이랑이 베이에 사는 한국인 가족 이야기.',
-    url: 'https://mymairangi.com/about',
-    images: [{ url: 'https://mymairangi.com/og-about.jpg', width: 1200, height: 630 }],
+    url: 'https://mhj-homepage.vercel.app/about',
+    images: [{ url: 'https://mhj-homepage.vercel.app/og-about.jpg', width: 1200, height: 630 }],
   },
-  alternates: { canonical: 'https://mymairangi.com/about' },
+  alternates: { canonical: 'https://mhj-homepage.vercel.app/about' },
 };
 
 const FALLBACK_MEMBERS: FamilyMember[] = [
@@ -69,7 +69,7 @@ export default async function AboutPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
       { '@type': 'ListItem', position: 2, name: 'About' },
     ],
   };

@@ -14,7 +14,7 @@ export function generateNewsletterHTML(
   blogPost?: BlogPostInfo,
 ): string {
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mymairangi.com';
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mhj-homepage.vercel.app';
 
   /* ── 공통 파트 ── */
   const header = `

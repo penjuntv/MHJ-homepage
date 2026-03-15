@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: '/admin',
       },
     ],
-    sitemap: 'https://mymairangi.com/sitemap.xml',
+    sitemap: 'https://mhj-homepage.vercel.app/sitemap.xml',
   };
 }

@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
-const BASE_URL = 'https://mymairangi.com';
+const BASE_URL = 'https://mhj-homepage.vercel.app';
 const OG_IMAGE = `${BASE_URL}/og-default.jpg`;
 
 export const metadata: Metadata = {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mymairangi.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mhj-homepage.vercel.app';
 
 const organizationJsonLd = {
   '@context': 'https://schema.org',
@@ -87,7 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="alternate"
           type="application/rss+xml"
           title="MY MAIRANGI — RSS Feed"
-          href="https://mymairangi.com/feed.xml"
+          href="https://mhj-homepage.vercel.app/feed.xml"
         />
       </head>
       <body>

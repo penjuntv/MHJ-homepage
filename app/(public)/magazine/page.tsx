@@ -16,10 +16,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Magazine — MY MAIRANGI',
     description: '뉴질랜드 마이랑이 가족의 월간 라이프 매거진.',
-    url: 'https://mymairangi.com/magazine',
-    images: [{ url: 'https://mymairangi.com/og-magazine.jpg', width: 1200, height: 630 }],
+    url: 'https://mhj-homepage.vercel.app/magazine',
+    images: [{ url: 'https://mhj-homepage.vercel.app/og-magazine.jpg', width: 1200, height: 630 }],
   },
-  alternates: { canonical: 'https://mymairangi.com/magazine' },
+  alternates: { canonical: 'https://mhj-homepage.vercel.app/magazine' },
 };
 
 const FALLBACK_MAGAZINES: Magazine[] = [
@@ -60,7 +60,7 @@ export default async function MagazinePage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
       { '@type': 'ListItem', position: 2, name: 'Magazine' },
     ],
   };

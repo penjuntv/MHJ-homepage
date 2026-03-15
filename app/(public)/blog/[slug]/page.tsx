@@ -113,7 +113,7 @@ export async function generateMetadata({
     openGraph: {
       title: blog.title,
       description,
-      url: `https://mymairangi.com/blog/${blog.slug}`,
+      url: `https://mhj-homepage.vercel.app/blog/${blog.slug}`,
       images: [{ url: ogImage, width: 1200, height: 630, alt: blog.title }],
       type: 'article',
       authors: [blog.author],
@@ -124,7 +124,7 @@ export async function generateMetadata({
       description,
       images: [ogImage],
     },
-    alternates: { canonical: `https://mymairangi.com/blog/${blog.slug}` },
+    alternates: { canonical: `https://mhj-homepage.vercel.app/blog/${blog.slug}` },
   };
 }
 
@@ -153,8 +153,8 @@ export default async function BlogDetailPage({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://mymairangi.com/blog' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://mhj-homepage.vercel.app/blog' },
       { '@type': 'ListItem', position: 3, name: blog.title },
     ],
   };
@@ -165,7 +165,7 @@ export default async function BlogDetailPage({
     headline: blog.title,
     author: { '@type': 'Person', name: blog.author },
     datePublished: blog.date,
-    url: `https://mymairangi.com/blog/${blog.slug}`,
+    url: `https://mhj-homepage.vercel.app/blog/${blog.slug}`,
     image: blog.og_image_url || blog.image_url,
     description: blog.meta_description || plainText.slice(0, 160),
     keywords: blog.category,
@@ -173,7 +173,7 @@ export default async function BlogDetailPage({
     publisher: {
       '@type': 'Organization',
       name: 'MY MAIRANGI',
-      url: 'https://mymairangi.com',
+      url: 'https://mhj-homepage.vercel.app',
     },
   };
 
@@ -529,7 +529,7 @@ export default async function BlogDetailPage({
 
               <ShareButton
                 title={blog.title}
-                url={`https://mymairangi.com/blog/${blog.slug}`}
+                url={`https://mhj-homepage.vercel.app/blog/${blog.slug}`}
                 description={blog.meta_description || plainText.slice(0, 160)}
               />
             </footer>

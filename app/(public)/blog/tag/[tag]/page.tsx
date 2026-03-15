@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
   return {
     title: `Posts tagged #${tag} | MY MAIRANGI`,
     description: `MY MAIRANGI의 #${tag} 태그 글 모음`,
-    alternates: { canonical: `https://mymairangi.com/blog/tag/${tag}` },
+    alternates: { canonical: `https://mhj-homepage.vercel.app/blog/tag/${tag}` },
   };
 }
 
@@ -34,8 +34,8 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://mymairangi.com/blog' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://mhj-homepage.vercel.app/blog' },
       { '@type': 'ListItem', position: 3, name: `Tag: ${tag}` },
     ],
   };

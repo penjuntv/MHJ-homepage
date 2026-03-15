@@ -15,10 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: `${s.welcome_title} — MY MAIRANGI`,
       description: s.welcome_description,
-      url: 'https://mymairangi.com/welcome',
-      images: [{ url: 'https://mymairangi.com/og-default.jpg', width: 1200, height: 630 }],
+      url: 'https://mhj-homepage.vercel.app/welcome',
+      images: [{ url: 'https://mhj-homepage.vercel.app/og-default.jpg', width: 1200, height: 630 }],
     },
-    alternates: { canonical: 'https://mymairangi.com/welcome' },
+    alternates: { canonical: 'https://mhj-homepage.vercel.app/welcome' },
   };
 }
 
@@ -92,7 +92,7 @@ export default async function WelcomePage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
       { '@type': 'ListItem', position: 2, name: 'Welcome' },
     ],
   };
@@ -101,10 +101,10 @@ export default async function WelcomePage() {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: s.welcome_title,
-    url: 'https://mymairangi.com/welcome',
+    url: 'https://mhj-homepage.vercel.app/welcome',
     description: s.welcome_description,
     inLanguage: 'ko',
-    isPartOf: { '@type': 'WebSite', name: 'MY MAIRANGI', url: 'https://mymairangi.com' },
+    isPartOf: { '@type': 'WebSite', name: 'MY MAIRANGI', url: 'https://mhj-homepage.vercel.app' },
     about: {
       '@type': 'Person',
       name: '조상목·유희종 가족',

@@ -17,10 +17,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'MY MAIRANGI — Family Archive',
     description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진.',
-    url: 'https://mymairangi.com',
-    images: [{ url: 'https://mymairangi.com/og-default.jpg', width: 1200, height: 630, alt: 'MY MAIRANGI Family Archive' }],
+    url: 'https://mhj-homepage.vercel.app',
+    images: [{ url: 'https://mhj-homepage.vercel.app/og-default.jpg', width: 1200, height: 630, alt: 'MY MAIRANGI Family Archive' }],
   },
-  alternates: { canonical: 'https://mymairangi.com' },
+  alternates: { canonical: 'https://mhj-homepage.vercel.app' },
 };
 
 const FALLBACK_HERO_BLOGS: Blog[] = [
@@ -189,18 +189,18 @@ export default async function LandingPage() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'MY MAIRANGI',
-    url: 'https://mymairangi.com',
+    url: 'https://mhj-homepage.vercel.app',
     description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진.',
     inLanguage: 'ko',
     publisher: {
       '@type': 'Organization',
       name: 'MY MAIRANGI',
-      url: 'https://mymairangi.com',
-      sameAs: ['https://mymairangi.com/about'],
+      url: 'https://mhj-homepage.vercel.app',
+      sameAs: ['https://mhj-homepage.vercel.app/about'],
     },
     potentialAction: {
       '@type': 'ReadAction',
-      target: ['https://mymairangi.com/blog', 'https://mymairangi.com/magazine'],
+      target: ['https://mhj-homepage.vercel.app/blog', 'https://mhj-homepage.vercel.app/magazine'],
     },
   };
 

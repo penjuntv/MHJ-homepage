@@ -24,7 +24,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   ].filter(Boolean).join(' — ');
 
   const title = suffix ? `Blog — ${suffix}` : 'Blog Library';
-  const canonical = new URL('https://mymairangi.com/blog');
+  const canonical = new URL('https://mhj-homepage.vercel.app/blog');
   if (category) canonical.searchParams.set('category', category);
   if (page > 1) canonical.searchParams.set('page', String(page));
 
@@ -35,7 +35,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       title: `${title} — MY MAIRANGI`,
       description: '유희종의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
       url: canonical.toString(),
-      images: [{ url: 'https://mymairangi.com/og-blog.jpg', width: 1200, height: 630 }],
+      images: [{ url: 'https://mhj-homepage.vercel.app/og-blog.jpg', width: 1200, height: 630 }],
     },
     alternates: { canonical: canonical.toString() },
   };
@@ -135,7 +135,7 @@ export default async function BlogPage({ searchParams }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
       { '@type': 'ListItem', position: 2, name: 'Blog' },
     ],
   };
@@ -144,17 +144,17 @@ export default async function BlogPage({ searchParams }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Blog',
     name: 'MY MAIRANGI Blog Library',
-    url: 'https://mymairangi.com/blog',
+    url: 'https://mhj-homepage.vercel.app/blog',
     description: '유희종(Heejong Jo)의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
     inLanguage: 'ko',
     author: { '@type': 'Person', name: '유희종 (Heejong Jo)' },
-    publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: 'https://mymairangi.com' },
+    publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: 'https://mhj-homepage.vercel.app' },
     blogPost: paginated.blogs.slice(0, 10).map((b) => ({
       '@type': 'BlogPosting',
       headline: b.title,
       author: { '@type': 'Person', name: b.author },
       datePublished: b.date,
-      url: `https://mymairangi.com/blog/${b.slug}`,
+      url: `https://mhj-homepage.vercel.app/blog/${b.slug}`,
       image: b.og_image_url || b.image_url,
       description: b.meta_description || b.content.slice(0, 120),
       keywords: b.category,
@@ -162,7 +162,7 @@ export default async function BlogPage({ searchParams }: Props) {
   };
 
   // prev/next links
-  const canonical = new URL('https://mymairangi.com/blog');
+  const canonical = new URL('https://mhj-homepage.vercel.app/blog');
   if (category) canonical.searchParams.set('category', category);
 
   const prevUrl = page > 1 ? (() => {

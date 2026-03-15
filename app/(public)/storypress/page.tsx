@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'StoryPress — Learn English 4 Words at a Time',
     description: 'A gentle English learning app for ESOL children. Just 4 words a day, through stories they love.',
-    url: 'https://mymairangi.com/storypress',
-    images: [{ url: 'https://mymairangi.com/og-storypress.jpg', width: 1200, height: 630, alt: 'StoryPress' }],
+    url: 'https://mhj-homepage.vercel.app/storypress',
+    images: [{ url: 'https://mhj-homepage.vercel.app/og-storypress.jpg', width: 1200, height: 630, alt: 'StoryPress' }],
     type: 'website',
   },
   twitter: {
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: 'StoryPress — Learn English 4 Words at a Time',
     description: 'A gentle English learning app for ESOL children.',
   },
-  alternates: { canonical: 'https://mymairangi.com/storypress' },
+  alternates: { canonical: 'https://mhj-homepage.vercel.app/storypress' },
 };
 
 export default async function StoryPressPage() {
@@ -29,7 +29,7 @@ export default async function StoryPressPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mymairangi.com' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
       { '@type': 'ListItem', position: 2, name: 'StoryPress' },
     ],
   };
@@ -41,8 +41,8 @@ export default async function StoryPressPage() {
     applicationCategory: 'EducationalApplication',
     operatingSystem: 'iOS, Android',
     description: 'A gentle English learning app for ESOL children. Just 4 words a day, through stories they love.',
-    url: 'https://mymairangi.com/storypress',
-    author: { '@type': 'Organization', name: 'MY MAIRANGI', url: 'https://mymairangi.com' },
+    url: 'https://mhj-homepage.vercel.app/storypress',
+    author: { '@type': 'Organization', name: 'MY MAIRANGI', url: 'https://mhj-homepage.vercel.app' },
     audience: { '@type': 'Audience', audienceType: 'Children aged 5–12, bilingual families' },
     inLanguage: ['en', 'ko'],
   };
