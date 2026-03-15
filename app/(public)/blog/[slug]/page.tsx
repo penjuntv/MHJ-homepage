@@ -193,7 +193,7 @@ export default async function BlogDetailPage({
 
         {/* ── 미리보기 배너 ── */}
         {isPreview && (
-          <div style={{
+          <div className="preview-banner" style={{
             background: '#FEF3C7',
             borderBottom: '1px solid #FDE68A',
             padding: '14px clamp(24px, 4vw, 48px)',
@@ -367,7 +367,7 @@ export default async function BlogDetailPage({
                 <style>{`
                   .blog-content {
                     font-size: clamp(17px, 2vw, 20px);
-                    color: #374151;
+                    color: var(--text);
                     font-weight: 400;
                     line-height: 1.8;
                   }
@@ -452,7 +452,7 @@ export default async function BlogDetailPage({
             ) : (
               <p style={{
                 fontSize: 'clamp(17px, 2vw, 20px)',
-                color: '#374151',
+                color: 'var(--text)',
                 fontWeight: 400,
                 lineHeight: 1.8,
               }}>

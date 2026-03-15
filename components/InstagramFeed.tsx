@@ -78,7 +78,7 @@ export default function InstagramFeed({ instagramUrl }: Props) {
   if (loaded && posts.length === 0) {
     if (!instagramUrl) return null;
     return (
-      <section style={{ background: '#FFF0F5', padding: 'clamp(40px, 6vw, 64px) clamp(24px, 4vw, 80px)', textAlign: 'center' }}>
+      <section className="insta-section-bg" style={{ padding: 'clamp(40px, 6vw, 64px) clamp(24px, 4vw, 80px)', textAlign: 'center' }}>
         <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 5, color: '#F9A8D4', marginBottom: 16 }}>INSTAGRAM</p>
         <h2 className="font-display font-black" style={{ fontSize: 'clamp(28px, 4vw, 48px)', letterSpacing: '-1px', lineHeight: 1, marginBottom: 32, fontStyle: 'italic', color: 'var(--text)' }}>
           @MHJ Family on Instagram
@@ -98,7 +98,8 @@ export default function InstagramFeed({ instagramUrl }: Props) {
 
   return (
     <section
-      style={{ background: '#FFF0F5', padding: 'clamp(48px, 8vw, 80px) 0', overflow: 'hidden' }}
+      className="insta-section-bg"
+      style={{ padding: 'clamp(48px, 8vw, 80px) 0', overflow: 'hidden' }}
       onMouseEnter={() => { isHoveredRef.current = true; }}
       onMouseLeave={() => { isHoveredRef.current = false; }}
       onTouchStart={onTouchStart}

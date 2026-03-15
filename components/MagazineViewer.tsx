@@ -345,12 +345,13 @@ export default function MagazineViewer({ magazine, articles }: Props) {
   return (
     <>
       <div
+        className="mv-root"
         style={{ minHeight: '100vh', background: '#F5F0EB', display: 'flex', flexDirection: 'column', color: '#2C1F14' }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
         {/* ─── 상단 바 ─── */}
-        <div style={{
+        <div className="mv-header" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '12px 20px',
           borderBottom: '1px solid #E8DDD4',
@@ -390,7 +391,7 @@ export default function MagazineViewer({ magazine, articles }: Props) {
 
         {/* ─── 탭 전환 (PDF + Articles 둘 다 있을 때만) ─── */}
         {hasBothModes && (
-          <div style={{
+          <div className="mv-header" style={{
             display: 'flex', gap: 4,
             padding: '10px 20px',
             background: '#FAF7F4',
@@ -639,12 +640,12 @@ export default function MagazineViewer({ magazine, articles }: Props) {
             ══════════════════════════════════════════════ */}
         {showArticles && (
           <div style={{ flex: 1, padding: 'clamp(48px, 6vw, 80px) clamp(24px, 4vw, 48px)' }}>
-            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-              <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#8B7355', display: 'block', marginBottom: 10 }}>Past Issue</span>
-              <h2 style={{ margin: 0, fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 900, letterSpacing: -1.5, textTransform: 'uppercase', marginBottom: 8, color: '#2C1F14' }}>
+            <div className="mv-articles-wrap" style={{ maxWidth: 1100, margin: '0 auto' }}>
+              <span className="mv-label" style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#8B7355', display: 'block', marginBottom: 10 }}>Past Issue</span>
+              <h2 className="mv-title" style={{ margin: 0, fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 900, letterSpacing: -1.5, textTransform: 'uppercase', marginBottom: 8, color: '#2C1F14' }}>
                 {magazine.title}
               </h2>
-              <p style={{ margin: '0 0 40px', fontSize: 14, color: '#7A6958', fontWeight: 500 }}>
+              <p className="mv-meta" style={{ margin: '0 0 40px', fontSize: 14, color: '#7A6958', fontWeight: 500 }}>
                 {magazine.year} {magazine.month_name} · Editor: {magazine.editor} · {sortedArticles.length} Articles
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: 48 }}>
@@ -654,6 +655,7 @@ export default function MagazineViewer({ magazine, articles }: Props) {
                     article={a}
                     onOpen={() => setSelectedArticle(a)}
                     magazineLabel={`${magazine.month_name}${magazine.year}`}
+                    magazineCoverUrl={magazine.image_url}
                     liked={likedArticles.has(a.id)}
                     likeCount={reactionCounts[a.id]?.likes ?? 0}
                     commentCount={reactionCounts[a.id]?.comments ?? 0}
@@ -703,6 +705,10 @@ export default function MagazineViewer({ magazine, articles }: Props) {
           flex: 1 1 0;
           min-width: 0;
         }
+        .dark .mag-sidebar {
+          background: var(--bg-card) !important;
+          border-left-color: var(--border) !important;
+        }
         .mag-sidebar {
           flex: 0 0 300px;
           background: #FAF7F4;
@@ -740,18 +746,22 @@ export default function MagazineViewer({ magazine, articles }: Props) {
 }
 
 /* ─── Articles 모드 그리드 카드 ─── */
-function ArticleGridCard({ article, onOpen, magazineLabel, liked, likeCount, commentCount, onLike }: {
-  article: Article; onOpen: () => void; magazineLabel: string;
+function ArticleGridCard({ article, onOpen, magazineLabel, magazineCoverUrl, liked, likeCount, commentCount, onLike }: {
+  article: Article; onOpen: () => void; magazineLabel: string; magazineCoverUrl?: string;
   liked: boolean; likeCount: number; commentCount: number;
   onLike: (e: React.MouseEvent) => void;
 }) {
   const isImageFile = !!article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf');
   const cardRef = useRef<HTMLDivElement>(null);
+  const hasOwnImage = isImageFile ? !!article.pdf_url : !!article.image_url;
+  const fallbackSrc = magazineCoverUrl || '';
+  const isFallback = !hasOwnImage && !!fallbackSrc;
   return (
     <div style={{ position: 'relative' }}>
       <div
         ref={cardRef}
         onClick={onOpen}
+        className="mv-card"
         style={{ borderRadius: 16, overflow: 'hidden', background: '#fff', border: '1px solid #E8DDD4', cursor: 'pointer', transition: 'transform 0.25s ease, box-shadow 0.25s ease', boxShadow: '0 2px 8px rgba(44,31,20,0.06)' }}
         onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 16px 40px rgba(44,31,20,0.12)'; }}
         onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(44,31,20,0.06)'; }}
@@ -760,8 +770,22 @@ function ArticleGridCard({ article, onOpen, magazineLabel, liked, likeCount, com
           {isImageFile && article.pdf_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={article.pdf_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
+          ) : hasOwnImage ? (
             <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
+          ) : isFallback ? (
+            <>
+              <SafeImage src={fallbackSrc} alt={article.title} fill className="object-cover" style={{ filter: 'brightness(0.85) saturate(0.7)' }} />
+              <div className="mv-fallback-overlay">
+                <p style={{ fontSize: 12, fontWeight: 900, color: 'rgba(255,255,255,0.9)', lineHeight: 1.3, margin: 0, letterSpacing: -0.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {article.title}
+                </p>
+              </div>
+            </>
+          ) : (
+            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: 5, color: 'rgba(139,115,85,0.3)', textTransform: 'uppercase', margin: 0 }}>MY MAIRANGI</p>
+              <p style={{ fontSize: 11, fontWeight: 800, color: 'rgba(139,115,85,0.5)', textAlign: 'center', margin: 0, padding: '0 12px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{article.title}</p>
+            </div>
           )}
           {article.article_type && (
             <span style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(250,247,244,0.92)', color: '#7A6958', fontSize: 8, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4 }}>

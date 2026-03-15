@@ -38,9 +38,9 @@ export default function StoryPressFAQ() {
 
   return (
     <section
+      className="sp-hero-section"
       style={{
         padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
-        background: 'linear-gradient(135deg, #FFF4EE 0%, #F0F4FF 50%, #F0FDF9 100%)',
       }}
     >
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
@@ -68,9 +68,8 @@ export default function StoryPressFAQ() {
             return (
               <div
                 key={idx}
+                className="sp-faq-card"
                 style={{
-                  background: 'rgba(255,255,255,0.75)',
-                  backdropFilter: 'blur(12px)',
                   borderRadius: 24,
                   border: isOpen ? '1px solid rgba(245,158,66,0.35)' : '1px solid rgba(0,0,0,0.06)',
                   overflow: 'hidden',

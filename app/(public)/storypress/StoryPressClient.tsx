@@ -100,14 +100,13 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
 
       {/* ─── 히어로 — 2컬럼 ─── */}
-      <section style={{
+      <section className="sp-hero-section" style={{
         minHeight: '80vh',
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))',
         alignItems: 'center',
         gap: 'clamp(40px, 6vw, 80px)',
         padding: 'clamp(64px, 8vw, 112px) clamp(24px, 4vw, 80px)',
-        background: 'linear-gradient(135deg, #FFF4EE 0%, #F0F4FF 50%, #F0FDF9 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -182,7 +181,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               { word: 'Journey', korean: 'a long trip or adventure', color: '#ECFDF5', border: '#A7F3D0' },
               { word: 'Wonder', korean: 'a feeling of amazement', color: '#FDF2F8', border: '#FBCFE8' },
             ].map((item, i) => (
-              <div key={i} style={{ background: item.color, border: `1px solid ${item.border}`, borderRadius: 16, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={i} className="sp-word-card" style={{ background: item.color, border: `1px solid ${item.border}`, borderRadius: 16, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: -0.3 }}>{item.word}</p>
                   <p style={{ fontSize: 11, color: '#64748B', margin: 0, fontWeight: 500 }}>{item.korean}</p>
@@ -214,8 +213,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           maxWidth: 1200, margin: '0 auto',
-          opacity: featuresAnim.visible ? 1 : 0,
-          transform: featuresAnim.visible ? 'none' : 'translateY(40px)',
+            transform: featuresAnim.visible ? 'none' : 'translateY(40px)',
           transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
         }}
       >
@@ -250,7 +248,6 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   borderRadius: 32,
                   padding: 'clamp(28px, 3vw, 40px)',
                   cursor: 'default',
-                  opacity: featuresAnim.visible ? 1 : 0,
                   transform: isHovered
                     ? 'translateY(-8px)'
                     : featuresAnim.visible ? 'none' : 'translateY(30px)',
@@ -262,7 +259,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                     : `all 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s`,
                 }}
               >
-                <div style={{
+                <div className="sp-feature-icon" style={{
                   width: 52, height: 52, borderRadius: 16,
                   background: f.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   marginBottom: 20,
@@ -321,10 +318,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       {/* ─── How It Works ─── */}
       <section
         ref={stepsAnim.ref}
+        className="sp-steps-bg"
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
-          background: 'linear-gradient(135deg, #FFF7ED 0%, #F0F4FF 100%)',
-          opacity: stepsAnim.visible ? 1 : 0,
           transform: stepsAnim.visible ? 'none' : 'translateY(40px)',
           transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
         }}
@@ -357,7 +353,6 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   padding: 'clamp(32px, 4vw, 48px)',
                   position: 'relative',
                   overflow: 'hidden',
-                  opacity: stepsAnim.visible ? 1 : 0,
                   transform: stepsAnim.visible ? 'none' : 'translateY(30px)',
                   transition: `all 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 0.15}s`,
                 }}
@@ -403,7 +398,6 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           textAlign: 'center',
-          opacity: quoteAnim.visible ? 1 : 0,
           transform: quoteAnim.visible ? 'none' : 'translateY(40px)',
           transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
         }}
@@ -451,10 +445,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       <section
         id="storypress-signup"
         ref={formAnim.ref}
+        className="sp-cta-section"
         style={{
           padding: 'clamp(64px, 7vw, 96px) clamp(24px, 4vw, 80px)',
-          background: '#0A0A0A',
-          opacity: formAnim.visible ? 1 : 0,
           transform: formAnim.visible ? 'none' : 'translateY(40px)',
           transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
         }}
@@ -554,9 +547,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       </section>
 
       {/* ─── 하단 링크 ─── */}
-      <div style={{
+      <div className="sp-cta-section" style={{
         padding: '32px clamp(24px, 4vw, 80px)',
-        background: '#0A0A0A',
         borderTop: '1px solid rgba(255,255,255,0.06)',
         textAlign: 'center',
       }}>

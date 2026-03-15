@@ -622,3 +622,138 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ─── StoryPress 섹션 다크모드 ─── */
+.sp-hero-section {
+  background: linear-gradient(135deg, #FFF4EE 0%, #F0F4FF 50%, #F0FDF9 100%);
+}
+.dark .sp-hero-section {
+  background: linear-gradient(135deg, #1a0f07 0%, #0d1020 50%, #071014 100%);
+}
+.sp-cta-section {
+  background: #0A0A0A;
+}
+/* dark mode: #0A0A0A = var(--bg) 동일 — text 색상은 white 유지 */
+.sp-faq-card {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(12px);
+}
+.dark .sp-faq-card {
+  background: rgba(255,255,255,0.05) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* ─── Magazine Viewer 다크모드 ─── */
+.mv-root {
+  background: #F5F0EB;
+  color: #2C1F14;
+}
+.dark .mv-root {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+.mv-header {
+  background: #FAF7F4;
+}
+.dark .mv-header {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+.dark .mv-header h1 {
+  color: var(--text) !important;
+}
+.dark .mv-header span {
+  color: var(--text-secondary) !important;
+}
+.mv-card {
+  background: #fff;
+  border: 1px solid #E8DDD4;
+}
+.dark .mv-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+.dark .mv-card h3 {
+  color: var(--text) !important;
+}
+.dark .mv-card p {
+  color: var(--text-secondary) !important;
+}
+.mv-articles-wrap span.mv-label {
+  color: #8B7355;
+}
+.dark .mv-articles-wrap span.mv-label {
+  color: var(--text-secondary) !important;
+}
+.mv-articles-wrap h2.mv-title {
+  color: #2C1F14;
+}
+.dark .mv-articles-wrap h2.mv-title {
+  color: var(--text) !important;
+}
+.mv-articles-wrap p.mv-meta {
+  color: #7A6958;
+}
+.dark .mv-articles-wrap p.mv-meta {
+  color: var(--text-secondary) !important;
+}
+
+/* ─── Instagram 섹션 다크모드 ─── */
+.insta-section-bg {
+  background: #FFF0F5;
+}
+.dark .insta-section-bg {
+  background: #1A0D12;
+}
+
+/* ─── StoryPress Feature Icon 다크모드 ─── */
+.dark .sp-feature-icon {
+  background: rgba(255,255,255,0.06) !important;
+}
+.dark .sp-word-card {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+/* ─── StoryPress How It Works 섹션 다크모드 ─── */
+.sp-steps-bg {
+  background: linear-gradient(135deg, #FFF7ED 0%, #F0F4FF 100%);
+}
+.dark .sp-steps-bg {
+  background: linear-gradient(135deg, #1a0f07 0%, #0d1020 100%);
+}
+
+/* ─── Blog 미리보기 배너 다크모드 ─── */
+.dark .preview-banner {
+  background: #451a03 !important;
+  border-bottom-color: #78350f !important;
+}
+.dark .preview-banner p,
+.dark .preview-banner a {
+  color: #FCD34D !important;
+}
+
+/* ─── Blog Callout 다크모드 ─── */
+.dark .blog-content .blog-callout {
+  background: rgba(79,70,229,0.1);
+  border-left-color: #6366F1;
+}
+
+/* ─── Comment Toast 다크모드 ─── */
+.dark .comment-toast {
+  background: linear-gradient(135deg, rgba(79,70,229,0.15), rgba(109,40,217,0.1)) !important;
+  color: #A5B4FC !important;
+}
+
+/* ─── MagazineViewer Article Fallback 오버레이 ─── */
+.mv-fallback-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.15) 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+}
+.dark .mv-fallback-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%);
+}

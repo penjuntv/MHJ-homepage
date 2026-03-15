@@ -213,7 +213,7 @@ export default async function AboutPage() {
           {/* 헤더 */}
           <div style={{ textAlign: 'center', marginBottom: 'clamp(48px, 8vw, 128px)' }}>
             <p className="type-caption" style={{
-              color: '#cbd5e1',
+              color: 'var(--text-tertiary)',
               fontStyle: 'italic',
               letterSpacing: 6,
               marginBottom: 16,
@@ -229,7 +229,7 @@ export default async function AboutPage() {
               THE{' '}
               <span
                 className="font-display"
-                style={{ fontStyle: 'italic', fontWeight: 300, color: '#94a3b8' }}
+                style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--text-secondary)' }}
               >
                 PARENTS
               </span>
@@ -324,7 +324,7 @@ export default async function AboutPage() {
         {/* 헤더 */}
         <div style={{ textAlign: 'center', marginBottom: 'clamp(48px, 8vw, 128px)' }}>
           <p className="type-caption" style={{
-            color: '#cbd5e1',
+            color: 'var(--text-tertiary)',
             fontStyle: 'italic',
             letterSpacing: 6,
             marginBottom: 16,
@@ -340,7 +340,7 @@ export default async function AboutPage() {
             THE THREE{' '}
             <span
               className="font-display"
-              style={{ fontStyle: 'italic', fontWeight: 300, color: '#94a3b8' }}
+              style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--text-secondary)' }}
             >
               DAUGHTERS
             </span>

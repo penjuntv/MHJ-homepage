@@ -102,7 +102,7 @@ export default function DetailModal({ item, onClose }: Props) {
                   fontSize: 12,
                   fontWeight: 900,
                   letterSpacing: 5,
-                  color: '#cbd5e1',
+                  color: 'var(--text-tertiary)',
                   textTransform: 'uppercase',
                 }}>
                   {category ? `${category} / ` : ''}{item.date}
@@ -136,7 +136,7 @@ export default function DetailModal({ item, onClose }: Props) {
                     float: 'left',
                     marginRight: 16,
                     lineHeight: 0.8,
-                    color: '#f1f5f9',
+                    color: 'var(--drop-cap-color)',
                   }}>
                     {firstChar}
                   </span>
@@ -169,7 +169,7 @@ export default function DetailModal({ item, onClose }: Props) {
                     float: 'left',
                     marginRight: 16,
                     lineHeight: 0.8,
-                    color: '#f1f5f9',
+                    color: 'var(--drop-cap-color)',
                   }}>
                     {firstChar}
                   </span>
@@ -242,7 +242,7 @@ export default function DetailModal({ item, onClose }: Props) {
                 <span style={{
                   fontSize: 11,
                   fontWeight: 900,
-                  color: '#cbd5e1',
+                  color: 'var(--text-tertiary)',
                   textTransform: 'uppercase',
                   letterSpacing: 3,
                   marginBottom: 8,

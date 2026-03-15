@@ -205,7 +205,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
           </button>
 
           {toast && (
-            <p style={{
+            <p className="comment-toast" style={{
               marginTop: 16,
               padding: '14px 20px',
               background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
