@@ -122,7 +122,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </p>
           <h1
             className="font-display"
-            style={{ fontSize: 'clamp(56px, 10vw, 120px)', fontWeight: 900, fontStyle: 'italic', letterSpacing: -4, lineHeight: 0.88, color: '#1A1A1A', marginBottom: 28 }}
+            style={{ fontSize: 'clamp(56px, 10vw, 120px)', fontWeight: 900, fontStyle: 'italic', letterSpacing: -4, lineHeight: 0.88, color: 'var(--text)', marginBottom: 28 }}
           >
             {title}
           </h1>
@@ -164,14 +164,14 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               />
             </div>
           ) : (
-          <div style={{ width: '100%', maxWidth: 360, background: 'white', borderRadius: 40, padding: 32, boxShadow: '0 32px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06)', position: 'relative' }}>
+          <div style={{ width: '100%', maxWidth: 360, background: 'var(--bg-card)', borderRadius: 40, padding: 32, boxShadow: '0 32px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06)', position: 'relative' }}>
             {/* 앱 상단 바 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #F59E42, #F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <BookOpen size={20} color="white" />
               </div>
               <div>
-                <p style={{ fontSize: 14, fontWeight: 900, color: '#1A1A1A', margin: 0, letterSpacing: -0.5 }}>StoryPress</p>
+                <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: -0.5 }}>StoryPress</p>
                 <p style={{ fontSize: 10, color: '#94A3B8', margin: 0, fontWeight: 600, letterSpacing: 1 }}>TODAY&apos;S LESSON</p>
               </div>
             </div>
@@ -184,7 +184,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             ].map((item, i) => (
               <div key={i} style={{ background: item.color, border: `1px solid ${item.border}`, borderRadius: 16, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <p style={{ fontSize: 15, fontWeight: 900, color: '#1A1A1A', margin: 0, letterSpacing: -0.3 }}>{item.word}</p>
+                  <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: -0.3 }}>{item.word}</p>
                   <p style={{ fontSize: 11, color: '#64748B', margin: 0, fontWeight: 500 }}>{item.korean}</p>
                 </div>
                 <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -337,7 +337,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             <h2 className="font-display font-black" style={{
               fontSize: 'clamp(32px, 5vw, 64px)',
               letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic',
-              color: '#1A1A1A',
+              color: 'var(--text)',
             }}>
               How It Works
             </h2>
@@ -352,7 +352,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               <div
                 key={i}
                 style={{
-                  background: 'white',
+                  background: 'var(--bg-card)',
                   borderRadius: 32,
                   padding: 'clamp(32px, 4vw, 48px)',
                   position: 'relative',
@@ -383,7 +383,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   {step.num}
                 </p>
                 <h3 style={{
-                  fontSize: 22, fontWeight: 900, color: '#1A1A1A',
+                  fontSize: 22, fontWeight: 900, color: 'var(--text)',
                   letterSpacing: '-0.5px', marginBottom: 12,
                 }}>
                   {step.label}

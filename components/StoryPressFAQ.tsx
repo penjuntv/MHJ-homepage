@@ -54,7 +54,7 @@ export default function StoryPressFAQ() {
             style={{
               fontSize: 'clamp(28px, 4.5vw, 52px)',
               letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic',
-              color: '#1A1A1A',
+              color: 'var(--text)',
             }}
           >
             Frequently Asked Questions
@@ -98,7 +98,7 @@ export default function StoryPressFAQ() {
                   <span style={{
                     fontSize: 'clamp(14px, 1.8vw, 16px)',
                     fontWeight: 900,
-                    color: isOpen ? '#F59E42' : '#1A1A1A',
+                    color: isOpen ? '#F59E42' : 'var(--text)',
                     letterSpacing: '-0.3px',
                     lineHeight: 1.4,
                     transition: 'color 0.25s',

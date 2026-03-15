@@ -32,8 +32,8 @@ export default function NewsletterCTA() {
   return (
     <section style={{
       padding: 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)',
-      background: '#F8FAFC',
-      borderTop: '1px solid #F1F5F9',
+      background: 'var(--bg-surface)',
+      borderTop: '1px solid var(--border)',
     }}>
       <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
 
@@ -58,7 +58,7 @@ export default function NewsletterCTA() {
             fontWeight: 900,
             fontStyle: 'italic',
             letterSpacing: -2,
-            color: '#1A1A1A',
+            color: 'var(--text)',
             lineHeight: 1,
             marginBottom: 20,
           }}
@@ -82,14 +82,14 @@ export default function NewsletterCTA() {
           <div style={{
             padding: '24px 40px',
             borderRadius: 999,
-            background: '#F1F5F9',
-            border: '1px solid #E2E8F0',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
             display: 'inline-block',
           }}>
             <span style={{
               fontSize: 14,
               fontWeight: 700,
-              color: '#374151',
+              color: 'var(--text-secondary)',
               letterSpacing: 1,
             }}>
               Welcome aboard — see you in your inbox.
@@ -106,9 +106,9 @@ export default function NewsletterCTA() {
               style={{
                 padding: '18px 28px',
                 borderRadius: 999,
-                border: '1px solid #E2E8F0',
-                background: 'white',
-                color: '#1A1A1A',
+                border: '1px solid var(--border)',
+                background: 'var(--bg)',
+                color: 'var(--text)',
                 fontSize: 15,
                 fontWeight: 500,
                 outline: 'none',

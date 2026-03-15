@@ -109,13 +109,13 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: 'var(--bg-card)', borderRadius: 20, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         {/* 헤더 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #F1F5F9', flexShrink: 0 }}>
           <div>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, color: '#9C8B7A', textTransform: 'uppercase', margin: '0 0 3px' }}>{article.article_type || 'Article'} · {article.author}</p>
-            <p style={{ fontSize: 15, fontWeight: 900, color: '#1A1A1A', margin: 0 }}>{article.title}</p>
+            <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', margin: 0 }}>{article.title}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* 좋아요 버튼 */}

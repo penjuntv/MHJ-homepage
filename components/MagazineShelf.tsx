@@ -335,7 +335,7 @@ export default function MagazineShelf({
                           </span>
                         </div>
                         <div style={{
-                          padding: 12, background: 'white',
+                          padding: 12, background: 'var(--bg)',
                           borderRadius: '50%', color: '#000', display: 'flex',
                         }}>
                           <ArrowRight size={20} />

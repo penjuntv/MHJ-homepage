@@ -80,7 +80,7 @@ export default function InstagramFeed({ instagramUrl }: Props) {
     return (
       <section style={{ background: '#FFF0F5', padding: 'clamp(40px, 6vw, 64px) clamp(24px, 4vw, 80px)', textAlign: 'center' }}>
         <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 5, color: '#F9A8D4', marginBottom: 16 }}>INSTAGRAM</p>
-        <h2 className="font-display font-black" style={{ fontSize: 'clamp(28px, 4vw, 48px)', letterSpacing: '-1px', lineHeight: 1, marginBottom: 32, fontStyle: 'italic', color: '#1A1A1A' }}>
+        <h2 className="font-display font-black" style={{ fontSize: 'clamp(28px, 4vw, 48px)', letterSpacing: '-1px', lineHeight: 1, marginBottom: 32, fontStyle: 'italic', color: 'var(--text)' }}>
           @MHJ Family on Instagram
         </h2>
         <a href={instagramUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#000', color: '#fff', padding: '16px 36px', borderRadius: 999, textDecoration: 'none', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase' }}>
@@ -109,7 +109,7 @@ export default function InstagramFeed({ instagramUrl }: Props) {
         <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 5, color: '#F9A8D4', marginBottom: 12 }}>
           FROM OUR GALLERY
         </p>
-        <h2 className="font-display font-black" style={{ fontSize: 'clamp(24px, 3.5vw, 40px)', letterSpacing: '-1px', lineHeight: 1, fontStyle: 'italic', color: '#1A1A1A' }}>
+        <h2 className="font-display font-black" style={{ fontSize: 'clamp(24px, 3.5vw, 40px)', letterSpacing: '-1px', lineHeight: 1, fontStyle: 'italic', color: 'var(--text)' }}>
           @MHJ Family on Instagram
         </h2>
       </div>
