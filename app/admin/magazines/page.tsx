@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { Magazine } from '@/lib/types';
-import { Plus, BookOpen, ChevronRight, Trash2 } from 'lucide-react';
+import { Plus, BookOpen, ChevronRight, Trash2, Eye, EyeOff } from 'lucide-react';
 
 export default function AdminMagazinesPage() {
   const [magazines, setMagazines] = useState<Magazine[]>([]);
@@ -21,6 +21,11 @@ export default function AdminMagazinesPage() {
   }
 
   useEffect(() => { fetchMagazines(); }, []);
+
+  async function togglePublished(id: string, current: boolean) {
+    await supabase.from('magazines').update({ published: !current }).eq('id', id);
+    setMagazines(prev => prev.map(m => m.id === id ? { ...m, published: !current } : m));
+  }
 
   async function deleteMagazine(id: string) {
     if (!confirm('이 매거진 이슈와 모든 아티클이 삭제됩니다. 계속하시겠습니까?')) return;
@@ -90,6 +95,16 @@ export default function AdminMagazinesPage() {
                 }}>
                   {mag.year} {mag.month_name}
                 </div>
+                {/* Published 뱃지 */}
+                <div style={{
+                  position: 'absolute', top: '12px', right: '12px',
+                  background: mag.published === false ? '#FEF2F2' : '#DCFCE7',
+                  color: mag.published === false ? '#EF4444' : '#16A34A',
+                  borderRadius: '999px', padding: '3px 10px',
+                  fontSize: '10px', fontWeight: 900, letterSpacing: '1px',
+                }}>
+                  {mag.published === false ? '숨김' : '공개'}
+                </div>
               </div>
 
               {/* 정보 */}
@@ -115,6 +130,19 @@ export default function AdminMagazinesPage() {
                 >
                   아티클 관리 <ChevronRight size={12} />
                 </Link>
+                <button
+                  onClick={() => togglePublished(mag.id, mag.published !== false)}
+                  title={mag.published === false ? '서가에 공개' : '서가에서 숨기기'}
+                  style={{
+                    padding: '12px', borderRadius: '12px',
+                    border: mag.published === false ? '1px solid #DCFCE7' : '1px solid #F1F5F9',
+                    background: 'white', cursor: 'pointer',
+                    color: mag.published === false ? '#16A34A' : '#94A3B8',
+                    display: 'flex', alignItems: 'center',
+                  }}
+                >
+                  {mag.published === false ? <Eye size={14} /> : <EyeOff size={14} />}
+                </button>
                 <button
                   onClick={() => deleteMagazine(mag.id)}
                   style={{

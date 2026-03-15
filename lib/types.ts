@@ -17,6 +17,7 @@ export interface Magazine {
   cover_images?: string[] | null;   // 추가 표지 이미지 배열
   issue_number?: string | null;     // 이슈 번호 ('01', '02', ...)
   bg_color?: string | null;         // 배경색 (hex)
+  published?: boolean;              // 서가 노출 여부 (false면 숨김)
   created_at?: string;
 }
 

@@ -430,9 +430,12 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
   const [insertModal, setInsertModal] = useState<InsertModalType>(null);
   const [insertData, setInsertData] = useState({ text: '', url: '', address: '' });
 
-  // Native color pickers
+  // Native color pickers + selection snapshot
+  // 컬러 피커를 열면 editor focus/selection이 사라지므로 미리 저장해서 복원
   const colorInputRef = useRef<HTMLInputElement>(null);
   const highlightInputRef = useRef<HTMLInputElement>(null);
+  const savedColorSel = useRef<{ from: number; to: number } | null>(null);
+  const savedHighlightSel = useRef<{ from: number; to: number } | null>(null);
   const [showInsertMenu, setShowInsertMenu] = useState(false);
   const insertMenuRef = useRef<HTMLDivElement>(null);
 
@@ -587,7 +590,12 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
         {/* Text Color — 네이티브 컬러 피커 */}
         <div style={{ position: 'relative' }}>
           <button type="button" title="글자 색상"
-            onClick={() => colorInputRef.current?.click()}
+            onClick={() => {
+              // 피커 열기 전 selection 저장 (피커가 열리면 editor selection이 사라짐)
+              const sel = editor.state.selection;
+              savedColorSel.current = { from: sel.from, to: sel.to };
+              colorInputRef.current?.click();
+            }}
             style={{ ...btn(false), flexDirection: 'column', gap: 1, padding: '5px 8px' }}>
             <span style={{ fontSize: 13, fontWeight: 800, color: currentColor || '#1a1a1a', lineHeight: 1 }}>A</span>
             <div style={{ width: 14, height: 3, borderRadius: 2, background: currentColor || '#1a1a1a' }} />
@@ -597,14 +605,26 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
             type="color"
             value={currentColor || '#1a1a1a'}
             style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 1, height: 1, top: 0, left: 0, padding: 0, border: 'none' }}
-            onChange={e => editor.chain().focus().setColor(e.target.value).run()}
+            onChange={e => {
+              const sel = savedColorSel.current;
+              if (sel) {
+                editor.chain().focus().setTextSelection({ from: sel.from, to: sel.to }).setColor(e.target.value).run();
+                savedColorSel.current = null;
+              } else {
+                editor.chain().focus().setColor(e.target.value).run();
+              }
+            }}
           />
         </div>
 
         {/* Highlight — 네이티브 컬러 피커 */}
         <div style={{ position: 'relative' }}>
           <button type="button" title="형광펜"
-            onClick={() => highlightInputRef.current?.click()}
+            onClick={() => {
+              const sel = editor.state.selection;
+              savedHighlightSel.current = { from: sel.from, to: sel.to };
+              highlightInputRef.current?.click();
+            }}
             style={{ ...btn(editor.isActive('highlight')), padding: '5px 8px' }}>
             <Highlighter size={15} />
           </button>
@@ -613,7 +633,15 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
             type="color"
             value={currentHighlight || '#FEF08A'}
             style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 1, height: 1, top: 0, left: 0, padding: 0, border: 'none' }}
-            onChange={e => editor.chain().focus().setHighlight({ color: e.target.value }).run()}
+            onChange={e => {
+              const sel = savedHighlightSel.current;
+              if (sel) {
+                editor.chain().focus().setTextSelection({ from: sel.from, to: sel.to }).setHighlight({ color: e.target.value }).run();
+                savedHighlightSel.current = null;
+              } else {
+                editor.chain().focus().setHighlight({ color: e.target.value }).run();
+              }
+            }}
           />
         </div>
         {sep}
