@@ -224,6 +224,7 @@ export default function MagazineShelf({
                     justifyContent: 'space-between', alignItems: 'center',
                     height: '100%', padding: '64px 0',
                     position: 'absolute', inset: 0,
+                    overflow: 'hidden',
                     opacity: isActive ? 0 : 1,
                     transform: isActive ? 'scale(0.9)' : 'scale(1)',
                     transition: 'all 0.5s',

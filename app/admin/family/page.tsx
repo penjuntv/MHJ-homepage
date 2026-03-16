@@ -42,7 +42,9 @@ export default function AdminFamilyPage() {
     if (error) { toast.error('업로드 실패: ' + error.message); setUploading(null); return; }
     const { data } = supabase.storage.from('images').getPublicUrl(path);
     update(id, 'image_url', data.publicUrl);
-    toast.success('사진이 업로드되었습니다.');
+    // 업로드 즉시 DB에도 저장 (로컬 state 업데이트만으로는 새로고침 시 사라짐)
+    await supabase.from('family_members').update({ image_url: data.publicUrl }).eq('id', id);
+    toast.success('사진이 저장되었습니다.');
     setUploading(null);
   }
 

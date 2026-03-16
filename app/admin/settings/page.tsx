@@ -22,6 +22,8 @@ const SOCIAL_KEYS = ['social_instagram', 'social_facebook', 'social_youtube'] as
 
 // 이미지 업로드 키 정의
 const IMAGE_KEYS = [
+  { key: 'about_who_image_url', label: 'About — WHO WE ARE 사진', hint: 'About 페이지 상단 "Who We Are" 섹션 대형 가족사진', folder: 'site/about-who' },
+  { key: 'about_image_url', label: 'About — Vision 섹션 사진', hint: 'About 페이지 "Vision & Values" 섹션 가족사진', folder: 'site/about-vision' },
   { key: 'storypress_hero_image_url', label: 'StoryPress 히어로 이미지', hint: 'StoryPress 섹션 배경 이미지', folder: 'site/storypress' },
 ] as const;
 

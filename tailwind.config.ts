@@ -123,6 +123,11 @@ const config: Config = {
         "34": "8.5rem", // 136px
       },
 
+      /* ─── 브레이크포인트 ─── */
+      screens: {
+        'xl': '1320px',
+      },
+
       /* ─── aspect ratio ─── */
       aspectRatio: {
         "3/4": "3 / 4",
