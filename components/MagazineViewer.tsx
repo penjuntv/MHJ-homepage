@@ -144,12 +144,25 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
 
         {/* 본문 */}
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {isPdf && <iframe src={article.pdf_url!} style={{ width: '100%', height: '55vh', border: 'none', display: 'block' }} title={article.title} />}
-          {isImage && article.pdf_url && (
+          {/* article_images 갤러리 (페이지 이미지 복구된 경우 최우선) */}
+          {article.article_images && article.article_images.length > 0 ? (
+            <div style={{ background: '#1a1a1a' }}>
+              {article.article_images.map((imgUrl, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={imgUrl}
+                  alt={`${article.title} — p.${i + 1}`}
+                  style={{ width: '100%', display: 'block' }}
+                />
+              ))}
+            </div>
+          ) : isPdf ? (
+            <iframe src={article.pdf_url!} style={{ width: '100%', height: '55vh', border: 'none', display: 'block' }} title={article.title} />
+          ) : isImage && article.pdf_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '55vh', objectFit: 'contain', background: '#F5F0EB' }} />
-          )}
-          {!article.pdf_url && (
+          ) : (
             <div style={{ padding: 32 }}>
               {article.image_url && (
                 <div style={{ aspectRatio: '16/9', position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
