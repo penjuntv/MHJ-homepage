@@ -10,7 +10,12 @@ export async function POST(req: NextRequest) {
 
     const supabase = createAdminClient();
     // 원자적 증가 (race condition 방지)
-    await supabase.rpc('increment_blog_view', { p_slug: slug });
+    const { error } = await supabase.rpc('increment_blog_view', { p_slug: slug });
+
+    if (error) {
+      console.error('View count RPC error:', JSON.stringify(error));
+      return NextResponse.json({ error: 'Failed to update view count' }, { status: 500 });
+    }
 
     return NextResponse.json({ ok: true });
   } catch {
