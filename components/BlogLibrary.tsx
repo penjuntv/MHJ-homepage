@@ -7,7 +7,7 @@ import type { Blog } from '@/lib/types';
 import NewsletterCTA from './NewsletterCTA';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const CATS = ['All', 'Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'] as const;
+const FALLBACK_CATS = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
 
 interface Props {
   featuredBlog: Blog | null;
@@ -20,6 +20,7 @@ interface Props {
   readerFavorites?: Blog[];
   blogTitle?: string;
   blogDescription?: string;
+  availableCategories?: string[];
 }
 
 export default function BlogLibrary({
@@ -33,6 +34,7 @@ export default function BlogLibrary({
   readerFavorites,
   blogTitle,
   blogDescription,
+  availableCategories,
 }: Props) {
   const router = useRouter();
 
@@ -93,7 +95,11 @@ export default function BlogLibrary({
         </div>
 
         {/* 카테고리 필터 */}
-        <CategoryFilter selected={selectedCat} onChange={handleCategoryChange} />
+        <CategoryFilter
+          selected={selectedCat}
+          onChange={handleCategoryChange}
+          categories={availableCategories ?? FALLBACK_CATS}
+        />
       </header>
 
       {/* ═══════ Featured + Recent Stories ═══════ */}
@@ -117,7 +123,7 @@ export default function BlogLibrary({
             <div>
               <p style={{
                 fontSize: 11, fontWeight: 900, letterSpacing: 4,
-                textTransform: 'uppercase', color: 'var(--text-tertiary)',
+                textTransform: 'uppercase', color: 'var(--text-secondary)',
                 marginBottom: 24,
               }}>
                 Recent Stories
@@ -141,7 +147,7 @@ export default function BlogLibrary({
       )}
 
       {/* ═══════ ALL STORIES 구분선 ═══════ */}
-      <div style={{ borderTop: '1px solid var(--border)', marginBottom: 48, paddingTop: 48 }}>
+      <div style={{ borderTop: '1px solid var(--border-medium)', marginBottom: 48, paddingTop: 48 }}>
         <p style={{
           fontSize: 11, fontWeight: 900, letterSpacing: 4,
           textTransform: 'uppercase', color: 'var(--text-tertiary)',
@@ -221,7 +227,12 @@ export default function BlogLibrary({
 /* ════════════════════════════════════════════
    카테고리 필터 — 슬라이딩 인디케이터 (변경 없음)
    ════════════════════════════════════════════ */
-function CategoryFilter({ selected, onChange }: { selected: string; onChange: (cat: string) => void }) {
+function CategoryFilter({ selected, onChange, categories }: {
+  selected: string;
+  onChange: (cat: string) => void;
+  categories: string[];
+}) {
+  const allCats = ['All', ...categories];
   const [indicator, setIndicator] = useState({ left: 6, width: 0, opacity: 0 });
   const [transitioning, setTransitioning] = useState(false);
   const filterRef = { current: null as HTMLDivElement | null };
@@ -268,7 +279,7 @@ function CategoryFilter({ selected, onChange }: { selected: string; onChange: (c
           boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
         }}
       />
-      {CATS.map((cat, catIdx) => {
+      {allCats.map((cat, catIdx) => {
         const isActive = selected === cat;
         return (
           <button
@@ -370,11 +381,10 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
           style={{
             fontSize: 'clamp(28px, 4vw, 44px)',
             fontWeight: 900,
-            letterSpacing: -2,
-            lineHeight: 0.95,
+            letterSpacing: -1,
+            lineHeight: 1.05,
             color: 'var(--text)',
             fontStyle: 'italic',
-            textTransform: 'uppercase',
           }}
         >
           {blog.title}
@@ -423,31 +433,59 @@ function RecentStoryItem({ blog, isLast, onClick }: { blog: Blog; isLast: boolea
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        padding: '24px 0',
-        borderBottom: isLast ? 'none' : '1px solid var(--border)',
+        padding: '20px 0',
+        borderBottom: isLast ? 'none' : '1px solid var(--border-medium)',
         cursor: 'pointer',
+        display: 'flex',
+        gap: 16,
+        alignItems: 'flex-start',
       }}
     >
-      <h3 style={{
-        fontSize: 16,
-        fontWeight: 700,
-        color: hovered ? 'var(--accent)' : 'var(--text)',
-        lineHeight: 1.4,
-        marginBottom: 8,
-        transition: 'color 0.2s ease',
-        display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical' as const,
+      {/* 썸네일 */}
+      <div style={{
+        flexShrink: 0,
+        width: 56,
+        height: 56,
+        borderRadius: 8,
         overflow: 'hidden',
+        position: 'relative',
+        background: 'var(--bg-surface)',
       }}>
-        {blog.title}
-      </h3>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>{blog.date}</span>
-        <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: 1, textTransform: 'uppercase' }}>
-          {blog.category}
-        </span>
+        <SafeImage
+          src={blog.image_url}
+          alt={blog.title}
+          fill
+          className="object-cover"
+          style={{
+            transform: hovered ? 'scale(1.05)' : 'scale(1)',
+            transition: 'transform 0.4s ease',
+          }}
+        />
+      </div>
+
+      {/* 텍스트 */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <h3 style={{
+          fontSize: 14,
+          fontWeight: 700,
+          color: hovered ? 'var(--accent)' : 'var(--text)',
+          lineHeight: 1.45,
+          marginBottom: 6,
+          transition: 'color 0.2s ease',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical' as const,
+          overflow: 'hidden',
+        }}>
+          {blog.title}
+        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{blog.date}</span>
+          <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'var(--text-secondary)', flexShrink: 0 }} />
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: 1, textTransform: 'uppercase' }}>
+            {blog.category}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -478,8 +516,8 @@ function BlogCard({ blog, onClick }: CardProps) {
         transition: 'border-color 0.3s ease',
       }}
     >
-      {/* 이미지 — 에디토리얼 카드: 3:4 */}
-      <div style={{ aspectRatio: '3/4', position: 'relative', overflow: 'hidden' }}>
+      {/* 이미지 — 블로그 카드: 16:10 */}
+      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden' }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
@@ -496,7 +534,7 @@ function BlogCard({ blog, onClick }: CardProps) {
       <div style={{ padding: '16px 0 0' }}>
         <p style={{
           fontSize: 11, fontWeight: 900, letterSpacing: 2,
-          textTransform: 'uppercase', color: 'var(--text-tertiary)',
+          textTransform: 'uppercase', color: 'var(--text-secondary)',
           margin: '0 0 8px',
         }}>
           {blog.category}
@@ -569,8 +607,8 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
         transition: 'border-color 0.3s ease',
       }}
     >
-      {/* 이미지 — 에디토리얼 카드: 3:4 */}
-      <div style={{ aspectRatio: '3/4', position: 'relative', overflow: 'hidden' }}>
+      {/* 이미지 — Reader Favorites 카드: 16:10 */}
+      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden' }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
@@ -587,7 +625,7 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
       <div style={{ padding: '16px 0 0' }}>
         <p style={{
           fontSize: 11, fontWeight: 900, letterSpacing: 2,
-          textTransform: 'uppercase', color: 'var(--text-tertiary)',
+          textTransform: 'uppercase', color: 'var(--text-secondary)',
           margin: '0 0 8px',
         }}>
           <span style={{ marginRight: 8 }}>#{rank}</span>

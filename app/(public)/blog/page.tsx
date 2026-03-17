@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 9;
 const VALID_CATEGORIES = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
+const CATEGORY_ORDER = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
 
 interface Props {
   searchParams: Promise<{ page?: string; category?: string }>;
@@ -94,6 +95,17 @@ async function getMostReadBlogs(): Promise<Blog[]> {
   return (data ?? []) as Blog[];
 }
 
+async function getActiveCategories(): Promise<string[]> {
+  const now = new Date().toISOString();
+  const { data } = await supabase
+    .from('blogs')
+    .select('category')
+    .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`);
+  const used = new Set((data ?? []).map((b: { category: string }) => b.category).filter(Boolean));
+  return CATEGORY_ORDER.filter(c => used.has(c));
+}
+
 async function getPaginatedBlogs(
   page: number,
   category: string | null,
@@ -119,11 +131,12 @@ export default async function BlogPage({ searchParams }: Props) {
   const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
   const category = params.category && VALID_CATEGORIES.includes(params.category) ? params.category : null;
 
-  const [featured, paginated, mostRead, s] = await Promise.all([
+  const [featured, paginated, mostRead, s, activeCategories] = await Promise.all([
     getFeaturedBlog(category),
     getPaginatedBlogs(page, category),
     getMostReadBlogs(),
     getSiteSettings(),
+    getActiveCategories(),
   ]);
 
   const recent = await getRecentBlogs(category, featured?.id ?? null);
@@ -200,6 +213,7 @@ export default async function BlogPage({ searchParams }: Props) {
         readerFavorites={mostRead}
         blogTitle={s.blog_title}
         blogDescription={s.blog_description}
+        availableCategories={activeCategories}
       />
     </>
   );
