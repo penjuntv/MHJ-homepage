@@ -269,13 +269,15 @@ export default async function BlogDetailPage({
           <h1
             className="font-display slide-up stagger-1"
             style={{
-              fontSize: 'clamp(48px, 10vw, 140px)',
+              fontSize: 'clamp(32px, 5vw, 72px)',
               fontWeight: 900,
-              letterSpacing: 'clamp(-2px, -0.4vw, -5px)',
-              lineHeight: 0.85,
+              letterSpacing: '-2px',
+              lineHeight: 0.9,
               textTransform: 'uppercase',
               marginBottom: 40,
-              wordBreak: 'break-word',
+              wordBreak: 'keep-all',
+              overflowWrap: 'break-word',
+              hyphens: 'none',
               color: 'var(--text)',
             }}
           >
@@ -378,7 +380,7 @@ export default async function BlogDetailPage({
                     float: left;
                     margin-right: 12px;
                     line-height: 0.78;
-                    color: #4F46E5;
+                    color: var(--drop-cap-color);
                     font-family: 'Playfair Display', serif;
                   }
                   .blog-content h2 {
@@ -467,7 +469,7 @@ export default async function BlogDetailPage({
                   float: 'left',
                   marginRight: 12,
                   lineHeight: 0.78,
-                  color: '#4F46E5',
+                  color: 'var(--drop-cap-color)',
                   fontFamily: "'Playfair Display', serif",
                 }}>
                   {firstChar}

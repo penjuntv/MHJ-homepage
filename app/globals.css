@@ -25,7 +25,7 @@
   --nav-bg:         rgba(255,255,255,0.95);
   --overlay-bg:     rgba(255,255,255,0.95);
   --modal-bg:       rgba(255,255,255,0.4);
-  --drop-cap-color: #F1F5F9;
+  --drop-cap-color: #CBD5E1;
 
   /* ── 8px 그리드 디자인 베이스라인 ── */
   --section-v:      clamp(64px, 10vw, 120px);
@@ -56,7 +56,7 @@
   --nav-bg:         rgba(10,10,10,0.95);
   --overlay-bg:     rgba(10,10,10,0.97);
   --modal-bg:       rgba(0,0,0,0.7);
-  --drop-cap-color: #262626;
+  --drop-cap-color: #475569;
 }
 
 /* ─── 기본 설정 ─── */

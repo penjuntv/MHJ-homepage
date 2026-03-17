@@ -9,16 +9,16 @@ import { MAGAZINE_THEMES, type ThemeKey } from '@/lib/magazine-themes';
 import CoverPreview from '@/components/magazine/CoverPreview';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const AUTHORS = ['PeNnY', '유민', '유현', '유진'];
-const CONTRIBUTORS_OPTIONS = ['PeNnY', '유민', '유현', '유진'];
+const AUTHORS = ['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'];
+const CONTRIBUTORS_OPTIONS = ['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'];
 
 type SlotItem = { author: string; title: string };
 
 const INITIAL_SLOTS: SlotItem[] = [
   { author: 'PeNnY', title: '' },
-  { author: '유민', title: '' },
-  { author: '유현', title: '' },
-  { author: '유진', title: '' },
+  { author: 'Min', title: '' },
+  { author: 'Hyun', title: '' },
+  { author: 'Jin', title: '' },
 ];
 
 const TODAY = new Date()
@@ -45,7 +45,7 @@ export default function NewMagazinePage() {
     cover_copy: '',
     issue_number: '01',
   });
-  const [contributors, setContributors] = useState<string[]>(['PeNnY', '유민', '유현', '유진']);
+  const [contributors, setContributors] = useState<string[]>(['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin']);
 
   const [slots, setSlots] = useState<SlotItem[]>(INITIAL_SLOTS);
   const [showSlots, setShowSlots] = useState(true);
@@ -88,14 +88,29 @@ export default function NewMagazinePage() {
     setSaving(true);
     setError('');
 
-    // 1. 매거진 이슈 생성
-    const { error: insertErr } = await supabase.from('magazines').insert({ ...form, contributors });
+    // 1. ID 중복 확인 → 자동 suffix
+    let finalId = form.id;
+    const { data: existing } = await supabase
+      .from('magazines')
+      .select('id')
+      .like('id', `${form.id}%`);
+    if (existing && existing.some(r => r.id === finalId)) {
+      let counter = 2;
+      const existingIds = new Set(existing.map(r => r.id));
+      while (existingIds.has(finalId)) {
+        finalId = `${form.id}-${String(counter).padStart(2, '0')}`;
+        counter++;
+      }
+    }
+
+    // 2. 매거진 이슈 생성
+    const { error: insertErr } = await supabase.from('magazines').insert({ ...form, id: finalId, contributors });
     if (insertErr) { setError(insertErr.message); setSaving(false); return; }
 
-    // 2. 아티클 슬롯 일괄 생성
+    // 3. 아티클 슬롯 일괄 생성
     if (slots.length > 0) {
       const articleRows = slots.map((slot, idx) => ({
-        magazine_id: form.id,
+        magazine_id: finalId,
         title: slot.title.trim() || `${slot.author}의 글`,
         author: slot.author,
         date: TODAY,
@@ -108,7 +123,7 @@ export default function NewMagazinePage() {
       await supabase.from('articles').insert(articleRows);
     }
 
-    router.push(`/admin/magazines/${form.id}`);
+    router.push(`/admin/magazines/${finalId}`);
   }
 
   const inputStyle = {
@@ -156,7 +171,7 @@ export default function NewMagazinePage() {
           <div>
             <label style={labelStyle}>이슈 ID</label>
             <input value={form.id} onChange={e => set('id', e.target.value)} style={inputStyle} placeholder="2026-03" />
-            <p style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px' }}>형식: YYYY-MM</p>
+            <p style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px' }}>형식: YYYY-MM (중복 시 자동으로 -02 추가)</p>
           </div>
         </div>
 

@@ -4,25 +4,27 @@ import { useState, useEffect, useCallback } from 'react';
 import type { GalleryItem } from '@/lib/types';
 import { X, ChevronLeft, ChevronRight, MapPin, Camera } from 'lucide-react';
 
-const PHOTOGRAPHERS = ['All', 'Yumin', 'Yuhyeon', 'Yujin'] as const;
+const PHOTOGRAPHERS = ['All', 'Min', 'Hyun', 'Jin', 'PeNnY', 'Yussi'] as const;
 
 // 촬영자별 색상
 const PHOTOGRAPHER_COLOR: Record<string, string> = {
-  Yumin:   '#FB923C',
-  Yuhyeon: '#818CF8',
-  Yujin:   '#34D399',
+  Min:   '#FB923C',
+  Hyun:  '#818CF8',
+  Jin:   '#34D399',
+  PeNnY: '#F472B6',
+  Yussi: '#60A5FA',
 };
 
 const FALLBACK: GalleryItem[] = [
-  { id: 1, image_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800', title: 'Mairangi Bay Morning', comment: 'I like the way the waves look like silver ribbons in the morning.', photographer: 'Yumin', taken_date: '2026.03', location: 'Mairangi Bay Beach', sort_order: 0, published: true },
-  { id: 2, image_url: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=800', title: 'My School Road', comment: 'Every tree on this road has a funny shape. I named them!', photographer: 'Yuhyeon', taken_date: '2026.03', location: 'Murray Bay School', sort_order: 1, published: true },
-  { id: 3, image_url: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800', title: 'The Big Sky', comment: 'The sky here is bigger than in Korea. Mum says that too.', photographer: 'Yujin', taken_date: '2026.02', location: 'Mairangi Bay', sort_order: 2, published: true },
-  { id: 4, image_url: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800', title: 'Auckland Harbour', comment: 'The boats look so tiny from up here!', photographer: 'Yumin', taken_date: '2026.02', location: 'Auckland City', sort_order: 3, published: true },
-  { id: 5, image_url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800', title: 'Sisters Moment', comment: 'We were playing hide and seek. Yujin is the worst at hiding 😂', photographer: 'Yuhyeon', taken_date: '2026.01', location: 'Our Home', sort_order: 4, published: true },
-  { id: 6, image_url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800', title: 'Garden Corner', comment: 'There is a caterpillar behind this leaf. I found it first!', photographer: 'Yujin', taken_date: '2026.01', location: 'Our Garden', sort_order: 5, published: true },
-  { id: 7, image_url: 'https://images.unsplash.com/photo-1623428454614-abaf00244e52?w=800', title: 'Sunset Walk', comment: 'Dad said we should remember this colour forever.', photographer: 'Yumin', taken_date: '2025.12', location: 'Mairangi Bay', sort_order: 6, published: true },
-  { id: 8, image_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800', title: 'Weekend Lunch', comment: 'Mum made kimbap and also pizza. The best day.', photographer: 'Yuhyeon', taken_date: '2025.12', location: 'Our Kitchen', sort_order: 7, published: true },
-  { id: 9, image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800', title: 'Market Colours', comment: 'I want to eat everything here. Especially the strawberries.', photographer: 'Yujin', taken_date: '2025.11', location: 'Mairangi Market', sort_order: 8, published: true },
+  { id: 1, image_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800', title: 'Mairangi Bay Morning', comment: 'I like the way the waves look like silver ribbons in the morning.', photographer: 'Min', taken_date: '2026.03', location: 'Mairangi Bay Beach', sort_order: 0, published: true },
+  { id: 2, image_url: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=800', title: 'My School Road', comment: 'Every tree on this road has a funny shape. I named them!', photographer: 'Hyun', taken_date: '2026.03', location: 'Murray Bay School', sort_order: 1, published: true },
+  { id: 3, image_url: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800', title: 'The Big Sky', comment: 'The sky here is bigger than in Korea. Mum says that too.', photographer: 'Jin', taken_date: '2026.02', location: 'Mairangi Bay', sort_order: 2, published: true },
+  { id: 4, image_url: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800', title: 'Auckland Harbour', comment: 'The boats look so tiny from up here!', photographer: 'Min', taken_date: '2026.02', location: 'Auckland City', sort_order: 3, published: true },
+  { id: 5, image_url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800', title: 'Sisters Moment', comment: 'We were playing hide and seek. Jin is the worst at hiding 😂', photographer: 'Hyun', taken_date: '2026.01', location: 'Our Home', sort_order: 4, published: true },
+  { id: 6, image_url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800', title: 'Garden Corner', comment: 'There is a caterpillar behind this leaf. I found it first!', photographer: 'Jin', taken_date: '2026.01', location: 'Our Garden', sort_order: 5, published: true },
+  { id: 7, image_url: 'https://images.unsplash.com/photo-1623428454614-abaf00244e52?w=800', title: 'Sunset Walk', comment: 'Dad said we should remember this colour forever.', photographer: 'Min', taken_date: '2025.12', location: 'Mairangi Bay', sort_order: 6, published: true },
+  { id: 8, image_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800', title: 'Weekend Lunch', comment: 'Mum made kimbap and also pizza. The best day.', photographer: 'Hyun', taken_date: '2025.12', location: 'Our Kitchen', sort_order: 7, published: true },
+  { id: 9, image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800', title: 'Market Colours', comment: 'I want to eat everything here. Especially the strawberries.', photographer: 'Jin', taken_date: '2025.11', location: 'Mairangi Market', sort_order: 8, published: true },
 ];
 
 interface Props {
@@ -108,7 +110,7 @@ export default function GalleryClient({ items, galleryTitle, galleryDescription 
 
         {/* 촬영자 소개 도트 */}
         <div style={{ display: 'flex', gap: 20, marginTop: 28, flexWrap: 'wrap' }}>
-          {(['Yumin', 'Yuhyeon', 'Yujin'] as const).map(name => (
+          {(['Min', 'Hyun', 'Jin', 'PeNnY', 'Yussi'] as const).map(name => (
             <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{
                 width: 8, height: 8, borderRadius: '50%',

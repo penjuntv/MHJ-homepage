@@ -116,11 +116,13 @@ export default function DetailModal({ item, onClose }: Props) {
                 style={{
                   fontSize: 'clamp(28px, 5vw, 56px)',
                   fontWeight: 900,
-                  letterSpacing: -3,
-                  lineHeight: 0.8,
+                  letterSpacing: -2,
+                  lineHeight: 0.9,
                   textTransform: 'uppercase',
                   marginBottom: 60,
-                  wordBreak: 'break-all',
+                  wordBreak: 'keep-all',
+                  overflowWrap: 'break-word',
+                  hyphens: 'none',
                 }}
               >
                 {item.title}
