@@ -124,7 +124,7 @@ export default function HeroCarousel({ slides }: Props) {
         <div style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-          padding: '0 8% 120px',
+          padding: '0 8% 96px',
         }}>
           {/* 라벨 + 부제 (storypress는 라벨만) */}
           <div style={{
@@ -158,7 +158,7 @@ export default function HeroCarousel({ slides }: Props) {
             className="font-display font-black"
             style={{
               color: 'white',
-              fontSize: isStoryPress ? 'clamp(40px, 10vw, 160px)' : 'clamp(36px, 8vw, 120px)',
+              fontSize: isStoryPress ? 'clamp(36px, 8vw, 120px)' : 'clamp(32px, 6vw, 90px)',
               fontWeight: 900,
               fontStyle: isStoryPress ? 'italic' : 'normal',
               letterSpacing: isStoryPress ? '-4px' : '-2px',

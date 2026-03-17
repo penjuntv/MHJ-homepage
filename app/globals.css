@@ -28,7 +28,7 @@
   --drop-cap-color: #F1F5F9;
 
   /* ── 8px 그리드 디자인 베이스라인 ── */
-  --section-v:      clamp(80px, 12vw, 160px);
+  --section-v:      clamp(64px, 10vw, 120px);
   --section-h:      clamp(24px, 5vw, 80px);
   --content-max:    1200px;
   --text-max:       680px;
@@ -36,8 +36,8 @@
   --card-pad:       clamp(16px, 2vw, 24px);
 
   /* ── Typography Scale (5단계) ── */
-  --fs-display: clamp(48px, 6vw, 72px);   /* 페이지 타이틀 — font-display, italic 권장 / §5.3 최대 72px */
-  --fs-h1:      clamp(36px, 5vw, 56px);   /* 섹션 타이틀 */
+  --fs-display: clamp(40px, 5vw, 56px);   /* 페이지 타이틀 — font-display, italic 권장 / §5.3 최대 72px */
+  --fs-h1:      clamp(32px, 4vw, 48px);   /* 섹션 타이틀 */
   --fs-h2:      clamp(24px, 3vw, 36px);   /* 카드 제목, 아티클 제목 */
   --fs-body:    clamp(16px, 1.5vw, 18px); /* 본문 */
   --fs-caption: 11px;                     /* 날짜·카테고리·저자·라벨 */

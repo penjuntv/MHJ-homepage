@@ -67,15 +67,11 @@ export default function GalleryClient({ items, galleryTitle, galleryDescription 
     return () => window.removeEventListener('keydown', handler);
   }, [prev, next]);
 
-  // Masonry 3 columns
-  const col0 = filtered.filter((_, i) => i % 3 === 0);
-  const col1 = filtered.filter((_, i) => i % 3 === 1);
-  const col2 = filtered.filter((_, i) => i % 3 === 2);
 
   const currentItem = lightboxIndex !== null ? filtered[lightboxIndex] : null;
 
   return (
-    <section style={{ padding: 'clamp(80px, 10vw, 140px) clamp(24px, 5vw, 80px)' }}>
+    <section style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 80px)', maxWidth: 1400, margin: '0 auto' }}>
 
       {/* ─── 헤더 ─── */}
       <div style={{
@@ -93,7 +89,7 @@ export default function GalleryClient({ items, galleryTitle, galleryDescription 
         <h1
           className="font-display font-black"
           style={{
-            fontSize: 'clamp(56px, 8vw, 112px)',
+            fontSize: 'clamp(48px, 6vw, 80px)',
             letterSpacing: '-3px', lineHeight: 0.85,
             fontStyle: 'italic',
             color: 'var(--text)',
@@ -173,27 +169,19 @@ export default function GalleryClient({ items, galleryTitle, galleryDescription 
         </div>
       ) : (
         <div
-          className="gallery-grid"
+          className="gallery-masonry"
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 24,
+            columnGap: 24,
             opacity: loaded ? 1 : 0,
             transition: 'opacity 0.7s 0.2s cubic-bezier(0.16,1,0.3,1)',
           }}
         >
-          {[col0, col1, col2].map((col, ci) => (
-            <div key={ci} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              {col.map(item => {
-                const globalIndex = filtered.indexOf(item);
-                return (
-                  <GalleryCard
-                    key={item.id}
-                    item={item}
-                    onClick={() => openLightbox(globalIndex)}
-                  />
-                );
-              })}
+          {filtered.map((item, i) => (
+            <div key={item.id} style={{ breakInside: 'avoid', marginBottom: 24 }}>
+              <GalleryCard
+                item={item}
+                onClick={() => openLightbox(i)}
+              />
             </div>
           ))}
         </div>
@@ -354,12 +342,9 @@ export default function GalleryClient({ items, galleryTitle, galleryDescription 
       )}
 
       <style>{`
-        @media (max-width: 768px) {
-          .gallery-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-        @media (max-width: 480px) {
-          .gallery-grid { grid-template-columns: 1fr !important; }
-        }
+        .gallery-masonry { columns: 2; }
+        @media (min-width: 640px) { .gallery-masonry { columns: 3; } }
+        @media (min-width: 1024px) { .gallery-masonry { columns: 4; } }
       `}</style>
     </section>
   );
