@@ -91,6 +91,7 @@ async function getMostReadBlogs(): Promise<Blog[]> {
     .select('id, title, author, date, image_url, category, slug, view_count, meta_description, content, published, og_image_url')
     .eq('published', true)
     .order('view_count', { ascending: false })
+    .order('id', { ascending: false })
     .limit(5);
   return (data ?? []) as Blog[];
 }

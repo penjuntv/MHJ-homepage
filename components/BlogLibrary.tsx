@@ -578,14 +578,14 @@ function ReaderFavoritesSection({ blogs, onBlogClick }: { blogs: Blog[]; onBlogC
           Most Read
         </p>
         <h2
-          className="font-display font-black"
-          style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontStyle: 'italic', color: 'var(--text)', letterSpacing: -2, lineHeight: 0.95 }}
+          className="font-sans font-bold"
+          style={{ fontSize: 'clamp(24px, 3vw, 28px)', color: 'var(--text)', letterSpacing: -0.5, lineHeight: 1.1 }}
         >
           Reader Favorites
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {blogs.map((blog, i) => (
           <ReaderFavCard key={blog.id} blog={blog} rank={i + 1} onClick={() => onBlogClick(blog.slug)} />
         ))}
@@ -611,7 +611,7 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
         transition: 'border-color 0.3s ease',
       }}
     >
-      {/* 이미지 — 독립 라운드 6px */}
+      {/* 이미지 — 순위 배지 포함 */}
       <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 6 }}>
         <SafeImage
           src={blog.image_url}
@@ -623,26 +623,31 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
             transition: 'transform 0.5s ease',
           }}
         />
+        {/* 순위 배지 — 좌상단 absolute */}
+        <span style={{
+          position: 'absolute', top: 8, left: 8,
+          width: 20, height: 20,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          borderRadius: 4,
+          fontSize: 10, fontWeight: 900, lineHeight: 1,
+          background: rank <= 3 ? '#4F46E5' : '#E5E7EB',
+          color: rank <= 3 ? '#FFFFFF' : '#4B5563',
+        }}>
+          {rank}
+        </span>
       </div>
 
       {/* 텍스트 */}
-      <div style={{ paddingTop: 12 }}>
-        {/* 카테고리+순위 좌 / 날짜 우 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 }}>
-          <p style={{
-            fontSize: 10, fontWeight: 900, letterSpacing: 2,
-            textTransform: 'uppercase', color: 'var(--text-secondary)',
-            margin: 0, flexShrink: 0,
-          }}>
-            <span style={{ marginRight: 6 }}>#{rank}</span>
-            {blog.category}
-          </p>
-          <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-            {blog.date}
-          </span>
-        </div>
+      <div style={{ paddingTop: 10 }}>
+        <p style={{
+          fontSize: 10, fontWeight: 900, letterSpacing: 2,
+          textTransform: 'uppercase', color: 'var(--text-tertiary)',
+          margin: '0 0 6px',
+        }}>
+          {blog.category}
+        </p>
         <h3 style={{
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: 700,
           color: 'var(--text)',
           letterSpacing: -0.3,
