@@ -403,6 +403,7 @@ export default async function BlogDetailPage({
                     font-size: 1.1em;
                     line-height: 1.7;
                   }
+                  .blog-content blockquote p { margin: 0; }
                   .blog-content strong { font-weight: 700; color: var(--text); }
                   .blog-content em { font-style: italic; }
                   .blog-content ul, .blog-content ol { padding-left: 28px; margin: 0 0 2em; }
