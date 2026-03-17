@@ -431,6 +431,10 @@ export default async function BlogDetailPage({
                   /* Google Maps */
                   .blog-content .blog-map { margin: 32px 0; border-radius: 16px; overflow: hidden; }
                   .blog-content .blog-map iframe { width: 100%; height: 300px; border: none; display: block; }
+                  /* 본문 이미지 figure */
+                  .blog-content figure.blog-body-image { margin: 2em 0; }
+                  .blog-content figure.blog-body-image img { width: 100%; height: auto; border-radius: 12px; display: block; margin: 0; }
+                  .blog-content figure.blog-body-image figcaption { margin-top: 8px; font-size: 0.82em; color: var(--text-secondary); text-align: center; line-height: 1.5; }
                   /* Callout */
                   .blog-content .blog-callout { padding: 24px; background: #EEF2FF; border-left: 3px solid #4F46E5; border-radius: 0 12px 12px 0; margin: 24px 0; }
                   /* YouTube */
