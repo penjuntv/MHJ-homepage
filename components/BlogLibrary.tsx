@@ -86,7 +86,15 @@ export default function BlogLibrary({
 
       {/* ═══════ Featured + Recent Stories ═══════ */}
       {featuredBlog && (
-        <section style={{ marginBottom: 96 }}>
+        <section style={{
+          marginBottom: 96,
+          marginLeft: 'calc(-1 * clamp(20px, 4vw, 48px))',
+          marginRight: 'calc(-1 * clamp(20px, 4vw, 48px))',
+          padding: 'clamp(32px, 4vw, 48px) clamp(20px, 4vw, 48px)',
+          background: 'var(--bg-featured)',
+          borderTop: '1px solid var(--border)',
+          borderBottom: '1px solid var(--border)',
+        }}>
           <div
             style={{
               display: 'grid',
@@ -510,8 +518,8 @@ function BlogCard({ blog, onClick }: CardProps) {
         transition: 'border-color 0.3s ease',
       }}
     >
-      {/* 이미지 — 독립 라운드 12px */}
-      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
+      {/* 이미지 — 독립 라운드 6px */}
+      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 6 }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
@@ -603,8 +611,8 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
         transition: 'border-color 0.3s ease',
       }}
     >
-      {/* 이미지 — 독립 라운드 12px */}
-      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
+      {/* 이미지 — 독립 라운드 6px */}
+      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 6 }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}

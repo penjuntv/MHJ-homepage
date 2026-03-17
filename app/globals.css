@@ -16,6 +16,7 @@
   --bg:             #FFFFFF;
   --bg-surface:     #F8FAFC;
   --bg-card:        #FFFFFF;
+  --bg-featured:    #FAFAF8;
   --text:           #1A1A1A;
   --text-secondary: #64748B;
   --text-tertiary:  #CBD5E1;
@@ -46,6 +47,7 @@
   --bg:             #0A0A0A;
   --bg-surface:     #141414;
   --bg-card:        #1A1A1A;
+  --bg-featured:    #111111;
   --text:           #F1F5F9;
   --text-secondary: #94A3B8;
   --text-tertiary:  #475569;
