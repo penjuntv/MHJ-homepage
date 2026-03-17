@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('View count RPC error:', JSON.stringify(error));
-      return NextResponse.json({ error: 'Failed to update view count' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed', detail: error }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });
