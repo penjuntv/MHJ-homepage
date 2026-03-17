@@ -4,7 +4,7 @@
 (없음)
 
 ## 🟢 완료 (최근)
-- [x] Reader Favorites: view_count RPC 에러 핸들링 + 4열 순위배지 레이아웃 (BlogCard 동일 크기)
+- [x] Reader Favorites: 넷플릭스 캐러셀 (5개, 가로스크롤, 좌우화살표, 순위배지)
 - [x] 블로그 본문 이미지 이전 완료 (20개 글, 77개 이미지 → Supabase Storage, blockquote→figure 교체)
 
 ## 🟡 다음 대기

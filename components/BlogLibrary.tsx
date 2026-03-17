@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import SafeImage from './SafeImage';
 import { useRouter } from 'next/navigation';
 import type { Blog } from '@/lib/types';
@@ -568,12 +568,34 @@ function BlogCard({ blog, onClick }: CardProps) {
 }
 
 /* ════════════════════════════════════════════
-   Reader Favorites — 조회수 Top N
+   Reader Favorites — 넷플릭스 스타일 가로 캐러셀
    ════════════════════════════════════════════ */
 function ReaderFavoritesSection({ blogs, onBlogClick }: { blogs: Blog[]; onBlogClick: (slug: string) => void }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  const SCROLL_AMOUNT = 304; // 카드폭 280 + gap 24
+
+  function updateArrows() {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateArrows();
+    el.addEventListener('scroll', updateArrows, { passive: true });
+    return () => el.removeEventListener('scroll', updateArrows);
+  }, []);
+
   return (
     <section style={{ marginTop: 96 }}>
-      <div style={{ marginBottom: 48 }}>
+      {/* 헤더 */}
+      <div style={{ marginBottom: 32 }}>
         <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
           Most Read
         </p>
@@ -585,10 +607,69 @@ function ReaderFavoritesSection({ blogs, onBlogClick }: { blogs: Blog[]; onBlogC
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {blogs.map((blog, i) => (
-          <ReaderFavCard key={blog.id} blog={blog} rank={i + 1} onClick={() => onBlogClick(blog.slug)} />
-        ))}
+      {/* 캐러셀 래퍼 */}
+      <div style={{ position: 'relative' }}>
+
+        {/* 좌 화살표 */}
+        <button
+          onClick={() => scrollRef.current?.scrollBy({ left: -SCROLL_AMOUNT, behavior: 'smooth' })}
+          aria-label="Scroll left"
+          style={{
+            position: 'absolute', left: -20, top: '50%', transform: 'translateY(-50%)',
+            zIndex: 2,
+            width: 40, height: 40, borderRadius: '50%',
+            border: '1px solid var(--border-medium)',
+            background: 'var(--bg)',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+            opacity: canLeft ? 1 : 0,
+            pointerEvents: canLeft ? 'auto' : 'none',
+            transition: 'opacity 0.2s ease',
+          }}
+        >
+          <ChevronLeft size={16} />
+        </button>
+
+        {/* 스크롤 컨테이너 */}
+        <div
+          ref={scrollRef}
+          className="no-scrollbar"
+          style={{
+            display: 'flex',
+            gap: 24,
+            overflowX: 'auto',
+            paddingBottom: 2,
+          }}
+        >
+          {blogs.map((blog, i) => (
+            <ReaderFavCard key={blog.id} blog={blog} rank={i + 1} onClick={() => onBlogClick(blog.slug)} />
+          ))}
+        </div>
+
+        {/* 우 화살표 */}
+        <button
+          onClick={() => scrollRef.current?.scrollBy({ left: SCROLL_AMOUNT, behavior: 'smooth' })}
+          aria-label="Scroll right"
+          style={{
+            position: 'absolute', right: -20, top: '50%', transform: 'translateY(-50%)',
+            zIndex: 2,
+            width: 40, height: 40, borderRadius: '50%',
+            border: '1px solid var(--border-medium)',
+            background: 'var(--bg)',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+            opacity: canRight ? 1 : 0,
+            pointerEvents: canRight ? 'auto' : 'none',
+            transition: 'opacity 0.2s ease',
+          }}
+        >
+          <ChevronRight size={16} />
+        </button>
+
       </div>
     </section>
   );
@@ -603,15 +684,18 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        borderRadius: 12,
+        minWidth: 280,
+        flexShrink: 0,
+        borderRadius: 6,
         background: 'var(--bg-card, var(--bg))',
         border: '1px solid var(--border)',
         cursor: 'pointer',
         padding: 12,
-        transition: 'border-color 0.3s ease',
+        transition: 'opacity 0.3s ease, border-color 0.3s ease',
+        opacity: hovered ? 0.88 : 1,
       }}
     >
-      {/* 이미지 — 독립 라운드 6px + 순위 배지 */}
+      {/* 이미지 16:10 + 순위 배지 */}
       <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 6 }}>
         <SafeImage
           src={blog.image_url}
@@ -637,17 +721,15 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
         </span>
       </div>
 
-      {/* 텍스트 — BlogCard와 동일 구조 */}
-      <div style={{ paddingTop: 12 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 }}>
-          <p style={{
-            fontSize: 10, fontWeight: 900, letterSpacing: 2,
-            textTransform: 'uppercase', color: 'var(--text-secondary)',
-            margin: 0, flexShrink: 0,
-          }}>
-            {blog.category}
-          </p>
-        </div>
+      {/* 텍스트 */}
+      <div style={{ paddingTop: 10 }}>
+        <p style={{
+          fontSize: 10, fontWeight: 900, letterSpacing: 2,
+          textTransform: 'uppercase', color: 'var(--text-secondary)',
+          margin: '0 0 6px',
+        }}>
+          {blog.category}
+        </p>
         <h3 style={{
           fontSize: 14,
           fontWeight: 700,
