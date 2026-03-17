@@ -92,7 +92,7 @@ export default function BlogForm({ initial }: Props) {
   const [form, setForm] = useState<BlogInput>({
     category: initial?.category ?? 'Life',
     title: initial?.title ?? '',
-    author: initial?.author ?? 'Heejong Jo',
+    author: initial?.author ?? 'Yussi',
     date: initial?.date ?? new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace('.', '.'),
     image_url: initial?.image_url ?? '',
     content: initial?.content ?? '',

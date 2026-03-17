@@ -52,6 +52,7 @@ export default function BlogLibrary({
   }
 
   const selectedCat = activeCategory ?? 'All';
+  const cats = availableCategories ?? FALLBACK_CATS;
 
   return (
     <div
@@ -62,44 +63,25 @@ export default function BlogLibrary({
         padding: 'clamp(96px, 10vw, 128px) clamp(20px, 4vw, 48px)',
       }}
     >
-      {/* ═══════ 헤더 ═══════ */}
-      <header style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        marginBottom: 96,
-        gap: 40,
-      }}>
-        <div>
-          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
-            Blog Library
-          </p>
-          <h1
-            className="font-display font-black type-display"
-            style={{
-              textTransform: 'uppercase',
-              fontStyle: 'italic',
-              color: 'var(--text)',
-              marginBottom: 24,
-            }}
-          >
-            {blogTitle || 'The Library'}
-          </h1>
-          <p className="type-body" style={{
-            color: 'var(--text-secondary)',
-            maxWidth: 480,
-          }}>
-            {blogDescription || '사회복지사 석사 과정과 일상을 기록하는 희종의 개인 서재입니다.'}
-          </p>
-        </div>
-
-        {/* 카테고리 필터 */}
-        <CategoryFilter
-          selected={selectedCat}
-          onChange={handleCategoryChange}
-          categories={availableCategories ?? FALLBACK_CATS}
-        />
+      {/* ═══════ 헤더 — 타이틀 + 설명만 ═══════ */}
+      <header style={{ marginBottom: 96 }}>
+        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
+          Blog Library
+        </p>
+        <h1
+          className="font-display font-black type-display"
+          style={{
+            textTransform: 'uppercase',
+            fontStyle: 'italic',
+            color: 'var(--text)',
+            marginBottom: 24,
+          }}
+        >
+          {blogTitle || 'The Library'}
+        </h1>
+        <p className="type-body" style={{ color: 'var(--text-secondary)', maxWidth: 480 }}>
+          {blogDescription || '사회복지사 석사 과정과 일상을 기록하는 희종의 개인 서재입니다.'}
+        </p>
       </header>
 
       {/* ═══════ Featured + Recent Stories ═══════ */}
@@ -110,6 +92,7 @@ export default function BlogLibrary({
               display: 'grid',
               gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)',
               gap: 40,
+              alignItems: 'stretch',
             }}
             className="featured-grid"
           >
@@ -120,15 +103,15 @@ export default function BlogLibrary({
             />
 
             {/* Recent Stories Sidebar */}
-            <div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <p style={{
                 fontSize: 11, fontWeight: 900, letterSpacing: 4,
                 textTransform: 'uppercase', color: 'var(--text-secondary)',
-                marginBottom: 24,
+                marginBottom: 24, flexShrink: 0,
               }}>
                 Recent Stories
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                 {recentBlogs.map((blog, i) => (
                   <RecentStoryItem
                     key={blog.id}
@@ -146,18 +129,32 @@ export default function BlogLibrary({
         </section>
       )}
 
-      {/* ═══════ ALL STORIES 구분선 ═══════ */}
-      <div style={{ borderTop: '1px solid var(--border-medium)', marginBottom: 48, paddingTop: 48 }}>
+      {/* ═══════ ALL STORIES + 카테고리 필터 ═══════ */}
+      <div style={{
+        borderTop: '1px solid var(--border-medium)',
+        paddingTop: 40,
+        marginBottom: 40,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 16,
+      }}>
         <p style={{
           fontSize: 11, fontWeight: 900, letterSpacing: 4,
           textTransform: 'uppercase', color: 'var(--text-tertiary)',
-          margin: 0,
+          margin: 0, flexShrink: 0,
         }}>
           All Stories
           <span style={{ marginLeft: 12, fontWeight: 600, letterSpacing: 1 }}>
             ({totalCount})
           </span>
         </p>
+        <CategoryFilter
+          selected={selectedCat}
+          onChange={handleCategoryChange}
+          categories={cats}
+        />
       </div>
 
       {/* ═══════ 카드 그리드 ═══════ */}
@@ -207,7 +204,7 @@ export default function BlogLibrary({
         />
       )}
 
-      {/* Newsletter CTA — 컨테이너 패딩 상쇄해서 좌우 full-width */}
+      {/* Newsletter CTA */}
       <div style={{ margin: '96px calc(-1 * clamp(20px, 4vw, 48px)) 0' }}>
         <NewsletterCTA />
       </div>
@@ -225,7 +222,7 @@ export default function BlogLibrary({
 }
 
 /* ════════════════════════════════════════════
-   카테고리 필터 — 슬라이딩 인디케이터 (변경 없음)
+   카테고리 필터 — 슬라이딩 인디케이터
    ════════════════════════════════════════════ */
 function CategoryFilter({ selected, onChange, categories }: {
   selected: string;
@@ -233,7 +230,7 @@ function CategoryFilter({ selected, onChange, categories }: {
   categories: string[];
 }) {
   const allCats = ['All', ...categories];
-  const [indicator, setIndicator] = useState({ left: 6, width: 0, opacity: 0 });
+  const [indicator, setIndicator] = useState({ left: 0, width: 0, opacity: 0 });
   const [transitioning, setTransitioning] = useState(false);
   const filterRef = { current: null as HTMLDivElement | null };
   const buttonRefs: (HTMLButtonElement | null)[] = [];
@@ -253,23 +250,23 @@ function CategoryFilter({ selected, onChange, categories }: {
       style={{
         position: 'relative',
         display: 'flex',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
         gap: 0,
-        padding: 6,
         background: 'var(--bg-surface)',
         borderRadius: 20,
         border: '1px solid var(--border)',
         overflowX: 'auto',
+        flexShrink: 0,
       }}
     >
       <div
         style={{
           position: 'absolute',
-          top: 6, bottom: 6,
+          top: 5, bottom: 5,
           left: indicator.left,
           width: indicator.width,
           background: 'var(--text)',
-          borderRadius: 12,
+          borderRadius: 14,
           opacity: indicator.opacity,
           transition: transitioning
             ? 'left 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
@@ -298,8 +295,8 @@ function CategoryFilter({ selected, onChange, categories }: {
             style={{
               position: 'relative',
               zIndex: 1,
-              padding: '10px 20px',
-              borderRadius: 12,
+              padding: '8px 16px',
+              borderRadius: 14,
               border: 'none',
               cursor: 'pointer',
               fontSize: 10,
@@ -322,7 +319,7 @@ function CategoryFilter({ selected, onChange, categories }: {
 }
 
 /* ════════════════════════════════════════════
-   Featured Card — 좌측 2/3, 히어로 16:9
+   Featured Card
    ════════════════════════════════════════════ */
 function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
@@ -337,13 +334,16 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
         borderRadius: 12,
         overflow: 'hidden',
         cursor: 'pointer',
-        background: 'var(--bg-card, #fff)',
+        background: 'var(--bg-card, var(--bg))',
         border: '1px solid var(--border)',
         transition: 'border-color 0.3s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
       }}
     >
-      {/* 이미지 — 히어로: 16:9 */}
-      <div style={{ aspectRatio: '16/9', position: 'relative', overflow: 'hidden' }}>
+      {/* 이미지 — 16:9 */}
+      <div style={{ aspectRatio: '16/9', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
@@ -358,33 +358,27 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
       </div>
 
       {/* 텍스트 */}
-      <div style={{ padding: 'clamp(24px, 4vw, 40px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* 카테고리 + Featured 라벨 — 컬러 뱃지 없이 회색 텍스트 */}
+      <div style={{ padding: 'clamp(24px, 4vw, 40px)', display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+        {/* 카테고리 + Featured */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{
-            fontSize: 11, fontWeight: 900, letterSpacing: 2,
-            textTransform: 'uppercase', color: 'var(--text-tertiary)',
-          }}>
+          <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
             {blog.category}
           </span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-          <span style={{
-            fontSize: 11, fontWeight: 900, letterSpacing: 2,
-            textTransform: 'uppercase', color: 'var(--text-tertiary)',
-          }}>
+          <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
             Featured
           </span>
         </div>
 
+        {/* 제목 — sans-serif, weight 700, 이탤릭 없음 */}
         <h2
-          className="font-display"
           style={{
-            fontSize: 'clamp(28px, 4vw, 44px)',
-            fontWeight: 900,
-            letterSpacing: -1,
-            lineHeight: 1.05,
+            fontSize: 'clamp(22px, 3vw, 36px)',
+            fontWeight: 700,
+            letterSpacing: -0.5,
+            lineHeight: 1.2,
             color: 'var(--text)',
-            fontStyle: 'italic',
+            margin: 0,
           }}
         >
           {blog.title}
@@ -422,7 +416,7 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
 }
 
 /* ════════════════════════════════════════════
-   Recent Story Item — 우측 사이드바 텍스트 리스트
+   Recent Story Item — 썸네일 + 텍스트
    ════════════════════════════════════════════ */
 function RecentStoryItem({ blog, isLast, onClick }: { blog: Blog; isLast: boolean; onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
@@ -492,7 +486,7 @@ function RecentStoryItem({ blog, isLast, onClick }: { blog: Blog; isLast: boolea
 }
 
 /* ════════════════════════════════════════════
-   Blog Card — 3:4, radius 12, 절제된 호버
+   Blog Card — 16:10, 이미지 독립 라운드, 카테고리+날짜 한 줄
    ════════════════════════════════════════════ */
 interface CardProps {
   blog: Blog;
@@ -509,15 +503,15 @@ function BlogCard({ blog, onClick }: CardProps) {
       onMouseLeave={() => setHovered(false)}
       style={{
         borderRadius: 12,
-        background: 'var(--bg-card, #fff)',
-        border: '1px solid var(--border, #F1F5F9)',
+        background: 'var(--bg-card, var(--bg))',
+        border: '1px solid var(--border)',
         cursor: 'pointer',
-        overflow: 'hidden',
+        padding: 12,
         transition: 'border-color 0.3s ease',
       }}
     >
-      {/* 이미지 — 블로그 카드: 16:10 */}
-      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden' }}>
+      {/* 이미지 — 독립 라운드 12px */}
+      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
@@ -530,24 +524,28 @@ function BlogCard({ blog, onClick }: CardProps) {
         />
       </div>
 
-      {/* 텍스트 — 카테고리(회색) + 제목만. 이미지 위 텍스트 없음(§10.3) */}
-      <div style={{ padding: '16px 0 0' }}>
-        <p style={{
-          fontSize: 11, fontWeight: 900, letterSpacing: 2,
-          textTransform: 'uppercase', color: 'var(--text-secondary)',
-          margin: '0 0 8px',
-        }}>
-          {blog.category}
-          {blog.is_sponsored && (
-            <span style={{ marginLeft: 8, letterSpacing: 1, fontWeight: 600 }}>· AD</span>
-          )}
-        </p>
+      {/* 텍스트 */}
+      <div style={{ paddingTop: 12 }}>
+        {/* 카테고리 좌 / 날짜 우 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+          <p style={{
+            fontSize: 10, fontWeight: 900, letterSpacing: 2,
+            textTransform: 'uppercase', color: 'var(--text-secondary)',
+            margin: 0, flexShrink: 0,
+          }}>
+            {blog.category}
+            {blog.is_sponsored && <span style={{ marginLeft: 6 }}>· AD</span>}
+          </p>
+          <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+            {blog.date}
+          </span>
+        </div>
         <h3 style={{
-          fontSize: 18,
-          fontWeight: 800,
-          color: 'var(--text, #1A1A1A)',
-          letterSpacing: -0.4,
-          lineHeight: 1.35,
+          fontSize: 16,
+          fontWeight: 700,
+          color: 'var(--text)',
+          letterSpacing: -0.3,
+          lineHeight: 1.4,
           margin: 0,
           display: '-webkit-box',
           WebkitLineClamp: 2,
@@ -562,12 +560,11 @@ function BlogCard({ blog, onClick }: CardProps) {
 }
 
 /* ════════════════════════════════════════════
-   Reader Favorites — 조회수 Top 5
+   Reader Favorites — 조회수 Top N
    ════════════════════════════════════════════ */
 function ReaderFavoritesSection({ blogs, onBlogClick }: { blogs: Blog[]; onBlogClick: (slug: string) => void }) {
   return (
     <section style={{ marginTop: 96 }}>
-      {/* 섹션 헤더 */}
       <div style={{ marginBottom: 48 }}>
         <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
           Most Read
@@ -580,7 +577,6 @@ function ReaderFavoritesSection({ blogs, onBlogClick }: { blogs: Blog[]; onBlogC
         </h2>
       </div>
 
-      {/* 반응형 그리드 — BlogCard와 동일한 시스템 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {blogs.map((blog, i) => (
           <ReaderFavCard key={blog.id} blog={blog} rank={i + 1} onClick={() => onBlogClick(blog.slug)} />
@@ -600,15 +596,15 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
       onMouseLeave={() => setHovered(false)}
       style={{
         borderRadius: 12,
-        background: 'var(--bg-card, #fff)',
-        border: '1px solid var(--border, #F1F5F9)',
+        background: 'var(--bg-card, var(--bg))',
+        border: '1px solid var(--border)',
         cursor: 'pointer',
-        overflow: 'hidden',
+        padding: 12,
         transition: 'border-color 0.3s ease',
       }}
     >
-      {/* 이미지 — Reader Favorites 카드: 16:10 */}
-      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden' }}>
+      {/* 이미지 — 독립 라운드 12px */}
+      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
@@ -621,22 +617,28 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
         />
       </div>
 
-      {/* 텍스트 — 순위 + 카테고리(회색) + 제목 */}
-      <div style={{ padding: '16px 0 0' }}>
-        <p style={{
-          fontSize: 11, fontWeight: 900, letterSpacing: 2,
-          textTransform: 'uppercase', color: 'var(--text-secondary)',
-          margin: '0 0 8px',
-        }}>
-          <span style={{ marginRight: 8 }}>#{rank}</span>
-          {blog.category}
-        </p>
+      {/* 텍스트 */}
+      <div style={{ paddingTop: 12 }}>
+        {/* 카테고리+순위 좌 / 날짜 우 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+          <p style={{
+            fontSize: 10, fontWeight: 900, letterSpacing: 2,
+            textTransform: 'uppercase', color: 'var(--text-secondary)',
+            margin: 0, flexShrink: 0,
+          }}>
+            <span style={{ marginRight: 6 }}>#{rank}</span>
+            {blog.category}
+          </p>
+          <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+            {blog.date}
+          </span>
+        </div>
         <h3 style={{
-          fontSize: 18,
-          fontWeight: 800,
-          color: 'var(--text, #1A1A1A)',
-          letterSpacing: -0.4,
-          lineHeight: 1.35,
+          fontSize: 16,
+          fontWeight: 700,
+          color: 'var(--text)',
+          letterSpacing: -0.3,
+          lineHeight: 1.4,
           margin: 0,
           display: '-webkit-box',
           WebkitLineClamp: 2,
@@ -651,7 +653,7 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
 }
 
 /* ════════════════════════════════════════════
-   Pagination (변경 없음)
+   Pagination
    ════════════════════════════════════════════ */
 function Pagination({ currentPage, totalPages, onPageChange }: {
   currentPage: number;

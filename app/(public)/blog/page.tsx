@@ -6,7 +6,7 @@ import { getSiteSettings } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 20;
 const VALID_CATEGORIES = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
 const CATEGORY_ORDER = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
 
