@@ -585,7 +585,7 @@ function ReaderFavoritesSection({ blogs, onBlogClick }: { blogs: Blog[]; onBlogC
         </h2>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {blogs.map((blog, i) => (
           <ReaderFavCard key={blog.id} blog={blog} rank={i + 1} onClick={() => onBlogClick(blog.slug)} />
         ))}
@@ -611,7 +611,7 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
         transition: 'border-color 0.3s ease',
       }}
     >
-      {/* 이미지 — 순위 배지 포함 */}
+      {/* 이미지 — 독립 라운드 6px + 순위 배지 */}
       <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 6 }}>
         <SafeImage
           src={blog.image_url}
@@ -637,15 +637,17 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
         </span>
       </div>
 
-      {/* 텍스트 */}
-      <div style={{ paddingTop: 10 }}>
-        <p style={{
-          fontSize: 10, fontWeight: 900, letterSpacing: 2,
-          textTransform: 'uppercase', color: 'var(--text-tertiary)',
-          margin: '0 0 6px',
-        }}>
-          {blog.category}
-        </p>
+      {/* 텍스트 — BlogCard와 동일 구조 */}
+      <div style={{ paddingTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+          <p style={{
+            fontSize: 10, fontWeight: 900, letterSpacing: 2,
+            textTransform: 'uppercase', color: 'var(--text-secondary)',
+            margin: 0, flexShrink: 0,
+          }}>
+            {blog.category}
+          </p>
+        </div>
         <h3 style={{
           fontSize: 14,
           fontWeight: 700,
