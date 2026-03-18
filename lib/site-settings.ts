@@ -47,6 +47,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   social_instagram: '',
   social_facebook: '',
   social_youtube: 'https://www.youtube.com/@penjunetv',
+  social_threads: '',
   featured_post_id: '',
 };
 
@@ -91,6 +92,7 @@ export const SETTING_DESCRIPTIONS: Record<string, string> = {
   social_instagram: 'Instagram URL (비워두면 숨김)',
   social_facebook: 'Facebook URL (비워두면 숨김)',
   social_youtube: 'YouTube URL (비워두면 숨김)',
+  social_threads: 'Threads URL (비워두면 숨김)',
 };
 
 export async function getSiteSettings(): Promise<Record<string, string>> {

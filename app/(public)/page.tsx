@@ -216,6 +216,9 @@ export default async function LandingPage() {
       {/* Hero Carousel */}
       <HeroCarousel slides={carouselSlides} />
 
+      {/* Explore — Blog + Magazine 2분할 */}
+      <ExploreSplitSection latestBlog={mostRead[0] ?? null} latestMagazine={magazines[0] ?? null} />
+
       {/* StoryPress Section */}
       <StoryPressSection
         title={s.storypress_title}
@@ -223,9 +226,6 @@ export default async function LandingPage() {
         ctaUrl={s.storypress_cta_url}
         ctaText={s.storypress_cta_text}
       />
-
-      {/* Explore — Blog + Magazine 2분할 */}
-      <ExploreSplitSection latestBlog={mostRead[0] ?? null} latestMagazine={magazines[0] ?? null} />
 
       {/* Newsletter CTA */}
       <NewsletterCTA />
@@ -272,7 +272,7 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
                 {latestBlog?.title || 'Daily Life & Stories'}
               </h3>
               <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, lineHeight: 1.5, marginBottom: 16 }}>
-                사회복지 석사 과정과 뉴질랜드 일상을 기록하는 희종의 개인 서재
+                Heejong&apos;s personal library — social work studies &amp; life in New Zealand
               </p>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase' }}>
                 Explore Blog <ArrowRight size={12} />
@@ -305,7 +305,7 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
                 {latestMagazine?.title || 'Monthly Journal'}
               </h3>
               <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, lineHeight: 1.5, marginBottom: 16 }}>
-                가족의 매달을 아카이브하는 감성 포토 매거진
+                A monthly photo magazine archiving our family&apos;s everyday moments
               </p>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase' }}>
                 Browse Issues <ArrowRight size={12} />

@@ -166,7 +166,7 @@ export default function GalleryClient({ items, galleryTitle, galleryDescription 
       {filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '120px 0', color: 'var(--text-tertiary)' }}>
           <p className="font-black uppercase" style={{ fontSize: 11, letterSpacing: 4 }}>
-            사진이 없습니다
+            No photos
           </p>
         </div>
       ) : (

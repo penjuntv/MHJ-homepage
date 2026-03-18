@@ -122,7 +122,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
                 textTransform: 'uppercase',
                 marginBottom: 8,
               }}>
-                이름 *
+                Name *
               </label>
               <input
                 value={form.name}
@@ -144,7 +144,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
                 textTransform: 'uppercase',
                 marginBottom: 8,
               }}>
-                이메일 *
+                Email *
               </label>
               <input
                 type="email"
@@ -169,7 +169,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
               textTransform: 'uppercase',
               marginBottom: 8,
             }}>
-              댓글 *
+              Comment *
             </label>
             <textarea
               value={form.content}

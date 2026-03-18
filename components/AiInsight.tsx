@@ -23,7 +23,7 @@ export default function AiInsight({ title, content }: Props) {
       const data = await res.json();
       setInsight(data.insight);
     } catch {
-      setInsight('감상평을 불러오는 데 실패했습니다.');
+      setInsight('Failed to load AI insight.');
     } finally {
       setLoading(false);
     }
@@ -145,7 +145,7 @@ export default function AiInsight({ title, content }: Props) {
               position: 'relative',
             }}
           >
-            닫기
+            Close
           </button>
         </div>
       )}

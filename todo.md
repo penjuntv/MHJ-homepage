@@ -20,6 +20,11 @@ ALTER TABLE blogs ALTER COLUMN author SET DEFAULT 'Yussi';
 ```
 
 ## 🟢 완료 (최근)
+- [x] 공개 페이지 한글 UI → 영문화 (MagazineViewer, CommentSection, AiInsight, ArticleGrid, GalleryClient, blog slug page)
+- [x] 메인 페이지 섹션 순서 변경: ExploreSplitSection → StoryPressSection
+- [x] 네비게이션 소셜 아이콘 정비: Facebook 추가, Threads 추가(SVG), 순서 Instagram→Facebook→YouTube→Threads→Email
+- [x] aria-label 영문화 (Search, Light mode, Dark mode, Theme, Open menu)
+- [x] QA 버그 5건 수정: StoryPress "learning app" 제거, 블랙 공백 해결(useSlideUp), 매거진 published 필터, hydration 에러(suppressHydrationWarning), DB storypress_description 초기화 (구 Supabase 프로젝트 vpayqdatpqajsmalpfmq도 반영)
 - [x] 블로그 상세 제목 72px 상한 적용, word-break: keep-all
 - [x] DetailModal 제목 word-break break-all → keep-all (단어 중간 줄바꿈 방지)
 - [x] 드롭캡 색상: #F1F5F9→#CBD5E1(라이트), 다크모드도 #475569으로 수정, CSS var 통일
@@ -30,13 +35,14 @@ ALTER TABLE blogs ALTER COLUMN author SET DEFAULT 'Yussi';
 - [x] 갤러리 그리드 반응형: CSS columns 2/3/4열 (mobile/tablet/desktop), max-width 1400px
 - [x] Reader Favorites: 넷플릭스 캐러셀 (5개, 가로스크롤, 좌우화살표, 순위배지)
 - [x] admin↔public 동기화 전수 감사: 갤러리 촬영자·매거진 에디터/저자·블로그 카테고리 순서 통일
+- [x] StoryPress 페이지 텍스트 전면 교체 (4-10 Method, Library/Research/Our Story 섹션 신규, FAQ 7개)
 - [x] 블로그 본문 이미지 이전 완료 (20개 글, 77개 이미지 → Supabase Storage, blockquote→figure 교체)
 
 ## 🟡 다음 대기
 - [ ] Newsletter 라이브 발송 테스트
 - [ ] 더미 매거진 3개 정리
 - [ ] article_reactions 프론트엔드 구현
-- [ ] StoryPress 페이지 디자인
+- [ ] StoryPress 페이지 디자인 (텍스트 완료, UI 개선 예정)
 
 ## 🟢 완료
 - [x] 다크 모드 감사 (20파일)

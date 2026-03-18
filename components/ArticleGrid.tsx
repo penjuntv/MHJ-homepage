@@ -19,7 +19,7 @@ export default function ArticleGrid({ articles }: Props) {
     return (
       <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 80, color: '#cbd5e1' }}>
         <p style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>Coming Soon</p>
-        <p style={{ fontSize: 14, fontWeight: 500 }}>이 호에는 아직 글이 없습니다.</p>
+        <p style={{ fontSize: 14, fontWeight: 500 }}>No articles in this issue yet.</p>
       </div>
     );
   }

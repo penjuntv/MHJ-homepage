@@ -27,7 +27,9 @@ export default async function PublicLayout({
         siteName={s.site_name}
         siteSubtitle={s.site_subtitle}
         socialInstagram={s.social_instagram}
+        socialFacebook={s.social_facebook}
         socialYoutube={s.social_youtube}
+        socialThreads={s.social_threads}
         contactEmail={s.contact_email}
         navigationItems={navigationItems}
       />

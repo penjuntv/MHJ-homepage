@@ -177,18 +177,18 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
           {/* 댓글 섹션 */}
           <div style={{ padding: '24px 28px 28px', borderTop: '1px solid #F1F5F9' }}>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: '#9C8B7A', marginBottom: 16 }}>
-              댓글{comments.length > 0 ? ` (${comments.length})` : ''}
+              Comments{comments.length > 0 ? ` (${comments.length})` : ''}
             </p>
 
             {comments.length === 0 ? (
-              <p style={{ fontSize: 13, color: '#C4B8AB', marginBottom: 20 }}>아직 댓글이 없습니다. 첫 댓글을 남겨보세요.</p>
+              <p style={{ fontSize: 13, color: '#C4B8AB', marginBottom: 20 }}>No comments yet. Be the first to share your thoughts.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                 {comments.map(c => (
                   <div key={c.id} style={{ padding: '12px 16px', background: '#FAF7F4', borderRadius: 12 }}>
                     <div style={{ display: 'flex', gap: 10, marginBottom: 5, alignItems: 'center' }}>
                       <span style={{ fontSize: 13, fontWeight: 800, color: '#2C1F14' }}>{c.author_name}</span>
-                      <span style={{ fontSize: 11, color: '#C4B8AB' }}>{new Date(c.created_at).toLocaleDateString('ko-KR')}</span>
+                      <span style={{ fontSize: 11, color: '#C4B8AB' }}>{new Date(c.created_at).toLocaleDateString('en-NZ')}</span>
                     </div>
                     <p style={{ fontSize: 13, color: '#4A3F35', lineHeight: 1.6, margin: 0 }}>{c.content}</p>
                   </div>
@@ -201,14 +201,14 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
               <input
                 value={authorName}
                 onChange={e => setAuthorName(e.target.value)}
-                placeholder="닉네임"
+                placeholder="Nickname"
                 required
                 style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #E8DDD4', background: '#FAF7F4', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
               />
               <textarea
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
-                placeholder="댓글을 남겨주세요..."
+                placeholder="Leave a comment..."
                 required
                 rows={3}
                 style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #E8DDD4', background: '#FAF7F4', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
@@ -220,7 +220,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
                 fontSize: 12, fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer',
                 opacity: submitting ? 0.6 : 1,
               }}>
-                <Send size={12} /> {submitting ? '등록 중...' : '댓글 등록'}
+                <Send size={12} /> {submitting ? 'Posting...' : 'Post Comment'}
               </button>
             </form>
           </div>
@@ -828,7 +828,7 @@ function ArticleGridCard({ article, onOpen, magazineLabel, magazineCoverUrl, lik
               }}
             >
               <Heart size={11} fill={liked ? '#EF4444' : 'none'} color={liked ? '#EF4444' : '#9C8B7A'} />
-              {likeCount > 0 ? likeCount : '좋아요'}
+              {likeCount > 0 ? likeCount : 'Like'}
             </button>
             {commentCount > 0 && (
               <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#9C8B7A', fontWeight: 600 }}>

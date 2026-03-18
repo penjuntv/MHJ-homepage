@@ -204,7 +204,7 @@ export default async function BlogDetailPage({
             flexWrap: 'wrap',
           }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: 0 }}>
-              미리보기 모드 — 이 글은 아직 공개되지 않았습니다
+              Preview Mode — This post is not yet published
             </p>
             <Link
               href="/admin/blogs"
@@ -216,7 +216,7 @@ export default async function BlogDetailPage({
                 padding: '6px 14px', background: 'rgba(255,255,255,0.5)',
               }}
             >
-              ← 어드민으로 돌아가기
+              ← Back to Admin
             </Link>
           </div>
         )}
