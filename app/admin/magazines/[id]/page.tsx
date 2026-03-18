@@ -479,7 +479,7 @@ export default function MagazineDetailPage() {
                     <div><label style={labelStyle}>월</label><input value={magForm.month_name} onChange={e => setMagForm(p => ({ ...p, month_name: e.target.value }))} style={inputStyle} /></div>
                     <div><label style={labelStyle}>이슈 번호</label><input value={magForm.issue_number} onChange={e => setMagForm(p => ({ ...p, issue_number: e.target.value }))} style={inputStyle} /></div>
                   </div>
-                  <div><label style={labelStyle}>에디터</label><input value={magForm.editor} onChange={e => setMagForm(p => ({ ...p, editor: e.target.value }))} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>에디터</label><select value={magForm.editor} onChange={e => setMagForm(p => ({ ...p, editor: e.target.value }))} style={inputStyle}>{['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'].map(n => <option key={n} value={n}>{n}</option>)}</select></div>
                   <div>
                     <label style={labelStyle}>표지 카피</label>
                     <textarea value={magForm.cover_copy} onChange={e => setMagForm(p => ({ ...p, cover_copy: e.target.value }))} rows={2} placeholder="이번 호 한 줄 카피..." style={{ ...inputStyle, resize: 'vertical' }} />
@@ -1064,7 +1064,7 @@ function InlineForm({
           <label style={labelStyle}>저자 (복수 선택 가능)</label>
           {/* 체크박스 다중 선택 */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '6px' }}>
-            {['PeNnY', 'Yussi', 'Yumin', 'Yuhyun', 'Yujin'].map(name => {
+            {['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'].map(name => {
               const selected = form.author.split(',').map(s => s.trim()).filter(Boolean).includes(name);
               return (
                 <button

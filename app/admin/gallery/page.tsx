@@ -6,12 +6,14 @@ import type { GalleryItem } from '@/lib/types';
 import { Plus, Trash2, Loader2, Upload, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
-const PHOTOGRAPHERS = ['Yumin', 'Yuhyeon', 'Yujin'];
+const PHOTOGRAPHERS = ['Min', 'Hyun', 'Jin', 'PeNnY', 'Yussi'];
 
 const PHOTOGRAPHER_COLOR: Record<string, string> = {
-  Yumin: '#FB923C',
-  Yuhyeon: '#818CF8',
-  Yujin: '#34D399',
+  Min: '#FB923C',
+  Hyun: '#818CF8',
+  Jin: '#34D399',
+  PeNnY: '#F472B6',
+  Yussi: '#60A5FA',
 };
 
 export default function AdminGalleryPage() {

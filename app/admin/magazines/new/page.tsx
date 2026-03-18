@@ -190,7 +190,11 @@ export default function NewMagazinePage() {
         {/* 편집장 */}
         <div>
           <label style={labelStyle}>편집장</label>
-          <input value={form.editor} onChange={e => set('editor', e.target.value)} style={inputStyle} />
+          <select value={form.editor} onChange={e => set('editor', e.target.value)} style={inputStyle}>
+            {['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'].map(n => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
         </div>
 
         {/* 컬러 테마 */}

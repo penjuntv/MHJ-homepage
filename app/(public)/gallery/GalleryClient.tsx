@@ -105,7 +105,7 @@ export default function GalleryClient({ items, galleryTitle, galleryDescription 
           color: 'var(--text-secondary)',
           maxWidth: 520, lineHeight: 1.6, fontWeight: 500,
         }}>
-          {galleryDescription || 'New Zealand, as seen by Yumin, Yuhyeon & Yujin.'}
+          {galleryDescription || 'New Zealand, as seen by Min, Hyun, Jin, PeNnY & Yussi.'}
         </p>
 
         {/* 촬영자 소개 도트 */}

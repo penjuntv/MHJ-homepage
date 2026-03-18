@@ -55,7 +55,7 @@ export interface Blog {
   id: number;
   category: 'Education' | 'Settlement' | 'Girls' | 'Locals' | 'Life' | 'Travel';
   title: string;
-  author: string;        // default 'Heejong Jo'
+  author: string;        // default 'Yussi'
   date: string;
   image_url: string;
   content: string;
@@ -144,7 +144,7 @@ export interface GalleryItem {
   // 신규 필드 (photographer exhibition)
   title?: string | null;
   comment?: string | null;
-  photographer?: string | null;   // 'Yumin' | 'Yuhyeon' | 'Yujin'
+  photographer?: string | null;   // 'Min' | 'Hyun' | 'Jin' | 'PeNnY' | 'Yussi'
   taken_date?: string | null;
   location?: string | null;
   published?: boolean;

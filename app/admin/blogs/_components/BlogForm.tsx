@@ -17,7 +17,7 @@ interface Props {
   initial?: Blog;
 }
 
-const CATEGORIES: Blog['category'][] = ['Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
+const CATEGORIES: Blog['category'][] = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
 
 /* ── 발행 전 체크리스트 ── */
 function PublishChecklist({ form }: { form: Omit<Blog, 'id' | 'created_at'> }) {

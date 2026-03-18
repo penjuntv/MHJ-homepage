@@ -39,4 +39,4 @@ export function getFilterCss(key: string): string {
 }
 
 // 기본 기여자
-export const DEFAULT_CONTRIBUTORS = ['PeNnY', 'Yussi', 'Yumin', 'Yuhyun', 'Yujin'] as const;
+export const DEFAULT_CONTRIBUTORS = ['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'] as const;
