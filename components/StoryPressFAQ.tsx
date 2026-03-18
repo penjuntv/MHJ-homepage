@@ -5,15 +5,15 @@ import { useState } from 'react';
 const FAQS = [
   {
     q: 'What is StoryPress?',
-    a: 'StoryPress is a vocabulary-building app designed for bilingual children aged 5–12. It teaches just 4 words a day through stories, so learning feels natural — not like a chore. Born from our own bilingual family experience in Auckland, New Zealand.',
+    a: "StoryPress is an English storybook app for children aged 3–8. Every day, your child meets 4 new words, plays short games, and uses those words to create a story page. After 10 days, all the pages come together into a finished book — with your child's name on the cover. Born from our own bilingual family journey in Auckland.",
   },
   {
     q: 'Who is it for?',
-    a: 'StoryPress is made for children aged 5–12 (Year 1–8) who are growing up with two languages. It works especially well for ESOL families, overseas families, and children attending international schools.',
+    a: "Children aged 3–8 who are growing up with two languages. It works especially well for ESOL families, immigrant families, and children who need a gentle way into English — through stories, not pressure.",
   },
   {
     q: 'How does it work?',
-    a: 'Each day, children hear 4 words with native pronunciation → understand them in a short story → practise with a simple game. The next day, words are reviewed automatically so they stay in long-term memory.',
+    a: "Each day takes about 10 minutes. Your child meets 4 new words with pictures and sound → plays short games (spelling, matching, sentences) → then creates a story page using those words. After 10 days, the pages become a finished book. Words come back naturally — each one appears 14+ times — so they stick without drilling.",
   },
   {
     q: 'How much does it cost?',
@@ -21,11 +21,15 @@ const FAQS = [
   },
   {
     q: 'How is it different from other apps?',
-    a: 'Most apps focus on rote repetition. StoryPress teaches words inside stories, so children learn both meaning and natural usage. It\'s also the only app built specifically for bilingual families navigating two languages and two cultures.',
+    a: "Most apps end with a quiz. StoryPress ends with a book. Your child doesn't just practise words — they use them to create something real. And when they bring that book home to show you, that's when the real magic happens. It's also designed specifically for bilingual families — not adapted from a general English app.",
   },
   {
     q: 'Is there a parent dashboard?',
-    a: 'Yes. Parents can track their child\'s progress and review today\'s words together. We designed it so learning becomes a shared family moment — not just screen time.',
+    a: "Yes. Parents can track their child's progress and review today's words together. We designed it so learning becomes a shared family moment — not just screen time.",
+  },
+  {
+    q: 'What is the 4-10 Method?',
+    a: "4 words a day × 10 days = 1 storybook. Every day your child meets new words, plays with them, and creates a story page. By Day 10, they've made a complete book — and met over 40 English words along the way.",
   },
 ];
 
