@@ -156,6 +156,7 @@ async function getRecentMagazines(): Promise<Magazine[]> {
   const { data } = await supabase
     .from('magazines')
     .select('*, articles(count)')
+    .eq('published', true)
     .order('created_at', { ascending: false })
     .limit(10);
   if (!data?.length) return FALLBACK_MAGAZINES;

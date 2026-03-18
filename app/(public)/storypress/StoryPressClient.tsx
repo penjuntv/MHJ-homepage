@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   BookOpen, RefreshCw, Users, Sparkles, ChevronDown,
@@ -15,21 +15,6 @@ interface Props {
   heroImageUrl: string;
 }
 
-function useSlideUp(threshold = 0.15) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return { ref, visible };
-}
 
 const FEATURES = [
   {
@@ -147,14 +132,6 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
   const [hoverFeature, setHoverFeature] = useState<number | null>(null);
   const [hoverResearch, setHoverResearch] = useState<number | null>(null);
-
-  const featuresAnim = useSlideUp();
-  const stepsAnim = useSlideUp();
-  const libraryAnim = useSlideUp();
-  const researchAnim = useSlideUp();
-  const storyAnim = useSlideUp();
-  const quoteAnim = useSlideUp();
-  const formAnim = useSlideUp();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -293,12 +270,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       {/* ─── Features (Why StoryPress) — 데스크탑 4열 ─── */}
       <section
         id="why-storypress"
-        ref={featuresAnim.ref}
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           maxWidth: 1320, margin: '0 auto',
-          opacity: featuresAnim.visible ? 1 : 0,
-          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{ marginBottom: 64, textAlign: 'center' }}>
@@ -395,12 +369,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
 
       {/* ─── How It Works ─── */}
       <section
-        ref={stepsAnim.ref}
         className="sp-steps-bg"
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
-          opacity: stepsAnim.visible ? 1 : 0,
-          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{ maxWidth: 1320, margin: '0 auto' }}>
@@ -475,12 +446,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
 
       {/* ─── A Growing Library ─── */}
       <section
-        ref={libraryAnim.ref}
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           background: 'var(--bg)',
-          opacity: libraryAnim.visible ? 1 : 0,
-          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{ maxWidth: 1320, margin: '0 auto' }}>
@@ -589,12 +557,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
 
       {/* ─── Built on Research — 데스크탑 3열 ─── */}
       <section
-        ref={researchAnim.ref}
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           background: 'var(--bg-surface)',
-          opacity: researchAnim.visible ? 1 : 0,
-          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{ maxWidth: 1320, margin: '0 auto' }}>
@@ -676,12 +641,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
 
       {/* ─── Our Story — 2컬럼 레이아웃 ─── */}
       <section
-        ref={storyAnim.ref}
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           background: 'linear-gradient(135deg, #FFFBF5 0%, #FFF0E8 100%)',
-          opacity: storyAnim.visible ? 1 : 0,
-          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{
@@ -778,12 +740,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
 
       {/* ─── 인용문 ─── */}
       <section
-        ref={quoteAnim.ref}
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           textAlign: 'center',
-          opacity: quoteAnim.visible ? 1 : 0,
-          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
@@ -828,12 +787,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       {/* ─── 대기자 등록 폼 ─── */}
       <section
         id="storypress-signup"
-        ref={formAnim.ref}
         className="sp-cta-section"
         style={{
           padding: 'clamp(64px, 7vw, 96px) clamp(24px, 4vw, 80px)',
-          opacity: formAnim.visible ? 1 : 0,
-          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>

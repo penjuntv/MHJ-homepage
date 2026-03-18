@@ -28,7 +28,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   magazine_title: 'Magazine Shelf',
   magazine_hint: 'Scroll to explore',
   storypress_title: 'StoryPress',
-  storypress_description: 'An English learning app born from our bilingual family journey. Designed for ESOL children who deserve a gentle, story-based path to language.',
+  storypress_description: '',
   storypress_cta_url: '',
   storypress_cta_text: 'Join the Waitlist',
   storypress_hero_image_url: '',

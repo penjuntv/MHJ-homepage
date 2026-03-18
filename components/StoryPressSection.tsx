@@ -84,7 +84,7 @@ export default function StoryPressSection({ title, description, ctaUrl, ctaText 
           maxWidth: 440,
           margin: '0 auto 52px',
         }}>
-          {description || 'An English learning app for ESOL children, born from our bilingual family journey.'}
+          {description || 'Born from our bilingual family journey. For children who deserve a gentle, story-based path to English.'}
         </p>
 
         {/* CTA 버튼 */}

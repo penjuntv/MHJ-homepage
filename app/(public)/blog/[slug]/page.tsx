@@ -454,6 +454,7 @@ export default async function BlogDetailPage({
                 <div
                   className="blog-content"
                   dangerouslySetInnerHTML={{ __html: blog.content }}
+                  suppressHydrationWarning
                 />
               </div>
             ) : (
