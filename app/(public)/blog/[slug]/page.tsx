@@ -11,6 +11,7 @@ import RelatedCard from './RelatedCard';
 import ShareButton from '@/components/ShareButton';
 import CommentSection from './CommentSection';
 import AiInsight from '@/components/AiInsight';
+import ShareButtons from '@/components/ShareButtons';
 
 async function getBlogForPreview(slug: string): Promise<Blog | null> {
   const { data } = await supabase
@@ -625,6 +626,9 @@ export default async function BlogDetailPage({
             )}
           </article>
         </div>
+
+        {/* Share Buttons */}
+        <ShareButtons title={blog.title} slug={blog.slug} />
 
         {/* Related Posts */}
         {relatedBlogs.length > 0 && (
