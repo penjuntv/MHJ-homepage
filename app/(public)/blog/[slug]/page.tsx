@@ -105,7 +105,11 @@ export async function generateMetadata({
 
   const plainText = blog.content.replace(/<[^>]*>/g, '');
   const description = blog.meta_description || plainText.slice(0, 160);
-  const ogImage = blog.og_image_url || blog.image_url;
+
+  const baseUrl = 'https://mhj-homepage.vercel.app';
+  const ogImage = blog.og_image_url
+    ? blog.og_image_url
+    : `${baseUrl}/api/og?title=${encodeURIComponent(blog.title)}&category=${encodeURIComponent(blog.category)}&date=${encodeURIComponent(blog.date)}`;
 
   return {
     title: `${blog.title} — MY MAIRANGI`,
@@ -113,7 +117,7 @@ export async function generateMetadata({
     openGraph: {
       title: blog.title,
       description,
-      url: `https://mhj-homepage.vercel.app/blog/${blog.slug}`,
+      url: `${baseUrl}/blog/${blog.slug}`,
       images: [{ url: ogImage, width: 1200, height: 630, alt: blog.title }],
       type: 'article',
       authors: [blog.author],
@@ -124,7 +128,7 @@ export async function generateMetadata({
       description,
       images: [ogImage],
     },
-    alternates: { canonical: `https://mhj-homepage.vercel.app/blog/${blog.slug}` },
+    alternates: { canonical: `${baseUrl}/blog/${blog.slug}` },
   };
 }
 
