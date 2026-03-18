@@ -1,0 +1,38 @@
+{
+  "success": [
+    "girls-001"
+  ],
+  "skipped": [],
+  "failed": [],
+  "details": [
+    {
+      "id": 28,
+      "slug": "girls-001",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/PjujtvikBroVgpddBOEQexmyo.jpg?width=1200&height=600",
+          "stored": "blog/girls-001/body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/ceclROSmeT3vLqg3Sk70ZJJWtgA.jpg?width=1200&height=600",
+          "stored": "blog/girls-001/body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/QvwfDhwJASmeaUTtWORn5keK8.jpg?width=1200&height=600",
+          "stored": "blog/girls-001/body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/FjK5ZZZbs8W5p5Y7pYDQ07Ko.jpg?width=1200&height=1200",
+          "stored": "blog/girls-001/body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    }
+  ]
+}

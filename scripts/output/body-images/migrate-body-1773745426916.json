@@ -1,0 +1,21 @@
+{
+  "success": [],
+  "skipped": [
+    "education-001"
+  ],
+  "failed": [],
+  "details": [
+    {
+      "id": 13,
+      "slug": "education-001",
+      "images": [],
+      "blockquotes": 3,
+      "replaced": 0,
+      "errors": [
+        "이미지 01 업로드 실패: storageUpload 400: {\"statusCode\":\"403\",\"error\":\"Unauthorized\",\"message\":\"new row violates row-level security policy\"}",
+        "이미지 02 업로드 실패: storageUpload 400: {\"statusCode\":\"403\",\"error\":\"Unauthorized\",\"message\":\"new row violates row-level security policy\"}",
+        "이미지 03 업로드 실패: storageUpload 400: {\"statusCode\":\"403\",\"error\":\"Unauthorized\",\"message\":\"new row violates row-level security policy\"}"
+      ]
+    }
+  ]
+}

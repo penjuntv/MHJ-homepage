@@ -1,0 +1,63 @@
+{
+  "success": [
+    "education-001"
+  ],
+  "skipped": [],
+  "failed": [],
+  "details": [
+    {
+      "id": 13,
+      "slug": "education-001",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/kmWAOVoiA3Hnoil9mQbE7atNleU.jpg?width=1200&height=750",
+          "stored": "blog/education-001/body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/pViVF48fVghpJdBgwrIOIkwBZ4.jpg?width=1200&height=750",
+          "stored": "blog/education-001/body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/X2LnlMJATaQoErScElrlO8gvzSY.jpg?width=1200&height=750",
+          "stored": "blog/education-001/body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://feedspring-storage.fra1.cdn.digitaloceanspaces.com/feeds/d9BnAvO4nDGqXI0H-tlVy-tX7NYPHJge_iS9UNO9JJDairvPTS1KbNGEzm.jpg",
+          "stored": "blog/education-001/body-04.webp"
+        },
+        {
+          "index": 4,
+          "src": "https://feedspring-storage.fra1.cdn.digitaloceanspaces.com/feeds/d9BnAvO4nDGqXI0H-tlVy-TDET3P_7VUKOgn4mi2e5YQx33-hi3JjUyH3Q.jpg",
+          "stored": "blog/education-001/body-05.webp"
+        },
+        {
+          "index": 5,
+          "src": "https://feedspring-storage.fra1.cdn.digitaloceanspaces.com/feeds/d9BnAvO4nDGqXI0H-tlVy-wLRqSUh-Tv3Bmi8W63fYfiqpu3eY7IAPv_p2.jpg",
+          "stored": "blog/education-001/body-06.webp"
+        },
+        {
+          "index": 6,
+          "src": "https://feedspring-storage.fra1.cdn.digitaloceanspaces.com/feeds/d9BnAvO4nDGqXI0H-tlVy-H1FfAeFuMlu28IXPmV3NwhkeDnYg5bLfCsLV.jpg",
+          "stored": "blog/education-001/body-07.webp"
+        },
+        {
+          "index": 7,
+          "src": "https://feedspring-storage.fra1.cdn.digitaloceanspaces.com/feeds/d9BnAvO4nDGqXI0H-tlVy-EPNvqyNmIpzha7vVqqUZ33aIY_nSKC47ntNh.jpg",
+          "stored": "blog/education-001/body-08.webp"
+        },
+        {
+          "index": 8,
+          "src": "https://feedspring-storage.fra1.cdn.digitaloceanspaces.com/feeds/d9BnAvO4nDGqXI0H-tlVy-8_yrqaj9Gk8NqNk8FSriBIlrzV9xgc0-vlK3.jpg",
+          "stored": "blog/education-001/body-09.webp"
+        }
+      ],
+      "blockquotes": 3,
+      "replaced": 3,
+      "errors": []
+    }
+  ]
+}

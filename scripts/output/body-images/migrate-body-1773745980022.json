@@ -1,0 +1,604 @@
+{
+  "success": [
+    "education-001",
+    "education-002",
+    "education-003",
+    "education-004",
+    "education-005",
+    "education-006",
+    "settlement-001",
+    "settlement-002",
+    "settlement-003",
+    "settlement-004",
+    "settlement-005",
+    "settlement-006",
+    "settlement-007",
+    "settlement-008",
+    "girls-001",
+    "girls-002",
+    "girls-003",
+    "girls-004",
+    "locals-001",
+    "locals-002"
+  ],
+  "skipped": [
+    "education-007"
+  ],
+  "failed": [],
+  "details": [
+    {
+      "id": 13,
+      "slug": "education-001",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/kmWAOVoiA3Hnoil9mQbE7atNleU.jpg?width=1200&height=750",
+          "stored": "blog/blog-13-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/pViVF48fVghpJdBgwrIOIkwBZ4.jpg?width=1200&height=750",
+          "stored": "blog/blog-13-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/X2LnlMJATaQoErScElrlO8gvzSY.jpg?width=1200&height=750",
+          "stored": "blog/blog-13-body-03.webp"
+        }
+      ],
+      "blockquotes": 3,
+      "replaced": 3,
+      "errors": []
+    },
+    {
+      "id": 14,
+      "slug": "education-002",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/6RaqlIn9jbiHsN70FSgHwW9KlDo.webp?width=1200&height=600",
+          "stored": "blog/blog-14-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/lyAVoLZy1lK7b7mJ2mYn9vjUw.jpg?width=1200&height=750",
+          "stored": "blog/blog-14-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/6SJeMkvEosUYpJJjGBOIkV34.jpg?width=1200&height=750",
+          "stored": "blog/blog-14-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/fOhhnVvae5FZ2aod6Np99tPARk.jpg?width=1200&height=750",
+          "stored": "blog/blog-14-body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    },
+    {
+      "id": 15,
+      "slug": "education-003",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/9EnfAq6K4QmLylIUhGdYHYYPDls.png?width=838&height=1098",
+          "stored": "blog/blog-15-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/ENcrqfMmBjAA049x9awQP6RN1U.png?width=820&height=908",
+          "stored": "blog/blog-15-body-02.webp"
+        }
+      ],
+      "blockquotes": 1,
+      "replaced": 1,
+      "errors": []
+    },
+    {
+      "id": 16,
+      "slug": "education-004",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/WuSHwn2FLP6xh2pQmSc8Gg7mZrs.png?width=836&height=664",
+          "stored": "blog/blog-16-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/ZBevehwi3RUDqk20QGtbeNKIPg.png?width=934&height=1228",
+          "stored": "blog/blog-16-body-02.webp"
+        }
+      ],
+      "blockquotes": 1,
+      "replaced": 1,
+      "errors": []
+    },
+    {
+      "id": 17,
+      "slug": "education-005",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/Dpje8gCXCOyGUv7l8LPX4QPme4.webp?width=1200&height=600",
+          "stored": "blog/blog-17-body-01.webp"
+        }
+      ],
+      "blockquotes": 1,
+      "replaced": 1,
+      "errors": []
+    },
+    {
+      "id": 18,
+      "slug": "education-006",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/PClbSwdReVWZuCaqEU2YIkiL84.webp?width=1500&height=1500",
+          "stored": "blog/blog-18-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/rmIDH1gUn9XBHssZnUZ3myvfhxI.webp?width=1200&height=1200",
+          "stored": "blog/blog-18-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/Wl0kQgNSUau1b7uBg3kyocTdf4Q.png?width=1612&height=762",
+          "stored": "blog/blog-18-body-03.webp"
+        }
+      ],
+      "blockquotes": 3,
+      "replaced": 3,
+      "errors": []
+    },
+    {
+      "id": 19,
+      "slug": "education-007",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/wOR8ho9KooOMSB7fx0Ko1yJTj4.webp?width=1400&height=628",
+          "stored": "blog/blog-19-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/RG6HNrKsDlrbHKYGHLbkY25V4I.webp?width=1400&height=628",
+          "stored": "blog/blog-19-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/CW6IIWO2uE51LDVR32HiJbbiEE.webp?width=1400&height=628",
+          "stored": "blog/blog-19-body-03.webp"
+        }
+      ],
+      "blockquotes": 0,
+      "replaced": 0,
+      "errors": []
+    },
+    {
+      "id": 20,
+      "slug": "settlement-001",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/xFNBXrNNL2cwKp9DtVtkBU14GVk.jpg?width=900&height=900",
+          "stored": "blog/blog-20-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/RlZBg1foWaTGaxndG0zjiLJOONU.jpg?width=900&height=900",
+          "stored": "blog/blog-20-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/3qbNp0BkBYkyXjbDx1Qn6pABLU.jpg?width=900&height=900",
+          "stored": "blog/blog-20-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/OhYFJ5hs6lBHLBRzkbey2pDU8.jpg?width=1000&height=1000",
+          "stored": "blog/blog-20-body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    },
+    {
+      "id": 21,
+      "slug": "settlement-002",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/XfOOLLmLT7WFFlBKjK0kF1A7I.jpg?width=1000&height=1000",
+          "stored": "blog/blog-21-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/DNuxIKV4JMlQEYXPVV3KMabkrw.jpg?width=900&height=900",
+          "stored": "blog/blog-21-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/f35Jg4TDMjwx3wQu0euLBubJ30.jpg?width=900&height=900",
+          "stored": "blog/blog-21-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/1WBqoBxW2yCUx0aedUvbsGrn8.gif?width=1280&height=720",
+          "stored": "blog/blog-21-body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    },
+    {
+      "id": 22,
+      "slug": "settlement-003",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/g31LjwnBCxHLb5AHSuCPbQEPZY.jpg?width=900&height=900",
+          "stored": "blog/blog-22-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/7oLAH7maBTKD3OeZ2wqeJ60X0.jpg?width=900&height=900",
+          "stored": "blog/blog-22-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/2IEdI3XJJmZXWcVNwADFBqgcUzo.jpg?width=900&height=900",
+          "stored": "blog/blog-22-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/zfHjTN5HkBqp7p0lbBHa9CHuE.jpg?width=900&height=900",
+          "stored": "blog/blog-22-body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    },
+    {
+      "id": 23,
+      "slug": "settlement-004",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/VhSqn1XxCRUHbsLX5gotrTC1B8.jpg?width=1200&height=1200",
+          "stored": "blog/blog-23-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/EwwjD8a0bSfrzaXTEkp4DLs2hQ.jpg?width=1200&height=1200",
+          "stored": "blog/blog-23-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/xyHl5zv6YmTHtOLQR3xa0RIRyHk.jpg?width=1200&height=1200",
+          "stored": "blog/blog-23-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/OChcXb2IXIKd27o8DCKayLE678.jpg?width=1200&height=1200",
+          "stored": "blog/blog-23-body-04.webp"
+        }
+      ],
+      "blockquotes": 3,
+      "replaced": 3,
+      "errors": []
+    },
+    {
+      "id": 24,
+      "slug": "settlement-005",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/xxHxjIua7Ksi2KOpRBKdgWr8OgA.jpg?width=1200&height=1200",
+          "stored": "blog/blog-24-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/T7oxggDeys4bT6CodP8Vzw1XrwA.jpg?width=1200&height=1200",
+          "stored": "blog/blog-24-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/qu8KBqXvDu98UEkRNoWDHcB13Q.jpg?width=1200&height=1200",
+          "stored": "blog/blog-24-body-03.webp"
+        }
+      ],
+      "blockquotes": 3,
+      "replaced": 3,
+      "errors": []
+    },
+    {
+      "id": 25,
+      "slug": "settlement-006",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/hAyEkFUEHrHwQBL5FCYE4fBG8.jpg?width=1200&height=587",
+          "stored": "blog/blog-25-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/ZrBvLp78MJsLDyz9kd3loD7Q4p0.jpg?width=1200&height=1200",
+          "stored": "blog/blog-25-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/nTxHbPqPiWQPWDsHVC4jEfuucKo.jpg?width=1200&height=1200",
+          "stored": "blog/blog-25-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/mQINKIkKzJqn3Yag2mZkfGklyPw.jpg?width=1200&height=1200",
+          "stored": "blog/blog-25-body-04.webp"
+        }
+      ],
+      "blockquotes": 3,
+      "replaced": 3,
+      "errors": []
+    },
+    {
+      "id": 26,
+      "slug": "settlement-007",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/aUcxmA5nExW2mbpuSByXVJqIo.jpg?width=1200&height=1200",
+          "stored": "blog/blog-26-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/S6L8dq9wxNKCgZBrWPZQiZ8k.jpg?width=1200&height=1200",
+          "stored": "blog/blog-26-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/bBA8k82Qwm8JroMVVRwUcHuQb7Y.jpg?width=1200&height=1200",
+          "stored": "blog/blog-26-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/Hh5EnzJvS9rWA6ZqT3NTW51Cxs.jpg?width=1200&height=1200",
+          "stored": "blog/blog-26-body-04.webp"
+        },
+        {
+          "index": 4,
+          "src": "https://framerusercontent.com/images/0O4xT4osvWlePFTafkDE6j6pk.jpg?width=1200&height=1200",
+          "stored": "blog/blog-26-body-05.webp"
+        }
+      ],
+      "blockquotes": 5,
+      "replaced": 5,
+      "errors": []
+    },
+    {
+      "id": 27,
+      "slug": "settlement-008",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/Mcb6HukW0ndwNBOaKPGm6JHsLgI.jpg?width=1200&height=600",
+          "stored": "blog/blog-27-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/SKh6Uxg76cuP5ExKKgoe0Vxhkmg.jpg?width=1200&height=1200",
+          "stored": "blog/blog-27-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/2pQwFCdO7RwcO9CnUNdS5qeb4qc.jpg?width=1200&height=1200",
+          "stored": "blog/blog-27-body-03.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 3,
+      "errors": []
+    },
+    {
+      "id": 28,
+      "slug": "girls-001",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/PjujtvikBroVgpddBOEQexmyo.jpg?width=1200&height=600",
+          "stored": "blog/blog-28-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/ceclROSmeT3vLqg3Sk70ZJJWtgA.jpg?width=1200&height=600",
+          "stored": "blog/blog-28-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/QvwfDhwJASmeaUTtWORn5keK8.jpg?width=1200&height=600",
+          "stored": "blog/blog-28-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/FjK5ZZZbs8W5p5Y7pYDQ07Ko.jpg?width=1200&height=1200",
+          "stored": "blog/blog-28-body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    },
+    {
+      "id": 29,
+      "slug": "girls-002",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/1ZaaE9B0fIIp0vGxFWkLjK4Uk3o.jpg?width=1200&height=832",
+          "stored": "blog/blog-29-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/YXCGCjIUnZ0An411QrniPREa86E.jpg?width=1200&height=600",
+          "stored": "blog/blog-29-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/6Uu50GQcWFiNkUygEoyfQbt1s.jpg?width=1200&height=600",
+          "stored": "blog/blog-29-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/OqBJLBcreQIlozyyGqOeQuixFKM.jpg?width=1200&height=1200",
+          "stored": "blog/blog-29-body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    },
+    {
+      "id": 30,
+      "slug": "girls-003",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/BJ58yAdDT0F4S2LMI9XL72tkqH4.jpg?width=1200&height=1200",
+          "stored": "blog/blog-30-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/Y1qOkd2bcse1KODLjBg0SFrBc.jpg?width=1200&height=1200",
+          "stored": "blog/blog-30-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/e8RsS6QowevOr5RFELkEDNTBJyY.jpg?width=1200&height=1200",
+          "stored": "blog/blog-30-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/24qRkhli3zdBgTthS1UZNtBRARs.jpg?width=1200&height=1200",
+          "stored": "blog/blog-30-body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    },
+    {
+      "id": 31,
+      "slug": "girls-004",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/eISszuIKgYhVgHXx3xKBRDPM.jpg?width=1200&height=750",
+          "stored": "blog/blog-31-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/k2m0T1AuXcpEx4JBNuWTrt13Zo.webp?width=1024&height=1020",
+          "stored": "blog/blog-31-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/hLz4ozuWmySeybbxdFEmYvWdw.webp?width=1200&height=600",
+          "stored": "blog/blog-31-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/3bM5FyDlX8V0Wcj3nPIh86oJnis.webp?width=1200&height=600",
+          "stored": "blog/blog-31-body-04.webp"
+        },
+        {
+          "index": 4,
+          "src": "https://framerusercontent.com/images/kLi5Ns734PD5Cxkc3uZVnaCHMTU.jpg?width=1200&height=1200",
+          "stored": "blog/blog-31-body-05.webp"
+        }
+      ],
+      "blockquotes": 5,
+      "replaced": 5,
+      "errors": []
+    },
+    {
+      "id": 32,
+      "slug": "locals-001",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/BECghl3idhztx0L2Jwy0ucVaHEk.jpg?width=1200&height=459",
+          "stored": "blog/blog-32-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/HoiY97tfL58wsVVCLnqWH7eqFNY.jpg?width=1200&height=1200",
+          "stored": "blog/blog-32-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/cTqS2Y9XoKzQarvTFeJ7TzazI.jpg?width=1200&height=1200",
+          "stored": "blog/blog-32-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/8QvzZ0B44T5zqO2RNLMsD1xdn4.jpg?width=1200&height=1200",
+          "stored": "blog/blog-32-body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    },
+    {
+      "id": 33,
+      "slug": "locals-002",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/OVeDV41p39G2mfk78HTHqlD1ht4.jpg?width=1200&height=900",
+          "stored": "blog/blog-33-body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/c9ex6dhzSlBp9WZQ7QXx7W3fI.jpg?width=1200&height=900",
+          "stored": "blog/blog-33-body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/zG8EtAwdEBZnymt4pHZRJjcb4hw.jpg?width=1200&height=900",
+          "stored": "blog/blog-33-body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/bfcVj4N9MIjNw8qKB8MuDgG3yco.webp?width=1200&height=600",
+          "stored": "blog/blog-33-body-04.webp"
+        },
+        {
+          "index": 4,
+          "src": "https://framerusercontent.com/images/PQoh3ukp4W3BY0cfMJTfKTVoE.webp?width=1200&height=600",
+          "stored": "blog/blog-33-body-05.webp"
+        },
+        {
+          "index": 5,
+          "src": "https://framerusercontent.com/images/uJgURXKDj4kylmld0H9q75cjT0.jpg?width=1200&height=900",
+          "stored": "blog/blog-33-body-06.webp"
+        },
+        {
+          "index": 6,
+          "src": "https://framerusercontent.com/images/zm6tcEBi9JPoT4t6cKxs4M4N7fw.jpg?width=1200&height=900",
+          "stored": "blog/blog-33-body-07.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    }
+  ]
+}

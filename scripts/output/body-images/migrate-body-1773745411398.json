@@ -1,0 +1,38 @@
+{
+  "success": [
+    "settlement-001"
+  ],
+  "skipped": [],
+  "failed": [],
+  "details": [
+    {
+      "id": 20,
+      "slug": "settlement-001",
+      "images": [
+        {
+          "index": 0,
+          "src": "https://framerusercontent.com/images/xFNBXrNNL2cwKp9DtVtkBU14GVk.jpg?width=900&height=900",
+          "stored": "blog/settlement-001/body-01.webp"
+        },
+        {
+          "index": 1,
+          "src": "https://framerusercontent.com/images/RlZBg1foWaTGaxndG0zjiLJOONU.jpg?width=900&height=900",
+          "stored": "blog/settlement-001/body-02.webp"
+        },
+        {
+          "index": 2,
+          "src": "https://framerusercontent.com/images/3qbNp0BkBYkyXjbDx1Qn6pABLU.jpg?width=900&height=900",
+          "stored": "blog/settlement-001/body-03.webp"
+        },
+        {
+          "index": 3,
+          "src": "https://framerusercontent.com/images/OhYFJ5hs6lBHLBRzkbey2pDU8.jpg?width=1000&height=1000",
+          "stored": "blog/settlement-001/body-04.webp"
+        }
+      ],
+      "blockquotes": 4,
+      "replaced": 4,
+      "errors": []
+    }
+  ]
+}
