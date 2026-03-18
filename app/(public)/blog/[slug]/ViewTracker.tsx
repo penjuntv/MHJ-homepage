@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function ViewTracker({ slug }: { slug: string }) {
   useEffect(() => {
@@ -9,11 +10,11 @@ export default function ViewTracker({ slug }: { slug: string }) {
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, '1');
 
-    fetch('/api/view', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug }),
-    }).catch(() => {}); // silent fail
+    supabase
+      .rpc('increment_blog_view', { p_slug: slug })
+      .then(({ error }) => {
+        if (error) console.error('View count RPC error:', error);
+      });
   }, [slug]);
 
   return null;
