@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { BookOpen, RefreshCw, Users, Sparkles, ChevronDown } from 'lucide-react';
+import {
+  BookOpen, RefreshCw, Users, Sparkles, ChevronDown,
+  Clock, BookMarked, Calendar, Brain, Pencil, FlaskConical,
+  Star, Heart,
+} from 'lucide-react';
 import StoryPressFAQ from '@/components/StoryPressFAQ';
 
 interface Props {
@@ -84,15 +88,71 @@ const STEPS = [
   },
 ];
 
+const LIBRARY_STATS = [
+  {
+    icon: Clock,
+    color: '#F59E42',
+    bg: '#FFF7ED',
+    number: '10',
+    unit: 'min',
+    label: 'a day',
+    desc: 'Short enough for any schedule. Long enough to make real progress.',
+  },
+  {
+    icon: BookMarked,
+    color: '#6D7AFA',
+    bg: '#EEF2FF',
+    number: '40+',
+    unit: '',
+    label: 'words per book',
+    desc: 'Each storybook contains 40 carefully chosen, research-backed vocabulary words.',
+  },
+  {
+    icon: Calendar,
+    color: '#10B981',
+    bg: '#ECFDF5',
+    number: '10',
+    unit: 'days',
+    label: 'to a real book',
+    desc: 'Ten daily pages become one finished storybook — with your child\'s name on the cover.',
+  },
+];
+
+const RESEARCH_CARDS = [
+  {
+    icon: Brain,
+    color: '#6D7AFA',
+    bg: '#EEF2FF',
+    title: 'Words that stick',
+    desc: "Every word in StoryPress is chosen from the same research-backed lists used in classrooms across New Zealand, Australia, the US, and the UK. Your child meets each word 14+ times — through stories, games, and their own creations — so it stays.",
+  },
+  {
+    icon: BookOpen,
+    color: '#F59E42',
+    bg: '#FFF7ED',
+    title: 'Stories, not drills',
+    desc: "Children remember words far better when they meet them inside stories they care about. That's why every word in StoryPress lives inside a story your child helps create.",
+  },
+  {
+    icon: Pencil,
+    color: '#10B981',
+    bg: '#ECFDF5',
+    title: 'Made by them, not watched by them',
+    desc: "Your child doesn't just listen or tap. They build a story, colour the scene, and see their work become a real page in a real book. That's active creation — and it's what makes the difference.",
+  },
+];
+
 export default function StoryPressClient({ title, description, heroImageUrl }: Props) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
   const [hoverFeature, setHoverFeature] = useState<number | null>(null);
+  const [hoverResearch, setHoverResearch] = useState<number | null>(null);
 
   const featuresAnim = useSlideUp();
   const stepsAnim = useSlideUp();
   const libraryAnim = useSlideUp();
   const researchAnim = useSlideUp();
+  const storyAnim = useSlideUp();
   const quoteAnim = useSlideUp();
   const formAnim = useSlideUp();
 
@@ -230,15 +290,15 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         </div>
       </section>
 
-      {/* ─── Features (Why StoryPress) ─── */}
+      {/* ─── Features (Why StoryPress) — 데스크탑 4열 ─── */}
       <section
         id="why-storypress"
         ref={featuresAnim.ref}
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
-          maxWidth: 1200, margin: '0 auto',
-            transform: featuresAnim.visible ? 'none' : 'translateY(40px)',
-          transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
+          maxWidth: 1320, margin: '0 auto',
+          opacity: featuresAnim.visible ? 1 : 0,
+          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{ marginBottom: 64, textAlign: 'center' }}>
@@ -246,7 +306,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             Why StoryPress
           </p>
           <h2 className="font-display font-black" style={{
-            fontSize: 'clamp(32px, 5vw, 64px)',
+            fontSize: 'clamp(32px, 5vw, 56px)',
             letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic',
             color: 'var(--text)',
           }}>
@@ -254,11 +314,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </h2>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))',
-          gap: 24,
-        }}>
+        {/* 4열 그리드 (tablet 2×2, mobile 1열) */}
+        <div className="sp-grid-4">
           {FEATURES.map((f, i) => {
             const Icon = f.icon;
             const isHovered = hoverFeature === i;
@@ -269,26 +326,23 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                 onMouseLeave={() => setHoverFeature(null)}
                 style={{
                   background: 'var(--bg-surface)',
-                  borderRadius: 32,
-                  padding: 'clamp(28px, 3vw, 40px)',
+                  borderRadius: 20,
+                  padding: 'clamp(24px, 2.5vw, 36px)',
                   cursor: 'default',
-                  transform: isHovered
-                    ? 'translateY(-8px)'
-                    : featuresAnim.visible ? 'none' : 'translateY(30px)',
+                  opacity: isHovered ? 0.95 : 1,
+                  transform: isHovered ? 'scale(1.02)' : 'none',
                   boxShadow: isHovered
-                    ? '0 20px 48px rgba(0,0,0,0.12)'
+                    ? '0 20px 48px rgba(0,0,0,0.10)'
                     : '0 2px 8px rgba(0,0,0,0.04)',
-                  transition: isHovered
-                    ? 'transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s'
-                    : `all 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s`,
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease',
                 }}
               >
-                <div className="sp-feature-icon" style={{
-                  width: 52, height: 52, borderRadius: 16,
+                <div style={{
+                  width: 48, height: 48, borderRadius: 14,
                   background: f.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   marginBottom: 20,
                 }}>
-                  <Icon size={24} color={f.color} />
+                  <Icon size={22} color={f.color} />
                 </div>
 
                 {/* 숫자 강조 (첫 번째 카드) */}
@@ -297,7 +351,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                     <span
                       className="font-display"
                       style={{
-                        fontSize: 'clamp(48px, 6vw, 64px)',
+                        fontSize: 'clamp(40px, 5vw, 56px)',
                         fontWeight: 900,
                         fontStyle: 'italic',
                         letterSpacing: -3,
@@ -324,13 +378,13 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   </div>
                 ) : (
                   <h3 style={{
-                    fontSize: 18, fontWeight: 900, color: 'var(--text)',
+                    fontSize: 17, fontWeight: 900, color: 'var(--text)',
                     letterSpacing: '-0.5px', marginBottom: 12,
                   }}>
                     {f.title}
                   </h3>
                 )}
-                <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
                   {f.desc}
                 </p>
               </div>
@@ -345,17 +399,17 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         className="sp-steps-bg"
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
-          transform: stepsAnim.visible ? 'none' : 'translateY(40px)',
-          transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
+          opacity: stepsAnim.visible ? 1 : 0,
+          transition: 'opacity 0.8s ease',
         }}
       >
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto' }}>
           <div style={{ marginBottom: 64, textAlign: 'center' }}>
             <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#CBD5E1', textTransform: 'uppercase', marginBottom: 16 }}>
               Three steps to a real storybook
             </p>
             <h2 className="font-display font-black" style={{
-              fontSize: 'clamp(32px, 5vw, 64px)',
+              fontSize: 'clamp(32px, 5vw, 56px)',
               letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic',
               color: 'var(--text)',
             }}>
@@ -373,27 +427,16 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                 key={i}
                 style={{
                   background: 'var(--bg-card)',
-                  borderRadius: 32,
+                  borderRadius: 20,
                   padding: 'clamp(32px, 4vw, 48px)',
                   position: 'relative',
                   overflow: 'hidden',
-                  transform: stepsAnim.visible ? 'none' : 'translateY(30px)',
-                  transition: `all 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 0.15}s`,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
                 }}
               >
-                {/* 배경 숫자 */}
-                <div className="font-display" style={{
-                  position: 'absolute', top: -16, right: 16,
-                  fontSize: 120, fontWeight: 900, fontStyle: 'italic',
-                  color: 'rgba(0,0,0,0.04)', lineHeight: 1, letterSpacing: -4,
-                  pointerEvents: 'none', userSelect: 'none',
-                }}>
-                  {step.num}
-                </div>
-
-                {/* 번호 */}
+                {/* 번호만 — 배경 장식 숫자 없음 */}
                 <p className="font-display" style={{
-                  fontSize: 'clamp(48px, 6vw, 72px)',
+                  fontSize: 'clamp(40px, 5vw, 56px)',
                   fontWeight: 900, fontStyle: 'italic',
                   letterSpacing: -3, lineHeight: 1,
                   color: '#F59E42',
@@ -402,7 +445,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   {step.num}
                 </p>
                 <h3 style={{
-                  fontSize: 22, fontWeight: 900, color: 'var(--text)',
+                  fontSize: 20, fontWeight: 900, color: 'var(--text)',
                   letterSpacing: '-0.5px', marginBottom: 12,
                 }}>
                   {step.label}
@@ -435,57 +478,127 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         ref={libraryAnim.ref}
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
-          maxWidth: 1200, margin: '0 auto',
-          transform: libraryAnim.visible ? 'none' : 'translateY(40px)',
-          transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
+          background: 'var(--bg)',
+          opacity: libraryAnim.visible ? 1 : 0,
+          transition: 'opacity 0.8s ease',
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#CBD5E1', textTransform: 'uppercase', marginBottom: 16 }}>
-            A Growing Library
-          </p>
-          <h2 className="font-display font-black" style={{
-            fontSize: 'clamp(28px, 4.5vw, 52px)',
-            letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic',
-            color: 'var(--text)', marginBottom: 24,
-          }}>
-            A growing library of books they made themselves
-          </h2>
-          <p style={{ fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'var(--text-secondary)', lineHeight: 1.75, maxWidth: 640, margin: '0 auto 32px' }}>
-            Every day, your child creates a new story page. After 10 days, all the pages come together into a finished book — with their name right there on the cover. Then a new story begins.
-          </p>
-          {/* 통계 3개 */}
-          <div style={{ display: 'flex', gap: 32, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
-            {['10 min a day', '40+ words per book', 'A new book every 10 days'].map((stat, i) => (
-              <span key={i} style={{ fontSize: 13, fontWeight: 900, color: '#F59E42', letterSpacing: 1, textTransform: 'uppercase' }}>
-                {stat}
-              </span>
-            ))}
+        <div style={{ maxWidth: 1320, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#CBD5E1', textTransform: 'uppercase', marginBottom: 16 }}>
+              A Growing Library
+            </p>
+            <h2 className="font-display font-black" style={{
+              fontSize: 'clamp(28px, 4.5vw, 52px)',
+              letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic',
+              color: 'var(--text)', marginBottom: 20,
+            }}>
+              A growing library of books they made themselves
+            </h2>
+            <p style={{ fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'var(--text-secondary)', lineHeight: 1.75, maxWidth: 600, margin: '0 auto' }}>
+              Every day, your child creates a new story page. After 10 days, all the pages come together into a finished book — with their name right there on the cover. Then a new story begins.
+            </p>
           </div>
-          {/* 샘플 책 카드 */}
-          <div style={{ display: 'inline-block', background: 'var(--bg-surface)', borderRadius: 20, padding: '20px 32px', border: '1px solid rgba(0,0,0,0.06)' }}>
-            <p style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', marginBottom: 4, letterSpacing: '-0.5px' }}>
-              &ldquo;Jin&rsquo;s February Adventures&rdquo;
-            </p>
-            <p style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 1 }}>
-              10 pages · Created by Jin · February 2026
-            </p>
+
+          {/* 통계 3카드 — 아이콘 + 큰 숫자 + 설명 */}
+          <div className="sp-grid-3" style={{ marginBottom: 56 }}>
+            {LIBRARY_STATS.map((stat, i) => {
+              const Icon = stat.icon;
+              return (
+                <div key={i} style={{
+                  background: 'var(--bg-surface)',
+                  borderRadius: 20,
+                  padding: 'clamp(28px, 3vw, 40px)',
+                  textAlign: 'center',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                  border: '1px solid var(--border)',
+                }}>
+                  <div style={{
+                    width: 52, height: 52, borderRadius: 16,
+                    background: stat.bg,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '0 auto 20px',
+                  }}>
+                    <Icon size={24} color={stat.color} />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 4, marginBottom: 4 }}>
+                    <span className="font-display" style={{
+                      fontSize: 'clamp(40px, 5vw, 64px)',
+                      fontWeight: 900, fontStyle: 'italic',
+                      letterSpacing: -3, lineHeight: 1,
+                      color: stat.color,
+                    }}>
+                      {stat.number}
+                    </span>
+                    {stat.unit && (
+                      <span style={{ fontSize: 18, fontWeight: 900, color: stat.color }}>{stat.unit}</span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: 12 }}>
+                    {stat.label}
+                  </p>
+                  <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0 }}>
+                    {stat.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 샘플 책 카드들 */}
+          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {[
+              { title: "Jin's February Adventures", pages: 10, month: 'February 2026', rotate: '-3deg', color: '#FFF7ED', border: '#FED7AA' },
+              { title: "Lily's Spring Stories", pages: 10, month: 'March 2026', rotate: '1.5deg', color: '#EEF2FF', border: '#C7D2FE' },
+              { title: "Mia's Summer Garden", pages: 10, month: 'April 2026', rotate: '-1deg', color: '#ECFDF5', border: '#A7F3D0' },
+            ].map((book, i) => (
+              <div key={i} style={{
+                background: book.color,
+                border: `1px solid ${book.border}`,
+                borderRadius: 16,
+                padding: '20px 28px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+                transform: `rotate(${book.rotate})`,
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                minWidth: 200,
+                cursor: 'default',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLDivElement).style.transform = 'rotate(0deg) scale(1.03)';
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 16px 48px rgba(0,0,0,0.14)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLDivElement).style.transform = `rotate(${book.rotate})`;
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(0,0,0,0.10)';
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <Star size={14} color="#F59E42" fill="#F59E42" />
+                  <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: '#F59E42' }}>Finished Book</span>
+                </div>
+                <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', marginBottom: 4, letterSpacing: '-0.3px' }}>
+                  &ldquo;{book.title}&rdquo;
+                </p>
+                <p style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 1 }}>
+                  {book.pages} pages · {book.month}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Built on Research ─── */}
+      {/* ─── Built on Research — 데스크탑 3열 ─── */}
       <section
         ref={researchAnim.ref}
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           background: 'var(--bg-surface)',
-          transform: researchAnim.visible ? 'none' : 'translateY(40px)',
-          transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
+          opacity: researchAnim.visible ? 1 : 0,
+          transition: 'opacity 0.8s ease',
         }}
       >
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 64 }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#CBD5E1', textTransform: 'uppercase', marginBottom: 16 }}>
               Built on Research
             </p>
@@ -496,64 +609,171 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             }}>
               Not a new method. Proven science, wrapped in creativity.
             </h2>
-            <p style={{ fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'var(--text-secondary)', lineHeight: 1.75, maxWidth: 640, margin: '0 auto' }}>
+            <p style={{ fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'var(--text-secondary)', lineHeight: 1.75, maxWidth: 600, margin: '0 auto' }}>
               We didn&apos;t invent a new way to teach English. We took what decades of research already proved — and wrapped it in something a child would actually want to do: make their own storybook.
             </p>
           </div>
-          {/* 3개 카드 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px,100%),1fr))', gap: 24, marginBottom: 48 }}>
-            {[
-              {
-                title: 'Words that stick',
-                desc: "Every word in StoryPress is chosen from the same research-backed lists used in classrooms across New Zealand, Australia, the US, and the UK. Your child meets each word 14+ times — through stories, games, and their own creations — so it stays.",
-              },
-              {
-                title: 'Stories, not drills',
-                desc: "Children remember words far better when they meet them inside stories they care about. That's why every word in StoryPress lives inside a story your child helps create.",
-              },
-              {
-                title: 'Made by them, not watched by them',
-                desc: "Your child doesn't just listen or tap. They build a story, colour the scene, and see their work become a real page in a real book. That's active creation — and it's what makes the difference.",
-              },
-            ].map((card, i) => (
-              <div key={i} style={{ background: 'var(--bg-card)', borderRadius: 24, padding: 'clamp(24px, 3vw, 36px)' }}>
-                <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', marginBottom: 12, letterSpacing: '-0.5px' }}>{card.title}</h3>
-                <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.75, margin: 0 }}>{card.desc}</p>
-              </div>
-            ))}
+
+          {/* 3열 그리드 */}
+          <div className="sp-grid-3" style={{ marginBottom: 48 }}>
+            {RESEARCH_CARDS.map((card, i) => {
+              const Icon = card.icon;
+              const isHovered = hoverResearch === i;
+              return (
+                <div
+                  key={i}
+                  onMouseEnter={() => setHoverResearch(i)}
+                  onMouseLeave={() => setHoverResearch(null)}
+                  style={{
+                    background: 'var(--bg-card)',
+                    borderRadius: 20,
+                    padding: 'clamp(28px, 3vw, 40px)',
+                    boxShadow: isHovered ? '0 16px 40px rgba(0,0,0,0.10)' : '0 2px 12px rgba(0,0,0,0.05)',
+                    opacity: isHovered ? 0.95 : 1,
+                    transform: isHovered ? 'scale(1.02)' : 'none',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease',
+                  }}
+                >
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 14,
+                    background: card.bg,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 20,
+                  }}>
+                    <Icon size={22} color={card.color} />
+                  </div>
+                  <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', marginBottom: 12, letterSpacing: '-0.5px' }}>
+                    {card.title}
+                  </h3>
+                  <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.75, margin: 0 }}>
+                    {card.desc}
+                  </p>
+                </div>
+              );
+            })}
           </div>
-          <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 700, letterSpacing: 1 }}>
-            Built on the Science of Reading — the same research behind New Zealand&apos;s new classroom literacy programme.
-          </p>
+
+          {/* Science of Reading 배지 */}
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              padding: '12px 24px',
+              borderRadius: 999,
+              background: '#EEF2FF',
+              border: '1px solid #C7D2FE',
+            }}>
+              <FlaskConical size={16} color="#6D7AFA" />
+              <span style={{ fontSize: 12, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: '#6D7AFA' }}>
+                Built on the Science of Reading
+              </span>
+              <span style={{ fontSize: 12, color: '#94A3B8', fontWeight: 500 }}>
+                — the same research behind New Zealand&apos;s new classroom literacy programme
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ─── Our Story ─── */}
-      <section style={{ padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)', maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
-        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#CBD5E1', textTransform: 'uppercase', marginBottom: 16 }}>
-          Our Story
-        </p>
-        <h2 className="font-display font-black" style={{
-          fontSize: 'clamp(28px, 4.5vw, 52px)',
-          letterSpacing: '-2px', lineHeight: 1.1, fontStyle: 'italic',
-          color: 'var(--text)', marginBottom: 32,
+      {/* ─── Our Story — 2컬럼 레이아웃 ─── */}
+      <section
+        ref={storyAnim.ref}
+        style={{
+          padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
+          background: 'linear-gradient(135deg, #FFFBF5 0%, #FFF0E8 100%)',
+          opacity: storyAnim.visible ? 1 : 0,
+          transition: 'opacity 0.8s ease',
+        }}
+      >
+        <div style={{
+          maxWidth: 1200,
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))',
+          gap: 'clamp(40px, 6vw, 80px)',
+          alignItems: 'center',
         }}>
-          Built by a mom. For her daughter.
-        </h2>
-        <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: 'var(--text-secondary)', lineHeight: 1.85, marginBottom: 24 }}>
-          When Jin moved from Seoul to Auckland at age 4, English was a wall. We tried apps, tutors, YouTube, playgroups. Some helped. Most didn&apos;t stick.
-        </p>
-        <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: 'var(--text-secondary)', lineHeight: 1.85, marginBottom: 40 }}>
-          StoryPress was born from that journey — the frustration, the breakthroughs, and the moment Jin said &ldquo;I made a story!&rdquo; for the first time.
-        </p>
-        <blockquote style={{ borderLeft: '3px solid #F59E42', paddingLeft: 24, textAlign: 'left', margin: '0 auto', maxWidth: 560 }}>
-          <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', fontStyle: 'italic', color: 'var(--text)', lineHeight: 1.75, marginBottom: 12 }}>
-            &ldquo;We didn&apos;t invent a new teaching method. We took what research already proved — and wrapped it in something a 4-year-old would actually want to do: create her own storybook.&rdquo;
-          </p>
-          <cite style={{ fontSize: 12, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-tertiary)', fontStyle: 'normal' }}>
-            — Penny &amp; Yussi, StoryPress
-          </cite>
-        </blockquote>
+          {/* 좌: 가족 일러스트 카드 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* 메인 카드 */}
+            <div style={{
+              background: 'white',
+              borderRadius: 24,
+              padding: 32,
+              boxShadow: '0 20px 60px rgba(245,158,66,0.12), 0 4px 16px rgba(0,0,0,0.06)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #FF8B5E, #F59E42)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Heart size={22} color="white" fill="white" />
+                </div>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 900, color: '#1A1A1A', margin: 0 }}>Penny &amp; Yussi</p>
+                  <p style={{ fontSize: 11, color: '#94A3B8', margin: 0, fontWeight: 600, letterSpacing: 1 }}>AUCKLAND, NEW ZEALAND</p>
+                </div>
+              </div>
+              <p style={{ fontSize: 15, fontStyle: 'italic', color: '#64748B', lineHeight: 1.75, margin: 0 }}>
+                &ldquo;We didn&apos;t invent a new teaching method. We took what research already proved — and wrapped it in something a 4-year-old would actually want to do: create her own storybook.&rdquo;
+              </p>
+            </div>
+
+            {/* 보조 카드 */}
+            <div style={{ display: 'flex', gap: 12 }}>
+              {[
+                { emoji: '🇰🇷', label: 'Seoul', sub: 'where we started' },
+                { emoji: '🇳🇿', label: 'Auckland', sub: 'where we live' },
+                { emoji: '📖', label: 'StoryPress', sub: 'what we built' },
+              ].map((item, i) => (
+                <div key={i} style={{
+                  flex: 1,
+                  background: 'white',
+                  borderRadius: 16,
+                  padding: '16px 12px',
+                  textAlign: 'center',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+                }}>
+                  <div style={{ fontSize: 24, marginBottom: 6 }}>{item.emoji}</div>
+                  <p style={{ fontSize: 12, fontWeight: 900, color: '#1A1A1A', margin: 0, letterSpacing: '-0.3px' }}>{item.label}</p>
+                  <p style={{ fontSize: 10, color: '#94A3B8', margin: 0, fontWeight: 600 }}>{item.sub}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 우: 텍스트 */}
+          <div>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#F59E42', textTransform: 'uppercase', marginBottom: 20 }}>
+              Our Story
+            </p>
+            <h2 className="font-display font-black" style={{
+              fontSize: 'clamp(28px, 4.5vw, 52px)',
+              letterSpacing: '-2px', lineHeight: 1.1, fontStyle: 'italic',
+              color: 'var(--text)', marginBottom: 28,
+            }}>
+              Built by a mom.<br />For her daughter.
+            </h2>
+            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: 'var(--text-secondary)', lineHeight: 1.85, marginBottom: 20 }}>
+              When Jin moved from Seoul to Auckland at age 4, English was a wall. We tried apps, tutors, YouTube, playgroups. Some helped. Most didn&apos;t stick.
+            </p>
+            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: 'var(--text-secondary)', lineHeight: 1.85, marginBottom: 32 }}>
+              StoryPress was born from that journey — the frustration, the breakthroughs, and the moment Jin said &ldquo;I made a story!&rdquo; for the first time.
+            </p>
+            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              {['Immigrant family', 'ESOL experience', 'Research-based', 'Built with love'].map((tag, i) => (
+                <span key={i} style={{
+                  display: 'inline-block',
+                  padding: '6px 14px',
+                  borderRadius: 6,
+                  background: 'rgba(245,158,66,0.12)',
+                  color: '#B45309',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ─── 인용문 ─── */}
@@ -562,8 +782,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         style={{
           padding: 'clamp(56px, 6vw, 80px) clamp(24px, 4vw, 80px)',
           textAlign: 'center',
-          transform: quoteAnim.visible ? 'none' : 'translateY(40px)',
-          transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
+          opacity: quoteAnim.visible ? 1 : 0,
+          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
@@ -612,8 +832,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         className="sp-cta-section"
         style={{
           padding: 'clamp(64px, 7vw, 96px) clamp(24px, 4vw, 80px)',
-          transform: formAnim.visible ? 'none' : 'translateY(40px)',
-          transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1)',
+          opacity: formAnim.visible ? 1 : 0,
+          transition: 'opacity 0.8s ease',
         }}
       >
         <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>

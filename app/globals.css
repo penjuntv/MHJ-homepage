@@ -74,6 +74,8 @@
     background: var(--bg);
     overflow-x: hidden;
     transition: background-color 0.3s ease, color 0.3s ease;
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
 }
 
@@ -625,6 +627,25 @@
   .comment-form-grid {
     grid-template-columns: 1fr !important;
   }
+}
+
+/* ─── StoryPress 반응형 그리드 ─── */
+.sp-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.sp-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 1023px) {
+  .sp-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .sp-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 639px) {
+  .sp-grid-4, .sp-grid-3 { grid-template-columns: 1fr; }
 }
 
 /* ─── StoryPress 섹션 다크모드 ─── */
