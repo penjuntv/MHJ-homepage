@@ -47,7 +47,8 @@ export default function HeroCarousel({ slides }: Props) {
   return (
     <>
       <section
-        style={{ position: 'relative', height: '85vh', width: '100%', overflow: 'hidden', background: '#0a0a0a' }}
+        className="hero-section"
+        style={{ position: 'relative', width: '100%', overflow: 'hidden', background: '#0a0a0a' }}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
