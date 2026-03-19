@@ -238,7 +238,7 @@ export default async function LandingPage() {
 /* ─── Explore 2분할 섹션 ─── */
 function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog | null; latestMagazine: Magazine | null }) {
   return (
-    <section style={{ padding: 'var(--section-v) var(--section-h)', background: 'var(--bg)' }}>
+    <section style={{ padding: 'var(--section-v) clamp(20px, 4vw, 48px)', background: 'var(--bg)' }}>
       <div style={{ maxWidth: 'var(--content-max)', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 56, flexWrap: 'wrap', gap: 16 }}>
           <div>
@@ -256,7 +256,7 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
           <Link
             href="/blog"
             className="explore-panel"
-            style={{ display: 'block', borderRadius: 32, overflow: 'hidden', textDecoration: 'none', position: 'relative', aspectRatio: '16/9', boxShadow: '0 4px 24px rgba(0,0,0,0.09)' }}
+            style={{ display: 'block', borderRadius: 16, overflow: 'hidden', textDecoration: 'none', position: 'relative', aspectRatio: '16/9', boxShadow: '0 4px 24px rgba(0,0,0,0.09)' }}
           >
             {latestBlog && (
               <SafeImage src={latestBlog.image_url} alt="Blog" fill className="explore-img object-cover" />
@@ -265,9 +265,9 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.08))', pointerEvents: 'none', zIndex: 1 }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)' }} />
             <div style={{ position: 'absolute', top: 24, left: 24 }}>
-              <span style={{ padding: '6px 18px', borderRadius: 999, background: '#4F46E5', color: 'white', fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase' }}>Blog</span>
+              <span style={{ padding: '6px 18px', borderRadius: 4, background: '#4F46E5', color: 'white', fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase' }}>Blog</span>
             </div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px 28px 32px' }}>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 24px 28px' }}>
               <h3 style={{ color: 'white', fontSize: 'clamp(20px, 2.5vw, 28px)', fontWeight: 900, letterSpacing: -1, lineHeight: 1.2, marginBottom: 8 }}>
                 {latestBlog?.title || 'Daily Life & Stories'}
               </h3>
@@ -284,7 +284,7 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
           <Link
             href="/magazine"
             className="explore-panel"
-            style={{ display: 'block', borderRadius: 32, overflow: 'hidden', textDecoration: 'none', position: 'relative', aspectRatio: '16/9', boxShadow: '0 4px 24px rgba(0,0,0,0.09)' }}
+            style={{ display: 'block', borderRadius: 16, overflow: 'hidden', textDecoration: 'none', position: 'relative', aspectRatio: '16/9', boxShadow: '0 4px 24px rgba(0,0,0,0.09)' }}
           >
             {latestMagazine && (
               <SafeImage src={latestMagazine.image_url} alt="Magazine" fill className="explore-img object-cover" />
@@ -293,9 +293,9 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.08))', pointerEvents: 'none', zIndex: 1 }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)' }} />
             <div style={{ position: 'absolute', top: 24, left: 24 }}>
-              <span style={{ padding: '6px 18px', borderRadius: 999, background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', backdropFilter: 'blur(8px)' }}>Magazine</span>
+              <span style={{ padding: '6px 18px', borderRadius: 4, background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', backdropFilter: 'blur(8px)' }}>Magazine</span>
             </div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px 28px 32px' }}>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 24px 28px' }}>
               {latestMagazine && (
                 <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', marginBottom: 6 }}>
                   {latestMagazine.year} · {latestMagazine.month_name}

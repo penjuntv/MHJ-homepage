@@ -124,7 +124,7 @@ export default function HeroCarousel({ slides }: Props) {
         <div style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-          padding: '0 8% 96px',
+          padding: '0 clamp(20px, 8%, 80px) 80px',
         }}>
           {/* 라벨 + 부제 (storypress는 라벨만) */}
           <div style={{
@@ -220,7 +220,7 @@ export default function HeroCarousel({ slides }: Props) {
         {/* ─── 컨트롤 바 (하단) ─── */}
         <div style={{
           position: 'absolute',
-          bottom: 48, left: '8%', right: '8%',
+          bottom: 32, left: 'clamp(20px,8%,80px)', right: 'clamp(20px,8%,80px)',
           zIndex: 20,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
@@ -255,17 +255,6 @@ export default function HeroCarousel({ slides }: Props) {
           </div>
         </div>
 
-        {/* ─── 슬라이드 카운터 ─── */}
-        <div style={{
-          position: 'absolute', bottom: 60, right: '8%', zIndex: 10,
-          display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4,
-        }}>
-          <span className="font-display" style={{
-            fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.3)', letterSpacing: 3,
-          }}>
-            {String(idx + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
-          </span>
-        </div>
       </section>
 
       {selectedBlog && (
