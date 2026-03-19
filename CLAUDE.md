@@ -35,7 +35,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind CSS · Supabase (DB+Storage+Au
 - 블로그 22개, 매거진 5+1개, 아티클 19개, 갤러리 60개
 - 라이브: mhj-homepage.vercel.app
 - GitHub: penjuntv/MHJ-homepage
-- Supabase 프로젝트: asatbuonduelfrhdkwgu
+- Supabase 프로젝트: vpayqdatpqajsmalpfmq
 
 ## 작업 규칙
 - 1대화 = 1기능 (여러 기능 섞지 않기)

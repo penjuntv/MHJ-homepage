@@ -65,7 +65,7 @@ export default function HeroCarousel({ slides }: Props) {
           >
             {slide.type === 'storypress' ? (
               /* StoryPress: 다크 인디고 그라디언트 배경 */
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #0A0A0A 0%, #1e1b4b 55%, #312e81 100%)' }}>
+              <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: 'linear-gradient(135deg, #0A0A0A 0%, #1e1b4b 55%, #312e81 100%)' }}>
                 {/* 장식용 대형 타이포 */}
                 <div style={{
                   position: 'absolute', inset: 0,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Instagram } from 'lucide-react';
 
 interface GalleryPost {
@@ -14,15 +14,24 @@ interface Props {
 
 const CARD_W = 220;
 const GAP = 12;
+const STEP = CARD_W + GAP;
 
 export default function InstagramFeed({ instagramUrl }: Props) {
   const [posts, setPosts] = useState<GalleryPost[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [transitioning, setTransitioning] = useState(true);
-  const isHoveredRef = useRef(false);
-  const touchStartX = useRef<number | null>(null);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [dragDelta, setDragDelta] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
 
+  const isHoveredRef = useRef(false);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartY = useRef(0);
+  const isHorizontalDrag = useRef<boolean | null>(null);
+  const draggedRef = useRef(false);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  /* ── API fetch ── */
   useEffect(() => {
     fetch('/api/instagram')
       .then(r => r.json())
@@ -33,48 +42,117 @@ export default function InstagramFeed({ instagramUrl }: Props) {
       .catch(() => setLoaded(true));
   }, []);
 
-  /* 루프 리셋: offset이 원본 길이에 도달하면 순간이동 */
+  /* ── Loop reset: 유효 범위 [N, 2N-1] 유지 ── */
   useEffect(() => {
-    if (posts.length > 0 && offset >= posts.length) {
-      setTransitioning(false);
-      setOffset(0);
+    if (posts.length === 0) return;
+    if (currentIdx >= posts.length * 2) {
+      setIsTransitioning(false);
+      setCurrentIdx(i => i - posts.length);
+    } else if (currentIdx < posts.length) {
+      setIsTransitioning(false);
+      setCurrentIdx(i => i + posts.length);
     }
-  }, [offset, posts.length]);
+  }, [currentIdx, posts.length]);
 
+  /* ── transition 복원: double-rAF (드래그 중이면 skip) ── */
   useEffect(() => {
-    if (!transitioning) {
-      const t = setTimeout(() => setTransitioning(true), 50);
-      return () => clearTimeout(t);
+    if (!isTransitioning) {
+      const id = requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          if (!isDragging.current) setIsTransitioning(true);
+        })
+      );
+      return () => cancelAnimationFrame(id);
     }
-  }, [transitioning]);
+  }, [isTransitioning]);
 
-  /* 4초 자동 스크롤 — hover 시 일시 정지 */
+  /* ── 4초 자동 스크롤 ── */
   useEffect(() => {
     if (posts.length === 0) return;
     const id = setInterval(() => {
-      if (!isHoveredRef.current) {
-        setOffset(i => i + 1);
+      if (!isHoveredRef.current && !isDragging.current) {
+        setCurrentIdx(i => i + 1);
       }
     }, 4000);
     return () => clearInterval(id);
   }, [posts.length]);
 
-  /* 터치 스와이프 */
-  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) {
-        setOffset(i => i + 1);
-      } else {
-        setOffset(i => Math.max(0, i - 1));
-      }
-    }
-    touchStartX.current = null;
-  };
+  /* ── 드래그 시작 (touch + mouse 공용) ── */
+  const handleDragStart = useCallback((clientX: number, clientY: number) => {
+    isDragging.current = true;
+    draggedRef.current = false;
+    dragStartX.current = clientX;
+    dragStartY.current = clientY;
+    isHorizontalDrag.current = null;
+    setIsTransitioning(false);
+  }, []);
 
-  /* 포스트 없음 */
+  /* ── 드래그 종료 (touch + mouse 공용) ── */
+  const handleDragEnd = useCallback((clientX: number) => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    const dx = clientX - dragStartX.current;
+    setIsTransitioning(true);
+    setDragDelta(0);
+    if (isHorizontalDrag.current && Math.abs(dx) > 20) {
+      draggedRef.current = true;
+      if (dx < 0) setCurrentIdx(i => i + 1);
+      else setCurrentIdx(i => i - 1);
+    }
+    isHorizontalDrag.current = null;
+  }, []);
+
+  /* ── non-passive touchmove: 가로 드래그 시 브라우저 스크롤 방지 ── */
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el || posts.length === 0) return;
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isDragging.current) return;
+      const dx = e.touches[0].clientX - dragStartX.current;
+      const dy = e.touches[0].clientY - dragStartY.current;
+
+      if (isHorizontalDrag.current === null) {
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+          isHorizontalDrag.current = Math.abs(dx) > Math.abs(dy);
+        }
+        return;
+      }
+
+      if (isHorizontalDrag.current) {
+        e.preventDefault();
+        if (Math.abs(dx) > 20) draggedRef.current = true;
+        setDragDelta(dx);
+      }
+    };
+
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => el.removeEventListener('touchmove', onTouchMove);
+  }, [posts.length]);
+
+  /* ── 마우스 드래그: document 레벨 (카드 밖으로 나가도 추적) ── */
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      isHorizontalDrag.current = true;
+      const dx = e.clientX - dragStartX.current;
+      if (Math.abs(dx) > 20) draggedRef.current = true;
+      setDragDelta(dx);
+    };
+
+    const onMouseUp = (e: MouseEvent) => {
+      handleDragEnd(e.clientX);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [handleDragEnd]);
+
+  /* ── 포스트 없음 fallback ── */
   if (loaded && posts.length === 0) {
     if (!instagramUrl) return null;
     return (
@@ -92,9 +170,8 @@ export default function InstagramFeed({ instagramUrl }: Props) {
 
   if (!loaded || posts.length === 0) return null;
 
-  /* 원본 + 복사본으로 끊김 없는 루프 */
-  const loopPosts = [...posts, ...posts];
-  const translateX = -(CARD_W + GAP) * offset;
+  const loopPosts = [...posts, ...posts, ...posts];
+  const translateX = -STEP * currentIdx + dragDelta;
 
   return (
     <section
@@ -102,8 +179,6 @@ export default function InstagramFeed({ instagramUrl }: Props) {
       style={{ padding: 'clamp(48px, 8vw, 80px) 0', overflow: 'hidden' }}
       onMouseEnter={() => { isHoveredRef.current = true; }}
       onMouseLeave={() => { isHoveredRef.current = false; }}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
     >
       {/* 헤더 */}
       <div style={{ textAlign: 'center', marginBottom: 36, padding: '0 clamp(24px, 4vw, 80px)' }}>
@@ -115,20 +190,31 @@ export default function InstagramFeed({ instagramUrl }: Props) {
         </h2>
       </div>
 
-      {/* 가로 스크롤 트랙 */}
+      {/* 트랙 */}
       <div style={{ overflow: 'hidden' }}>
         <div
+          ref={trackRef}
           style={{
             display: 'flex',
             gap: GAP,
             transform: `translateX(${translateX}px)`,
-            transition: transitioning ? 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+            transition: isTransitioning ? 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
             paddingLeft: 'clamp(24px, 4vw, 80px)',
             willChange: 'transform',
+            cursor: 'grab',
+            userSelect: 'none',
           }}
+          onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
+          onTouchStart={(e) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY)}
+          onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
         >
           {loopPosts.map((post, idx) => (
-            <FeedCard key={`${post.id}-${idx}`} mediaUrl={post.media_url} instagramUrl={instagramUrl} />
+            <FeedCard
+              key={`${post.id}-${idx}`}
+              mediaUrl={post.media_url}
+              instagramUrl={instagramUrl}
+              draggedRef={draggedRef}
+            />
           ))}
         </div>
       </div>
@@ -150,7 +236,16 @@ export default function InstagramFeed({ instagramUrl }: Props) {
   );
 }
 
-function FeedCard({ mediaUrl, instagramUrl }: { mediaUrl: string; instagramUrl: string }) {
+/* ── FeedCard ── */
+function FeedCard({
+  mediaUrl,
+  instagramUrl,
+  draggedRef,
+}: {
+  mediaUrl: string;
+  instagramUrl: string;
+  draggedRef: React.MutableRefObject<boolean>;
+}) {
   const [hovered, setHovered] = useState(false);
   return (
     <a
@@ -158,6 +253,8 @@ function FeedCard({ mediaUrl, instagramUrl }: { mediaUrl: string; instagramUrl: 
       target="_blank"
       rel="noopener noreferrer"
       style={{ textDecoration: 'none', flexShrink: 0, display: 'block' }}
+      onClick={(e) => { if (draggedRef.current) e.preventDefault(); }}
+      draggable={false}
     >
       <div
         onMouseEnter={() => setHovered(true)}
@@ -178,6 +275,7 @@ function FeedCard({ mediaUrl, instagramUrl }: { mediaUrl: string; instagramUrl: 
           src={mediaUrl}
           alt="Gallery"
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          draggable={false}
         />
       </div>
     </a>

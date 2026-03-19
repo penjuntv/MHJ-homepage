@@ -34,11 +34,11 @@ export default function Footer({
   ].filter(s => !!s.href);
 
   return (
-    <footer style={{ background: '#111111', padding: '96px 40px 48px' }}>
+    <footer style={{ background: '#111111', padding: '96px clamp(20px, 4vw, 40px) 48px' }}>
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))',
           gap: '80px',
           maxWidth: '1400px',
           margin: '0 auto',
