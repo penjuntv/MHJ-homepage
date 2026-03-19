@@ -44,6 +44,7 @@ export default async function PublicLayout({
         socialInstagram={s.social_instagram}
         socialFacebook={s.social_facebook}
         socialYoutube={s.social_youtube}
+        socialThreads={s.social_threads}
       />
     </>
   );

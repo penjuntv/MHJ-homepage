@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Rss, Instagram, Facebook, Youtube, Mail } from 'lucide-react';
+import { Rss } from 'lucide-react';
 
 interface FooterProps {
   siteName?: string;
@@ -12,6 +12,7 @@ interface FooterProps {
   socialInstagram?: string;
   socialFacebook?: string;
   socialYoutube?: string;
+  socialThreads?: string;
 }
 
 export default function Footer({
@@ -20,18 +21,11 @@ export default function Footer({
   footerDescription = '뉴질랜드 오클랜드 노스쇼어\n마이랑이 베이에서 기록하는\n우리 가족의 이야기',
   contactLocation = 'Mairangi Bay, Auckland',
   contactEmail,
-  socialInstagram,
   socialFacebook,
   socialYoutube,
+  socialThreads,
 }: FooterProps) {
   const descLines = footerDescription.split('\n');
-
-  const socials = [
-    { href: socialInstagram,                                  icon: <Instagram size={16} />, label: 'Instagram' },
-    { href: socialFacebook,                                   icon: <Facebook  size={16} />, label: 'Facebook'  },
-    { href: socialYoutube,                                    icon: <Youtube   size={16} />, label: 'YouTube'   },
-    { href: contactEmail ? `mailto:${contactEmail}` : '',     icon: <Mail      size={16} />, label: 'Email'     },
-  ].filter(s => !!s.href);
 
   return (
     <footer style={{ background: '#111111', padding: '96px clamp(20px, 4vw, 40px) 48px' }}>
@@ -72,16 +66,6 @@ export default function Footer({
             ))}
           </p>
 
-          {/* 소셜 아이콘 */}
-          {socials.length > 0 && (
-            <div style={{ display: 'flex', gap: '10px', marginTop: '28px', flexWrap: 'wrap' }}>
-              {socials.map(s => (
-                <SocialBtn key={s.label} href={s.href!} label={s.label}>
-                  {s.icon}
-                </SocialBtn>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Explore */}
@@ -136,7 +120,7 @@ export default function Footer({
           </div>
           <div className="flex flex-col" style={{ gap: '8px' }}>
             <p className="font-bold" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
-              {contactLocation}
+              📍 {contactLocation}
             </p>
             {contactEmail && (
               <a
@@ -144,7 +128,40 @@ export default function Footer({
                 className="font-bold"
                 style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}
               >
-                {contactEmail}
+                ✉️ {contactEmail}
+              </a>
+            )}
+            {socialYoutube && (
+              <a
+                href={socialYoutube}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold"
+                style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}
+              >
+                📺 YouTube
+              </a>
+            )}
+            {socialFacebook && (
+              <a
+                href={socialFacebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold"
+                style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}
+              >
+                📘 Facebook
+              </a>
+            )}
+            {socialThreads && (
+              <a
+                href={socialThreads}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold"
+                style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}
+              >
+                🧵 Threads
               </a>
             )}
           </div>
@@ -185,42 +202,3 @@ export default function Footer({
   );
 }
 
-/* ── 소셜 아이콘 버튼 ── */
-function SocialBtn({
-  href, label, children,
-}: {
-  href: string; label: string; children: React.ReactNode;
-}) {
-  const isExternal = !href.startsWith('mailto:');
-  return (
-    <a
-      href={href}
-      aria-label={label}
-      target={isExternal ? '_blank' : undefined}
-      rel={isExternal ? 'noopener noreferrer' : undefined}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        background: 'rgba(255,255,255,0.08)',
-        color: 'rgba(255,255,255,0.55)',
-        textDecoration: 'none',
-        transition: 'background 0.2s, color 0.2s',
-        flexShrink: 0,
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.18)';
-        e.currentTarget.style.color = '#fff';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-        e.currentTarget.style.color = 'rgba(255,255,255,0.55)';
-      }}
-    >
-      {children}
-    </a>
-  );
-}
