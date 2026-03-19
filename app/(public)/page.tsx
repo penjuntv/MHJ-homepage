@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Blog, Magazine, CarouselSlide, HeroSlide } from '@/lib/types';
 import HeroCarousel from '@/components/HeroCarousel';
+import MhjBrandReveal from '@/components/MhjBrandReveal';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import StoryPressSection from '@/components/StoryPressSection';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -215,6 +216,9 @@ export default async function LandingPage() {
 
       {/* Hero Carousel */}
       <HeroCarousel slides={carouselSlides} />
+
+      {/* MHJ Brand Reveal */}
+      <MhjBrandReveal />
 
       {/* Explore — Blog + Magazine 2분할 */}
       <ExploreSplitSection latestBlog={mostRead[0] ?? null} latestMagazine={magazines[0] ?? null} />
