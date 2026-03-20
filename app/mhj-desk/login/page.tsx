@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useState, useMemo } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  // createBrowserClient: 세션을 쿠키에 저장 → middleware / mfa-verify 모두 동일한 쿠키 읽음
+  const supabase = useMemo(() => createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ), []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,11 +26,12 @@ export default function AdminLoginPage() {
     } else {
       const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aalData?.nextLevel === 'aal2' && aalData?.currentLevel === 'aal1') {
-        router.push('/mhj-desk/mfa-verify');
+        // 쿠키 기록 완료 후 하드 네비게이션 → mfa-verify가 같은 쿠키로 세션 읽음
+        window.location.href = '/mhj-desk/mfa-verify';
       } else if (aalData?.nextLevel === 'aal1') {
-        router.push('/mhj-desk/mfa-setup');
+        window.location.href = '/mhj-desk/mfa-setup';
       } else {
-        router.push('/mhj-desk');
+        window.location.href = '/mhj-desk';
       }
     }
   };

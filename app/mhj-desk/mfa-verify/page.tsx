@@ -1,18 +1,39 @@
 'use client';
 
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 
 export default function MfaVerifyPage() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  // createBrowserClient: 세션을 localStorage가 아닌 쿠키에 저장 → middleware가 정확히 읽음
+  // createBrowserClient: 세션을 쿠키에 저장 → middleware와 동일한 쿠키 기반
   const supabase = useMemo(() => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   ), []);
+
+  // 마운트 시 세션 확인 — 쿠키 기록 타이밍 차이 대비
+  useEffect(() => {
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setSessionReady(true);
+        return;
+      }
+      // 쿠키가 아직 기록 중일 수 있으므로 refreshSession으로 강제 동기화
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      if (refreshed.session) {
+        setSessionReady(true);
+      } else {
+        setError('session-expired');
+      }
+    }
+    checkSession();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleInput = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -37,9 +58,18 @@ export default function MfaVerifyPage() {
     setLoading(true);
     setError('');
 
-    const { data: factors, error: listError } = await supabase.auth.mfa.listFactors();
+    let { data: factors, error: listError } = await supabase.auth.mfa.listFactors();
+
+    // factor 목록이 비어있으면 refreshSession 후 1회 재시도
+    if (!listError && !factors?.totp?.length) {
+      await supabase.auth.refreshSession();
+      const retry = await supabase.auth.mfa.listFactors();
+      factors = retry.data;
+      listError = retry.error;
+    }
+
     if (listError || !factors?.totp?.length) {
-      setError('등록된 인증 수단을 찾을 수 없습니다.');
+      setError('no-factors');
       setLoading(false);
       return;
     }
@@ -66,7 +96,6 @@ export default function MfaVerifyPage() {
       setLoading(false);
     } else {
       // aal2 세션이 쿠키에 기록된 후 하드 네비게이션
-      // router.push는 기존 쿠키를 그대로 사용하므로 window.location 사용
       window.location.href = '/mhj-desk';
     }
   };
@@ -79,6 +108,12 @@ export default function MfaVerifyPage() {
     }
   };
 
+  const loginLink = (
+    <a href="/mhj-desk/login" style={{ color: '#4F46E5', fontWeight: 700, textDecoration: 'none' }}>
+      다시 로그인하기
+    </a>
+  );
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC' }}>
       <div style={{ background: 'white', borderRadius: 32, padding: 48, width: '100%', maxWidth: 440, boxShadow: '0 25px 60px rgba(0,0,0,0.08)' }}>
@@ -90,55 +125,80 @@ export default function MfaVerifyPage() {
           MFA VERIFY — MY MAIRANGI CMS
         </p>
 
-        <p style={{ fontSize: 14, color: '#475569', marginBottom: 32, lineHeight: 1.6 }}>
-          Google Authenticator 앱에 표시된<br />6자리 코드를 입력하세요.
-        </p>
-
-        {/* 6자리 입력 */}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 28 }}>
-          {code.map((digit, i) => (
-            <input
-              key={i}
-              ref={el => { inputRefs.current[i] = el; }}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={e => handleInput(i, e.target.value)}
-              onKeyDown={e => handleKeyDown(i, e)}
-              onPaste={i === 0 ? handlePaste : undefined}
-              autoFocus={i === 0}
-              style={{
-                width: 48, height: 56, borderRadius: 12,
-                border: '1.5px solid #E2E8F0',
-                textAlign: 'center', fontSize: 22, fontWeight: 700,
-                outline: 'none', background: '#F8FAFC',
-                transition: 'border-color 0.15s',
-              }}
-              onFocus={e => { e.target.style.borderColor = '#000'; }}
-              onBlur={e => { e.target.style.borderColor = '#E2E8F0'; }}
-            />
-          ))}
-        </div>
-
-        {error && (
-          <p style={{ color: '#EF4444', fontSize: 13, fontWeight: 500, marginBottom: 16, textAlign: 'center' }}>{error}</p>
+        {/* 세션 만료 에러 */}
+        {error === 'session-expired' && (
+          <div style={{ background: '#FEF2F2', borderRadius: 12, padding: '16px 20px', marginBottom: 24 }}>
+            <p style={{ color: '#EF4444', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+              세션이 만료됐습니다.
+            </p>
+            <p style={{ color: '#64748B', fontSize: 13 }}>{loginLink}</p>
+          </div>
         )}
 
-        <button
-          onClick={handleVerify}
-          disabled={loading || code.join('').length !== 6}
-          className="font-black uppercase"
-          style={{
-            width: '100%', background: '#000', color: '#fff',
-            border: 'none', borderRadius: 999, padding: 16,
-            fontSize: 12, letterSpacing: 3,
-            cursor: (loading || code.join('').length !== 6) ? 'not-allowed' : 'pointer',
-            opacity: (loading || code.join('').length !== 6) ? 0.5 : 1,
-          }}
-        >
-          {loading ? '확인 중...' : '인증하기'}
-        </button>
+        {/* factor 없음 에러 */}
+        {error === 'no-factors' && (
+          <div style={{ background: '#FEF2F2', borderRadius: 12, padding: '16px 20px', marginBottom: 24 }}>
+            <p style={{ color: '#EF4444', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+              등록된 인증 수단을 찾을 수 없습니다.
+            </p>
+            <p style={{ color: '#64748B', fontSize: 13 }}>세션이 유효하지 않을 수 있습니다. {loginLink}</p>
+          </div>
+        )}
+
+        {error !== 'session-expired' && (
+          <>
+            <p style={{ fontSize: 14, color: '#475569', marginBottom: 32, lineHeight: 1.6 }}>
+              Google Authenticator 앱에 표시된<br />6자리 코드를 입력하세요.
+            </p>
+
+            {/* 6자리 입력 */}
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 28 }}>
+              {code.map((digit, i) => (
+                <input
+                  key={i}
+                  ref={el => { inputRefs.current[i] = el; }}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={e => handleInput(i, e.target.value)}
+                  onKeyDown={e => handleKeyDown(i, e)}
+                  onPaste={i === 0 ? handlePaste : undefined}
+                  autoFocus={i === 0}
+                  disabled={!sessionReady}
+                  style={{
+                    width: 48, height: 56, borderRadius: 12,
+                    border: '1.5px solid #E2E8F0',
+                    textAlign: 'center', fontSize: 22, fontWeight: 700,
+                    outline: 'none', background: sessionReady ? '#F8FAFC' : '#F1F5F9',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = '#000'; }}
+                  onBlur={e => { e.target.style.borderColor = '#E2E8F0'; }}
+                />
+              ))}
+            </div>
+
+            {error && error !== 'no-factors' && (
+              <p style={{ color: '#EF4444', fontSize: 13, fontWeight: 500, marginBottom: 16, textAlign: 'center' }}>{error}</p>
+            )}
+
+            <button
+              onClick={handleVerify}
+              disabled={loading || !sessionReady || code.join('').length !== 6}
+              className="font-black uppercase"
+              style={{
+                width: '100%', background: '#000', color: '#fff',
+                border: 'none', borderRadius: 999, padding: 16,
+                fontSize: 12, letterSpacing: 3,
+                cursor: (loading || !sessionReady || code.join('').length !== 6) ? 'not-allowed' : 'pointer',
+                opacity: (loading || !sessionReady || code.join('').length !== 6) ? 0.5 : 1,
+              }}
+            >
+              {!sessionReady ? '세션 확인 중...' : loading ? '확인 중...' : '인증하기'}
+            </button>
+          </>
+        )}
 
         <div style={{ marginTop: 24, textAlign: 'center' }}>
           <button
