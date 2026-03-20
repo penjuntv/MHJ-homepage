@@ -534,6 +534,14 @@
 }
 
 /* ─── Landing — Explore 2-Panel ─── */
+.explore-grid {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .explore-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 .explore-panel {
   transition: opacity 0.3s ease;
   min-height: 280px;

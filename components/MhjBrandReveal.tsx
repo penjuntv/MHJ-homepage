@@ -56,8 +56,8 @@ export default function MhjBrandReveal() {
                       height 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s;
         }
         .mhj-reveal-wrap.open .mhj-reveal-spotlight {
-          width: 500px;
-          height: 500px;
+          width: min(500px, 90vw);
+          height: min(500px, 90vw);
         }
         .mhj-reveal-core {
           display: flex;
@@ -71,21 +71,24 @@ export default function MhjBrandReveal() {
           font-family: 'Playfair Display', serif;
           font-weight: 900;
           font-style: italic;
-          font-size: 80px;
-          color: var(--text);
+          font-size: 82px;
+          color: #1e293b;
           line-height: 1;
           display: inline-block;
           transition: font-size 1s cubic-bezier(0.16,1,0.3,1);
         }
+        .dark .mhj-bl {
+          color: #e2e8f0;
+        }
         .mhj-reveal-wrap.open .mhj-bl {
-          font-size: 64px;
+          font-size: 66px;
         }
         .mhj-tl {
           font-family: 'Playfair Display', serif;
           font-weight: 300;
           font-style: italic;
-          font-size: 48px;
-          color: var(--text-secondary);
+          font-size: 50px;
+          color: #475569;
           line-height: 1;
           max-width: 0;
           opacity: 0;
@@ -95,6 +98,9 @@ export default function MhjBrandReveal() {
           vertical-align: baseline;
           transition: max-width 1s cubic-bezier(0.16,1,0.3,1) 0.35s,
                       opacity 0.6s ease 0.4s;
+        }
+        .dark .mhj-tl {
+          color: #94a3b8;
         }
         .mhj-reveal-wrap.open .mhj-tl {
           max-width: 80px;
@@ -178,14 +184,17 @@ export default function MhjBrandReveal() {
           font-family: 'Playfair Display', serif;
           font-weight: 300;
           font-style: italic;
-          font-size: 20px;
-          color: var(--text-secondary);
+          font-size: 22px;
+          color: #475569;
           display: flex;
           align-items: center;
           justify-content: center;
           opacity: 0;
           transform: translateY(8px);
           transition: opacity 0.5s ease 0.5s, transform 0.5s ease 0.5s;
+        }
+        .dark .mhj-sub-b {
+          color: #94a3b8;
         }
         .mhj-reveal-wrap.open .mhj-sub-b {
           opacity: 1;
@@ -206,14 +215,17 @@ export default function MhjBrandReveal() {
         .mhj-story-line {
           font-family: 'Noto Sans KR', sans-serif;
           font-weight: 500;
-          font-size: 13px;
-          color: var(--text-tertiary);
+          font-size: 14px;
+          color: #64748b;
           line-height: 1.8;
           opacity: 0;
           transform: translateY(12px);
           transition: opacity 0.6s ease 0.7s, transform 0.6s ease 0.7s;
           position: relative;
           z-index: 1;
+        }
+        .dark .mhj-story-line {
+          color: #94a3b8;
         }
         .mhj-reveal-wrap.open .mhj-story-line {
           opacity: 1;
@@ -223,11 +235,14 @@ export default function MhjBrandReveal() {
           font-family: 'Playfair Display', serif;
           font-weight: 400;
           font-style: italic;
-          color: var(--text-secondary);
+          color: #334155;
+        }
+        .dark .mhj-story-em {
+          color: #cbd5e1;
         }
         @media (max-width: 640px) {
-          .mhj-bl { font-size: 64px; }
-          .mhj-reveal-wrap.open .mhj-bl { font-size: 52px; }
+          .mhj-bl { font-size: 66px; }
+          .mhj-reveal-wrap.open .mhj-bl { font-size: 54px; }
           .mhj-tl { font-size: 38px; }
           .mhj-ap { font-size: 36px; }
         }

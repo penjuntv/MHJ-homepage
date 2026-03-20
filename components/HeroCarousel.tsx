@@ -103,7 +103,7 @@ export default function HeroCarousel({ slides }: Props) {
                   alt={slide.title}
                   fill
                   className="object-cover"
-                  style={{ filter: 'saturate(1.4) contrast(1.05)', transform: 'scale(1.03)' }}
+                  style={{ filter: 'saturate(1.4) contrast(1.05)' }}
                   priority={i === 0}
                 />
                 {/* 하단 그라디언트 */}

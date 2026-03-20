@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabase';
 import type { Blog, Magazine, CarouselSlide, HeroSlide } from '@/lib/types';
 import HeroCarousel from '@/components/HeroCarousel';
 import MhjBrandReveal from '@/components/MhjBrandReveal';
-import DebugOverflow from '@/components/DebugOverflow';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import StoryPressSection from '@/components/StoryPressSection';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -217,7 +216,6 @@ export default async function LandingPage() {
 
       {/* Hero Carousel */}
       <HeroCarousel slides={carouselSlides} />
-      <DebugOverflow />
 
       {/* MHJ Brand Reveal */}
       <MhjBrandReveal />
@@ -257,7 +255,7 @@ function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog 
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))', gap: 32 }}>
+        <div className="explore-grid" style={{ display: 'grid', gap: 32 }}>
           {/* Blog Panel */}
           <Link
             href="/blog"
