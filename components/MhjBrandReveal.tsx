@@ -8,23 +8,24 @@ export default function MhjBrandReveal() {
   const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const isTouchDevice = window.matchMedia('(hover: none)').matches;
     const el = wrapRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setExpanded(true);
-          setScrollTriggered(true);
+          if (isTouchDevice) setScrollTriggered(true);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.7 }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
   const handleMouseEnter = () => {
-    if (!scrollTriggered) setExpanded(true);
+    setExpanded(true);
   };
 
   const handleMouseLeave = () => {
@@ -37,7 +38,7 @@ export default function MhjBrandReveal() {
         .mhj-reveal-wrap {
           position: relative;
           text-align: center;
-          padding: var(--section-v) clamp(20px, 4vw, 48px);
+          padding: clamp(48px, 6vw, 80px) clamp(20px, 4vw, 48px);
           overflow: hidden;
           cursor: default;
         }
@@ -70,19 +71,20 @@ export default function MhjBrandReveal() {
           font-family: 'Playfair Display', serif;
           font-weight: 900;
           font-style: italic;
-          font-size: 64px;
+          font-size: 80px;
           color: var(--text);
           line-height: 1;
           display: inline-block;
           transition: font-size 1s cubic-bezier(0.16,1,0.3,1);
         }
         .mhj-reveal-wrap.open .mhj-bl {
-          font-size: 52px;
+          font-size: 64px;
         }
         .mhj-tl {
-          font-family: 'Caveat', cursive;
-          font-weight: 400;
-          font-size: 38px;
+          font-family: 'Playfair Display', serif;
+          font-weight: 300;
+          font-style: italic;
+          font-size: 48px;
           color: var(--text-secondary);
           line-height: 1;
           max-width: 0;
@@ -173,9 +175,10 @@ export default function MhjBrandReveal() {
         .mhj-sub-b {
           position: absolute;
           inset: 0;
-          font-family: 'Caveat', cursive;
-          font-weight: 400;
-          font-size: 21px;
+          font-family: 'Playfair Display', serif;
+          font-weight: 300;
+          font-style: italic;
+          font-size: 20px;
           color: var(--text-secondary);
           display: flex;
           align-items: center;
@@ -223,9 +226,9 @@ export default function MhjBrandReveal() {
           color: var(--text-secondary);
         }
         @media (max-width: 640px) {
-          .mhj-bl { font-size: 48px; }
-          .mhj-reveal-wrap.open .mhj-bl { font-size: 40px; }
-          .mhj-tl { font-size: 30px; }
+          .mhj-bl { font-size: 64px; }
+          .mhj-reveal-wrap.open .mhj-bl { font-size: 52px; }
+          .mhj-tl { font-size: 38px; }
           .mhj-ap { font-size: 36px; }
         }
       `}</style>

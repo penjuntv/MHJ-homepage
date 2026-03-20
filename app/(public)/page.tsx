@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import type { Blog, Magazine, CarouselSlide, HeroSlide } from '@/lib/types';
 import HeroCarousel from '@/components/HeroCarousel';
 import MhjBrandReveal from '@/components/MhjBrandReveal';
+import DebugOverflow from '@/components/DebugOverflow';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import StoryPressSection from '@/components/StoryPressSection';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -216,6 +217,7 @@ export default async function LandingPage() {
 
       {/* Hero Carousel */}
       <HeroCarousel slides={carouselSlides} />
+      <DebugOverflow />
 
       {/* MHJ Brand Reveal */}
       <MhjBrandReveal />
