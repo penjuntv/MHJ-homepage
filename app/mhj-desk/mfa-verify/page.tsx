@@ -1,15 +1,18 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useState, useRef, useMemo } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function MfaVerifyPage() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const router = useRouter();
+  // createBrowserClient: 세션을 localStorage가 아닌 쿠키에 저장 → middleware가 정확히 읽음
+  const supabase = useMemo(() => createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ), []);
 
   const handleInput = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -62,7 +65,9 @@ export default function MfaVerifyPage() {
       inputRefs.current[0]?.focus();
       setLoading(false);
     } else {
-      router.push('/mhj-desk');
+      // aal2 세션이 쿠키에 기록된 후 하드 네비게이션
+      // router.push는 기존 쿠키를 그대로 사용하므로 window.location 사용
+      window.location.href = '/mhj-desk';
     }
   };
 
@@ -137,7 +142,7 @@ export default function MfaVerifyPage() {
 
         <div style={{ marginTop: 24, textAlign: 'center' }}>
           <button
-            onClick={async () => { await supabase.auth.signOut(); router.push('/mhj-desk/login'); }}
+            onClick={async () => { await supabase.auth.signOut(); window.location.href = '/mhj-desk/login'; }}
             style={{ fontSize: 12, color: '#94A3B8', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             다른 계정으로 로그인

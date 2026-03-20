@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function MfaSetupPage() {
   const [qrCode, setQrCode] = useState('');
@@ -13,7 +12,11 @@ export default function MfaSetupPage() {
   const [loading, setLoading] = useState(false);
   const [enrolling, setEnrolling] = useState(true);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const router = useRouter();
+  // useMemo로 클라이언트 인스턴스 안정화 (createBrowserClient는 쿠키에 세션 저장)
+  const supabase = useMemo(() => createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ), []);
 
   useEffect(() => {
     async function enroll() {
@@ -29,6 +32,8 @@ export default function MfaSetupPage() {
       setEnrolling(false);
     }
     enroll();
+  // supabase는 useMemo([], [])로 안정적 참조 — 마운트 1회만 실행
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleInput = (index: number, value: string) => {
@@ -73,7 +78,8 @@ export default function MfaSetupPage() {
       inputRefs.current[0]?.focus();
       setLoading(false);
     } else {
-      router.push('/mhj-desk');
+      // aal2 세션이 쿠키에 기록된 후 하드 네비게이션
+      window.location.href = '/mhj-desk';
     }
   };
 
