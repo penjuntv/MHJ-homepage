@@ -6,7 +6,7 @@ import React, {
 import SafeImage from '@/components/SafeImage';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import type { Magazine, Article } from '@/lib/types';
 import {
   ChevronLeft, Plus, Trash2, X, Upload, Loader2, Check,

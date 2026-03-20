@@ -95,7 +95,8 @@ export default function MfaVerifyPage() {
       inputRefs.current[0]?.focus();
       setLoading(false);
     } else {
-      // aal2 세션이 쿠키에 기록된 후 하드 네비게이션
+      // verify 성공 → refreshSession으로 aal2 JWT를 쿠키에 확실히 기록
+      await supabase.auth.refreshSession();
       window.location.href = '/mhj-desk';
     }
   };

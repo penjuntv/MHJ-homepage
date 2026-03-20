@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import { Upload, Loader2, Plus, Minus, ChevronDown, ChevronUp } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
 import { MAGAZINE_THEMES, type ThemeKey } from '@/lib/magazine-themes';

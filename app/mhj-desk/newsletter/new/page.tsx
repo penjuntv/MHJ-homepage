@@ -2,7 +2,7 @@
 
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import { generateNewsletterHTML } from '@/lib/newsletter-template';
 import { Loader2, Eye, X } from 'lucide-react';
 

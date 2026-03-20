@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import { Check, Trash2, MessageCircle, BookOpen } from 'lucide-react';
 import type { Comment } from '@/lib/types';
 

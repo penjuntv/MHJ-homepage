@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import type { Blog, HeroSlide } from '@/lib/types';
 import { ChevronUp, ChevronDown, Star, X, ArrowLeft, Info, Eye, EyeOff, Zap, Plus, Upload, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';

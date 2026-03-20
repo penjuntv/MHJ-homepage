@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import SafeImage from '@/components/SafeImage';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import { Copy, Grid2x2, List, Loader2, Trash2, Upload, X, Check } from 'lucide-react';
 
 /* ── 타입 ── */

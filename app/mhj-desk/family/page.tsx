@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import { Loader2, Upload, Save, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import SafeImage from '@/components/SafeImage';

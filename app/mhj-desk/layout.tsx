@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Toaster } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import {
   LayoutDashboard, FileText, BookOpen, Settings, Palette,
   LogOut, ExternalLink, Images, MessageCircle, Users,

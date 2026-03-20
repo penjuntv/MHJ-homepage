@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import type { Blog } from '@/lib/types';
 import { AlertCircle, AlertTriangle, CheckCircle2, Info, Loader2, Search } from 'lucide-react';
 

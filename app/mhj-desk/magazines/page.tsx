@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import type { Magazine } from '@/lib/types';
 import { Plus, BookOpen, ChevronRight, Trash2, Eye, EyeOff } from 'lucide-react';
 

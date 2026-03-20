@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import { Users, Download, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 
 interface Subscriber {

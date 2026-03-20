@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import type { Blog } from '@/lib/types';
 import { TrendingUp, BookOpen, Users, BarChart2, MessageCircle, Plus, Upload, FileText, Clock, UserPlus, Eye, Star } from 'lucide-react';
 

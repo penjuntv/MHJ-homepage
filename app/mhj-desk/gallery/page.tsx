@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import type { GalleryItem } from '@/lib/types';
 import { Plus, Trash2, Loader2, Upload, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
