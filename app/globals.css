@@ -544,7 +544,6 @@
 }
 .explore-panel {
   transition: opacity 0.3s ease;
-  min-height: 280px;
 }
 .explore-panel:hover {
   opacity: 0.92;
