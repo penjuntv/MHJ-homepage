@@ -54,7 +54,7 @@ export default function NewsletterPage() {
             활성 구독자: {subCount}명
           </p>
         </div>
-        <Link href="/admin/newsletter/new" style={{
+        <Link href="/mhj-desk/newsletter/new" style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           background: '#000', color: '#fff', borderRadius: 999,
           padding: '14px 28px', fontSize: 12, fontWeight: 900,
@@ -78,7 +78,7 @@ export default function NewsletterPage() {
       ) : newsletters.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
           <p style={{ fontSize: 16, color: '#94A3B8', marginBottom: 24 }}>아직 뉴스레터가 없습니다.</p>
-          <Link href="/admin/newsletter/new" style={{
+          <Link href="/mhj-desk/newsletter/new" style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
             background: '#000', color: '#fff', borderRadius: 999,
             padding: '14px 28px', fontSize: 12, fontWeight: 900,
@@ -119,7 +119,7 @@ export default function NewsletterPage() {
 
                 {nl.status === 'draft' && (
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <Link href={`/admin/newsletter/new?id=${nl.id}`} style={{
+                    <Link href={`/mhj-desk/newsletter/new?id=${nl.id}`} style={{
                       padding: '8px 18px', borderRadius: 999,
                       background: '#F1F5F9', color: '#1A1A1A',
                       fontSize: 11, fontWeight: 900, letterSpacing: 2,

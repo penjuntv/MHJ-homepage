@@ -16,27 +16,27 @@ type NavGroup = { type: 'group'; label: string };
 type NavEntry = NavItem | NavGroup;
 
 const NAV: NavEntry[] = [
-  { type: 'item', href: '/admin', label: '대시보드', icon: LayoutDashboard, exact: true },
+  { type: 'item', href: '/mhj-desk', label: '대시보드', icon: LayoutDashboard, exact: true },
 
   { type: 'group', label: '콘텐츠' },
-  { type: 'item', href: '/admin/blogs', label: '블로그', icon: FileText, badge: 'blogs' },
-  { type: 'item', href: '/admin/magazines', label: '매거진', icon: BookOpen },
-  { type: 'item', href: '/admin/gallery', label: '갤러리', icon: Images },
-  { type: 'item', href: '/admin/hero', label: '히어로 슬라이드', icon: Layers },
-  { type: 'item', href: '/admin/seo', label: 'SEO', icon: SearchCheck },
+  { type: 'item', href: '/mhj-desk/blogs', label: '블로그', icon: FileText, badge: 'blogs' },
+  { type: 'item', href: '/mhj-desk/magazines', label: '매거진', icon: BookOpen },
+  { type: 'item', href: '/mhj-desk/gallery', label: '갤러리', icon: Images },
+  { type: 'item', href: '/mhj-desk/hero', label: '히어로 슬라이드', icon: Layers },
+  { type: 'item', href: '/mhj-desk/seo', label: 'SEO', icon: SearchCheck },
 
   { type: 'group', label: '페이지' },
-  { type: 'item', href: '/admin/pages', label: '페이지 관리', icon: LayoutList },
-  { type: 'item', href: '/admin/navigation', label: '내비게이션', icon: Menu },
+  { type: 'item', href: '/mhj-desk/pages', label: '페이지 관리', icon: LayoutList },
+  { type: 'item', href: '/mhj-desk/navigation', label: '내비게이션', icon: Menu },
 
   { type: 'group', label: '커뮤니티' },
-  { type: 'item', href: '/admin/comments', label: '댓글', icon: MessageCircle, badge: 'comments' },
-  { type: 'item', href: '/admin/subscribers', label: '구독자', icon: Users },
+  { type: 'item', href: '/mhj-desk/comments', label: '댓글', icon: MessageCircle, badge: 'comments' },
+  { type: 'item', href: '/mhj-desk/subscribers', label: '구독자', icon: Users },
 
   { type: 'group', label: '설정' },
-  { type: 'item', href: '/admin/family', label: '패밀리', icon: Users },
-  { type: 'item', href: '/admin/settings', label: '사이트 설정', icon: Settings },
-  { type: 'item', href: '/admin/design-kit', label: '디자인 키트', icon: Palette },
+  { type: 'item', href: '/mhj-desk/family', label: '패밀리', icon: Users },
+  { type: 'item', href: '/mhj-desk/settings', label: '사이트 설정', icon: Settings },
+  { type: 'item', href: '/mhj-desk/design-kit', label: '디자인 키트', icon: Palette },
 ];
 
 const GROUP_LABEL_STYLE: React.CSSProperties = {
@@ -57,7 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const isLogin = pathname === '/admin/login';
+  const isLogin = pathname === '/mhj-desk/login' || pathname === '/mhj-desk/mfa-setup' || pathname === '/mhj-desk/mfa-verify';
 
   useEffect(() => {
     function check() { setIsMobile(window.innerWidth < 768); }
@@ -69,7 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session && !isLogin) {
-        router.replace('/admin/login');
+        router.replace('/mhj-desk/login');
       } else {
         setReady(true);
         if (session) {
@@ -87,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const logout = async () => {
     await supabase.auth.signOut();
-    router.replace('/admin/login');
+    router.replace('/mhj-desk/login');
   };
 
   if (isLogin) return <div style={{ minHeight: '100vh', background: '#F8FAFC' }}>{children}</div>;

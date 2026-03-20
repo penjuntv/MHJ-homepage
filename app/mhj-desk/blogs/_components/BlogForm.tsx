@@ -334,7 +334,7 @@ export default function BlogForm({ initial }: Props) {
     // 임시저장 삭제 + 토스트
     try { sessionStorage.removeItem(draftKey); } catch { /* ignore */ }
     toast.success(shouldPublish ? '글이 발행되었습니다.' : '글이 저장되었습니다.');
-    router.push('/admin/blogs');
+    router.push('/mhj-desk/blogs');
     router.refresh();
   }
 

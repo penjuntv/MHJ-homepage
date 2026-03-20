@@ -391,7 +391,7 @@ export default function MagazineDetailPage() {
   if (!magazine) return (
     <div style={{ padding: '48px' }}>
       <p style={{ color: '#64748B' }}>매거진을 찾을 수 없습니다.</p>
-      <Link href="/admin/magazines" style={{ marginTop: '16px', display: 'inline-block', color: '#4F46E5' }}>← 목록으로</Link>
+      <Link href="/mhj-desk/magazines" style={{ marginTop: '16px', display: 'inline-block', color: '#4F46E5' }}>← 목록으로</Link>
     </div>
   );
 
@@ -418,7 +418,7 @@ export default function MagazineDetailPage() {
       {/* ─── 상단 바 ─── */}
       <div style={{ padding: '20px clamp(24px,4vw,48px) 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Link href="/admin/magazines" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: '#94A3B8', textDecoration: 'none' }}>
+          <Link href="/mhj-desk/magazines" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: '#94A3B8', textDecoration: 'none' }}>
             <ChevronLeft size={14} /> 매거진 목록
           </Link>
           <div>

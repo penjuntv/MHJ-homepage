@@ -254,7 +254,7 @@ export default function AdminSeoPage() {
                   {/* 제목 */}
                   <div style={{ paddingRight: 16 }}>
                     <Link
-                      href={`/admin/blogs/${b.id}/edit`}
+                      href={`/mhj-desk/blogs/${b.id}/edit`}
                       style={{
                         fontSize: 14, fontWeight: 700, color: '#1A1A1A',
                         textDecoration: 'none', display: 'block',
@@ -333,7 +333,7 @@ export default function AdminSeoPage() {
                       );
                     })}
                     <Link
-                      href={`/admin/blogs/${b.id}/edit`}
+                      href={`/mhj-desk/blogs/${b.id}/edit`}
                       style={{
                         fontSize: 10, fontWeight: 700, padding: '3px 12px',
                         borderRadius: 999, background: '#4F46E5', color: 'white',

@@ -164,7 +164,7 @@ export default function HeroManagePage() {
       {/* ─── 헤더 ─── */}
       <div style={{ marginBottom: '40px' }}>
         <Link
-          href="/admin/blogs"
+          href="/mhj-desk/blogs"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             fontSize: 12, fontWeight: 700, color: '#94A3B8',
@@ -185,7 +185,7 @@ export default function HeroManagePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {saving && <span style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8' }}>저장 중...</span>}
             <Link
-              href="/admin/blogs"
+              href="/mhj-desk/blogs"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 padding: '10px 20px', borderRadius: 999,
@@ -292,7 +292,7 @@ export default function HeroManagePage() {
                       </span>
                     </div>
                     <Link
-                      href="/admin/blogs"
+                      href="/mhj-desk/blogs"
                       style={{
                         fontSize: 9, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase',
                         color: '#6366F1', textDecoration: 'none', whiteSpace: 'nowrap',

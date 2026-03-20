@@ -161,7 +161,7 @@ export default function AdminDashboard() {
       sub: publishedCount !== null && blogCount !== null ? `발행 ${publishedCount} · 비공개 ${blogCount - publishedCount}` : '—',
       icon: FileText,
       color: '#4F46E5',
-      href: '/admin/blogs',
+      href: '/mhj-desk/blogs',
     },
     {
       label: '매거진 이슈',
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
       sub: '총 이슈',
       icon: BookOpen,
       color: '#0ea5e9',
-      href: '/admin/magazines',
+      href: '/mhj-desk/magazines',
     },
     {
       label: '구독자',
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
       sub: '활성 구독자',
       icon: Users,
       color: '#10b981',
-      href: '/admin/subscribers',
+      href: '/mhj-desk/subscribers',
     },
     {
       label: '총 조회수',
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
       sub: pendingComments && pendingComments > 0 ? `미승인 댓글 ${pendingComments}건` : '누적 페이지뷰',
       icon: Eye,
       color: '#f59e0b',
-      href: '/admin/blogs',
+      href: '/mhj-desk/blogs',
     },
   ];
 
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
           </h1>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <Link
-              href="/admin/blogs/new"
+              href="/mhj-desk/blogs/new"
               className="font-black uppercase"
               style={{
                 background: '#0A0A0A', color: '#fff',
@@ -216,7 +216,7 @@ export default function AdminDashboard() {
               <Plus size={14} /> 새 블로그 글
             </Link>
             <Link
-              href="/admin/magazines/new"
+              href="/mhj-desk/magazines/new"
               className="font-black uppercase"
               style={{
                 background: 'white', color: '#1a1a1a',
@@ -230,7 +230,7 @@ export default function AdminDashboard() {
               <BookOpen size={14} /> 새 매거진 이슈
             </Link>
             <Link
-              href="/admin/gallery"
+              href="/mhj-desk/gallery"
               className="font-black uppercase"
               style={{
                 background: 'white', color: '#1a1a1a',
@@ -376,7 +376,7 @@ export default function AdminDashboard() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {popularBlogs.map((blog, i) => (
-                <Link key={blog.id} href={`/admin/blogs/${blog.id}/edit`} style={{
+                <Link key={blog.id} href={`/mhj-desk/blogs/${blog.id}/edit`} style={{
                   display: 'flex', alignItems: 'center', gap: 14,
                   padding: '12px 0',
                   borderBottom: i < popularBlogs.length - 1 ? '1px solid #f8fafc' : 'none',
@@ -475,7 +475,7 @@ export default function AdminDashboard() {
               최근 블로그
             </p>
           </div>
-          <Link href="/admin/blogs" style={{
+          <Link href="/mhj-desk/blogs" style={{
             fontSize: 11, fontWeight: 700, color: '#4F46E5',
             textDecoration: 'none', letterSpacing: 1,
           }}>
@@ -541,7 +541,7 @@ export default function AdminDashboard() {
                     </span>
                   </td>
                   <td style={{ padding: '14px 16px' }}>
-                    <Link href={`/admin/blogs/${blog.id}/edit`} style={{
+                    <Link href={`/mhj-desk/blogs/${blog.id}/edit`} style={{
                       fontSize: 11, fontWeight: 700, color: '#64748b',
                       textDecoration: 'none', padding: '6px 12px',
                       border: '1px solid #e2e8f0', borderRadius: 8,

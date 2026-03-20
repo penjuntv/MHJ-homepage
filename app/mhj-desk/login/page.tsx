@@ -21,7 +21,14 @@ export default function AdminLoginPage() {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.');
       setLoading(false);
     } else {
-      router.push('/admin');
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aalData?.nextLevel === 'aal2' && aalData?.currentLevel === 'aal1') {
+        router.push('/mhj-desk/mfa-verify');
+      } else if (aalData?.nextLevel === 'aal1') {
+        router.push('/mhj-desk/mfa-setup');
+      } else {
+        router.push('/mhj-desk');
+      }
     }
   };
 

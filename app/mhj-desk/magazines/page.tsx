@@ -47,7 +47,7 @@ export default function AdminMagazinesPage() {
           </p>
         </div>
         <Link
-          href="/admin/magazines/new"
+          href="/mhj-desk/magazines/new"
           style={{
             display: 'flex', alignItems: 'center', gap: '8px',
             background: '#4F46E5', color: '#fff', borderRadius: '999px',
@@ -120,7 +120,7 @@ export default function AdminMagazinesPage() {
               {/* 버튼 */}
               <div style={{ padding: '0 20px 20px', display: 'flex', gap: '8px' }}>
                 <Link
-                  href={`/admin/magazines/${mag.id}`}
+                  href={`/mhj-desk/magazines/${mag.id}`}
                   style={{
                     flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                     padding: '12px', background: '#F8FAFC', borderRadius: '12px',

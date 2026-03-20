@@ -107,7 +107,7 @@ export default function AdminBlogsPage() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Link href="/admin/hero" style={{
+          <Link href="/mhj-desk/hero" style={{
             display: 'flex', alignItems: 'center', gap: 8,
             background: '#FEF3C7', color: '#92400E', borderRadius: 999,
             padding: '12px 20px', fontSize: 11, fontWeight: 900,
@@ -115,7 +115,7 @@ export default function AdminBlogsPage() {
           }}>
             <Star size={13} fill="#F59E0B" color="#F59E0B" /> 히어로 ({heroCount})
           </Link>
-          <Link href="/admin/blogs/new" style={{
+          <Link href="/mhj-desk/blogs/new" style={{
             display: 'flex', alignItems: 'center', gap: 8,
             background: '#000', color: '#fff', borderRadius: 999,
             padding: '12px 24px', fontSize: 11, fontWeight: 900,
@@ -265,7 +265,7 @@ export default function AdminBlogsPage() {
                   }}>
                     {blog.published ? <Eye size={13} /> : <EyeOff size={13} />}
                   </button>
-                  <Link href={`/admin/blogs/${blog.id}/edit`} style={{
+                  <Link href={`/mhj-desk/blogs/${blog.id}/edit`} style={{
                     padding: '7px', borderRadius: 8, border: '1px solid #f1f5f9',
                     background: 'white', display: 'flex', alignItems: 'center', color: '#64748B', textDecoration: 'none',
                   }}>
@@ -349,7 +349,7 @@ export default function AdminBlogsPage() {
                       }}>
                         {blog.published ? <Eye size={13} /> : <EyeOff size={13} />}
                       </button>
-                      <Link href={`/admin/blogs/${blog.id}/edit`} style={{
+                      <Link href={`/mhj-desk/blogs/${blog.id}/edit`} style={{
                         padding: '6px', borderRadius: 8, border: '1px solid #f1f5f9',
                         background: 'white', color: '#64748B', textDecoration: 'none', display: 'flex',
                       }}>

@@ -192,7 +192,7 @@ export default function PageEditorPage() {
     return (
       <div style={{ padding: 48 }}>
         <p style={{ color: '#ef4444', fontWeight: 700 }}>페이지를 찾을 수 없습니다: {pageId}</p>
-        <Link href="/admin/pages" style={{ color: '#4F46E5', textDecoration: 'underline', marginTop: 16, display: 'inline-block' }}>← 페이지 관리로 돌아가기</Link>
+        <Link href="/mhj-desk/pages" style={{ color: '#4F46E5', textDecoration: 'underline', marginTop: 16, display: 'inline-block' }}>← 페이지 관리로 돌아가기</Link>
       </div>
     );
   }
@@ -226,7 +226,7 @@ export default function PageEditorPage() {
 
       {/* 헤더 */}
       <div style={{ marginBottom: 36 }}>
-        <Link href="/admin/pages" style={{
+        <Link href="/mhj-desk/pages" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           fontSize: 11, fontWeight: 700, color: '#94a3b8', textDecoration: 'none',
           marginBottom: 16,

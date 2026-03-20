@@ -123,7 +123,7 @@ export default function NewMagazinePage() {
       await supabase.from('articles').insert(articleRows);
     }
 
-    router.push(`/admin/magazines/${finalId}`);
+    router.push(`/mhj-desk/magazines/${finalId}`);
   }
 
   const inputStyle = {

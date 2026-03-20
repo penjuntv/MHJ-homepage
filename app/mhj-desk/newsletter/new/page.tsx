@@ -43,7 +43,7 @@ export default function NewNewsletterPage() {
       await supabase.from('newsletters').insert({ subject, content, status: 'draft', recipient_count: 0 });
     }
     setSaving(false);
-    router.push('/admin/newsletter');
+    router.push('/mhj-desk/newsletter');
   }
 
   async function sendNewsletter() {
@@ -75,7 +75,7 @@ export default function NewNewsletterPage() {
       return;
     }
 
-    router.push('/admin/newsletter');
+    router.push('/mhj-desk/newsletter');
   }
 
   const inputStyle: React.CSSProperties = {

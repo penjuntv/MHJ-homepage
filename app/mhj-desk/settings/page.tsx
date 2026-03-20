@@ -18,7 +18,7 @@ const SETTING_KEYS = [
   'contact_location', 'contact_email',
 ];
 
-const SOCIAL_KEYS = ['social_instagram', 'social_facebook', 'social_youtube'] as const;
+const SOCIAL_KEYS = ['social_instagram', 'social_facebook', 'social_youtube', 'social_threads'] as const;
 
 // 이미지 업로드 키 정의
 const IMAGE_KEYS = [
@@ -45,6 +45,11 @@ const SOCIAL_META: Record<string, { label: string; icon: React.ReactNode; placeh
     label: 'YouTube',
     icon: <Youtube size={16} />,
     placeholder: 'https://www.youtube.com/@yourchannel',
+  },
+  social_threads: {
+    label: 'THREADS',
+    icon: <span style={{ fontSize: 14, lineHeight: 1 }}>🧵</span>,
+    placeholder: 'https://www.threads.net/@mhj_nz',
   },
 };
 
@@ -160,10 +165,11 @@ export default function SettingsPage() {
             padding: '20px 28px', borderBottom: '1px solid #F1F5F9',
             display: 'flex', alignItems: 'center', gap: '12px',
           }}>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <Instagram size={16} style={{ color: '#E1306C' }} />
               <Facebook  size={16} style={{ color: '#1877F2' }} />
               <Youtube   size={16} style={{ color: '#FF0000' }} />
+              <span style={{ fontSize: 14, lineHeight: 1 }}>🧵</span>
             </div>
             <div>
               <p style={{ fontSize: '12px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#1A1A1A', margin: 0 }}>

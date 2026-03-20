@@ -25,7 +25,7 @@ const PAGES = [
     label: 'StoryPress',
     path: '/storypress',
     desc: '히어로 · 소개 · 기능',
-    status: 'draft' as const,
+    status: 'live' as const,
     sections: ['제목', '설명', 'CTA 버튼', '히어로 이미지'],
   },
   {
@@ -67,7 +67,7 @@ export default function PagesAdminPage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {PAGES.map((page) => (
-          <Link key={page.id} href={`/admin/pages/${page.id}`} style={{
+          <Link key={page.id} href={`/mhj-desk/pages/${page.id}`} style={{
             display: 'flex', alignItems: 'center', gap: 20,
             background: 'white', borderRadius: 20, padding: '20px 24px',
             border: '1px solid #f1f5f9', textDecoration: 'none',

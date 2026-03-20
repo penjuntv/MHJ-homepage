@@ -212,7 +212,7 @@ export default async function BlogDetailPage({
               Preview Mode — This post is not yet published
             </p>
             <Link
-              href="/admin/blogs"
+              href="/mhj-desk/blogs"
               style={{
                 fontSize: 11, fontWeight: 900, color: '#92400E',
                 textDecoration: 'none', letterSpacing: 2,
