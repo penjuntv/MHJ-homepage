@@ -455,6 +455,24 @@ export default async function BlogDetailPage({
                     .blog-content .grid-1-2 > img:first-child { grid-row: auto; }
                     .blog-content > p:first-child::first-letter { font-size: clamp(48px, 12vw, 72px); }
                   }
+                  /* HTML 블록 격리 — .blog-content 스타일이 인포블록 내부에 침범하지 않도록 */
+                  .blog-content [data-type="html-block"] {
+                    max-width: none !important;
+                    font-size: revert;
+                    line-height: revert;
+                  }
+                  .blog-content [data-type="html-block"] > * {
+                    all: revert;
+                  }
+                  .blog-content [data-type="html-block"] > p:first-child::first-letter {
+                    font-size: revert;
+                    font-weight: revert;
+                    float: revert;
+                    margin: revert;
+                    line-height: revert;
+                    color: revert;
+                    font-family: revert;
+                  }
                 `}</style>
                 <div
                   className="blog-content"

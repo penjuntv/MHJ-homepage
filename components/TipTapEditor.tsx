@@ -16,12 +16,12 @@ import LinkExtension from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 import {
   Bold, Italic, Heading2, Heading3, Quote, ImageIcon, Loader2,
   AlignLeft, AlignCenter, AlignRight, Underline, Strikethrough,
   Link2, Link2Off, Minus, Highlighter, ChevronDown,
-  MapPin, Youtube, MessageSquare, MousePointer2,
+  MapPin, Youtube, MessageSquare, MousePointer2, Code2,
 } from 'lucide-react';
 
 
@@ -181,6 +181,31 @@ const CalloutBlockNode = Node.create({
   },
 });
 
+/* ── HtmlBlock ── */
+const HtmlBlockNode = Node.create({
+  name: 'htmlBlock',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      content: {
+        default: '',
+        parseHTML: el => el.innerHTML,
+        renderHTML: () => ({}),
+      },
+    };
+  },
+  parseHTML() { return [{ tag: 'div[data-type="html-block"]' }]; },
+  renderHTML({ node }) {
+    const dom = document.createElement('div');
+    dom.setAttribute('data-type', 'html-block');
+    dom.innerHTML = node.attrs.content as string;
+    return { dom };
+  },
+  addNodeView() { return ReactNodeViewRenderer(HtmlBlockView); },
+});
+
 /* ════════════════════════════════════════
    CUSTOM NODE VIEWS
 ════════════════════════════════════════ */
@@ -257,6 +282,83 @@ function CtaButtonView({ node, selected }: NodeViewProps) {
           → {node.attrs.href}
         </span>
       </div>
+    </NodeViewWrapper>
+  );
+}
+
+function HtmlBlockView({ node, updateAttributes, selected }: NodeViewProps) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+
+  const openEdit = () => {
+    setDraft(node.attrs.content as string);
+    setEditing(true);
+  };
+
+  return (
+    <NodeViewWrapper>
+      <div contentEditable={false} style={{
+        background: '#faf8f5',
+        border: `1.5px solid ${selected ? '#4F46E5' : '#ede9e3'}`,
+        borderRadius: 12,
+        margin: '16px 0',
+        overflow: 'hidden',
+      }}>
+        {/* Label bar */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '8px 14px', background: '#ede9e3', borderBottom: '1px solid #ddd8d0',
+        }}>
+          <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: '#6b6560', textTransform: 'uppercase' }}>
+            HTML BLOCK
+          </span>
+          <button type="button" onClick={openEdit}
+            style={{ fontSize: 11, fontWeight: 700, color: '#4F46E5', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
+            편집
+          </button>
+        </div>
+        {/* Rendered HTML */}
+        <div style={{ padding: '16px 18px', overflow: 'auto' }}
+          dangerouslySetInnerHTML={{ __html: node.attrs.content as string }}
+        />
+      </div>
+
+      {/* Edit modal */}
+      {editing && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: 20,
+        }} onClick={() => setEditing(false)}>
+          <div style={{
+            background: 'white', borderRadius: 20, padding: 24,
+            maxWidth: 640, width: '100%', maxHeight: '85vh', display: 'flex', flexDirection: 'column', gap: 16,
+          }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: 16, fontWeight: 900, margin: 0 }}>HTML 블록 편집</h3>
+            <textarea
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              rows={14}
+              style={{
+                width: '100%', padding: '12px 14px', borderRadius: 10,
+                border: '1px solid #e2e8f0', fontFamily: 'monospace', fontSize: 12,
+                lineHeight: 1.6, resize: 'vertical', outline: 'none', boxSizing: 'border-box',
+              }}
+            />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button type="button"
+                onClick={() => { updateAttributes({ content: draft }); setEditing(false); }}
+                style={{ flex: 1, padding: '12px', background: '#1a1a1a', color: 'white', borderRadius: 10, border: 'none', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>
+                적용
+              </button>
+              <button type="button" onClick={() => setEditing(false)}
+                style={{ padding: '12px 20px', background: '#f8fafc', color: '#64748b', borderRadius: 10, border: '1px solid #e2e8f0', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </NodeViewWrapper>
   );
 }
@@ -405,6 +507,9 @@ type ImageLayout = '1' | '2' | '3' | '1+2';
 interface SlotState { url: string; uploading: boolean; }
 type InsertModalType = 'youtube' | 'maps' | 'cta' | null;
 
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
 function youtubeToEmbed(url: string): string {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
   if (m) return `https://www.youtube.com/embed/${m[1]}`;
@@ -438,6 +543,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
   const savedHighlightSel = useRef<{ from: number; to: number } | null>(null);
   const [showInsertMenu, setShowInsertMenu] = useState(false);
   const insertMenuRef = useRef<HTMLDivElement>(null);
+  const [htmlModal, setHtmlModal] = useState<{ content: string } | null>(null);
 
   // Close insert menu on outside click — ref.contains 방식 사용 (stopPropagation 방식은
   // document 레벨 네이티브 리스너와 React 합성 이벤트 실행 순서 경합으로 드롭다운 항목
@@ -455,9 +561,17 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
 
   const uploadAndInsert = useCallback(async (file: File) => {
     if (!editor) return;
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      alert('jpg, png, webp, gif 형식만 업로드할 수 있습니다.');
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      alert('이미지 크기는 5MB를 초과할 수 없습니다.');
+      return;
+    }
     setUploading(true);
     const ext = file.name.split('.').pop();
-    const path = `blogs/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
+    const path = `blog/inline-images/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
     const { error } = await supabase.storage.from('images').upload(path, file);
     if (error) { alert('업로드 실패: ' + error.message); setUploading(false); return; }
     const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
@@ -528,6 +642,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
       MapEmbedNode,
       CtaButtonNode,
       CalloutBlockNode,
+      HtmlBlockNode,
     ],
     content,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
@@ -660,6 +775,11 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
         {/* Image */}
         <button type="button" onClick={openImageModal} disabled={uploading} style={{ ...btn(false), opacity: uploading ? 0.5 : 1 }} title="이미지 삽입">
           {uploading ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={15} />}
+        </button>
+
+        {/* HTML Block */}
+        <button type="button" onClick={() => setHtmlModal({ content: '' })} style={btn(false)} title="HTML 블록 삽입">
+          <Code2 size={15} />
         </button>
 
         {/* Link */}
@@ -1008,6 +1128,47 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
               </div>
             </>
           )}
+        </ModalOverlay>
+      )}
+
+      {/* ── HTML BLOCK MODAL ── */}
+      {htmlModal && (
+        <ModalOverlay onClose={() => setHtmlModal(null)}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <Code2 size={20} color="#4F46E5" />
+            <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0 }}>HTML 블록 삽입</h2>
+          </div>
+          <textarea
+            autoFocus
+            value={htmlModal.content}
+            onChange={e => setHtmlModal({ content: e.target.value })}
+            rows={14}
+            placeholder="HTML 코드를 붙여넣으세요..."
+            style={{
+              width: '100%', padding: '12px 14px', borderRadius: 12,
+              border: '1px solid #f1f5f9', fontFamily: 'monospace', fontSize: 12,
+              lineHeight: 1.6, resize: 'vertical', outline: 'none',
+              background: '#f8fafc', boxSizing: 'border-box', marginBottom: 20,
+            }}
+          />
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button type="button"
+              onClick={() => {
+                if (!htmlModal.content.trim() || !editor) return;
+                editor.chain().focus().insertContent({
+                  type: 'htmlBlock',
+                  attrs: { content: htmlModal.content.trim() },
+                }).run();
+                setHtmlModal(null);
+              }}
+              style={{ flex: 1, padding: '13px', background: '#1a1a1a', color: 'white', borderRadius: 12, border: 'none', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>
+              삽입
+            </button>
+            <button type="button" onClick={() => setHtmlModal(null)}
+              style={{ padding: '13px 20px', background: '#f8fafc', color: '#64748b', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+              취소
+            </button>
+          </div>
         </ModalOverlay>
       )}
     </div>
