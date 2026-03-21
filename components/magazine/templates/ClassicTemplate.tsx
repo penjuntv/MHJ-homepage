@@ -37,9 +37,6 @@ export default function ClassicTemplate({ article, accentColor = '#1A1A1A', bgCo
 
       {/* 하단: 텍스트 */}
       <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '3px', color: accentColor, textTransform: 'uppercase', marginBottom: '10px', flexShrink: 0 }}>
-          Article
-        </div>
         <div style={{ fontFamily: 'var(--font-display,"Playfair Display",serif)', fontWeight: 900, fontSize: '24px', color: accentColor, lineHeight: 1.1, marginBottom: '14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', flexShrink: 0 }}>
           {article.title || 'Article Title'}
         </div>

@@ -968,6 +968,72 @@ function SpreadPage({ label, children, filename, onEdit, onPreview }: {
   );
 }
 
+/* ─── 템플릿 레이아웃 다이어그램 ─── */
+function TemplateDiagram({ tplKey }: { tplKey: string }) {
+  const photo = (label: string, radius = '2px') => (
+    <div style={{ background: '#374151', borderRadius: radius, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+      <span style={{ fontSize: '9px', fontWeight: 900, color: 'white', lineHeight: 1 }}>{label}</span>
+    </div>
+  );
+  const line = (w: string, h = '2px', bg = '#E5E7EB') => (
+    <div style={{ height: h, background: bg, borderRadius: '1px', width: w, flexShrink: 0 }} />
+  );
+  const style: React.CSSProperties = { display: 'flex', height: '100%', padding: '7px', boxSizing: 'border-box' };
+
+  if (tplKey === 'photo-hero') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '4px' }}>
+      <div style={{ flex: 3, width: '100%' }}>{photo('A', '3px')}</div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+        {line('75%', '3px', '#D1D5DB')}{line('90%')}{line('65%')}
+      </div>
+    </div>
+  );
+  if (tplKey === 'classic') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '4px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {line('70%', '3px', '#D1D5DB')}{line('90%')}{line('55%')}
+      </div>
+      <div style={{ flex: 1, width: '100%' }}>{photo('A', '3px')}</div>
+    </div>
+  );
+  if (tplKey === 'photo-essay') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '4px' }}>
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '3px' }}>
+        {['A','B','C','D'].map(l => <div key={l} style={{ minHeight: 0 }}>{photo(l)}</div>)}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {line('80%')}{line('60%')}
+      </div>
+    </div>
+  );
+  if (tplKey === 'gallery') return (
+    <div style={{ ...style, flexDirection: 'row', gap: '5px' }}>
+      <div style={{ width: '38%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        {['A','B','C'].map(l => <div key={l} style={{ flex: 1 }}>{photo(l)}</div>)}
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+        {line('90%', '3px', '#D1D5DB')}{line('75%')}{line('80%')}{line('55%')}
+      </div>
+    </div>
+  );
+  if (tplKey === 'text-only') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '3px', justifyContent: 'center' }}>
+      {line('45%', '2px', '#9CA3AF')}
+      {line('85%', '3px', '#D1D5DB')}
+      {line('90%')}{line('80%')}{line('90%')}{line('75%')}{line('85%')}
+    </div>
+  );
+  /* split */
+  return (
+    <div style={{ ...style, flexDirection: 'row', gap: '5px' }}>
+      <div style={{ width: '45%' }}>{photo('A', '3px')}</div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+        {line('90%', '3px', '#D1D5DB')}{line('80%')}{line('85%')}{line('70%')}
+      </div>
+    </div>
+  );
+}
+
 /* ════════════════════════════════════════════
    인라인 편집 폼 컴포넌트
    ════════════════════════════════════════════ */
@@ -991,27 +1057,8 @@ function InlineForm({
   onContentUpload: () => void;
   onSlotUpload: (idx: number) => void;
 }) {
-  const TYPE_OPTIONS = [
-    { value: 'cover' as ArticleType,    label: 'COVER',    color: '#F59E0B' },
-    { value: 'contents' as ArticleType, label: 'CONTENTS', color: '#4F46E5' },
-    { value: 'article' as ArticleType,  label: 'ARTICLE',  color: '#94A3B8' },
-  ];
-
   return (
     <div style={{ background: 'white', borderRadius: '12px', padding: '16px', border: '1px solid #F1F5F9', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-
-      {/* 타입 */}
-      <div>
-        <label style={labelStyle}>기사 타입</label>
-        <div style={{ display: 'flex', gap: '6px' }}>
-          {TYPE_OPTIONS.map(opt => (
-            <button key={opt.value} type="button" onClick={() => setForm({ article_type: opt.value })}
-              style={{ flex: 1, padding: '8px 4px', borderRadius: '10px', cursor: 'pointer', border: form.article_type === opt.value ? `2px solid ${opt.color}` : '2px solid #F1F5F9', background: form.article_type === opt.value ? `${opt.color}15` : 'white', fontSize: '10px', fontWeight: 900, letterSpacing: '1px', color: form.article_type === opt.value ? opt.color : '#CBD5E1', textTransform: 'uppercase', transition: 'all 0.15s' }}>
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* 상태 */}
       <div>
@@ -1027,30 +1074,23 @@ function InlineForm({
       </div>
 
       {/* 템플릿 선택 */}
-      {form.article_type === 'article' && (
-        <div>
-          <label style={labelStyle}>템플릿</label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
-            {TEMPLATE_META.map(t => {
-              const miniArt: ArticlePreviewData = { title: form.title, author: form.author, content: form.content, image_url: form.image_url, article_images: form.article_images };
-              return (
-                <button key={t.key} type="button" onClick={() => setForm({ template: t.key })}
-                  style={{ padding: 0, borderRadius: '8px', cursor: 'pointer', overflow: 'hidden', border: form.template === t.key ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: 'white', transition: 'all 0.15s' }}>
-                  <div style={{ height: '72px', overflow: 'hidden', position: 'relative', background: '#F8FAFC' }}>
-                    <div style={{ transform: 'scale(0.3)', transformOrigin: 'top left', width: '333%', pointerEvents: 'none' }}>
-                      {renderTemplate(t.key, miniArt, accentColor)}
-                    </div>
-                  </div>
-                  <div style={{ padding: '4px 6px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '8px', fontWeight: 900, color: form.template === t.key ? accentColor : '#94A3B8', margin: 0, textTransform: 'uppercase' }}>{t.label}</p>
-                    <p style={{ fontSize: '7px', color: '#CBD5E1', margin: 0 }}>사진 {t.photos}장</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+      <div>
+        <label style={labelStyle}>템플릿</label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+          {TEMPLATE_META.map(t => (
+            <button key={t.key} type="button" onClick={() => setForm({ template: t.key })}
+              style={{ padding: 0, borderRadius: '8px', cursor: 'pointer', overflow: 'hidden', border: form.template === t.key ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: 'white', transition: 'all 0.15s' }}>
+              <div style={{ height: '72px', overflow: 'hidden', background: '#F8FAFC' }}>
+                <TemplateDiagram tplKey={t.key} />
+              </div>
+              <div style={{ padding: '4px 6px', textAlign: 'center' }}>
+                <p style={{ fontSize: '8px', fontWeight: 900, color: form.template === t.key ? accentColor : '#94A3B8', margin: 0, textTransform: 'uppercase' }}>{t.label}</p>
+                <p style={{ fontSize: '7px', color: '#CBD5E1', margin: 0 }}>사진 {t.photos}장</p>
+              </div>
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* 제목 */}
       <div>
@@ -1117,7 +1157,7 @@ function InlineForm({
       </div>
 
       {/* 기사 사진 슬롯 */}
-      {form.article_type === 'article' && photoCount > 0 && (
+      {photoCount > 0 && (
         <div>
           <label style={labelStyle}>
             기사 사진 <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}>({(form.article_images ?? []).filter(Boolean).length}/{photoCount}장)</span>
