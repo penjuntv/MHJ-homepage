@@ -72,6 +72,7 @@ export interface Blog {
   is_hero?: boolean;
   hero_order?: number;
   created_at?: string;
+  info_block_html?: string | null;
 }
 
 export interface Comment {

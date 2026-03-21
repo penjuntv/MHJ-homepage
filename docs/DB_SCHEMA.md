@@ -77,6 +77,7 @@
 | is_hero | boolean | YES | false | |
 | featured | boolean | YES | false | |
 | content_backup | text | YES | — | |
+| info_block_html | text | YES | — | 인포블록 HTML |
 
 ---
 

@@ -455,24 +455,6 @@ export default async function BlogDetailPage({
                     .blog-content .grid-1-2 > img:first-child { grid-row: auto; }
                     .blog-content > p:first-child::first-letter { font-size: clamp(48px, 12vw, 72px); }
                   }
-                  /* HTML 블록 격리 — .blog-content 본문 스타일만 선택적으로 차단 */
-                  /* all:revert 금지 — 인포블록 인라인 스타일까지 날림 */
-                  .blog-content [data-type="html-block"] {
-                    font-size: initial;
-                    line-height: initial;
-                  }
-                  .blog-content [data-type="html-block"] p {
-                    font-size: inherit;
-                    line-height: inherit;
-                    margin: inherit;
-                  }
-                  .blog-content [data-type="html-block"] p::first-letter {
-                    float: none;
-                    font-size: inherit;
-                    font-weight: inherit;
-                    margin: 0;
-                    color: inherit;
-                  }
                 `}</style>
                 <div
                   className="blog-content"
@@ -500,6 +482,13 @@ export default async function BlogDetailPage({
                 </span>
                 {restContent}
               </p>
+            )}
+
+            {/* ── 인포블록 ── */}
+            {blog.info_block_html && (
+              <div style={{ margin: '48px 0' }}
+                dangerouslySetInnerHTML={{ __html: blog.info_block_html }}
+              />
             )}
 
             {/* 태그 */}

@@ -102,6 +102,7 @@ export default function BlogForm({ initial }: Props) {
     published: initial?.published ?? false,
     is_sponsored: initial?.is_sponsored ?? false,
     sponsor_name: initial?.sponsor_name ?? '',
+    info_block_html: initial?.info_block_html ?? '',
   });
 
   const [saving, setSaving] = useState(false);
@@ -119,6 +120,7 @@ export default function BlogForm({ initial }: Props) {
   );
   const [sendAsNewsletter, setSendAsNewsletter] = useState(false);
   const [aiSeoLoading, setAiSeoLoading] = useState(false);
+  const [infoBlockPreview, setInfoBlockPreview] = useState(false);
 
   /* ── 슬러그 중복 검사 ── */
   const [slugError, setSlugError] = useState('');
@@ -632,6 +634,41 @@ export default function BlogForm({ initial }: Props) {
             </div>
           );
         })()}
+
+        {/* ── INFO BLOCK HTML ── */}
+        <div style={{ background: 'white', borderRadius: 20, padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>
+              Info Block HTML
+            </p>
+            <button type="button" onClick={() => setInfoBlockPreview(p => !p)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '6px 12px', borderRadius: 999,
+                background: infoBlockPreview ? '#4F46E5' : '#F8FAFC',
+                color: infoBlockPreview ? 'white' : '#64748B',
+                border: '1px solid #E2E8F0', fontSize: 10, fontWeight: 900,
+                letterSpacing: 1.5, textTransform: 'uppercase', cursor: 'pointer',
+              }}>
+              <Eye size={11} /> {infoBlockPreview ? '코드 보기' : '미리보기'}
+            </button>
+          </div>
+          {infoBlockPreview ? (
+            <div
+              style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: '20px', minHeight: 120, background: '#FAFAFA' }}
+              dangerouslySetInnerHTML={{ __html: form.info_block_html || '<p style="color:#94A3B8;font-size:13px">인포블록 HTML을 입력하면 여기에 렌더링됩니다.</p>' }}
+            />
+          ) : (
+            <textarea
+              value={form.info_block_html ?? ''}
+              onChange={e => set('info_block_html', e.target.value)}
+              placeholder="유씨팩토리에서 받은 인포블록 HTML을 붙여넣으세요..."
+              rows={12}
+              style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 12, lineHeight: 1.6, resize: 'vertical', minHeight: 300 }}
+            />
+          )}
+          <p style={{ fontSize: 11, color: '#94A3B8', margin: 0 }}>본문 아래 별도 영역으로 렌더링됩니다. 비워두면 표시 안 됩니다.</p>
+        </div>
 
         {/* 태그 */}
         <div>
