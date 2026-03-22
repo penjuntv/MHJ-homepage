@@ -7,8 +7,8 @@ import { getSiteSettings } from '@/lib/site-settings';
 export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 20;
-const VALID_CATEGORIES = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
-const CATEGORY_ORDER = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
+const VALID_CATEGORIES = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
+const CATEGORY_ORDER = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
 
 interface Props {
   searchParams: Promise<{ page?: string; category?: string }>;
