@@ -7,7 +7,7 @@ import type { Blog } from '@/lib/types';
 import NewsletterCTA from './NewsletterCTA';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const FALLBACK_CATS = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
+const FALLBACK_CATS = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
 
 interface Props {
   featuredBlog: Blog | null;
@@ -37,13 +37,23 @@ export default function BlogLibrary({
   availableCategories,
 }: Props) {
   const router = useRouter();
+  const allStoriesRef = useRef<HTMLDivElement>(null);
+  const prevPageRef = useRef(currentPage);
+
+  // 페이지 변경 시 All Stories 섹션으로 스크롤
+  useEffect(() => {
+    if (prevPageRef.current !== currentPage) {
+      prevPageRef.current = currentPage;
+      allStoriesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [currentPage]);
 
   function navigateTo(category: string | null, page: number) {
     const params = new URLSearchParams();
     if (category) params.set('category', category);
     if (page > 1) params.set('page', String(page));
     const qs = params.toString();
-    router.push(`/blog${qs ? `?${qs}` : ''}`);
+    router.push(`/blog${qs ? `?${qs}` : ''}`, { scroll: false });
   }
 
   function handleCategoryChange(cat: string) {
@@ -138,7 +148,7 @@ export default function BlogLibrary({
       )}
 
       {/* ═══════ ALL STORIES + 카테고리 필터 ═══════ */}
-      <div style={{
+      <div ref={allStoriesRef} style={{
         borderTop: '1px solid var(--border-medium)',
         paddingTop: 40,
         marginBottom: 40,
@@ -784,7 +794,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
       marginTop: 80,
     }}>
       <button
-        onClick={() => { onPageChange(currentPage - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         style={{
           width: 40, height: 40,
@@ -812,7 +822,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
         ) : (
           <button
             key={p}
-            onClick={() => { onPageChange(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            onClick={() => onPageChange(p)}
             style={{
               width: 40, height: 40,
               borderRadius: 8,
@@ -831,7 +841,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
       )}
 
       <button
-        onClick={() => { onPageChange(currentPage + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         style={{
           width: 40, height: 40,
