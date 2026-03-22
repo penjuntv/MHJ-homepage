@@ -139,6 +139,16 @@ export interface CarouselSlide {
   link_url?: string;
 }
 
+export interface ArticlePage {
+  id?: number;
+  article_id: number;
+  page_number: number;
+  template: string;      // classic/photo-hero/photo-essay/gallery/text-only/split
+  content: string;
+  images: string[];
+  caption?: string | null;
+}
+
 export interface GalleryItem {
   id: number;
   image_url: string;

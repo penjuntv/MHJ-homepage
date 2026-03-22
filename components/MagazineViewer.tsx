@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { X, ChevronLeft, ChevronRight, Download, List, BookOpen, Image as ImageIcon, AlignLeft, Heart, MessageCircle, Send } from 'lucide-react';
 import DownloadBtn from '@/components/DownloadBtn';
 import SafeImage from '@/components/SafeImage';
-import type { Magazine, Article } from '@/lib/types';
+import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 
 interface ArticleReaction {
@@ -80,6 +80,21 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
   const isImage = !!article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf');
   const isPdf = !!article.pdf_url && article.pdf_url.toLowerCase().includes('.pdf');
 
+  /* ─── 다중 페이지 ─── */
+  const [extraPages, setExtraPages] = useState<ArticlePage[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    supabase
+      .from('article_pages')
+      .select('*')
+      .eq('article_id', article.id)
+      .order('page_number', { ascending: true })
+      .then(({ data }) => { setExtraPages((data ?? []) as ArticlePage[]); });
+  }, [article.id]);
+
+  const totalPages = 1 + extraPages.length;
+
   const [comments, setComments] = useState<ArticleReaction[]>([]);
   const [authorName, setAuthorName] = useState('');
   const [commentText, setCommentText] = useState('');
@@ -144,33 +159,86 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
 
         {/* 본문 */}
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {/* article_images 갤러리 (페이지 이미지 복구된 경우 최우선) */}
-          {article.article_images && article.article_images.length > 0 ? (
-            <div style={{ background: '#1a1a1a' }}>
-              {article.article_images.map((imgUrl, i) => (
+          {/* ── 페이지 1: 기존 기사 콘텐츠 ── */}
+          {currentPage === 1 && (
+            <>
+              {/* article_images 갤러리 (페이지 이미지 복구된 경우 최우선) */}
+              {article.article_images && article.article_images.length > 0 ? (
+                <div style={{ background: '#1a1a1a' }}>
+                  {article.article_images.map((imgUrl, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={imgUrl}
+                      alt={`${article.title} — p.${i + 1}`}
+                      style={{ width: '100%', display: 'block' }}
+                    />
+                  ))}
+                </div>
+              ) : isPdf ? (
+                <iframe src={article.pdf_url!} style={{ width: '100%', height: '55vh', border: 'none', display: 'block' }} title={article.title} />
+              ) : isImage && article.pdf_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={i}
-                  src={imgUrl}
-                  alt={`${article.title} — p.${i + 1}`}
-                  style={{ width: '100%', display: 'block' }}
-                />
-              ))}
-            </div>
-          ) : isPdf ? (
-            <iframe src={article.pdf_url!} style={{ width: '100%', height: '55vh', border: 'none', display: 'block' }} title={article.title} />
-          ) : isImage && article.pdf_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '55vh', objectFit: 'contain', background: '#F5F0EB' }} />
-          ) : (
-            <div style={{ padding: 32 }}>
-              {article.image_url && (
-                <div style={{ aspectRatio: '16/9', position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
-                  <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
+                <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '55vh', objectFit: 'contain', background: '#F5F0EB' }} />
+              ) : (
+                <div style={{ padding: 32 }}>
+                  {article.image_url && (
+                    <div style={{ aspectRatio: '16/9', position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
+                      <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
+                    </div>
+                  )}
+                  <p style={{ color: '#4A3F35', lineHeight: 1.8, fontSize: 15, margin: 0 }}>{article.content.replace(/<[^>]+>/g, '')}</p>
+                  <p style={{ color: '#9C8B7A', fontSize: 13, marginTop: 20, fontStyle: 'italic' }}>— {article.author}</p>
                 </div>
               )}
-              <p style={{ color: '#4A3F35', lineHeight: 1.8, fontSize: 15, margin: 0 }}>{article.content.replace(/<[^>]+>/g, '')}</p>
-              <p style={{ color: '#9C8B7A', fontSize: 13, marginTop: 20, fontStyle: 'italic' }}>— {article.author}</p>
+            </>
+          )}
+
+          {/* ── 추가 페이지 콘텐츠 ── */}
+          {currentPage > 1 && (() => {
+            const pg = extraPages[currentPage - 2];
+            if (!pg) return null;
+            return (
+              <div style={{ padding: 28 }}>
+                {/* 이미지들 */}
+                {pg.images && pg.images.filter(Boolean).length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+                    {pg.images.filter(Boolean).map((src, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={i} src={src} alt={`p.${currentPage} — ${i + 1}`} style={{ width: '100%', borderRadius: 10, display: 'block' }} />
+                    ))}
+                  </div>
+                )}
+                {/* 본문 */}
+                {pg.content && (
+                  <p style={{ color: '#4A3F35', lineHeight: 1.8, fontSize: 15, margin: '0 0 16px' }}>{pg.content}</p>
+                )}
+                {/* 캡션 */}
+                {pg.caption && (
+                  <p style={{ color: '#9C8B7A', fontSize: 12, fontStyle: 'italic', margin: 0, paddingTop: 8, borderTop: '1px solid #F1F5F9' }}>{pg.caption}</p>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* ── 페이지 네비게이션 (추가 페이지 있을 때만) ── */}
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderTop: '1px solid #F1F5F9', background: '#FAF7F4' }}>
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 999, border: '1px solid #E8DDD4', background: 'white', fontSize: 12, fontWeight: 700, color: currentPage === 1 ? '#CBD5E1' : '#4A3F35', cursor: currentPage === 1 ? 'default' : 'pointer' }}>
+                <ChevronLeft size={13} /> 이전
+              </button>
+              <span style={{ fontSize: 11, fontWeight: 900, color: '#9C8B7A', letterSpacing: 2 }}>
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 999, border: '1px solid #E8DDD4', background: currentPage === totalPages ? 'white' : '#2C1F14', fontSize: 12, fontWeight: 700, color: currentPage === totalPages ? '#CBD5E1' : 'white', cursor: currentPage === totalPages ? 'default' : 'pointer' }}>
+                다음 페이지 <ChevronRight size={13} />
+              </button>
             </div>
           )}
 

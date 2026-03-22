@@ -7,7 +7,7 @@ import SafeImage from '@/components/SafeImage';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
-import type { Magazine, Article } from '@/lib/types';
+import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import {
   ChevronLeft, Plus, Trash2, X, Upload, Loader2, Check,
   ChevronUp, ChevronDown, ExternalLink, BookOpen, AlertCircle,
@@ -150,6 +150,11 @@ export default function MagazineDetailPage() {
   const [uploadingContent, setUploadingContent] = useState(false);
   const [uploadingSlotIdx, setUploadingSlotIdx] = useState<number | null>(null);
 
+  /* ─── 추가 페이지 (article_pages) ─── */
+  const [articlePages, setArticlePages] = useState<ArticlePage[]>([]);
+  const [savingPages, setSavingPages] = useState(false);
+  const [uploadingPageSlot, setUploadingPageSlot] = useState<{ pageIdx: number; slotIdx: number } | null>(null);
+
   /* ─── 정렬 ─── */
   const [reordering, setReordering] = useState(false);
 
@@ -165,6 +170,8 @@ export default function MagazineDetailPage() {
   const contentFileRef  = useRef<HTMLInputElement>(null);
   const slotImgRef      = useRef<HTMLInputElement>(null);
   const pendingSlot     = useRef<number>(0);
+  const pageSlotRef     = useRef<HTMLInputElement>(null);
+  const pendingPageSlot = useRef<{ pageIdx: number; slotIdx: number }>({ pageIdx: 0, slotIdx: 0 });
 
   /* ─── Tab 2 live preview ref ─── */
   const previewDivRef = useRef<HTMLDivElement>(null);
@@ -210,6 +217,24 @@ export default function MagazineDetailPage() {
   }, [id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  /* ─── 추가 페이지 로드 ─── */
+  const fetchArticlePages = useCallback(async (artId: number) => {
+    const { data } = await supabase
+      .from('article_pages')
+      .select('*')
+      .eq('article_id', artId)
+      .order('page_number', { ascending: true });
+    setArticlePages((data ?? []) as ArticlePage[]);
+  }, []);
+
+  useEffect(() => {
+    if (selectedArtId && !inlineIsNew) {
+      fetchArticlePages(selectedArtId);
+    } else {
+      setArticlePages([]);
+    }
+  }, [selectedArtId, inlineIsNew, fetchArticlePages]);
 
   /* ─── 토스트 ─── */
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(''), 3000); }
@@ -317,6 +342,45 @@ export default function MagazineDetailPage() {
       showToast('기사가 추가되었습니다.');
     }
     setSavingArticle(false);
+  }
+
+  /* ─── 추가 페이지 저장 ─── */
+  async function saveArticlePages() {
+    if (!selectedArtId) return;
+    setSavingPages(true);
+    await supabase.from('article_pages').delete().eq('article_id', selectedArtId);
+    if (articlePages.length > 0) {
+      const rows = articlePages.map((p, idx) => ({
+        article_id: selectedArtId,
+        page_number: idx + 1,
+        template: p.template,
+        content: p.content,
+        images: p.images,
+        caption: p.caption ?? null,
+      }));
+      const { error } = await supabase.from('article_pages').insert(rows);
+      if (error) { showToast('페이지 저장 실패: ' + error.message); setSavingPages(false); return; }
+    }
+    showToast('추가 페이지가 저장되었습니다.');
+    setSavingPages(false);
+    await fetchArticlePages(selectedArtId);
+  }
+
+  /* ─── 페이지 이미지 업로드 ─── */
+  async function uploadPageSlotImage(file: File, pageIdx: number, slotIdx: number) {
+    setUploadingPageSlot({ pageIdx, slotIdx });
+    const path = `articles/${Date.now()}_page${pageIdx}_slot${slotIdx}.${file.name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, file);
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      setArticlePages(prev => prev.map((p, i) => {
+        if (i !== pageIdx) return p;
+        const imgs = [...(p.images ?? [])];
+        imgs[slotIdx] = publicUrl;
+        return { ...p, images: imgs };
+      }));
+    }
+    setUploadingPageSlot(null);
   }
 
   /* ─── 기사 삭제 ─── */
@@ -710,6 +774,21 @@ export default function MagazineDetailPage() {
                         onSlotUpload={(idx) => { pendingSlot.current = idx; slotImgRef.current?.click(); }}
                       />
                     )}
+                    {/* ─── 추가 페이지 섹션 ─── */}
+                    {isSelected && !inlineIsNew && (
+                      <ArticlePagesSection
+                        pages={articlePages}
+                        setPages={setArticlePages}
+                        saving={savingPages}
+                        onSave={saveArticlePages}
+                        uploadingSlot={uploadingPageSlot}
+                        onImageUpload={(pi, si) => {
+                          pendingPageSlot.current = { pageIdx: pi, slotIdx: si };
+                          pageSlotRef.current?.click();
+                        }}
+                        accentColor={accentCol}
+                      />
+                    )}
                   </div>
                 );
               })}
@@ -753,6 +832,23 @@ export default function MagazineDetailPage() {
                 <div ref={previewDivRef}>
                   {renderTemplate(inlineForm.template, previewArtData, accentCol, bgCol)}
                 </div>
+                {/* 추가 페이지 미리보기 */}
+                {!inlineIsNew && articlePages.map((page, pi) => (
+                  <div key={pi} style={{ marginTop: '16px' }}>
+                    <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', margin: '0 0 6px' }}>
+                      Page {pi + 2} · {TEMPLATE_META.find(t => t.key === page.template)?.label ?? 'Classic'}
+                    </p>
+                    {renderTemplate(page.template, {
+                      title: inlineForm.title,
+                      author: inlineForm.author,
+                      content: page.content,
+                      image_url: page.images?.[0] ?? '',
+                      article_images: page.images ?? [],
+                      image_positions: [],
+                      template: page.template,
+                    }, accentCol, bgCol)}
+                  </div>
+                ))}
                 <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: accentCol, display: 'inline-block' }} />
                   <span style={{ fontSize: '10px', fontWeight: 700, color: '#94A3B8' }}>Accent: {accentCol}</span>
@@ -903,6 +999,8 @@ export default function MagazineDetailPage() {
       <input ref={contentFileRef} type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadContentFile(f); e.target.value = ''; }} />
       <input ref={slotImgRef} type="file" accept="image/*" style={{ display: 'none' }}
         onChange={e => { const f = e.target.files?.[0]; if (f) uploadArticleSlotImage(f, pendingSlot.current); e.target.value = ''; }} />
+      <input ref={pageSlotRef} type="file" accept="image/*" style={{ display: 'none' }}
+        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPageSlotImage(f, pendingPageSlot.current.pageIdx, pendingPageSlot.current.slotIdx); e.target.value = ''; }} />
 
       {/* ─── 토스트 ─── */}
       {toast && (
@@ -1237,6 +1335,164 @@ function InlineForm({
         </button>
         <button onClick={onDelete} style={{ padding: '11px 16px', background: 'white', color: '#EF4444', border: '1px solid #FEE2E2', borderRadius: '999px', fontSize: '11px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Trash2 size={12} />{isNew ? '취소' : '삭제'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════
+   추가 페이지 섹션 컴포넌트
+   ════════════════════════════════════════════ */
+function ArticlePagesSection({
+  pages, setPages, saving, onSave, uploadingSlot, onImageUpload, accentColor,
+}: {
+  pages: ArticlePage[];
+  setPages: (pages: ArticlePage[]) => void;
+  saving: boolean;
+  onSave: () => void;
+  uploadingSlot: { pageIdx: number; slotIdx: number } | null;
+  onImageUpload: (pageIdx: number, slotIdx: number) => void;
+  accentColor: string;
+}) {
+  function addPage() {
+    setPages([...pages, { article_id: 0, page_number: pages.length + 1, template: 'classic', content: '', images: [] }]);
+  }
+  function deletePage(idx: number) {
+    setPages(pages.filter((_, i) => i !== idx));
+  }
+  function movePage(idx: number, dir: 'up' | 'down') {
+    const next = [...pages];
+    const swap = dir === 'up' ? idx - 1 : idx + 1;
+    if (swap < 0 || swap >= next.length) return;
+    [next[idx], next[swap]] = [next[swap], next[idx]];
+    setPages(next);
+  }
+  function updatePage(idx: number, patch: Partial<ArticlePage>) {
+    setPages(pages.map((p, i) => i === idx ? { ...p, ...patch } : p));
+  }
+
+  return (
+    <div style={{ border: '1.5px solid #E8DDD4', borderRadius: '12px', overflow: 'hidden', marginTop: '10px' }}>
+      {/* 헤더 */}
+      <div style={{ background: '#FFF9F5', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #F1F5F9' }}>
+        <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '3px', color: '#9C8B7A', margin: 0, textTransform: 'uppercase' }}>
+          추가 페이지 {pages.length > 0 ? `(${pages.length})` : ''}
+        </p>
+        <span style={{ fontSize: '10px', color: '#CBD5E1' }}>기사 본문 이후 페이지</span>
+      </div>
+
+      {/* 페이지 없음 안내 */}
+      {pages.length === 0 && (
+        <div style={{ padding: '16px', textAlign: 'center', color: '#CBD5E1', fontSize: '11px', fontWeight: 700 }}>
+          추가 페이지가 없습니다
+        </div>
+      )}
+
+      {/* 페이지 목록 */}
+      {pages.map((page, pi) => {
+        const photoCount = TEMPLATE_PHOTO_COUNT[page.template] ?? 0;
+        return (
+          <div key={pi} style={{ padding: '14px', borderBottom: '1px solid #F8FAFC', background: 'white' }}>
+            {/* 페이지 헤더 */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '2px', color: '#4F46E5', textTransform: 'uppercase' }}>
+                Page {pi + 2}
+              </span>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button type="button" onClick={() => movePage(pi, 'up')} disabled={pi === 0} style={{ padding: '3px 6px', border: '1px solid #F1F5F9', borderRadius: '5px', background: 'white', cursor: 'pointer', color: '#94A3B8', opacity: pi === 0 ? 0.3 : 1 }}>
+                  <ChevronUp size={11} />
+                </button>
+                <button type="button" onClick={() => movePage(pi, 'down')} disabled={pi === pages.length - 1} style={{ padding: '3px 6px', border: '1px solid #F1F5F9', borderRadius: '5px', background: 'white', cursor: 'pointer', color: '#94A3B8', opacity: pi === pages.length - 1 ? 0.3 : 1 }}>
+                  <ChevronDown size={11} />
+                </button>
+                <button type="button" onClick={() => deletePage(pi)} style={{ padding: '3px 6px', border: '1px solid #FEE2E2', borderRadius: '5px', background: 'white', cursor: 'pointer', color: '#EF4444', display: 'flex', alignItems: 'center' }}>
+                  <Trash2 size={11} />
+                </button>
+              </div>
+            </div>
+
+            {/* 템플릿 선택 */}
+            <div style={{ marginBottom: '10px' }}>
+              <label style={labelStyle}>템플릿</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                {TEMPLATE_META.map(t => (
+                  <button key={t.key} type="button" onClick={() => updatePage(pi, { template: t.key, images: [] })}
+                    style={{ padding: '5px 4px', borderRadius: '6px', cursor: 'pointer', border: page.template === t.key ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: 'white', fontSize: '9px', fontWeight: 900, color: page.template === t.key ? accentColor : '#94A3B8', transition: 'all 0.15s' }}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 이미지 슬롯 */}
+            {photoCount > 0 && (
+              <div style={{ marginBottom: '10px' }}>
+                <label style={labelStyle}>사진 ({(page.images ?? []).filter(Boolean).length}/{photoCount})</label>
+                <div style={{ display: 'grid', gridTemplateColumns: photoCount === 1 ? '1fr' : 'repeat(2, 1fr)', gap: '6px' }}>
+                  {Array.from({ length: photoCount }, (_, si) => {
+                    const src = page.images?.[si] ?? '';
+                    const isUp = uploadingSlot?.pageIdx === pi && uploadingSlot?.slotIdx === si;
+                    return (
+                      <div key={si} onClick={() => !isUp && onImageUpload(pi, si)}
+                        style={{ border: '2px dashed #F1F5F9', borderRadius: '6px', overflow: 'hidden', cursor: 'pointer', background: '#F8FAFC', aspectRatio: '4/3', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {src
+                          // eslint-disable-next-line @next/next/no-img-element
+                          ? <img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <div style={{ color: '#CBD5E1', textAlign: 'center' }}>
+                              {isUp ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={14} />}
+                              <p style={{ fontSize: '9px', fontWeight: 700, margin: '2px 0 0' }}>사진 {si + 1}</p>
+                            </div>
+                        }
+                        {src && (
+                          <button type="button" onClick={e => { e.stopPropagation(); const imgs = [...(page.images ?? [])]; imgs[si] = ''; updatePage(pi, { images: imgs }); }}
+                            style={{ position: 'absolute', top: '3px', right: '3px', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer', color: 'white', display: 'flex' }}>
+                            <X size={10} />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 본문 */}
+            <div style={{ marginBottom: '8px' }}>
+              <label style={labelStyle}>본문</label>
+              <textarea
+                value={page.content}
+                onChange={e => updatePage(pi, { content: e.target.value })}
+                rows={4}
+                placeholder="페이지 본문 텍스트..."
+                style={{ ...inputStyle, resize: 'vertical' }}
+              />
+            </div>
+
+            {/* 캡션 */}
+            <div>
+              <label style={labelStyle}>캡션 (선택)</label>
+              <input
+                value={page.caption ?? ''}
+                onChange={e => updatePage(pi, { caption: e.target.value })}
+                placeholder="사진 설명 또는 캡션..."
+                style={inputStyle}
+              />
+            </div>
+          </div>
+        );
+      })}
+
+      {/* 하단 버튼 */}
+      <div style={{ padding: '12px 14px', display: 'flex', gap: '8px', background: '#FAFAFA' }}>
+        <button type="button" onClick={addPage}
+          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'white', border: '1px dashed #CBD5E1', borderRadius: '10px', fontSize: '11px', fontWeight: 700, color: '#64748B', cursor: 'pointer' }}>
+          <Plus size={11} /> 페이지 추가
+        </button>
+        <button type="button" onClick={onSave} disabled={saving}
+          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 16px', background: '#4F46E5', color: 'white', border: 'none', borderRadius: '10px', fontSize: '11px', fontWeight: 900, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}>
+          {saving ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={11} />}
+          {saving ? '저장 중...' : '추가 페이지 저장'}
         </button>
       </div>
     </div>

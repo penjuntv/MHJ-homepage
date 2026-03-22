@@ -28,7 +28,8 @@ export default function TocPreview({
     : { ...baseTheme, bg: bg_color || baseTheme.bg };
 
   const tocItems = articles
-    .filter(a => a.article_type === 'article' || !a.article_type)
+    .filter(a => a.article_type !== 'cover')
+    .filter(a => a.article_status === 'published' || !a.article_status)
     .slice(0, 10);
 
   return (

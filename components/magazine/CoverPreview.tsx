@@ -23,6 +23,7 @@ export default function CoverPreview({
   title,
   year,
   month_name,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   editor,
   cover_copy = '',
   cover_subtitle = '',
@@ -154,19 +155,6 @@ export default function CoverPreview({
           </div>
         )}
 
-        {issue_number && (
-          <div style={{
-            position: 'absolute', top: '12px', right: '12px',
-            width: '32px', height: '32px',
-            borderRadius: '50%',
-            background: accentHex,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '11px', fontWeight: 900, color: 'white',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-          }}>
-            {issue_number}
-          </div>
-        )}
 
         {isCarousel && (
           <div style={{
@@ -259,9 +247,9 @@ export default function CoverPreview({
           }}>
             {year}
           </div>
-          {editor && (
+          {issue_number && (
             <div style={{ fontSize: '10px', color: '#8B7D6B', marginTop: '4px', fontWeight: 700 }}>
-              Ed. {editor}
+              Vol.{issue_number}
             </div>
           )}
         </div>
