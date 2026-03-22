@@ -5,72 +5,56 @@ import Link from 'next/link';
 import type { Blog } from '@/lib/types';
 
 export default function RelatedCard({ blog }: { blog: Blog }) {
-
   return (
     <Link
       href={`/blog/${blog.slug}`}
       className="related-card"
       style={{
         display: 'block',
-        borderRadius: 32,
+        borderRadius: 12,
         overflow: 'hidden',
-        position: 'relative',
-        aspectRatio: '1 / 1',
         textDecoration: 'none',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-        transition: 'transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s',
+        background: 'var(--bg)',
+        border: '1px solid var(--border)',
       }}
     >
       <style>{`
-        .related-card:hover { transform: translateY(-16px); box-shadow: 0 24px 48px rgba(0,0,0,0.16); }
-        .related-card:hover .related-img { filter: saturate(2.2); }
-        .related-img { transition: filter 0.4s; }
+        .related-card:hover { opacity: 0.88; }
+        .related-card:hover .related-img { transform: scale(1.02); }
+        .related-img { transition: transform 0.5s ease; }
+        .related-card { transition: opacity 0.3s ease; }
       `}</style>
 
-      {/* 이미지 */}
-      <SafeImage
-        src={blog.image_url}
-        alt={blog.title}
-        fill
-        className="object-cover related-img"
-      />
+      {/* 이미지 16:10 */}
+      <div style={{ position: 'relative', aspectRatio: '16 / 10', overflow: 'hidden' }}>
+        <SafeImage
+          src={blog.image_url}
+          alt={blog.title}
+          fill
+          className="object-cover related-img"
+        />
+      </div>
 
-      {/* 그라디언트 오버레이 */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
-        padding: '24px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-      }}>
-        {/* 카테고리 배지 */}
+      {/* 텍스트 영역 */}
+      <div style={{ padding: '16px' }}>
         <span style={{
-          display: 'inline-block',
-          padding: '3px 10px',
-          borderRadius: 999,
-          background: 'rgba(0,0,0,0.6)',
-          color: 'white',
-          fontSize: 9,
+          fontSize: 10,
           fontWeight: 900,
-          letterSpacing: 2,
+          letterSpacing: 3,
           textTransform: 'uppercase',
+          color: 'var(--text-tertiary)',
+          display: 'block',
           marginBottom: 8,
-          alignSelf: 'flex-start',
-          backdropFilter: 'blur(8px)',
         }}>
           {blog.category}
         </span>
-
-        {/* 제목 */}
         <p style={{
-          fontSize: 'clamp(14px, 2vw, 18px)',
+          fontSize: 16,
           fontWeight: 800,
-          color: '#fff',
+          color: 'var(--text)',
           lineHeight: 1.3,
           letterSpacing: '-0.3px',
-          marginBottom: 6,
+          margin: '0 0 8px',
           display: '-webkit-box',
           WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical',
@@ -78,9 +62,7 @@ export default function RelatedCard({ blog }: { blog: Blog }) {
         }}>
           {blog.title}
         </p>
-
-        {/* 날짜 */}
-        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>
           {blog.date}
         </span>
       </div>

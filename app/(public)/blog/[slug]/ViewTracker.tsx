@@ -1,20 +1,22 @@
 'use client';
 
 import { useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-browser';
 
 export default function ViewTracker({ slug }: { slug: string }) {
   useEffect(() => {
     const key = `viewed:${slug}`;
-    // 같은 세션 내 중복 집계 방지
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, '1');
 
-    supabase
-      .rpc('increment_blog_view', { p_slug: slug })
-      .then(({ error }) => {
-        if (error) console.error('View count RPC error:', error);
-      });
+    (async () => {
+      try {
+        const { error } = await supabase.rpc('increment_view_count', { blog_slug: slug });
+        if (error) console.warn('View count RPC error:', error);
+      } catch (e) {
+        console.warn('View count RPC failed:', e);
+      }
+    })();
   }, [slug]);
 
   return null;

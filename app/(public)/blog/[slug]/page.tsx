@@ -228,7 +228,7 @@ export default async function BlogDetailPage({
 
         {/* ── 1) 헤더: Back + 제목 + 메타 ── */}
         <div style={{
-          maxWidth: 900,
+          maxWidth: 720,
           margin: '0 auto',
           padding: 'clamp(60px, 8vw, 100px) clamp(24px, 4vw, 48px) 0',
         }}>
@@ -272,7 +272,7 @@ export default async function BlogDetailPage({
 
           {/* 1) 대형 제목 */}
           <h1
-            className="font-display slide-up stagger-1"
+            className="font-display"
             style={{
               fontSize: 'clamp(32px, 5vw, 72px)',
               fontWeight: 900,
@@ -290,7 +290,7 @@ export default async function BlogDetailPage({
           </h1>
 
           {/* 1) 저자 · 날짜 · 카테고리 · AI Insight 버튼 한 줄 */}
-          <div className="slide-up stagger-2" style={{
+          <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: 16,
@@ -317,7 +317,7 @@ export default async function BlogDetailPage({
                 fontWeight: 900,
                 letterSpacing: 4,
                 textTransform: 'uppercase',
-                color: '#4F46E5',
+                color: 'var(--text-secondary)',
                 textDecoration: 'none',
               }}
             >
@@ -363,7 +363,7 @@ export default async function BlogDetailPage({
         }}>
           <article style={blog.is_sponsored ? {
             background: 'var(--bg-surface)',
-            borderRadius: 32,
+            borderRadius: 12,
             padding: 'clamp(32px, 4vw, 56px)',
             marginBottom: 32,
           } : undefined}>
@@ -643,7 +643,7 @@ export default async function BlogDetailPage({
             padding: 'clamp(60px, 8vw, 120px) clamp(24px, 4vw, 80px)',
             background: 'var(--bg-surface)',
           }}>
-            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            <div style={{ maxWidth: 1320, margin: '0 auto' }}>
               <div style={{ marginBottom: 48 }}>
                 <p className="font-black uppercase" style={{
                   fontSize: 10,
@@ -669,10 +669,8 @@ export default async function BlogDetailPage({
                 gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
                 gap: 24,
               }}>
-                {relatedBlogs.map((related, i) => (
-                  <div key={related.id} className={`slide-up stagger-${Math.min(i + 1, 4)}`}>
-                    <RelatedCard blog={related} />
-                  </div>
+                {relatedBlogs.map((related) => (
+                  <RelatedCard key={related.id} blog={related} />
                 ))}
               </div>
             </div>

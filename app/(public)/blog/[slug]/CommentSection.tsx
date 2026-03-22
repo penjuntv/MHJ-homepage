@@ -69,7 +69,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
   const inputStyle = (field: string): React.CSSProperties => ({
     ...inputBase,
     border: focused === field
-      ? '1.5px solid #4F46E5'
+      ? '1.5px solid var(--text)'
       : '1px solid var(--border-medium)',
   });
 
@@ -106,7 +106,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
         {/* 6) 입력 폼 */}
         <form onSubmit={handleSubmit} style={{
           background: 'var(--bg-surface)',
-          borderRadius: 24,
+          borderRadius: 16,
           padding: 'clamp(24px, 4vw, 40px)',
           marginBottom: 56,
           border: '1px solid var(--border)',
@@ -208,9 +208,9 @@ export default function CommentSection({ blogId }: { blogId: number }) {
             <p className="comment-toast" style={{
               marginTop: 16,
               padding: '14px 20px',
-              background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
-              color: '#4F46E5',
-              borderRadius: 12,
+              background: 'var(--bg-surface)',
+              color: 'var(--text-secondary)',
+              borderRadius: 8,
               fontSize: 13,
               fontWeight: 600,
             }}>
@@ -261,7 +261,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
                       width: 36,
                       height: 36,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                      background: 'var(--text)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -270,7 +270,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
                       <span style={{
                         fontSize: 13,
                         fontWeight: 900,
-                        color: 'white',
+                        color: 'var(--bg)',
                         textTransform: 'uppercase',
                       }}>
                         {c.name.charAt(0)}
