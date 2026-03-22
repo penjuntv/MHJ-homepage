@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase-browser';
-import { Users, Download, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Users, Download, Trash2, ToggleLeft, ToggleRight, UserPlus, Loader2 } from 'lucide-react';
 
 interface Subscriber {
   id: number;
@@ -15,6 +15,12 @@ interface Subscriber {
 export default function SubscribersPage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
+
+  /* ── 수동 추가 ── */
+  const [addEmail, setAddEmail] = useState('');
+  const [addName, setAddName] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -39,6 +45,30 @@ export default function SubscribersPage() {
     setSubscribers((prev) => prev.filter((s) => s.id !== id));
   };
 
+  const addSubscriber = async () => {
+    setAddError('');
+    const email = addEmail.trim();
+    if (!email) { setAddError('이메일을 입력해주세요.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setAddError('유효한 이메일 형식이 아닙니다.'); return; }
+    if (subscribers.some(s => s.email === email)) { setAddError('이미 등록된 이메일입니다.'); return; }
+
+    setAdding(true);
+    const { data, error } = await supabase
+      .from('subscribers')
+      .insert({ email, name: addName.trim() || null, active: true })
+      .select()
+      .single();
+
+    if (error) {
+      setAddError(error.message);
+    } else if (data) {
+      setSubscribers(prev => [data as Subscriber, ...prev]);
+      setAddEmail('');
+      setAddName('');
+    }
+    setAdding(false);
+  };
+
   const exportCSV = () => {
     const header = 'ID,Email,Name,Subscribed At,Active';
     const rows = subscribers.map((s) =>
@@ -55,6 +85,13 @@ export default function SubscribersPage() {
   };
 
   const activeCount = subscribers.filter((s) => s.active).length;
+
+  const IS: React.CSSProperties = {
+    flex: 1, padding: '11px 14px', borderRadius: 12,
+    border: '1px solid #E2E8F0', background: '#F8FAFC',
+    fontSize: 14, color: '#1a1a1a', outline: 'none',
+    fontFamily: 'inherit', minWidth: 0,
+  };
 
   return (
     <div style={{ padding: '40px 48px', maxWidth: 1100 }}>
@@ -82,7 +119,7 @@ export default function SubscribersPage() {
       </div>
 
       {/* 통계 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 40 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 32 }}>
         {[
           { label: '전체 구독자', value: subscribers.length, icon: Users, color: '#6366f1' },
           { label: '활성 구독자', value: activeCount, icon: ToggleRight, color: '#10b981' },
@@ -107,6 +144,50 @@ export default function SubscribersPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* 수동 구독 추가 */}
+      <div style={{ background: 'white', borderRadius: 20, border: '1px solid #E2E8F0', padding: '20px 24px', marginBottom: 24 }}>
+        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: '#94A3B8', margin: '0 0 14px' }}>
+          구독자 수동 추가
+        </p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <input
+            type="email"
+            value={addEmail}
+            onChange={e => setAddEmail(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addSubscriber()}
+            placeholder="이메일 *"
+            style={{ ...IS, maxWidth: 300 }}
+          />
+          <input
+            type="text"
+            value={addName}
+            onChange={e => setAddName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addSubscriber()}
+            placeholder="이름 (선택)"
+            style={{ ...IS, maxWidth: 200 }}
+          />
+          <button
+            onClick={addSubscriber}
+            disabled={adding}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              padding: '11px 22px', borderRadius: 12, border: 'none',
+              background: '#1a1a1a', color: 'white',
+              fontSize: 13, fontWeight: 700, cursor: adding ? 'not-allowed' : 'pointer',
+              opacity: adding ? 0.7 : 1, flexShrink: 0,
+            }}
+          >
+            {adding
+              ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+              : <UserPlus size={14} />}
+            {adding ? '추가 중...' : '추가'}
+          </button>
+        </div>
+        {addError && (
+          <p style={{ margin: '10px 0 0', fontSize: 12, color: '#EF4444', fontWeight: 600 }}>{addError}</p>
+        )}
       </div>
 
       {/* 테이블 */}
