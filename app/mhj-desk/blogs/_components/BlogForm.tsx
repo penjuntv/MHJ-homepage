@@ -17,7 +17,7 @@ interface Props {
   initial?: Blog;
 }
 
-const CATEGORIES: Blog['category'][] = ['Settlement', 'Education', 'Girls', 'Locals', 'Life', 'Travel'];
+const CATEGORIES: Blog['category'][] = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
 
 /* ── 발행 전 체크리스트 ── */
 function PublishChecklist({ form }: { form: Omit<Blog, 'id' | 'created_at'> }) {
@@ -90,7 +90,7 @@ export default function BlogForm({ initial }: Props) {
   const draftKey = `blog-draft-${initial?.id ?? 'new'}`;
 
   const [form, setForm] = useState<BlogInput>({
-    category: initial?.category ?? 'Life',
+    category: initial?.category ?? 'Life in Aotearoa',
     title: initial?.title ?? '',
     author: initial?.author ?? 'Yussi',
     date: initial?.date ?? new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace('.', '.'),
