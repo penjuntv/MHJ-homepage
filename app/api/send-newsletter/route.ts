@@ -6,71 +6,160 @@ import {
 } from '@/lib/newsletter-template';
 import type { BlogPostInfo, MailrangiNotesData } from '@/lib/newsletter-template';
 
+/* ── DB row 타입 ── */
+interface NewsletterRow {
+  id: number;
+  subject: string;
+  issue_number?: number;
+  issue_date?: string;
+  preheader?: string;
+  note_title?: string;
+  note_body?: string;
+  main_blog_id?: number | null;
+  main_excerpt?: string;
+  lunch_image?: string;
+  lunch_title?: string;
+  lunch_body?: string;
+  campus_title?: string;
+  campus_body?: string;
+  jin_expression?: string;
+  jin_body?: string;
+  jin_storypress_url?: string;
+  locals_json?: MailrangiNotesData['locals'];
+  archive_blog_id?: number | null;
+  archive_excerpt?: string;
+}
+
+interface BlogData {
+  title: string;
+  slug: string;
+  category: string;
+  date: string;
+  image_url: string;
+}
+
+/** newsletters row + blog JOIN → MailrangiNotesData */
+async function buildFromRow(
+  nl: NewsletterRow,
+  db: ReturnType<typeof createAdminClient>,
+): Promise<MailrangiNotesData> {
+  const [mainRes, archiveRes] = await Promise.all([
+    nl.main_blog_id
+      ? db.from('blogs').select('title,slug,category,date,image_url').eq('id', nl.main_blog_id).single()
+      : Promise.resolve({ data: null }),
+    nl.archive_blog_id
+      ? db.from('blogs').select('title,slug,category,date,image_url').eq('id', nl.archive_blog_id).single()
+      : Promise.resolve({ data: null }),
+  ]);
+  const mb = mainRes.data as BlogData | null;
+  const ab = archiveRes.data as BlogData | null;
+
+  return {
+    issueNumber: nl.issue_number ?? 1,
+    issueDate:   nl.issue_date   ?? '',
+    preheader:   nl.preheader    ?? '',
+    noteTitle:   nl.note_title   ?? '',
+    noteBody:    nl.note_body    ?? '',
+    blog: mb ? { ...mb, excerpt: nl.main_excerpt ?? '' } : undefined,
+    lunch: nl.lunch_title
+      ? { image: nl.lunch_image ?? '', title: nl.lunch_title, body: nl.lunch_body ?? '' }
+      : undefined,
+    campus: nl.campus_title
+      ? { title: nl.campus_title, body: nl.campus_body ?? '' }
+      : undefined,
+    jin: nl.jin_expression
+      ? { expression: nl.jin_expression, body: nl.jin_body ?? '', storypressUrl: nl.jin_storypress_url ?? '' }
+      : undefined,
+    locals:  nl.locals_json ?? undefined,
+    archive: ab ? { ...ab, excerpt: nl.archive_excerpt ?? '' } : undefined,
+    unsubscribeUrl: 'https://www.mhj.nz/unsubscribe',
+  };
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.json() as {
-    subject: string;
-    content?: string;
     newsletter_id?: number;
+    subject?: string;
+    content?: string;
     blogPost?: BlogPostInfo;
     structured_data?: MailrangiNotesData;
-    test_email?: string;          // 지정 시 해당 주소로만 발송
+    test_email?: string;
   };
 
-  const { subject, content, newsletter_id, blogPost, structured_data, test_email } = body;
-
-  if (!subject) {
-    return NextResponse.json({ error: 'subject required' }, { status: 400 });
-  }
-  if (!structured_data && !content) {
-    return NextResponse.json({ error: 'content or structured_data required' }, { status: 400 });
-  }
+  const { newsletter_id, structured_data, content, blogPost, test_email } = body;
+  let subject = body.subject ?? '';
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: 'RESEND_API_KEY not configured' }, { status: 503 });
   }
 
-  const supabase = createAdminClient();
+  const db = createAdminClient();
 
   /* ── HTML 생성 ── */
-  const htmlBody = structured_data
-    ? renderMailrangiNotes(structured_data)
-    : generateNewsletterHTML(subject, content!, blogPost);
+  let htmlBody: string;
+
+  if (newsletter_id && !structured_data && !content) {
+    /* ① DB-JOIN 경로: newsletter_id만 받아서 서버에서 모든 데이터 조회 */
+    const { data: nl, error: nlErr } = await db
+      .from('newsletters')
+      .select('*')
+      .eq('id', newsletter_id)
+      .single();
+
+    if (nlErr || !nl) {
+      return NextResponse.json({ error: '뉴스레터를 찾을 수 없습니다.' }, { status: 404 });
+    }
+
+    subject = (nl as NewsletterRow).subject;
+    const mailData = await buildFromRow(nl as NewsletterRow, db);
+    htmlBody = renderMailrangiNotes(mailData);
+
+  } else if (structured_data) {
+    /* ② structured_data 직접 전달 경로 (하위 호환) */
+    if (!subject) return NextResponse.json({ error: 'subject required' }, { status: 400 });
+    htmlBody = renderMailrangiNotes(structured_data);
+
+  } else {
+    /* ③ 레거시 content 경로 */
+    if (!subject) return NextResponse.json({ error: 'subject required' }, { status: 400 });
+    if (!content) return NextResponse.json({ error: 'content or structured_data required' }, { status: 400 });
+    htmlBody = generateNewsletterHTML(subject, content, blogPost);
+  }
 
   /* ── 수신자 결정 ── */
   let recipients: Array<{ email: string; name?: string }>;
 
   if (test_email) {
-    // 테스트 발송: 단일 주소
     recipients = [{ email: test_email }];
   } else {
-    const { data: subscribers, error: subErr } = await supabase
+    const { data: subscribers, error: subErr } = await db
       .from('subscribers')
       .select('email, name')
       .eq('active', true);
 
     if (subErr) return NextResponse.json({ error: subErr.message }, { status: 500 });
-    if (!subscribers || subscribers.length === 0) {
+    if (!subscribers?.length) {
       return NextResponse.json({ error: '활성 구독자가 없습니다.' }, { status: 400 });
     }
     recipients = subscribers;
   }
 
   /* ── DB 상태 업데이트 (전체 발송 시에만) ── */
-  let dbId = newsletter_id;
+  let dbId: number | undefined = newsletter_id;
+
   if (!test_email) {
-    if (!dbId) {
-      const { data: nl } = await supabase
+    if (dbId) {
+      await db.from('newsletters')
+        .update({ status: 'sending', content: htmlBody })
+        .eq('id', dbId);
+    } else {
+      const { data: newNl } = await db
         .from('newsletters')
         .insert({ subject, content: htmlBody, status: 'sending', recipient_count: 0 })
         .select('id')
         .single();
-      dbId = nl?.id;
-    } else {
-      await supabase
-        .from('newsletters')
-        .update({ status: 'sending', content: htmlBody })
-        .eq('id', dbId);
+      dbId = (newNl as { id: number } | null)?.id;
     }
   }
 
@@ -99,7 +188,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!test_email && dbId) {
-      await supabase.from('newsletters').update({
+      await db.from('newsletters').update({
         status: 'sent',
         sent_at: new Date().toISOString(),
         recipient_count: successCount,
@@ -109,7 +198,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, sent: successCount });
   } catch (err) {
     if (!test_email && dbId) {
-      await supabase.from('newsletters').update({ status: 'failed' }).eq('id', dbId);
+      await db.from('newsletters').update({ status: 'failed' }).eq('id', dbId);
     }
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
