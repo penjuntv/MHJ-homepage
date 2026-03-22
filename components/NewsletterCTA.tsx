@@ -37,76 +37,87 @@ export default function NewsletterCTA() {
     }}>
       <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
 
-        {/* 라벨 */}
+        {/* 뉴스레터 이름 */}
         <span style={{
           fontSize: 10,
           fontWeight: 900,
           letterSpacing: 5,
           textTransform: 'uppercase',
-          color: '#CBD5E1',
+          color: 'var(--text-tertiary)',
           display: 'block',
-          marginBottom: 24,
+          marginBottom: 16,
         }}>
-          Newsletter
+          Mairangi Notes
         </span>
 
-        {/* 헤드라인 */}
+        {/* 헤드라인 — max 56px (DESIGN_RULES §5.3) */}
         <h2
           className="font-display"
           style={{
-            fontSize: 'clamp(36px, 5vw, 64px)',
+            fontSize: 'clamp(32px, 5vw, 56px)',
             fontWeight: 900,
             fontStyle: 'italic',
-            letterSpacing: -2,
+            letterSpacing: -1.5,
             color: 'var(--text)',
-            lineHeight: 1,
-            marginBottom: 20,
+            lineHeight: 1.1,
+            marginBottom: 16,
           }}
         >
           Stories from Mairangi Bay,
           <br />delivered weekly.
         </h2>
 
+        {/* 설명 */}
         <p style={{
-          fontSize: 16,
-          color: '#64748B',
+          fontSize: 15,
+          color: 'var(--text-secondary)',
           fontWeight: 500,
-          lineHeight: 1.6,
+          lineHeight: 1.7,
           marginBottom: 48,
         }}>
-          Essays on family life, the North Shore, and everything in between.
-          <br />No spam. Unsubscribe anytime.
+          매주 금요일, Yussi가 보내는 위클리 매거진.
+          <br />
+          <span style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>
+            뉴질랜드 오클랜드 마이랑이 베이의 일상 · 육아 · 학교 · 동네 이야기.
+            스팸 없음. 언제든 해지 가능.
+          </span>
         </p>
 
         {status === 'success' ? (
+          /* 성공 메시지 — borderRadius 12px (DESIGN_RULES §8.1) */
           <div style={{
             padding: '24px 40px',
-            borderRadius: 999,
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            borderRadius: 12,
+            background: 'var(--bg)',
+            border: '1px solid var(--border-strong)',
             display: 'inline-block',
           }}>
-            <span style={{
-              fontSize: 14,
+            <p style={{
+              fontSize: 15,
               fontWeight: 700,
-              color: 'var(--text-secondary)',
-              letterSpacing: 1,
+              color: 'var(--text)',
+              margin: 0,
+              lineHeight: 1.6,
             }}>
-              Welcome aboard — see you in your inbox.
-            </span>
+              환영합니다!
+              <br />
+              <span style={{ fontWeight: 500, color: 'var(--text-secondary)', fontSize: 14 }}>
+                다음 금요일에 첫 Mairangi Notes를 보내드릴게요.
+              </span>
+            </p>
           </div>
         ) : (
           <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 480, margin: '0 auto' }}>
             {/* 이름 (선택) */}
             <input
               type="text"
-              placeholder="Your name (optional)"
+              placeholder="이름 (선택)"
               value={name}
               onChange={(e) => setName(e.target.value)}
               style={{
-                padding: '18px 28px',
-                borderRadius: 999,
-                border: '1px solid var(--border)',
+                padding: '16px 24px',
+                borderRadius: 8,
+                border: '1px solid var(--border-strong)',
                 background: 'var(--bg)',
                 color: 'var(--text)',
                 fontSize: 15,
@@ -114,6 +125,7 @@ export default function NewsletterCTA() {
                 outline: 'none',
                 width: '100%',
                 boxSizing: 'border-box',
+                fontFamily: 'inherit',
               }}
             />
 
@@ -127,49 +139,50 @@ export default function NewsletterCTA() {
                 required
                 style={{
                   flex: 1,
-                  padding: '18px 28px',
-                  borderRadius: 999,
-                  border: '1px solid var(--border-medium)',
+                  padding: '16px 24px',
+                  borderRadius: 8,
+                  border: '1px solid var(--border-strong)',
                   background: 'var(--bg)',
                   color: 'var(--text)',
                   fontSize: 15,
                   fontWeight: 500,
                   outline: 'none',
                   minWidth: 0,
+                  fontFamily: 'inherit',
                 }}
               />
               <button
                 type="submit"
                 disabled={status === 'loading'}
                 style={{
-                  padding: '18px 32px',
-                  borderRadius: 999,
+                  padding: '16px 24px',
+                  borderRadius: 8,
                   background: status === 'loading' ? 'rgba(0,0,0,0.4)' : '#1A1A1A',
-                  border: '1px solid var(--border)',
+                  border: 'none',
                   color: '#fff',
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: 900,
                   letterSpacing: 2,
                   textTransform: 'uppercase',
                   cursor: status === 'loading' ? 'not-allowed' : 'pointer',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.2s',
+                  transition: 'opacity 0.2s ease',
                   flexShrink: 0,
                 }}
               >
-                {status === 'loading' ? '...' : 'Subscribe'}
+                {status === 'loading' ? '...' : '구독'}
               </button>
             </div>
 
             {/* 피드백 메시지 */}
             {status === 'duplicate' && (
-              <p style={{ fontSize: 13, color: '#94A3B8', textAlign: 'center' }}>
-                You&apos;re already subscribed — thank you!
+              <p style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
+                이미 구독 중입니다 — 고맙습니다!
               </p>
             )}
             {status === 'error' && (
-              <p style={{ fontSize: 13, color: '#ef4444', textAlign: 'center' }}>
-                Something went wrong. Please try again.
+              <p style={{ fontSize: 13, color: '#ef4444', textAlign: 'center', margin: 0 }}>
+                오류가 발생했습니다. 다시 시도해 주세요.
               </p>
             )}
           </form>

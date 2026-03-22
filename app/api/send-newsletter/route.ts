@@ -98,6 +98,8 @@ export async function POST(req: NextRequest) {
 
   /* ── HTML 생성 ── */
   let htmlBody: string;
+  // mailData is kept for per-subscriber URL personalization (paths ① and ②)
+  let baseMailData: MailrangiNotesData | undefined;
 
   if (newsletter_id && !structured_data && !content) {
     /* ① DB-JOIN 경로: newsletter_id만 받아서 서버에서 모든 데이터 조회 */
@@ -112,12 +114,13 @@ export async function POST(req: NextRequest) {
     }
 
     subject = (nl as NewsletterRow).subject;
-    const mailData = await buildFromRow(nl as NewsletterRow, db);
-    htmlBody = renderMailrangiNotes(mailData);
+    baseMailData = await buildFromRow(nl as NewsletterRow, db);
+    htmlBody = renderMailrangiNotes(baseMailData);
 
   } else if (structured_data) {
     /* ② structured_data 직접 전달 경로 (하위 호환) */
     if (!subject) return NextResponse.json({ error: 'subject required' }, { status: 400 });
+    baseMailData = structured_data;
     htmlBody = renderMailrangiNotes(structured_data);
 
   } else {
@@ -164,12 +167,22 @@ export async function POST(req: NextRequest) {
   }
 
   /* ── Resend 배치 발송 ── */
-  const emails = recipients.map((r) => ({
-    from: 'Mairangi Notes <onboarding@resend.dev>',
-    to: r.email,
-    subject,
-    html: htmlBody,
-  }));
+  const emails = recipients.map((r) => {
+    // Personalize unsubscribe URL per subscriber (paths ① and ②)
+    const html = baseMailData
+      ? renderMailrangiNotes({
+          ...baseMailData,
+          unsubscribeUrl: `https://www.mhj.nz/unsubscribe?email=${encodeURIComponent(r.email)}`,
+        })
+      : htmlBody;
+
+    return {
+      from: 'Mairangi Notes <onboarding@resend.dev>',
+      to: r.email,
+      subject,
+      html,
+    };
+  });
 
   try {
     const BATCH_SIZE = 100;
