@@ -85,6 +85,7 @@ export default function NewMagazinePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title) { setError('제목은 필수입니다.'); return; }
+    if (!form.issue_number.trim()) { setError('이슈 번호를 입력해주세요.'); return; }
     setSaving(true);
     setError('');
 
@@ -172,6 +173,10 @@ export default function NewMagazinePage() {
             <label style={labelStyle}>이슈 ID</label>
             <input value={form.id} onChange={e => set('id', e.target.value)} style={inputStyle} placeholder="2026-03" />
             <p style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px' }}>형식: YYYY-MM (중복 시 자동으로 -02 추가)</p>
+          </div>
+          <div>
+            <label style={labelStyle}>이슈 번호 *</label>
+            <input value={form.issue_number} onChange={e => set('issue_number', e.target.value)} style={inputStyle} placeholder="01" maxLength={4} />
           </div>
         </div>
 

@@ -242,6 +242,7 @@ export default function MagazineDetailPage() {
   /* ─── 이슈 정보 저장 ─── */
   async function saveMagazine() {
     if (!magazine) return;
+    if (!magForm.issue_number.trim()) { showToast('이슈 번호를 입력해주세요.'); return; }
     setSavingMag(true);
     const { error } = await supabase.from('magazines').update({
       title: magForm.title, editor: magForm.editor, year: magForm.year,
