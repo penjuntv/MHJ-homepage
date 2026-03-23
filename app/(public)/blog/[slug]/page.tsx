@@ -379,7 +379,7 @@ export default async function BlogDetailPage({
                     line-height: 1.7;
                   }
                   .blog-content p { margin: 0 0 24px; }
-                  .blog-content > p:first-child::first-letter {
+                  .blog-content > p:first-of-type::first-letter {
                     font-size: 4rem;
                     font-weight: 900;
                     float: left;
@@ -453,7 +453,7 @@ export default async function BlogDetailPage({
                     .blog-content img { float: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
                     .blog-content .grid-2, .blog-content .grid-3, .blog-content .grid-1-2 { grid-template-columns: 1fr !important; }
                     .blog-content .grid-1-2 > img:first-child { grid-row: auto; }
-                    .blog-content > p:first-child::first-letter { font-size: 3rem; }
+                    .blog-content > p:first-of-type::first-letter { font-size: 3rem; }
                   }
                 `}</style>
                 <div

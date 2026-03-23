@@ -131,21 +131,19 @@ export default function DetailModal({ item, onClose }: Props) {
               {/* 본문 */}
               {isHtml ? (
                 <div>
-                  {/* 드롭캡 (첫 글자) */}
-                  <span style={{
-                    fontSize: 'clamp(40px, 6vw, 96px)',
-                    fontWeight: 900,
-                    float: 'left',
-                    marginRight: 16,
-                    lineHeight: 0.8,
-                    color: 'var(--drop-cap-color)',
-                  }}>
-                    {firstChar}
-                  </span>
-                  {/* HTML 콘텐츠 렌더링 */}
+                  {/* HTML 콘텐츠 렌더링 — 드롭캡은 CSS ::first-letter로 처리 */}
                   <style>{`
                     .detail-html-content { font-size: clamp(16px, 2vw, 20px); color: var(--text); font-weight: 500; line-height: 1.8; }
                     .detail-html-content p { margin: 12px 0; }
+                    .detail-html-content > p:first-of-type::first-letter {
+                      font-size: clamp(40px, 6vw, 96px);
+                      font-weight: 900;
+                      float: left;
+                      margin-right: 16px;
+                      line-height: 0.8;
+                      color: var(--drop-cap-color);
+                      font-family: 'Playfair Display', serif;
+                    }
                     .detail-html-content h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 800; margin: 32px 0 16px; color: var(--text); }
                     .detail-html-content h3 { font-size: clamp(20px, 2.5vw, 28px); font-weight: 700; margin: 24px 0 12px; color: var(--text); }
                     .detail-html-content img { max-width: 100%; height: auto; border-radius: 16px; margin: 24px 0; }
