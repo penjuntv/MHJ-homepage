@@ -3,19 +3,16 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
-// Local font files in public/fonts/ — avoids Google Fonts runtime fetch issues
-const NOTO_SANS_KR_URL = new URL('../../../public/fonts/NotoSansKR-Bold.woff', import.meta.url);
-const PLAYFAIR_ITALIC_URL = new URL('../../../public/fonts/PlayfairDisplay-BoldItalic.woff', import.meta.url);
-
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  const { searchParams, origin } = new URL(request.url);
   const title = (searchParams.get('title') || 'MY MAIRANGI').slice(0, 120);
   const category = searchParams.get('category') || '';
   const date = searchParams.get('date') || '';
 
+  // Fetch fonts from public/ at runtime (not bundled into edge function)
   const [notoData, playfairItalicData] = await Promise.all([
-    fetch(NOTO_SANS_KR_URL).then((r) => r.arrayBuffer()).catch(() => null),
-    fetch(PLAYFAIR_ITALIC_URL).then((r) => r.arrayBuffer()).catch(() => null),
+    fetch(`${origin}/fonts/NotoSansKR-Bold.woff`).then((r) => r.arrayBuffer()).catch(() => null),
+    fetch(`${origin}/fonts/PlayfairDisplay-BoldItalic.woff`).then((r) => r.arrayBuffer()).catch(() => null),
   ]);
 
   const titleFontSize = title.length > 60 ? 48 : title.length > 40 ? 58 : title.length > 20 ? 68 : 72;
