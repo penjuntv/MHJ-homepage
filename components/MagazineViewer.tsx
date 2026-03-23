@@ -7,7 +7,8 @@ import { X, ChevronLeft, ChevronRight, Download, List, BookOpen, Image as ImageI
 import DownloadBtn from '@/components/DownloadBtn';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
-import { supabase } from '@/lib/supabase';
+import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
+import { supabase } from '@/lib/supabase-browser';
 
 interface ArticleReaction {
   id: number;
@@ -96,7 +97,9 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
   const totalPages = 1 + extraPages.length;
 
   const [comments, setComments] = useState<ArticleReaction[]>([]);
-  const [authorName, setAuthorName] = useState('');
+  const [authorName, setAuthorName] = useState(() => {
+    try { return sessionStorage.getItem('mag_nickname') ?? ''; } catch { return ''; }
+  });
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -117,6 +120,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
       article_id: article.id, type: 'comment',
       content: commentText.trim(), author_name: authorName.trim(),
     });
+    try { sessionStorage.setItem('mag_nickname', authorName.trim()); } catch { /* ignore */ }
     await loadComments();
     setCommentText('');
     setSubmitting(false);
@@ -159,65 +163,42 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
 
         {/* 본문 */}
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {/* ── 페이지 1: 기존 기사 콘텐츠 ── */}
+          {/* ── 페이지 1: 기사 콘텐츠 (template 기반 렌더링) ── */}
           {currentPage === 1 && (
             <>
-              {/* article_images 갤러리 (페이지 이미지 복구된 경우 최우선) */}
-              {article.article_images && article.article_images.length > 0 ? (
-                <div style={{ background: '#1a1a1a' }}>
-                  {article.article_images.map((imgUrl, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={i}
-                      src={imgUrl}
-                      alt={`${article.title} — p.${i + 1}`}
-                      style={{ width: '100%', display: 'block' }}
-                    />
-                  ))}
-                </div>
-              ) : isPdf ? (
+              {isPdf ? (
                 <iframe src={article.pdf_url!} style={{ width: '100%', height: '55vh', border: 'none', display: 'block' }} title={article.title} />
               ) : isImage && article.pdf_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '55vh', objectFit: 'contain', background: '#F5F0EB' }} />
               ) : (
-                <div style={{ padding: 32 }}>
-                  {article.image_url && (
-                    <div style={{ aspectRatio: '16/9', position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
-                      <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
-                    </div>
-                  )}
-                  <p style={{ color: '#4A3F35', lineHeight: 1.8, fontSize: 15, margin: 0 }}>{article.content.replace(/<[^>]+>/g, '')}</p>
-                  <p style={{ color: '#9C8B7A', fontSize: 13, marginTop: 20, fontStyle: 'italic' }}>— {article.author}</p>
-                </div>
+                <ArticlePageRenderer
+                  template={article.template ?? 'classic'}
+                  title={article.title}
+                  author={article.author}
+                  content={article.content}
+                  images={(article.article_images ?? []).filter(Boolean) as string[]}
+                  captions={((article as Article & { image_captions?: string[] }).image_captions ?? [])}
+                  hideTitle={false}
+                />
               )}
             </>
           )}
 
-          {/* ── 추가 페이지 콘텐츠 ── */}
+          {/* ── 추가 페이지 콘텐츠 (template 기반 렌더링) ── */}
           {currentPage > 1 && (() => {
             const pg = extraPages[currentPage - 2];
             if (!pg) return null;
             return (
-              <div style={{ padding: 28 }}>
-                {/* 이미지들 */}
-                {pg.images && pg.images.filter(Boolean).length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
-                    {pg.images.filter(Boolean).map((src, i) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={i} src={src} alt={`p.${currentPage} — ${i + 1}`} style={{ width: '100%', borderRadius: 10, display: 'block' }} />
-                    ))}
-                  </div>
-                )}
-                {/* 본문 */}
-                {pg.content && (
-                  <p style={{ color: '#4A3F35', lineHeight: 1.8, fontSize: 15, margin: '0 0 16px' }}>{pg.content}</p>
-                )}
-                {/* 캡션 */}
-                {pg.caption && (
-                  <p style={{ color: '#9C8B7A', fontSize: 12, fontStyle: 'italic', margin: 0, paddingTop: 8, borderTop: '1px solid #F1F5F9' }}>{pg.caption}</p>
-                )}
-              </div>
+              <ArticlePageRenderer
+                template={pg.template ?? article.template ?? 'classic'}
+                title={article.title}
+                author={article.author}
+                content={pg.content}
+                images={(pg.images ?? []).filter(Boolean) as string[]}
+                captions={pg.captions ?? []}
+                hideTitle={true}
+              />
             );
           })()}
 

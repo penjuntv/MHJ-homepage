@@ -173,9 +173,41 @@ function BlogCommentsTab() {
 /* ══════════════════════════════════════
    매거진 댓글 탭
 ══════════════════════════════════════ */
+interface StatsData {
+  totalLikes: number;
+  totalComments: number;
+  top5: { article_id: number; title: string; likes: number }[];
+}
+
 function MagazineCommentsTab() {
   const [comments, setComments] = useState<MagazineComment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<StatsData>({ totalLikes: 0, totalComments: 0, top5: [] });
+
+  const loadStats = useCallback(async () => {
+    const { data } = await supabase
+      .from('article_reactions')
+      .select('article_id, type, article:article_id(title)');
+    if (!data) return;
+
+    let likes = 0, coms = 0;
+    const likeMap: Record<number, { title: string; likes: number }> = {};
+    (data as { article_id: number; type: string; article?: { title: string } | { title: string }[] | null }[]).forEach((r) => {
+      const articleTitle = Array.isArray(r.article) ? r.article[0]?.title : r.article?.title;
+      if (r.type === 'like') {
+        likes++;
+        if (!likeMap[r.article_id]) likeMap[r.article_id] = { title: articleTitle ?? `#${r.article_id}`, likes: 0 };
+        likeMap[r.article_id].likes++;
+      } else if (r.type === 'comment') {
+        coms++;
+      }
+    });
+    const top5 = Object.entries(likeMap)
+      .map(([id, v]) => ({ article_id: Number(id), title: v.title, likes: v.likes }))
+      .sort((a, b) => b.likes - a.likes)
+      .slice(0, 5);
+    setStats({ totalLikes: likes, totalComments: coms, top5 });
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -188,7 +220,7 @@ function MagazineCommentsTab() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); loadStats(); }, [load, loadStats]);
 
   async function remove(id: number) {
     if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
@@ -196,17 +228,44 @@ function MagazineCommentsTab() {
     setComments(prev => prev.filter(c => c.id !== id));
   }
 
-  if (loading) return <p style={{ textAlign: 'center', padding: 40, color: '#94A3B8', fontSize: 13 }}>로딩 중...</p>;
-
-  if (comments.length === 0) return (
-    <div style={{ textAlign: 'center', padding: 60 }}>
-      <BookOpen size={32} color="#E2E8F0" style={{ marginBottom: 12 }} />
-      <p style={{ color: '#94A3B8', fontSize: 14 }}>매거진 댓글이 없습니다.</p>
-    </div>
-  );
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div>
+      {/* 통계 카드 */}
+      <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 140, background: 'white', borderRadius: 12, padding: '20px 24px', border: '1px solid #F1F5F9' }}>
+          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', marginBottom: 8 }}>총 좋아요</p>
+          <p style={{ fontSize: 32, fontWeight: 900, color: '#1A1A1A', margin: 0, letterSpacing: -1 }}>{stats.totalLikes}</p>
+        </div>
+        <div style={{ flex: 1, minWidth: 140, background: 'white', borderRadius: 12, padding: '20px 24px', border: '1px solid #F1F5F9' }}>
+          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', marginBottom: 8 }}>총 댓글</p>
+          <p style={{ fontSize: 32, fontWeight: 900, color: '#1A1A1A', margin: 0, letterSpacing: -1 }}>{stats.totalComments}</p>
+        </div>
+        {stats.top5.length > 0 && (
+          <div style={{ flex: 2, minWidth: 240, background: 'white', borderRadius: 12, padding: '20px 24px', border: '1px solid #F1F5F9' }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', marginBottom: 12 }}>좋아요 Top 5</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {stats.top5.map((item, i) => (
+                <div key={item.article_id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: '#CBD5E1', width: 16, textAlign: 'center' }}>{i + 1}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#374151', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</span>
+                  <span style={{ fontSize: 12, fontWeight: 900, color: '#1A1A1A' }}>♥ {item.likes}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 댓글 목록 */}
+      {loading ? (
+        <p style={{ textAlign: 'center', padding: 40, color: '#94A3B8', fontSize: 13 }}>로딩 중...</p>
+      ) : comments.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 60 }}>
+          <BookOpen size={32} color="#E2E8F0" style={{ marginBottom: 12 }} />
+          <p style={{ color: '#94A3B8', fontSize: 14 }}>매거진 댓글이 없습니다.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {comments.map(c => (
         <div key={c.id} style={{ background: 'white', borderRadius: 20, padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -228,7 +287,9 @@ function MagazineCommentsTab() {
             <Trash2 size={16} color="#EF4444" />
           </button>
         </div>
-      ))}
+          ))}
+        </div>
+      )}
     </div>
   );
 }
