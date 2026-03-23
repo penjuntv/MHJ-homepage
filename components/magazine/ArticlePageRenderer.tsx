@@ -47,7 +47,7 @@ export default function ArticlePageRenderer({
     .apr-${uid} ul, .apr-${uid} ol { margin: 0 0 14px; padding-left: 24px; }
     .apr-${uid} li { font-size: 15px; line-height: 1.8; margin-bottom: 4px; }
     .apr-${uid} blockquote { border-left: 3px solid ${accentColor}40; padding: 4px 16px; margin: 16px 0; color: ${accentColor}99; font-style: italic; }
-    .apr-${uid} img { max-width: 100%; height: auto; border-radius: 4px; margin: 8px 0; }
+    .apr-${uid} img { max-width: 100%; height: auto; border-radius: 4px; margin: 8px 0; cursor: pointer; }
     @media (max-width: 600px) {
       .apr-flex-${uid} { flex-direction: column !important; }
       .apr-img-${uid}  { flex: none !important; width: 100% !important; max-height: 260px; }
@@ -61,7 +61,7 @@ export default function ArticlePageRenderer({
     return (
       <div style={{ position: 'relative', overflow: 'hidden', ...style }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', cursor: 'pointer' }} />
         {caption && (
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.55)', color: 'white', fontSize: '11px', lineHeight: 1.4, padding: '4px 8px' }}>
             {caption}
@@ -123,7 +123,7 @@ export default function ArticlePageRenderer({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={src} alt=""
-                style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '4px' }}
+                style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '4px', cursor: 'pointer' }}
               />
               {captions[i] && (
                 <div style={{

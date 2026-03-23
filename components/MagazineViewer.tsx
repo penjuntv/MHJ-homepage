@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { X, ChevronLeft, ChevronRight, Download, List, BookOpen, Image as ImageIcon, AlignLeft, Heart, MessageCircle, Send } from 'lucide-react';
@@ -98,11 +98,14 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
   const totalPages = 1 + extraPages.length;
 
   const [comments, setComments] = useState<ArticleReaction[]>([]);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const [authorName, setAuthorName] = useState(() => {
     try { return sessionStorage.getItem('mag_nickname') ?? ''; } catch { return ''; }
   });
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const loadComments = useCallback(async () => {
     const { data } = await supabase.from('article_reactions').select('*')
@@ -127,6 +130,54 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
     setSubmitting(false);
   }
 
+  /* ── 라이트박스용 이미지 수집 ── */
+  const allImages = useMemo(() => {
+    const imgs: string[] = [];
+    // article_images
+    (article.article_images ?? []).filter(Boolean).forEach(src => { if (src && !imgs.includes(src)) imgs.push(src); });
+    // content 안의 img 태그
+    const parser = typeof DOMParser !== 'undefined' ? new DOMParser() : null;
+    if (parser && article.content) {
+      const doc = parser.parseFromString(article.content, 'text/html');
+      doc.querySelectorAll('img').forEach(el => {
+        const src = el.getAttribute('src');
+        if (src && !imgs.includes(src)) imgs.push(src);
+      });
+    }
+    return imgs;
+  }, [article.article_images, article.content]);
+
+  /* 본문 영역 이미지 클릭 핸들러 */
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'IMG') {
+        const src = target.getAttribute('src');
+        if (src) {
+          const idx = allImages.indexOf(src);
+          if (idx >= 0) { setLightboxIdx(idx); }
+          else { setLightboxIdx(allImages.length); allImages.push(src); }
+        }
+      }
+    };
+    el.addEventListener('click', handler);
+    return () => el.removeEventListener('click', handler);
+  }, [allImages]);
+
+  /* 라이트박스 키보드 */
+  useEffect(() => {
+    if (lightboxIdx === null) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIdx(null);
+      else if (e.key === 'ArrowLeft') setLightboxIdx(i => i !== null ? Math.max(0, i - 1) : null);
+      else if (e.key === 'ArrowRight') setLightboxIdx(i => i !== null ? Math.min(allImages.length - 1, i + 1) : null);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [lightboxIdx, allImages.length]);
+
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <style>{`
@@ -138,47 +189,49 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
         }
       `}</style>
 
-      {/* 좌우 화살표 — 모달 바깥 (데스크톱) */}
+      {/* 좌우 화살표 — 모달 가장자리 바깥 (데스크톱) */}
       {totalPages > 1 && (
         <>
           <button
             className="apop-nav-side"
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            onClick={(e) => { e.stopPropagation(); setCurrentPage(p => Math.max(1, p - 1)); }}
             disabled={currentPage === 1}
             style={{
-              left: 'clamp(4px, 2vw, 16px)', zIndex: 210,
-              width: 40, height: 40, borderRadius: '50%',
+              left: 'calc(50% - 380px - 48px - 14px)', zIndex: 210,
+              width: 48, height: 48, borderRadius: '50%',
               border: 'none', cursor: currentPage === 1 ? 'default' : 'pointer',
-              background: currentPage === 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.9)',
-              color: currentPage === 1 ? 'rgba(255,255,255,0.3)' : '#2C1F14',
+              background: currentPage === 1 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)',
+              color: currentPage === 1 ? 'rgba(255,255,255,0.2)' : 'white',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.2s',
+              transition: 'all 0.2s', backdropFilter: 'blur(4px)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
             }}
             aria-label="이전 페이지"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={22} />
           </button>
           <button
             className="apop-nav-side"
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            onClick={(e) => { e.stopPropagation(); setCurrentPage(p => Math.min(totalPages, p + 1)); }}
             disabled={currentPage === totalPages}
             style={{
-              right: 'clamp(4px, 2vw, 16px)', zIndex: 210,
-              width: 40, height: 40, borderRadius: '50%',
+              right: 'calc(50% - 380px - 48px - 14px)', zIndex: 210,
+              width: 48, height: 48, borderRadius: '50%',
               border: 'none', cursor: currentPage === totalPages ? 'default' : 'pointer',
-              background: currentPage === totalPages ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.9)',
-              color: currentPage === totalPages ? 'rgba(255,255,255,0.3)' : '#2C1F14',
+              background: currentPage === totalPages ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)',
+              color: currentPage === totalPages ? 'rgba(255,255,255,0.2)' : 'white',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.2s',
+              transition: 'all 0.2s', backdropFilter: 'blur(4px)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
             }}
             aria-label="다음 페이지"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={22} />
           </button>
         </>
       )}
 
-      <div style={{ background: 'var(--bg-card)', borderRadius: 20, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: 'var(--bg-card)', borderRadius: 20, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
 
         {/* 헤더 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `2px solid ${accentColor}20`, flexShrink: 0 }}>
@@ -218,7 +271,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
         </div>
 
         {/* 본문 */}
-        <div style={{ flex: 1, overflow: 'auto' }}>
+        <div ref={bodyRef} style={{ flex: 1, overflow: 'auto', cursor: 'default' }}>
           {/* ── 페이지 1: 기사 콘텐츠 (template 기반 렌더링) ── */}
           {currentPage === 1 && (
             <>
@@ -297,58 +350,163 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
             </div>
           )}
 
-          {/* 댓글 섹션 */}
-          <div style={{ padding: '24px 28px 28px', borderTop: '1px solid #F1F5F9' }}>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: '#9C8B7A', marginBottom: 16 }}>
+          {/* 댓글 섹션 (접기/펼치기) */}
+          <div style={{ borderTop: '1px solid #F1F5F9' }}>
+            <button
+              onClick={() => setCommentsOpen(o => !o)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                padding: '14px 28px', background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 10, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase',
+                color: '#9C8B7A', transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#FAF7F4'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none'; }}
+            >
+              <MessageCircle size={13} />
               Comments{comments.length > 0 ? ` (${comments.length})` : ''}
-            </p>
+              <ChevronRight size={12} style={{ transform: commentsOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+            </button>
 
-            {comments.length === 0 ? (
-              <p style={{ fontSize: 13, color: '#C4B8AB', marginBottom: 20 }}>No comments yet. Be the first to share your thoughts.</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-                {comments.map(c => (
-                  <div key={c.id} style={{ padding: '12px 16px', background: '#FAF7F4', borderRadius: 12 }}>
-                    <div style={{ display: 'flex', gap: 10, marginBottom: 5, alignItems: 'center' }}>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: '#2C1F14' }}>{c.author_name}</span>
-                      <span style={{ fontSize: 11, color: '#C4B8AB' }}>{new Date(c.created_at).toLocaleDateString('en-NZ')}</span>
-                    </div>
-                    <p style={{ fontSize: 13, color: '#4A3F35', lineHeight: 1.6, margin: 0 }}>{c.content}</p>
+            {commentsOpen && (
+              <div style={{ padding: '0 28px 28px' }}>
+                {comments.length === 0 ? (
+                  <p style={{ fontSize: 13, color: '#C4B8AB', marginBottom: 20 }}>No comments yet. Be the first to share your thoughts.</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                    {comments.map(c => (
+                      <div key={c.id} style={{ padding: '12px 16px', background: '#FAF7F4', borderRadius: 12 }}>
+                        <div style={{ display: 'flex', gap: 10, marginBottom: 5, alignItems: 'center' }}>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: '#2C1F14' }}>{c.author_name}</span>
+                          <span style={{ fontSize: 11, color: '#C4B8AB' }}>{new Date(c.created_at).toLocaleDateString('en-NZ')}</span>
+                        </div>
+                        <p style={{ fontSize: 13, color: '#4A3F35', lineHeight: 1.6, margin: 0 }}>{c.content}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
+
+                {/* 댓글 작성 폼 */}
+                <form onSubmit={submitComment} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <input
+                    value={authorName}
+                    onChange={e => setAuthorName(e.target.value)}
+                    placeholder="Nickname"
+                    required
+                    style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #E8DDD4', background: '#FAF7F4', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
+                  />
+                  <textarea
+                    value={commentText}
+                    onChange={e => setCommentText(e.target.value)}
+                    placeholder="Leave a comment..."
+                    required
+                    rows={3}
+                    style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #E8DDD4', background: '#FAF7F4', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
+                  />
+                  <button type="submit" disabled={submitting} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    padding: '10px 20px', borderRadius: 999, alignSelf: 'flex-end',
+                    background: '#2C1F14', color: 'white', border: 'none',
+                    fontSize: 12, fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer',
+                    opacity: submitting ? 0.6 : 1,
+                  }}>
+                    <Send size={12} /> {submitting ? 'Posting...' : 'Post Comment'}
+                  </button>
+                </form>
               </div>
             )}
-
-            {/* 댓글 작성 폼 */}
-            <form onSubmit={submitComment} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <input
-                value={authorName}
-                onChange={e => setAuthorName(e.target.value)}
-                placeholder="Nickname"
-                required
-                style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #E8DDD4', background: '#FAF7F4', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
-              />
-              <textarea
-                value={commentText}
-                onChange={e => setCommentText(e.target.value)}
-                placeholder="Leave a comment..."
-                required
-                rows={3}
-                style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #E8DDD4', background: '#FAF7F4', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
-              />
-              <button type="submit" disabled={submitting} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                padding: '10px 20px', borderRadius: 999, alignSelf: 'flex-end',
-                background: '#2C1F14', color: 'white', border: 'none',
-                fontSize: 12, fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer',
-                opacity: submitting ? 0.6 : 1,
-              }}>
-                <Send size={12} /> {submitting ? 'Posting...' : 'Post Comment'}
-              </button>
-            </form>
           </div>
         </div>
       </div>
+
+      {/* ── 이미지 라이트박스 ── */}
+      {lightboxIdx !== null && allImages[lightboxIdx] && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setLightboxIdx(null); }}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 300,
+            background: 'rgba(0,0,0,0.92)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          {/* 닫기 */}
+          <button
+            onClick={() => setLightboxIdx(null)}
+            style={{
+              position: 'absolute', top: 16, right: 16, zIndex: 310,
+              width: 40, height: 40, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.15)', border: 'none',
+              color: 'white', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <X size={18} />
+          </button>
+
+          {/* 인디케이터 */}
+          {allImages.length > 1 && (
+            <div style={{
+              position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)',
+              fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: 2,
+            }}>
+              {lightboxIdx + 1} / {allImages.length}
+            </div>
+          )}
+
+          {/* 이전 */}
+          {allImages.length > 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setLightboxIdx(i => i !== null ? Math.max(0, i - 1) : null); }}
+              disabled={lightboxIdx === 0}
+              style={{
+                position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+                width: 44, height: 44, borderRadius: '50%',
+                background: lightboxIdx === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)',
+                border: 'none', cursor: lightboxIdx === 0 ? 'default' : 'pointer',
+                color: lightboxIdx === 0 ? 'rgba(255,255,255,0.2)' : 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s',
+              }}
+            >
+              <ChevronLeft size={22} />
+            </button>
+          )}
+
+          {/* 이미지 */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={lightboxIdx}
+            src={allImages[lightboxIdx]}
+            alt=""
+            style={{
+              maxWidth: 'calc(100vw - 120px)', maxHeight: 'calc(100vh - 80px)',
+              objectFit: 'contain', borderRadius: 4,
+              animation: 'lbFadeIn 0.2s ease',
+            }}
+          />
+
+          {/* 다음 */}
+          {allImages.length > 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setLightboxIdx(i => i !== null ? Math.min(allImages.length - 1, i + 1) : null); }}
+              disabled={lightboxIdx === allImages.length - 1}
+              style={{
+                position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
+                width: 44, height: 44, borderRadius: '50%',
+                background: lightboxIdx === allImages.length - 1 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)',
+                border: 'none', cursor: lightboxIdx === allImages.length - 1 ? 'default' : 'pointer',
+                color: lightboxIdx === allImages.length - 1 ? 'rgba(255,255,255,0.2)' : 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s',
+              }}
+            >
+              <ChevronRight size={22} />
+            </button>
+          )}
+
+          <style>{`@keyframes lbFadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }`}</style>
+        </div>
+      )}
     </div>
   );
 }
