@@ -387,6 +387,34 @@ export default function MagazineDetailPage() {
     setUploadingPageSlot(null);
   }
 
+  /* ─── 콘텐츠 파일 삭제 ─── */
+  async function deleteContentFile() {
+    if (!inlineForm?.pdf_url) return;
+    if (!confirm('콘텐츠 파일을 삭제하시겠습니까?')) return;
+
+    const url = inlineForm.pdf_url;
+
+    // 기존 기사(DB 레코드 있음)면 DB 먼저 업데이트
+    if (!inlineIsNew && selectedArtId) {
+      const { error: dbErr } = await supabase
+        .from('articles')
+        .update({ pdf_url: null })
+        .eq('id', selectedArtId);
+      if (dbErr) { showToast('DB 업데이트 실패: ' + dbErr.message); return; }
+    }
+
+    // Storage에서 삭제
+    const marker = '/storage/v1/object/public/images/';
+    const storagePath = url.includes(marker) ? url.split(marker)[1] : null;
+    if (storagePath) {
+      const { error: stErr } = await supabase.storage.from('images').remove([storagePath]);
+      if (stErr) showToast('Storage 삭제 실패: ' + stErr.message);
+    }
+
+    setInlineForm(p => p ? { ...p, pdf_url: '' } : p);
+    showToast('파일이 삭제되었습니다.');
+  }
+
   /* ─── 기사 삭제 ─── */
   async function deleteArticle(artId: number) {
     if (!confirm('이 기사를 삭제하시겠습니까?')) return;
@@ -774,6 +802,7 @@ export default function MagazineDetailPage() {
                           onSave={saveArticle}
                           onDelete={() => deleteArticle(article.id)}
                           onContentUpload={() => contentFileRef.current?.click()}
+                          onContentDelete={deleteContentFile}
                           onSlotUpload={(idx) => { pendingSlot.current = idx; slotImgRef.current?.click(); }}
                         />
                       </div>
@@ -813,6 +842,7 @@ export default function MagazineDetailPage() {
                     onSave={saveArticle}
                     onDelete={() => { setInlineIsNew(false); setInlineForm(null); }}
                     onContentUpload={() => contentFileRef.current?.click()}
+                    onContentDelete={deleteContentFile}
                     onSlotUpload={(idx) => { pendingSlot.current = idx; slotImgRef.current?.click(); }}
                   />
                 </div>
@@ -1183,7 +1213,7 @@ function InlineForm({
   form, setForm, accentColor, photoCount,
   saving, error, isNew,
   uploadingContent, uploadingSlotIdx,
-  onSave, onDelete, onContentUpload, onSlotUpload,
+  onSave, onDelete, onContentUpload, onContentDelete, onSlotUpload,
 }: {
   form: ArticleInput;
   setForm: (patch: Partial<ArticleInput>) => void;
@@ -1197,6 +1227,7 @@ function InlineForm({
   onSave: () => void;
   onDelete: () => void;
   onContentUpload: () => void;
+  onContentDelete: () => void;
   onSlotUpload: (idx: number) => void;
 }) {
   return (
@@ -1356,10 +1387,27 @@ function InlineForm({
       <div>
         <label style={labelStyle}>콘텐츠 파일 <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}>(이미지 or PDF)</span></label>
         <div onClick={onContentUpload} style={{ border: '2px dashed #F1F5F9', borderRadius: '10px', padding: '10px', textAlign: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
-          {form.pdf_url
-            ? <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px' }}><FileText size={20} color="#4F46E5" style={{ flexShrink: 0 }} /><p style={{ fontSize: '11px', fontWeight: 700, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.pdf_url.split('/').pop()?.slice(0, 30)}</p></div>
-            : <div style={{ color: '#CBD5E1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '6px 0' }}>{uploadingContent ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={16} />}<p style={{ fontSize: '10px', fontWeight: 700, margin: 0 }}>{uploadingContent ? '업로드 중...' : '파일 업로드'}</p></div>
-          }
+          {form.pdf_url ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px' }}>
+              <FileText size={20} color="#4F46E5" style={{ flexShrink: 0 }} />
+              <p style={{ fontSize: '11px', fontWeight: 700, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                {form.pdf_url.split('/').pop()?.slice(0, 30)}
+              </p>
+              <button
+                type="button"
+                onClick={e => { e.stopPropagation(); onContentDelete(); }}
+                style={{ flexShrink: 0, background: '#FEF2F2', border: '1px solid #FEE2E2', borderRadius: '6px', padding: '3px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                title="파일 삭제"
+              >
+                <X size={12} color="#EF4444" />
+              </button>
+            </div>
+          ) : (
+            <div style={{ color: '#CBD5E1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '6px 0' }}>
+              {uploadingContent ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={16} />}
+              <p style={{ fontSize: '10px', fontWeight: 700, margin: 0 }}>{uploadingContent ? '업로드 중...' : '파일 업로드'}</p>
+            </div>
+          )}
         </div>
       </div>
 
