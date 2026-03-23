@@ -247,83 +247,38 @@ function CategoryFilter({ selected, onChange, categories }: {
   onChange: (cat: string) => void;
   categories: string[];
 }) {
-  const allCats = ['All', ...categories];
-  const [indicator, setIndicator] = useState({ left: 0, width: 0, opacity: 0 });
-  const [transitioning, setTransitioning] = useState(false);
-  const filterRef = { current: null as HTMLDivElement | null };
-  const buttonRefs: (HTMLButtonElement | null)[] = [];
-
-  function updateIndicator(idx: number, el: HTMLButtonElement | null, container: HTMLDivElement | null) {
-    if (!el || !container) return;
-    const cRect = container.getBoundingClientRect();
-    const bRect = el.getBoundingClientRect();
-    setIndicator({ left: bRect.left - cRect.left, width: bRect.width, opacity: 1 });
-    setTransitioning(true);
-  }
+  const allCats = ['All Stories', ...categories];
 
   return (
     <div
-      ref={el => { filterRef.current = el; }}
       className="no-scrollbar"
       style={{
-        position: 'relative',
         display: 'flex',
         flexWrap: 'nowrap',
-        gap: 0,
-        background: 'var(--bg-surface)',
-        borderRadius: 20,
-        border: '1px solid var(--border)',
+        gap: 32,
         overflowX: 'auto',
         flexShrink: 0,
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          top: 5, bottom: 5,
-          left: indicator.left,
-          width: indicator.width,
-          background: 'var(--text)',
-          borderRadius: 14,
-          opacity: indicator.opacity,
-          transition: transitioning
-            ? 'left 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
-            : 'none',
-          pointerEvents: 'none',
-          zIndex: 0,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-        }}
-      />
-      {allCats.map((cat, catIdx) => {
-        const isActive = selected === cat;
+      {allCats.map((cat) => {
+        const catValue = cat === 'All Stories' ? 'All' : cat;
+        const isActive = selected === catValue;
         return (
           <button
             key={cat}
-            ref={el => {
-              buttonRefs[catIdx] = el;
-              if (isActive && el && filterRef.current) {
-                requestAnimationFrame(() => updateIndicator(catIdx, el, filterRef.current));
-              }
-            }}
-            onClick={() => {
-              onChange(cat);
-              const el = buttonRefs[catIdx];
-              if (el && filterRef.current) updateIndicator(catIdx, el, filterRef.current);
-            }}
+            onClick={() => onChange(catValue)}
             style={{
-              position: 'relative',
-              zIndex: 1,
-              padding: '8px 16px',
-              borderRadius: 14,
+              padding: '4px 0 8px',
               border: 'none',
+              borderBottom: isActive ? '2px solid var(--text)' : '2px solid transparent',
               cursor: 'pointer',
               fontSize: 10,
-              fontWeight: 900,
+              fontWeight: isActive ? 900 : 700,
               letterSpacing: 2,
               textTransform: 'uppercase',
               background: 'transparent',
-              color: isActive ? 'var(--bg)' : 'var(--text-secondary)',
-              transition: 'color 0.25s',
+              color: isActive ? 'var(--text)' : 'var(--text-secondary)',
+              transition: 'color 0.2s, border-color 0.2s',
               whiteSpace: 'nowrap',
               flexShrink: 0,
             }}
@@ -536,7 +491,7 @@ function BlogCard({ blog, onClick }: CardProps) {
           fill
           className="object-cover"
           style={{
-            transform: hovered ? 'scale(1.02)' : 'scale(1)',
+            transform: hovered ? 'scale(1.03)' : 'scale(1)',
             transition: 'transform 0.5s ease',
           }}
         />
@@ -569,6 +524,10 @@ function BlogCard({ blog, onClick }: CardProps) {
           WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical' as const,
           overflow: 'hidden',
+          textDecoration: hovered ? 'underline' : 'none',
+          textUnderlineOffset: '4px',
+          textDecorationThickness: '1px',
+          transition: 'text-decoration-color 0.3s ease',
         }}>
           {blog.title}
         </h3>

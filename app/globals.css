@@ -528,6 +528,16 @@
   color: #C7D2FE !important;
 }
 
+/* 인포블록 CSS 격리 — blog-content 스타일 침범 방지 */
+.blog-info-block {
+  font-size: initial;
+  line-height: initial;
+}
+.blog-info-block::first-letter {
+  float: none !important;
+  font-size: inherit !important;
+}
+
 /* 블로그 본문 다크 모드 */
 .dark .blog-content {
   color: var(--text);
@@ -536,7 +546,7 @@
   color: #818CF8;
 }
 .dark .blog-content blockquote {
-  border-left-color: #6366F1;
+  border-left-color: var(--text-tertiary);
   color: var(--text-secondary);
 }
 .dark .blog-content h2,

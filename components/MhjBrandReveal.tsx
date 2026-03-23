@@ -38,7 +38,7 @@ export default function MhjBrandReveal() {
         .mhj-reveal-wrap {
           position: relative;
           text-align: center;
-          padding: clamp(48px, 6vw, 80px) clamp(20px, 4vw, 48px);
+          padding: clamp(64px, 10vw, 128px) clamp(20px, 4vw, 48px);
           overflow: hidden;
           cursor: default;
         }
@@ -204,7 +204,7 @@ export default function MhjBrandReveal() {
           width: 0;
           height: 1px;
           background: var(--border-medium);
-          margin: 24px auto;
+          margin: 32px auto;
           transition: width 0.8s cubic-bezier(0.16,1,0.3,1) 0.4s;
           position: relative;
           z-index: 1;

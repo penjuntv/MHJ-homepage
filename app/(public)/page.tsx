@@ -242,7 +242,7 @@ export default async function LandingPage() {
 /* ─── Explore 2분할 섹션 ─── */
 function ExploreSplitSection({ latestBlog, latestMagazine }: { latestBlog: Blog | null; latestMagazine: Magazine | null }) {
   return (
-    <section style={{ padding: 'var(--section-v) clamp(20px, 4vw, 48px)', background: 'var(--bg)' }}>
+    <section style={{ padding: 'clamp(96px, 12vw, 128px) clamp(20px, 4vw, 48px)', background: 'var(--bg)' }}>
       <div style={{ maxWidth: 'var(--content-max)', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 56, flexWrap: 'wrap', gap: 16 }}>
           <div>

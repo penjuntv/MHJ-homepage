@@ -230,7 +230,7 @@ export default async function BlogDetailPage({
         <div style={{
           maxWidth: 720,
           margin: '0 auto',
-          padding: 'clamp(60px, 8vw, 100px) clamp(24px, 4vw, 48px) 0',
+          padding: 'clamp(64px, 8vw, 96px) clamp(20px, 4vw, 32px) 0',
         }}>
           {/* Back to Library */}
           <Link
@@ -239,16 +239,16 @@ export default async function BlogDetailPage({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 10,
+              gap: 8,
               padding: '12px 20px',
               borderRadius: 999,
               fontWeight: 900,
-              fontSize: 10,
+              fontSize: 11,
               letterSpacing: 3,
               textTransform: 'uppercase',
               textDecoration: 'none',
               color: 'var(--text-secondary)',
-              marginBottom: 56,
+              marginBottom: 48,
               border: '1px solid var(--border)',
               transition: 'all 0.2s',
             }}
@@ -274,12 +274,12 @@ export default async function BlogDetailPage({
           <h1
             className="font-display"
             style={{
-              fontSize: 'clamp(32px, 5vw, 72px)',
+              fontSize: 'clamp(32px, 5vw, 48px)',
               fontWeight: 900,
               letterSpacing: '-2px',
               lineHeight: 0.9,
               textTransform: 'uppercase',
-              marginBottom: 40,
+              marginBottom: 8,
               wordBreak: 'keep-all',
               overflowWrap: 'break-word',
               hyphens: 'none',
@@ -295,27 +295,28 @@ export default async function BlogDetailPage({
             alignItems: 'center',
             gap: 16,
             flexWrap: 'wrap',
-            marginBottom: 48,
+            marginBottom: 32,
           }}>
             <span style={{
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 900,
               color: 'var(--text)',
-              letterSpacing: 1,
+              letterSpacing: 3,
+              textTransform: 'uppercase',
             }}>
               {blog.author}
             </span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
               {blog.date}
             </span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
             <Link
               href={`/blog?category=${blog.category}`}
               style={{
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: 900,
-                letterSpacing: 4,
+                letterSpacing: 3,
                 textTransform: 'uppercase',
                 color: 'var(--text-secondary)',
                 textDecoration: 'none',
@@ -330,36 +331,35 @@ export default async function BlogDetailPage({
           </div>
         </div>
 
-        {/* ── 2) 풀 블리드 대표 이미지 ── */}
+        {/* ── 2) 대표 이미지 (720px 읽기 영역) ── */}
         <div style={{
-          width: '100%',
-          aspectRatio: '21/9',
-          overflow: 'hidden',
-          position: 'relative',
-          marginBottom: 'clamp(48px, 6vw, 96px)',
+          maxWidth: 720,
+          margin: '0 auto',
+          padding: '0 clamp(20px, 4vw, 32px)',
+          marginBottom: 48,
         }}>
-          <SafeImage
-            src={blog.image_url}
-            alt={blog.title}
-            fill
-            className="object-cover"
-            priority
-            style={{ filter: 'saturate(1.1)' }}
-          />
-          {/* 하단 페이드 */}
           <div style={{
-            position: 'absolute',
-            bottom: 0, left: 0, right: 0,
-            height: '30%',
-            background: 'linear-gradient(to top, var(--bg) 0%, transparent 100%)',
-          }} />
+            width: '100%',
+            overflow: 'hidden',
+            position: 'relative',
+            borderRadius: 8,
+            aspectRatio: '16/10',
+          }}>
+            <SafeImage
+              src={blog.image_url}
+              alt={blog.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
         </div>
 
         {/* ── 3) 본문 콘텐츠 ── */}
         <div style={{
           maxWidth: 720,
           margin: '0 auto',
-          padding: '0 clamp(24px, 4vw, 48px)',
+          padding: '0 clamp(20px, 4vw, 32px)',
         }}>
           <article style={blog.is_sponsored ? {
             background: 'var(--bg-surface)',
@@ -373,14 +373,14 @@ export default async function BlogDetailPage({
               <div>
                 <style>{`
                   .blog-content {
-                    font-size: clamp(17px, 2vw, 20px);
+                    font-size: 16px;
                     color: var(--text);
-                    font-weight: 400;
-                    line-height: 1.8;
+                    font-weight: 500;
+                    line-height: 1.7;
                   }
-                  .blog-content p { margin: 0 0 2em; }
+                  .blog-content p { margin: 0 0 24px; }
                   .blog-content > p:first-child::first-letter {
-                    font-size: clamp(56px, 8vw, 88px);
+                    font-size: 4rem;
                     font-weight: 900;
                     float: left;
                     margin-right: 12px;
@@ -391,20 +391,20 @@ export default async function BlogDetailPage({
                   .blog-content h2 {
                     font-size: clamp(24px, 3vw, 36px);
                     font-weight: 800;
-                    margin: 2.5em 0 0.6em;
+                    margin: 48px 0 16px;
                     letter-spacing: -0.5px;
                     color: var(--text);
                   }
                   .blog-content h3 {
                     font-size: clamp(20px, 2.5vw, 28px);
                     font-weight: 700;
-                    margin: 2em 0 0.5em;
+                    margin: 40px 0 16px;
                     color: var(--text);
                   }
                   .blog-content blockquote {
-                    border-left: 4px solid #4F46E5;
-                    padding: 12px 0 12px 28px;
-                    margin: 2em 0;
+                    border-left: 3px solid var(--text-tertiary);
+                    padding: 12px 0 12px 24px;
+                    margin: 32px 0;
                     color: var(--text-secondary);
                     font-style: italic;
                     font-size: 1.1em;
@@ -413,10 +413,10 @@ export default async function BlogDetailPage({
                   .blog-content blockquote p { margin: 0; }
                   .blog-content strong { font-weight: 700; color: var(--text); }
                   .blog-content em { font-style: italic; }
-                  .blog-content ul, .blog-content ol { padding-left: 28px; margin: 0 0 2em; }
+                  .blog-content ul, .blog-content ol { padding-left: 24px; margin: 0 0 24px; }
                   .blog-content li { margin: 0.5em 0; line-height: 1.7; }
                   .blog-content a { color: #4F46E5; text-decoration: underline; text-underline-offset: 3px; }
-                  .blog-content img { max-width: 100%; height: auto; border-radius: 12px; margin: 2em 0; display: block; }
+                  .blog-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 24px 0; display: block; }
                   .blog-content img[data-align="left"]   { float: left;  margin: 8px 24px 16px 0; display: inline; }
                   .blog-content img[data-align="right"]  { float: right; margin: 8px 0 16px 24px; display: inline; }
                   .blog-content img[data-align="center"] { margin-left: auto; margin-right: auto; }
@@ -431,29 +431,29 @@ export default async function BlogDetailPage({
                   .blog-content .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
                   .blog-content .grid-1-2 { grid-template-columns: 1fr 1fr; }
                   .blog-content .grid-1-2 > img:first-child { grid-row: span 2; }
-                  .blog-content .image-grid img { margin: 0; border-radius: 12px; width: 100%; height: 100%; object-fit: cover; }
+                  .blog-content .image-grid img { margin: 0; border-radius: 8px; width: 100%; height: 100%; object-fit: cover; }
                   /* CTA 버튼 */
                   .blog-content .blog-cta { text-align: center; margin: 32px 0; }
                   .blog-content .blog-cta a { color: white; text-decoration: none; }
                   /* Google Maps */
-                  .blog-content .blog-map { margin: 32px 0; border-radius: 16px; overflow: hidden; }
+                  .blog-content .blog-map { margin: 32px 0; border-radius: 8px; overflow: hidden; }
                   .blog-content .blog-map iframe { width: 100%; height: 300px; border: none; display: block; }
                   /* 본문 이미지 figure */
-                  .blog-content figure.blog-body-image { margin: 2em 0; }
-                  .blog-content figure.blog-body-image img { width: 100%; height: auto; border-radius: 12px; display: block; margin: 0; }
-                  .blog-content figure.blog-body-image figcaption { margin-top: 8px; font-size: 0.82em; color: var(--text-secondary); text-align: center; line-height: 1.5; }
+                  .blog-content figure.blog-body-image { margin: 24px 0; }
+                  .blog-content figure.blog-body-image img { width: 100%; height: auto; border-radius: 8px; display: block; margin: 0; }
+                  .blog-content figure.blog-body-image figcaption { margin-top: 8px; font-size: 13px; font-style: italic; color: var(--text-secondary); text-align: center; line-height: 1.5; }
                   /* Callout */
-                  .blog-content .blog-callout { padding: 24px; background: #EEF2FF; border-left: 3px solid #4F46E5; border-radius: 0 12px 12px 0; margin: 24px 0; }
+                  .blog-content .blog-callout { padding: 24px; background: #EEF2FF; border-left: 3px solid #4F46E5; border-radius: 0 8px 8px 0; margin: 24px 0; }
                   /* YouTube */
                   .blog-content .blog-youtube,
-                  .blog-content .blog-video { margin: 32px 0; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; }
+                  .blog-content .blog-video { margin: 32px 0; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9; }
                   .blog-content .blog-youtube iframe,
                   .blog-content .blog-video iframe { width: 100%; height: 100%; border: none; display: block; }
                   @media (max-width: 640px) {
                     .blog-content img { float: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
                     .blog-content .grid-2, .blog-content .grid-3, .blog-content .grid-1-2 { grid-template-columns: 1fr !important; }
                     .blog-content .grid-1-2 > img:first-child { grid-row: auto; }
-                    .blog-content > p:first-child::first-letter { font-size: clamp(48px, 12vw, 72px); }
+                    .blog-content > p:first-child::first-letter { font-size: 3rem; }
                   }
                 `}</style>
                 <div
@@ -464,13 +464,13 @@ export default async function BlogDetailPage({
               </div>
             ) : (
               <p style={{
-                fontSize: 'clamp(17px, 2vw, 20px)',
+                fontSize: 16,
                 color: 'var(--text)',
-                fontWeight: 400,
-                lineHeight: 1.8,
+                fontWeight: 500,
+                lineHeight: 1.7,
               }}>
                 <span style={{
-                  fontSize: 'clamp(56px, 8vw, 88px)',
+                  fontSize: '4rem',
                   fontWeight: 900,
                   float: 'left',
                   marginRight: 12,
@@ -486,14 +486,16 @@ export default async function BlogDetailPage({
 
             {/* ── 인포블록 ── */}
             {blog.info_block_html && (
-              <div style={{ margin: '48px 0' }}
+              <div
+                className="blog-info-block"
+                style={{ margin: '48px 0', fontSize: 'initial', lineHeight: 'initial' }}
                 dangerouslySetInnerHTML={{ __html: blog.info_block_html }}
               />
             )}
 
             {/* 태그 */}
             {blog.tags && blog.tags.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 56 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 48 }}>
                 {blog.tags.map(tag => (
                   <Link
                     key={tag}
@@ -524,7 +526,7 @@ export default async function BlogDetailPage({
               justifyContent: 'space-between',
               alignItems: 'center',
               borderTop: '1px solid var(--border)',
-              paddingTop: 56,
+              paddingTop: 48,
               paddingBottom: 48,
               gap: 24,
             }}>
@@ -640,7 +642,7 @@ export default async function BlogDetailPage({
         {/* Related Posts */}
         {relatedBlogs.length > 0 && (
           <section style={{
-            padding: 'clamp(60px, 8vw, 120px) clamp(24px, 4vw, 80px)',
+            padding: 'clamp(64px, 8vw, 96px) clamp(20px, 4vw, 32px)',
             background: 'var(--bg-surface)',
           }}>
             <div style={{ maxWidth: 1320, margin: '0 auto' }}>
@@ -654,7 +656,7 @@ export default async function BlogDetailPage({
                   Continue Reading
                 </p>
                 <h2 className="font-display font-black" style={{
-                  fontSize: 'clamp(32px, 5vw, 64px)',
+                  fontSize: 'clamp(32px, 5vw, 48px)',
                   letterSpacing: '-2px',
                   lineHeight: 1,
                   fontStyle: 'italic',
