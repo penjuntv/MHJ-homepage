@@ -197,7 +197,7 @@ export default function ShareButton({ title, url, description }: ShareButtonProp
               }}
             >
               {copied ? <Check size={16} color="#10B981" /> : <Link2 size={16} />}
-              {copied ? 'Copied!' : '링크 복사'}
+              {copied ? 'Copied!' : 'Copy Link'}
             </button>
           </div>
         )}
@@ -230,7 +230,7 @@ export default function ShareButton({ title, url, description }: ShareButtonProp
         }}
       >
         <Check size={14} color="#10B981" />
-        링크가 복사됐어요
+        Link copied!
       </div>
     </>
   );

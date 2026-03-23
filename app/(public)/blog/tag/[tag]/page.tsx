@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
   const tag = decodeURIComponent(params.tag);
   return {
     title: `Posts tagged #${tag} | MY MAIRANGI`,
-    description: `MY MAIRANGI의 #${tag} 태그 글 모음`,
+    description: `Posts tagged #${tag} on MY MAIRANGI`,
     alternates: { canonical: `https://mhj-homepage.vercel.app/blog/tag/${tag}` },
   };
 }
@@ -76,14 +76,14 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
             #{tag}
           </h1>
           <p style={{ marginTop: 20, fontSize: 14, color: 'var(--text-secondary)', fontWeight: 600 }}>
-            {blogs.length}개의 글
+            {blogs.length} {blogs.length === 1 ? 'post' : 'posts'}
           </p>
         </div>
 
         {/* 글 목록 */}
         {blogs.length === 0 ? (
           <p style={{ fontSize: 16, color: 'var(--text-tertiary)', textAlign: 'center', padding: '80px 0' }}>
-            이 태그로 작성된 글이 없습니다.
+            No posts with this tag.
           </p>
         ) : (
           <div style={{
@@ -95,7 +95,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
               <Link key={blog.id} href={`/blog/${blog.slug}`} style={{ textDecoration: 'none' }}>
                 <div style={{
                   background: 'var(--bg-card)',
-                  borderRadius: 32,
+                  borderRadius: 12,
                   overflow: 'hidden',
                   transition: 'transform 0.3s, box-shadow 0.3s',
                 }} className="blog-tag-card">

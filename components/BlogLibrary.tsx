@@ -90,7 +90,7 @@ export default function BlogLibrary({
           {blogTitle || 'The Library'}
         </h1>
         <p className="type-body" style={{ color: 'var(--text-secondary)', maxWidth: 480 }}>
-          {blogDescription || '사회복지사 석사 과정과 일상을 기록하는 희종의 개인 서재입니다.'}
+          {blogDescription || 'Stories from our life in Mairangi Bay — family, learning, and everything in between.'}
         </p>
       </header>
 

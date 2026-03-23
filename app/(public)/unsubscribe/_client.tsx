@@ -70,7 +70,7 @@ export default function UnsubscribeClient() {
               lineHeight: 1.15,
               marginBottom: 16,
             }}>
-              구독이 해지되었습니다
+              You&apos;ve been unsubscribed
             </h1>
             <p style={{
               fontSize: 15,
@@ -78,10 +78,10 @@ export default function UnsubscribeClient() {
               lineHeight: 1.7,
               marginBottom: 40,
             }}>
-              <strong style={{ color: 'var(--text)' }}>{email}</strong> 주소로 더 이상 뉴스레터를 받지 않습니다.
+              <strong style={{ color: 'var(--text)' }}>{email}</strong> will no longer receive newsletters.
               <br />
               <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
-                언제든 다시 구독하실 수 있습니다.
+                You can resubscribe anytime.
               </span>
             </p>
             <Link
@@ -99,7 +99,7 @@ export default function UnsubscribeClient() {
                 textDecoration: 'none',
               }}
             >
-              다시 구독하기
+              Resubscribe
             </Link>
           </>
         ) : status === 'already' ? (
@@ -113,7 +113,7 @@ export default function UnsubscribeClient() {
               lineHeight: 1.15,
               marginBottom: 16,
             }}>
-              이미 해지된 구독입니다
+              Already unsubscribed
             </h1>
             <p style={{
               fontSize: 15,
@@ -121,7 +121,7 @@ export default function UnsubscribeClient() {
               lineHeight: 1.7,
               marginBottom: 40,
             }}>
-              <strong style={{ color: 'var(--text)' }}>{email}</strong> 주소는 이미 구독이 해지된 상태입니다.
+              <strong style={{ color: 'var(--text)' }}>{email}</strong> is already unsubscribed.
             </p>
             <Link
               href="/"
@@ -139,7 +139,7 @@ export default function UnsubscribeClient() {
                 border: '1px solid var(--border)',
               }}
             >
-              홈으로
+              Home
             </Link>
           </>
         ) : (
@@ -153,7 +153,7 @@ export default function UnsubscribeClient() {
               lineHeight: 1.15,
               marginBottom: 16,
             }}>
-              구독을 해지하시겠습니까?
+              Unsubscribe?
             </h1>
 
             {email ? (
@@ -163,8 +163,8 @@ export default function UnsubscribeClient() {
                 lineHeight: 1.7,
                 marginBottom: 40,
               }}>
-                <strong style={{ color: 'var(--text)' }}>{email}</strong> 주소로
-                <br />더 이상 Mairangi Notes를 받지 않게 됩니다.
+                <strong style={{ color: 'var(--text)' }}>{email}</strong>
+                <br />will no longer receive Mairangi Notes.
               </p>
             ) : (
               <p style={{
@@ -173,10 +173,10 @@ export default function UnsubscribeClient() {
                 lineHeight: 1.7,
                 marginBottom: 40,
               }}>
-                이메일 링크를 통해 접근해 주세요.
+                Please use the link from your email.
                 <br />
                 <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
-                  뉴스레터 하단의 &apos;구독 해지&apos; 링크를 클릭하시면 됩니다.
+                  Click the &apos;Unsubscribe&apos; link at the bottom of any newsletter.
                 </span>
               </p>
             )}
@@ -199,7 +199,7 @@ export default function UnsubscribeClient() {
                     cursor: status === 'loading' ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  {status === 'loading' ? '처리 중...' : '구독 해지'}
+                  {status === 'loading' ? 'Processing...' : 'Unsubscribe'}
                 </button>
                 <Link
                   href="/"
@@ -217,14 +217,14 @@ export default function UnsubscribeClient() {
                     border: '1px solid var(--border)',
                   }}
                 >
-                  취소
+                  Cancel
                 </Link>
               </div>
             )}
 
             {status === 'error' && (
               <p style={{ marginTop: 16, fontSize: 13, color: '#ef4444' }}>
-                오류가 발생했습니다. 다시 시도해 주세요.
+                Something went wrong. Please try again.
               </p>
             )}
           </>

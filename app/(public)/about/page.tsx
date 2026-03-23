@@ -107,7 +107,7 @@ export default async function AboutPage() {
               overflow: 'hidden',
               boxShadow: '0 24px 64px rgba(0,0,0,0.10)',   /* static, hover 아님 */
               position: 'relative',
-              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)',
+              background: 'linear-gradient(135deg, var(--bg-surface), var(--border))',
             }}>
               {whoImage ? (
                 <SafeImage
@@ -247,7 +247,7 @@ export default async function AboutPage() {
                       marginBottom: 32,        /* 32 = 4×8 ✅ */
                       boxShadow: '0 16px 40px rgba(0,0,0,0.08)',   /* static */
                       position: 'relative',
-                      background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
+                      background: 'linear-gradient(135deg, var(--bg-surface), var(--border))',
                     }}>
                       {m.image_url ? (
                         <SafeImage

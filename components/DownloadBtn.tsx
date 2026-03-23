@@ -12,9 +12,9 @@ interface Props {
 }
 
 const RATIOS: { key: Ratio; label: string; sub: string }[] = [
-  { key: 'a4',    label: 'A4 원본',          sub: '매거진 비율' },
-  { key: 'feed',  label: '인스타 피드',       sub: '1 : 1 정사각형' },
-  { key: 'story', label: '인스타 스토리',     sub: '9 : 16 세로형' },
+  { key: 'a4',    label: 'A4 Original',       sub: 'Magazine ratio' },
+  { key: 'feed',  label: 'Insta Feed',        sub: '1 : 1 Square' },
+  { key: 'story', label: 'Insta Story',       sub: '9 : 16 Vertical' },
 ];
 
 export default function DownloadBtn({ targetRef, filename, size = 'md' }: Props) {
@@ -94,7 +94,7 @@ export default function DownloadBtn({ targetRef, filename, size = 'md' }: Props)
       <button
         onClick={() => !loading && setOpen(p => !p)}
         disabled={loading}
-        title="PNG 다운로드"
+        title="Download PNG"
         style={{
           display: 'flex', alignItems: 'center', ...btnSize,
           background: 'white', border: '1px solid #E2E8F0',

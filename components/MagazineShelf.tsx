@@ -131,7 +131,7 @@ export default function MagazineShelf({
 
             /* ── 그림자 ── */
             const shadow = (isActive || isClicking)
-              ? '0 30px 60px rgba(0,0,0,0.5), 0 -8px 30px rgba(79,70,229,0.15)'
+              ? '0 20px 60px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15)'
               : 'inset -1px 0 0 rgba(255,255,255,0.06), inset 1px 0 0 rgba(255,255,255,0.03)';
 
             return (
