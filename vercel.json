@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/process-welcome-sequence",
+      "schedule": "0 21 * * *"
+    }
+  ]
+}
