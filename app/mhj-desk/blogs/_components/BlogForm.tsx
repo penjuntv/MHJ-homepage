@@ -165,7 +165,15 @@ export default function BlogForm({ initial }: Props) {
     const id = setInterval(() => {
       try {
         const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa } = stateRef.current;
-        sessionStorage.setItem(draftKey, JSON.stringify({ form: f, tags: t, scheduleMode: sm, scheduleAt: sa }));
+        // content가 매우 클 경우 content_backup을 제외한 슬림 버전으로 저장 시도
+        const payload = { form: f, tags: t, scheduleMode: sm, scheduleAt: sa };
+        let serialized = JSON.stringify(payload);
+        if (serialized.length > 3_000_000) {
+          // 3MB 초과 시 content만 제외하고 저장 (Supabase에 직접 저장된 본문은 안전)
+          const slimForm = { ...f, content: '' };
+          serialized = JSON.stringify({ form: slimForm, tags: t, scheduleMode: sm, scheduleAt: sa });
+        }
+        sessionStorage.setItem(draftKey, serialized);
         const now = new Date();
         const hm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         setAutoSaveLabel(`임시저장됨 ${hm}`);

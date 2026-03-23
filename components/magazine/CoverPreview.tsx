@@ -7,7 +7,6 @@ interface CoverPreviewProps {
   title: string;
   year: string;
   month_name: string;
-  editor?: string;
   cover_copy?: string;
   cover_subtitle?: string;
   contributors?: string[];
@@ -23,8 +22,6 @@ export default function CoverPreview({
   title,
   year,
   month_name,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  editor,
   cover_copy = '',
   cover_subtitle = '',
   contributors = [],

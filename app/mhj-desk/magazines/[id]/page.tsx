@@ -20,7 +20,8 @@ import DownloadBtn from '@/components/DownloadBtn';
 import PhotoHeroTemplate   from '@/components/magazine/templates/PhotoHeroTemplate';
 import ClassicTemplate     from '@/components/magazine/templates/ClassicTemplate';
 import PhotoEssayTemplate  from '@/components/magazine/templates/PhotoEssayTemplate';
-import GalleryTemplate     from '@/components/magazine/templates/GalleryTemplate';
+import Story2Template      from '@/components/magazine/templates/Story2Template';
+import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import TextOnlyTemplate    from '@/components/magazine/templates/TextOnlyTemplate';
 import SplitTemplate       from '@/components/magazine/templates/SplitTemplate';
 import type { ArticlePreviewData } from '@/components/magazine/templates/shared';
@@ -54,9 +55,9 @@ const TEMPLATE_META: { key: string; label: string; desc: string; photos: number 
   { key: 'photo-hero',   label: 'Photo Hero',   desc: '풀블리드 사진',    photos: 1 },
   { key: 'classic',      label: 'Classic',      desc: '상단 사진+드롭캡', photos: 1 },
   { key: 'photo-essay',  label: 'Photo Essay',  desc: '다크 사진 그리드', photos: 4 },
-  { key: 'gallery',      label: 'Gallery',      desc: '사진 3장 스트립',  photos: 3 },
+  { key: 'story-2',      label: 'Story-2',      desc: '사진 2장+본문',    photos: 2 },
   { key: 'text-only',    label: 'Essay',        desc: '사진 없는 에세이', photos: 0 },
-  { key: 'split',        label: 'Split',        desc: '좌우 분할',        photos: 1 },
+  { key: 'split',        label: 'Split',        desc: '좌우 분할',        photos: 3 },
 ];
 
 const STATUS_CONFIG: Record<ArticleStatus, { label: string; bg: string; color: string }> = {
@@ -101,12 +102,13 @@ function renderTemplate(
   artData: ArticlePreviewData,
   accentColor: string,
   bgColor?: string,
+  hideTitle?: boolean,
 ) {
-  const props = { article: artData, accentColor, bgColor };
+  const props = { article: artData, accentColor, bgColor, hideTitle };
   switch (tpl) {
     case 'photo-hero':  return <PhotoHeroTemplate  {...props} />;
     case 'photo-essay': return <PhotoEssayTemplate {...props} />;
-    case 'gallery':     return <GalleryTemplate    {...props} />;
+    case 'story-2':     return <Story2Template     {...props} />;
     case 'text-only':   return <TextOnlyTemplate   {...props} />;
     case 'split':       return <SplitTemplate      {...props} />;
     default:            return <ClassicTemplate    {...props} />;
@@ -154,6 +156,7 @@ export default function MagazineDetailPage() {
   const [articlePages, setArticlePages] = useState<ArticlePage[]>([]);
   const [savingPages, setSavingPages] = useState(false);
   const [uploadingPageSlot, setUploadingPageSlot] = useState<{ pageIdx: number; slotIdx: number } | null>(null);
+  const [focusedPageIdx, setFocusedPageIdx] = useState<number | null>(null); // null=Page1, 0+=추가페이지
 
   /* ─── 정렬 ─── */
   const [reordering, setReordering] = useState(false);
@@ -358,6 +361,7 @@ export default function MagazineDetailPage() {
         content: p.content,
         images: p.images,
         caption: p.caption ?? null,
+        captions: p.captions ?? [],
       }));
       const { error } = await supabase.from('article_pages').insert(rows);
       if (error) { showToast('페이지 저장 실패: ' + error.message); setSavingPages(false); return; }
@@ -418,6 +422,7 @@ export default function MagazineDetailPage() {
   function selectArticle(article: Article) {
     setSelectedArtId(article.id);
     setInlineIsNew(false);
+    setFocusedPageIdx(null);
     setFormError('');
     setInlineForm({
       magazine_id: article.magazine_id,
@@ -440,6 +445,7 @@ export default function MagazineDetailPage() {
     setInlineIsNew(true);
     setInlineForm(EMPTY_FORM(id, nextOrder));
     setFormError('');
+    setFocusedPageIdx(null);
   }
 
   const sortedArticles = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
@@ -460,14 +466,6 @@ export default function MagazineDetailPage() {
     </div>
   );
 
-  /* ─── 인라인 프리뷰 데이터 ─── */
-  const previewArtData: ArticlePreviewData = inlineForm ? {
-    title: inlineForm.title, author: inlineForm.author,
-    content: inlineForm.content, image_url: inlineForm.image_url,
-    article_images: inlineForm.article_images,
-    image_positions: inlineForm.image_positions,
-    template: inlineForm.template,
-  } : { title: '', author: '', content: '', image_url: '' };
   const photoCount = inlineForm ? (TEMPLATE_PHOTO_COUNT[inlineForm.template] ?? 0) : 0;
   const bgCol = magazine?.bg_color ?? '#F5F0EA';
 
@@ -478,6 +476,10 @@ export default function MagazineDetailPage() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes slideRight { from { transform: translateX(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+        @media (max-width: 1023px) {
+          .article-edit-grid { grid-template-columns: 1fr !important; }
+          .article-preview-panel { position: static !important; max-height: none !important; }
+        }
       `}</style>
 
       {/* ─── 상단 바 ─── */}
@@ -687,7 +689,7 @@ export default function MagazineDetailPage() {
                 <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', marginBottom: '8px' }}>Cover</p>
                 <CoverPreview
                   title={magForm.title} year={magForm.year} month_name={magForm.month_name}
-                  editor={magForm.editor} cover_copy={magForm.cover_copy}
+                  cover_copy={magForm.cover_copy}
                   contributors={magForm.contributors} image_url={magForm.image_url}
                   cover_images={magForm.cover_images} accent_color={magForm.accent_color}
                   bg_color={magForm.bg_color}
@@ -711,7 +713,7 @@ export default function MagazineDetailPage() {
           탭 2: 기사 편집
           ══════════════════════════════════════════ */}
       {tab === 'articles' && (
-        <div style={{ padding: '0 24px', display: 'grid', gridTemplateColumns: '45% 55%', gap: '24px', alignItems: 'start', minWidth: 0 }}>
+        <div className="article-edit-grid" style={{ padding: '0 24px', display: 'grid', gridTemplateColumns: '45% 55%', gap: '24px', alignItems: 'start', minWidth: 0 }}>
 
           {/* ─── 좌: 기사 목록 + 인라인 폼 ─── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0', minWidth: 0 }}>
@@ -763,17 +765,19 @@ export default function MagazineDetailPage() {
 
                     {/* ─── 인라인 편집 폼 (선택된 기사) ─── */}
                     {isSelected && inlineForm && (
-                      <InlineForm
-                        form={inlineForm} setForm={v => setInlineForm(p => p ? { ...p, ...v } : p)}
-                        accentColor={accentCol} photoCount={photoCount}
-                        saving={savingArticle} error={formError} isNew={false}
-                        uploadingContent={uploadingContent}
-                        uploadingSlotIdx={uploadingSlotIdx}
-                        onSave={saveArticle}
-                        onDelete={() => deleteArticle(article.id)}
-                        onContentUpload={() => contentFileRef.current?.click()}
-                        onSlotUpload={(idx) => { pendingSlot.current = idx; slotImgRef.current?.click(); }}
-                      />
+                      <div onClick={() => setFocusedPageIdx(null)}>
+                        <InlineForm
+                          form={inlineForm} setForm={v => setInlineForm(p => p ? { ...p, ...v } : p)}
+                          accentColor={accentCol} photoCount={photoCount}
+                          saving={savingArticle} error={formError} isNew={false}
+                          uploadingContent={uploadingContent}
+                          uploadingSlotIdx={uploadingSlotIdx}
+                          onSave={saveArticle}
+                          onDelete={() => deleteArticle(article.id)}
+                          onContentUpload={() => contentFileRef.current?.click()}
+                          onSlotUpload={(idx) => { pendingSlot.current = idx; slotImgRef.current?.click(); }}
+                        />
+                      </div>
                     )}
                     {/* ─── 추가 페이지 섹션 ─── */}
                     {isSelected && !inlineIsNew && (
@@ -788,6 +792,7 @@ export default function MagazineDetailPage() {
                           pageSlotRef.current?.click();
                         }}
                         accentColor={accentCol}
+                        onFocusPage={setFocusedPageIdx}
                       />
                     )}
                   </div>
@@ -796,7 +801,7 @@ export default function MagazineDetailPage() {
 
               {/* ─── 인라인 폼: 새 기사 ─── */}
               {inlineIsNew && inlineForm && (
-                <div style={{ border: '1.5px dashed #4F46E5', borderRadius: '12px', overflow: 'hidden', marginTop: '4px' }}>
+                <div style={{ border: '1.5px dashed #4F46E5', borderRadius: '12px', overflow: 'hidden', marginTop: '4px' }} onClick={() => setFocusedPageIdx(null)}>
                   <div style={{ background: '#EEF2FF', padding: '8px 12px' }}>
                     <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '2px', color: '#4F46E5', margin: 0 }}>+ 새 기사</p>
                   </div>
@@ -816,46 +821,89 @@ export default function MagazineDetailPage() {
             </div>
           </div>
 
-          {/* ─── 우: 실시간 프리뷰 (스티키) ─── */}
-          <div style={{ position: 'sticky', top: '80px', overflowY: 'auto', maxHeight: 'calc(100vh - 100px)', minWidth: 0 }}>
-            {inlineForm ? (
-              <>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', margin: 0 }}>
-                    Live Preview · {TEMPLATE_META.find(t => t.key === inlineForm.template)?.label ?? 'Classic'}
-                  </p>
-                  <DownloadBtn
-                    targetRef={previewDivRef as React.RefObject<HTMLElement>}
-                    filename={`TheMHJ_${magazine.month_name}${magazine.year}_${inlineForm.title.slice(0, 20)}`}
-                    size="sm"
-                  />
-                </div>
-                <div ref={previewDivRef}>
-                  {renderTemplate(inlineForm.template, previewArtData, accentCol, bgCol)}
-                </div>
-                {/* 추가 페이지 미리보기 */}
-                {!inlineIsNew && articlePages.map((page, pi) => (
-                  <div key={pi} style={{ marginTop: '16px' }}>
-                    <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', margin: '0 0 6px' }}>
-                      Page {pi + 2} · {TEMPLATE_META.find(t => t.key === page.template)?.label ?? 'Classic'}
+          {/* ─── 우: 실시간 프리뷰 (스티키, 현재 포커스 페이지만) ─── */}
+          <div className="article-preview-panel" style={{ position: 'sticky', top: '80px', overflowY: 'auto', maxHeight: 'calc(100vh - 100px)', minWidth: 0 }}>
+            {inlineForm ? (() => {
+              const totalPageCount = 1 + articlePages.length;
+              const focusedExtraPage = focusedPageIdx !== null ? articlePages[focusedPageIdx] : null;
+              const currentTemplateName = focusedPageIdx === null
+                ? (TEMPLATE_META.find(t => t.key === inlineForm.template)?.label ?? 'Classic')
+                : (TEMPLATE_META.find(t => t.key === focusedExtraPage?.template)?.label ?? 'Classic');
+              const currentPageNum = focusedPageIdx === null ? 1 : focusedPageIdx + 2;
+
+              return (
+                <>
+                  {/* 헤더: 인디케이터 + 다운로드 */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '3px', color: '#CBD5E1', textTransform: 'uppercase', margin: 0 }}>
+                      Page {currentPageNum}/{totalPageCount} · {currentTemplateName}
                     </p>
-                    {renderTemplate(page.template, {
-                      title: inlineForm.title,
-                      author: inlineForm.author,
-                      content: page.content,
-                      image_url: page.images?.[0] ?? '',
-                      article_images: page.images ?? [],
-                      image_positions: [],
-                      template: page.template,
-                    }, accentCol, bgCol)}
+                    {focusedPageIdx === null && (
+                      <DownloadBtn
+                        targetRef={previewDivRef as React.RefObject<HTMLElement>}
+                        filename={`TheMHJ_${magazine.month_name}${magazine.year}_${inlineForm.title.slice(0, 20)}`}
+                        size="sm"
+                      />
+                    )}
                   </div>
-                ))}
-                <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: accentCol, display: 'inline-block' }} />
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#94A3B8' }}>Accent: {accentCol}</span>
-                </div>
-              </>
-            ) : (
+
+                  {/* 현재 포커스 페이지 미리보기 (라이브 뷰 스타일) */}
+                  {focusedPageIdx === null ? (
+                    <div ref={previewDivRef} style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden', background: 'white' }}>
+                      <ArticlePageRenderer
+                        template={inlineForm.template}
+                        title={inlineForm.title}
+                        author={inlineForm.author}
+                        content={inlineForm.content}
+                        images={(inlineForm.article_images ?? []).filter(Boolean)}
+                        captions={[]}
+                        accentColor={accentCol}
+                      />
+                    </div>
+                  ) : focusedExtraPage ? (
+                    <div style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden', background: 'white' }}>
+                      <ArticlePageRenderer
+                        template={focusedExtraPage.template}
+                        title={inlineForm.title}
+                        author={inlineForm.author}
+                        content={focusedExtraPage.content}
+                        images={(focusedExtraPage.images ?? []).filter(Boolean)}
+                        captions={focusedExtraPage.captions ?? []}
+                        accentColor={accentCol}
+                        hideTitle={true}
+                      />
+                    </div>
+                  ) : null}
+
+                  {/* 페이지 전환 버튼 (추가 페이지 있을 때) */}
+                  {!inlineIsNew && totalPageCount > 1 && (
+                    <div style={{ display: 'flex', gap: '5px', marginTop: '12px', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={() => setFocusedPageIdx(null)}
+                        style={{ padding: '4px 10px', borderRadius: '6px', border: focusedPageIdx === null ? `2px solid ${accentCol}` : '2px solid #F1F5F9', background: focusedPageIdx === null ? `${accentCol}15` : 'white', fontSize: '10px', fontWeight: 900, color: focusedPageIdx === null ? accentCol : '#94A3B8', cursor: 'pointer', transition: 'all 0.15s' }}
+                      >
+                        P1
+                      </button>
+                      {articlePages.map((_, pi) => (
+                        <button
+                          key={pi}
+                          onClick={() => setFocusedPageIdx(pi)}
+                          style={{ padding: '4px 10px', borderRadius: '6px', border: focusedPageIdx === pi ? `2px solid ${accentCol}` : '2px solid #F1F5F9', background: focusedPageIdx === pi ? `${accentCol}15` : 'white', fontSize: '10px', fontWeight: 900, color: focusedPageIdx === pi ? accentCol : '#94A3B8', cursor: 'pointer', transition: 'all 0.15s' }}
+                        >
+                          P{pi + 2}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 액센트 색상 표시 */}
+                  <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: accentCol, display: 'inline-block' }} />
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#94A3B8' }}>Accent: {accentCol}</span>
+                  </div>
+                </>
+              );
+            })() : (
               <div style={{ aspectRatio: '210/297', background: '#F8FAFC', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #F1F5F9' }}>
                 <p style={{ fontSize: '11px', color: '#CBD5E1', fontWeight: 700, textAlign: 'center' }}>기사를 선택하면<br />미리보기가 표시됩니다</p>
               </div>
@@ -874,7 +922,7 @@ export default function MagazineDetailPage() {
             label: 'Cover',
             content: <CoverPreview
               title={magazine.title} year={magazine.year} month_name={magazine.month_name}
-              editor={magazine.editor} cover_copy={magazine.cover_copy ?? ''}
+              cover_copy={magazine.cover_copy ?? ''}
               contributors={magazine.contributors ?? []} image_url={magazine.image_url}
               cover_images={magazine.cover_images ?? []}
               accent_color={magazine.accent_color ?? '#1A1A1A'}
@@ -1105,13 +1153,12 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
       </div>
     </div>
   );
-  if (tplKey === 'gallery') return (
+  if (tplKey === 'story-2') return (
     <div style={{ ...style, flexDirection: 'row', gap: '5px' }}>
-      <div style={{ width: '38%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-        {['A','B','C'].map(l => <div key={l} style={{ flex: 1 }}>{photo(l)}</div>)}
-      </div>
+      <div style={{ width: '25%' }}>{photo('A', '3px')}</div>
+      <div style={{ width: '25%' }}>{photo('B', '3px')}</div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
-        {line('90%', '3px', '#D1D5DB')}{line('75%')}{line('80%')}{line('55%')}
+        {line('90%', '3px', '#D1D5DB')}{line('80%')}{line('85%')}{line('70%')}
       </div>
     </div>
   );
@@ -1346,7 +1393,7 @@ function InlineForm({
    추가 페이지 섹션 컴포넌트
    ════════════════════════════════════════════ */
 function ArticlePagesSection({
-  pages, setPages, saving, onSave, uploadingSlot, onImageUpload, accentColor,
+  pages, setPages, saving, onSave, uploadingSlot, onImageUpload, accentColor, onFocusPage,
 }: {
   pages: ArticlePage[];
   setPages: (pages: ArticlePage[]) => void;
@@ -1355,9 +1402,10 @@ function ArticlePagesSection({
   uploadingSlot: { pageIdx: number; slotIdx: number } | null;
   onImageUpload: (pageIdx: number, slotIdx: number) => void;
   accentColor: string;
+  onFocusPage: (pageIdx: number) => void;
 }) {
   function addPage() {
-    setPages([...pages, { article_id: 0, page_number: pages.length + 1, template: 'classic', content: '', images: [] }]);
+    setPages([...pages, { article_id: 0, page_number: pages.length + 1, template: 'classic', content: '', images: [], captions: [] }]);
   }
   function deletePage(idx: number) {
     setPages(pages.filter((_, i) => i !== idx));
@@ -1394,7 +1442,7 @@ function ArticlePagesSection({
       {pages.map((page, pi) => {
         const photoCount = TEMPLATE_PHOTO_COUNT[page.template] ?? 0;
         return (
-          <div key={pi} style={{ padding: '14px', borderBottom: '1px solid #F8FAFC', background: 'white' }}>
+          <div key={pi} onClick={() => onFocusPage(pi)} style={{ padding: '14px', borderBottom: '1px solid #F8FAFC', background: 'white', cursor: 'default' }}>
             {/* 페이지 헤더 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
               <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '2px', color: '#4F46E5', textTransform: 'uppercase' }}>
@@ -1470,16 +1518,25 @@ function ArticlePagesSection({
               />
             </div>
 
-            {/* 캡션 */}
-            <div>
-              <label style={labelStyle}>캡션 (선택)</label>
-              <input
-                value={page.caption ?? ''}
-                onChange={e => updatePage(pi, { caption: e.target.value })}
-                placeholder="사진 설명 또는 캡션..."
-                style={inputStyle}
-              />
-            </div>
+            {/* 사진별 캡션 */}
+            {photoCount > 0 && (
+              <div>
+                <label style={labelStyle}>사진 캡션 (선택)</label>
+                {Array.from({ length: photoCount }, (_, si) => (
+                  <input
+                    key={si}
+                    value={page.captions?.[si] ?? ''}
+                    onChange={e => {
+                      const caps = [...(page.captions ?? [])];
+                      caps[si] = e.target.value;
+                      updatePage(pi, { captions: caps });
+                    }}
+                    placeholder={`사진 ${si + 1} 설명 (선택)`}
+                    style={{ ...inputStyle, marginTop: si > 0 ? '4px' : 0 }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         );
       })}

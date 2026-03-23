@@ -27,21 +27,23 @@ export interface ArticlePreviewData {
   image_positions?: string[];
   image_url?: string;
   template?: string;
+  image_captions?: string[];
 }
 
 export interface NewTemplateProps {
   article: ArticlePreviewData;
   accentColor?: string;
   bgColor?: string;
+  hideTitle?: boolean;
 }
 
 export const TEMPLATE_PHOTO_COUNT: Record<string, number> = {
   'photo-hero': 1,
   'classic': 1,
   'photo-essay': 4,
-  'gallery': 3,
+  'story-2': 2,
   'text-only': 0,
-  'split': 1,
+  'split': 3,
 };
 
 export function getImages(article: ArticlePreviewData, count: number): (string | null)[] {

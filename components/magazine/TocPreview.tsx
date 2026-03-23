@@ -29,7 +29,6 @@ export default function TocPreview({
 
   const tocItems = articles
     .filter(a => a.article_type !== 'cover')
-    .filter(a => a.article_status === 'published' || !a.article_status)
     .slice(0, 10);
 
   return (

@@ -559,6 +559,19 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
           return false;
         },
         dragover: (_view, event) => { event.preventDefault(); return false; },
+        paste: (_view, event) => {
+          const items = Array.from((event as ClipboardEvent).clipboardData?.items ?? []);
+          const imgItems = items.filter(item => item.type.startsWith('image/'));
+          if (imgItems.length > 0) {
+            event.preventDefault();
+            imgItems.forEach(item => {
+              const file = item.getAsFile();
+              if (file) uploadAndInsert(file);
+            });
+            return true;
+          }
+          return false;
+        },
       },
     },
   });

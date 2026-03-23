@@ -462,7 +462,6 @@ export default function NewMagazinePage() {
           title={form.title}
           year={form.year}
           month_name={form.month_name}
-          editor={form.editor}
           cover_copy={form.cover_copy}
           contributors={contributors}
           image_url={form.image_url}

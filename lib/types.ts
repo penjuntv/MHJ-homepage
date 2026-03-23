@@ -147,6 +147,7 @@ export interface ArticlePage {
   content: string;
   images: string[];
   caption?: string | null;
+  captions?: string[] | null;   // 사진별 캡션 (images[i] ↔ captions[i])
 }
 
 export interface GalleryItem {
