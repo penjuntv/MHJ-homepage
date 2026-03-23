@@ -83,6 +83,7 @@ export interface Comment {
   content: string;
   approved: boolean;
   created_at: string;
+  parent_id?: number | null;
   blog?: { title: string; slug: string };
 }
 
