@@ -117,19 +117,19 @@ export default function ArticlePageRenderer({
     return (
       <div style={{ background: bgColor }}>
         <style>{proseStyle}</style>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px' }}>
           {images.map((src, i) => (
-            <div key={i} style={{ position: 'relative' }}>
+            <div key={i}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={src} alt=""
-                style={{ width: '100%', display: 'block', objectFit: 'contain', background: '#f0ece6' }}
+                style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '4px' }}
               />
               {captions[i] && (
                 <div style={{
-                  position: 'absolute', bottom: 0, left: 0, right: 0,
-                  background: 'rgba(0,0,0,0.5)', color: 'white',
-                  fontSize: '11px', lineHeight: 1.4, padding: '4px 10px',
+                  marginTop: '4px',
+                  fontSize: '11px', lineHeight: 1.4, color: accentColor + '80',
+                  padding: '2px 4px',
                 }}>
                   {captions[i]}
                 </div>

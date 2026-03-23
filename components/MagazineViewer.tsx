@@ -129,15 +129,70 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <style>{`
+        .apop-nav-side { position: absolute; top: 50%; transform: translateY(-50%); }
+        .apop-nav-bottom { display: none; }
+        @media (max-width: 860px) {
+          .apop-nav-side { display: none !important; }
+          .apop-nav-bottom { display: flex !important; }
+        }
+      `}</style>
+
+      {/* 좌우 화살표 — 모달 바깥 (데스크톱) */}
+      {totalPages > 1 && (
+        <>
+          <button
+            className="apop-nav-side"
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            style={{
+              left: 'clamp(4px, 2vw, 16px)', zIndex: 210,
+              width: 40, height: 40, borderRadius: '50%',
+              border: 'none', cursor: currentPage === 1 ? 'default' : 'pointer',
+              background: currentPage === 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.9)',
+              color: currentPage === 1 ? 'rgba(255,255,255,0.3)' : '#2C1F14',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}
+            aria-label="이전 페이지"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            className="apop-nav-side"
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            style={{
+              right: 'clamp(4px, 2vw, 16px)', zIndex: 210,
+              width: 40, height: 40, borderRadius: '50%',
+              border: 'none', cursor: currentPage === totalPages ? 'default' : 'pointer',
+              background: currentPage === totalPages ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.9)',
+              color: currentPage === totalPages ? 'rgba(255,255,255,0.3)' : '#2C1F14',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}
+            aria-label="다음 페이지"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </>
+      )}
+
       <div style={{ background: 'var(--bg-card)', borderRadius: 20, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         {/* 헤더 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `2px solid ${accentColor}20`, flexShrink: 0 }}>
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, color: accentColor + '80', textTransform: 'uppercase', margin: '0 0 3px' }}>{article.article_type || 'Article'} · {article.author}</p>
-            <p style={{ fontSize: 15, fontWeight: 900, color: accentColor, margin: 0 }}>{article.title}</p>
+            <p style={{ fontSize: 15, fontWeight: 900, color: accentColor, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{article.title}</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {/* 페이지 인디케이터 */}
+            {totalPages > 1 && (
+              <span style={{ fontSize: 10, fontWeight: 900, color: '#9C8B7A', letterSpacing: 1.5, whiteSpace: 'nowrap' }}>
+                {currentPage}/{totalPages}
+              </span>
+            )}
             {/* 좋아요 버튼 */}
             <button onClick={onLike} style={{
               display: 'flex', alignItems: 'center', gap: 5,
@@ -207,14 +262,21 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
             );
           })()}
 
-          {/* ── 페이지 네비게이션 (추가 페이지 있을 때만) ── */}
+          {/* 모바일 페이지 네비게이션 (하단) */}
           {totalPages > 1 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderTop: '1px solid #F1F5F9', background: '#FAF7F4' }}>
+            <div className="apop-nav-bottom" style={{ display: 'none', alignItems: 'center', justifyContent: 'center', gap: 16, padding: '12px 20px', borderTop: '1px solid #F1F5F9', background: '#FAF7F4' }}>
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 999, border: '1px solid #E8DDD4', background: 'white', fontSize: 12, fontWeight: 700, color: currentPage === 1 ? '#CBD5E1' : '#4A3F35', cursor: currentPage === 1 ? 'default' : 'pointer' }}>
-                <ChevronLeft size={13} /> 이전
+                style={{
+                  width: 36, height: 36, borderRadius: '50%',
+                  border: '1px solid #E8DDD4', background: 'white',
+                  color: currentPage === 1 ? '#CBD5E1' : '#4A3F35',
+                  cursor: currentPage === 1 ? 'default' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <ChevronLeft size={16} />
               </button>
               <span style={{ fontSize: 11, fontWeight: 900, color: '#9C8B7A', letterSpacing: 2 }}>
                 {currentPage} / {totalPages}
@@ -222,8 +284,15 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 999, border: '1px solid #E8DDD4', background: currentPage === totalPages ? 'white' : '#2C1F14', fontSize: 12, fontWeight: 700, color: currentPage === totalPages ? '#CBD5E1' : 'white', cursor: currentPage === totalPages ? 'default' : 'pointer' }}>
-                다음 페이지 <ChevronRight size={13} />
+                style={{
+                  width: 36, height: 36, borderRadius: '50%',
+                  border: '1px solid #E8DDD4', background: currentPage === totalPages ? 'white' : '#2C1F14',
+                  color: currentPage === totalPages ? '#CBD5E1' : 'white',
+                  cursor: currentPage === totalPages ? 'default' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <ChevronRight size={16} />
               </button>
             </div>
           )}
