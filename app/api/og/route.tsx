@@ -3,32 +3,9 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
-async function loadFont(
-  family: string,
-  weight: number,
-  style: string = 'normal'
-): Promise<ArrayBuffer | null> {
-  try {
-    const params = new URLSearchParams({
-      family: style === 'italic' ? `${family}:ital,wght@1,${weight}` : `${family}:wght@${weight}`,
-      display: 'swap',
-    });
-    // User-Agent without "Chrome" → Google Fonts returns TrueType (.ttf)
-    // Modern Chrome UA returns woff2 which can be OTF-based (unsupported by ImageResponse)
-    const css = await fetch(`https://fonts.googleapis.com/css2?${params}`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; MSIE 11.0; Windows NT 6.3; Trident/7.0)',
-      },
-    }).then((r) => r.text());
-
-    const match = css.match(/src: url\(([^)]+)\) format\('truetype'\)/);
-    if (!match) return null;
-
-    return fetch(match[1]).then((r) => r.arrayBuffer());
-  } catch {
-    return null;
-  }
-}
+// Local font files in public/fonts/ — avoids Google Fonts runtime fetch issues
+const NOTO_SANS_KR_URL = new URL('../../../public/fonts/NotoSansKR-Bold.woff', import.meta.url);
+const PLAYFAIR_ITALIC_URL = new URL('../../../public/fonts/PlayfairDisplay-BoldItalic.woff', import.meta.url);
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -36,29 +13,20 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get('category') || '';
   const date = searchParams.get('date') || '';
 
-  const [playfairData, playfairItalicData, notoData] = await Promise.all([
-    loadFont('Playfair Display', 700),
-    loadFont('Playfair Display', 700, 'italic'),
-    loadFont('Noto Sans KR', 700),
+  const [notoData, playfairItalicData] = await Promise.all([
+    fetch(NOTO_SANS_KR_URL).then((r) => r.arrayBuffer()).catch(() => null),
+    fetch(PLAYFAIR_ITALIC_URL).then((r) => r.arrayBuffer()).catch(() => null),
   ]);
 
   const titleFontSize = title.length > 60 ? 48 : title.length > 40 ? 58 : title.length > 20 ? 68 : 72;
 
   const fonts = [
-    playfairData && { name: 'Playfair Display', data: playfairData, weight: 700 as const, style: 'normal' as const },
-    playfairItalicData && { name: 'Playfair Italic', data: playfairItalicData, weight: 700 as const, style: 'normal' as const },
     notoData && { name: 'Noto Sans KR', data: notoData, weight: 700 as const, style: 'normal' as const },
+    playfairItalicData && { name: 'Playfair Italic', data: playfairItalicData, weight: 700 as const, style: 'normal' as const },
   ].filter(Boolean) as { name: string; data: ArrayBuffer; weight: 700; style: 'normal' }[];
 
-  const titleFont = notoData
-    ? '"Noto Sans KR", "Playfair Display", serif'
-    : playfairData
-      ? '"Playfair Display", serif'
-      : 'serif';
-
-  const logoFont = playfairItalicData
-    ? '"Playfair Italic", serif'
-    : 'serif';
+  const titleFont = notoData ? '"Noto Sans KR", sans-serif' : 'sans-serif';
+  const logoFont = playfairItalicData ? '"Playfair Italic", serif' : 'serif';
 
   return new ImageResponse(
     (
