@@ -1,0 +1,19 @@
+# MHJ scope-guard 보호 파일 목록
+# 매 세션 시작 시 필요에 따라 편집
+# 빈 줄과 # 주석은 무시됨
+
+# Welcome Sequence (완료)
+lib/welcome-emails.ts
+app/api/subscribe/route.ts
+app/api/process-welcome-sequence/route.ts
+vercel.json
+
+# 댓글 시스템 (완료)
+app/(public)/blog/[slug]/CommentSection.tsx
+app/api/comments/route.ts
+
+# 푸터 리디자인 (완료)
+components/Footer.tsx
+
+# Admin 전체
+app/mhj-desk/
