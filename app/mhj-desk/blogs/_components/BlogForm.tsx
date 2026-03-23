@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase-browser';
 import type { Blog } from '@/lib/types';
 import { Upload, Loader2, Sparkles, Eye } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
+import { slugify as romanizeSlugify } from 'transliteration';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
@@ -75,12 +76,11 @@ function PublishChecklist({ form }: { form: Omit<Blog, 'id' | 'created_at'> }) {
 }
 
 function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
+  return romanizeSlugify(text, {
+    lowercase: true,
+    separator: '-',
+    ignore: [],
+  });
 }
 
 export default function BlogForm({ initial }: Props) {

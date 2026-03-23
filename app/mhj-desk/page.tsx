@@ -41,6 +41,9 @@ export default function AdminDashboard() {
   const [selectedFeaturedId, setSelectedFeaturedId] = useState<string>('');
   const [savingFeatured, setSavingFeatured] = useState(false);
   const [savedFeaturedId, setSavedFeaturedId] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     // 유저 이름
@@ -452,7 +455,7 @@ export default function AdminDashboard() {
                     <p style={{ fontSize: 11, color: '#94a3b8' }}>{act.sub}</p>
                   </div>
                   <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 600, flexShrink: 0, marginTop: 2 }}>
-                    {formatRelativeTime(act.time)}
+                    {mounted ? formatRelativeTime(act.time) : act.time.slice(0, 10).replace(/-/g, '.')}
                   </span>
                 </div>
               ))}

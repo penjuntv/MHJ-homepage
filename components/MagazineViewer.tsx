@@ -74,9 +74,10 @@ function EmptyPage({ magazine }: { magazine: Magazine }) {
 }
 
 /* ─── 기사 팝업 (Articles 모드용) ─── */
-function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
+function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor = '#2C1F14', bgColor = '#FDFBF8' }: {
   article: Article; onClose: () => void;
   liked: boolean; likeCount: number; onLike: () => void;
+  accentColor?: string; bgColor?: string;
 }) {
   const isImage = !!article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf');
   const isPdf = !!article.pdf_url && article.pdf_url.toLowerCase().includes('.pdf');
@@ -131,10 +132,10 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
       <div style={{ background: 'var(--bg-card)', borderRadius: 20, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         {/* 헤더 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #F1F5F9', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `2px solid ${accentColor}20`, flexShrink: 0 }}>
           <div>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, color: '#9C8B7A', textTransform: 'uppercase', margin: '0 0 3px' }}>{article.article_type || 'Article'} · {article.author}</p>
-            <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', margin: 0 }}>{article.title}</p>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, color: accentColor + '80', textTransform: 'uppercase', margin: '0 0 3px' }}>{article.article_type || 'Article'} · {article.author}</p>
+            <p style={{ fontSize: 15, fontWeight: 900, color: accentColor, margin: 0 }}>{article.title}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* 좋아요 버튼 */}
@@ -179,6 +180,8 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
                   content={article.content}
                   images={(article.article_images ?? []).filter(Boolean) as string[]}
                   captions={((article as Article & { image_captions?: string[] }).image_captions ?? [])}
+                  accentColor={accentColor}
+                  bgColor={bgColor}
                   hideTitle={false}
                 />
               )}
@@ -197,6 +200,8 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike }: {
                 content={pg.content}
                 images={(pg.images ?? []).filter(Boolean) as string[]}
                 captions={pg.captions ?? []}
+                accentColor={accentColor}
+                bgColor={bgColor}
                 hideTitle={true}
               />
             );
@@ -741,6 +746,8 @@ export default function MagazineViewer({ magazine, articles }: Props) {
           liked={likedArticles.has(selectedArticle.id)}
           likeCount={reactionCounts[selectedArticle.id]?.likes ?? 0}
           onLike={() => handleLike(selectedArticle.id)}
+          accentColor={magazine.accent_color ?? '#2C1F14'}
+          bgColor={magazine.bg_color ?? '#FDFBF8'}
         />
       )}
 

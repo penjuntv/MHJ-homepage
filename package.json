@@ -33,7 +33,8 @@
     "react": "^18",
     "react-dom": "^18",
     "react-pdf": "^10.4.1",
-    "sonner": "^2.0.7"
+    "sonner": "^2.0.7",
+    "transliteration": "^2.6.1"
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.99.2",

@@ -96,7 +96,7 @@ function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
         </div>
         <Link
           href="/magazine"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#4F46E5', textDecoration: 'none' }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: 'var(--accent)', textDecoration: 'none' }}
         >
           All Issues <ArrowRight size={14} />
         </Link>
@@ -110,7 +110,7 @@ function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
             href={`/magazine/${mag.id}`}
             className="mag-card"
             style={{
-              display: 'block', borderRadius: '24px', overflow: 'hidden',
+              display: 'block', borderRadius: '12px', overflow: 'hidden',
               textDecoration: 'none', background: 'var(--bg-card)',
               boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
               border: '1px solid var(--border)',
@@ -123,11 +123,9 @@ function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
               {/* 연도·월 뱃지 */}
               <div style={{ position: 'absolute', top: '16px', left: '16px' }}>
                 <span style={{
-                  background: 'rgba(255,255,255,0.15)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
+                  background: 'rgba(0,0,0,0.4)',
                   border: '1px solid rgba(255,255,255,0.25)',
-                  padding: '4px 12px', borderRadius: '999px',
+                  padding: '4px 12px', borderRadius: '4px',
                   fontSize: '9px', fontWeight: 900, letterSpacing: '3px',
                   textTransform: 'uppercase', color: 'white',
                 }}>
@@ -153,7 +151,7 @@ function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
                 }}>
                   📖 PDF
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', color: '#4F46E5' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--accent)' }}>
                   Open Edition <ArrowRight size={12} />
                 </span>
               </div>

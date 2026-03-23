@@ -23,8 +23,8 @@ export default function MagazineShelf({
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  /* null = 아무것도 호버 안 함 (기본 상태: 첫 번째 이슈만 약간 넓게) */
-  const [hovered, setHovered] = useState<number | null>(null);
+  /* 0 = 첫 진입 시 최신 이슈(첫 번째)가 기본 펼침 */
+  const [hovered, setHovered] = useState<number | null>(0);
   /* 클릭 애니메이션 중인 인덱스 */
   const [clicking, setClicking] = useState<number | null>(null);
   const router = useRouter();
@@ -67,7 +67,7 @@ export default function MagazineShelf({
     <div
       ref={outerRef}
       className="animate-fade-in"
-      style={{ display: 'flex', flexDirection: 'column', minHeight: '85vh', background: '#0a0a1a' }}
+      style={{ display: 'flex', flexDirection: 'column', minHeight: '85vh', background: 'var(--shelf-bg)' }}
     >
       {/* 헤더 */}
       <div style={{ padding: '40px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -110,10 +110,8 @@ export default function MagazineShelf({
 
             /* ── 너비 결정 ── */
             const width = isActive
-              ? 'clamp(300px, 40vw, 520px)'
-              : (!somethingHovered && index === 0)
-              ? 'clamp(100px, 10.4vw, 156px)'   /* 기본: 첫 이슈 ~30% 넓게 */
-              : 'clamp(80px, 8vw, 120px)';
+              ? 'clamp(320px, 38vw, 480px)'
+              : 'clamp(80px, 7vw, 100px)';
 
             /* ── 3D + 리프트 transform ── */
             const transform = isClicking
@@ -153,7 +151,7 @@ export default function MagazineShelf({
                   borderRight: isActive
                     ? '1px solid rgba(255,255,255,0.08)'
                     : '1px solid transparent',
-                  background: '#0d0d20',
+                  background: 'var(--shelf-item-bg)',
                   /* CSS 클래스 transition을 인라인으로 덮어씀 */
                   transition: [
                     'width 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -174,7 +172,7 @@ export default function MagazineShelf({
                         fill
                         className="object-cover"
                         style={{
-                          filter: isActive ? 'saturate(1.4) contrast(1.05) brightness(1.05)' : 'saturate(1.1) contrast(1.02) brightness(1.02)',
+                          filter: isActive ? 'brightness(1.05)' : 'brightness(1)',
                           transition: 'filter 0.6s',
                         }}
                       />
@@ -195,8 +193,8 @@ export default function MagazineShelf({
                       <div style={{
                         position: 'absolute', inset: 0,
                         background: isActive
-                          ? 'linear-gradient(160deg, #4338ca 0%, #1e1b4b 50%, #0a0a1a 100%)'
-                          : 'linear-gradient(160deg, #1e1b4b 0%, #0d0d20 100%)',
+                          ? 'linear-gradient(160deg, var(--shelf-gradient-accent) 0%, var(--shelf-gradient-from) 50%, var(--shelf-bg) 100%)'
+                          : 'linear-gradient(160deg, var(--shelf-gradient-from) 0%, var(--shelf-item-bg) 100%)',
                         transition: 'background 0.7s',
                       }} />
                       <div style={{
@@ -237,7 +235,7 @@ export default function MagazineShelf({
                       </span>
                       <span style={{
                         fontSize: 14, fontWeight: 900, color: 'white',
-                        textTransform: 'uppercase', background: '#4f46e5',
+                        textTransform: 'uppercase', background: 'rgba(255,255,255,0.15)',
                         padding: '2px 8px', borderRadius: 2,
                       }}>
                         {item.month_name}
@@ -287,11 +285,9 @@ export default function MagazineShelf({
                     <div style={{ maxWidth: 400 }}>
                       {/* 이슈 라벨 */}
                       <span style={{
-                        background: 'rgba(255,255,255,0.12)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
+                        background: 'rgba(0,0,0,0.4)',
                         border: '1px solid rgba(255,255,255,0.18)',
-                        padding: '6px 16px', borderRadius: 999,
+                        padding: '6px 16px', borderRadius: 4,
                         fontSize: 10, fontWeight: 900,
                         color: 'rgba(255,255,255,0.9)',
                         letterSpacing: 3, textTransform: 'uppercase',

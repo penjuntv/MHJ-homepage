@@ -26,6 +26,13 @@
   --overlay-bg:     rgba(255,255,255,0.95);
   --modal-bg:       rgba(255,255,255,0.4);
   --drop-cap-color: #CBD5E1;
+  --accent:         #4F46E5;
+
+  /* ── 매거진 서가 전용 ── */
+  --shelf-bg:             #0a0a1a;
+  --shelf-item-bg:        #0d0d20;
+  --shelf-gradient-from:  #1e1b4b;
+  --shelf-gradient-accent:#4338ca;
 
   /* ── 8px 그리드 디자인 베이스라인 ── */
   --section-v:      clamp(64px, 10vw, 120px);
@@ -57,6 +64,13 @@
   --overlay-bg:     rgba(10,10,10,0.97);
   --modal-bg:       rgba(0,0,0,0.7);
   --drop-cap-color: #475569;
+  --accent:         #4F46E5;
+
+  /* ── 매거진 서가 전용 (다크에서도 동일) ── */
+  --shelf-bg:             #0a0a1a;
+  --shelf-item-bg:        #0d0d20;
+  --shelf-gradient-from:  #1e1b4b;
+  --shelf-gradient-accent:#4338ca;
 }
 
 /* ─── 기본 설정 ─── */

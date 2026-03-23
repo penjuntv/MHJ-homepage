@@ -23,6 +23,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState('');
   const [focused, setFocused] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
@@ -33,6 +34,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
   }, [blogId]);
 
   useEffect(() => { fetchComments(); }, [fetchComments]);
+  useEffect(() => { setMounted(true); }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -287,7 +289,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
                     fontWeight: 600,
                     letterSpacing: 1,
                   }}>
-                    {timeAgo(c.created_at)}
+                    {mounted ? timeAgo(c.created_at) : c.created_at.slice(0, 10).replace(/-/g, '.')}
                   </p>
                 </div>
                 <p style={{
