@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'Mairangi Notes <onboarding@resend.dev>',
+      from: 'Yussi from MHJ <hello@mhj.nz>',
       to: body.test_email,
       subject: `[TEST] ${body.form.subject}`,
       html,

@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
       : htmlBody;
 
     return {
-      from: 'Mairangi Notes <onboarding@resend.dev>',
+      from: 'Yussi from MHJ <hello@mhj.nz>',
       to: r.email,
       subject,
       html,
