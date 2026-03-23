@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 가족의 이야기. 기자 출신 아빠, 석사 과정 엄마, 세 딸의 라이프 매거진.',
   keywords: ['뉴질랜드', '오클랜드', '노스쇼어', '마이랑이', 'Mairangi Bay', '가족', '육아', '이민', '뉴질랜드 생활'],
-  authors: [{ name: '조상목 (PeNnY)' }, { name: '유희종 (Heejong Jo)' }],
+  authors: [{ name: '조상목 (PeNnY)' }, { name: 'Yussi' }],
   creator: 'MY MAIRANGI',
   publisher: 'MY MAIRANGI',
   openGraph: {

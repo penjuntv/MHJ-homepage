@@ -75,11 +75,11 @@ export default function NewsletterCTA() {
           lineHeight: 1.7,
           marginBottom: 48,
         }}>
-          매주 금요일, Yussi가 보내는 위클리 매거진.
+          Every Friday, stories from our family in Mairangi Bay.
           <br />
           <span style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>
-            뉴질랜드 오클랜드 마이랑이 베이의 일상 · 육아 · 학교 · 동네 이야기.
-            스팸 없음. 언제든 해지 가능.
+            Life, school, and neighbourhood stories from Auckland&apos;s North Shore.
+            No spam. Unsubscribe anytime.
           </span>
         </p>
 
@@ -99,10 +99,10 @@ export default function NewsletterCTA() {
               margin: 0,
               lineHeight: 1.6,
             }}>
-              환영합니다!
+              You&apos;re in!
               <br />
               <span style={{ fontWeight: 500, color: 'var(--text-secondary)', fontSize: 14 }}>
-                다음 금요일에 첫 Mairangi Notes를 보내드릴게요.
+                Your first Mairangi Notes arrives next Friday.
               </span>
             </p>
           </div>
@@ -111,7 +111,7 @@ export default function NewsletterCTA() {
             {/* 이름 (선택) */}
             <input
               type="text"
-              placeholder="이름 (선택)"
+              placeholder="Name (optional)"
               value={name}
               onChange={(e) => setName(e.target.value)}
               style={{
@@ -170,19 +170,19 @@ export default function NewsletterCTA() {
                   flexShrink: 0,
                 }}
               >
-                {status === 'loading' ? '...' : '구독'}
+                {status === 'loading' ? '...' : 'Subscribe'}
               </button>
             </div>
 
             {/* 피드백 메시지 */}
             {status === 'duplicate' && (
               <p style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
-                이미 구독 중입니다 — 고맙습니다!
+                Already subscribed
               </p>
             )}
             {status === 'error' && (
               <p style={{ fontSize: 13, color: '#ef4444', textAlign: 'center', margin: 0 }}>
-                오류가 발생했습니다. 다시 시도해 주세요.
+                Something went wrong. Please try again.
               </p>
             )}
           </form>

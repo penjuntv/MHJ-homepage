@@ -31,10 +31,10 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
   return {
     title,
-    description: '유희종(Heejong Jo)의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
+    description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
     openGraph: {
       title: `${title} — MY MAIRANGI`,
-      description: '유희종의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
+      description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
       url: canonical.toString(),
       images: [{ url: 'https://mhj-homepage.vercel.app/og-blog.jpg', width: 1200, height: 630 }],
     },
@@ -159,9 +159,9 @@ export default async function BlogPage({ searchParams }: Props) {
     '@type': 'Blog',
     name: 'MY MAIRANGI Blog Library',
     url: 'https://mhj-homepage.vercel.app/blog',
-    description: '유희종(Heejong Jo)의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
+    description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
     inLanguage: 'ko',
-    author: { '@type': 'Person', name: '유희종 (Heejong Jo)' },
+    author: { '@type': 'Person', name: 'Yussi' },
     publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: 'https://mhj-homepage.vercel.app' },
     blogPost: paginated.blogs.slice(0, 10).map((b) => ({
       '@type': 'BlogPosting',

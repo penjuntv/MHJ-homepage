@@ -94,8 +94,8 @@ export default function Navigation({ siteName, siteSubtitle, socialInstagram, co
               {siteName || 'MY MAIRANGI'}
             </span>
             <span
-              className="font-black uppercase"
-              style={{ fontSize: '8px', letterSpacing: '4px', color: 'var(--text-tertiary)' }}
+              className="uppercase"
+              style={{ fontSize: '9px', letterSpacing: '3px', color: 'var(--text-tertiary)', fontWeight: 500 }}
             >
               {siteSubtitle || 'Family Archive'}
             </span>
