@@ -281,17 +281,19 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '55vh', objectFit: 'contain', background: '#F5F0EB' }} />
               ) : (
-                <ArticlePageRenderer
-                  template={article.template ?? 'classic'}
-                  title={article.title}
-                  author={article.author}
-                  content={article.content}
-                  images={(article.article_images ?? []).filter(Boolean) as string[]}
-                  captions={((article as Article & { image_captions?: string[] }).image_captions ?? [])}
-                  accentColor={accentColor}
-                  bgColor={bgColor}
-                  hideTitle={false}
-                />
+                <div style={{ width: 420, minHeight: 594, margin: '0 auto', background: bgColor }}>
+                  <ArticlePageRenderer
+                    template={article.template ?? 'classic'}
+                    title={article.title}
+                    author={article.author}
+                    content={article.content}
+                    images={(article.article_images ?? []).filter(Boolean) as string[]}
+                    captions={((article as Article & { image_captions?: string[] }).image_captions ?? [])}
+                    accentColor={accentColor}
+                    bgColor={bgColor}
+                    hideTitle={false}
+                  />
+                </div>
               )}
             </>
           )}
@@ -301,17 +303,19 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
             const pg = extraPages[currentPage - 2];
             if (!pg) return null;
             return (
-              <ArticlePageRenderer
-                template={pg.template ?? article.template ?? 'classic'}
-                title={article.title}
-                author={article.author}
-                content={pg.content}
-                images={(pg.images ?? []).filter(Boolean) as string[]}
-                captions={pg.captions ?? []}
-                accentColor={accentColor}
-                bgColor={bgColor}
-                hideTitle={true}
-              />
+              <div style={{ width: 420, minHeight: 594, margin: '0 auto', background: bgColor }}>
+                <ArticlePageRenderer
+                  template={pg.template ?? article.template ?? 'classic'}
+                  title={article.title}
+                  author={article.author}
+                  content={pg.content}
+                  images={(pg.images ?? []).filter(Boolean) as string[]}
+                  captions={pg.captions ?? []}
+                  accentColor={accentColor}
+                  bgColor={bgColor}
+                  hideTitle={true}
+                />
+              </div>
             );
           })()}
 

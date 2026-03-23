@@ -21,7 +21,6 @@ import PhotoHeroTemplate   from '@/components/magazine/templates/PhotoHeroTempla
 import ClassicTemplate     from '@/components/magazine/templates/ClassicTemplate';
 import PhotoEssayTemplate  from '@/components/magazine/templates/PhotoEssayTemplate';
 import Story2Template      from '@/components/magazine/templates/Story2Template';
-import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import TextOnlyTemplate    from '@/components/magazine/templates/TextOnlyTemplate';
 import SplitTemplate       from '@/components/magazine/templates/SplitTemplate';
 import type { ArticlePreviewData } from '@/components/magazine/templates/shared';
@@ -847,31 +846,28 @@ export default function MagazineDetailPage() {
                     )}
                   </div>
 
-                  {/* 현재 포커스 페이지 미리보기 (라이브 뷰 스타일) */}
+                  {/* 현재 포커스 페이지 미리보기 (템플릿 기반) */}
                   {focusedPageIdx === null ? (
                     <div ref={previewDivRef} style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden', background: 'white' }}>
-                      <ArticlePageRenderer
-                        template={inlineForm.template}
-                        title={inlineForm.title}
-                        author={inlineForm.author}
-                        content={inlineForm.content}
-                        images={(inlineForm.article_images ?? []).filter(Boolean)}
-                        captions={[]}
-                        accentColor={accentCol}
-                      />
+                      {renderTemplate(inlineForm.template, {
+                        title: inlineForm.title,
+                        author: inlineForm.author,
+                        content: inlineForm.content,
+                        article_images: (inlineForm.article_images ?? []).filter(Boolean),
+                        image_url: '',
+                        template: inlineForm.template,
+                      } as ArticlePreviewData, accentCol, bgCol)}
                     </div>
                   ) : focusedExtraPage ? (
                     <div style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden', background: 'white' }}>
-                      <ArticlePageRenderer
-                        template={focusedExtraPage.template}
-                        title={inlineForm.title}
-                        author={inlineForm.author}
-                        content={focusedExtraPage.content}
-                        images={(focusedExtraPage.images ?? []).filter(Boolean)}
-                        captions={focusedExtraPage.captions ?? []}
-                        accentColor={accentCol}
-                        hideTitle={true}
-                      />
+                      {renderTemplate(focusedExtraPage.template ?? inlineForm.template, {
+                        title: inlineForm.title,
+                        author: inlineForm.author,
+                        content: focusedExtraPage.content,
+                        article_images: (focusedExtraPage.images ?? []).filter(Boolean),
+                        image_url: '',
+                        template: focusedExtraPage.template ?? inlineForm.template,
+                      } as ArticlePreviewData, accentCol, bgCol, true)}
                     </div>
                   ) : null}
 
