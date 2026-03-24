@@ -1,7 +1,14 @@
+import type { Metadata } from 'next';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import InstagramFeed from '@/components/InstagramFeed';
 import { getSiteSettings } from '@/lib/site-settings';
+
+export const metadata: Metadata = {
+  verification: {
+    google: 'qC-Rqu96p3i9Vyzi3IUnWpfOIzoQDBVu1fZHX40aAOg',
+  },
+};
 
 export const dynamic = 'force-dynamic';
 
