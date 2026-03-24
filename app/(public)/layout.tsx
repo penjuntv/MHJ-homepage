@@ -3,6 +3,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import InstagramFeed from '@/components/InstagramFeed';
 import { getSiteSettings } from '@/lib/site-settings';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export const metadata: Metadata = {
   verification: {
@@ -53,6 +54,7 @@ export default async function PublicLayout({
         socialYoutube={s.social_youtube}
         socialThreads={s.social_threads}
       />
+      <GoogleAnalytics gaId="G-326N3JJFGN" />
     </>
   );
 }
