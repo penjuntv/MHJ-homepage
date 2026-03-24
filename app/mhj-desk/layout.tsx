@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase-browser';
 import {
   LayoutDashboard, FileText, BookOpen, Settings, Palette,
   LogOut, ExternalLink, Images, MessageCircle, Users,
-  SearchCheck, LayoutList, Menu, Layers,
+  SearchCheck, LayoutList, Menu, Layers, BarChart3, Search, Link2,
 } from 'lucide-react';
 
 type NavItem = { type: 'item'; href: string; label: string; icon: React.ElementType; exact?: boolean; badge?: 'comments' | 'blogs' };
@@ -32,6 +32,7 @@ const NAV: NavEntry[] = [
   { type: 'group', label: '커뮤니티' },
   { type: 'item', href: '/mhj-desk/comments', label: '댓글', icon: MessageCircle, badge: 'comments' },
   { type: 'item', href: '/mhj-desk/subscribers', label: '구독자', icon: Users },
+  { type: 'item', href: '/mhj-desk/affiliates', label: '어필리에이트', icon: Link2 },
 
   { type: 'group', label: '설정' },
   { type: 'item', href: '/mhj-desk/family', label: '패밀리', icon: Users },
@@ -196,7 +197,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* 하단 */}
         <div style={{ padding: '12px 10px 24px', display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
-          <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 4px 8px' }} />
+          <span style={GROUP_LABEL_STYLE}>외부 도구</span>
+          <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer" style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '10px 14px', borderRadius: 10, textDecoration: 'none',
+            color: 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 700,
+          }}>
+            <BarChart3 size={14} /> Analytics
+          </a>
+          <a href="https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.mhj.nz" target="_blank" rel="noopener noreferrer" style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '10px 14px', borderRadius: 10, textDecoration: 'none',
+            color: 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 700,
+          }}>
+            <Search size={14} /> Search Console
+          </a>
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '8px 4px' }} />
           <Link href="https://mhj-homepage.vercel.app" target="_blank" rel="noopener noreferrer" style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 14px', borderRadius: 10, textDecoration: 'none',
