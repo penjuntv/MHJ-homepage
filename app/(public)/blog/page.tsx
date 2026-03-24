@@ -6,6 +6,8 @@ import { getSiteSettings } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 const PAGE_SIZE = 20;
 const VALID_CATEGORIES = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
 const CATEGORY_ORDER = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
@@ -25,7 +27,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   ].filter(Boolean).join(' — ');
 
   const title = suffix ? `Blog — ${suffix}` : 'Blog Library';
-  const canonical = new URL('https://mhj-homepage.vercel.app/blog');
+  const canonical = new URL(`${SITE_URL}/blog`);
   if (category) canonical.searchParams.set('category', category);
   if (page > 1) canonical.searchParams.set('page', String(page));
 
@@ -36,7 +38,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       title: `${title} — MY MAIRANGI`,
       description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
       url: canonical.toString(),
-      images: [{ url: 'https://mhj-homepage.vercel.app/og-blog.jpg', width: 1200, height: 630 }],
+      images: [{ url: `${SITE_URL}/og-blog.jpg`, width: 1200, height: 630 }],
     },
     alternates: { canonical: canonical.toString() },
   };
@@ -149,7 +151,7 @@ export default async function BlogPage({ searchParams }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'Blog' },
     ],
   };
@@ -158,17 +160,17 @@ export default async function BlogPage({ searchParams }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Blog',
     name: 'MY MAIRANGI Blog Library',
-    url: 'https://mhj-homepage.vercel.app/blog',
+    url: `${SITE_URL}/blog`,
     description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
     inLanguage: 'ko',
     author: { '@type': 'Person', name: 'Yussi' },
-    publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: 'https://mhj-homepage.vercel.app' },
+    publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: SITE_URL },
     blogPost: paginated.blogs.slice(0, 10).map((b) => ({
       '@type': 'BlogPosting',
       headline: b.title,
       author: { '@type': 'Person', name: b.author },
       datePublished: b.date,
-      url: `https://mhj-homepage.vercel.app/blog/${b.slug}`,
+      url: `${SITE_URL}/blog/${b.slug}`,
       image: b.og_image_url || b.image_url,
       description: b.meta_description || b.content.slice(0, 120),
       keywords: b.category,
@@ -176,7 +178,7 @@ export default async function BlogPage({ searchParams }: Props) {
   };
 
   // prev/next links
-  const canonical = new URL('https://mhj-homepage.vercel.app/blog');
+  const canonical = new URL(`${SITE_URL}/blog`);
   if (category) canonical.searchParams.set('category', category);
 
   const prevUrl = page > 1 ? (() => {

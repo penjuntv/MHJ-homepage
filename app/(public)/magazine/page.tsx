@@ -10,16 +10,18 @@ import { getSiteSettings } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 export const metadata: Metadata = {
   title: 'Magazine',
   description: '뉴질랜드 마이랑이 가족의 월간 라이프 매거진. 매달 새로운 이슈로 기록하는 오클랜드 노스쇼어의 일상.',
   openGraph: {
     title: 'Magazine — MY MAIRANGI',
     description: '뉴질랜드 마이랑이 가족의 월간 라이프 매거진.',
-    url: 'https://mhj-homepage.vercel.app/magazine',
-    images: [{ url: 'https://mhj-homepage.vercel.app/og-magazine.jpg', width: 1200, height: 630 }],
+    url: `${SITE_URL}/magazine`,
+    images: [{ url: `${SITE_URL}/og-magazine.jpg`, width: 1200, height: 630 }],
   },
-  alternates: { canonical: 'https://mhj-homepage.vercel.app/magazine' },
+  alternates: { canonical: `${SITE_URL}/magazine` },
 };
 
 const FALLBACK_MAGAZINES: Magazine[] = [
@@ -60,7 +62,7 @@ export default async function MagazinePage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'Magazine' },
     ],
   };

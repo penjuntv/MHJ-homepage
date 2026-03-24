@@ -5,7 +5,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from 'sonner';
 
-const BASE_URL = 'https://mhj-homepage.vercel.app';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 const OG_IMAGE = `${BASE_URL}/og-default.jpg`;
 
 export const metadata: Metadata = {
@@ -46,13 +46,11 @@ export const metadata: Metadata = {
   },
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mhj-homepage.vercel.app';
-
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'MY MAIRANGI',
-  url: SITE_URL,
+  url: BASE_URL,
   description: 'A family life magazine from Mairangi Bay, Auckland',
   address: {
     '@type': 'PostalAddress',
@@ -90,7 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="alternate"
           type="application/rss+xml"
           title="MY MAIRANGI — RSS Feed"
-          href="https://mhj-homepage.vercel.app/feed.xml"
+          href={`${BASE_URL}/feed.xml`}
         />
       </head>
       <body>

@@ -7,16 +7,18 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 
 export const dynamic = 'force-dynamic';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 export const metadata: Metadata = {
   title: 'About',
   description: '뉴질랜드 마이랑이 베이에 사는 한국인 가족 이야기. 기자 출신 아빠 조상목, 사회복지 석사 엄마 유희종, 그리고 세 딸 유민·유현·유진.',
   openGraph: {
     title: 'About — MY MAIRANGI',
     description: '뉴질랜드 마이랑이 베이에 사는 한국인 가족 이야기.',
-    url: 'https://mhj-homepage.vercel.app/about',
-    images: [{ url: 'https://mhj-homepage.vercel.app/og-about.jpg', width: 1200, height: 630 }],
+    url: `${SITE_URL}/about`,
+    images: [{ url: `${SITE_URL}/og-about.jpg`, width: 1200, height: 630 }],
   },
-  alternates: { canonical: 'https://mhj-homepage.vercel.app/about' },
+  alternates: { canonical: `${SITE_URL}/about` },
 };
 
 const FALLBACK_MEMBERS: FamilyMember[] = [
@@ -77,7 +79,7 @@ export default async function AboutPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'About' },
     ],
   };

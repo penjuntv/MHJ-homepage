@@ -4,14 +4,16 @@ import StoryPressClient from './StoryPressClient';
 
 export const dynamic = 'force-dynamic';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 export const metadata: Metadata = {
   title: 'StoryPress — 4 Words a Day, One Storybook at a Time | MY MAIRANGI',
   description: 'Your child meets 4 new English words a day, creates a story page, and builds a real storybook — with their name on the cover. For ESOL families in Auckland and beyond.',
   openGraph: {
     title: 'StoryPress — 4 Words a Day, One Storybook at a Time',
     description: '4 words a day. A story page tonight. A real book by the end of the month — with your child\'s name on the cover.',
-    url: 'https://mhj-homepage.vercel.app/storypress',
-    images: [{ url: 'https://mhj-homepage.vercel.app/og-storypress.jpg', width: 1200, height: 630, alt: 'StoryPress' }],
+    url: `${SITE_URL}/storypress`,
+    images: [{ url: `${SITE_URL}/og-storypress.jpg`, width: 1200, height: 630, alt: 'StoryPress' }],
     type: 'website',
   },
   twitter: {
@@ -19,7 +21,7 @@ export const metadata: Metadata = {
     title: 'StoryPress — 4 Words a Day, One Storybook at a Time',
     description: 'Your child meets 4 new English words a day and builds a real storybook.',
   },
-  alternates: { canonical: 'https://mhj-homepage.vercel.app/storypress' },
+  alternates: { canonical: `${SITE_URL}/storypress` },
 };
 
 export default async function StoryPressPage() {
@@ -29,7 +31,7 @@ export default async function StoryPressPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'StoryPress' },
     ],
   };
@@ -41,8 +43,8 @@ export default async function StoryPressPage() {
     applicationCategory: 'EducationalApplication',
     operatingSystem: 'iOS, Android',
     description: 'An English storybook app for children aged 3–8. Every day, 4 new words — a story page — a real book by the end of 10 days.',
-    url: 'https://mhj-homepage.vercel.app/storypress',
-    author: { '@type': 'Organization', name: 'MY MAIRANGI', url: 'https://mhj-homepage.vercel.app' },
+    url: `${SITE_URL}/storypress`,
+    author: { '@type': 'Organization', name: 'MY MAIRANGI', url: SITE_URL },
     audience: { '@type': 'Audience', audienceType: 'Children aged 3–8, ESOL families, bilingual families' },
     inLanguage: ['en', 'ko'],
   };

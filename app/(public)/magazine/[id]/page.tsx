@@ -43,12 +43,14 @@ async function getArticles(magazineId: string): Promise<Article[]> {
   return magazineId === '2026-03' ? FALLBACK_ARTICLES : [];
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const magazine = await getMagazine(params.id);
   if (!magazine) return {};
   const title = `${magazine.title} — ${magazine.year} ${magazine.month_name}`;
   const description = `MY MAIRANGI ${magazine.year} ${magazine.month_name} Edition. Editor: ${magazine.editor}. 뉴질랜드 마이랑이 가족의 월간 매거진.`;
-  const url = `https://mhj-homepage.vercel.app/magazine/${params.id}`;
+  const url = `${SITE_URL}/magazine/${params.id}`;
   return {
     title,
     description,
@@ -74,8 +76,8 @@ export default async function MagazineIssuePage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
-      { '@type': 'ListItem', position: 2, name: 'Magazine', item: 'https://mhj-homepage.vercel.app/magazine' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Magazine', item: `${SITE_URL}/magazine` },
       { '@type': 'ListItem', position: 3, name: magazine.title },
     ],
   };
@@ -86,9 +88,9 @@ export default async function MagazineIssuePage({ params }: Props) {
     name: magazine.title,
     issueNumber: `${magazine.year}-${magazine.month_name}`,
     datePublished: magazine.created_at ?? `${magazine.year}`,
-    publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: 'https://mhj-homepage.vercel.app' },
+    publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: SITE_URL },
     image: magazine.image_url,
-    url: `https://mhj-homepage.vercel.app/magazine/${params.id}`,
+    url: `${SITE_URL}/magazine/${params.id}`,
     hasPart: articles.map((a) => ({
       '@type': 'Article',
       name: a.title,

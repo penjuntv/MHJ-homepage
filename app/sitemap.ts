@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://mhj-homepage.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
   // 정적 페이지
   const staticPages: MetadataRoute.Sitemap = [

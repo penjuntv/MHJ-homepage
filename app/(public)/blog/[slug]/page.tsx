@@ -24,6 +24,8 @@ async function getBlogForPreview(slug: string): Promise<Blog | null> {
 
 export const dynamic = 'force-dynamic';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 async function getAdjacentBlogs(currentId: number): Promise<{
   prev: { id: number; title: string; slug: string } | null;
   next: { id: number; title: string; slug: string } | null;
@@ -107,7 +109,7 @@ export async function generateMetadata({
   const plainText = blog.content.replace(/<[^>]*>/g, '');
   const description = blog.meta_description || plainText.slice(0, 160);
 
-  const baseUrl = 'https://mhj-homepage.vercel.app';
+  const baseUrl = SITE_URL;
   const ogImage = blog.og_image_url
     ? blog.og_image_url
     : `${baseUrl}/api/og?title=${encodeURIComponent(blog.title)}&category=${encodeURIComponent(blog.category)}&date=${encodeURIComponent(blog.date)}`;
@@ -158,8 +160,8 @@ export default async function BlogDetailPage({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://mhj-homepage.vercel.app/blog' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE_URL}/blog` },
       { '@type': 'ListItem', position: 3, name: blog.title },
     ],
   };
@@ -170,7 +172,7 @@ export default async function BlogDetailPage({
     headline: blog.title,
     author: { '@type': 'Person', name: blog.author },
     datePublished: blog.date,
-    url: `https://mhj-homepage.vercel.app/blog/${blog.slug}`,
+    url: `${SITE_URL}/blog/${blog.slug}`,
     image: blog.og_image_url || blog.image_url,
     description: blog.meta_description || plainText.slice(0, 160),
     keywords: blog.category,
@@ -178,7 +180,7 @@ export default async function BlogDetailPage({
     publisher: {
       '@type': 'Organization',
       name: 'MY MAIRANGI',
-      url: 'https://mhj-homepage.vercel.app',
+      url: SITE_URL,
     },
   };
 
@@ -551,7 +553,7 @@ export default async function BlogDetailPage({
 
               <ShareButton
                 title={blog.title}
-                url={`https://mhj-homepage.vercel.app/blog/${blog.slug}`}
+                url={`${SITE_URL}/blog/${blog.slug}`}
                 description={blog.meta_description || plainText.slice(0, 160)}
               />
             </footer>

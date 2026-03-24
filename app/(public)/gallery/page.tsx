@@ -6,16 +6,18 @@ import GalleryClient from './GalleryClient';
 
 export const dynamic = 'force-dynamic';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 export const metadata: Metadata = {
   title: 'Photo Gallery',
   description: '마이랑이 베이에서 담아낸 우리 가족의 순간들.',
   openGraph: {
     title: 'Photo Gallery — MY MAIRANGI',
     description: '마이랑이 베이에서 담아낸 우리 가족의 순간들.',
-    url: 'https://mhj-homepage.vercel.app/gallery',
-    images: [{ url: 'https://mhj-homepage.vercel.app/og-gallery.jpg', width: 1200, height: 630 }],
+    url: `${SITE_URL}/gallery`,
+    images: [{ url: `${SITE_URL}/og-gallery.jpg`, width: 1200, height: 630 }],
   },
-  alternates: { canonical: 'https://mhj-homepage.vercel.app/gallery' },
+  alternates: { canonical: `${SITE_URL}/gallery` },
 };
 
 async function getGallery(): Promise<GalleryItem[]> {
@@ -35,7 +37,7 @@ export default async function GalleryPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'Gallery' },
     ],
   };

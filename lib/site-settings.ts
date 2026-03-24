@@ -24,7 +24,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   blog_description: '사회복지사 석사 과정과 일상을 기록하는 희종의 개인 서재입니다.',
   footer_description: '뉴질랜드 오클랜드 노스쇼어\n마이랑이 베이에서 기록하는\n우리 가족의 이야기',
   contact_location: 'Mairangi Bay, Auckland, New Zealand',
-  contact_email: 'sangmok.jo@email.com',
+  contact_email: 'hello@mhj.nz',
   magazine_title: 'Magazine Shelf',
   magazine_hint: 'Scroll to explore',
   storypress_title: 'StoryPress',

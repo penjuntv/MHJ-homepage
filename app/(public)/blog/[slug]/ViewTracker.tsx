@@ -11,10 +11,9 @@ export default function ViewTracker({ slug }: { slug: string }) {
 
     (async () => {
       try {
-        const { error } = await supabase.rpc('increment_view_count', { blog_slug: slug });
-        if (error) console.warn('View count RPC error:', error);
-      } catch (e) {
-        console.warn('View count RPC failed:', e);
+        await supabase.rpc('increment_view_count', { blog_slug: slug });
+      } catch {
+        // ignore view count failures silently
       }
     })();
   }, [slug]);

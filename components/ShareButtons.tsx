@@ -8,7 +8,7 @@ interface ShareButtonsProps {
   slug: string;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://mhj-homepage.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mhj.nz';
 
 export default function ShareButtons({ title, slug }: ShareButtonsProps) {
   const url = `${SITE_URL}/blog/${slug}`;

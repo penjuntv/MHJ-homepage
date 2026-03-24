@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
-const BASE_URL = 'https://mhj-homepage.vercel.app';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 function escapeXml(str: string): string {
   return str

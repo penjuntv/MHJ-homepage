@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
                 letterSpacing: '2px',
               }}
             >
-              mhj-homepage.vercel.app
+              www.mhj.nz
             </div>
           </div>
 

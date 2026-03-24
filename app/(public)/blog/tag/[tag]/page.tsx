@@ -7,12 +7,14 @@ import type { Blog } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURIComponent(params.tag);
   return {
     title: `Posts tagged #${tag} | MY MAIRANGI`,
     description: `Posts tagged #${tag} on MY MAIRANGI`,
-    alternates: { canonical: `https://mhj-homepage.vercel.app/blog/tag/${tag}` },
+    alternates: { canonical: `${SITE_URL}/blog/tag/${tag}` },
   };
 }
 
@@ -34,8 +36,8 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mhj-homepage.vercel.app' },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://mhj-homepage.vercel.app/blog' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE_URL}/blog` },
       { '@type': 'ListItem', position: 3, name: `Tag: ${tag}` },
     ],
   };

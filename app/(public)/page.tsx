@@ -12,16 +12,18 @@ import { getSiteSettings } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 export const metadata: Metadata = {
   title: 'MY MAIRANGI — Family Archive',
   description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진. 기자 출신 아빠, 사회복지 석사 엄마, 세 딸의 이야기.',
   openGraph: {
     title: 'MY MAIRANGI — Family Archive',
     description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진.',
-    url: 'https://mhj-homepage.vercel.app',
-    images: [{ url: 'https://mhj-homepage.vercel.app/og-default.jpg', width: 1200, height: 630, alt: 'MY MAIRANGI Family Archive' }],
+    url: SITE_URL,
+    images: [{ url: `${SITE_URL}/og-default.jpg`, width: 1200, height: 630, alt: 'MY MAIRANGI Family Archive' }],
   },
-  alternates: { canonical: 'https://mhj-homepage.vercel.app' },
+  alternates: { canonical: SITE_URL },
 };
 
 const FALLBACK_HERO_BLOGS: Blog[] = [
@@ -191,18 +193,18 @@ export default async function LandingPage() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'MY MAIRANGI',
-    url: 'https://mhj-homepage.vercel.app',
+    url: SITE_URL,
     description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진.',
     inLanguage: 'ko',
     publisher: {
       '@type': 'Organization',
       name: 'MY MAIRANGI',
-      url: 'https://mhj-homepage.vercel.app',
-      sameAs: ['https://mhj-homepage.vercel.app/about'],
+      url: SITE_URL,
+      sameAs: [`${SITE_URL}/about`],
     },
     potentialAction: {
       '@type': 'ReadAction',
-      target: ['https://mhj-homepage.vercel.app/blog', 'https://mhj-homepage.vercel.app/magazine'],
+      target: [`${SITE_URL}/blog`, `${SITE_URL}/magazine`],
     },
   };
 
