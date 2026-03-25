@@ -27,10 +27,12 @@ const AFFILIATE_PROGRAMS = [
 function toSlug(title: string): string {
   return title
     .toLowerCase()
+    .replace(/['']/g, '')
     .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/[\s]+/g, '-')
+    .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/^-|-$/g, '')
+    .slice(0, 50);
 }
 
 const BLANK = { slug: '', destination_url: '', title: '', program: '' };
@@ -190,7 +192,8 @@ export default function AffiliatesPage() {
         <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: '#94A3B8', margin: '0 0 14px' }}>
           {editId !== null ? '링크 수정' : '새 링크 추가'}
         </p>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+        {/* Row 1: 제목 + 프로그램 */}
+        <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
           <input
             type="text"
             value={form.title}
@@ -199,58 +202,69 @@ export default function AffiliatesPage() {
               setForm(f => ({ ...f, title, slug: toSlug(title) }));
             }}
             placeholder="제목 (예: Montessori 카드 세트) *"
-            style={{ ...IS, maxWidth: 320 }}
+            style={{ ...IS, height: 44, boxSizing: 'border-box' }}
           />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+          <select
+            value={form.program}
+            onChange={e => setForm(f => ({ ...f, program: e.target.value }))}
+            style={{ ...IS, flex: 'none', width: 180, height: 44, boxSizing: 'border-box', cursor: 'pointer' }}
+          >
+            <option value="">프로그램 선택</option>
+            {AFFILIATE_PROGRAMS.map(p => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Row 1-b: 기타 프로그램 직접 입력 */}
+        {form.program === 'other' && (
+          <div style={{ marginBottom: 10 }}>
             <input
               type="text"
-              value={form.slug}
-              onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
-placeholder="슬러그 (자동 생성) *"
-              disabled={editId !== null}
-              style={{ ...IS, maxWidth: 260, opacity: editId !== null ? 0.5 : 1 }}
+              value={programOther}
+              onChange={e => setProgramOther(e.target.value)}
+              placeholder="프로그램명 직접 입력"
+              style={{ ...IS, height: 44, boxSizing: 'border-box', maxWidth: 240 }}
             />
-            <span style={{ fontSize: 11, color: '#94a3b8', paddingLeft: 2 }}>
+          </div>
+        )}
+
+        {/* Row 2: 슬러그 */}
+        <div style={{ marginBottom: 10 }}>
+          <input
+            type="text"
+            value={form.slug}
+            onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
+            placeholder="슬러그 (자동 생성) *"
+            disabled={editId !== null}
+            style={{ ...IS, height: 44, boxSizing: 'border-box', background: '#F1F5F9', opacity: editId !== null ? 0.5 : 1 }}
+          />
+          <div style={{ marginTop: 4, paddingLeft: 2 }}>
+            <span style={{ fontSize: 11, color: '#94a3b8' }}>
               mhj.nz/go/{form.slug || '…'}
             </span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <select
-              value={form.program}
-              onChange={e => setForm(f => ({ ...f, program: e.target.value }))}
-              style={{ ...IS, maxWidth: 200, cursor: 'pointer' }}
-            >
-              <option value="">프로그램 선택</option>
-              {AFFILIATE_PROGRAMS.map(p => (
-                <option key={p.value} value={p.value}>{p.label}</option>
-              ))}
-            </select>
-            {form.program === 'other' && (
-              <input
-                type="text"
-                value={programOther}
-                onChange={e => setProgramOther(e.target.value)}
-                placeholder="프로그램명 직접 입력"
-                style={{ ...IS, maxWidth: 200 }}
-              />
-            )}
+            <span style={{ fontSize: 11, color: '#f59e0b', fontStyle: 'italic', marginLeft: 12 }}>
+              Pro tip: 제품명 대신 검색 키워드를 넣으세요 (예: best-school-sneakers, kids-tablet)
+            </span>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+
+        {/* Row 3: URL + 버튼 */}
+        <div style={{ display: 'flex', gap: 10 }}>
           <input
             type="url"
             value={form.destination_url}
             onChange={e => setForm(f => ({ ...f, destination_url: e.target.value }))}
             placeholder="목적지 URL (https://...) *"
-            style={{ ...IS }}
+            style={{ ...IS, height: 44, boxSizing: 'border-box' }}
           />
           <button
             onClick={save}
             disabled={saving}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
-              padding: '11px 22px', borderRadius: 12, border: 'none',
-              background: '#1a1a1a', color: 'white',
+              height: 44, padding: '0 22px', borderRadius: 12, border: 'none',
+              background: '#1a1a1a', color: 'white', boxSizing: 'border-box',
               fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
               opacity: saving ? 0.7 : 1, flexShrink: 0,
             }}
@@ -263,8 +277,8 @@ placeholder="슬러그 (자동 생성) *"
               onClick={cancelEdit}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 7,
-                padding: '11px 18px', borderRadius: 12, border: '1px solid #E2E8F0',
-                background: 'white', color: '#64748b',
+                height: 44, padding: '0 18px', borderRadius: 12, border: '1px solid #E2E8F0',
+                background: 'white', color: '#64748b', boxSizing: 'border-box',
                 fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0,
               }}
             >
