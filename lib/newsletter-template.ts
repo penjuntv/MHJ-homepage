@@ -228,6 +228,13 @@ export interface MailrangiNotesData {
     title: string;
     body: string;
   };
+  sponsor?: {                 // §4.5 Partner Spotlight
+    label?: string;           // 기본값 "PARTNER SPOTLIGHT"
+    name: string;
+    url?: string;
+    image?: string;
+    body: string;
+  };
   jin?: {                     // §5 English with Jin
     expression: string;
     body: string;
@@ -377,6 +384,53 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
           ${formatText(data.campus.body)}
         </p>
       </div>
+    </td>
+  </tr>`
+    : '';
+
+  /* ── §4.5 Partner Spotlight ── */
+  const sectionSponsor = data.sponsor
+    ? `${sep()}
+  <tr>
+    <td style="padding:32px 40px 28px;">
+      <p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:10px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:#9ca3af;">
+        ${escapeHtml(data.sponsor.label ?? 'PARTNER SPOTLIGHT')}
+      </p>
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#faf8f5;border-radius:12px;overflow:hidden;">
+        ${data.sponsor.image
+          ? `<tr>
+               <td style="padding:0;line-height:0;">
+                 <img src="${escapeHtml(data.sponsor.image)}" alt="${escapeHtml(data.sponsor.name)}" width="100%"
+                      style="display:block;width:100%;max-height:200px;object-fit:cover;border-radius:12px 12px 0 0;border:0;" />
+               </td>
+             </tr>`
+          : ''}
+        <tr>
+          <td style="padding:20px 24px;">
+            <p style="margin:0 0 8px;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:18px;font-weight:700;color:#1a1a1a;">
+              ${escapeHtml(data.sponsor.name)}
+            </p>
+            <p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:14px;font-weight:500;line-height:1.65;color:#4b5563;">
+              ${formatText(data.sponsor.body)}
+            </p>
+            ${data.sponsor.url
+              ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                   <tr>
+                     <td style="background:#1a1a1a;border-radius:6px;">
+                       <a href="${escapeHtml(data.sponsor.url)}" target="_blank"
+                          style="display:inline-block;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#ffffff;text-decoration:none;padding:8px 20px;">
+                         Learn more &rarr;
+                       </a>
+                     </td>
+                   </tr>
+                 </table>`
+              : ''}
+          </td>
+        </tr>
+      </table>
+      <p style="margin:12px 0 0;font-family:Arial,sans-serif;font-size:10px;font-weight:500;color:#d4d0c8;text-align:center;">
+        This section is sponsored. MHJ only partners with brands we genuinely recommend.
+      </p>
     </td>
   </tr>`
     : '';
@@ -609,6 +663,7 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
           ${section2}
           ${section3}
           ${section4}
+          ${sectionSponsor}
           ${section5}
           ${section6}
           ${section7}

@@ -257,6 +257,15 @@ export default function NewsletterComposePage() {
   const [local2Enabled, setLocal2Enabled] = useState(false);
   const [local2, setLocal2] = useState<LocalItem>({ emoji: '', label: '', title: '', body: '', link: '' });
 
+  /* ── §4.5 Partner Spotlight ── */
+  const [sponsorEnabled, setSponsorEnabled] = useState(false);
+  const [sponsorLabel, setSponsorLabel] = useState('Partner Spotlight');
+  const [sponsorName, setSponsorName] = useState('');
+  const [sponsorUrl, setSponsorUrl] = useState('');
+  const [sponsorImage, setSponsorImage] = useState('');
+  const [sponsorBody, setSponsorBody] = useState('');
+  const [uploadingSponsor, setUploadingSponsor] = useState(false);
+
   /* ── §7 From the Archive ── */
   const [archiveEnabled, setArchiveEnabled] = useState(false);
   const [archiveBlogId, setArchiveBlogId] = useState<number | null>(null);
@@ -350,6 +359,14 @@ export default function NewsletterComposePage() {
             setLocal2(d.locals_json[1] as LocalItem);
           }
         }
+        if (d.has_sponsor) {
+          setSponsorEnabled(true);
+          setSponsorLabel(d.sponsor_label ?? 'Partner Spotlight');
+          setSponsorName(d.sponsor_name ?? '');
+          setSponsorUrl(d.sponsor_url ?? '');
+          setSponsorImage(d.sponsor_image ?? '');
+          setSponsorBody(d.sponsor_body ?? '');
+        }
         if (d.archive_blog_id) {
           setArchiveEnabled(true);
           setArchiveBlogId(d.archive_blog_id);
@@ -398,6 +415,18 @@ export default function NewsletterComposePage() {
     setUploading(false);
   }
 
+  async function uploadSponsorImage(file: File) {
+    setUploadingSponsor(true);
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const path = `newsletters/sponsor-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from('images').upload(path, file);
+    if (!upErr) {
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      setSponsorImage(publicUrl);
+    }
+    setUploadingSponsor(false);
+  }
+
   /* ── build MailrangiNotesData ── */
   const buildData = useCallback((): MailrangiNotesData => {
     const locals: MailrangiNotesData['locals'] = localsEnabled
@@ -422,6 +451,9 @@ export default function NewsletterComposePage() {
       campus: campusEnabled ? { title: campusTitle, body: campusBody } : undefined,
       jin: jinEnabled ? { expression: jinExpression, body: jinBody, storypressUrl: jinUrl } : undefined,
       locals,
+      sponsor: sponsorEnabled && sponsorName
+        ? { label: sponsorLabel || undefined, name: sponsorName, url: sponsorUrl || undefined, image: sponsorImage || undefined, body: sponsorBody }
+        : undefined,
       archive: archiveEnabled && archiveBlog
         ? { title: archiveBlog.title, slug: archiveBlog.slug, category: archiveBlog.category, image_url: archiveBlog.image_url, excerpt: archiveExcerpt }
         : undefined,
@@ -434,6 +466,7 @@ export default function NewsletterComposePage() {
     campusEnabled, campusTitle, campusBody,
     jinEnabled, jinExpression, jinBody, jinUrl,
     localsEnabled, local1, local2Enabled, local2,
+    sponsorEnabled, sponsorLabel, sponsorName, sponsorUrl, sponsorImage, sponsorBody,
     archiveEnabled, archiveBlog, archiveExcerpt,
   ]);
 
@@ -468,6 +501,12 @@ export default function NewsletterComposePage() {
             ...(local2Enabled ? [{ emoji: local2.emoji, label: local2.label, title: local2.title, body: local2.body, link: local2.link }] : []),
           ]
         : null,
+      has_sponsor: sponsorEnabled,
+      sponsor_label: sponsorEnabled ? sponsorLabel : null,
+      sponsor_name: sponsorEnabled ? sponsorName : null,
+      sponsor_url: sponsorEnabled ? sponsorUrl : null,
+      sponsor_image: sponsorEnabled ? sponsorImage : null,
+      sponsor_body: sponsorEnabled ? sponsorBody : null,
       archive_blog_id: archiveEnabled ? archiveBlogId : null,
       archive_excerpt: archiveEnabled ? archiveExcerpt : null,
     };
@@ -707,6 +746,64 @@ export default function NewsletterComposePage() {
           <div style={{ marginTop: 12 }}>
             <Field label="본문">
               <Textarea value={campusBody} onChange={setCampusBody} placeholder="이번 주 캠퍼스에서..." rows={3} />
+            </Field>
+          </div>
+        </SectionCard>
+
+        {/* ── §4.5 Partner Spotlight ── */}
+        <SectionCard
+          num={0} title="Partner Spotlight" optional
+          enabled={sponsorEnabled} onToggle={() => setSponsorEnabled(v => !v)}
+        >
+          <Row gap={12}>
+            <Field label="라벨" flex={1}>
+              <Input value={sponsorLabel} onChange={setSponsorLabel} placeholder="Partner Spotlight" />
+            </Field>
+            <Field label="스폰서명 *" flex={1}>
+              <Input value={sponsorName} onChange={setSponsorName} placeholder="브랜드 이름" />
+            </Field>
+          </Row>
+          <div style={{ marginTop: 12 }}>
+            <Field label="URL (선택)">
+              <Input value={sponsorUrl} onChange={setSponsorUrl} placeholder="https://..." />
+            </Field>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <Label>이미지 (선택)</Label>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <label style={{
+                display: 'block', width: 180, height: 100, border: '1.5px dashed #E2E8F0',
+                borderRadius: 12, cursor: 'pointer', overflow: 'hidden',
+                background: sponsorImage ? 'transparent' : '#F8FAFC',
+                position: 'relative', flexShrink: 0,
+              }}>
+                {sponsorImage ? (
+                  <img src={sponsorImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 6, color: '#CBD5E1' }}>
+                    {uploadingSponsor
+                      ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
+                      : <Upload size={20} />}
+                    <span style={{ fontSize: 11, fontWeight: 700 }}>{uploadingSponsor ? '업로드 중...' : '클릭하여 업로드'}</span>
+                  </div>
+                )}
+                <input type="file" accept="image/*" style={{ display: 'none' }}
+                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadSponsorImage(f); }} />
+              </label>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <Input value={sponsorImage} onChange={setSponsorImage} placeholder="또는 이미지 URL 직접 입력" />
+                {sponsorImage && (
+                  <button type="button" onClick={() => setSponsorImage('')}
+                    style={{ marginTop: 6, fontSize: 11, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>
+                    이미지 제거
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <Field label="소개문 *">
+              <Textarea value={sponsorBody} onChange={setSponsorBody} placeholder="스폰서 브랜드 소개 문구 (2-3줄 권장)..." rows={3} />
             </Field>
           </div>
         </SectionCard>

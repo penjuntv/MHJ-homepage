@@ -23,6 +23,12 @@ interface NewsletterFormData {
   locals_json?: MailrangiNotesData['locals'];
   archive_blog_id?: number | null;
   archive_excerpt?: string;
+  has_sponsor?: boolean;
+  sponsor_name?: string;
+  sponsor_url?: string;
+  sponsor_image?: string;
+  sponsor_body?: string;
+  sponsor_label?: string;
 }
 
 interface BlogData {
@@ -66,6 +72,9 @@ async function buildMailrangiData(
       : undefined,
     locals:  form.locals_json ?? undefined,
     archive: ab ? { ...ab, excerpt: form.archive_excerpt ?? '' } : undefined,
+    sponsor: form.has_sponsor && form.sponsor_name
+      ? { label: form.sponsor_label ?? undefined, name: form.sponsor_name, url: form.sponsor_url ?? undefined, image: form.sponsor_image ?? undefined, body: form.sponsor_body ?? '' }
+      : undefined,
     unsubscribeUrl: 'https://www.mhj.nz/unsubscribe',
   };
 }
