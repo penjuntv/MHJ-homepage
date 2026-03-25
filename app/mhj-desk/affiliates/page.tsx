@@ -15,6 +15,24 @@ interface AffiliateLink {
   created_at: string;
 }
 
+const AFFILIATE_PROGRAMS = [
+  { value: 'amazon-au', label: 'Amazon AU' },
+  { value: 'mighty-ape', label: 'Mighty Ape' },
+  { value: 'fishpond', label: 'Fishpond' },
+  { value: 'coupang', label: 'Coupang' },
+  { value: 'direct', label: '직접 제휴' },
+  { value: 'other', label: '기타' },
+];
+
+function toSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[\s]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 const BLANK = { slug: '', destination_url: '', title: '', program: '' };
 
 const IS: React.CSSProperties = {
@@ -28,6 +46,7 @@ export default function AffiliatesPage() {
   const [links, setLinks] = useState<AffiliateLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(BLANK);
+  const [programOther, setProgramOther] = useState('');
   const [saving, setSaving] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [error, setError] = useState('');
@@ -59,11 +78,12 @@ export default function AffiliatesPage() {
     setError('');
     setSaving(true);
 
+    const programValue = form.program === 'other' ? programOther.trim() : form.program;
     const payload = {
       slug: form.slug.trim(),
       destination_url: form.destination_url.trim(),
       title: form.title.trim(),
-      program: form.program.trim(),
+      program: programValue,
     };
 
     if (editId !== null) {
@@ -81,19 +101,28 @@ export default function AffiliatesPage() {
 
     setForm(BLANK);
     setEditId(null);
+    setProgramOther('');
     setSaving(false);
     await load();
   };
 
   const startEdit = (link: AffiliateLink) => {
     setEditId(link.id);
-    setForm({ slug: link.slug, destination_url: link.destination_url, title: link.title, program: link.program });
+    const knownProgram = AFFILIATE_PROGRAMS.find(p => p.value === link.program);
+    if (knownProgram) {
+      setForm({ slug: link.slug, destination_url: link.destination_url, title: link.title, program: link.program });
+      setProgramOther('');
+    } else {
+      setForm({ slug: link.slug, destination_url: link.destination_url, title: link.title, program: 'other' });
+      setProgramOther(link.program);
+    }
     setError('');
   };
 
   const cancelEdit = () => {
     setEditId(null);
     setForm(BLANK);
+    setProgramOther('');
     setError('');
   };
 
@@ -164,26 +193,48 @@ export default function AffiliatesPage() {
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
           <input
             type="text"
-            value={form.slug}
-            onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
-            placeholder="슬러그 (예: montessori-cards) *"
-            disabled={editId !== null}
-            style={{ ...IS, maxWidth: 240, opacity: editId !== null ? 0.5 : 1 }}
-          />
-          <input
-            type="text"
             value={form.title}
-            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+            onChange={e => {
+              const title = e.target.value;
+              setForm(f => ({ ...f, title, slug: toSlug(title) }));
+            }}
             placeholder="제목 (예: Montessori 카드 세트) *"
-            style={{ ...IS, maxWidth: 300 }}
+            style={{ ...IS, maxWidth: 320 }}
           />
-          <input
-            type="text"
-            value={form.program}
-            onChange={e => setForm(f => ({ ...f, program: e.target.value }))}
-            placeholder="프로그램 (예: Amazon AU)"
-            style={{ ...IS, maxWidth: 200 }}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+            <input
+              type="text"
+              value={form.slug}
+              onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
+placeholder="슬러그 (자동 생성) *"
+              disabled={editId !== null}
+              style={{ ...IS, maxWidth: 260, opacity: editId !== null ? 0.5 : 1 }}
+            />
+            <span style={{ fontSize: 11, color: '#94a3b8', paddingLeft: 2 }}>
+              mhj.nz/go/{form.slug || '…'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <select
+              value={form.program}
+              onChange={e => setForm(f => ({ ...f, program: e.target.value }))}
+              style={{ ...IS, maxWidth: 200, cursor: 'pointer' }}
+            >
+              <option value="">프로그램 선택</option>
+              {AFFILIATE_PROGRAMS.map(p => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
+            </select>
+            {form.program === 'other' && (
+              <input
+                type="text"
+                value={programOther}
+                onChange={e => setProgramOther(e.target.value)}
+                placeholder="프로그램명 직접 입력"
+                style={{ ...IS, maxWidth: 200 }}
+              />
+            )}
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <input
