@@ -6,7 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from 'sonner';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
-const OG_IMAGE = `${BASE_URL}/og-default.jpg`;
+const OG_IMAGE = `${BASE_URL}/api/og?title=MY%20MAIRANGI&category=Family%20Archive`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -58,7 +58,11 @@ const organizationJsonLd = {
     addressRegion: 'Auckland',
     addressCountry: 'NZ',
   },
-  sameAs: [],
+  sameAs: [
+    'https://www.instagram.com/mhj_nz/',
+    'https://www.facebook.com/minhyunjin.nz/',
+    'https://www.youtube.com/@penjunetv',
+  ],
 };
 
 // FOUC 방지 인라인 스크립트 — React hydration 전에 실행되어 dark 클래스를 즉시 적용

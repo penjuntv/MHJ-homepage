@@ -15,5 +15,8 @@ app/api/comments/route.ts
 # 푸터 리디자인 (완료)
 components/Footer.tsx
 
-# Admin 전체
-app/mhj-desk/
+# Admin 핵심 기능 (완료)
+app/mhj-desk/blogs/
+app/mhj-desk/newsletters/
+app/mhj-desk/subscribers/
+app/mhj-desk/comments/

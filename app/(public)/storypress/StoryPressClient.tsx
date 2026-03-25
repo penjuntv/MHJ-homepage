@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import Link from 'next/link';
 import {
   BookOpen, RefreshCw, Users, Sparkles, ChevronDown,
@@ -188,6 +189,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a
               href="#storypress-signup"
+              onClick={() => trackEvent('cta_click', { location: 'hero' })}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', borderRadius: 999, background: '#1A1A1A', color: '#fff', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 16px 32px rgba(0,0,0,0.15)' }}
             >
               Start Your Free Adventure

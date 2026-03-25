@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 
 export default function NewsletterCTA() {
   const [email, setEmail] = useState('');
@@ -22,6 +23,7 @@ export default function NewsletterCTA() {
       setStatus('success');
       setEmail('');
       setName('');
+      trackEvent('newsletter_subscribe', { source: 'cta' });
     } else if (res.status === 409) {
       setStatus('duplicate');
     } else {

@@ -12,6 +12,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/magazine`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/blog`, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${baseUrl}/storypress`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/gallery`, changeFrequency: 'monthly', priority: 0.6 },
   ];
 
   // 동적 매거진 이슈

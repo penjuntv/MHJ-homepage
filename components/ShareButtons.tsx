@@ -2,6 +2,7 @@
 
 import { Link2, Facebook, Twitter, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/analytics';
 
 interface ShareButtonsProps {
   title: string;
@@ -15,13 +16,15 @@ export default function ShareButtons({ title, slug }: ShareButtonsProps) {
   const encoded = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
 
-  function openWindow(shareUrl: string) {
+  function openWindow(shareUrl: string, method: string) {
+    trackEvent('blog_share', { slug, method });
     window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=500');
   }
 
   async function copyLink() {
     try {
       await navigator.clipboard.writeText(url);
+      trackEvent('blog_share', { slug, method: 'copy' });
       toast('Link copied!');
     } catch (err) {
       console.error('Failed to copy link:', err);
@@ -37,17 +40,17 @@ export default function ShareButtons({ title, slug }: ShareButtonsProps) {
     {
       label: 'Share on Facebook',
       icon: <Facebook size={20} />,
-      onClick: () => openWindow(`https://www.facebook.com/sharer/sharer.php?u=${encoded}`),
+      onClick: () => openWindow(`https://www.facebook.com/sharer/sharer.php?u=${encoded}`, 'facebook'),
     },
     {
       label: 'Share on Twitter / X',
       icon: <Twitter size={20} />,
-      onClick: () => openWindow(`https://twitter.com/intent/tweet?url=${encoded}&text=${encodedTitle}`),
+      onClick: () => openWindow(`https://twitter.com/intent/tweet?url=${encoded}&text=${encodedTitle}`, 'twitter'),
     },
     {
       label: 'Share on Kakao',
       icon: <MessageCircle size={20} />,
-      onClick: () => openWindow(`https://story.kakao.com/share?url=${encoded}`),
+      onClick: () => openWindow(`https://story.kakao.com/share?url=${encoded}`, 'kakao'),
     },
   ];
 

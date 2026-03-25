@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight, MousePointer2, BookOpen } from 'lucide-react';
 import type { Magazine } from '@/lib/types';
+import { trackEvent } from '@/lib/analytics';
 
 interface Props {
   magazines: Magazine[];
@@ -58,6 +59,7 @@ export default function MagazineShelf({
   const handleClick = (m: Magazine, idx: number) => {
     if (isComing(m)) return;
     setClicking(idx);
+    trackEvent('magazine_open', { issue_id: m.id, issue_title: m.title });
     setTimeout(() => router.push(`/magazine/${m.id}`), 280);
   };
 

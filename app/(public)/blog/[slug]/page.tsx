@@ -12,6 +12,7 @@ import ShareButton from '@/components/ShareButton';
 import CommentSection from './CommentSection';
 import AiInsight from '@/components/AiInsight';
 import ShareButtons from '@/components/ShareButtons';
+import BlogReadTracker from './BlogReadTracker';
 
 async function getBlogForPreview(slug: string): Promise<Blog | null> {
   const { data } = await supabase
@@ -171,7 +172,8 @@ export default async function BlogDetailPage({
     '@type': 'BlogPosting',
     headline: blog.title,
     author: { '@type': 'Person', name: blog.author },
-    datePublished: blog.date,
+    datePublished: blog.created_at ?? blog.date,
+    dateModified: blog.created_at ?? blog.date,
     url: `${SITE_URL}/blog/${blog.slug}`,
     image: blog.og_image_url || blog.image_url,
     description: blog.meta_description || plainText.slice(0, 160),
@@ -196,6 +198,7 @@ export default async function BlogDetailPage({
       />
 
       <ViewTracker slug={blog.slug} />
+      <BlogReadTracker slug={blog.slug} category={blog.category} author={blog.author} />
       <div className="animate-fade-in">
 
         {/* ── 미리보기 배너 ── */}
@@ -494,6 +497,9 @@ export default async function BlogDetailPage({
                 dangerouslySetInnerHTML={{ __html: blog.info_block_html }}
               />
             )}
+
+            {/* 읽기 완료 감지 sentinel — BlogReadTracker가 observe */}
+            <div id="blog-read-sentinel" />
 
             {/* 태그 */}
             {blog.tags && blog.tags.length > 0 && (

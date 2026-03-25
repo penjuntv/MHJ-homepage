@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase-browser';
 import type { Blog } from '@/lib/types';
 import { Upload, Loader2, Sparkles, Eye } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
+import AffiliateLinksValidator from '@/components/admin/AffiliateLinksValidator';
 import { slugify as romanizeSlugify } from 'transliteration';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
@@ -675,6 +676,7 @@ export default function BlogForm({ initial }: Props) {
               style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 12, lineHeight: 1.6, resize: 'vertical', minHeight: 300 }}
             />
           )}
+          <AffiliateLinksValidator infoBlockHtml={form.info_block_html ?? ''} />
           <p style={{ fontSize: 11, color: '#94A3B8', margin: 0 }}>본문 아래 별도 영역으로 렌더링됩니다. 비워두면 표시 안 됩니다.</p>
         </div>
 
