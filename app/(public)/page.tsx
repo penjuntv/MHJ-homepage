@@ -576,14 +576,16 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                   textDecoration: 'none',
                   paddingBottom: i < subs.length - 1 ? 24 : 0,
                   borderBottom: i < subs.length - 1 ? '0.5px solid var(--border)' : 'none',
+                  paddingTop: i > 0 ? 24 : 0,
                 }}
               >
                 <div style={{
                   position: 'relative',
-                  aspectRatio: '16/10',
-                  width: '100%',
-                  borderRadius: 8,
+                  width: 160,
+                  height: 100,
+                  borderRadius: 6,
                   overflow: 'hidden',
+                  flexShrink: 0,
                 }}>
                   <SafeImage
                     src={blog.image_url}
@@ -592,7 +594,7 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                     className="object-cover"
                   />
                 </div>
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <span style={{
                     fontSize: 11,
                     fontWeight: 600,
@@ -603,7 +605,7 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                     {blog.category}
                   </span>
                   <p style={{
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: 600,
                     color: 'var(--text)',
                     lineHeight: 1.4,
