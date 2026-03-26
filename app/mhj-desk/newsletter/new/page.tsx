@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase-browser';
 import { renderMailrangiNotes } from '@/lib/newsletter-template';
 import type { MailrangiNotesData } from '@/lib/newsletter-template';
 import { Loader2, Eye, X, Upload, ArrowLeft, Send, FlaskConical } from 'lucide-react';
+import ImageCropModal from '@/components/admin/ImageCropModal';
 
 /* ─────────────────────────────────────────────────────────── types */
 
@@ -239,6 +240,8 @@ export default function NewsletterComposePage() {
   const [lunchTitle, setLunchTitle] = useState('');
   const [lunchBody, setLunchBody] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [cropLunchFile, setCropLunchFile] = useState<File | null>(null);
+  const [cropSponsorFile, setCropSponsorFile] = useState<File | null>(null);
 
   /* ── §4 Campus Notes ── */
   const [campusEnabled, setCampusEnabled] = useState(false);
@@ -403,11 +406,12 @@ export default function NewsletterComposePage() {
     if (b && !archiveExcerpt) setArchiveExcerpt(b.meta_description ?? '');
   }
 
-  async function uploadLunchImage(file: File) {
+  async function uploadLunchImage(fileOrBlob: File | Blob, fileName?: string) {
     setUploading(true);
-    const ext = file.name.split('.').pop() ?? 'jpg';
+    const name = fileName ?? (fileOrBlob instanceof File ? fileOrBlob.name : 'lunch.jpg');
+    const ext = name.split('.').pop() ?? 'jpg';
     const path = `newsletters/${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from('images').upload(path, file);
+    const { error: upErr } = await supabase.storage.from('images').upload(path, fileOrBlob);
     if (!upErr) {
       const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
       setLunchImage(publicUrl);
@@ -415,11 +419,12 @@ export default function NewsletterComposePage() {
     setUploading(false);
   }
 
-  async function uploadSponsorImage(file: File) {
+  async function uploadSponsorImage(fileOrBlob: File | Blob, fileName?: string) {
     setUploadingSponsor(true);
-    const ext = file.name.split('.').pop() ?? 'jpg';
+    const name = fileName ?? (fileOrBlob instanceof File ? fileOrBlob.name : 'sponsor.jpg');
+    const ext = name.split('.').pop() ?? 'jpg';
     const path = `newsletters/sponsor-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from('images').upload(path, file);
+    const { error: upErr } = await supabase.storage.from('images').upload(path, fileOrBlob);
     if (!upErr) {
       const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
       setSponsorImage(publicUrl);
@@ -710,7 +715,7 @@ export default function NewsletterComposePage() {
                   type="file"
                   accept="image/*"
                   style={{ display: 'none' }}
-                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadLunchImage(f); }}
+                  onChange={e => { const f = e.target.files?.[0]; if (f) { setCropLunchFile(f); e.target.value = ''; } }}
                 />
               </label>
               {lunchImage && (
@@ -788,7 +793,7 @@ export default function NewsletterComposePage() {
                   </div>
                 )}
                 <input type="file" accept="image/*" style={{ display: 'none' }}
-                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadSponsorImage(f); }} />
+                  onChange={e => { const f = e.target.files?.[0]; if (f) { setCropSponsorFile(f); e.target.value = ''; } }} />
               </label>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <Input value={sponsorImage} onChange={setSponsorImage} placeholder="또는 이미지 URL 직접 입력" />
@@ -1032,6 +1037,24 @@ export default function NewsletterComposePage() {
         }}>
           {toast}
         </div>
+      )}
+
+      {cropLunchFile && (
+        <ImageCropModal
+          imageFile={cropLunchFile}
+          onCropComplete={(blob, name) => { setCropLunchFile(null); uploadLunchImage(blob, name); }}
+          onSkip={(file) => { setCropLunchFile(null); uploadLunchImage(file); }}
+          onCancel={() => setCropLunchFile(null)}
+        />
+      )}
+
+      {cropSponsorFile && (
+        <ImageCropModal
+          imageFile={cropSponsorFile}
+          onCropComplete={(blob, name) => { setCropSponsorFile(null); uploadSponsorImage(blob, name); }}
+          onSkip={(file) => { setCropSponsorFile(null); uploadSponsorImage(file); }}
+          onCancel={() => setCropSponsorFile(null)}
+        />
       )}
     </div>
   );

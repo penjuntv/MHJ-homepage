@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase-browser';
 import type { Blog } from '@/lib/types';
 import { Upload, Loader2, Sparkles, Eye } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
+import ImageCropModal from '@/components/admin/ImageCropModal';
 import AffiliateLinksValidator from '@/components/admin/AffiliateLinksValidator';
 import { slugify as romanizeSlugify } from 'transliteration';
 
@@ -108,6 +109,7 @@ export default function BlogForm({ initial }: Props) {
 
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [tagInput, setTagInput] = useState('');
@@ -239,11 +241,12 @@ export default function BlogForm({ initial }: Props) {
     });
   }
 
-  async function uploadImage(file: File) {
+  async function uploadImage(fileOrBlob: File | Blob, fileName?: string) {
     setUploading(true);
-    const ext = file.name.split('.').pop();
+    const name = fileName ?? (fileOrBlob instanceof File ? fileOrBlob.name : 'image.jpg');
+    const ext = name.split('.').pop();
     const path = `blogs/${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from('images').upload(path, file);
+    const { error: upErr } = await supabase.storage.from('images').upload(path, fileOrBlob);
     if (upErr) {
       toast.error('이미지 업로드 실패: ' + upErr.message);
       setUploading(false);
@@ -487,7 +490,7 @@ export default function BlogForm({ initial }: Props) {
           </div>
           <input
             ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
-            onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) { setCropFile(f); e.target.value = ''; } }}
           />
           <input
             value={form.image_url}
@@ -915,6 +918,16 @@ export default function BlogForm({ initial }: Props) {
         }}>
           {autoSaveLabel}
         </div>
+      )}
+
+      {cropFile && (
+        <ImageCropModal
+          imageFile={cropFile}
+          defaultAspect={16 / 10}
+          onCropComplete={(blob, name) => { setCropFile(null); uploadImage(blob, name); }}
+          onSkip={(file) => { setCropFile(null); uploadImage(file); }}
+          onCancel={() => setCropFile(null)}
+        />
       )}
     </div>
   );

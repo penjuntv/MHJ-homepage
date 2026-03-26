@@ -14,6 +14,7 @@ import {
   FileText, Image as ImageIcon, ZoomIn, ZoomOut,
 } from 'lucide-react';
 import { ACCENT_PRESETS, COVER_FILTERS, DEFAULT_CONTRIBUTORS } from '@/lib/magazine-themes';
+import ImageCropModal from '@/components/admin/ImageCropModal';
 import CoverPreview from '@/components/magazine/CoverPreview';
 import TocPreview from '@/components/magazine/TocPreview';
 import DownloadBtn from '@/components/DownloadBtn';
@@ -140,6 +141,7 @@ export default function MagazineDetailPage() {
   const [uploadingMagPdf, setUploadingMagPdf]   = useState(false);
   const [uploadingMagCover, setUploadingMagCover] = useState(false);
   const [uploadingExtraImg, setUploadingExtraImg] = useState(false);
+  const [cropCoverFile, setCropCoverFile] = useState<File | null>(null);
   const [newContributor, setNewContributor]      = useState('');
 
   /* ─── 인라인 기사 편집 ─── */
@@ -273,10 +275,11 @@ export default function MagazineDetailPage() {
     setUploadingMagPdf(false);
   }
 
-  async function uploadMagCover(file: File) {
+  async function uploadMagCover(fileOrBlob: File | Blob, fileName?: string) {
     setUploadingMagCover(true);
-    const path = `magazines/${id}/cover_${Date.now()}.${file.name.split('.').pop()}`;
-    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    const name = fileName ?? (fileOrBlob instanceof File ? fileOrBlob.name : 'cover.jpg');
+    const path = `magazines/${id}/cover_${Date.now()}.${name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, fileOrBlob, { upsert: true });
     if (error) { showToast('업로드 실패: ' + error.message); } else {
       const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
       setMagForm(p => ({ ...p, image_url: publicUrl }));
@@ -1069,7 +1072,7 @@ export default function MagazineDetailPage() {
 
       {/* ─── Hidden file inputs ─── */}
       <input ref={magPdfRef} type="file" accept=".pdf,image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagPdf(f); e.target.value = ''; }} />
-      <input ref={magCoverRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadMagCover(f); e.target.value = ''; }} />
+      <input ref={magCoverRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) setCropCoverFile(f); e.target.value = ''; }} />
       <input ref={extraImgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadExtraCoverImage(f); e.target.value = ''; }} />
       <input ref={contentFileRef} type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadContentFile(f); e.target.value = ''; }} />
       <input ref={slotImgRef} type="file" accept="image/*" style={{ display: 'none' }}
@@ -1083,6 +1086,16 @@ export default function MagazineDetailPage() {
           <Check size={14} style={{ display: 'inline', marginRight: 8, color: '#4ADE80' }} />
           {toast}
         </div>
+      )}
+
+      {cropCoverFile && (
+        <ImageCropModal
+          imageFile={cropCoverFile}
+          defaultAspect={3 / 4}
+          onCropComplete={(blob, name) => { setCropCoverFile(null); uploadMagCover(blob, name); }}
+          onSkip={(file) => { setCropCoverFile(null); uploadMagCover(file); }}
+          onCancel={() => setCropCoverFile(null)}
+        />
       )}
     </div>
   );
