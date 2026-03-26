@@ -453,12 +453,12 @@
 
 /* Most Read 카드 hover */
 .most-read-card {
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+  transition: box-shadow 0.4s, opacity 0.4s;
 }
 .most-read-card:hover {
-  transform: translateY(-12px);
   box-shadow: 0 30px 60px rgba(0,0,0,0.12) !important;
   text-decoration: none;
+  opacity: 0.92;
 }
 .most-read-card:hover .most-read-img {
   transform: scale(1.05);
@@ -493,7 +493,7 @@
   width: 100%;
 }
 
-/* Popular Tags hover: translateY + outline → fill */
+/* Popular Tags hover: outline → fill */
 .blog-tag {
   transition: all 0.25s ease;
 }
@@ -501,7 +501,6 @@
   background: var(--text) !important;
   color: var(--bg) !important;
   border-color: var(--text) !important;
-  transform: translateY(-2px);
 }
 
 /* ─── B-4 블로그 상세 리파인 ─── */
@@ -603,11 +602,11 @@
 
 /* 카테고리 카드 hover */
 .cat-card {
-  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s;
+  transition: box-shadow 0.35s, opacity 0.35s;
 }
 .cat-card:hover {
-  transform: translateY(-10px);
   box-shadow: 0 32px 64px rgba(0,0,0,0.16) !important;
+  opacity: 0.92;
 }
 .cat-card:hover .cat-img {
   filter: saturate(1.4) contrast(1.05) brightness(1.05) !important;
@@ -619,11 +618,11 @@
 
 /* 매거진 카드 hover */
 .mag-card {
-  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s;
+  transition: box-shadow 0.35s, opacity 0.35s;
 }
 .mag-card:hover {
-  transform: translateY(-10px);
   box-shadow: 0 32px 64px rgba(0,0,0,0.18) !important;
+  opacity: 0.92;
 }
 .mag-card:hover .mag-img {
   filter: saturate(1.4) contrast(1.05) brightness(1.05) !important;
@@ -815,5 +814,60 @@
 @media (max-width: 768px) {
   .hero-section {
     height: 56vh;
+  }
+}
+
+/* === Homepage Redesign Grids === */
+
+/* Featured Story: 데스크톱 3:2 가로 배치, 모바일 세로 스택 */
+.featured-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+@media (min-width: 768px) {
+  .featured-grid {
+    grid-template-columns: 3fr 2fr;
+    gap: 48px;
+    align-items: center;
+  }
+}
+
+/* Main: Latest Posts(2/3) + Sidebar(1/3) */
+.home-main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+}
+@media (min-width: 1024px) {
+  .home-main-grid {
+    grid-template-columns: 2fr 1fr;
+    gap: 48px;
+  }
+}
+
+/* Latest Posts 내부 2열 그리드 */
+.home-latest-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 640px) {
+  .home-latest-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Magazine mini-banner 좌우 배치 */
+.magazine-mini-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: center;
+}
+@media (min-width: 640px) {
+  .magazine-mini-grid {
+    grid-template-columns: auto 1fr;
+    gap: 32px;
   }
 }

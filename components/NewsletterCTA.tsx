@@ -4,7 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
 
-export default function NewsletterCTA() {
+interface Props {
+  compact?: boolean;
+}
+
+export default function NewsletterCTA({ compact = false }: Props) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
@@ -17,14 +21,14 @@ export default function NewsletterCTA() {
     const res = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name }),
+      body: JSON.stringify({ email, name: compact ? '' : name }),
     });
 
     if (res.ok) {
       setStatus('success');
       setEmail('');
       setName('');
-      trackEvent('newsletter_subscribe', { source: 'cta' });
+      trackEvent('newsletter_subscribe', { source: compact ? 'sidebar' : 'cta' });
     } else if (res.status === 409) {
       setStatus('duplicate');
     } else {
@@ -32,6 +36,103 @@ export default function NewsletterCTA() {
     }
   };
 
+  /* ── Compact version (sidebar) ── */
+  if (compact) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <span style={{
+          fontSize: 10,
+          fontWeight: 900,
+          letterSpacing: 5,
+          textTransform: 'uppercase',
+          color: 'var(--text-tertiary)',
+          display: 'block',
+          marginBottom: 12,
+        }}>
+          Mairangi Notes
+        </span>
+
+        <p style={{
+          fontSize: 14,
+          color: 'var(--text-secondary)',
+          fontWeight: 500,
+          lineHeight: 1.6,
+          marginBottom: 16,
+        }}>
+          Weekly stories from Mairangi Bay.
+        </p>
+
+        {status === 'success' ? (
+          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', margin: 0 }}>
+            You&apos;re in!
+          </p>
+        ) : (
+          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  border: '1px solid var(--border-strong)',
+                  background: 'var(--bg)',
+                  color: 'var(--text)',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  outline: 'none',
+                  minWidth: 0,
+                  fontFamily: 'inherit',
+                }}
+              />
+              <button
+                type="submit"
+                disabled={status === 'loading'}
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  background: status === 'loading' ? 'rgba(0,0,0,0.4)' : '#1A1A1A',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: 11,
+                  fontWeight: 900,
+                  letterSpacing: 2,
+                  textTransform: 'uppercase',
+                  cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >
+                {status === 'loading' ? '...' : 'Subscribe'}
+              </button>
+            </div>
+            <p style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
+              By subscribing, you agree to our{' '}
+              <Link href="/privacy" style={{ color: 'var(--text-tertiary)', textDecoration: 'underline' }}>
+                Privacy Policy
+              </Link>.
+            </p>
+            {status === 'duplicate' && (
+              <p style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
+                Already subscribed
+              </p>
+            )}
+            {status === 'error' && (
+              <p style={{ fontSize: 12, color: '#ef4444', textAlign: 'center', margin: 0 }}>
+                Something went wrong.
+              </p>
+            )}
+          </form>
+        )}
+      </div>
+    );
+  }
+
+  /* ── Full version ── */
   return (
     <section style={{
       padding: 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)',
