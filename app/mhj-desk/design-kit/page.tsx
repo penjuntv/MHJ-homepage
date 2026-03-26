@@ -408,7 +408,7 @@ function ArticleCardDemo() {
       <div>
         <div style={{ display: 'flex', gap: 12, marginBottom: 8 }}>
           <span style={{ fontSize: 9, fontWeight: 700, color: '#818cf8', letterSpacing: 4, textTransform: 'uppercase' }}>2026.03.05</span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: '#cbd5e1', letterSpacing: 4, textTransform: 'uppercase' }}>Cho Yumin</span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: '#cbd5e1', letterSpacing: 4, textTransform: 'uppercase' }}>Family Member</span>
         </div>
         <h3 style={{ fontSize: 22, fontWeight: 900, letterSpacing: -1, textTransform: 'uppercase', lineHeight: 0.9, margin: 0 }}>
           My First Day at School

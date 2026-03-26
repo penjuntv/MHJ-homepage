@@ -1,0 +1,104 @@
+
+> mhj-homepage@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./app/mhj-desk/mfa-setup/page.tsx
+128:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/mhj-desk/newsletter/new/page.tsx
+669:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+700:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+781:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+924:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/SearchOverlay.tsx
+250:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/magazine/templates/ClassicTemplate.tsx
+53:5  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+ ⚠ Using edge runtime on a page currently disables static generation for that page
+   Generating static pages (0/48) ...
+   Generating static pages (12/48) 
+   Generating static pages (24/48) 
+   Generating static pages (36/48) 
+ ✓ Generating static pages (48/48)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ƒ /                                    5.68 kB         111 kB
+├ ○ /_not-found                          876 B          88.8 kB
+├ ƒ /about                               1.78 kB          95 kB
+├ ƒ /api/ai-insight                      0 B                0 B
+├ ƒ /api/ai-seo                          0 B                0 B
+├ ƒ /api/comments                        0 B                0 B
+├ ○ /api/instagram                       0 B                0 B
+├ ƒ /api/newsletter-preview              0 B                0 B
+├ ƒ /api/og                              0 B                0 B
+├ ƒ /api/process-welcome-sequence        0 B                0 B
+├ ƒ /api/search                          0 B                0 B
+├ ƒ /api/send-newsletter                 0 B                0 B
+├ ƒ /api/send-test-newsletter            0 B                0 B
+├ ƒ /api/subscribe                       0 B                0 B
+├ ƒ /api/unsubscribe                     0 B                0 B
+├ ƒ /api/view                            0 B                0 B
+├ ƒ /blog                                9.44 kB         103 kB
+├ ƒ /blog/[slug]                         6 kB            176 kB
+├ ƒ /blog/tag/[tag]                      345 B           102 kB
+├ ƒ /feed.xml                            0 B                0 B
+├ ƒ /gallery                             4.91 kB        92.9 kB
+├ ƒ /go/[slug]                           0 B                0 B
+├ ○ /icon                                0 B                0 B
+├ ƒ /magazine                            4.65 kB         107 kB
+├ ƒ /magazine/[id]                       14.9 kB         164 kB
+├ ƒ /media-kit                           142 B          88.1 kB
+├ ○ /mhj-desk                            6.18 kB         164 kB
+├ ○ /mhj-desk/affiliates                 5.11 kB         149 kB
+├ ○ /mhj-desk/blogs                      5.75 kB         173 kB
+├ ƒ /mhj-desk/blogs/[id]/edit            654 B           223 kB
+├ ○ /mhj-desk/blogs/new                  190 B           222 kB
+├ ○ /mhj-desk/comments                   4.29 kB         148 kB
+├ ○ /mhj-desk/design-kit                 4.82 kB        98.1 kB
+├ ○ /mhj-desk/family                     3.8 kB          162 kB
+├ ○ /mhj-desk/gallery                    4.98 kB         158 kB
+├ ○ /mhj-desk/hero                       7.49 kB         175 kB
+├ ○ /mhj-desk/login                      1.54 kB         145 kB
+├ ○ /mhj-desk/magazines                  3.34 kB         156 kB
+├ ƒ /mhj-desk/magazines/[id]             18.6 kB         180 kB
+├ ○ /mhj-desk/magazines/new              5.16 kB         158 kB
+├ ○ /mhj-desk/media                      5.6 kB          155 kB
+├ ○ /mhj-desk/mfa-setup                  2.41 kB         146 kB
+├ ○ /mhj-desk/mfa-verify                 2.47 kB         146 kB
+├ ○ /mhj-desk/navigation                 4.48 kB         148 kB
+├ ○ /mhj-desk/newsletter                 3.74 kB         156 kB
+├ ○ /mhj-desk/newsletter/new             12.5 kB         165 kB
+├ ○ /mhj-desk/pages                      2.57 kB        99.2 kB
+├ ƒ /mhj-desk/pages/[pageId]             6.62 kB         168 kB
+├ ○ /mhj-desk/seo                        4.44 kB         157 kB
+├ ○ /mhj-desk/settings                   6.86 kB         165 kB
+├ ○ /mhj-desk/subscribers                4.21 kB         148 kB
+├ ○ /robots.txt                          0 B                0 B
+├ ƒ /sitemap.xml                         0 B                0 B
+├ ƒ /storypress                          10.1 kB         107 kB
+└ ƒ /unsubscribe                         1.49 kB        98.1 kB
++ First Load JS shared by all            88 kB
+  ├ chunks/2117-92947eff5233ab4c.js      31.7 kB
+  ├ chunks/fd9d1056-ad44428ca46fb0ea.js  53.6 kB
+  └ other shared chunks (total)          2.58 kB
+
+
+ƒ Middleware                             75.2 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -33,7 +33,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind CSS · Supabase (DB+Storage+Au
 
 ## 현재 상태 스냅샷
 - 블로그 22개, 매거진 5+1개, 아티클 19개, 갤러리 60개
-- 라이브: mhj-homepage.vercel.app
+- 라이브: www.mhj.nz
 - GitHub: penjuntv/MHJ-homepage
 - Supabase 프로젝트: vpayqdatpqajsmalpfmq
 

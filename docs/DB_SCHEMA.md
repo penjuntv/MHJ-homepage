@@ -1,6 +1,6 @@
 # MHJ HOMEPAGE — DB 스키마 (실제)
 
-> Supabase 프로젝트: asatbuonduelfrhdkwgu
+> Supabase 프로젝트: vpayqdatpqajsmalpfmq
 > 마지막 업데이트: 2026-03-17 (자동 조회)
 
 ---
@@ -57,9 +57,9 @@
 | 컬럼 | 타입 | Null | 기본값 | 비고 |
 |------|------|------|--------|------|
 | id | integer | NO | serial | PK |
-| category | text | NO | — | CHECK: Daily/School/Kids/Travel/Food |
+| category | text | NO | — | CHECK: Little 15 Mins/Home Learning/Whanau/Settlement/Life in Aotearoa/Travelers/Local Guide |
 | title | text | NO | — | |
-| author | text | NO | 'Heejong Jo' | |
+| author | text | NO | 'Yussi' | |
 | date | text | NO | — | |
 | image_url | text | NO | — | |
 | content | text | NO | — | |

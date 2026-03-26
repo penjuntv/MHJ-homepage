@@ -72,17 +72,21 @@ async function getLatestPosts(excludeId: number): Promise<Blog[]> {
   return (data ?? FALLBACK_BLOGS.slice(1)) as Blog[];
 }
 
-async function getMostReadBlogs(excludeId: number): Promise<Blog[]> {
-  const { data } = await supabase
+async function getMostReadBlogs(excludeIds: number[]): Promise<Blog[]> {
+  let query = supabase
     .from('blogs')
     .select('id, title, category, slug, view_count, date, image_url, author, content, published')
     .eq('published', true)
-    .neq('id', excludeId)
     .order('view_count', { ascending: false })
     .order('id', { ascending: false })
-    .limit(5);
+    .limit(10);
 
-  return (data ?? FALLBACK_BLOGS) as Blog[];
+  if (excludeIds.length) {
+    query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+  }
+
+  const { data } = await query;
+  return ((data ?? FALLBACK_BLOGS) as Blog[]).slice(0, 5);
 }
 
 async function getCommentCounts(blogIds: number[]): Promise<Record<number, number>> {
@@ -112,19 +116,27 @@ async function getLatestMagazine(): Promise<Magazine | null> {
   return (data?.[0] as Magazine) ?? null;
 }
 
+/* ─── Helpers ─── */
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-NZ', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 /* ─── Page component ─── */
 
 export default async function LandingPage() {
   const featured = await getFeaturedPost();
   const excludeId = featured?.id ?? 0;
 
-  const [latest, mostRead, latestMag] = await Promise.all([
-    getLatestPosts(excludeId),
-    getMostReadBlogs(excludeId),
+  const latest = await getLatestPosts(excludeId);
+  const allExcludeIds = [excludeId, ...latest.map(b => b.id)].filter(Boolean);
+
+  const [mostRead, latestMag] = await Promise.all([
+    getMostReadBlogs(allExcludeIds),
     getLatestMagazine(),
   ]);
 
-  const allBlogIds = [featured?.id, ...latest.map(b => b.id)].filter((id): id is number => typeof id === 'number');
+  const allBlogIds = [featured?.id, ...latest.map(b => b.id), ...mostRead.map(b => b.id)].filter((id): id is number => typeof id === 'number');
   const commentCounts = await getCommentCounts(allBlogIds);
 
   const jsonLd = {
@@ -182,7 +194,7 @@ export default async function LandingPage() {
               </div>
 
               {/* View All Posts */}
-              <div style={{ marginTop: 48, textAlign: 'center' }}>
+              <div style={{ marginTop: 32, textAlign: 'center' }}>
                 <Link
                   href="/blog"
                   style={{
@@ -205,8 +217,70 @@ export default async function LandingPage() {
 
             {/* Right: Sidebar */}
             <aside style={{ position: 'sticky', top: 80, alignSelf: 'start' }}>
-              {/* Most Read */}
-              <div>
+              {/* Newsletter CTA (compact) — 첫 번째 */}
+              <div style={{
+                padding: 24,
+                borderRadius: 12,
+                border: '1px solid var(--border)',
+                background: 'var(--bg-surface)',
+              }}>
+                <NewsletterCTA compact />
+              </div>
+
+              {/* About mini-card — 두 번째 */}
+              <div style={{
+                marginTop: 32,
+                padding: 24,
+                borderRadius: 12,
+                border: '1px solid var(--border)',
+                background: 'var(--bg-card)',
+              }}>
+                <p style={{
+                  fontSize: 10,
+                  fontWeight: 900,
+                  letterSpacing: 5,
+                  textTransform: 'uppercase',
+                  color: 'var(--text-tertiary)',
+                  marginBottom: 12,
+                }}>
+                  About
+                </p>
+                <p style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: 'var(--text)',
+                  marginBottom: 4,
+                }}>
+                  Yussi
+                </p>
+                <p style={{
+                  fontSize: 14,
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.6,
+                  marginBottom: 16,
+                }}>
+                  Stories from a Korean family in Mairangi Bay, Auckland.
+                </p>
+                <Link
+                  href="/about"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontSize: 11,
+                    fontWeight: 900,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
+                    color: 'var(--text-secondary)',
+                    textDecoration: 'none',
+                  }}
+                >
+                  About Us <ArrowRight size={12} />
+                </Link>
+              </div>
+
+              {/* Most Read — 세 번째 */}
+              <div style={{ marginTop: 32 }}>
                 <p style={{
                   fontSize: 10,
                   fontWeight: 900,
@@ -274,76 +348,13 @@ export default async function LandingPage() {
                   ))}
                 </div>
               </div>
-
-              {/* Newsletter CTA (compact) */}
-              <div style={{
-                marginTop: 48,
-                padding: 24,
-                borderRadius: 12,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-surface)',
-              }}>
-                <NewsletterCTA compact />
-              </div>
-
-              {/* About mini-card */}
-              <div style={{
-                marginTop: 32,
-                padding: 24,
-                borderRadius: 12,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-              }}>
-                <p style={{
-                  fontSize: 10,
-                  fontWeight: 900,
-                  letterSpacing: 5,
-                  textTransform: 'uppercase',
-                  color: 'var(--text-tertiary)',
-                  marginBottom: 12,
-                }}>
-                  About
-                </p>
-                <p style={{
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: 'var(--text)',
-                  marginBottom: 4,
-                }}>
-                  Yussi
-                </p>
-                <p style={{
-                  fontSize: 14,
-                  color: 'var(--text-secondary)',
-                  lineHeight: 1.6,
-                  marginBottom: 16,
-                }}>
-                  Stories from a Korean family in Mairangi Bay, Auckland.
-                </p>
-                <Link
-                  href="/about"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 11,
-                    fontWeight: 900,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                  }}
-                >
-                  About Us <ArrowRight size={12} />
-                </Link>
-              </div>
             </aside>
           </div>
         </section>
 
         {/* ═══════ §4. Magazine Highlight ═══════ */}
         {latestMag && (
-          <section style={{ maxWidth: 1320, margin: '0 auto', padding: '64px clamp(20px, 4vw, 48px) 0' }}>
+          <section style={{ maxWidth: 1320, margin: '0 auto', padding: '48px clamp(20px, 4vw, 48px) 0' }}>
             <Link
               href="/magazine"
               style={{
@@ -358,7 +369,7 @@ export default async function LandingPage() {
             >
               <div className="magazine-mini-grid">
                 <div style={{
-                  width: 96,
+                  height: 160,
                   aspectRatio: '3/4',
                   borderRadius: 8,
                   overflow: 'hidden',
@@ -419,7 +430,7 @@ export default async function LandingPage() {
         )}
 
         {/* ═══════ §5. Newsletter CTA (full) ═══════ */}
-        <div style={{ marginTop: 64 }}>
+        <div style={{ marginTop: 48 }}>
           <NewsletterCTA />
         </div>
 
@@ -471,6 +482,16 @@ function FeaturedStory({ blog, commentCount }: { blog: Blog; commentCount: numbe
               {blog.category}
             </span>
 
+            {blog.date && (
+              <p style={{
+                fontSize: 13,
+                color: 'var(--text-tertiary)',
+                margin: '8px 0 0',
+              }}>
+                {formatDate(blog.date)}
+              </p>
+            )}
+
             <h1
               className="font-display"
               style={{
@@ -501,7 +522,15 @@ function FeaturedStory({ blog, commentCount }: { blog: Blog; commentCount: numbe
               </p>
             )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <span style={{
+                fontSize: 11,
+                color: 'var(--text-tertiary)',
+              }}>
+                by {blog.author || 'Yussi'}
+                {commentCount > 0 && ` · ${commentCount} ${commentCount === 1 ? 'Comment' : 'Comments'}`}
+              </span>
+
               <span style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -514,15 +543,6 @@ function FeaturedStory({ blog, commentCount }: { blog: Blog; commentCount: numbe
               }}>
                 Read <ArrowRight size={12} />
               </span>
-
-              {commentCount > 0 && (
-                <span style={{
-                  fontSize: 12,
-                  color: 'var(--text-tertiary)',
-                }}>
-                  {commentCount} {commentCount === 1 ? 'comment' : 'comments'}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -586,7 +606,7 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
             fontWeight: 400,
             color: 'var(--text-secondary)',
           }}>
-            {blog.date}
+            {blog.date ? formatDate(blog.date) : ''}
           </span>
         </div>
 
@@ -606,17 +626,15 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
           {blog.title}
         </h3>
 
-        {/* Comment count */}
-        {commentCount > 0 && (
-          <p style={{
-            fontSize: 12,
-            color: 'var(--text-tertiary)',
-            marginTop: 8,
-            margin: '8px 0 0',
-          }}>
-            {commentCount} {commentCount === 1 ? 'comment' : 'comments'}
-          </p>
-        )}
+        {/* Author + Comment count */}
+        <p style={{
+          fontSize: 11,
+          color: 'var(--text-tertiary)',
+          margin: '8px 0 0',
+        }}>
+          by {blog.author || 'Yussi'}
+          {commentCount > 0 && ` · ${commentCount} ${commentCount === 1 ? 'Comment' : 'Comments'}`}
+        </p>
       </div>
     </Link>
   );

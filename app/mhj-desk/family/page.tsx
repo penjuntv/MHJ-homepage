@@ -167,7 +167,7 @@ export default function AdminFamilyPage() {
               style={inputStyle}
               value={member.name}
               onChange={e => update(member.id, 'name', e.target.value)}
-              placeholder="CHO YUMIN"
+              placeholder="FAMILY MEMBER"
             />
           </div>
           <div>

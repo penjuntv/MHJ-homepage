@@ -7,10 +7,10 @@ export const dynamic = 'force-dynamic';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
-  title: 'Media Kit — MY MAIRANGI',
+  title: 'Media Kit',
   description: 'Partner with My Mairangi Journal. Reach families on Auckland\'s North Shore through newsletter sponsorship, sponsored posts, and affiliate partnerships.',
   openGraph: {
-    title: 'Media Kit — MY MAIRANGI',
+    title: 'Media Kit',
     description: 'Partner with My Mairangi Journal. Reach families on Auckland\'s North Shore.',
     url: `${SITE_URL}/media-kit`,
   },

@@ -66,18 +66,17 @@ function ArticleCard({ article, staggerClass, onClick }: CardProps) {
       onClick={onClick}
       style={{ cursor: 'pointer' }}
     >
-      {/* 이미지 래퍼 — hover 시 translateY(-16px) */}
+      {/* 이미지 래퍼 */}
       <div
         style={{
           aspectRatio: '3/4',
           overflow: 'hidden',
-          borderRadius: 32,
+          borderRadius: 12,
           marginBottom: 32,
           boxShadow: hovered
             ? '0 30px 60px rgba(0,0,0,0.15)'
             : '0 15px 40px rgba(0,0,0,0.08)',
           position: 'relative',
-          transform: hovered ? 'translateY(-16px)' : 'translateY(0)',
           transition: 'all 0.5s',
         }}
         onMouseEnter={() => setHovered(true)}

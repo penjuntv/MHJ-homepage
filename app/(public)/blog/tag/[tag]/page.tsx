@@ -12,7 +12,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURIComponent(params.tag);
   return {
-    title: `Posts tagged #${tag} | MY MAIRANGI`,
+    title: `Posts tagged #${tag}`,
     description: `Posts tagged #${tag} on MY MAIRANGI`,
     alternates: { canonical: `${SITE_URL}/blog/tag/${tag}` },
   };

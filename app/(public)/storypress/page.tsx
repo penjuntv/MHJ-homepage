@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
-  title: 'StoryPress — 4 Words a Day, One Storybook at a Time | MY MAIRANGI',
+  title: 'StoryPress — 4 Words a Day, One Storybook at a Time',
   description: 'Your child meets 4 new English words a day, creates a story page, and builds a real storybook — with their name on the cover. For ESOL families in Auckland and beyond.',
   openGraph: {
     title: 'StoryPress — 4 Words a Day, One Storybook at a Time',

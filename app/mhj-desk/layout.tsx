@@ -213,7 +213,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Search size={14} /> Search Console
           </a>
           <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '8px 4px' }} />
-          <Link href="https://mhj-homepage.vercel.app" target="_blank" rel="noopener noreferrer" style={{
+          <Link href="https://www.mhj.nz" target="_blank" rel="noopener noreferrer" style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 14px', borderRadius: 10, textDecoration: 'none',
             color: 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 700,

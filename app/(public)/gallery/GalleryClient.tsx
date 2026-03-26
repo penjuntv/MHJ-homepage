@@ -73,7 +73,7 @@ export default function GalleryClient({ items, galleryTitle, galleryDescription 
   const currentItem = lightboxIndex !== null ? filtered[lightboxIndex] : null;
 
   return (
-    <section style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 80px)', maxWidth: 1400, margin: '0 auto' }}>
+    <section style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 80px)', maxWidth: 1320, margin: '0 auto' }}>
 
       {/* ─── 헤더 ─── */}
       <div style={{

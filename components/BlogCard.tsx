@@ -20,13 +20,12 @@ export default function BlogCard({ blog, onClick, staggerIndex }: Props) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        borderRadius: '40px',
+        borderRadius: '12px',
         overflow: 'hidden',
         cursor: 'pointer',
         aspectRatio: '1/1',
         position: 'relative',
         boxShadow: hovered ? '0 30px 60px rgba(0,0,0,0.15)' : '0 4px 12px rgba(0,0,0,0.04)',
-        transform: hovered ? 'translateY(-16px)' : 'translateY(0)',
         transition: 'all 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >

@@ -18,7 +18,7 @@ const BLOG_LIST_URL = `${BASE_URL}/blog`;
 const OUTPUT_DIR = path.join(process.cwd(), 'scripts', 'output');
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'framer-blogs.json');
 const DELAY_MS = 1000; // 요청 간 딜레이 (ms)
-const AUTHOR = 'Heejong Jo';
+const AUTHOR = 'Yussi';
 
 // 카테고리 매핑 (slug 접두사 기준)
 const CATEGORY_MAP: Record<string, string> = {

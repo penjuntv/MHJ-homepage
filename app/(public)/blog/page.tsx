@@ -35,7 +35,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     title,
     description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
     openGraph: {
-      title: `${title} — MY MAIRANGI`,
+      title: title,
       description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
       url: canonical.toString(),
       images: [{ url: `${SITE_URL}/og-blog.jpg`, width: 1200, height: 630 }],

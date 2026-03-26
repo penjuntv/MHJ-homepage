@@ -7,7 +7,7 @@
 
 ## 현재 완성 상태
 
-### 라이브 사이트: https://mhj-homepage.vercel.app
+### 라이브 사이트: https://www.mhj.nz
 
 | 구분 | 완성된 항목 |
 |------|-----------|

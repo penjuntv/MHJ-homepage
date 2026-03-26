@@ -11,9 +11,9 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
   title: 'About',
-  description: '뉴질랜드 마이랑이 베이에 사는 한국인 가족 이야기. 기자 출신 아빠 조상목, 사회복지 석사 엄마 유희종, 그리고 세 딸 유민·유현·유진.',
+  description: '뉴질랜드 마이랑이 베이에 사는 한국인 가족 이야기. 기자 출신 아빠, 사회복지 석사 엄마, 그리고 세 딸의 일상을 기록합니다.',
   openGraph: {
-    title: 'About — MY MAIRANGI',
+    title: 'About',
     description: '뉴질랜드 마이랑이 베이에 사는 한국인 가족 이야기.',
     url: `${SITE_URL}/about`,
     images: [{ url: `${SITE_URL}/og-about.jpg`, width: 1200, height: 630 }],
@@ -24,26 +24,26 @@ export const metadata: Metadata = {
 const FALLBACK_MEMBERS: FamilyMember[] = [
   {
     id: 1,
-    name: 'CHO YUMIN',
-    role: 'First Daughter / Year 6',
+    name: 'FIRST DAUGHTER',
+    role: 'Year 6',
     bio: '머레이스 베이 초등학교의 든든한 첫째. 그림 그리는 것을 좋아하고 뉴질랜드의 드넓은 자연에서 새로운 영감을 찾고 있습니다.',
-    image_url: 'https://picsum.photos/seed/yumin/400/500',
+    image_url: 'https://picsum.photos/seed/daughter1/400/500',
     sort_order: 1,
   },
   {
     id: 2,
-    name: 'CHO YUHYEON',
-    role: 'Second Daughter / Year 5',
+    name: 'SECOND DAUGHTER',
+    role: 'Year 5',
     bio: '호기심 많은 둘째. 학교 축구팀에서 활약하며 뉴질랜드 친구들과 금방 가까워진 사교성 만점의 소녀입니다.',
-    image_url: 'https://picsum.photos/seed/yuhyeon/400/500',
+    image_url: 'https://picsum.photos/seed/daughter2/400/500',
     sort_order: 2,
   },
   {
     id: 3,
-    name: 'CHO YUJIN',
-    role: 'Third Daughter / Year 1 (Soon)',
+    name: 'THIRD DAUGHTER',
+    role: 'Year 1 (Soon)',
     bio: '우리 집의 귀염둥이 막내. 내년 머레이스 베이 입학을 기다리며 매일 언니들의 가방을 탐내는 야심가입니다.',
-    image_url: 'https://picsum.photos/seed/yujin/400/500',
+    image_url: 'https://picsum.photos/seed/daughter3/400/500',
     sort_order: 3,
   },
 ];

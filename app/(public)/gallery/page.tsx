@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: 'Photo Gallery',
   description: '마이랑이 베이에서 담아낸 우리 가족의 순간들.',
   openGraph: {
-    title: 'Photo Gallery — MY MAIRANGI',
+    title: 'Photo Gallery',
     description: '마이랑이 베이에서 담아낸 우리 가족의 순간들.',
     url: `${SITE_URL}/gallery`,
     images: [{ url: `${SITE_URL}/og-gallery.jpg`, width: 1200, height: 630 }],

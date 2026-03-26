@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import Anthropic from '@anthropic-ai/sdk';
 
 const client = new Anthropic({
@@ -6,6 +8,23 @@ const client = new Anthropic({
 });
 
 export async function POST(req: NextRequest) {
+  /* ── 인증 체크 ── */
+  const cookieStore = cookies();
+  const authClient = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll(); },
+        setAll() {},
+      },
+    }
+  );
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { title, content } = await req.json();
 
