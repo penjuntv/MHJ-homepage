@@ -116,15 +116,12 @@ async function getLatestMagazine(): Promise<Magazine | null> {
   return (data?.[0] as Magazine) ?? null;
 }
 
-async function getMagazineArticles(magazineId: string): Promise<{ title: string }[]> {
-  const { data } = await supabase
+async function getMagazineArticleCount(magazineId: string): Promise<number> {
+  const { count } = await supabase
     .from('articles')
-    .select('title, sort_order')
-    .eq('magazine_id', magazineId)
-    .order('sort_order', { ascending: true })
-    .limit(4);
-
-  return (data ?? []) as { title: string }[];
+    .select('id', { count: 'exact', head: true })
+    .eq('magazine_id', magazineId);
+  return count ?? 0;
 }
 
 /* ─── Helpers ─── */
@@ -147,7 +144,7 @@ export default async function LandingPage() {
     getLatestMagazine(),
   ]);
 
-  const magArticles = latestMag ? await getMagazineArticles(String(latestMag.id)) : [];
+  const magArticleCount = latestMag ? await getMagazineArticleCount(String(latestMag.id)) : 0;
 
   const allBlogIds = [featured?.id, ...latest.map(b => b.id), ...mostRead.map(b => b.id)].filter((id): id is number => typeof id === 'number');
   const commentCounts = await getCommentCounts(allBlogIds);
@@ -370,22 +367,11 @@ export default async function LandingPage() {
         {/* ═══════ §4. Magazine Feature ═══════ */}
         {latestMag && (
           <section style={{ maxWidth: 1320, margin: '0 auto', padding: '48px clamp(20px, 4vw, 48px) 0' }}>
-            <p style={{
-              fontSize: 10,
-              fontWeight: 900,
-              letterSpacing: 5,
-              textTransform: 'uppercase',
-              color: 'var(--text-tertiary)',
-              marginBottom: 24,
-            }}>
-              From the Magazine
-            </p>
-
             <Link
               href="/magazine"
               style={{
                 display: 'block',
-                padding: 32,
+                padding: 'clamp(24px, 4vw, 48px)',
                 borderRadius: 12,
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border)',
@@ -395,8 +381,8 @@ export default async function LandingPage() {
             >
               <div className="magazine-feature-grid">
                 {/* Cover */}
-                <div style={{
-                  height: 240,
+                <div className="magazine-cover-shadow" style={{
+                  height: 280,
                   aspectRatio: '3/4',
                   borderRadius: 8,
                   overflow: 'hidden',
@@ -411,63 +397,61 @@ export default async function LandingPage() {
                   />
                 </div>
 
-                {/* Info + TOC */}
+                {/* Info */}
                 <div>
                   <p style={{
-                    fontSize: 13,
+                    fontSize: 11,
+                    fontWeight: 900,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
                     color: 'var(--text-secondary)',
-                    marginBottom: 8,
+                    marginBottom: 16,
                   }}>
-                    {latestMag.year} {latestMag.month_name}
-                    {latestMag.issue_number ? ` · Issue ${latestMag.issue_number}` : ''}
+                    From the Magazine
                   </p>
 
                   <h3 className="font-display" style={{
-                    fontSize: 'clamp(24px, 3vw, 36px)',
+                    fontSize: 'clamp(24px, 3vw, 28px)',
                     fontWeight: 900,
                     fontStyle: 'italic',
                     color: 'var(--text)',
                     letterSpacing: -0.5,
                     lineHeight: 1.1,
-                    margin: '0 0 16px',
+                    margin: '0 0 12px',
                   }}>
                     {latestMag.title}
                   </h3>
 
-                  {/* Article TOC */}
-                  {magArticles.length > 0 && (
-                    <ul style={{
-                      listStyle: 'none',
-                      padding: 0,
-                      margin: '0 0 24px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 8,
+                  <p style={{
+                    fontSize: 14,
+                    color: 'var(--text-secondary)',
+                    marginBottom: 8,
+                  }}>
+                    {latestMag.year} {latestMag.month_name}
+                    {latestMag.issue_number ? ` · Issue ${String(latestMag.issue_number).padStart(2, '0')}` : ''}
+                  </p>
+
+                  {magArticleCount > 0 && (
+                    <p style={{
+                      fontSize: 14,
+                      color: 'var(--text-tertiary)',
+                      marginBottom: 24,
                     }}>
-                      {magArticles.map((article, i) => (
-                        <li key={i} style={{
-                          fontSize: 15,
-                          fontWeight: 400,
-                          color: 'var(--text-secondary)',
-                          lineHeight: 1.4,
-                        }}>
-                          · {article.title}
-                        </li>
-                      ))}
-                    </ul>
+                      {magArticleCount} {magArticleCount === 1 ? 'story' : 'stories'} inside
+                    </p>
                   )}
 
                   <span style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 6,
-                    fontSize: 11,
+                    fontSize: 13,
                     fontWeight: 900,
                     letterSpacing: 2,
                     textTransform: 'uppercase',
                     color: 'var(--text-secondary)',
                   }}>
-                    Browse All Issues <ArrowRight size={12} />
+                    Browse Issues <ArrowRight size={12} />
                   </span>
                 </div>
               </div>
@@ -520,28 +504,19 @@ function FeaturedStory({ blog, commentCount }: { blog: Blog; commentCount: numbe
           <div>
             <span style={{
               fontSize: 11,
-              fontWeight: 900,
+              fontWeight: 600,
               letterSpacing: 2,
               textTransform: 'uppercase',
               color: 'var(--text-secondary)',
             }}>
               {blog.category}
+              {blog.date && ` · ${formatDate(blog.date)}`}
             </span>
-
-            {blog.date && (
-              <p style={{
-                fontSize: 13,
-                color: 'var(--text-tertiary)',
-                margin: '8px 0 0',
-              }}>
-                {formatDate(blog.date)}
-              </p>
-            )}
 
             <h1
               className="font-display"
               style={{
-                fontSize: 'clamp(28px, 4vw, 48px)',
+                fontSize: 'clamp(28px, 4vw, 36px)',
                 fontWeight: 900,
                 fontStyle: 'italic',
                 letterSpacing: -1,
@@ -557,7 +532,7 @@ function FeaturedStory({ blog, commentCount }: { blog: Blog; commentCount: numbe
               <p style={{
                 fontSize: 16,
                 color: 'var(--text-secondary)',
-                lineHeight: 1.7,
+                lineHeight: 1.6,
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
@@ -568,28 +543,22 @@ function FeaturedStory({ blog, commentCount }: { blog: Blog; commentCount: numbe
               </p>
             )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <span style={{
+              fontSize: 14,
+              color: 'var(--text-tertiary)',
+            }}>
+              by {blog.author || 'Yussi'}
+              {commentCount > 0 && ` · ${commentCount} ${commentCount === 1 ? 'Comment' : 'Comments'}`}
+              {' · '}
               <span style={{
-                fontSize: 11,
-                color: 'var(--text-tertiary)',
-              }}>
-                by {blog.author || 'Yussi'}
-                {commentCount > 0 && ` · ${commentCount} ${commentCount === 1 ? 'Comment' : 'Comments'}`}
-              </span>
-
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 11,
                 fontWeight: 900,
                 letterSpacing: 2,
                 textTransform: 'uppercase',
                 color: 'var(--text-secondary)',
               }}>
-                Read <ArrowRight size={12} />
+                Read <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
               </span>
-            </div>
+            </span>
           </div>
         </div>
       </Link>

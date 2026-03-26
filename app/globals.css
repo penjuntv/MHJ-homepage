@@ -823,7 +823,7 @@
 .featured-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 32px;
+  gap: 16px;
 }
 @media (min-width: 768px) {
   .featured-grid {
@@ -872,17 +872,27 @@
   }
 }
 
-/* Magazine feature section 좌우 배치 */
+/* Magazine feature section: 모바일 중앙, 데스크톱 가로 배치 */
 .magazine-feature-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
 }
 @media (min-width: 640px) {
   .magazine-feature-grid {
-    grid-template-columns: auto 1fr;
-    gap: 40px;
+    flex-direction: row;
     align-items: center;
+    gap: 40px;
+    text-align: left;
   }
+}
+
+/* Magazine cover shadow (다크 모드 대응) */
+.magazine-cover-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+.dark .magazine-cover-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
