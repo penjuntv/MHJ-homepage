@@ -80,7 +80,7 @@ function CommentForm({
     // 30초 클라이언트 쿨다운
     const last = sessionStorage.getItem(COOLDOWN_KEY);
     if (last && Date.now() - Number(last) < COOLDOWN_MS) {
-      setToast('잠시 후 다시 시도해주세요.');
+      setToast('Please wait a moment before trying again.');
       setTimeout(() => setToast(''), 3000);
       return;
     }
@@ -102,23 +102,23 @@ function CommentForm({
     if (res.ok) {
       sessionStorage.setItem(COOLDOWN_KEY, String(Date.now()));
       setForm({ name: '', email: '', content: '' });
-      setToast('댓글이 등록되었습니다. 승인 후 표시됩니다.');
+      setToast('Your comment has been submitted and will appear after approval.');
       setTimeout(() => { setToast(''); onSubmitted(); }, 3000);
     } else {
       const data = await res.json().catch(() => ({}));
-      setToast(data.error || '오류가 발생했습니다. 다시 시도해주세요.');
+      setToast(data.error || 'Something went wrong. Please try again.');
       setTimeout(() => setToast(''), 5000);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{
+    <form onSubmit={handleSubmit} style={compact ? {
       background: 'var(--bg-surface)',
       borderRadius: 12,
-      padding: compact ? 16 : 'clamp(24px, 4vw, 40px)',
-      marginBottom: compact ? 16 : 32,
+      padding: 16,
+      marginBottom: 16,
       border: '1px solid var(--border)',
-    }}>
+    } : undefined}>
       {/* 허니팟 — 봇만 채우는 hidden 필드 */}
       <div style={{ position: 'absolute', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true">
         <label htmlFor="website">Website</label>
@@ -151,7 +151,7 @@ function CommentForm({
             onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
             onFocus={() => setFocused('name')}
             onBlur={() => setFocused(null)}
-            placeholder="닉네임"
+            placeholder="Name"
             required
             maxLength={NAME_MAX}
             style={inputStyle('name')}
@@ -175,7 +175,7 @@ function CommentForm({
             onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
             onFocus={() => setFocused('email')}
             onBlur={() => setFocused(null)}
-            placeholder="이메일 (공개되지 않습니다)"
+            placeholder="Email (not displayed)"
             required
             maxLength={100}
             style={inputStyle('email')}
@@ -200,10 +200,10 @@ function CommentForm({
           onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
           onFocus={() => setFocused('content')}
           onBlur={() => setFocused(null)}
-          placeholder={parentId ? '답글을 남겨주세요' : '댓글을 남겨주세요'}
+          placeholder={parentId ? 'Write a reply' : 'Leave a comment'}
           required
           maxLength={CONTENT_MAX}
-          rows={compact ? 3 : 5}
+          rows={3}
           style={{ ...inputStyle('content'), resize: 'vertical' }}
         />
         <p style={{
@@ -236,7 +236,7 @@ function CommentForm({
             transition: 'opacity 0.2s',
           }}
         >
-          {submitting ? 'Submitting...' : parentId ? '답글 남기기' : '댓글 남기기'}
+          {submitting ? 'Submitting...' : 'Submit'}
         </button>
 
         {onCancel && (
@@ -504,6 +504,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
     <section style={{
       padding: 'clamp(32px, 4vw, 48px) clamp(24px, 4vw, 40px)',
       background: 'var(--bg)',
+      borderTop: '1px solid var(--border)',
     }}>
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
 
@@ -520,9 +521,6 @@ export default function CommentSection({ blogId }: { blogId: number }) {
           </h2>
         </div>
 
-        {/* 댓글 작성 폼 */}
-        <CommentForm blogId={blogId} onSubmitted={fetchComments} />
-
         {/* 댓글 목록 */}
         {loading ? (
           <p style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', padding: '32px 0' }}>
@@ -536,10 +534,10 @@ export default function CommentSection({ blogId }: { blogId: number }) {
             padding: '32px 0',
             fontStyle: 'italic',
           }}>
-            아직 댓글이 없습니다. 첫 댓글을 남겨보세요.
+            No comments yet. Be the first to share your thoughts.
           </p>
         ) : (
-          <div>
+          <div style={{ marginBottom: 32 }}>
             {topLevel.map((c, i) => (
               <div
                 key={c.id}
@@ -561,6 +559,9 @@ export default function CommentSection({ blogId }: { blogId: number }) {
             ))}
           </div>
         )}
+
+        {/* 댓글 작성 폼 */}
+        <CommentForm blogId={blogId} onSubmitted={fetchComments} />
       </div>
     </section>
   );

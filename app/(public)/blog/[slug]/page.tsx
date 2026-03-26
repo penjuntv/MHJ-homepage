@@ -11,7 +11,6 @@ import RelatedCard from './RelatedCard';
 import ShareButton from '@/components/ShareButton';
 import CommentSection from './CommentSection';
 import AiInsight from '@/components/AiInsight';
-import ShareButtons from '@/components/ShareButtons';
 import BlogReadTracker from './BlogReadTracker';
 
 async function getBlogForPreview(slug: string): Promise<Blog | null> {
@@ -643,9 +642,6 @@ export default async function BlogDetailPage({
             )}
           </article>
         </div>
-
-        {/* Share Buttons */}
-        <ShareButtons title={blog.title} slug={blog.slug} />
 
         {/* 6) 댓글 섹션 */}
         <CommentSection blogId={blog.id} />
