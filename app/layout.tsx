@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 가족의 이야기. 기자 출신 아빠, 석사 과정 엄마, 세 딸의 라이프 매거진.',
   keywords: ['뉴질랜드', '오클랜드', '노스쇼어', '마이랑이', 'Mairangi Bay', '가족', '육아', '이민', '뉴질랜드 생활'],
-  authors: [{ name: '조상목 (PeNnY)' }, { name: 'Yussi' }],
+  authors: [{ name: 'PeNnY' }, { name: 'Yussi' }],
   creator: 'MY MAIRANGI',
   publisher: 'MY MAIRANGI',
   openGraph: {
@@ -43,6 +43,13 @@ export const metadata: Metadata = {
   alternates: { canonical: BASE_URL },
   icons: {
     icon: '/icon',
+    apple: '/apple-icon',
+  },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'MY MAIRANGI',
   },
 };
 
@@ -80,9 +87,11 @@ const themeScript = `
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script
           type="application/ld+json"

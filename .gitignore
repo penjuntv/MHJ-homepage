@@ -39,4 +39,5 @@ next-env.d.ts
 # playwright & screenshots
 .playwright-mcp/
 *.png
+!public/icon-*.png
 *.jpg.tmp
