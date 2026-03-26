@@ -27,10 +27,10 @@ export async function GET(req: NextRequest) {
 // POST: 새 댓글 제출 (approved=false 기본값) — anon key + RLS "Public insert" 정책으로 처리
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { blog_id, name, email, content, parent_id, honeypot } = body;
+  const { blog_id, name, email, content, parent_id, honeypot, website } = body;
 
   // 허니팟 스팸 방지: 봇이 채운 hidden 필드 → silent 성공 반환
-  if (honeypot) {
+  if (honeypot || website) {
     return NextResponse.json(
       { message: 'Comment submitted for review' },
       { status: 201 },
