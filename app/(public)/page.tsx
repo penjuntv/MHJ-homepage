@@ -574,31 +574,28 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                 className="hero-sub-card"
                 style={{
                   textDecoration: 'none',
-                  paddingBottom: 24,
+                  paddingBottom: i < subs.length - 1 ? 24 : 0,
                   borderBottom: i < subs.length - 1 ? '0.5px solid var(--border)' : 'none',
-                  paddingTop: i > 0 ? 24 : 0,
                 }}
               >
                 <div style={{
-                  width: 80,
-                  height: 80,
+                  position: 'relative',
+                  aspectRatio: '16/10',
+                  width: '100%',
                   borderRadius: 8,
                   overflow: 'hidden',
-                  position: 'relative',
-                  flexShrink: 0,
                 }}>
                   <SafeImage
                     src={blog.image_url}
                     alt={blog.title}
                     fill
                     className="object-cover"
-                    style={{ objectPosition: 'center' }}
                   />
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div>
                   <span style={{
                     fontSize: 11,
-                    fontWeight: 900,
+                    fontWeight: 600,
                     letterSpacing: 2,
                     textTransform: 'uppercase',
                     color: 'var(--text-secondary)',
