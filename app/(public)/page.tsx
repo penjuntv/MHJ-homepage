@@ -574,9 +574,9 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                 className="hero-sub-card"
                 style={{
                   textDecoration: 'none',
-                  paddingBottom: i < subs.length - 1 ? 24 : 0,
+                  paddingBottom: i < subs.length - 1 ? 16 : 0,
                   borderBottom: i < subs.length - 1 ? '0.5px solid var(--border)' : 'none',
-                  paddingTop: i > 0 ? 24 : 0,
+                  paddingTop: i > 0 ? 16 : 0,
                 }}
               >
                 <div style={{

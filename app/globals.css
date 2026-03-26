@@ -828,7 +828,8 @@
 .hero-sub-cards {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 0;
+  align-self: start;
 }
 .hero-sub-card {
   display: flex;
@@ -853,7 +854,7 @@
     align-items: start;
   }
   .hero-sub-cards {
-    gap: 24px;
+    gap: 0;
   }
 }
 
