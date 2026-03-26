@@ -819,17 +819,45 @@
 
 /* === Homepage Redesign Grids === */
 
-/* Featured Story: 데스크톱 3:2 가로 배치, 모바일 세로 스택 */
-.featured-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+/* Hero Editorial Grid: 메인(60%) + 서브(40%) */
+.hero-editorial-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.hero-sub-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  justify-content: center;
+}
+.hero-sub-card {
+  display: flex;
   gap: 16px;
+  align-items: flex-start;
 }
 @media (min-width: 768px) {
-  .featured-grid {
-    grid-template-columns: 3fr 2fr;
-    gap: 48px;
-    align-items: center;
+  .hero-sub-cards {
+    flex-direction: row;
+    gap: 24px;
+  }
+  .hero-sub-cards > * {
+    flex: 1;
+  }
+}
+@media (min-width: 1024px) {
+  .hero-editorial-grid {
+    flex-direction: row;
+    gap: 40px;
+  }
+  .hero-editorial-grid > .hero-main {
+    flex: 3;
+    min-width: 0;
+  }
+  .hero-editorial-grid > .hero-sub-cards {
+    flex: 2;
+    flex-direction: column;
+    gap: 24px;
   }
 }
 

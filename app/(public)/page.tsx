@@ -31,10 +31,10 @@ const FALLBACK_BLOGS: Blog[] = [
 
 /* ─── Data fetching ─── */
 
-async function getFeaturedPost(): Promise<Blog | null> {
+async function getFeaturedPosts(): Promise<Blog[]> {
   const now = new Date().toISOString();
 
-  // 1) featured=true 최신
+  // 1) featured=true 최신 3개
   const { data: featured } = await supabase
     .from('blogs')
     .select('*')
@@ -42,33 +42,37 @@ async function getFeaturedPost(): Promise<Blog | null> {
     .eq('featured', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
-    .limit(1);
+    .limit(3);
 
-  if (featured?.length) return featured[0] as Blog;
+  if (featured?.length) return featured as Blog[];
 
-  // 2) fallback: 최신 published
+  // 2) fallback: 최신 published 3개
   const { data: latest } = await supabase
     .from('blogs')
     .select('*')
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
-    .limit(1);
+    .limit(3);
 
-  return (latest?.[0] as Blog) ?? FALLBACK_BLOGS[0];
+  return (latest as Blog[]) ?? FALLBACK_BLOGS;
 }
 
-async function getLatestPosts(excludeId: number): Promise<Blog[]> {
+async function getLatestPosts(excludeIds: number[]): Promise<Blog[]> {
   const now = new Date().toISOString();
-  const { data } = await supabase
+  let query = supabase
     .from('blogs')
     .select('*')
     .eq('published', true)
-    .neq('id', excludeId)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
     .limit(6);
 
+  if (excludeIds.length) {
+    query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+  }
+
+  const { data } = await query;
   return (data ?? FALLBACK_BLOGS.slice(1)) as Blog[];
 }
 
@@ -133,11 +137,11 @@ function formatDate(dateStr: string): string {
 /* ─── Page component ─── */
 
 export default async function LandingPage() {
-  const featured = await getFeaturedPost();
-  const excludeId = featured?.id ?? 0;
+  const heroBlogs = await getFeaturedPosts();
+  const heroIds = heroBlogs.map(b => b.id);
 
-  const latest = await getLatestPosts(excludeId);
-  const allExcludeIds = [excludeId, ...latest.map(b => b.id)].filter(Boolean);
+  const latest = await getLatestPosts(heroIds);
+  const allExcludeIds = [...heroIds, ...latest.map(b => b.id)].filter(Boolean);
 
   const [mostRead, latestMag] = await Promise.all([
     getMostReadBlogs(allExcludeIds),
@@ -146,7 +150,7 @@ export default async function LandingPage() {
 
   const magArticleCount = latestMag ? await getMagazineArticleCount(String(latestMag.id)) : 0;
 
-  const allBlogIds = [featured?.id, ...latest.map(b => b.id), ...mostRead.map(b => b.id)].filter((id): id is number => typeof id === 'number');
+  const allBlogIds = [...heroBlogs.map(b => b.id), ...latest.map(b => b.id), ...mostRead.map(b => b.id)].filter((id): id is number => typeof id === 'number');
   const commentCounts = await getCommentCounts(allBlogIds);
 
   const jsonLd = {
@@ -176,10 +180,10 @@ export default async function LandingPage() {
       />
       <div className="animate-fade-in">
 
-        {/* ═══════ §1. Featured Story (full-bleed surface bg) ═══════ */}
-        {featured && (
+        {/* ═══════ §1. Editorial Hero (full-bleed surface bg) ═══════ */}
+        {heroBlogs.length > 0 && (
           <div style={{ background: 'var(--bg-surface)' }}>
-            <FeaturedStory blog={featured} commentCount={commentCounts[featured.id] ?? 0} />
+            <EditorialHero blogs={heroBlogs} commentCounts={commentCounts} />
           </div>
         )}
 
@@ -469,99 +473,154 @@ export default async function LandingPage() {
   );
 }
 
-/* ─── Featured Story section ─── */
-function FeaturedStory({ blog, commentCount }: { blog: Blog; commentCount: number }) {
-  const excerpt = blog.content
-    ?.replace(/<[^>]*>/g, '')
-    .slice(0, 160)
-    .trim();
+/* ─── Editorial Hero section ─── */
+function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts: Record<number, number> }) {
+  const main = blogs[0];
+  const subs = blogs.slice(1);
+
+  function getExcerpt(blog: Blog): string {
+    if (blog.meta_description) return blog.meta_description;
+    return blog.content?.replace(/<[^>]*>/g, '').slice(0, 160).trim() ?? '';
+  }
+
+  const mainExcerpt = getExcerpt(main);
+  const mainComments = commentCounts[main.id] ?? 0;
 
   return (
     <section style={{
       maxWidth: 1320,
       margin: '0 auto',
-      padding: 'clamp(64px, 8vw, 96px) clamp(20px, 4vw, 48px) 64px',
+      padding: '48px clamp(20px, 4vw, 48px)',
     }}>
-      <Link href={`/blog/${blog.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-        <div className="featured-grid">
-          {/* Image */}
-          <div style={{
-            position: 'relative',
-            aspectRatio: '16/10',
-            borderRadius: 12,
-            overflow: 'hidden',
-          }}>
-            <SafeImage
-              src={blog.image_url}
-              alt={blog.title}
-              fill
-              className="object-cover"
-              style={{ transition: 'transform 0.5s ease' }}
-            />
-          </div>
-
-          {/* Text */}
-          <div>
-            <span style={{
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: 2,
-              textTransform: 'uppercase',
-              color: 'var(--text-secondary)',
+      <div className="hero-editorial-grid">
+        {/* Main Featured */}
+        <div className="hero-main">
+          <Link href={`/blog/${main.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
+            <div style={{
+              position: 'relative',
+              aspectRatio: '16/10',
+              borderRadius: 12,
+              overflow: 'hidden',
             }}>
-              {blog.category}
-              {blog.date && ` · ${formatDate(blog.date)}`}
-            </span>
+              <SafeImage
+                src={main.og_image_url || main.image_url}
+                alt={main.title}
+                fill
+                className="object-cover"
+              />
+            </div>
 
-            <h1
-              className="font-display"
-              style={{
-                fontSize: 'clamp(28px, 4vw, 36px)',
-                fontWeight: 900,
-                fontStyle: 'italic',
-                letterSpacing: -1,
-                lineHeight: 1.1,
-                color: 'var(--text)',
-                margin: '12px 0 16px',
-              }}
-            >
-              {blog.title}
-            </h1>
-
-            {excerpt && (
-              <p style={{
-                fontSize: 16,
-                color: 'var(--text-secondary)',
-                lineHeight: 1.6,
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                marginBottom: 16,
-              }}>
-                {excerpt}
-              </p>
-            )}
-
-            <span style={{
-              fontSize: 14,
-              color: 'var(--text-tertiary)',
-            }}>
-              by {blog.author || 'Yussi'}
-              {commentCount > 0 && ` · ${commentCount} ${commentCount === 1 ? 'Comment' : 'Comments'}`}
-              {' · '}
+            <div style={{ marginTop: 16 }}>
               <span style={{
-                fontWeight: 900,
+                fontSize: 12,
+                fontWeight: 600,
                 letterSpacing: 2,
                 textTransform: 'uppercase',
                 color: 'var(--text-secondary)',
               }}>
-                Read <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                {main.category}
+                {main.date && ` · ${formatDate(main.date)}`}
               </span>
-            </span>
-          </div>
+
+              <h1
+                className="font-display"
+                style={{
+                  fontSize: 'clamp(26px, 4vw, 32px)',
+                  fontWeight: 900,
+                  fontStyle: 'italic',
+                  letterSpacing: -1,
+                  lineHeight: 1.1,
+                  color: 'var(--text)',
+                  margin: '8px 0',
+                }}
+              >
+                {main.title}
+              </h1>
+
+              {mainExcerpt && (
+                <p style={{
+                  fontSize: 16,
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.6,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  margin: '8px 0 0',
+                }}>
+                  {mainExcerpt}
+                </p>
+              )}
+
+              <span style={{ fontSize: 14, color: 'var(--text-tertiary)', marginTop: 12, display: 'block' }}>
+                by {main.author || 'Yussi'}
+                {mainComments > 0 && ` · ${mainComments} ${mainComments === 1 ? 'Comment' : 'Comments'}`}
+                {' · '}
+                <span style={{ fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                  Read <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                </span>
+              </span>
+            </div>
+          </Link>
         </div>
-      </Link>
+
+        {/* Sub Featured Cards */}
+        {subs.length > 0 && (
+          <div className="hero-sub-cards">
+            {subs.map((blog) => (
+              <Link
+                key={blog.id}
+                href={`/blog/${blog.slug}`}
+                className="hero-sub-card"
+                style={{ textDecoration: 'none', paddingBottom: 24, borderBottom: '1px solid var(--border)' }}
+              >
+                <div style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 8,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  flexShrink: 0,
+                }}>
+                  <SafeImage
+                    src={blog.og_image_url || blog.image_url}
+                    alt={blog.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 900,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
+                    color: 'var(--text-secondary)',
+                  }}>
+                    {blog.category}
+                  </span>
+                  <p style={{
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: 'var(--text)',
+                    lineHeight: 1.4,
+                    margin: '4px 0',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}>
+                    {blog.title}
+                  </p>
+                  <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
+                    by {blog.author || 'Yussi'}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
