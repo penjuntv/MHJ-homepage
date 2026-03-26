@@ -828,15 +828,15 @@
 .hero-sub-cards {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  justify-content: center;
+  gap: 0;
+  justify-content: flex-start;
 }
 .hero-sub-card {
   display: flex;
   gap: 16px;
   align-items: flex-start;
 }
-@media (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .hero-sub-cards {
     flex-direction: row;
     gap: 24px;
@@ -857,7 +857,7 @@
   .hero-editorial-grid > .hero-sub-cards {
     flex: 2;
     flex-direction: column;
-    gap: 24px;
+    gap: 0;
   }
 }
 

@@ -567,12 +567,17 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
         {/* Sub Featured Cards */}
         {subs.length > 0 && (
           <div className="hero-sub-cards">
-            {subs.map((blog) => (
+            {subs.map((blog, i) => (
               <Link
                 key={blog.id}
                 href={`/blog/${blog.slug}`}
                 className="hero-sub-card"
-                style={{ textDecoration: 'none', paddingBottom: 24, borderBottom: '1px solid var(--border)' }}
+                style={{
+                  textDecoration: 'none',
+                  paddingBottom: 24,
+                  borderBottom: i < subs.length - 1 ? '0.5px solid var(--border)' : 'none',
+                  paddingTop: i > 0 ? 24 : 0,
+                }}
               >
                 <div style={{
                   width: 80,
@@ -583,10 +588,11 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                   flexShrink: 0,
                 }}>
                   <SafeImage
-                    src={blog.og_image_url || blog.image_url}
+                    src={blog.image_url}
                     alt={blog.title}
                     fill
                     className="object-cover"
+                    style={{ objectPosition: 'center' }}
                   />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
