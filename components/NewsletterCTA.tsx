@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
 
 export default function NewsletterCTA() {
@@ -175,6 +176,14 @@ export default function NewsletterCTA() {
                 {status === 'loading' ? '...' : 'Subscribe'}
               </button>
             </div>
+
+            {/* Privacy 동의 문구 */}
+            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
+              By subscribing, you agree to our{' '}
+              <Link href="/privacy" style={{ color: 'var(--text-tertiary)', textDecoration: 'underline' }}>
+                Privacy Policy
+              </Link>.
+            </p>
 
             {/* 피드백 메시지 */}
             {status === 'duplicate' && (
