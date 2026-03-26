@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await supabase
     .from('comments')
-    .select('id, blog_id, name, content, created_at, parent_id')
+    .select('id, blog_id, name, content, created_at, parent_id, is_admin')
     .eq('blog_id', Number(blogId))
     .eq('approved', true)
     .order('created_at', { ascending: true });
@@ -27,7 +27,15 @@ export async function GET(req: NextRequest) {
 // POST: 새 댓글 제출 (approved=false 기본값) — anon key + RLS "Public insert" 정책으로 처리
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { blog_id, name, email, content, parent_id } = body;
+  const { blog_id, name, email, content, parent_id, honeypot } = body;
+
+  // 허니팟 스팸 방지: 봇이 채운 hidden 필드 → silent 성공 반환
+  if (honeypot) {
+    return NextResponse.json(
+      { message: 'Comment submitted for review' },
+      { status: 201 },
+    );
+  }
 
   if (!blog_id || !name || !email || !content) {
     return NextResponse.json({ error: '모든 필드를 입력해주세요.' }, { status: 400 });
@@ -38,14 +46,14 @@ export async function POST(req: NextRequest) {
   const trimEmail = email.trim();
   const trimContent = content.trim();
 
-  if (trimName.length < 1 || trimName.length > 50) {
-    return NextResponse.json({ error: 'Name must be 1-50 characters.' }, { status: 400 });
+  if (trimName.length < 1 || trimName.length > 30) {
+    return NextResponse.json({ error: 'Name must be 1-30 characters.' }, { status: 400 });
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimEmail)) {
     return NextResponse.json({ error: 'Invalid email format.' }, { status: 400 });
   }
-  if (trimContent.length < 1 || trimContent.length > 2000) {
-    return NextResponse.json({ error: 'Content must be 1-2000 characters.' }, { status: 400 });
+  if (trimContent.length < 1 || trimContent.length > 500) {
+    return NextResponse.json({ error: 'Content must be 1-500 characters.' }, { status: 400 });
   }
 
   // IP 기반 60초 쿨다운

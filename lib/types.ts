@@ -84,6 +84,7 @@ export interface Comment {
   approved: boolean;
   created_at: string;
   parent_id?: number | null;
+  is_admin?: boolean;
   blog?: { title: string; slug: string };
 }
 

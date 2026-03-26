@@ -3,8 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Comment } from '@/lib/types';
 
-const AUTHOR_NAMES = ['Yussi', 'PeNnY'];
-
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
@@ -18,9 +16,22 @@ function timeAgo(dateStr: string): string {
   return `${mo} month${mo > 1 ? 's' : ''} ago`;
 }
 
-function isAuthor(name: string): boolean {
-  return AUTHOR_NAMES.some(a => a.toLowerCase() === name.toLowerCase());
-}
+const CONTENT_MAX = 500;
+const NAME_MAX = 30;
+const COOLDOWN_MS = 30_000;
+const COOLDOWN_KEY = 'mhj_comment_last';
+
+/* ── Author 뱃지 스타일 (achromatic, 작고 세련된) ─── */
+const authorBadgeStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 700,
+  color: 'var(--text-secondary)',
+  border: '1px solid var(--border-medium)',
+  borderRadius: 4,
+  padding: '1px 6px',
+  lineHeight: '16px',
+  letterSpacing: 0.5,
+};
 
 /* ── 댓글 폼 (최상위 + 답글 공용) ─────────────────────── */
 function CommentForm({
@@ -37,6 +48,7 @@ function CommentForm({
   compact?: boolean;
 }) {
   const [form, setForm] = useState({ name: '', email: '', content: '' });
+  const [honeypot, setHoneypot] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState('');
   const [focused, setFocused] = useState<string | null>(null);
@@ -64,6 +76,15 @@ function CommentForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name || !form.email || !form.content) return;
+
+    // 30초 클라이언트 쿨다운
+    const last = sessionStorage.getItem(COOLDOWN_KEY);
+    if (last && Date.now() - Number(last) < COOLDOWN_MS) {
+      setToast('잠시 후 다시 시도해주세요.');
+      setTimeout(() => setToast(''), 3000);
+      return;
+    }
+
     setSubmitting(true);
 
     const res = await fetch('/api/comments', {
@@ -72,18 +93,20 @@ function CommentForm({
       body: JSON.stringify({
         blog_id: blogId,
         ...form,
+        honeypot,
         ...(parentId ? { parent_id: parentId } : {}),
       }),
     });
 
     setSubmitting(false);
     if (res.ok) {
+      sessionStorage.setItem(COOLDOWN_KEY, String(Date.now()));
       setForm({ name: '', email: '', content: '' });
-      setToast('Your comment is awaiting approval. Thank you!');
+      setToast('댓글이 등록되었습니다. 승인 후 표시됩니다.');
       setTimeout(() => { setToast(''); onSubmitted(); }, 3000);
     } else {
       const data = await res.json().catch(() => ({}));
-      setToast(data.error || 'Something went wrong. Please try again.');
+      setToast(data.error || '오류가 발생했습니다. 다시 시도해주세요.');
       setTimeout(() => setToast(''), 5000);
     }
   }
@@ -91,11 +114,25 @@ function CommentForm({
   return (
     <form onSubmit={handleSubmit} style={{
       background: 'var(--bg-surface)',
-      borderRadius: compact ? 8 : 16,
+      borderRadius: 12,
       padding: compact ? 16 : 'clamp(24px, 4vw, 40px)',
       marginBottom: compact ? 16 : 56,
       border: '1px solid var(--border)',
     }}>
+      {/* 허니팟 — 봇만 채우는 hidden 필드 */}
+      <div style={{ position: 'absolute', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true">
+        <label htmlFor="website">Website</label>
+        <input
+          id="website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={honeypot}
+          onChange={e => setHoneypot(e.target.value)}
+        />
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         <div>
           <label style={{
@@ -114,9 +151,9 @@ function CommentForm({
             onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
             onFocus={() => setFocused('name')}
             onBlur={() => setFocused(null)}
-            placeholder="Your name"
+            placeholder="닉네임"
             required
-            maxLength={50}
+            maxLength={NAME_MAX}
             style={inputStyle('name')}
           />
         </div>
@@ -138,8 +175,9 @@ function CommentForm({
             onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
             onFocus={() => setFocused('email')}
             onBlur={() => setFocused(null)}
-            placeholder="your@email.com"
+            placeholder="이메일 (공개되지 않습니다)"
             required
+            maxLength={100}
             style={inputStyle('email')}
           />
         </div>
@@ -162,12 +200,21 @@ function CommentForm({
           onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
           onFocus={() => setFocused('content')}
           onBlur={() => setFocused(null)}
-          placeholder={parentId ? 'Write a reply...' : 'Share your thoughts...'}
+          placeholder={parentId ? '답글을 남겨주세요' : '댓글을 남겨주세요'}
           required
-          maxLength={2000}
+          maxLength={CONTENT_MAX}
           rows={compact ? 3 : 5}
           style={{ ...inputStyle('content'), resize: 'vertical' }}
         />
+        <p style={{
+          textAlign: 'right',
+          fontSize: 11,
+          color: 'var(--text-tertiary)',
+          margin: '6px 0 0',
+          fontWeight: 600,
+        }}>
+          {form.content.length}/{CONTENT_MAX}
+        </p>
       </div>
 
       <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -189,7 +236,7 @@ function CommentForm({
             transition: 'opacity 0.2s',
           }}
         >
-          {submitting ? 'Submitting...' : parentId ? 'Reply' : 'Leave a Comment'}
+          {submitting ? 'Submitting...' : parentId ? '답글 남기기' : '댓글 남기기'}
         </button>
 
         {onCancel && (
@@ -282,18 +329,8 @@ function CommentItem({
             <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
               {comment.name}
             </p>
-            {isAuthor(comment.name) && (
-              <span style={{
-                background: '#4F46E5',
-                color: '#fff',
-                fontSize: 10,
-                fontWeight: 700,
-                padding: '2px 8px',
-                borderRadius: 999,
-                lineHeight: '16px',
-              }}>
-                Author
-              </span>
+            {comment.is_admin && (
+              <span style={authorBadgeStyle}>Author</span>
             )}
           </div>
           <p style={{
@@ -316,7 +353,7 @@ function CommentItem({
           {comment.content}
         </p>
 
-        {/* Reply 버튼 (최상위 댓글에만 — parent_id가 없는 것) */}
+        {/* Reply 버튼 (최상위 댓글에만) */}
         {!comment.parent_id && (
           <button
             type="button"
@@ -342,7 +379,7 @@ function CommentItem({
 
       {/* 답글 폼 */}
       {showReplyForm && (
-        <div style={{ marginLeft: 32 }}>
+        <div style={{ borderLeft: '2px solid var(--border)', paddingLeft: 24 }}>
           <CommentForm
             blogId={blogId}
             parentId={comment.id}
@@ -358,7 +395,7 @@ function CommentItem({
 
       {/* 답글 목록 */}
       {replies.length > 0 && (
-        <div style={{ marginLeft: 32 }}>
+        <div style={{ borderLeft: '2px solid var(--border)', paddingLeft: 24 }}>
           {replies.map((reply) => (
             <div
               key={reply.id}
@@ -398,18 +435,8 @@ function CommentItem({
                   <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
                     {reply.name}
                   </p>
-                  {isAuthor(reply.name) && (
-                    <span style={{
-                      background: '#4F46E5',
-                      color: '#fff',
-                      fontSize: 10,
-                      fontWeight: 700,
-                      padding: '2px 8px',
-                      borderRadius: 999,
-                      lineHeight: '16px',
-                    }}>
-                      Author
-                    </span>
+                  {reply.is_admin && (
+                    <span style={authorBadgeStyle}>Author</span>
                   )}
                 </div>
                 <p style={{
@@ -499,7 +526,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
             fontStyle: 'italic',
             color: 'var(--text)',
           }}>
-            Comments ({totalCount})
+            Comments{totalCount > 0 ? ` (${totalCount})` : ''}
           </h2>
         </div>
 
@@ -519,7 +546,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
             padding: '40px 0',
             fontStyle: 'italic',
           }}>
-            Be the first to share your thoughts!
+            아직 댓글이 없습니다. 첫 댓글을 남겨보세요.
           </p>
         ) : (
           <div>

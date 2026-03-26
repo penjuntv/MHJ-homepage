@@ -2,8 +2,21 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase-browser';
-import { Check, Trash2, MessageCircle, BookOpen } from 'lucide-react';
+import { Check, Trash2, MessageCircle, BookOpen, Reply, Send } from 'lucide-react';
 import type { Comment } from '@/lib/types';
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '방금 전';
+  if (m < 60) return `${m}분 전`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}시간 전`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}일 전`;
+  const mo = Math.floor(d / 30);
+  return `${mo}개월 전`;
+}
 
 /* ══════════════════════════════════════
    타입 정의
@@ -41,6 +54,9 @@ function BlogCommentsTab() {
   const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [replyTo, setReplyTo] = useState<{ id: number; blogId: number } | null>(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [replying, setReplying] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -68,7 +84,26 @@ function BlogCommentsTab() {
   }
 
   async function remove(id: number) {
+    if (!confirm('이 댓글을 삭제하시겠습니까? 답글도 함께 삭제됩니다.')) return;
     await supabase.from('comments').delete().eq('id', id);
+    load();
+  }
+
+  async function adminReply() {
+    if (!replyTo || !replyContent.trim()) return;
+    setReplying(true);
+    await supabase.from('comments').insert({
+      blog_id: replyTo.blogId,
+      parent_id: replyTo.id,
+      name: 'Yussi',
+      email: 'hello@mhj.nz',
+      is_admin: true,
+      approved: true,
+      content: replyContent.trim(),
+    });
+    setReplyTo(null);
+    setReplyContent('');
+    setReplying(false);
     load();
   }
 
@@ -137,30 +172,65 @@ function BlogCommentsTab() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {comments.map(c => (
-              <div key={c.id} style={{ background: 'white', borderRadius: 20, padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', gap: 16, alignItems: 'flex-start', opacity: c.approved ? 0.7 : 1 }}>
-                <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggleSelect(c.id)} style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0, marginTop: 4 }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {c.blog && (
-                    <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: '#4F46E5', textTransform: 'uppercase', marginBottom: 6 }}>↳ {c.blog.title}</p>
-                  )}
-                  <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 8 }}>
-                    <span style={{ fontSize: 13, fontWeight: 900, color: '#1A1A1A' }}>{c.name}</span>
-                    <span style={{ fontSize: 12, color: '#94A3B8' }}>{c.email}</span>
-                    <span style={{ fontSize: 11, color: '#CBD5E1' }}>{new Date(c.created_at).toLocaleDateString('ko-KR')}</span>
-                    {!c.approved && <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: '#F59E0B', textTransform: 'uppercase' }}>미승인</span>}
+              <div key={c.id} style={{ background: 'white', borderRadius: 20, padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', opacity: c.approved ? 0.7 : 1 }}>
+                <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                  <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggleSelect(c.id)} style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0, marginTop: 4 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {c.blog && (
+                      <p
+                        onClick={() => window.open(`/blog/${c.blog!.slug}`, '_blank')}
+                        style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: '#4F46E5', textTransform: 'uppercase', marginBottom: 6, cursor: 'pointer' }}
+                        title="새 탭에서 열기"
+                      >
+                        ↳ {c.blog.title}
+                      </p>
+                    )}
+                    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
+                      <span style={{ fontSize: 13, fontWeight: 900, color: '#1A1A1A' }}>
+                        {c.name}
+                        {c.is_admin && <span style={{ marginLeft: 6, fontSize: 11, color: '#64748B', fontWeight: 700 }}>Admin</span>}
+                      </span>
+                      <span style={{ fontSize: 12, color: '#94A3B8' }}>{c.email}</span>
+                      <span style={{ fontSize: 11, color: '#CBD5E1' }}>{timeAgo(c.created_at)}</span>
+                      {!c.approved && <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: '#F59E0B', textTransform: 'uppercase' }}>미승인</span>}
+                    </div>
+                    <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.6, margin: 0 }}>{c.content}</p>
                   </div>
-                  <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.6, margin: 0 }}>{c.content}</p>
-                </div>
-                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                  {!c.approved && (
-                    <button onClick={() => approve(c.id)} title="승인" style={{ width: 36, height: 36, borderRadius: 10, background: '#ECFDF5', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Check size={16} color="#10B981" />
+                  <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                    <button onClick={() => setReplyTo(replyTo?.id === c.id ? null : { id: c.id, blogId: c.blog_id })} title="답글" style={{ width: 36, height: 36, borderRadius: 10, background: replyTo?.id === c.id ? '#E0E7FF' : '#F1F5F9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Reply size={16} color={replyTo?.id === c.id ? '#4F46E5' : '#64748B'} />
                     </button>
-                  )}
-                  <button onClick={() => remove(c.id)} title="삭제" style={{ width: 36, height: 36, borderRadius: 10, background: '#FEF2F2', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Trash2 size={16} color="#EF4444" />
-                  </button>
+                    {!c.approved && (
+                      <button onClick={() => approve(c.id)} title="승인" style={{ width: 36, height: 36, borderRadius: 10, background: '#ECFDF5', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Check size={16} color="#10B981" />
+                      </button>
+                    )}
+                    <button onClick={() => remove(c.id)} title="삭제" style={{ width: 36, height: 36, borderRadius: 10, background: '#FEF2F2', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Trash2 size={16} color="#EF4444" />
+                    </button>
+                  </div>
                 </div>
+                {/* 관리자 답글 폼 */}
+                {replyTo?.id === c.id && (
+                  <div style={{ marginTop: 12, marginLeft: 32, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <textarea
+                      value={replyContent}
+                      onChange={e => setReplyContent(e.target.value)}
+                      placeholder="관리자 답글 작성... (Yussi)"
+                      rows={2}
+                      maxLength={500}
+                      style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1px solid #E2E8F0', fontSize: 13, fontFamily: 'inherit', resize: 'vertical', outline: 'none' }}
+                    />
+                    <button
+                      onClick={adminReply}
+                      disabled={replying || !replyContent.trim()}
+                      title="답글 보내기"
+                      style={{ width: 36, height: 36, borderRadius: 10, background: '#4F46E5', border: 'none', cursor: replyContent.trim() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: replyContent.trim() ? 1 : 0.5, flexShrink: 0 }}
+                    >
+                      <Send size={16} color="white" />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

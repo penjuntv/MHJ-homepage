@@ -8,10 +8,6 @@ app/api/subscribe/route.ts
 app/api/process-welcome-sequence/route.ts
 vercel.json
 
-# 댓글 시스템 (완료)
-app/(public)/blog/[slug]/CommentSection.tsx
-app/api/comments/route.ts
-
 # 푸터 리디자인 (완료)
 components/Footer.tsx
 
@@ -19,4 +15,3 @@ components/Footer.tsx
 app/mhj-desk/blogs/
 app/mhj-desk/newsletters/
 app/mhj-desk/subscribers/
-app/mhj-desk/comments/
