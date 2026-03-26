@@ -116,7 +116,7 @@ function CommentForm({
       background: 'var(--bg-surface)',
       borderRadius: 12,
       padding: compact ? 16 : 'clamp(24px, 4vw, 40px)',
-      marginBottom: compact ? 16 : 56,
+      marginBottom: compact ? 16 : 32,
       border: '1px solid var(--border)',
     }}>
       {/* 허니팟 — 봇만 채우는 hidden 필드 */}
@@ -502,28 +502,18 @@ export default function CommentSection({ blogId }: { blogId: number }) {
 
   return (
     <section style={{
-      padding: 'clamp(60px, 8vw, 100px) clamp(24px, 4vw, 80px)',
+      padding: 'clamp(32px, 4vw, 48px) clamp(24px, 4vw, 40px)',
       background: 'var(--bg)',
     }}>
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
 
         {/* 섹션 제목 */}
-        <div style={{ marginBottom: 48 }}>
-          <p style={{
-            fontSize: 10,
-            fontWeight: 900,
-            letterSpacing: 5,
-            color: 'var(--text-tertiary)',
-            textTransform: 'uppercase',
-            marginBottom: 12,
-          }}>
-            Conversation
-          </p>
-          <h2 className="font-display font-black" style={{
-            fontSize: 'clamp(28px, 4vw, 48px)',
-            letterSpacing: '-1px',
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{
+            fontSize: 20,
+            fontWeight: 800,
+            letterSpacing: '-0.5px',
             lineHeight: 1,
-            fontStyle: 'italic',
             color: 'var(--text)',
           }}>
             Comments{totalCount > 0 ? ` (${totalCount})` : ''}
@@ -540,10 +530,10 @@ export default function CommentSection({ blogId }: { blogId: number }) {
           </p>
         ) : totalCount === 0 ? (
           <p style={{
-            fontSize: 16,
+            fontSize: 13,
             color: 'var(--text-secondary)',
             textAlign: 'center',
-            padding: '40px 0',
+            padding: '32px 0',
             fontStyle: 'italic',
           }}>
             아직 댓글이 없습니다. 첫 댓글을 남겨보세요.

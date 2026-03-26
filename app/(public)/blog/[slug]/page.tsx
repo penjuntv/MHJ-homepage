@@ -105,7 +105,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const isPreview = searchParams?.preview === 'true';
   const blog = isPreview ? await getBlogForPreview(params.slug) : await getBlog(params.slug);
-  if (!blog) return { title: 'Not Found — MY MAIRANGI' };
+  if (!blog) return { title: 'Not Found' };
 
   const plainText = blog.content.replace(/<[^>]*>/g, '');
   const description = blog.meta_description || plainText.slice(0, 160);
@@ -116,7 +116,7 @@ export async function generateMetadata({
     : `${baseUrl}/api/og?title=${encodeURIComponent(blog.title)}&category=${encodeURIComponent(blog.category)}&date=${encodeURIComponent(blog.date)}`;
 
   return {
-    title: `${blog.title} — MY MAIRANGI`,
+    title: blog.title,
     description,
     openGraph: {
       title: blog.title,
@@ -647,6 +647,9 @@ export default async function BlogDetailPage({
         {/* Share Buttons */}
         <ShareButtons title={blog.title} slug={blog.slug} />
 
+        {/* 6) 댓글 섹션 */}
+        <CommentSection blogId={blog.id} />
+
         {/* Related Posts */}
         {relatedBlogs.length > 0 && (
           <section style={{
@@ -686,9 +689,6 @@ export default async function BlogDetailPage({
             </div>
           </section>
         )}
-
-        {/* 6) 댓글 섹션 */}
-        <CommentSection blogId={blog.id} />
 
         {/* Newsletter CTA */}
         <NewsletterCTA />
