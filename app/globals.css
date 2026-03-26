@@ -830,20 +830,42 @@
   flex-direction: column;
   gap: 0;
   align-self: start;
+  padding-top: 0;
 }
 .hero-sub-card {
   display: flex;
   flex-direction: row;
   gap: 16px;
   align-items: flex-start;
+  transition: opacity 0.2s ease;
+}
+.hero-sub-card:hover {
+  opacity: 0.75;
+}
+.hero-sub-thumb {
+  width: 140px;
+  height: 88px;
+}
+/* 모바일: 메인과 서브 사이 구분선 */
+@media (max-width: 767px) {
+  .hero-sub-cards {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
 }
 @media (min-width: 768px) and (max-width: 1023px) {
   .hero-sub-cards {
     flex-direction: row;
     gap: 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
   }
   .hero-sub-cards > * {
     flex: 1;
+  }
+  .hero-sub-thumb {
+    width: 200px;
+    height: 125px;
   }
 }
 @media (min-width: 1024px) {
@@ -855,6 +877,10 @@
   }
   .hero-sub-cards {
     gap: 0;
+  }
+  .hero-sub-thumb {
+    width: 200px;
+    height: 125px;
   }
 }
 

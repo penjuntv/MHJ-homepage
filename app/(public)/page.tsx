@@ -490,7 +490,7 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
     <section style={{
       maxWidth: 1320,
       margin: '0 auto',
-      padding: '48px clamp(20px, 4vw, 48px)',
+      padding: '32px clamp(20px, 4vw, 48px)',
     }}>
       <div className="hero-editorial-grid">
         {/* Main Featured */}
@@ -574,15 +574,13 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                 className="hero-sub-card"
                 style={{
                   textDecoration: 'none',
-                  paddingBottom: i < subs.length - 1 ? 16 : 0,
-                  borderBottom: i < subs.length - 1 ? '0.5px solid var(--border)' : 'none',
-                  paddingTop: i > 0 ? 16 : 0,
+                  paddingBottom: i < subs.length - 1 ? 20 : 0,
+                  borderBottom: i < subs.length - 1 ? '1px solid var(--border-tertiary, var(--border))' : 'none',
+                  paddingTop: i > 0 ? 20 : 0,
                 }}
               >
-                <div style={{
+                <div className="hero-sub-thumb" style={{
                   position: 'relative',
-                  width: 160,
-                  height: 100,
                   borderRadius: 6,
                   overflow: 'hidden',
                   flexShrink: 0,
