@@ -188,7 +188,7 @@ export default async function LandingPage() {
         )}
 
         {/* ═══════ §2+3. Latest Posts + Sidebar ═══════ */}
-        <section style={{ maxWidth: 1320, margin: '0 auto', padding: '64px clamp(20px, 4vw, 48px) 0' }}>
+        <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '64px clamp(20px, 4vw, 48px) 0' }}>
           <p style={{
             fontSize: 10,
             fontWeight: 900,
@@ -370,7 +370,7 @@ export default async function LandingPage() {
 
         {/* ═══════ §4. Magazine Feature ═══════ */}
         {latestMag && (
-          <section style={{ maxWidth: 1320, margin: '0 auto', padding: '48px clamp(20px, 4vw, 48px) 0' }}>
+          <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '48px clamp(20px, 4vw, 48px) 0' }}>
             <Link
               href="/magazine"
               style={{
@@ -489,6 +489,8 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
   return (
     <section style={{
       maxWidth: 1320,
+      width: '100%',
+      boxSizing: 'border-box' as const,
       margin: '0 auto',
       padding: '32px clamp(20px, 4vw, 48px)',
     }}>

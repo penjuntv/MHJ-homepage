@@ -824,6 +824,10 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
+}
+.hero-editorial-grid > * {
+  min-width: 0;
 }
 .hero-sub-cards {
   display: flex;
@@ -889,6 +893,10 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 48px;
+  min-width: 0;
+}
+.home-main-grid > * {
+  min-width: 0;
 }
 @media (min-width: 1024px) {
   .home-main-grid {
@@ -902,6 +910,10 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
+  min-width: 0;
+}
+.home-latest-grid > * {
+  min-width: 0;
 }
 @media (min-width: 640px) {
   .home-latest-grid {
