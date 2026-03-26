@@ -6,9 +6,10 @@ import { trackEvent } from '@/lib/analytics';
 
 interface Props {
   compact?: boolean;
+  reducedPadding?: boolean;
 }
 
-export default function NewsletterCTA({ compact = false }: Props) {
+export default function NewsletterCTA({ compact = false, reducedPadding = false }: Props) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
@@ -135,7 +136,9 @@ export default function NewsletterCTA({ compact = false }: Props) {
   /* ── Full version ── */
   return (
     <section style={{
-      padding: 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)',
+      padding: reducedPadding
+        ? 'clamp(48px, 6vw, 96px) clamp(24px, 4vw, 40px)'
+        : 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)',
       background: 'var(--bg-surface)',
       borderTop: '1px solid var(--border)',
     }}>
@@ -177,7 +180,7 @@ export default function NewsletterCTA({ compact = false }: Props) {
           color: 'var(--text-secondary)',
           fontWeight: 500,
           lineHeight: 1.7,
-          marginBottom: 48,
+          marginBottom: reducedPadding ? 32 : 48,
         }}>
           Every Friday, stories from our family in Mairangi Bay.
           <br />

@@ -67,7 +67,7 @@ async function getLatestPosts(excludeId: number): Promise<Blog[]> {
     .neq('id', excludeId)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
-    .limit(8);
+    .limit(6);
 
   return (data ?? FALLBACK_BLOGS.slice(1)) as Blog[];
 }
@@ -116,6 +116,17 @@ async function getLatestMagazine(): Promise<Magazine | null> {
   return (data?.[0] as Magazine) ?? null;
 }
 
+async function getMagazineArticles(magazineId: string): Promise<{ title: string }[]> {
+  const { data } = await supabase
+    .from('articles')
+    .select('title, sort_order')
+    .eq('magazine_id', magazineId)
+    .order('sort_order', { ascending: true })
+    .limit(4);
+
+  return (data ?? []) as { title: string }[];
+}
+
 /* ─── Helpers ─── */
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -135,6 +146,8 @@ export default async function LandingPage() {
     getMostReadBlogs(allExcludeIds),
     getLatestMagazine(),
   ]);
+
+  const magArticles = latestMag ? await getMagazineArticles(String(latestMag.id)) : [];
 
   const allBlogIds = [featured?.id, ...latest.map(b => b.id), ...mostRead.map(b => b.id)].filter((id): id is number => typeof id === 'number');
   const commentCounts = await getCommentCounts(allBlogIds);
@@ -166,9 +179,11 @@ export default async function LandingPage() {
       />
       <div className="animate-fade-in">
 
-        {/* ═══════ §1. Featured Story ═══════ */}
+        {/* ═══════ §1. Featured Story (full-bleed surface bg) ═══════ */}
         {featured && (
-          <FeaturedStory blog={featured} commentCount={commentCounts[featured.id] ?? 0} />
+          <div style={{ background: 'var(--bg-surface)' }}>
+            <FeaturedStory blog={featured} commentCount={commentCounts[featured.id] ?? 0} />
+          </div>
         )}
 
         {/* ═══════ §2+3. Latest Posts + Sidebar ═══════ */}
@@ -352,9 +367,20 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════ §4. Magazine Highlight ═══════ */}
+        {/* ═══════ §4. Magazine Feature ═══════ */}
         {latestMag && (
           <section style={{ maxWidth: 1320, margin: '0 auto', padding: '48px clamp(20px, 4vw, 48px) 0' }}>
+            <p style={{
+              fontSize: 10,
+              fontWeight: 900,
+              letterSpacing: 5,
+              textTransform: 'uppercase',
+              color: 'var(--text-tertiary)',
+              marginBottom: 24,
+            }}>
+              From the Magazine
+            </p>
+
             <Link
               href="/magazine"
               style={{
@@ -367,9 +393,10 @@ export default async function LandingPage() {
                 transition: 'opacity 0.3s ease',
               }}
             >
-              <div className="magazine-mini-grid">
+              <div className="magazine-feature-grid">
+                {/* Cover */}
                 <div style={{
-                  height: 160,
+                  height: 240,
                   aspectRatio: '3/4',
                   borderRadius: 8,
                   overflow: 'hidden',
@@ -383,34 +410,53 @@ export default async function LandingPage() {
                     className="object-cover"
                   />
                 </div>
+
+                {/* Info + TOC */}
                 <div>
-                  <span style={{
-                    fontSize: 10,
-                    fontWeight: 900,
-                    letterSpacing: 5,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-tertiary)',
-                  }}>
-                    Magazine
-                  </span>
-                  <h3 className="font-display" style={{
-                    fontSize: 'clamp(20px, 3vw, 28px)',
-                    fontWeight: 900,
-                    fontStyle: 'italic',
-                    color: 'var(--text)',
-                    letterSpacing: -0.5,
-                    margin: '8px 0 4px',
-                  }}>
-                    {latestMag.title}
-                  </h3>
                   <p style={{
                     fontSize: 13,
                     color: 'var(--text-secondary)',
-                    marginBottom: 12,
+                    marginBottom: 8,
                   }}>
                     {latestMag.year} {latestMag.month_name}
                     {latestMag.issue_number ? ` · Issue ${latestMag.issue_number}` : ''}
                   </p>
+
+                  <h3 className="font-display" style={{
+                    fontSize: 'clamp(24px, 3vw, 36px)',
+                    fontWeight: 900,
+                    fontStyle: 'italic',
+                    color: 'var(--text)',
+                    letterSpacing: -0.5,
+                    lineHeight: 1.1,
+                    margin: '0 0 16px',
+                  }}>
+                    {latestMag.title}
+                  </h3>
+
+                  {/* Article TOC */}
+                  {magArticles.length > 0 && (
+                    <ul style={{
+                      listStyle: 'none',
+                      padding: 0,
+                      margin: '0 0 24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
+                    }}>
+                      {magArticles.map((article, i) => (
+                        <li key={i} style={{
+                          fontSize: 15,
+                          fontWeight: 400,
+                          color: 'var(--text-secondary)',
+                          lineHeight: 1.4,
+                        }}>
+                          · {article.title}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
                   <span style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -421,7 +467,7 @@ export default async function LandingPage() {
                     textTransform: 'uppercase',
                     color: 'var(--text-secondary)',
                   }}>
-                    Browse Issues <ArrowRight size={12} />
+                    Browse All Issues <ArrowRight size={12} />
                   </span>
                 </div>
               </div>
@@ -431,7 +477,7 @@ export default async function LandingPage() {
 
         {/* ═══════ §5. Newsletter CTA (full) ═══════ */}
         <div style={{ marginTop: 48 }}>
-          <NewsletterCTA />
+          <NewsletterCTA reducedPadding />
         </div>
 
       </div>
@@ -450,7 +496,7 @@ function FeaturedStory({ blog, commentCount }: { blog: Blog; commentCount: numbe
     <section style={{
       maxWidth: 1320,
       margin: '0 auto',
-      padding: 'clamp(64px, 8vw, 96px) clamp(20px, 4vw, 48px) 0',
+      padding: 'clamp(64px, 8vw, 96px) clamp(20px, 4vw, 48px) 64px',
     }}>
       <Link href={`/blog/${blog.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
         <div className="featured-grid">

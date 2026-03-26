@@ -176,12 +176,12 @@ export default function InstagramFeed({ instagramUrl }: Props) {
   return (
     <section
       className="insta-section-bg"
-      style={{ padding: 'clamp(48px, 8vw, 80px) 0', overflow: 'hidden' }}
+      style={{ padding: 'clamp(40px, 7vw, 68px) 0', overflow: 'hidden' }}
       onMouseEnter={() => { isHoveredRef.current = true; }}
       onMouseLeave={() => { isHoveredRef.current = false; }}
     >
       {/* 헤더 */}
-      <div style={{ textAlign: 'center', marginBottom: 36, padding: '0 clamp(24px, 4vw, 80px)' }}>
+      <div style={{ textAlign: 'center', marginBottom: 28, padding: '0 clamp(24px, 4vw, 80px)' }}>
         <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 5, color: '#F9A8D4', marginBottom: 12 }}>
           FROM OUR GALLERY
         </p>
@@ -221,7 +221,7 @@ export default function InstagramFeed({ instagramUrl }: Props) {
 
       {/* 팔로우 버튼 */}
       {instagramUrl && (
-        <div style={{ textAlign: 'center', marginTop: 36, padding: '0 clamp(24px, 4vw, 80px)' }}>
+        <div style={{ textAlign: 'center', marginTop: 28, padding: '0 clamp(24px, 4vw, 80px)' }}>
           <a
             href={instagramUrl}
             target="_blank"
