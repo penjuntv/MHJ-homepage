@@ -116,6 +116,8 @@ export default async function AboutPage() {
                   src={whoImage}
                   alt="Mairangi Family"
                   fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  unoptimized={whoImage.includes('picsum.photos')}
                   className="object-cover"
                 />
               ) : (
@@ -186,7 +188,6 @@ export default async function AboutPage() {
               </p>
             </div>
 
-            {/* 가족 사진 — radius 12px (§8.1), 4:5 (§4.1), slide-up 제거 (§9.3) */}
             <div style={{
               aspectRatio: '4/5',
               borderRadius: 12,
@@ -198,6 +199,8 @@ export default async function AboutPage() {
                 src={visionImage || 'https://picsum.photos/seed/about/800/1000'}
                 alt="Family"
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                unoptimized={(visionImage || 'https://picsum.photos/seed/about/800/1000').includes('picsum.photos')}
                 className="object-cover"
               />
             </div>
@@ -256,6 +259,8 @@ export default async function AboutPage() {
                           src={m.image_url}
                           alt={m.name}
                           fill
+                          sizes="(max-width: 640px) 100vw, 50vw"
+                          unoptimized={m.image_url.includes('picsum.photos')}
                           className="object-cover grayscale-hover"
                         />
                       ) : (
@@ -353,6 +358,9 @@ export default async function AboutPage() {
                       src={m.image_url}
                       alt={m.name}
                       fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      unoptimized={true}
+                      priority={true}
                       className="object-cover grayscale-hover"
                     />
                   </div>
