@@ -370,12 +370,12 @@ export default async function LandingPage() {
 
         {/* ═══════ §4. Magazine Feature ═══════ */}
         {latestMag && (
-          <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '48px clamp(20px, 4vw, 48px) 0' }}>
+          <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '32px clamp(20px, 4vw, 48px) 0' }}>
             <Link
               href="/magazine"
               style={{
                 display: 'block',
-                padding: 'clamp(24px, 4vw, 48px)',
+                padding: 'clamp(20px, 3vw, 24px) clamp(24px, 4vw, 32px)',
                 borderRadius: 12,
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border)',
@@ -386,8 +386,9 @@ export default async function LandingPage() {
               <div className="magazine-feature-grid">
                 {/* Cover */}
                 <div className="magazine-cover-shadow" style={{
-                  height: 280,
+                  height: 180,
                   aspectRatio: '3/4',
+                  width: 'auto',
                   borderRadius: 8,
                   overflow: 'hidden',
                   position: 'relative',
@@ -409,7 +410,7 @@ export default async function LandingPage() {
                     letterSpacing: 2,
                     textTransform: 'uppercase',
                     color: 'var(--text-secondary)',
-                    marginBottom: 16,
+                    marginBottom: 8,
                   }}>
                     From the Magazine
                   </p>
@@ -421,7 +422,7 @@ export default async function LandingPage() {
                     color: 'var(--text)',
                     letterSpacing: -0.5,
                     lineHeight: 1.1,
-                    margin: '0 0 12px',
+                    margin: '0 0 8px',
                   }}>
                     {latestMag.title}
                   </h3>
@@ -439,7 +440,7 @@ export default async function LandingPage() {
                     <p style={{
                       fontSize: 14,
                       color: 'var(--text-tertiary)',
-                      marginBottom: 24,
+                      marginBottom: 12,
                     }}>
                       {magArticleCount} {magArticleCount === 1 ? 'story' : 'stories'} inside
                     </p>

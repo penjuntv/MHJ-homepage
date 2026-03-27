@@ -137,7 +137,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
   return (
     <section style={{
       padding: reducedPadding
-        ? 'clamp(48px, 6vw, 96px) clamp(24px, 4vw, 40px)'
+        ? 'clamp(24px, 3vw, 48px) clamp(16px, 2vw, 24px)'
         : 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)',
       background: 'var(--bg-surface)',
       borderTop: '1px solid var(--border)',
@@ -152,7 +152,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
           textTransform: 'uppercase',
           color: 'var(--text-tertiary)',
           display: 'block',
-          marginBottom: 16,
+          marginBottom: reducedPadding ? 8 : 16,
         }}>
           Mairangi Notes
         </span>
@@ -161,13 +161,13 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
         <h2
           className="font-display"
           style={{
-            fontSize: 'clamp(32px, 5vw, 56px)',
+            fontSize: reducedPadding ? 'clamp(24px, 3.5vw, 36px)' : 'clamp(32px, 5vw, 56px)',
             fontWeight: 900,
             fontStyle: 'italic',
             letterSpacing: -1.5,
             color: 'var(--text)',
             lineHeight: 1.1,
-            marginBottom: 16,
+            marginBottom: reducedPadding ? 24 : 16,
           }}
         >
           Stories from Mairangi Bay,
@@ -175,20 +175,22 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
         </h2>
 
         {/* 설명 */}
-        <p style={{
-          fontSize: 15,
-          color: 'var(--text-secondary)',
-          fontWeight: 500,
-          lineHeight: 1.7,
-          marginBottom: reducedPadding ? 32 : 48,
-        }}>
-          Every Friday, stories from our family in Mairangi Bay.
-          <br />
-          <span style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>
-            Life, school, and neighbourhood stories from Auckland&apos;s North Shore.
-            No spam. Unsubscribe anytime.
-          </span>
-        </p>
+        {!reducedPadding && (
+          <p style={{
+            fontSize: 15,
+            color: 'var(--text-secondary)',
+            fontWeight: 500,
+            lineHeight: 1.7,
+            marginBottom: 48,
+          }}>
+            Every Friday, stories from our family in Mairangi Bay.
+            <br />
+            <span style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>
+              Life, school, and neighbourhood stories from Auckland&apos;s North Shore.
+              No spam. Unsubscribe anytime.
+            </span>
+          </p>
+        )}
 
         {status === 'success' ? (
           /* 성공 메시지 — borderRadius 12px (DESIGN_RULES §8.1) */
@@ -216,25 +218,27 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
         ) : (
           <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 480, margin: '0 auto' }}>
             {/* 이름 (선택) */}
-            <input
-              type="text"
-              placeholder="Name (optional)"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={{
-                padding: '16px 24px',
-                borderRadius: 8,
-                border: '1px solid var(--border-strong)',
-                background: 'var(--bg)',
-                color: 'var(--text)',
-                fontSize: 15,
-                fontWeight: 500,
-                outline: 'none',
-                width: '100%',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-              }}
-            />
+            {!reducedPadding && (
+              <input
+                type="text"
+                placeholder="Name (optional)"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{
+                  padding: '16px 24px',
+                  borderRadius: 8,
+                  border: '1px solid var(--border-strong)',
+                  background: 'var(--bg)',
+                  color: 'var(--text)',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  outline: 'none',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit',
+                }}
+              />
+            )}
 
             {/* 이메일 + 버튼 */}
             <div style={{ display: 'flex', gap: 8 }}>
