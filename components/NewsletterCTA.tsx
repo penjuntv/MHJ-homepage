@@ -96,9 +96,9 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
                 style={{
                   padding: '12px 16px',
                   borderRadius: 8,
-                  background: status === 'loading' ? 'rgba(0,0,0,0.4)' : '#1A1A1A',
+                  background: status === 'loading' ? 'rgba(0,0,0,0.4)' : 'var(--text)',
                   border: 'none',
-                  color: '#fff',
+                  color: 'var(--bg)',
                   fontSize: 11,
                   fontWeight: 900,
                   letterSpacing: 2,
@@ -268,9 +268,9 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
                 style={{
                   padding: '16px 24px',
                   borderRadius: 8,
-                  background: status === 'loading' ? 'rgba(0,0,0,0.4)' : '#1A1A1A',
+                  background: status === 'loading' ? 'rgba(0,0,0,0.4)' : 'var(--text)',
                   border: 'none',
-                  color: '#fff',
+                  color: 'var(--bg)',
                   fontSize: 12,
                   fontWeight: 900,
                   letterSpacing: 2,
