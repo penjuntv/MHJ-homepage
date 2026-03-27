@@ -37,6 +37,7 @@ export default function AdminDashboard() {
   const [popularBlogs, setPopularBlogs] = useState<Blog[]>([]);
   const [recentBlogs, setRecentBlogs] = useState<RecentBlog[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [approvedComments, setApprovedComments] = useState<number | null>(null);
   const [publishedBlogs, setPublishedBlogs] = useState<{ id: number; title: string; category: string }[]>([]);
   const [selectedFeaturedId, setSelectedFeaturedId] = useState<string>('');
   const [savingFeatured, setSavingFeatured] = useState(false);
@@ -60,6 +61,7 @@ export default function AdminDashboard() {
       supabase.from('magazines').select('*', { count: 'exact', head: true }),
       supabase.from('subscribers').select('*', { count: 'exact', head: true }).eq('active', true),
       supabase.from('comments').select('*', { count: 'exact', head: true }).eq('approved', false),
+      supabase.from('comments').select('*', { count: 'exact', head: true }).eq('approved', true),
       supabase.from('blogs').select('id, title, category, slug, view_count, date, image_url').eq('published', true)
         .order('view_count', { ascending: false }).limit(5),
       supabase.from('blogs').select('id, title, category, date, image_url, published, author')
@@ -71,6 +73,7 @@ export default function AdminDashboard() {
       { count: mc },
       { count: sc },
       { count: cc },
+      { count: ac },
       { data: popular },
       { data: recent },
       { data: views },
@@ -80,6 +83,7 @@ export default function AdminDashboard() {
       setMagazineCount(mc ?? 0);
       setSubscriberCount(sc ?? 0);
       setPendingComments(cc ?? 0);
+      setApprovedComments(ac ?? 0);
       setPopularBlogs((popular as Blog[]) ?? []);
       setRecentBlogs((recent as RecentBlog[]) ?? []);
       const vsum = (views ?? []).reduce((acc: number, r: { view_count: number | null }) => acc + (r.view_count ?? 0), 0);
@@ -248,6 +252,96 @@ export default function AdminDashboard() {
             </Link>
           </div>
         </div>
+      </div>
+
+      {/* ── 요약 통계 4열 (compact) ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: 16,
+        marginBottom: 16,
+      }}>
+        {[
+          { label: 'Total Posts', value: publishedCount, icon: FileText, color: '#4F46E5' },
+          { label: 'Total Views', value: totalViews, icon: Eye, color: '#0ea5e9' },
+          { label: 'Subscribers', value: subscriberCount, icon: Users, color: '#10b981' },
+          { label: 'Comments', value: approvedComments, icon: MessageCircle, color: '#f59e0b' },
+        ].map((card) => (
+          <div key={card.label} style={{
+            background: 'white', borderRadius: 16, padding: '20px 24px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            border: '1px solid #f1f5f9',
+            display: 'flex', flexDirection: 'column', gap: 6,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <card.icon size={13} color={card.color} />
+              <p style={{
+                fontSize: 11, fontWeight: 800, letterSpacing: 2,
+                textTransform: 'uppercase', color: '#94a3b8', margin: 0,
+              }}>
+                {card.label}
+              </p>
+            </div>
+            <p className="font-display font-black" style={{
+              fontSize: 32, letterSpacing: -1, color: '#1A1A1A', lineHeight: 1, margin: 0,
+            }}>
+              {card.value !== null ? card.value!.toLocaleString() : '—'}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Most Read Posts Top 5 ── */}
+      <div style={{
+        background: 'white', borderRadius: 16, padding: '24px 28px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9',
+        marginBottom: 36,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <TrendingUp size={16} color="#4F46E5" />
+          <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 3, color: '#4F46E5', margin: 0 }}>
+            Most Read Posts
+          </p>
+        </div>
+        {popularBlogs.length === 0 ? (
+          <p style={{ fontSize: 13, color: '#cbd5e1', textAlign: 'center', padding: '16px 0' }}>데이터 없음</p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0 }}>
+            {popularBlogs.map((blog, i) => (
+              <Link key={blog.id} href={`/mhj-desk/blogs/${blog.id}/edit`} style={{
+                display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 16px',
+                borderRight: i < popularBlogs.length - 1 ? '1px solid #f1f5f9' : 'none',
+                textDecoration: 'none',
+              }}>
+                <span className="font-display font-black" style={{
+                  fontSize: 28, letterSpacing: -1, lineHeight: 1,
+                  color: i < 3 ? '#4F46E5' : '#CBD5E1', fontStyle: 'italic',
+                }}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <p style={{
+                  fontSize: 12, fontWeight: 700, color: '#1A1A1A', margin: 0,
+                  overflow: 'hidden', display: '-webkit-box',
+                  WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+                  lineHeight: 1.4,
+                }}>
+                  {blog.title}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 'auto' }}>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, color: '#4F46E5',
+                    background: '#eef2ff', borderRadius: 4, padding: '2px 7px',
+                  }}>
+                    {blog.category}
+                  </span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>
+                    {(blog.view_count ?? 0).toLocaleString()}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── 통계 카드 4열 ── */}
