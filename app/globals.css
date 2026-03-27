@@ -14,7 +14,7 @@
 /* ─── CSS 변수 (라이트/다크 모드) ─── */
 :root {
   --bg:             #FFFFFF;
-  --bg-surface:     #F8FAFC;
+  --bg-surface:     #FAF8F5;
   --bg-card:        #FFFFFF;
   --bg-featured:    #FAFAF8;
   --text:           #1A1A1A;
@@ -52,7 +52,7 @@
 
 .dark {
   --bg:             #0A0A0A;
-  --bg-surface:     #141414;
+  --bg-surface:     #161412;
   --bg-card:        #1A1A1A;
   --bg-featured:    #111111;
   --text:           #F1F5F9;
