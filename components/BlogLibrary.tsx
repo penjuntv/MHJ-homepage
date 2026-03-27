@@ -7,7 +7,7 @@ import type { Blog } from '@/lib/types';
 import NewsletterCTA from './NewsletterCTA';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const FALLBACK_CATS = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
+const ALL_CATEGORIES = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers', 'Local Guide'];
 
 interface Props {
   featuredBlog: Blog | null;
@@ -20,7 +20,7 @@ interface Props {
   readerFavorites?: Blog[];
   blogTitle?: string;
   blogDescription?: string;
-  availableCategories?: string[];
+  categoryCounts?: Record<string, number>;
 }
 
 export default function BlogLibrary({
@@ -34,7 +34,7 @@ export default function BlogLibrary({
   readerFavorites,
   blogTitle,
   blogDescription,
-  availableCategories,
+  categoryCounts = {},
 }: Props) {
   const router = useRouter();
   const allStoriesRef = useRef<HTMLDivElement>(null);
@@ -62,7 +62,6 @@ export default function BlogLibrary({
   }
 
   const selectedCat = activeCategory ?? 'All';
-  const cats = availableCategories ?? FALLBACK_CATS;
 
   return (
     <div
@@ -152,45 +151,39 @@ export default function BlogLibrary({
         borderTop: '1px solid var(--border-medium)',
         paddingTop: 40,
         marginBottom: 40,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: 16,
       }}>
-        <p style={{
-          fontSize: 11, fontWeight: 900, letterSpacing: 4,
-          textTransform: 'uppercase', color: 'var(--text-tertiary)',
-          margin: 0, flexShrink: 0,
-        }}>
-          All Stories
-          <span style={{ marginLeft: 12, fontWeight: 600, letterSpacing: 1 }}>
-            ({totalCount})
-          </span>
-        </p>
         <CategoryFilter
           selected={selectedCat}
           onChange={handleCategoryChange}
-          categories={cats}
+          totalCount={totalCount}
+          categoryCounts={categoryCounts}
         />
       </div>
 
       {/* ═══════ 카드 그리드 ═══════ */}
       {blogs.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
-          <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: 16 }}>
-            No stories yet
-          </p>
-          {activeCategory && (
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-              Try browsing{' '}
-              <button
-                onClick={() => handleCategoryChange('All')}
-                style={{ color: 'var(--accent)', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}
-              >
-                all categories
-              </button>
+          {activeCategory && (categoryCounts[activeCategory] ?? 0) === 0 ? (
+            <>
+              <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: 12 }}>
+                Coming Soon
+              </p>
+              <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20 }}>
+                Coming soon — stay tuned!
+              </p>
+            </>
+          ) : (
+            <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: 16 }}>
+              No stories yet
             </p>
+          )}
+          {activeCategory && (
+            <button
+              onClick={() => handleCategoryChange('All')}
+              style={{ color: 'var(--accent)', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}
+            >
+              ← Browse all categories
+            </button>
           )}
         </div>
       ) : (
@@ -240,47 +233,78 @@ export default function BlogLibrary({
 }
 
 /* ════════════════════════════════════════════
-   카테고리 필터 — 슬라이딩 인디케이터
+   카테고리 필터 — Scrollable Pill Chips
    ════════════════════════════════════════════ */
-function CategoryFilter({ selected, onChange, categories }: {
+function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
   selected: string;
   onChange: (cat: string) => void;
-  categories: string[];
+  totalCount: number;
+  categoryCounts: Record<string, number>;
 }) {
-  const allCats = ['All Stories', ...categories];
-
   return (
     <div
       className="no-scrollbar"
       style={{
         display: 'flex',
         flexWrap: 'nowrap',
-        gap: 32,
+        gap: 8,
         overflowX: 'auto',
-        flexShrink: 0,
+        padding: '12px 0',
       }}
     >
-      {allCats.map((cat) => {
-        const catValue = cat === 'All Stories' ? 'All' : cat;
-        const isActive = selected === catValue;
+      {/* All Stories pill */}
+      {(() => {
+        const isActive = selected === 'All';
+        return (
+          <button
+            key="all"
+            onClick={() => onChange('All')}
+            style={{
+              padding: '6px 14px',
+              borderRadius: 20,
+              border: `1px solid ${isActive ? 'var(--text)' : 'var(--border-medium)'}`,
+              cursor: 'pointer',
+              fontSize: 11,
+              fontWeight: isActive ? 800 : 500,
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              background: isActive ? 'var(--text)' : 'transparent',
+              color: isActive ? 'var(--bg)' : 'var(--text-secondary)',
+              transition: 'background 0.18s, color 0.18s, border-color 0.18s',
+            }}
+          >
+            All Stories ({totalCount})
+          </button>
+        );
+      })()}
+
+      {/* Category pills */}
+      {ALL_CATEGORIES.map((cat) => {
+        const isActive = selected === cat;
+        const count = categoryCounts[cat] ?? 0;
+        const isEmpty = count === 0;
         return (
           <button
             key={cat}
-            onClick={() => onChange(catValue)}
+            onClick={() => onChange(cat)}
             style={{
-              padding: '4px 0 8px',
-              border: 'none',
-              borderBottom: isActive ? '2px solid var(--text)' : '2px solid transparent',
+              padding: '6px 14px',
+              borderRadius: 20,
+              border: `1px ${isEmpty ? 'dashed' : 'solid'} ${
+                isActive ? 'var(--text)' : isEmpty ? 'var(--border)' : 'var(--border-medium)'
+              }`,
               cursor: 'pointer',
-              fontSize: 10,
-              fontWeight: isActive ? 900 : 700,
-              letterSpacing: 2,
+              fontSize: 11,
+              fontWeight: isActive ? 800 : 500,
+              letterSpacing: '1px',
               textTransform: 'uppercase',
-              background: 'transparent',
-              color: isActive ? 'var(--text)' : 'var(--text-secondary)',
-              transition: 'color 0.2s, border-color 0.2s',
               whiteSpace: 'nowrap',
               flexShrink: 0,
+              background: isActive ? 'var(--text)' : 'transparent',
+              color: isActive ? 'var(--bg)' : isEmpty ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+              transition: 'background 0.18s, color 0.18s, border-color 0.18s',
             }}
           >
             {cat}

@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 const PAGE_SIZE = 20;
-const VALID_CATEGORIES = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
-const CATEGORY_ORDER = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
+const VALID_CATEGORIES = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers', 'Local Guide'];
+const CATEGORY_ORDER = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers', 'Local Guide'];
 
 interface Props {
   searchParams: Promise<{ page?: string; category?: string }>;
@@ -98,15 +98,19 @@ async function getMostReadBlogs(): Promise<Blog[]> {
   return (data ?? []) as Blog[];
 }
 
-async function getActiveCategories(): Promise<string[]> {
+async function getCategoryCounts(): Promise<Record<string, number>> {
   const now = new Date().toISOString();
   const { data } = await supabase
     .from('blogs')
     .select('category')
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`);
-  const used = new Set((data ?? []).map((b: { category: string }) => b.category).filter(Boolean));
-  return CATEGORY_ORDER.filter(c => used.has(c));
+  const counts: Record<string, number> = {};
+  for (const cat of CATEGORY_ORDER) counts[cat] = 0;
+  for (const row of data ?? []) {
+    if (row.category && counts[row.category] !== undefined) counts[row.category]++;
+  }
+  return counts;
 }
 
 async function getPaginatedBlogs(
@@ -134,12 +138,12 @@ export default async function BlogPage({ searchParams }: Props) {
   const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
   const category = params.category && VALID_CATEGORIES.includes(params.category) ? params.category : null;
 
-  const [featured, paginated, mostRead, s, activeCategories] = await Promise.all([
+  const [featured, paginated, mostRead, s, categoryCounts] = await Promise.all([
     getFeaturedBlog(category),
     getPaginatedBlogs(page, category),
     getMostReadBlogs(),
     getSiteSettings(),
-    getActiveCategories(),
+    getCategoryCounts(),
   ]);
 
   const recent = await getRecentBlogs(category, featured?.id ?? null);
@@ -216,7 +220,7 @@ export default async function BlogPage({ searchParams }: Props) {
         readerFavorites={mostRead}
         blogTitle={s.blog_title}
         blogDescription={s.blog_description}
-        availableCategories={activeCategories}
+        categoryCounts={categoryCounts}
       />
     </>
   );
