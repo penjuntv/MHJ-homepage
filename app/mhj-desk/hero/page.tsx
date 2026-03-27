@@ -208,7 +208,7 @@ export default function HeroManagePage() {
       }}>
         <Info size={16} style={{ color: '#F59E0B', flexShrink: 0, marginTop: 1 }} />
         <p style={{ fontSize: 12, color: '#92400E', margin: 0 }}>
-          <strong>위/아래 버튼</strong>으로 순서를 바꾸면 즉시 저장됩니다. 권장 개수: 3~7개.
+          <strong>위/아래 버튼</strong>으로 순서를 바꾸면 즉시 저장됩니다. 권장 개수: 3~5개.
           <br />눈 아이콘으로 개별 슬라이드를 숨길 수 있습니다. X 버튼은 히어로에서 완전 제거합니다.
         </p>
       </div>
@@ -229,7 +229,7 @@ export default function HeroManagePage() {
             <Zap size={18} style={{ color: '#6366F1', flexShrink: 0, marginTop: 1 }} />
             <div>
               <p style={{ fontSize: 13, fontWeight: 900, color: '#4338CA', margin: '0 0 4px' }}>
-                현재 자동 모드 — 최신 글 5개가 표시됩니다
+                현재 자동 모드 — 최신 글 3개가 히어로에 표시됩니다 (메인 1 + 서브 2)
               </p>
               <p style={{ fontSize: 12, color: '#6366F1', margin: 0 }}>
                 수동으로 변경하려면 블로그 목록에서 ⭐ 버튼을 눌러 글을 지정하세요.
