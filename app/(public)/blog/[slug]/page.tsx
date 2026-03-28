@@ -17,6 +17,14 @@ export const revalidate = 600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
+export async function generateStaticParams() {
+  const { data } = await supabase
+    .from('blogs')
+    .select('slug')
+    .eq('published', true);
+  return (data ?? []).map((b) => ({ slug: b.slug }));
+}
+
 async function getAdjacentBlogs(currentId: number): Promise<{
   prev: { id: number; title: string; slug: string } | null;
   next: { id: number; title: string; slug: string } | null;
