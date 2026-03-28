@@ -100,9 +100,10 @@ export async function generateMetadata({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { preview?: string };
+  searchParams: Promise<{ preview?: string }>;
 }): Promise<Metadata> {
-  const isPreview = searchParams?.preview === 'true';
+  const sp = await searchParams;
+  const isPreview = sp?.preview === 'true';
   const blog = isPreview ? await getBlogForPreview(params.slug) : await getBlog(params.slug);
   if (!blog) return { title: 'Not Found' };
 
@@ -140,9 +141,10 @@ export default async function BlogDetailPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { preview?: string };
+  searchParams: Promise<{ preview?: string }>;
 }) {
-  const isPreview = searchParams?.preview === 'true';
+  const sp = await searchParams;
+  const isPreview = sp?.preview === 'true';
   const blog = isPreview ? await getBlogForPreview(params.slug) : await getBlog(params.slug);
   if (!blog) notFound();
 
