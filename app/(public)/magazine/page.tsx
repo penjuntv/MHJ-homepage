@@ -8,7 +8,7 @@ import SafeImage from '@/components/SafeImage';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 

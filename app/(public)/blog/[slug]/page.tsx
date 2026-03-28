@@ -22,7 +22,7 @@ async function getBlogForPreview(slug: string): Promise<Blog | null> {
   return data;
 }
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 

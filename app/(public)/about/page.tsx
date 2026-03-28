@@ -5,7 +5,7 @@ import type { FamilyMember } from '@/lib/types';
 import { getSiteSettings } from '@/lib/site-settings';
 import NewsletterCTA from '@/components/NewsletterCTA';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 

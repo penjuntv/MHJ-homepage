@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import type { Blog, Magazine } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 

@@ -4,7 +4,7 @@ import type { Blog } from '@/lib/types';
 import BlogLibrary from '@/components/BlogLibrary';
 import { getSiteSettings } from '@/lib/site-settings';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
