@@ -75,14 +75,14 @@ export default function MagazineShelf({
       <div style={{ padding: '40px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <h2
           className="type-caption"
-          style={{ color: 'rgba(203,213,225,0.7)', fontStyle: 'italic', letterSpacing: 5, margin: 0 }}
+          style={{ color: 'var(--shelf-gradient-accent)', fontStyle: 'italic', letterSpacing: 5, margin: 0, opacity: 0.8 }}
         >
           {magazineTitle}
         </h2>
         <div style={{
           display: 'flex', fontSize: 10, fontWeight: 700,
-          color: 'rgba(203,213,225,0.5)', textTransform: 'uppercase',
-          letterSpacing: 3, alignItems: 'center', gap: 8,
+          color: 'var(--shelf-gradient-accent)', textTransform: 'uppercase',
+          letterSpacing: 3, alignItems: 'center', gap: 8, opacity: 0.6,
         }}>
           <MousePointer2 size={12} /> {magazineHint}
         </div>
@@ -91,20 +91,21 @@ export default function MagazineShelf({
       {/* ── 서가 컨테이너 ──
           paddingTop: 48px — translateY(-20px)가 이 여백 안으로 들어와서 클리핑 안 됨
           height: 72vh   — 여분 높이 포함 */}
-      <div style={{ flexGrow: 1, display: 'flex', alignItems: 'stretch' }}>
-        <div
-          ref={scrollRef}
-          className="no-scrollbar"
-          style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: 0,
-            padding: '48px 8vw 0',
-            overflowX: 'auto',
-            height: '72vh',
-            width: '100%',
-          }}
-        >
+      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flexGrow: 1, display: 'flex', alignItems: 'stretch' }}>
+          <div
+            ref={scrollRef}
+            className="no-scrollbar"
+            style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              gap: 0,
+              padding: '48px 8vw 0',
+              overflowX: 'auto',
+              height: '72vh',
+              width: '100%',
+            }}
+          >
           {visibleMags.map((item, index) => {
             const coming    = isComing(item);
             const isActive  = !coming && hovered === index;
@@ -132,9 +133,10 @@ export default function MagazineShelf({
               : 'brightness(1)';
 
             /* ── 그림자 ── */
+            /* DESIGN_RULES §11.5 예외: translateY 호버 허용 (서가 물리적 메타포) */
             const shadow = (isActive || isClicking)
-              ? '0 20px 60px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15)'
-              : 'inset -1px 0 0 rgba(255,255,255,0.06), inset 1px 0 0 rgba(255,255,255,0.03)';
+              ? '0 20px 60px rgba(0,0,0,0.25), 0 8px 20px rgba(0,0,0,0.12)'
+              : '0 4px 12px rgba(0,0,0,0.08), inset -1px 0 0 rgba(0,0,0,0.04), inset 1px 0 0 rgba(0,0,0,0.02)';
 
             return (
               <div
@@ -151,8 +153,8 @@ export default function MagazineShelf({
                   filter: filterVal,
                   boxShadow: shadow,
                   borderRight: isActive
-                    ? '1px solid rgba(255,255,255,0.08)'
-                    : '1px solid transparent',
+                    ? '1px solid rgba(0,0,0,0.06)'
+                    : '1px solid rgba(0,0,0,0.03)',
                   background: 'var(--shelf-item-bg)',
                   /* CSS 클래스 transition을 인라인으로 덮어씀 */
                   transition: [
@@ -195,15 +197,15 @@ export default function MagazineShelf({
                       <div style={{
                         position: 'absolute', inset: 0,
                         background: isActive
-                          ? 'linear-gradient(160deg, var(--shelf-gradient-accent) 0%, var(--shelf-gradient-from) 50%, var(--shelf-bg) 100%)'
-                          : 'linear-gradient(160deg, var(--shelf-gradient-from) 0%, var(--shelf-item-bg) 100%)',
+                          ? 'linear-gradient(160deg, var(--shelf-gradient-accent) 0%, var(--shelf-gradient-from) 50%, var(--shelf-item-bg) 100%)'
+                          : 'linear-gradient(160deg, var(--shelf-gradient-accent) 0%, var(--shelf-gradient-from) 100%)',
                         transition: 'background 0.7s',
                       }} />
                       <div style={{
                         position: 'absolute', top: '-30%', right: '-20%',
                         width: '80%', height: '60%',
                         borderRadius: '50%',
-                        background: 'rgba(255,255,255,0.04)',
+                        background: 'rgba(255,255,255,0.08)',
                         pointerEvents: 'none',
                       }} />
                     </>
@@ -350,7 +352,10 @@ export default function MagazineShelf({
 
           {/* 우측 여백 */}
           <div style={{ flexShrink: 0, width: '8vw', height: 1 }} />
+          </div>
         </div>
+        {/* 나무 선반 (shelf plank) */}
+        <div className="shelf-plank" style={{ margin: '0 8vw' }} />
       </div>
     </div>
   );

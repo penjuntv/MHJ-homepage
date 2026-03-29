@@ -344,7 +344,7 @@ transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 | 일반 규칙 | 서가 예외 | 이유 |
 |-----------|----------|------|
 | translateY 호버 금지 (§9.1) | translateY(-20px) 허용 | 책이 서가에서 앞으로 나오는 물리적 메타포 |
-| 배경 #1a1a1a (REFERENCE) | #0a0a1a 사용 | 더 깊은 네이비가 서재 분위기에 적합 |
+| 배경 #1a1a1a (REFERENCE) | 라이트: #F5F0EA / 다크: #1A1814 | 따뜻한 나무 서재 컨셉 (warm cream 톤) |
 | saturate() 금지 (§12.2) | brightness(1.05)로 대체 완료 | 2026-03-23 수정 |
 
 ---

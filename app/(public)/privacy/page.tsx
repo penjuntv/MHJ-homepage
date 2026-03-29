@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — MY MAIRANGI',
+  title: 'Privacy Policy',
   description: 'How MY MAIRANGI collects, uses, and protects your personal information under the NZ Privacy Act 2020.',
 };
 
