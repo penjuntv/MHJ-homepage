@@ -3,7 +3,8 @@ import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { draftMode } from 'next/headers';
+import { supabase, createAdminClient } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import ViewTracker from './ViewTracker';
@@ -94,12 +95,25 @@ async function getBlog(slug: string): Promise<Blog | null> {
   return data;
 }
 
+async function getBlogForPreview(slug: string): Promise<Blog | null> {
+  const adminClient = createAdminClient();
+  const { data } = await adminClient
+    .from('blogs')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+  return data;
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const blog = await getBlog(params.slug);
+  const { isEnabled } = draftMode();
+  const blog = isEnabled
+    ? await getBlogForPreview(params.slug)
+    : await getBlog(params.slug);
   if (!blog) return { title: 'Not Found' };
 
   const plainText = blog.content.replace(/<[^>]*>/g, '');
@@ -136,7 +150,10 @@ export default async function BlogDetailPage({
 }: {
   params: { slug: string };
 }) {
-  const blog = await getBlog(params.slug);
+  const { isEnabled: isPreview } = draftMode();
+  const blog = isPreview
+    ? await getBlogForPreview(params.slug)
+    : await getBlog(params.slug);
   if (!blog) notFound();
 
   const [relatedBlogs, adjacent] = await Promise.all([
@@ -192,6 +209,36 @@ export default async function BlogDetailPage({
       <ViewTracker slug={blog.slug} />
       <BlogReadTracker slug={blog.slug} category={blog.category} author={blog.author} />
       <div className="animate-fade-in">
+
+        {/* ── 미리보기 배너 ── */}
+        {isPreview && (
+          <div style={{
+            background: '#FEF3C7',
+            borderBottom: '1px solid #FDE68A',
+            padding: '14px clamp(24px, 4vw, 48px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap',
+          }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: 0 }}>
+              미리보기 모드 — 아직 발행되지 않은 글입니다
+            </p>
+            <Link
+              href="/api/preview-exit"
+              style={{
+                fontSize: 11, fontWeight: 900, color: '#92400E',
+                textDecoration: 'none', letterSpacing: 2,
+                textTransform: 'uppercase', flexShrink: 0,
+                border: '1px solid #FCD34D', borderRadius: 999,
+                padding: '6px 14px', background: 'rgba(255,255,255,0.5)',
+              }}
+            >
+              ← 어드민으로 돌아가기
+            </Link>
+          </div>
+        )}
 
         {/* ── 1) 헤더: Back + 제목 + 메타 ── */}
         <div style={{

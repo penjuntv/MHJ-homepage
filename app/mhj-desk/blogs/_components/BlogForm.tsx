@@ -881,7 +881,7 @@ export default function BlogForm({ initial }: Props) {
               if (!form.slug) { toast.error('슬러그를 입력해야 미리보기가 가능합니다.'); return; }
               const url = form.published
                 ? `/blog/${form.slug}`
-                : `/blog/${form.slug}?preview=true`;
+                : `/api/preview?slug=${form.slug}`;
               window.open(url, '_blank');
             }}
             style={{
