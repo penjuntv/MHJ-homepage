@@ -258,8 +258,21 @@ export default function MagazineDetailPage() {
       cover_copy: magForm.cover_copy, cover_images: magForm.cover_images,
       issue_number: magForm.issue_number,
     }).eq('id', magazine.id);
-    if (error) showToast('저장 실패: ' + error.message);
-    else { showToast('표지 정보가 저장되었습니다.'); await fetchData(); }
+    if (error) { showToast('저장 실패: ' + error.message); }
+    else {
+      showToast('표지 정보가 저장되었습니다.');
+      await fetchData();
+      try {
+        await fetch('/api/revalidate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET,
+            paths: ['/magazine', `/magazine/${id}`, '/'],
+          }),
+        });
+      } catch { /* revalidation 실패해도 저장은 성공 */ }
+    }
     setSavingMag(false);
   }
 
@@ -347,6 +360,16 @@ export default function MagazineDetailPage() {
       if (data) { setArticles(prev => [...prev, data]); setSelectedArtId(data.id); setInlineIsNew(false); }
       showToast('기사가 추가되었습니다.');
     }
+    try {
+      await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET,
+          paths: ['/magazine', `/magazine/${id}`, '/'],
+        }),
+      });
+    } catch { /* revalidation 실패해도 저장은 성공 */ }
     setSavingArticle(false);
   }
 

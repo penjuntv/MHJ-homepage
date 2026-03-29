@@ -345,6 +345,18 @@ export default function BlogForm({ initial }: Props) {
       });
     }
 
+    // On-demand revalidation
+    try {
+      await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET,
+          paths: [`/blog/${form.slug}`, '/', '/blog'],
+        }),
+      });
+    } catch { /* revalidation 실패해도 저장은 성공 */ }
+
     // 임시저장 삭제 + 토스트
     try { sessionStorage.removeItem(draftKey); } catch { /* ignore */ }
     toast.success(shouldPublish ? '글이 발행되었습니다.' : '글이 저장되었습니다.');
