@@ -34,13 +34,14 @@ const FALLBACK_BLOGS: Blog[] = [
 async function getFeaturedPosts(): Promise<Blog[]> {
   const now = new Date().toISOString();
 
-  // 1) featured=true 최신 3개
+  // 1) featured=true → hero_order 순서 우선, date 보조
   const { data: featured } = await supabase
     .from('blogs')
     .select('*')
     .eq('published', true)
     .eq('featured', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
+    .order('hero_order', { ascending: true, nullsFirst: false })
     .order('date', { ascending: false })
     .limit(3);
 
