@@ -74,6 +74,15 @@ export default function AdminBlogsPage() {
     await supabase.from('blogs').update({ featured: next }).eq('id', blog.id);
     setBlogs(prev => prev.map(b => b.id === blog.id ? { ...b, featured: next } : b));
     toast.success(next ? '피처드로 설정되었습니다.' : '피처드가 해제되었습니다.');
+
+    // 라이브 홈페이지 히어로 즉시 반영
+    try {
+      await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/'] }),
+      });
+    } catch {}
   }
 
   async function deleteBlog(id: number) {
