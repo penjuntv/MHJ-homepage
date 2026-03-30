@@ -80,9 +80,9 @@ export default async function MagazinePage() {
   );
 }
 
-/* ─── Latest Issues 섹션 (pdf_url 이슈만, 최대 3개) ─── */
+/* ─── Latest Issues 섹션 (published 전체, 최대 3개) ─── */
 function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
-  const pdfIssues = magazines.filter((m) => m.pdf_url).slice(0, 3);
+  const pdfIssues = magazines.slice(0, 3);
   if (!pdfIssues.length) return null;
 
   return (
@@ -151,7 +151,7 @@ function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
                   border: '1px solid var(--border-medium)',
                   padding: '5px 12px', borderRadius: '999px',
                 }}>
-                  📖 PDF
+                  {mag.pdf_url ? '📖 PDF' : `${mag.article_count ?? 0} articles`}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--accent)' }}>
                   Open Edition <ArrowRight size={12} />
