@@ -197,7 +197,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div style={{ padding: '48px', maxWidth: 1200, margin: '0 auto' }}>
+    <div className="px-4 py-8 sm:px-8 sm:py-10 lg:px-12" style={{ maxWidth: 1200, margin: '0 auto' }}>
 
       {/* ── 환영 + Quick Actions ── */}
       <div style={{ marginBottom: 40 }}>
@@ -205,7 +205,7 @@ export default function AdminDashboard() {
           MY MAIRANGI CMS
         </p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
-          <h1 className="font-display font-black" style={{ fontSize: 40, letterSpacing: -2, margin: 0 }}>
+          <h1 className="font-display font-black" style={{ fontSize: 40, letterSpacing: -2, margin: 0, color: '#1a1a1a' }}>
             안녕하세요, {userName || '…'} 👋
           </h1>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
       {/* ── 요약 통계 4열 (compact) ── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(160px, 100%), 1fr))',
         gap: 16,
         marginBottom: 16,
       }}>
@@ -306,7 +306,8 @@ export default function AdminDashboard() {
         {popularBlogs.length === 0 ? (
           <p style={{ fontSize: 13, color: '#cbd5e1', textAlign: 'center', padding: '16px 0' }}>데이터 없음</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0 }}>
+          <div style={{ overflowX: 'auto', margin: '0 -4px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(140px, 1fr))', gap: 0, minWidth: 560 }}>
             {popularBlogs.map((blog, i) => (
               <Link key={blog.id} href={`/mhj-desk/blogs/${blog.id}/edit`} style={{
                 display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 16px',
@@ -341,13 +342,14 @@ export default function AdminDashboard() {
               </Link>
             ))}
           </div>
+          </div>
         )}
       </div>
 
       {/* ── 통계 카드 4열 ── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))',
         gap: 20,
         marginBottom: 36,
       }}>
@@ -376,7 +378,7 @@ export default function AdminDashboard() {
               <p className="font-black uppercase" style={{ fontSize: 9, letterSpacing: 3, color: '#94a3b8', marginBottom: 4 }}>
                 {card.label}
               </p>
-              <p style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 600 }}>
+              <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>
                 {card.sub}
               </p>
             </div>
@@ -455,7 +457,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── 2컬럼: 인기 글 TOP 5 + 최근 활동 ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 36 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 20, marginBottom: 36 }}>
 
         {/* 인기 글 TOP 5 */}
         <div style={{
@@ -562,7 +564,7 @@ export default function AdminDashboard() {
       <div style={{
         background: 'white', borderRadius: 24,
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9',
-        overflow: 'hidden',
+        overflowX: 'auto',
       }}>
         {/* 테이블 헤더 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 28px 20px' }}>

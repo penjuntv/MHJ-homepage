@@ -94,7 +94,7 @@ export default function SubscribersPage() {
   };
 
   return (
-    <div style={{ padding: '40px 48px', maxWidth: 1100 }}>
+    <div className="px-4 py-8 sm:px-8 sm:py-10 lg:px-12" style={{ maxWidth: 1100 }}>
 
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
@@ -191,7 +191,7 @@ export default function SubscribersPage() {
       </div>
 
       {/* 테이블 */}
-      <div style={{ background: 'white', borderRadius: 24, border: '1px solid #f1f5f9', overflow: 'hidden' }}>
+      <div style={{ background: 'white', borderRadius: 24, border: '1px solid #f1f5f9', overflowX: 'auto' }}>
         {loading ? (
           <div style={{ padding: 60, textAlign: 'center', color: '#94a3b8', fontSize: 13, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>
             Loading...
@@ -201,7 +201,7 @@ export default function SubscribersPage() {
             구독자가 없습니다
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                 {['#', '이메일', '이름', '구독일', '상태', ''].map((h) => (

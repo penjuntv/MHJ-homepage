@@ -106,13 +106,13 @@ export default function AdminBlogsPage() {
   });
 
   return (
-    <div style={{ padding: '40px 48px', maxWidth: 1200, margin: '0 auto' }}>
+    <div className="px-4 py-8 sm:px-8 sm:py-10 lg:px-12" style={{ maxWidth: 1200, margin: '0 auto' }}>
 
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1 className="font-display font-black uppercase" style={{ fontSize: 40, letterSpacing: -2, margin: 0 }}>Blog</h1>
-          <p style={{ fontSize: 10, letterSpacing: 4, color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', marginTop: 6 }}>
+          <p style={{ fontSize: 10, letterSpacing: 4, color: '#64748b', fontWeight: 800, textTransform: 'uppercase', marginTop: 6 }}>
             총 {blogs.length}편 · 발행 {publishedCount} · 비공개 {blogs.length - publishedCount}
           </p>
         </div>
@@ -294,8 +294,8 @@ export default function AdminBlogsPage() {
         </div>
       ) : (
         /* ── LIST VIEW ── */
-        <div style={{ background: 'white', borderRadius: 24, border: '1px solid #f1f5f9', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={{ background: 'white', borderRadius: 24, border: '1px solid #f1f5f9', overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
             <thead>
               <tr style={{ background: '#fafafa', borderBottom: '1px solid #f1f5f9' }}>
                 {['', '', '글', '카테고리', '저자', '날짜', '상태', '조회', ''].map((h, i) => (
