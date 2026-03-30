@@ -4,10 +4,11 @@ import { useState, useRef, useEffect } from 'react';
 import SafeImage from './SafeImage';
 import { useRouter } from 'next/navigation';
 import type { Blog } from '@/lib/types';
+import { BLOG_CATEGORIES } from '@/lib/constants';
 import NewsletterCTA from './NewsletterCTA';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ALL_CATEGORIES = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers', 'Local Guide'];
+const ALL_CATEGORIES = [...BLOG_CATEGORIES];
 
 interface Props {
   featuredBlog: Blog | null;

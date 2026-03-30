@@ -53,7 +53,7 @@ export interface ArticleReaction {
 
 export interface Blog {
   id: number;
-  category: 'Little 15 Mins' | 'Home Learning' | 'Whānau' | 'Settlement' | 'Life in Aotearoa' | 'Travelers';
+  category: 'Little 15 Mins' | 'Home Learning' | 'Whānau' | 'Settlement' | 'Life in Aotearoa' | 'Travelers' | 'Local Guide';
   title: string;
   author: string;        // default 'Yussi'
   date: string;

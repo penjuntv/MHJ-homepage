@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
+import { BLOG_CATEGORIES } from '@/lib/constants';
 import BlogLibrary from '@/components/BlogLibrary';
 import { getSiteSettings } from '@/lib/site-settings';
 
@@ -9,8 +10,8 @@ export const revalidate = 300;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 const PAGE_SIZE = 20;
-const VALID_CATEGORIES = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers', 'Local Guide'];
-const CATEGORY_ORDER = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers', 'Local Guide'];
+const VALID_CATEGORIES = [...BLOG_CATEGORIES] as string[];
+const CATEGORY_ORDER = [...BLOG_CATEGORIES];
 
 interface Props {
   searchParams: Promise<{ page?: string; category?: string }>;

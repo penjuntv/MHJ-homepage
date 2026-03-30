@@ -7,8 +7,9 @@ import { supabase } from '@/lib/supabase-browser';
 import type { Blog } from '@/lib/types';
 import { Plus, Search, Pencil, Trash2, Eye, EyeOff, Star, LayoutGrid, List, TrendingUp, Award } from 'lucide-react';
 import { toast } from 'sonner';
+import { BLOG_CATEGORIES } from '@/lib/constants';
 
-const CATEGORIES = ['All', 'Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers', 'Local Guide'];
+const CATEGORIES = ['All', ...BLOG_CATEGORIES];
 type StatusFilter = 'all' | 'published' | 'draft';
 type ViewMode = 'list' | 'card';
 

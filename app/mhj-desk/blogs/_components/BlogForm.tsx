@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase-browser';
 import type { Blog } from '@/lib/types';
+import { BLOG_CATEGORIES } from '@/lib/constants';
 import { Upload, Loader2, Sparkles, Eye } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
 import ImageCropModal from '@/components/admin/ImageCropModal';
@@ -20,7 +21,7 @@ interface Props {
   initial?: Blog;
 }
 
-const CATEGORIES: Blog['category'][] = ['Little 15 Mins', 'Home Learning', 'Whānau', 'Settlement', 'Life in Aotearoa', 'Travelers'];
+const CATEGORIES: Blog['category'][] = [...BLOG_CATEGORIES];
 
 /* ── 발행 전 체크리스트 ── */
 function PublishChecklist({ form }: { form: Omit<Blog, 'id' | 'created_at'> }) {

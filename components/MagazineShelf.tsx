@@ -13,9 +13,10 @@ interface Props {
   magazineHint?: string;
 }
 
-/* Coming Soon 판별: DB에서 가져온 데이터(article_count가 정의됨)에만 적용 */
-const isComing = (m: Magazine) =>
-  m.article_count !== undefined && m.article_count === 0 && !m.pdf_url;
+/* Coming Soon 판별: 현재 모든 published 매거진은 클릭 가능.
+   상세 페이지에서 표지/기사 유무에 따라 적절히 렌더링. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const isComing = (m: Magazine) => false;
 
 export default function MagazineShelf({
   magazines,
@@ -30,15 +31,8 @@ export default function MagazineShelf({
   const [clicking, setClicking] = useState<number | null>(null);
   const router = useRouter();
 
-  /* Coming Soon 최대 2개 — 나머지 숨김 */
-  let comingSoonSeen = 0;
-  const visibleMags = magazines.filter((m) => {
-    if (isComing(m)) {
-      if (comingSoonSeen < 2) { comingSoonSeen++; return true; }
-      return false;
-    }
-    return true;
-  });
+  /* published=true인 모든 매거진을 서가에 표시 */
+  const visibleMags = magazines;
 
   /* 마우스 휠 → 가로 스크롤 */
   const handleWheel = useCallback((e: WheelEvent) => {
