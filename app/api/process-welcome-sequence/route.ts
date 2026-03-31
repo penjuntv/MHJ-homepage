@@ -57,14 +57,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Step 2 → 3: 7일 이상 경과한 구독자에게 3통 발송
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  // Step 2 → 3: 이메일 2 발송 4일 후 (구독 7일째) 3통 발송
+  const fourDaysAgo = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString();
   const { data: step2 } = await supabase
     .from('subscribers')
     .select('email, name')
     .eq('active', true)
     .eq('welcome_step', 2)
-    .lt('welcome_last_sent', sevenDaysAgo);
+    .lt('welcome_last_sent', fourDaysAgo);
 
   for (const sub of step2 ?? []) {
     try {
