@@ -20,7 +20,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 동적 매거진 이슈
   const { data: magazines } = await supabase
     .from('magazines')
-    .select('id, created_at');
+    .select('id, created_at')
+    .eq('published', true);
 
   const magazinePages: MetadataRoute.Sitemap = (magazines ?? []).map((m) => ({
     url: `${baseUrl}/magazine/${m.id}`,
