@@ -384,98 +384,11 @@ export default async function BlogDetailPage({
 
             {/* 3) 본문 */}
             {isHtml ? (
-              <div>
-                <style>{`
-                  .blog-content {
-                    font-size: 16px;
-                    color: var(--text);
-                    font-weight: 500;
-                    line-height: 1.7;
-                  }
-                  .blog-content p { margin: 0 0 24px; }
-                  .blog-content > p:first-of-type::first-letter {
-                    font-size: 4rem;
-                    font-weight: 900;
-                    float: left;
-                    margin-right: 12px;
-                    line-height: 0.78;
-                    color: var(--drop-cap-color);
-                    font-family: 'Playfair Display', serif;
-                  }
-                  .blog-content h2 {
-                    font-size: clamp(24px, 3vw, 36px);
-                    font-weight: 800;
-                    margin: 48px 0 16px;
-                    letter-spacing: -0.5px;
-                    color: var(--text);
-                  }
-                  .blog-content h3 {
-                    font-size: clamp(20px, 2.5vw, 28px);
-                    font-weight: 700;
-                    margin: 40px 0 16px;
-                    color: var(--text);
-                  }
-                  .blog-content blockquote {
-                    border-left: 3px solid var(--text-tertiary);
-                    padding: 12px 0 12px 24px;
-                    margin: 32px 0;
-                    color: var(--text-secondary);
-                    font-style: italic;
-                    font-size: 1.1em;
-                    line-height: 1.7;
-                  }
-                  .blog-content blockquote p { margin: 0; }
-                  .blog-content strong { font-weight: 700; color: var(--text); }
-                  .blog-content em { font-style: italic; }
-                  .blog-content ul, .blog-content ol { padding-left: 24px; margin: 0 0 24px; }
-                  .blog-content li { margin: 0.5em 0; line-height: 1.7; }
-                  .blog-content a { color: #4F46E5; text-decoration: underline; text-underline-offset: 3px; }
-                  .blog-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 24px 0; display: block; }
-                  .blog-content img[data-align="left"]   { float: left;  margin: 8px 24px 16px 0; display: inline; }
-                  .blog-content img[data-align="right"]  { float: right; margin: 8px 0 16px 24px; display: inline; }
-                  .blog-content img[data-align="center"] { margin-left: auto; margin-right: auto; }
-                  .blog-content img[data-width="25%"]  { width: 25%; }
-                  .blog-content img[data-width="50%"]  { width: 50%; }
-                  .blog-content img[data-width="75%"]  { width: 75%; }
-                  .blog-content img[data-width="100%"] { width: 100%; }
-                  .blog-content a { color: #4F46E5; text-decoration: underline; text-underline-offset: 4px; }
-                  /* 이미지 그리드 */
-                  .blog-content .image-grid { display: grid; gap: 8px; margin: 24px 0; }
-                  .blog-content .grid-2 { grid-template-columns: 1fr 1fr; }
-                  .blog-content .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-                  .blog-content .grid-1-2 { grid-template-columns: 1fr 1fr; }
-                  .blog-content .grid-1-2 > img:first-child { grid-row: span 2; }
-                  .blog-content .image-grid img { margin: 0; border-radius: 8px; width: 100%; height: 100%; object-fit: cover; }
-                  /* CTA 버튼 */
-                  .blog-content .blog-cta { text-align: center; margin: 32px 0; }
-                  .blog-content .blog-cta a { color: white; text-decoration: none; }
-                  /* Google Maps */
-                  .blog-content .blog-map { margin: 32px 0; border-radius: 8px; overflow: hidden; }
-                  .blog-content .blog-map iframe { width: 100%; height: 300px; border: none; display: block; }
-                  /* 본문 이미지 figure */
-                  .blog-content figure.blog-body-image { margin: 24px 0; }
-                  .blog-content figure.blog-body-image img { width: 100%; height: auto; border-radius: 8px; display: block; margin: 0; }
-                  .blog-content figure.blog-body-image figcaption { margin-top: 8px; font-size: 13px; font-style: italic; color: var(--text-secondary); text-align: center; line-height: 1.5; }
-                  /* Callout */
-                  .blog-content .blog-callout { padding: 24px; background: #EEF2FF; border-left: 3px solid #4F46E5; border-radius: 0 8px 8px 0; margin: 24px 0; }
-                  /* YouTube */
-                  .blog-content .blog-youtube,
-                  .blog-content .blog-video { margin: 32px 0; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9; }
-                  .blog-content .blog-youtube iframe,
-                  .blog-content .blog-video iframe { width: 100%; height: 100%; border: none; display: block; }
-                  @media (max-width: 640px) {
-                    .blog-content img { float: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
-                    .blog-content .grid-2, .blog-content .grid-3, .blog-content .grid-1-2 { grid-template-columns: 1fr !important; }
-                    .blog-content .grid-1-2 > img:first-child { grid-row: auto; }
-                    .blog-content > p:first-of-type::first-letter { font-size: 3rem; }
-                  }
-                `}</style>
-                <div
-                  className="blog-content"
-                  dangerouslySetInnerHTML={{ __html: blog.content }}
-                  suppressHydrationWarning
-                />
-              </div>
+              <div
+                className="blog-content"
+                dangerouslySetInnerHTML={{ __html: blog.content }}
+                suppressHydrationWarning
+              />
             ) : (
               <p style={{
                 fontSize: 16,

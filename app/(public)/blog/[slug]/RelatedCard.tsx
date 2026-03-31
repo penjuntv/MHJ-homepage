@@ -18,13 +18,6 @@ export default function RelatedCard({ blog }: { blog: Blog }) {
         border: '1px solid var(--border)',
       }}
     >
-      <style>{`
-        .related-card:hover { opacity: 0.88; }
-        .related-card:hover .related-img { transform: scale(1.02); }
-        .related-img { transition: transform 0.5s ease; }
-        .related-card { transition: opacity 0.3s ease; }
-      `}</style>
-
       {/* 이미지 16:10 */}
       <div style={{ position: 'relative', aspectRatio: '16 / 10', overflow: 'hidden' }}>
         <SafeImage
