@@ -598,7 +598,7 @@ export default async function BlogDetailPage({
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
                 gap: 24,
               }}>
                 {relatedBlogs.map((related) => (

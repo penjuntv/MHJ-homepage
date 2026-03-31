@@ -343,9 +343,18 @@ transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 
 | 일반 규칙 | 서가 예외 | 이유 |
 |-----------|----------|------|
-| translateY 호버 금지 (§9.1) | translateY(-20px) 허용 | 책이 서가에서 앞으로 나오는 물리적 메타포 |
+| translateY 호버 금지 (§9.1) | translateY(-20px) 허용 (최대 -28px) | 책이 서가에서 앞으로 나오는 물리적 메타포 |
 | 배경 #1a1a1a (REFERENCE) | 라이트: #F5F0EA / 다크: #1A1814 | 따뜻한 나무 서재 컨셉 (warm cream 톤) |
 | saturate() 금지 (§12.2) | brightness(1.05)로 대체 완료 | 2026-03-23 수정 |
+
+### 11.6 예외: 매거진 서가 호버 (세네카의 서재)
+
+- **translateY 호버**: 서가 은유 구현을 위해 허용 (최대 -12px, 활성 상태 -20px)
+- **이유**: 물리적 서가에서 책을 꺼내는 동작의 시각적 표현
+- **적용 범위**: /magazine 서가 컴포넌트(`MagazineShelf.tsx`) 한정
+- **box-shadow 강화**: 책이 선반에서 들어올려지는 깊이감 표현
+- **선반 3D**: CSS gradient로 나무 앞면 입체감 + 나무결 텍스처
+- **모바일**: `@media (hover: none)` — `:active`에 동일 효과 적용
 
 ---
 

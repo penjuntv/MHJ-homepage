@@ -396,24 +396,101 @@
 .shelf-plank {
   position: relative;
   width: 100%;
-  height: 14px;
-  background: linear-gradient(180deg, var(--shelf-gradient-from) 0%, var(--shelf-gradient-accent) 100%);
-  border-radius: 0 0 2px 2px;
+  height: 18px;
   flex-shrink: 0;
+  /* 앞면: 상단 밝은 나무 → 하단 어두운 나무 (3D 입체감) */
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--shelf-gradient-from) 100%, white 15%) 0%,
+      var(--shelf-gradient-from) 30%,
+      var(--shelf-gradient-accent) 100%
+    );
+  border-radius: 0 0 3px 3px;
+  /* 선반 상단 하이라이트 */
+  border-top: 1px solid color-mix(in srgb, var(--shelf-gradient-from), white 20%);
 }
+/* 선반 앞면 나무결 텍스처 (CSS gradient) */
+.shelf-plank::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 40px,
+      rgba(0, 0, 0, 0.03) 40px,
+      rgba(0, 0, 0, 0.03) 41px,
+      transparent 41px,
+      transparent 120px,
+      rgba(0, 0, 0, 0.02) 120px,
+      rgba(0, 0, 0, 0.02) 121px
+    );
+  border-radius: inherit;
+  pointer-events: none;
+}
+/* 선반 아래 드롭 섀도우 */
 .shelf-plank::after {
   content: '';
   position: absolute;
-  bottom: -6px;
-  left: 2%;
-  right: 2%;
-  height: 6px;
+  bottom: -8px;
+  left: 1%;
+  right: 1%;
+  height: 8px;
   background: transparent;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  border-radius: 0 0 4px 4px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 0 0 6px 6px;
 }
 .dark .shelf-plank::after {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+}
+.dark .shelf-plank::before {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 40px,
+      rgba(255, 255, 255, 0.02) 40px,
+      rgba(255, 255, 255, 0.02) 41px,
+      transparent 41px,
+      transparent 120px,
+      rgba(255, 255, 255, 0.015) 120px,
+      rgba(255, 255, 255, 0.015) 121px
+    );
+}
+
+/* ─── 서가 책 하단 그림자 (책이 선반 위에 서 있는 느낌) ─── */
+.magazine-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 4px;
+  right: 4px;
+  height: 12px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.12), transparent);
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 0.3s ease;
+}
+.dark .magazine-item::after {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.25), transparent);
+}
+
+/* ─── 서가 호버 인터랙션 (CSS Only, hover 디바이스만) ─── */
+@media (hover: hover) {
+  .magazine-item {
+    transition:
+      width 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.3s ease-out,
+      box-shadow 0.3s ease-out;
+  }
+}
+/* 터치 디바이스: :active로 동일 효과 */
+@media (hover: none) {
+  .magazine-item:active {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  }
 }
 
 /* ─── RSS 아이콘 링크 ─── */
@@ -1026,6 +1103,11 @@
 
 .dark .blog-info-block [style*="background"] {
   background-color: var(--bg-card) !important;
+}
+
+/* 다크모드 인포블록 하이라이트 (gradient underline) — 밝은 amber를 부드럽게 */
+.dark .blog-info-block [style*="gradient"] {
+  background: linear-gradient(transparent 60%, rgba(234, 179, 8, 0.28) 60%) !important;
 }
 
 /* 뱃지 등 역전이 필요한 경우 보완 */

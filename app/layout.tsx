@@ -42,8 +42,8 @@ export const metadata: Metadata = {
   verification: { google: 'kjz6IsQn0jwDusM7kcWrGHT5gO2lc6k7FecrzEuuZBg' },
   alternates: { canonical: BASE_URL },
   icons: {
-    icon: '/icon',
-    apple: '/apple-icon',
+    icon: '/favicon.ico',
+    apple: '/icons/apple-touch-icon.png',
   },
   manifest: '/manifest.webmanifest',
   appleWebApp: {
