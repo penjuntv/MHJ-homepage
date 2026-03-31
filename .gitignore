@@ -40,4 +40,6 @@ next-env.d.ts
 .playwright-mcp/
 *.png
 !public/icon-*.png
+!public/icons/*.png
+!public/favicon.ico
 *.jpg.tmp
