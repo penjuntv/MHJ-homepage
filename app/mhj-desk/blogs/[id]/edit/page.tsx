@@ -27,7 +27,7 @@ export default function EditBlogPage() {
 
   if (blog === null) return (
     <div style={{ padding: '48px' }}>
-      <p style={{ color: '#EF4444' }}>블로그 글을 찾을 수 없습니다.</p>
+      <p style={{ color: '#EF4444' }}>저널 글을 찾을 수 없습니다.</p>
     </div>
   );
 

@@ -90,7 +90,7 @@ export default function DesignKitPage() {
               { sample: 'MAIRANGI MORNING', family: 'Playfair Display', weight: 900, italic: false, use: 'Display / Headings', size: 48, cls: 'font-display', lh: 0.85 },
               { sample: 'Journal', family: 'Playfair Display', weight: 300, italic: true, use: 'Subtitle / Emphasis', size: 48, cls: 'font-display', lh: 0.85 },
               { sample: 'DASHBOARD', family: 'Noto Sans KR', weight: 900, italic: false, use: 'UI Labels (uppercase)', size: 32, cls: '', lh: 1 },
-              { sample: 'Blog Management', family: 'Noto Sans KR', weight: 700, italic: false, use: 'Menu / Label', size: 20, cls: '', lh: 1.2 },
+              { sample: 'Journal Management', family: 'Noto Sans KR', weight: 700, italic: false, use: 'Menu / Label', size: 20, cls: '', lh: 1.2 },
               { sample: 'Three daughters growing up on Auckland\u2019s North Shore, discovering new horizons every day.', family: 'Noto Sans KR', weight: 500, italic: false, use: 'Body Text', size: 16, cls: '', lh: 1.6 },
             ].map((t, i) => (
               <div key={i} style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center', paddingBottom: 24, borderBottom: i < 4 ? '1px solid #F1F5F9' : 'none' }}>

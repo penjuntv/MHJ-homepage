@@ -76,7 +76,7 @@ export default function BlogLibrary({
       {/* ═══════ 헤더 — 타이틀 + 설명만 ═══════ */}
       <header style={{ marginBottom: 96 }}>
         <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
-          Blog Library
+          Journal
         </p>
         <h1
           className="font-display font-black type-display"

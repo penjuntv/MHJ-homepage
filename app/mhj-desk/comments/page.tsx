@@ -390,14 +390,14 @@ export default function AdminCommentsPage() {
           </h1>
         </div>
         <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 4, color: '#94A3B8' }}>
-          블로그 · 매거진 댓글 관리
+          저널 · 매거진 댓글 관리
         </p>
       </div>
 
       {/* 메인 탭 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 32 }}>
         <button onClick={() => setMainTab('blog')} style={tabBtn(mainTab === 'blog')}>
-          📝 블로그 댓글
+          📝 저널 댓글
         </button>
         <button onClick={() => setMainTab('magazine')} style={tabBtn(mainTab === 'magazine')}>
           📖 매거진 댓글

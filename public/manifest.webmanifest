@@ -1,7 +1,7 @@
 {
   "name": "My Mairangi Journal",
   "short_name": "MHJ",
-  "description": "Less screen, more soil",
+  "description": "A family archive from Mairangi Bay, Auckland",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FAF8F5",

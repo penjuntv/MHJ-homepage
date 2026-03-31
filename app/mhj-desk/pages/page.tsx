@@ -38,9 +38,9 @@ const PAGES = [
   },
   {
     id: 'blog',
-    label: 'Blog Library',
+    label: 'Journal Library',
     path: '/blog',
-    desc: '카테고리 필터 · 블로그 그리드',
+    desc: '카테고리 필터 · 저널 그리드',
     status: 'live' as const,
     sections: ['라이브러리 제목', '라이브러리 설명'],
   },

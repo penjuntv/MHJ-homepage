@@ -16,7 +16,7 @@ const DEFAULT_NAV: NavItem[] = [
   { label: 'About', path: '/about', visible: true, order: 1 },
   { label: 'StoryPress', path: '/storypress', visible: true, order: 2 },
   { label: 'Magazine', path: '/magazine', visible: true, order: 3 },
-  { label: 'Blog', path: '/blog', visible: true, order: 4 },
+  { label: 'Journal', path: '/blog', visible: true, order: 4 },
   { label: 'Gallery', path: '/gallery', visible: true, order: 5 },
 ];
 

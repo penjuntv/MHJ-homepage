@@ -111,7 +111,7 @@ export default function AdminBlogsPage() {
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 className="font-display font-black uppercase" style={{ fontSize: 40, letterSpacing: -2, margin: 0 }}>Blog</h1>
+          <h1 className="font-display font-black uppercase" style={{ fontSize: 40, letterSpacing: -2, margin: 0 }}>Journal</h1>
           <p style={{ fontSize: 10, letterSpacing: 4, color: '#64748b', fontWeight: 800, textTransform: 'uppercase', marginTop: 6 }}>
             총 {blogs.length}편 · 발행 {publishedCount} · 비공개 {blogs.length - publishedCount}
           </p>

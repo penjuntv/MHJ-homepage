@@ -19,7 +19,7 @@ const NAV: NavEntry[] = [
   { type: 'item', href: '/mhj-desk', label: '대시보드', icon: LayoutDashboard, exact: true },
 
   { type: 'group', label: '콘텐츠' },
-  { type: 'item', href: '/mhj-desk/blogs', label: '블로그', icon: FileText, badge: 'blogs' },
+  { type: 'item', href: '/mhj-desk/blogs', label: '저널', icon: FileText, badge: 'blogs' },
   { type: 'item', href: '/mhj-desk/magazines', label: '매거진', icon: BookOpen },
   { type: 'item', href: '/mhj-desk/gallery', label: '갤러리', icon: Images },
   { type: 'item', href: '/mhj-desk/hero', label: '히어로 슬라이드', icon: Layers },

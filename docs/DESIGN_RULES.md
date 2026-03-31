@@ -386,9 +386,10 @@ transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 ### 13.1 네비게이션
 
 - 배경: rgba(255,255,255,0.95) + backdrop-filter: blur(20px) — 유지
-- 높이: 64px 고정
-- 로고: "MY MAIRANGI" + "Family Archive" — 유지
-- 메뉴 간격: gap: 40px — 유지
+- 높이: 72px 고정
+- 로고: MHJ 워드마크 (§17.2 참조) — 좌측
+- 메뉴: About / Journal / Magazine / StoryPress — 우측 (§17.3 참조)
+- 메뉴 간격: gap: 36px — 유지
 - 모바일 햄버거: 유지
 
 ### 13.2 푸터
@@ -450,6 +451,52 @@ transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 
 ---
 
+## 17. 브랜드 시스템 (2026-04)
+
+### 17.1 브랜드 컬러
+
+```css
+:root {
+  --mhj-brown: #8A6B4F;      /* 로고, 헤더 메뉴 호버 전용 */
+  --mhj-black: #1E1E1E;
+  --mhj-green: #3E5F4A;
+  --mhj-brown-dark: #C9A882;  /* 다크모드 대응 */
+}
+```
+
+- **브라운(#8A6B4F)은 로고와 헤더 전용** — 본문, 카드, 버튼에 사용 금지
+- 본문 UI는 기존 achromatic 팔레트(§6) 유지
+- 다크모드에서 브랜드 브라운은 #C9A882로 대응
+
+### 17.2 로고 사용 규칙
+
+| 요소 | 스펙 |
+|------|------|
+| **MHJ 워드마크** | Playfair Display 400, 28px, #8A6B4F, letter-spacing 0.05em |
+| **구분선** | 56px × 1px, #8A6B4F, margin 5px 0 |
+| **tagline** | Inter 400, 10px, #8A6B4F, letter-spacing 0.28em, lowercase "my mairangi" |
+| **다크모드** | 전부 #C9A882 |
+
+**금지 사항:**
+- 그림자 추가 ❌
+- 굵은 선/테두리 ❌
+- 그라디언트/효과 ❌
+- 로고 비율 변경 ❌
+
+### 17.3 헤더 메뉴
+
+- 메뉴 항목: About / Journal / Magazine / StoryPress
+- 기본 색상: #444 (라이트), #B0ADA6 (다크)
+- 호버/활성: var(--mhj-brown) (라이트), var(--mhj-brown-dark) (다크)
+- transition: color 0.2s
+
+### 17.4 용어 규칙: Blog → Journal
+
+- 사용자에게 보이는 모든 UI 텍스트에서 "Blog"/"블로그" → "Journal"/"저널"
+- **변경 금지**: URL 경로(/blog), DB 테이블명(blogs), 파일명, 변수명, 함수명, API 경로
+
+---
+
 ## 변경 이력
 
 | 날짜 | 내용 | 작성자 |
@@ -457,3 +504,4 @@ transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 | 2026-03-16 | 초안 작성 — Kinfolk/Cereal/Monocle/Apartamento/Gentlewoman 레퍼런스 분석 기반 | PeNnY + Claude |
 | 2026-03-18 | 전체 콘텐츠 크기 축소 (데스크탑 max 75% 기준): --fs-display→56px, --fs-h1→48px, --section-v max→120px, 히어로 제목→90px/120px, 갤러리 제목→80px | PeNnY + Claude |
 | 2026-03-18 | 갤러리 그리드 반응형: CSS columns 기반 2(mobile)/3(tablet)/4(desktop), max-width 1400px | PeNnY + Claude |
+| 2026-04-01 | 브랜드 시스템 적용: MHJ 로고(Playfair+Inter), 브랜드 컬러(--mhj-brown), Blog→Journal 용어 변경, PWA 아이콘 교체 | PeNnY + Claude |

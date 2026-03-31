@@ -9,9 +9,8 @@ import { useTheme } from './ThemeProvider';
 
 const NAV_LINKS = [
   { label: 'About', href: '/about' },
+  { label: 'Journal', href: '/blog' },
   { label: 'Magazine', href: '/magazine' },
-  { label: 'Gallery', href: '/gallery' },
-  { label: 'Blog', href: '/blog' },
   { label: 'StoryPress', href: '/storypress' },
 ];
 
@@ -33,12 +32,16 @@ interface NavProps {
   navigationItems?: NavItem[];
 }
 
-export default function Navigation({ siteName, siteSubtitle, socialInstagram, contactEmail, navigationItems }: NavProps) {
+export default function Navigation({ socialInstagram, contactEmail, navigationItems }: NavProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+
+  const brandColor = isDark ? 'var(--mhj-brown-dark)' : 'var(--mhj-brown)';
+  const menuDefault = isDark ? '#B0ADA6' : '#444';
+  const menuHover = brandColor;
 
   const effectiveLinks = (navigationItems && navigationItems.length > 0)
     ? navigationItems
@@ -48,6 +51,7 @@ export default function Navigation({ siteName, siteSubtitle, socialInstagram, co
     : NAV_LINKS;
 
   const isActive = (href: string) => {
+    if (href === '/blog') return pathname.startsWith('/blog');
     if (href === '/magazine') return pathname.startsWith('/magazine');
     if (href === '/storypress') return pathname.startsWith('/storypress');
     return pathname === href;
@@ -85,34 +89,60 @@ export default function Navigation({ siteName, siteSubtitle, socialInstagram, co
           className="flex items-center justify-between"
           style={{ padding: '0 clamp(24px, 4vw, 40px)', height: '72px' }}
         >
-          {/* 브랜드 */}
-          <Link href="/" className="flex flex-col" onClick={closeMobile}>
+          {/* ── MHJ 브랜드 로고 ── */}
+          <Link href="/" className="flex flex-col items-start" onClick={closeMobile} style={{ textDecoration: 'none' }}>
             <span
-              className="font-black tracking-wider-5 uppercase"
-              style={{ fontSize: '20px', letterSpacing: '3px', color: 'var(--text)' }}
+              className="font-display"
+              style={{
+                fontSize: 28,
+                fontWeight: 400,
+                letterSpacing: '0.05em',
+                color: brandColor,
+                lineHeight: 1,
+              }}
             >
-              {siteName || 'MY MAIRANGI'}
+              MHJ
             </span>
             <span
-              className="uppercase"
-              style={{ fontSize: '9px', letterSpacing: '3px', color: 'var(--text-tertiary)', fontWeight: 500 }}
+              style={{
+                width: 56,
+                height: 1,
+                background: brandColor,
+                display: 'block',
+                margin: '5px 0',
+              }}
+            />
+            <span
+              style={{
+                fontFamily: 'var(--font-inter), Inter, sans-serif',
+                fontSize: 10,
+                fontWeight: 400,
+                letterSpacing: '0.28em',
+                color: brandColor,
+                textTransform: 'lowercase' as const,
+                lineHeight: 1,
+              }}
             >
-              {siteSubtitle || 'Family Archive'}
+              my mairangi
             </span>
           </Link>
 
-          {/* 데스크톱 메뉴 */}
+          {/* ── 데스크톱 메뉴 ── */}
           <div className="desktop-nav flex items-center" style={{ gap: '36px' }}>
             {effectiveLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="font-black uppercase transition-colors duration-300"
+                className="font-black uppercase"
                 style={{
                   fontSize: '11px',
                   letterSpacing: '3px',
-                  color: isActive(link.href) ? '#4F46E5' : 'var(--text)',
+                  color: isActive(link.href) ? brandColor : menuDefault,
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
                 }}
+                onMouseEnter={e => { if (!isActive(link.href)) e.currentTarget.style.color = menuHover; }}
+                onMouseLeave={e => { if (!isActive(link.href)) e.currentTarget.style.color = menuDefault; }}
               >
                 {link.label}
               </Link>
@@ -120,7 +150,6 @@ export default function Navigation({ siteName, siteSubtitle, socialInstagram, co
 
             {/* 아이콘 버튼들 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {/* 소셜 아이콘 (설정된 경우만 표시) */}
               {socialInstagram && (
                 <NavSocialBtn href={socialInstagram} label="Instagram" isDark={isDark}>
                   <Instagram size={17} />
@@ -131,18 +160,16 @@ export default function Navigation({ siteName, siteSubtitle, socialInstagram, co
                   <Mail size={17} />
                 </NavSocialBtn>
               )}
-              {/* 검색 */}
               <IconBtn onClick={openSearch} label="Search" isDark={isDark}>
                 <Search size={17} />
               </IconBtn>
-              {/* 다크모드 토글 */}
               <IconBtn onClick={toggleTheme} label={isDark ? 'Light mode' : 'Dark mode'} isDark={isDark}>
                 {isDark ? <Sun size={17} /> : <Moon size={17} />}
               </IconBtn>
             </div>
           </div>
 
-          {/* 모바일: 검색 + 테마 + 햄버거 */}
+          {/* ── 모바일: 검색 + 테마 + 햄버거 ── */}
           <div className="mobile-toggle" style={{ display: 'none', alignItems: 'center', gap: '8px' }}>
             <IconBtn onClick={openSearch} label="Search" isDark={isDark}><Search size={18} /></IconBtn>
             <IconBtn onClick={toggleTheme} label="Theme" isDark={isDark}>
@@ -177,7 +204,9 @@ export default function Navigation({ siteName, siteSubtitle, socialInstagram, co
               style={{
                 fontSize: '32px',
                 letterSpacing: '3px',
-                color: isActive(link.href) ? '#4F46E5' : 'var(--text)',
+                color: isActive(link.href) ? brandColor : menuDefault,
+                textDecoration: 'none',
+                transition: 'color 0.2s',
               }}
             >
               {link.label}
@@ -198,6 +227,7 @@ export default function Navigation({ siteName, siteSubtitle, socialInstagram, co
 function IconBtn({ onClick, label, isDark, children }: {
   onClick: () => void; label: string; isDark: boolean; children: React.ReactNode;
 }) {
+  const hoverColor = isDark ? 'var(--mhj-brown-dark)' : 'var(--mhj-brown)';
   return (
     <button
       onClick={onClick}
@@ -205,15 +235,15 @@ function IconBtn({ onClick, label, isDark, children }: {
       style={{
         background: 'none', border: 'none', cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'var(--text)', padding: '8px', borderRadius: '8px',
+        color: isDark ? '#B0ADA6' : '#444', padding: '8px', borderRadius: '8px',
         transition: 'color 0.2s, background 0.2s',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.color = '#4F46E5';
-        e.currentTarget.style.background = isDark ? 'rgba(79,70,229,0.15)' : '#EEF2FF';
+        e.currentTarget.style.color = hoverColor;
+        e.currentTarget.style.background = isDark ? 'rgba(201,168,130,0.1)' : 'rgba(138,107,79,0.08)';
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.color = 'var(--text)';
+        e.currentTarget.style.color = isDark ? '#B0ADA6' : '#444';
         e.currentTarget.style.background = 'none';
       }}
     >
@@ -226,6 +256,7 @@ function NavSocialBtn({ href, label, isDark, children }: {
   href: string; label: string; isDark: boolean; children: React.ReactNode;
 }) {
   const isExternal = !href.startsWith('mailto:');
+  const hoverColor = isDark ? 'var(--mhj-brown-dark)' : 'var(--mhj-brown)';
   return (
     <a
       href={href}
@@ -234,16 +265,16 @@ function NavSocialBtn({ href, label, isDark, children }: {
       rel={isExternal ? 'noopener noreferrer' : undefined}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'var(--text)', padding: '8px', borderRadius: '8px',
+        color: isDark ? '#B0ADA6' : '#444', padding: '8px', borderRadius: '8px',
         textDecoration: 'none',
         transition: 'color 0.2s, background 0.2s',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.color = '#4F46E5';
-        e.currentTarget.style.background = isDark ? 'rgba(79,70,229,0.15)' : '#EEF2FF';
+        e.currentTarget.style.color = hoverColor;
+        e.currentTarget.style.background = isDark ? 'rgba(201,168,130,0.1)' : 'rgba(138,107,79,0.08)';
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.color = 'var(--text)';
+        e.currentTarget.style.color = isDark ? '#B0ADA6' : '#444';
         e.currentTarget.style.background = 'none';
       }}
     >

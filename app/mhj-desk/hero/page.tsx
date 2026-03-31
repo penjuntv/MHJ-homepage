@@ -178,7 +178,7 @@ export default function HeroManagePage() {
             textDecoration: 'none', marginBottom: 20,
           }}
         >
-          <ArrowLeft size={14} /> 블로그 목록
+          <ArrowLeft size={14} /> 저널 목록
         </Link>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>

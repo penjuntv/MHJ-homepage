@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     page > 1 ? `Page ${page}` : null,
   ].filter(Boolean).join(' — ');
 
-  const title = suffix ? `Blog — ${suffix}` : 'Blog Library';
+  const title = suffix ? `Journal — ${suffix}` : 'Journal';
   const canonical = new URL(`${SITE_URL}/blog`);
   if (category) canonical.searchParams.set('category', category);
   if (page > 1) canonical.searchParams.set('page', String(page));

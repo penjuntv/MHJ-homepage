@@ -6,7 +6,7 @@ import { X, Search, ArrowRight } from 'lucide-react';
 import type { SearchResult } from '@/app/api/search/route';
 
 const TYPE_LABEL: Record<string, string> = {
-  blog: 'Blog',
+  blog: 'Journal',
   magazine: 'Magazine',
   article: 'Article',
 };

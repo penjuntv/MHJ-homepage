@@ -75,9 +75,9 @@ interface FooterProps {
 }
 
 export default function Footer({
-  siteName = 'MY MAIRANGI',
+  siteName = 'MHJ — my mairangi',
   siteSubtitle = 'Family Archive',
-  footerDescription = '뉴질랜드 오클랜드 노스쇼어\n마이랑이 베이에서 기록하는\n우리 가족의 이야기',
+  footerDescription = 'A family archive from Mairangi Bay, Auckland.',
   contactLocation = 'Mairangi Bay, Auckland, New Zealand',
   contactEmail = 'hello@mhj.nz',
   socialInstagram,
@@ -143,8 +143,8 @@ export default function Footer({
           <div className="flex flex-col" style={{ gap: '12px' }}>
             {[
               { label: 'About',      href: '/about' },
+              { label: 'Journal',    href: '/blog' },
               { label: 'Magazine',   href: '/magazine' },
-              { label: 'Blog',       href: '/blog' },
               { label: 'StoryPress', href: '/storypress' },
               { label: 'Privacy',    href: '/privacy' },
             ].map((link) => (

@@ -381,10 +381,10 @@ export default function BlogForm({ initial }: Props) {
     <div style={{ padding: '48px', maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ marginBottom: '40px' }}>
         <h1 className="font-display font-black uppercase" style={{ fontSize: '48px', letterSpacing: '-2px' }}>
-          {isEdit ? 'Edit Blog' : 'New Blog'}
+          {isEdit ? 'Edit Journal' : 'New Journal'}
         </h1>
         <p className="font-black uppercase text-mhj-text-tertiary" style={{ fontSize: '10px', letterSpacing: '4px', marginTop: '8px' }}>
-          {isEdit ? '블로그 글 수정' : '새 블로그 글 작성'}
+          {isEdit ? '저널 글 수정' : '새 저널 글 작성'}
         </p>
       </div>
 
@@ -514,7 +514,7 @@ export default function BlogForm({ initial }: Props) {
           <ImagePreviewTabs
             imageUrl={form.image_url}
             tabs={[
-              { id: 'card',   label: 'Card',   ratio: '1:1',   description: 'Blog Library 카드 — 정사각형으로 잘립니다' },
+              { id: 'card',   label: 'Card',   ratio: '1:1',   description: 'Journal Library 카드 — 정사각형으로 잘립니다' },
               { id: 'hero',   label: 'Hero',   ratio: '16:9',  description: 'Landing 히어로 캐러셀 — 좌우 여백 없이 꽉 채웁니다' },
               { id: 'detail', label: 'Detail', ratio: '21:9',  description: '글 상세 하단 이미지 — 위아래가 많이 잘립니다' },
             ]}

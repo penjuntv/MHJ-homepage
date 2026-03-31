@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" fill="none">
+  <!-- MHJ wordmark -->
+  <text x="60" y="28" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-size="28" font-weight="400" letter-spacing="0.05em" fill="#8A6B4F">MHJ</text>
+  <!-- divider -->
+  <line x1="32" y1="36" x2="88" y2="36" stroke="#8A6B4F" stroke-width="1"/>
+  <!-- tagline -->
+  <text x="60" y="50" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="10" font-weight="400" letter-spacing="0.28em" fill="#8A6B4F">my mairangi</text>
+</svg>

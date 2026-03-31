@@ -111,7 +111,7 @@ export default function AdminDashboard() {
         ...(blogs ?? []).map((b: { title: string; created_at: string }) => ({
           type: 'blog' as const,
           label: b.title,
-          sub: '블로그 발행',
+          sub: '저널 발행',
           time: b.created_at,
           icon: FileText,
           color: '#4F46E5',
@@ -163,7 +163,7 @@ export default function AdminDashboard() {
 
   const STAT_CARDS = [
     {
-      label: '블로그 글',
+      label: '저널 글',
       value: blogCount,
       sub: publishedCount !== null && blogCount !== null ? `발행 ${publishedCount} · 비공개 ${blogCount - publishedCount}` : '—',
       icon: FileText,
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                 whiteSpace: 'nowrap',
               }}
             >
-              <Plus size={14} /> 새 블로그 글
+              <Plus size={14} /> 새 저널 글
             </Link>
             <Link
               href="/mhj-desk/magazines/new"
@@ -560,7 +560,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── 최근 블로그 테이블 ── */}
+      {/* ── 최근 저널 테이블 ── */}
       <div style={{
         background: 'white', borderRadius: 24,
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9',
@@ -571,7 +571,7 @@ export default function AdminDashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <BarChart2 size={18} color="#64748b" />
             <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 3, color: '#64748b' }}>
-              최근 블로그
+              최근 저널
             </p>
           </div>
           <Link href="/mhj-desk/blogs" style={{
@@ -584,7 +584,7 @@ export default function AdminDashboard() {
 
         {recentBlogs.length === 0 ? (
           <div style={{ padding: '32px', textAlign: 'center', color: '#cbd5e1', fontSize: 13, fontWeight: 700 }}>
-            블로그 글이 없습니다
+            저널 글이 없습니다
           </div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>

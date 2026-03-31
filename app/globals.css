@@ -13,6 +13,12 @@
 
 /* ─── CSS 변수 (라이트/다크 모드) ─── */
 :root {
+  /* ── 브랜드 컬러 ── */
+  --mhj-brown: #8A6B4F;
+  --mhj-black: #1E1E1E;
+  --mhj-green: #3E5F4A;
+  --mhj-brown-dark: #C9A882;
+
   --bg: #FFFFFF;
   --bg-surface: #FAF8F5;
   --bg-card: #FFFFFF;

@@ -197,7 +197,7 @@ function BlogSelect({
       onChange={e => onChange(Number(e.target.value))}
       style={{ ...IS, cursor: 'pointer' }}
     >
-      <option value="">— 블로그 글 선택 —</option>
+      <option value="">— 저널 글 선택 —</option>
       {blogs.map(b => (
         <option key={b.id} value={b.id}>
           {b.title} ({b.date}) · {b.category}
@@ -661,7 +661,7 @@ export default function NewsletterComposePage() {
           num={2} title="Main Story" optional
           enabled={mainEnabled} onToggle={() => setMainEnabled(v => !v)}
         >
-          <Field label="블로그 글 선택">
+          <Field label="저널 글 선택">
             <BlogSelect
               blogs={blogs}
               value={mainBlogId}
@@ -681,7 +681,7 @@ export default function NewsletterComposePage() {
           )}
           <div style={{ marginTop: 12 }}>
             <Field label="발췌문 (자동 입력 후 수동 편집 가능)">
-              <Textarea value={mainExcerpt} onChange={setMainExcerpt} placeholder="블로그 글의 핵심 내용..." rows={3} />
+              <Textarea value={mainExcerpt} onChange={setMainExcerpt} placeholder="저널 글의 핵심 내용..." rows={3} />
             </Field>
           </div>
         </SectionCard>
@@ -916,7 +916,7 @@ export default function NewsletterComposePage() {
           num={7} title="From the Archive" optional
           enabled={archiveEnabled} onToggle={() => setArchiveEnabled(v => !v)}
         >
-          <Field label="블로그 글 선택">
+          <Field label="저널 글 선택">
             <BlogSelect
               blogs={blogs}
               value={archiveBlogId}

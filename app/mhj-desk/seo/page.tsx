@@ -110,7 +110,7 @@ export default function AdminSeoPage() {
           SEO Check
         </h1>
         <p style={{ fontSize: 13, color: '#94A3B8', marginTop: 8, fontWeight: 500 }}>
-          블로그 글의 SEO 상태를 점검합니다. 문제를 클릭하면 바로 수정할 수 있습니다.
+          저널 글의 SEO 상태를 점검합니다. 문제를 클릭하면 바로 수정할 수 있습니다.
         </p>
       </div>
 

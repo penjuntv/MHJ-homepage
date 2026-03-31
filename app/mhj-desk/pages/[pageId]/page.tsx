@@ -83,11 +83,11 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
     ],
   },
   blog: {
-    label: 'Blog Library',
+    label: 'Journal Library',
     path: '/blog',
     sections: [
       {
-        heading: '블로그 라이브러리',
+        heading: '저널 라이브러리',
         fields: [
           { key: 'blog_title', label: '라이브러리 제목', type: 'text', hint: '예: The Library' },
           { key: 'blog_description', label: '라이브러리 설명', type: 'textarea' },
