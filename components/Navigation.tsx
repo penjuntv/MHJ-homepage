@@ -133,10 +133,10 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
               <Link
                 key={link.href}
                 href={link.href}
-                className="font-black uppercase"
                 style={{
-                  fontSize: '11px',
-                  letterSpacing: '3px',
+                  fontSize: '13px',
+                  fontWeight: 400,
+                  letterSpacing: '0.04em',
                   color: isActive(link.href) ? brandColor : menuDefault,
                   textDecoration: 'none',
                   transition: 'color 0.2s',
@@ -200,10 +200,10 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
               key={link.href}
               href={link.href}
               onClick={closeMobile}
-              className="font-black uppercase"
               style={{
-                fontSize: '32px',
-                letterSpacing: '3px',
+                fontSize: '28px',
+                fontWeight: 400,
+                letterSpacing: '0.04em',
                 color: isActive(link.href) ? brandColor : menuDefault,
                 textDecoration: 'none',
                 transition: 'color 0.2s',
