@@ -1270,6 +1270,18 @@
   }
 }
 
+/* Brand copy transition zone */
+.brand-copy-zone {
+  padding-top: 32px;
+  padding-bottom: 20px;
+}
+@media (min-width: 768px) {
+  .brand-copy-zone {
+    padding-top: 40px;
+    padding-bottom: 24px;
+  }
+}
+
 /* Latest Posts 내부 2열 그리드 */
 .home-latest-grid {
   display: grid;

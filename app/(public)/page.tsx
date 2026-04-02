@@ -188,6 +188,42 @@ export default async function LandingPage() {
           </div>
         )}
 
+        {/* ═══════ §1.5 Brand Copy (transition zone) ═══════ */}
+        <div
+          className="brand-copy-zone"
+          style={{
+            maxWidth: 1320,
+            width: '100%',
+            boxSizing: 'border-box' as const,
+            margin: '0 auto',
+            paddingLeft: 'clamp(20px, 4vw, 48px)',
+            paddingRight: 'clamp(20px, 4vw, 48px)',
+            borderTop: '1px solid var(--border)',
+          }}
+        >
+          <p
+            className="font-display"
+            style={{
+              fontSize: 'clamp(24px, 3vw, 32px)',
+              fontWeight: 900,
+              fontStyle: 'italic',
+              color: 'var(--text)',
+              lineHeight: 1.2,
+              margin: 0,
+            }}
+          >
+            A family archive from Mairangi Bay, Auckland.
+          </p>
+          <p style={{
+            fontSize: 14,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.6,
+            margin: '8px 0 0',
+          }}>
+            Stories, images, and small records of a Korean family building a life in New Zealand.
+          </p>
+        </div>
+
         {/* ═══════ §2+3. Latest Posts + Sidebar ═══════ */}
         <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '64px clamp(20px, 4vw, 48px) 0' }}>
           <p style={{
