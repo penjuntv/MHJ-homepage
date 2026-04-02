@@ -898,7 +898,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase',
           color: 'rgba(255,255,255,0.25)', textDecoration: 'none',
         }}>
-          ← Back to MY MAIRANGI
+          ← Back to MHJ
         </Link>
       </div>
 

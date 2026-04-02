@@ -221,10 +221,11 @@ function CommentForm({
         <button
           type="submit"
           disabled={submitting}
+          className="comment-submit-btn"
           style={{
-            background: 'var(--text)',
-            color: 'var(--bg)',
-            border: 'none',
+            background: compact ? 'var(--text)' : 'transparent',
+            color: compact ? 'var(--bg)' : 'var(--text)',
+            border: compact ? 'none' : '1.5px solid var(--text)',
             borderRadius: compact ? 8 : 999,
             padding: compact ? '10px 24px' : '16px 40px',
             fontSize: 11,
@@ -233,10 +234,10 @@ function CommentForm({
             textTransform: 'uppercase',
             cursor: submitting ? 'not-allowed' : 'pointer',
             opacity: submitting ? 0.7 : 1,
-            transition: 'opacity 0.2s',
+            transition: 'all 0.2s',
           }}
         >
-          {submitting ? 'Submitting...' : 'Submit'}
+          {submitting ? 'Submitting...' : compact ? 'Reply' : 'Post comment'}
         </button>
 
         {onCancel && (
@@ -502,19 +503,26 @@ export default function CommentSection({ blogId }: { blogId: number }) {
 
   return (
     <section style={{
-      padding: 'clamp(32px, 4vw, 48px) clamp(24px, 4vw, 40px)',
+      padding: 'clamp(48px, 6vw, 80px) clamp(24px, 4vw, 40px)',
       background: 'var(--bg)',
-      borderTop: '1px solid var(--border)',
     }}>
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
 
         {/* 섹션 제목 */}
-        <div style={{ marginBottom: 24 }}>
-          <h2 style={{
-            fontSize: 20,
-            fontWeight: 800,
-            letterSpacing: '-0.5px',
+        <div style={{ marginBottom: 32 }}>
+          <p className="font-black uppercase" style={{
+            fontSize: 10,
+            letterSpacing: 5,
+            color: 'var(--text-tertiary)',
+            marginBottom: 12,
+          }}>
+            Join the conversation
+          </p>
+          <h2 className="font-display font-black" style={{
+            fontSize: 'clamp(24px, 4vw, 36px)',
+            letterSpacing: '-1px',
             lineHeight: 1,
+            fontStyle: 'italic',
             color: 'var(--text)',
           }}>
             Comments{totalCount > 0 ? ` (${totalCount})` : ''}

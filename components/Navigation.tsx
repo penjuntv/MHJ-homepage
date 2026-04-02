@@ -94,7 +94,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
             <span
               className="font-display"
               style={{
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: 400,
                 letterSpacing: '0.05em',
                 color: brandColor,

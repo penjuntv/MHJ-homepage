@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
           className="font-black uppercase text-mhj-text-tertiary"
           style={{ fontSize: '10px', letterSpacing: '4px', marginBottom: '40px' }}
         >
-          MY MAIRANGI CMS
+          MHJ DESK
         </p>
 
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

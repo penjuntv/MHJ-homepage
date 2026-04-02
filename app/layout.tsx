@@ -14,32 +14,32 @@ const inter = Inter({
 });
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
-const OG_IMAGE = `${BASE_URL}/api/og?title=MY%20MAIRANGI&category=Family%20Archive`;
+const OG_IMAGE = `${BASE_URL}/api/og?title=MHJ&category=my%20mairangi`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'MY MAIRANGI — Family Archive',
-    template: '%s — MY MAIRANGI',
+    default: 'MHJ — my mairangi',
+    template: '%s — MHJ',
   },
   description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 가족의 이야기. 기자 출신 아빠, 석사 과정 엄마, 세 딸의 라이프 매거진.',
   keywords: ['뉴질랜드', '오클랜드', '노스쇼어', '마이랑이', 'Mairangi Bay', '가족', '육아', '이민', '뉴질랜드 생활'],
   authors: [{ name: 'PeNnY' }, { name: 'Yussi' }],
-  creator: 'MY MAIRANGI',
-  publisher: 'MY MAIRANGI',
+  creator: 'MHJ',
+  publisher: 'MHJ',
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
     url: BASE_URL,
-    siteName: 'MY MAIRANGI',
-    title: 'MY MAIRANGI — Family Archive',
-    description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 가족의 이야기.',
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'MY MAIRANGI Family Archive' }],
+    siteName: 'MHJ',
+    title: 'MHJ — my mairangi',
+    description: 'A family archive from Mairangi Bay, Auckland.',
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'MHJ — A family archive from Mairangi Bay, Auckland' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MY MAIRANGI — Family Archive',
-    description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 가족의 이야기.',
+    title: 'MHJ — my mairangi',
+    description: 'A family archive from Mairangi Bay, Auckland.',
     images: [OG_IMAGE],
   },
   robots: {
@@ -57,14 +57,14 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'MY MAIRANGI',
+    title: 'MHJ',
   },
 };
 
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'MY MAIRANGI',
+  name: 'MHJ',
   url: BASE_URL,
   description: 'A family life magazine from Mairangi Bay, Auckland',
   address: {
@@ -108,7 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link
           rel="alternate"
           type="application/rss+xml"
-          title="MY MAIRANGI — RSS Feed"
+          title="MHJ — RSS Feed"
           href={`${BASE_URL}/feed.xml`}
         />
       </head>

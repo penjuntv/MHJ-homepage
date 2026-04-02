@@ -5,25 +5,25 @@ export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
-  const title = (searchParams.get('title') || 'MY MAIRANGI').slice(0, 120);
+  const title = (searchParams.get('title') || 'MHJ').slice(0, 120);
   const category = searchParams.get('category') || '';
   const date = searchParams.get('date') || '';
 
   // Fetch fonts from public/ at runtime (not bundled into edge function)
-  const [notoData, playfairItalicData] = await Promise.all([
+  const [notoData, playfairRegularData] = await Promise.all([
     fetch(`${origin}/fonts/NotoSansKR-Bold.woff`).then((r) => r.arrayBuffer()).catch(() => null),
-    fetch(`${origin}/fonts/PlayfairDisplay-BoldItalic.woff`).then((r) => r.arrayBuffer()).catch(() => null),
+    fetch(`${origin}/fonts/PlayfairDisplay-Regular.woff`).then((r) => r.arrayBuffer()).catch(() => null),
   ]);
 
   const titleFontSize = title.length > 60 ? 48 : title.length > 40 ? 58 : title.length > 20 ? 68 : 72;
 
   const fonts = [
     notoData && { name: 'Noto Sans KR', data: notoData, weight: 700 as const, style: 'normal' as const },
-    playfairItalicData && { name: 'Playfair Italic', data: playfairItalicData, weight: 700 as const, style: 'normal' as const },
-  ].filter(Boolean) as { name: string; data: ArrayBuffer; weight: 700; style: 'normal' }[];
+    playfairRegularData && { name: 'Playfair Display', data: playfairRegularData, weight: 400 as const, style: 'normal' as const },
+  ].filter(Boolean) as { name: string; data: ArrayBuffer; weight: 700 | 400; style: 'normal' }[];
 
   const titleFont = notoData ? '"Noto Sans KR", sans-serif' : 'sans-serif';
-  const logoFont = playfairItalicData ? '"Playfair Italic", serif' : 'serif';
+  const logoFont = playfairRegularData ? '"Playfair Display", serif' : 'serif';
 
   return new ImageResponse(
     (
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         style={{
           width: '1200px',
           height: '630px',
-          background: '#0a0a1a',
+          background: '#1E1E1E',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
             left: 0,
             width: '3px',
             height: '100%',
-            background: 'rgba(255,255,255,0.15)',
+            background: '#8A6B4F',
           }}
         />
 
@@ -62,18 +62,43 @@ export async function GET(request: NextRequest) {
             alignItems: 'center',
           }}
         >
-          {/* MY MAIRANGI 로고 — Playfair italic */}
+          {/* MHJ 로고 — Playfair Display 400 */}
           <div
             style={{
-              fontSize: '22px',
-              fontWeight: 700,
-              color: 'rgba(255,255,255,0.7)',
-              fontFamily: logoFont,
-              fontStyle: 'italic',
-              letterSpacing: '1px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
             }}
           >
-            MY MAIRANGI
+            <div
+              style={{
+                fontSize: '28px',
+                fontWeight: 400,
+                color: '#C9A882',
+                fontFamily: logoFont,
+                letterSpacing: '0.05em',
+              }}
+            >
+              MHJ
+            </div>
+            <div
+              style={{
+                width: '1px',
+                height: '20px',
+                background: 'rgba(255,255,255,0.2)',
+              }}
+            />
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: 400,
+                color: 'rgba(255,255,255,0.4)',
+                fontFamily: logoFont,
+                letterSpacing: '0.28em',
+              }}
+            >
+              my mairangi
+            </div>
           </div>
 
           {/* 카테고리 라벨 */}
@@ -147,7 +172,7 @@ export async function GET(request: NextRequest) {
                 textTransform: 'uppercase',
               }}
             >
-              Family Archive
+              A family archive from Mairangi Bay
             </div>
             <div
               style={{

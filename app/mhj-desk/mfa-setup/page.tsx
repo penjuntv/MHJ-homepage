@@ -92,7 +92,7 @@ export default function MfaSetupPage() {
           2단계 인증 설정
         </h1>
         <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 4, color: '#94A3B8', marginBottom: 36 }}>
-          MFA SETUP — MY MAIRANGI CMS
+          MFA SETUP — MHJ DESK
         </p>
 
         {enrolling ? (

@@ -11,13 +11,13 @@ export const revalidate = 300;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
-  title: { absolute: 'MY MAIRANGI — Family Archive' },
-  description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진. 기자 출신 아빠, 사회복지 석사 엄마, 세 딸의 이야기.',
+  title: { absolute: 'MHJ — my mairangi' },
+  description: 'A family archive from Mairangi Bay, Auckland. Stories, images, and small records of a Korean family building a life in New Zealand.',
   openGraph: {
-    title: 'MY MAIRANGI — Family Archive',
-    description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진.',
+    title: 'MHJ — my mairangi',
+    description: 'A family archive from Mairangi Bay, Auckland.',
     url: SITE_URL,
-    images: [{ url: `${SITE_URL}/og-default.jpg`, width: 1200, height: 630, alt: 'MY MAIRANGI Family Archive' }],
+    images: [{ url: `${SITE_URL}/og-default.jpg`, width: 1200, height: 630, alt: 'MHJ — A family archive from Mairangi Bay, Auckland' }],
   },
   alternates: { canonical: SITE_URL },
 };
@@ -157,13 +157,13 @@ export default async function LandingPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'MY MAIRANGI',
+    name: 'MHJ',
     url: SITE_URL,
     description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진.',
     inLanguage: 'ko',
     publisher: {
       '@type': 'Organization',
-      name: 'MY MAIRANGI',
+      name: 'MHJ',
       url: SITE_URL,
       sameAs: [`${SITE_URL}/about`],
     },

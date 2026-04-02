@@ -21,8 +21,8 @@ export function generateNewsletterHTML(
     <tr>
       <td style="padding:32px 40px 24px 40px; border-bottom:1px solid #F1F5F9;">
         <a href="${siteUrl}"
-           style="text-decoration:none; color:#1a1a1a; font-family:Georgia,'Times New Roman',serif; font-size:22px; font-weight:900; letter-spacing:-0.5px;">
-          MY MAIRANGI
+           style="text-decoration:none; color:#8A6B4F; font-family:Georgia,'Times New Roman',serif; font-size:22px; font-weight:400; letter-spacing:0.05em;">
+          MHJ
         </a>
         <p style="margin:4px 0 0; font-family:Arial,sans-serif; font-size:10px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:#CBD5E1;">
           Mairangi Bay &nbsp;&middot;&nbsp; Auckland, New Zealand
@@ -34,7 +34,7 @@ export function generateNewsletterHTML(
     <tr>
       <td style="padding:28px 40px 36px 40px; background:#F8FAFC; border-top:1px solid #F1F5F9;">
         <p style="margin:0 0 10px; font-family:Arial,sans-serif; font-size:12px; color:#94A3B8; text-align:center; line-height:1.6;">
-          You received this because you subscribed to MY MAIRANGI newsletter.
+          You received this because you subscribed to MHJ newsletter.
         </p>
         <p style="margin:0; font-family:Arial,sans-serif; font-size:11px; color:#CBD5E1; text-align:center;">
           <a href="${siteUrl}/unsubscribe" style="color:#94A3B8; text-decoration:underline;">Unsubscribe</a>
@@ -646,7 +646,7 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
                       Mairangi Notes
                     </p>
                     <p style="margin:0;font-family:Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#94a3b8;">
-                      MY MAIRANGI &nbsp;&middot;&nbsp; Mairangi Bay, Auckland
+                      MHJ &nbsp;&middot;&nbsp; Mairangi Bay, Auckland
                     </p>
                   </td>
                   <td style="text-align:right;vertical-align:bottom;">

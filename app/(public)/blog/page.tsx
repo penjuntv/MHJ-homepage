@@ -164,12 +164,12 @@ export default async function BlogPage({ searchParams }: Props) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    name: 'MY MAIRANGI Blog Library',
+    name: 'MHJ Blog Library',
     url: `${SITE_URL}/blog`,
     description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
     inLanguage: 'ko',
     author: { '@type': 'Person', name: 'Yussi' },
-    publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: SITE_URL },
+    publisher: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
     blogPost: paginated.blogs.slice(0, 10).map((b) => ({
       '@type': 'BlogPosting',
       headline: b.title,

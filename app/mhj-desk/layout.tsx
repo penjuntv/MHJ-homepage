@@ -147,8 +147,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }}>
         {/* 브랜드 */}
         <div style={{ padding: '28px 20px 20px', flexShrink: 0 }}>
-          <h1 style={{ fontSize: 15, fontWeight: 900, fontStyle: 'italic', letterSpacing: -0.5, color: 'white', margin: 0 }}>MY MAIRANGI</h1>
-          <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.25)', letterSpacing: 4, textTransform: 'uppercase', display: 'block', marginTop: 4 }}>CMS Admin</span>
+          <h1 style={{ fontSize: 15, fontWeight: 900, fontStyle: 'italic', letterSpacing: -0.5, color: 'white', margin: 0 }}>MHJ</h1>
+          <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.25)', letterSpacing: 4, textTransform: 'uppercase', display: 'block', marginTop: 4 }}>Desk</span>
         </div>
 
         <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 20px', flexShrink: 0 }} />

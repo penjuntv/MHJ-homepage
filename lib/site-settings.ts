@@ -8,8 +8,8 @@ export interface SiteSetting {
 
 // 기본값 (fallback)
 export const DEFAULT_SETTINGS: Record<string, string> = {
-  site_name: 'MY MAIRANGI',
-  site_subtitle: 'Family Archive',
+  site_name: 'MHJ',
+  site_subtitle: 'my mairangi',
   hero_label: 'Featured Story',
   intro_title: 'MAIRANGI',
   intro_subtitle: 'JOURNAL',
@@ -38,7 +38,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   welcome_description: 'A Korean family\'s life archive from Mairangi Bay, Auckland',
   about_image_url: '',
   about_family_image_url: '',
-  site_title: 'MY MAIRANGI',
+  site_title: 'MHJ',
   site_description: "A Korean family's life archive from Mairangi Bay, Auckland",
   intro_image_url: '',
   magazine_shelf_title: 'Magazine Shelf',

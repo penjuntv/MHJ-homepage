@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -18,8 +19,12 @@ export async function GET(
     .eq('slug', slug)
     .single();
 
-  if (!data || !data.is_active) {
-    return NextResponse.redirect(new URL('/', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz'), { status: 302 });
+  if (!data) {
+    notFound();
+  }
+
+  if (!data.is_active) {
+    notFound();
   }
 
   // Fire-and-forget click count increment

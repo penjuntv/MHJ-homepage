@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'MY MAIRANGI',
+    name: 'MHJ — my mairangi',
     short_name: 'MHJ',
     description: 'A family life magazine from Mairangi Bay, Auckland',
     start_url: '/',

@@ -128,7 +128,7 @@ export default async function AboutPage() {
                   gap: 16,
                 }}>
                   <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 6, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase' }}>
-                    MY MAIRANGI
+                    MHJ
                   </p>
                   <p style={{ fontSize: 'clamp(48px, 8vw, 72px)', fontWeight: 900, color: 'rgba(255,255,255,0.06)', letterSpacing: -3, lineHeight: 1, textAlign: 'center', margin: 0 }}>
                     FAMILY

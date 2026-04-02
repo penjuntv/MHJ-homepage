@@ -123,7 +123,7 @@ export default function MfaVerifyPage() {
           2단계 인증
         </h1>
         <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 4, color: '#94A3B8', marginBottom: 40 }}>
-          MFA VERIFY — MY MAIRANGI CMS
+          MFA VERIFY — MHJ DESK
         </p>
 
         {/* 세션 만료 에러 */}

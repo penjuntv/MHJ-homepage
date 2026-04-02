@@ -34,7 +34,7 @@ function wrap(subject: string, preheader: string, body: string, email: string): 
   <!-- Header -->
   <tr>
     <td class="border-light" style="padding:32px 40px 24px;border-bottom:1px solid #f1f5f9;">
-      <a href="${siteUrl}" style="text-decoration:none;color:#1a1a1a;font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:900;letter-spacing:-0.5px;" class="text-primary">MY MAIRANGI</a>
+      <a href="${siteUrl}" style="text-decoration:none;color:#8A6B4F;font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:400;letter-spacing:0.05em;" class="text-primary">MHJ</a>
       <p class="text-tertiary" style="margin:4px 0 0;font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#cbd5e1;">Mairangi Bay &middot; Auckland, New Zealand</p>
     </td>
   </tr>
@@ -47,7 +47,7 @@ function wrap(subject: string, preheader: string, body: string, email: string): 
         <a href="https://www.instagram.com/mhj_nz" style="text-decoration:none;font-family:Arial,sans-serif;font-size:12px;color:#94a3b8;">Instagram @mhj_nz</a>
       </p>
       <p class="text-tertiary" style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:12px;color:#94a3b8;text-align:center;line-height:1.6;">
-        You received this because you subscribed to MY MAIRANGI newsletter.
+        You received this because you subscribed to MHJ newsletter.
       </p>
       <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:#cbd5e1;text-align:center;">
         <a href="${unsubscribeUrl}" style="color:#94a3b8;text-decoration:underline;">Unsubscribe</a>

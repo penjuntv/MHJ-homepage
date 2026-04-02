@@ -1083,7 +1083,7 @@ function ArticleGridCard({ article, onOpen, magazineLabel, magazineCoverUrl, lik
             </>
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: 5, color: 'rgba(139,115,85,0.3)', textTransform: 'uppercase', margin: 0 }}>MY MAIRANGI</p>
+              <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: 5, color: 'rgba(139,115,85,0.3)', textTransform: 'uppercase', margin: 0 }}>MHJ</p>
               <p style={{ fontSize: 11, fontWeight: 800, color: 'rgba(139,115,85,0.5)', textAlign: 'center', margin: 0, padding: '0 12px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{article.title}</p>
             </div>
           )}

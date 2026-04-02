@@ -190,7 +190,7 @@ export default async function BlogDetailPage({
     inLanguage: 'en',
     publisher: {
       '@type': 'Organization',
-      name: 'MY MAIRANGI',
+      name: 'MHJ',
       url: SITE_URL,
     },
   };

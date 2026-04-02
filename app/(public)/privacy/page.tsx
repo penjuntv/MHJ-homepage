@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'How MY MAIRANGI collects, uses, and protects your personal information under the NZ Privacy Act 2020.',
+  description: 'How MHJ collects, uses, and protects your personal information under the NZ Privacy Act 2020.',
 };
 
 const sectionStyle: React.CSSProperties = {
@@ -82,7 +82,7 @@ export default function PrivacyPage() {
       <section style={sectionStyle}>
         <h2 style={h2Style}>1. Who We Are</h2>
         <p style={pStyle}>
-          MY MAIRANGI (mhj.nz) is a family lifestyle editorial magazine based in
+          MHJ (mhj.nz) is a family lifestyle editorial magazine based in
           Mairangi Bay, Auckland, New Zealand. This policy explains how we collect,
           use, and protect your personal information in accordance with the
           New Zealand Privacy Act 2020.

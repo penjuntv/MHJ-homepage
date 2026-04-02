@@ -44,7 +44,7 @@ export default async function StoryPressPage() {
     operatingSystem: 'iOS, Android',
     description: 'An English storybook app for children aged 3–8. Every day, 4 new words — a story page — a real book by the end of 10 days.',
     url: `${SITE_URL}/storypress`,
-    author: { '@type': 'Organization', name: 'MY MAIRANGI', url: SITE_URL },
+    author: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
     audience: { '@type': 'Audience', audienceType: 'Children aged 3–8, ESOL families, bilingual families' },
     inLanguage: ['en', 'ko'],
   };

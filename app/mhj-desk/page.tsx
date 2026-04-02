@@ -202,7 +202,7 @@ export default function AdminDashboard() {
       {/* ── 환영 + Quick Actions ── */}
       <div style={{ marginBottom: 40 }}>
         <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: 4, color: '#94a3b8', textTransform: 'uppercase', marginBottom: 10 }}>
-          MY MAIRANGI CMS
+          MHJ DESK
         </p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
           <h1 className="font-display font-black" style={{ fontSize: 40, letterSpacing: -2, margin: 0, color: '#1a1a1a' }}>
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
         marginBottom: 16,
       }}>
         {[
-          { label: 'Total Posts', value: publishedCount, icon: FileText, color: '#4F46E5' },
+          { label: 'Published Posts', value: publishedCount, icon: FileText, color: '#4F46E5' },
           { label: 'Total Views', value: totalViews, icon: Eye, color: '#0ea5e9' },
           { label: 'Subscribers', value: subscriberCount, icon: Users, color: '#10b981' },
           { label: 'Comments', value: approvedComments, icon: MessageCircle, color: '#f59e0b' },

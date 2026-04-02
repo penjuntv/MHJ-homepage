@@ -44,7 +44,7 @@ export async function GET() {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>MY MAIRANGI — Family Archive</title>
+    <title>MHJ — my mairangi</title>
     <link>${BASE_URL}</link>
     <atom:link href="${BASE_URL}/feed.xml" rel="self" type="application/rss+xml" />
     <description>뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진.</description>
@@ -52,7 +52,7 @@ export async function GET() {
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <image>
       <url>${BASE_URL}/og-default.jpg</url>
-      <title>MY MAIRANGI</title>
+      <title>MHJ</title>
       <link>${BASE_URL}</link>
     </image>
     ${items}

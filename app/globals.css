@@ -1335,3 +1335,9 @@
 .related-card:hover { opacity: 0.88; }
 .related-img { transition: transform 0.5s ease; }
 .related-card:hover .related-img { transform: scale(1.02); }
+
+/* Comment submit outline → fill on hover */
+.comment-submit-btn:hover:not(:disabled) {
+  background: var(--text) !important;
+  color: var(--bg) !important;
+}

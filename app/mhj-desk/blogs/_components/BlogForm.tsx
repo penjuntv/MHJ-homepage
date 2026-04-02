@@ -632,7 +632,7 @@ export default function BlogForm({ initial }: Props) {
                       <span style={{ color: 'white', fontSize: 11, fontWeight: 900, letterSpacing: -0.5 }}>M</span>
                     </div>
                     <div>
-                      <div style={{ fontSize: 13, color: '#202124', lineHeight: 1.2 }}>MY MAIRANGI JOURNAL</div>
+                      <div style={{ fontSize: 13, color: '#202124', lineHeight: 1.2 }}>MHJ — my mairangi</div>
                       <div style={{ fontSize: 11, color: '#4D5156', lineHeight: 1.2 }}>
                         mairangijournal.com › blog › {form.slug || 'slug'}
                       </div>

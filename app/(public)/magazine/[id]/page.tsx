@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const magazine = await getMagazine(params.id);
   if (!magazine) return {};
   const title = `${magazine.title} — ${magazine.year} ${magazine.month_name}`;
-  const description = `MY MAIRANGI ${magazine.year} ${magazine.month_name} Edition. Editor: ${magazine.editor}. 뉴질랜드 마이랑이 가족의 월간 매거진.`;
+  const description = `MHJ ${magazine.year} ${magazine.month_name} Edition. Editor: ${magazine.editor}. 뉴질랜드 마이랑이 가족의 월간 매거진.`;
   const url = `${SITE_URL}/magazine/${params.id}`;
   return {
     title,
@@ -88,7 +88,7 @@ export default async function MagazineIssuePage({ params }: Props) {
     name: magazine.title,
     issueNumber: `${magazine.year}-${magazine.month_name}`,
     datePublished: magazine.created_at ?? `${magazine.year}`,
-    publisher: { '@type': 'Organization', name: 'MY MAIRANGI', url: SITE_URL },
+    publisher: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
     image: magazine.image_url,
     url: `${SITE_URL}/magazine/${params.id}`,
     hasPart: articles.map((a) => ({

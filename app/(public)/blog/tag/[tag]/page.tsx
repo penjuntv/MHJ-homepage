@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
   const tag = decodeURIComponent(params.tag);
   return {
     title: `Posts tagged #${tag}`,
-    description: `Posts tagged #${tag} on MY MAIRANGI`,
+    description: `Posts tagged #${tag} on MHJ`,
     alternates: { canonical: `${SITE_URL}/blog/tag/${tag}` },
   };
 }
