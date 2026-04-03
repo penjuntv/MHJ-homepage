@@ -13,6 +13,7 @@ import ShareButton from '@/components/ShareButton';
 import CommentSection from './CommentSection';
 import AiInsight from '@/components/AiInsight';
 import BlogReadTracker from './BlogReadTracker';
+import { formatDate } from '@/lib/utils';
 
 export const revalidate = 600;
 
@@ -322,7 +323,7 @@ export default async function BlogDetailPage({
             </span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
-              {blog.date}
+              {formatDate(blog.date)}
             </span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
             <Link

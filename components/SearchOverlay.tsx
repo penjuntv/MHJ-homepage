@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { X, Search, ArrowRight } from 'lucide-react';
 import type { SearchResult } from '@/app/api/search/route';
+import { formatDate } from '@/lib/utils';
 
 const TYPE_LABEL: Record<string, string> = {
   blog: 'Journal',
@@ -275,7 +276,7 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
             </span>
           )}
           {item.date && (
-            <span style={{ fontSize: '10px', color: '#CBD5E1' }}>{item.date}</span>
+            <span style={{ fontSize: '10px', color: '#CBD5E1' }}>{formatDate(item.date)}</span>
           )}
         </div>
         <p style={{

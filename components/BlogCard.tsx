@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import SafeImage from '@/components/SafeImage';
 import type { Blog } from '@/lib/types';
+import { formatDate } from '@/lib/utils';
 
 interface Props {
   blog: Blog;
@@ -57,7 +58,7 @@ export default function BlogCard({ blog, onClick, staggerIndex }: Props) {
           style={{ gap: '16px', marginBottom: '12px' }}
         >
           <span style={{ fontSize: '9px', letterSpacing: '3px', color: 'rgba(255,255,255,0.6)' }}>
-            {blog.date}
+            {formatDate(blog.date)}
           </span>
           <span style={{ fontSize: '9px', letterSpacing: '3px', color: '#818CF8' }}>
             {blog.category}

@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Blog, Magazine } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import { formatDate } from '@/lib/utils';
 
 export const revalidate = 300;
 
@@ -129,11 +130,6 @@ async function getMagazineArticleCount(magazineId: string): Promise<number> {
   return count ?? 0;
 }
 
-/* ─── Helpers ─── */
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-NZ', { month: 'short', day: 'numeric', year: 'numeric' });
-}
 
 /* ─── Page component ─── */
 

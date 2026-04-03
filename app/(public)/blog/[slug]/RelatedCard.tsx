@@ -3,6 +3,7 @@
 import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import type { Blog } from '@/lib/types';
+import { formatDate } from '@/lib/utils';
 
 export default function RelatedCard({ blog }: { blog: Blog }) {
   return (
@@ -56,7 +57,7 @@ export default function RelatedCard({ blog }: { blog: Blog }) {
           {blog.title}
         </p>
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>
-          {blog.date}
+          {formatDate(blog.date)}
         </span>
       </div>
     </Link>

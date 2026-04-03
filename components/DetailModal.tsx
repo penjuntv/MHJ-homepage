@@ -5,6 +5,7 @@ import SafeImage from '@/components/SafeImage';
 import { X, Share2 } from 'lucide-react';
 import type { Blog, Article } from '@/lib/types';
 import AiInsight from './AiInsight';
+import { formatDate } from '@/lib/utils';
 
 type DetailItem = Blog | Article;
 
@@ -105,7 +106,7 @@ export default function DetailModal({ item, onClose }: Props) {
                   color: 'var(--text-tertiary)',
                   textTransform: 'uppercase',
                 }}>
-                  {category ? `${category} / ` : ''}{item.date}
+                  {category ? `${category} / ` : ''}{formatDate(item.date)}
                 </span>
                 <AiInsight title={item.title} content={item.content} />
               </div>

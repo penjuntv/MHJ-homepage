@@ -7,6 +7,7 @@ import type { Blog } from '@/lib/types';
 import { BLOG_CATEGORIES } from '@/lib/constants';
 import NewsletterCTA from './NewsletterCTA';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
 
 const ALL_CATEGORIES = [...BLOG_CATEGORIES];
 
@@ -397,7 +398,7 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>{blog.author}</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>{blog.date}</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>{formatDate(blog.date)}</span>
         </div>
 
         <div style={{
@@ -472,7 +473,7 @@ function RecentStoryItem({ blog, isLast, onClick }: { blog: Blog; isLast: boolea
           {blog.title}
         </h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{blog.date}</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{formatDate(blog.date)}</span>
           <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'var(--text-secondary)', flexShrink: 0 }} />
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: 1, textTransform: 'uppercase' }}>
             {blog.category}
@@ -535,7 +536,7 @@ function BlogCard({ blog, onClick }: CardProps) {
             {blog.is_sponsored && <span style={{ marginLeft: 6 }}>· AD</span>}
           </p>
           <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-            {blog.date}
+            {formatDate(blog.date)}
           </span>
         </div>
         <h3 style={{
