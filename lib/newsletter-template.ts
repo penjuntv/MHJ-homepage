@@ -572,7 +572,7 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
               Facebook
             </a>
             <span style="color:#475569;font-size:10px;">&middot;</span>
-            <a href="https://www.youtube.com"
+            <a href="https://www.youtube.com/@penjunetv"
                style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#94a3b8;text-decoration:none;margin:0 10px;">
               YouTube
             </a>
