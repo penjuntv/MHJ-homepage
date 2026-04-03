@@ -329,9 +329,9 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
         </p>
         <table role="presentation" cellspacing="0" cellpadding="0" border="0">
           <tr>
-            <td style="background:#1a1a1a;">
+            <td style="background:#8A6B4F;border-radius:6px;">
               <a href="${siteUrl}/blog/${escapeHtml(data.blog.slug)}"
-                 style="display:inline-block;padding:12px 28px;font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#ffffff;text-decoration:none;">
+                 style="display:inline-block;padding:12px 32px;font-family:Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;color:#ffffff;text-decoration:none;">
                 Read Story &rarr;
               </a>
             </td>
@@ -360,9 +360,10 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
             <h3 style="margin:0 0 10px;font-family:'Noto Sans KR',Arial,sans-serif;font-size:17px;font-weight:700;color:#1a1a1a;line-height:1.4;">
               ${escapeHtml(data.lunch.title)}
             </h3>
-            <p style="margin:0;font-family:'Noto Sans KR',Arial,sans-serif;font-size:14px;line-height:1.85;color:#475569;">
+            <p style="margin:0 0 14px;font-family:'Noto Sans KR',Arial,sans-serif;font-size:14px;line-height:1.85;color:#475569;">
               ${formatText(data.lunch.body)}
             </p>
+            <a href="${siteUrl}/blog" style="font-family:Arial,sans-serif;font-size:13px;color:#8A6B4F;text-decoration:underline;">Visit mhj.nz &rarr;</a>
           </td>
         </tr>
       </table>
@@ -380,9 +381,10 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
         <h3 style="margin:0 0 10px;font-family:'Noto Sans KR',Arial,sans-serif;font-size:17px;font-weight:700;color:#1a1a1a;line-height:1.4;">
           ${escapeHtml(data.campus.title)}
         </h3>
-        <p style="margin:0;font-family:'Noto Sans KR',Arial,sans-serif;font-size:14px;line-height:1.85;color:#475569;">
+        <p style="margin:0 0 14px;font-family:'Noto Sans KR',Arial,sans-serif;font-size:14px;line-height:1.85;color:#475569;">
           ${formatText(data.campus.body)}
         </p>
+        <a href="${siteUrl}/blog" style="font-family:Arial,sans-serif;font-size:13px;color:#8A6B4F;text-decoration:underline;">Visit mhj.nz &rarr;</a>
       </div>
     </td>
   </tr>`
@@ -458,6 +460,11 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
               StoryPress &rarr;
             </a>
           </td>
+          <td style="padding-left:14px;vertical-align:middle;">
+            <span style="color:#93c5fd;font-size:12px;">&middot;</span>
+            &nbsp;
+            <a href="${siteUrl}/blog" style="font-family:Arial,sans-serif;font-size:13px;color:#8A6B4F;text-decoration:underline;">Visit mhj.nz &rarr;</a>
+          </td>
         </tr>
       </table>
     </td>
@@ -498,6 +505,9 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
       </table>`,
         )
         .join('')}
+      <p style="margin:18px 0 0;padding-left:56px;">
+        <a href="${siteUrl}/blog" style="font-family:Arial,sans-serif;font-size:13px;color:#8A6B4F;text-decoration:underline;">Visit mhj.nz &rarr;</a>
+      </p>
     </td>
   </tr>`
       : '';
@@ -525,9 +535,19 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
                 ${escapeHtml(data.archive.title)}
               </a>
             </h3>
-            <p style="margin:0;font-family:'Noto Sans KR',Arial,sans-serif;font-size:13px;line-height:1.75;color:#475569;">
+            <p style="margin:0 0 14px;font-family:'Noto Sans KR',Arial,sans-serif;font-size:13px;line-height:1.75;color:#475569;">
               ${formatText(data.archive.excerpt)}
             </p>
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+              <tr>
+                <td style="background:#8A6B4F;border-radius:6px;">
+                  <a href="${siteUrl}/blog/${escapeHtml(data.archive.slug)}"
+                     style="display:inline-block;padding:12px 32px;font-family:Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;color:#ffffff;text-decoration:none;">
+                    Read Story &rarr;
+                  </a>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
@@ -547,7 +567,7 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
               Instagram
             </a>
             <span style="color:#475569;font-size:10px;">&middot;</span>
-            <a href="https://www.facebook.com"
+            <a href="https://www.facebook.com/minhyunjin.nz"
                style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#94a3b8;text-decoration:none;margin:0 10px;">
               Facebook
             </a>
@@ -562,6 +582,9 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
       <p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:12px;color:#475569;text-align:center;line-height:1.6;">
         <a href="${siteUrl}" style="color:#94a3b8;text-decoration:none;font-weight:700;">www.mhj.nz</a>
         &nbsp;&middot;&nbsp; Mairangi Bay, Auckland, New Zealand
+      </p>
+      <p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:12px;color:#94a3b8;text-align:center;line-height:1.6;">
+        Enjoyed this? Forward this email to a friend.
       </p>
       <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:#475569;text-align:center;line-height:1.6;">
         You received this because you subscribed to Mairangi Notes.
@@ -642,11 +665,14 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td style="vertical-align:bottom;">
-                    <p style="margin:0 0 4px;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:26px;font-weight:900;letter-spacing:-0.5px;color:#1a1a1a;line-height:1;">
-                      Mairangi Notes
+                    <p style="margin:0 0 2px;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;letter-spacing:0.02em;color:#8A6B4F;line-height:1;">
+                      MHJ
                     </p>
-                    <p style="margin:0;font-family:Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#94a3b8;">
-                      MHJ &nbsp;&middot;&nbsp; Mairangi Bay, Auckland
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:6px 0 0;">
+                      <tr><td style="background:#8A6B4F;height:1px;width:60px;font-size:0;line-height:0;">&nbsp;</td></tr>
+                    </table>
+                    <p style="margin:5px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:400;letter-spacing:0.28em;color:#94a3b8;">
+                      my mairangi
                     </p>
                   </td>
                   <td style="text-align:right;vertical-align:bottom;">
