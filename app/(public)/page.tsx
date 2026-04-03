@@ -221,7 +221,7 @@ export default async function LandingPage() {
         </div>
 
         {/* ═══════ §2+3. Latest Posts + Sidebar ═══════ */}
-        <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '64px clamp(20px, 4vw, 48px) 0' }}>
+        <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '96px clamp(20px, 4vw, 48px) 0' }}>
           <p style={{
             fontSize: 10,
             fontWeight: 900,
@@ -404,7 +404,7 @@ export default async function LandingPage() {
 
         {/* ═══════ §4. Magazine Feature ═══════ */}
         {latestMag && (
-          <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '32px clamp(20px, 4vw, 48px) 0' }}>
+          <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '48px clamp(20px, 4vw, 48px) 0' }}>
             <Link
               href="/magazine"
               style={{
@@ -499,7 +499,7 @@ export default async function LandingPage() {
         )}
 
         {/* ═══════ §5. Newsletter CTA (full) ═══════ */}
-        <div style={{ marginTop: 48 }}>
+        <div style={{ marginTop: 80 }}>
           <NewsletterCTA reducedPadding />
         </div>
 
@@ -683,7 +683,7 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
       {/* Thumbnail */}
       <div style={{
         position: 'relative',
-        aspectRatio: '16/10',
+        aspectRatio: '4/3',
         borderRadius: 6,
         overflow: 'hidden',
       }}>

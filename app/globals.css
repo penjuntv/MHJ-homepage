@@ -1282,13 +1282,13 @@
 
 /* Brand copy transition zone */
 .brand-copy-zone {
-  padding-top: 32px;
-  padding-bottom: 20px;
+  padding-top: 48px;
+  padding-bottom: 32px;
 }
 @media (min-width: 768px) {
   .brand-copy-zone {
-    padding-top: 40px;
-    padding-bottom: 24px;
+    padding-top: 64px;
+    padding-bottom: 40px;
   }
 }
 

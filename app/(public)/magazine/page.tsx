@@ -86,7 +86,7 @@ function LatestIssuesSection({ magazines }: { magazines: Magazine[] }) {
   if (!pdfIssues.length) return null;
 
   return (
-    <section style={{ padding: 'clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px)', background: 'var(--bg-surface)' }}>
+    <section style={{ padding: 'clamp(48px, 6vw, 80px) clamp(24px, 5vw, 80px) clamp(80px, 12vw, 160px)', background: 'var(--bg-surface)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '64px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
