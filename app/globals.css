@@ -1053,7 +1053,7 @@
 
 /* ─── Instagram 섹션 다크모드 ─── */
 .insta-section-bg {
-  background: #FFF0F5;
+  background: var(--bg-surface);
 }
 
 .dark .insta-section-bg {
