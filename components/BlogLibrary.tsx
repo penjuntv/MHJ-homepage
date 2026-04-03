@@ -87,7 +87,7 @@ export default function BlogLibrary({
             marginBottom: 24,
           }}
         >
-          {blogTitle || 'The Library'}
+          {blogTitle || 'The Journal'}
         </h1>
         <p className="type-body" style={{ color: 'var(--text-secondary)', maxWidth: 480 }}>
           {blogDescription || 'Stories from our life in Mairangi Bay — family, learning, and everything in between.'}

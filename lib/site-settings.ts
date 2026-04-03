@@ -20,7 +20,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   about_who_image_url: '',
   about_vision_title: 'START TO GLOW',
   about_vision_description: '기자 출신의 아빠와 석사 과정을 밟고 있는 엄마, 그리고 세 명의 딸이 함께 일구는 뉴질랜드 삶의 기록입니다.',
-  blog_title: 'The Library',
+  blog_title: 'The Journal',
   blog_description: '사회복지사 석사 과정과 일상을 기록하는 희종의 개인 서재입니다.',
   footer_description: '뉴질랜드 오클랜드 노스쇼어\n마이랑이 베이에서 기록하는\n우리 가족의 이야기',
   contact_location: 'Mairangi Bay, Auckland, New Zealand',
