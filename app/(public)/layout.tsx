@@ -45,7 +45,6 @@ export default async function PublicLayout({
       <main>{children}</main>
       <InstagramFeed instagramUrl={s.social_instagram || ''} />
       <Footer
-        siteName={s.site_name}
         siteSubtitle={s.site_subtitle}
         footerDescription={s.footer_description}
         contactLocation={s.contact_location}

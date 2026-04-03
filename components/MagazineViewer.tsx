@@ -1073,24 +1073,12 @@ function ArticleGridCard({ article, onOpen, magazineLabel, magazineCoverUrl, lik
           ) : hasOwnImage ? (
             <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
           ) : isFallback ? (
-            <>
-              <SafeImage src={fallbackSrc} alt={article.title} fill className="object-cover" style={{ filter: 'brightness(0.85) saturate(0.7)' }} />
-              <div className="mv-fallback-overlay">
-                <p style={{ fontSize: 12, fontWeight: 900, color: 'rgba(255,255,255,0.9)', lineHeight: 1.3, margin: 0, letterSpacing: -0.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {article.title}
-                </p>
-              </div>
-            </>
+            <SafeImage src={fallbackSrc} alt={article.title} fill className="object-cover" style={{ filter: 'brightness(0.85) saturate(0.7)' }} />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: 5, color: 'rgba(139,115,85,0.3)', textTransform: 'uppercase', margin: 0 }}>MHJ</p>
               <p style={{ fontSize: 11, fontWeight: 800, color: 'rgba(139,115,85,0.5)', textAlign: 'center', margin: 0, padding: '0 12px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{article.title}</p>
             </div>
-          )}
-          {article.article_type && (
-            <span style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(250,247,244,0.92)', color: '#7A6958', fontSize: 8, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4 }}>
-              {article.article_type}
-            </span>
           )}
         </div>
         <div style={{ padding: '14px 16px 12px' }}>

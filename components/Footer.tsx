@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Rss } from 'lucide-react';
+import { useTheme } from './ThemeProvider';
 
 /* ── Inline SVG icons (20px, monochrome) ── */
 function InstagramIcon() {
@@ -63,7 +64,6 @@ function SocialLink({ href, label, children }: { href: string; label: string; ch
 }
 
 interface FooterProps {
-  siteName?: string;
   siteSubtitle?: string;
   footerDescription?: string;
   contactLocation?: string;
@@ -75,7 +75,6 @@ interface FooterProps {
 }
 
 export default function Footer({
-  siteName = 'MHJ — my mairangi',
   siteSubtitle = 'Family Archive',
   footerDescription = 'A family archive from Mairangi Bay, Auckland.',
   contactLocation = 'Mairangi Bay, Auckland, New Zealand',
@@ -85,6 +84,9 @@ export default function Footer({
   socialYoutube,
   socialThreads,
 }: FooterProps) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+  const brandColor = isDark ? 'var(--mhj-brown-dark)' : 'var(--mhj-brown)';
   const descLines = footerDescription.split('\n');
 
   return (
@@ -102,17 +104,31 @@ export default function Footer({
       >
         {/* Brand */}
         <div>
-          <div
-            className="font-display font-black uppercase type-h2"
-            style={{
-              fontStyle: 'italic',
-              color: 'rgba(255,255,255,0.9)',
-              letterSpacing: '-2px',
-              marginBottom: '24px',
-            }}
+          <Link
+            href="/"
+            style={{ textDecoration: 'none', display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: '24px' }}
           >
-            {siteName}
-          </div>
+            <span
+              className="font-display"
+              style={{ fontSize: 28, fontWeight: 400, letterSpacing: '0.05em', color: brandColor, lineHeight: 1 }}
+            >
+              MHJ
+            </span>
+            <span style={{ width: 56, height: 1, background: brandColor, display: 'block', margin: '5px 0' }} />
+            <span
+              style={{
+                fontFamily: 'var(--font-inter), Inter, sans-serif',
+                fontSize: 10,
+                fontWeight: 400,
+                letterSpacing: '0.28em',
+                color: brandColor,
+                textTransform: 'lowercase',
+                lineHeight: 1,
+              }}
+            >
+              my mairangi
+            </span>
+          </Link>
           <p
             style={{
               fontSize: '14px',
