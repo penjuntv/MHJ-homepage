@@ -244,6 +244,7 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
   categoryCounts: Record<string, number>;
 }) {
   return (
+    <div style={{ position: 'relative' }}>
     <div
       className="no-scrollbar"
       style={{
@@ -313,6 +314,17 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
           </button>
         );
       })}
+    </div>
+    {/* 스크롤 힌트: 우측 페이드 */}
+    <div style={{
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      width: 48,
+      height: '100%',
+      background: 'linear-gradient(to right, transparent, var(--bg))',
+      pointerEvents: 'none',
+    }} />
     </div>
   );
 }

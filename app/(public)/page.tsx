@@ -346,6 +346,7 @@ export default async function LandingPage() {
                     <Link
                       key={blog.id}
                       href={`/blog/${blog.slug}`}
+                      className="most-read-item"
                       style={{
                         display: 'flex',
                         gap: 16,

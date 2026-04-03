@@ -634,6 +634,16 @@
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35) !important;
 }
 
+/* ─── 모바일 Most Read: 3개로 제한 ─── */
+@media (max-width: 767px) {
+  .most-read-item:nth-child(n+4) {
+    display: none;
+  }
+  .most-read-item:nth-child(3) {
+    border-bottom: none !important;
+  }
+}
+
 /* ─── B-2 Blog Library 리파인: hover 효과 ─── */
 
 /* 블로그 카드 제목 underline 슬라이드인 */

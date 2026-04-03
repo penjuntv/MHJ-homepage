@@ -72,7 +72,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
             <div style={{ display: 'flex', gap: 8 }}>
               <input
                 type="email"
-                placeholder="your@email.com"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
