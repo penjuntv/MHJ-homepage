@@ -25,6 +25,7 @@ export default function BlogCard({ blog, onClick, staggerIndex }: Props) {
         cursor: 'pointer',
         aspectRatio: '1/1',
         position: 'relative',
+        border: '1px solid var(--border)',
         boxShadow: hovered ? '0 30px 60px rgba(0,0,0,0.15)' : '0 4px 12px rgba(0,0,0,0.04)',
         transition: 'all 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
