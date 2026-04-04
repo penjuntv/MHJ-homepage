@@ -143,8 +143,11 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, name: 'StoryPress Waitlist', source: 'storypress' }),
     });
-    if (res.ok) { setStatus('success'); setEmail(''); }
-    else if (res.status === 409) setStatus('duplicate');
+    if (res.ok) {
+      setStatus('success');
+      setEmail('');
+      trackEvent('cta_click', { location: 'storypress_page' });
+    } else if (res.status === 409) setStatus('duplicate');
     else setStatus('error');
   }
 

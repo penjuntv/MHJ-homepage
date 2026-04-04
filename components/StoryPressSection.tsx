@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { trackEvent } from '@/lib/analytics';
 
 interface Props {
   title: string;
@@ -92,6 +93,7 @@ export default function StoryPressSection({ title, description, ctaUrl, ctaText 
           href={href}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
+          onClick={() => trackEvent('cta_click', { location: 'section' })}
           style={{
             display: 'inline-flex',
             alignItems: 'center',

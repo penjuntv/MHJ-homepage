@@ -9,6 +9,7 @@ import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import { supabase } from '@/lib/supabase-browser';
+import { trackEvent } from '@/lib/analytics';
 
 interface ArticleReaction {
   id: number;
@@ -565,6 +566,7 @@ export default function MagazineViewer({ magazine, articles }: Props) {
 
   const handleLike = useCallback(async (articleId: number) => {
     if (likedArticles.has(articleId)) return;
+    trackEvent('article_reaction', { blog_id: articleId, reaction_type: 'like' });
     await supabase.from('article_reactions').insert({ article_id: articleId, type: 'like' });
     const next = new Set(likedArticles);
     next.add(articleId);

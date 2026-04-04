@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Share2, Facebook, Twitter, Linkedin, Link2, Check } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 interface ShareButtonProps {
   title: string;
@@ -26,10 +27,13 @@ export default function ShareButton({ title, url, description }: ShareButtonProp
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showDropdown]);
 
+  const slug = url.split('/blog/')[1]?.split('?')[0] ?? url;
+
   async function handleShare() {
     if (navigator.share) {
       try {
         await navigator.share({ title, url, text: description });
+        trackEvent('blog_share', { slug, method: 'copy' });
       } catch {
         // 사용자가 취소한 경우 무시
       }
@@ -39,12 +43,15 @@ export default function ShareButton({ title, url, description }: ShareButtonProp
   }
 
   function openWindow(shareUrl: string) {
+    const method = shareUrl.includes('facebook') ? 'facebook' : 'twitter';
+    trackEvent('blog_share', { slug, method });
     window.open(shareUrl, '_blank', 'width=600,height=500,noopener,noreferrer');
     setShowDropdown(false);
   }
 
   function copyLink() {
     navigator.clipboard.writeText(url).then(() => {
+      trackEvent('blog_share', { slug, method: 'copy' });
       setCopied(true);
       setShowDropdown(false);
       setToast(true);
