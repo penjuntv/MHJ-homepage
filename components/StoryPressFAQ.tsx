@@ -17,7 +17,7 @@ const FAQS = [
   },
   {
     q: 'How much does it cost?',
-    a: 'StoryPress is currently in development. Join the waitlist for free — early subscribers will receive special launch benefits when we go live.',
+    a: 'StoryPress is free to start — your child gets a full 10-day cycle to create their first storybook. No credit card needed. After that, plans start at $5.99/month.',
   },
   {
     q: 'How is it different from other apps?',

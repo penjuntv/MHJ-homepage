@@ -129,27 +129,8 @@ const RESEARCH_CARDS = [
 ];
 
 export default function StoryPressClient({ title, description, heroImageUrl }: Props) {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
   const [hoverFeature, setHoverFeature] = useState<number | null>(null);
   const [hoverResearch, setHoverResearch] = useState<number | null>(null);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email) return;
-    setStatus('loading');
-    const res = await fetch('/api/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name: 'StoryPress Waitlist', source: 'storypress' }),
-    });
-    if (res.ok) {
-      setStatus('success');
-      setEmail('');
-      trackEvent('cta_click', { location: 'storypress_page' });
-    } else if (res.status === 409) setStatus('duplicate');
-    else setStatus('error');
-  }
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
@@ -191,7 +172,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a
-              href="#storypress-signup"
+              href="https://app.mhj.nz"
               onClick={() => trackEvent('cta_click', { location: 'hero' })}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', borderRadius: 999, background: '#1A1A1A', color: '#fff', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 16px 32px rgba(0,0,0,0.15)' }}
             >
@@ -811,82 +792,36 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             letterSpacing: -3, lineHeight: 0.9,
             color: 'white', marginBottom: 20,
           }}>
-            Join the Waitlist
+            Your Child&apos;s First Book Is Waiting
           </h2>
           <p style={{
             fontSize: 'clamp(15px, 1.8vw, 18px)',
             color: 'rgba(255,255,255,0.45)',
             fontWeight: 500, lineHeight: 1.7, marginBottom: 48,
           }}>
-            Your child&apos;s first English storybook is one sign-up away.<br />
-            We&apos;ll let you know the moment StoryPress is ready.
+            Start your free 10-day adventure today.<br />
+            No credit card needed. Just stories, words, and a real book.
           </p>
 
-          {status === 'success' ? (
-            <div style={{
-              padding: '32px 40px', borderRadius: 24,
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
-            }}>
-              <p style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
-                You&apos;re on the list!<br />
-                <span style={{ fontWeight: 500, fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
-                  We&apos;ll let you know when StoryPress launches.
-                </span>
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  required
-                  style={{
-                    flex: '1 1 240px',
-                    padding: '18px 24px',
-                    borderRadius: 999,
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    background: 'rgba(255,255,255,0.06)',
-                    color: 'white',
-                    fontSize: 15, fontWeight: 500,
-                    outline: 'none', minWidth: 0,
-                  }}
-                />
-                <button
-                  type="submit"
-                  disabled={status === 'loading'}
-                  className="font-black uppercase"
-                  style={{
-                    padding: '18px 36px', borderRadius: 999,
-                    background: status === 'loading' ? 'rgba(255,255,255,0.6)' : 'white',
-                    color: '#0A0A0A', border: 'none',
-                    fontSize: 12, letterSpacing: 3,
-                    cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-                    whiteSpace: 'nowrap', flexShrink: 0,
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {status === 'loading' ? '...' : 'Join Waitlist'}
-                </button>
-              </div>
-              {status === 'duplicate' && (
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginTop: 12 }}>
-                  You&apos;re already on the list — thank you!
-                </p>
-              )}
-              {status === 'error' && (
-                <p style={{ fontSize: 13, color: '#f87171', marginTop: 12 }}>
-                  Something went wrong. Please try again.
-                </p>
-              )}
-            </form>
-          )}
+          <a
+            href="https://app.mhj.nz"
+            onClick={() => trackEvent('cta_click', { location: 'bottom' })}
+            className="font-black uppercase"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              padding: '18px 48px', borderRadius: 999,
+              background: 'white', color: '#0A0A0A', border: 'none',
+              fontSize: 12, letterSpacing: 3,
+              textDecoration: 'none',
+              boxShadow: '0 16px 32px rgba(0,0,0,0.15)',
+              transition: 'all 0.2s',
+            }}
+          >
+            Start Free Adventure
+          </a>
 
           <p style={{ marginTop: 32, fontSize: 11, color: 'rgba(255,255,255,0.2)', fontWeight: 600 }}>
-            No spam. Unsubscribe anytime.
+            Free to try · Cancel anytime
           </p>
         </div>
       </section>
