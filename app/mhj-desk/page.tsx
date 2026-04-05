@@ -208,7 +208,7 @@ export default function AdminDashboard() {
           <h1 className="font-display font-black" style={{ fontSize: 40, letterSpacing: -2, margin: 0, color: '#1a1a1a' }}>
             안녕하세요, {userName || '…'} 👋
           </h1>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto" style={{ gap: 10 }}>
             <Link
               href="/mhj-desk/blogs/new"
               className="font-black uppercase"
@@ -255,9 +255,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── 요약 통계 4열 (compact) ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(160px, 100%), 1fr))',
+      <div className="grid grid-cols-2 sm:grid-cols-4" style={{
         gap: 16,
         marginBottom: 16,
       }}>
@@ -307,7 +305,7 @@ export default function AdminDashboard() {
           <p style={{ fontSize: 13, color: '#cbd5e1', textAlign: 'center', padding: '16px 0' }}>데이터 없음</p>
         ) : (
           <div style={{ overflowX: 'auto', margin: '0 -4px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(140px, 1fr))', gap: 0, minWidth: 560 }}>
+          <div className="grid grid-cols-2 sm:grid-cols-5" style={{ gap: 0 }}>
             {popularBlogs.map((blog, i) => (
               <Link key={blog.id} href={`/mhj-desk/blogs/${blog.id}/edit`} style={{
                 display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 16px',
@@ -347,9 +345,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── 통계 카드 4열 ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))',
+      <div className="grid grid-cols-2 sm:grid-cols-4" style={{
         gap: 20,
         marginBottom: 36,
       }}>
@@ -591,7 +587,7 @@ export default function AdminDashboard() {
             <thead>
               <tr style={{ borderTop: '1px solid #f1f5f9' }}>
                 {['글', '카테고리', '저자', '날짜', '상태', ''].map((h) => (
-                  <th key={h} style={{
+                  <th key={h} className={['카테고리', '저자'].includes(h) ? 'hidden sm:table-cell' : ''} style={{
                     padding: '12px 16px', textAlign: 'left',
                     fontSize: 9, fontWeight: 800, letterSpacing: 3,
                     textTransform: 'uppercase', color: '#94a3b8',
@@ -619,7 +615,7 @@ export default function AdminDashboard() {
                       </p>
                     </div>
                   </td>
-                  <td style={{ padding: '14px 16px' }}>
+                  <td className="hidden sm:table-cell" style={{ padding: '14px 16px' }}>
                     <span style={{
                       fontSize: 11, fontWeight: 700, color: '#4F46E5',
                       background: '#eef2ff', borderRadius: 6, padding: '3px 10px',
@@ -627,7 +623,7 @@ export default function AdminDashboard() {
                       {blog.category}
                     </span>
                   </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: '#64748b', fontWeight: 500 }}>{blog.author}</td>
+                  <td className="hidden sm:table-cell" style={{ padding: '14px 16px', fontSize: 13, color: '#64748b', fontWeight: 500 }}>{blog.author}</td>
                   <td style={{ padding: '14px 16px', fontSize: 12, color: '#94a3b8', whiteSpace: 'nowrap' }}>{blog.date}</td>
                   <td style={{ padding: '14px 16px' }}>
                     <span style={{

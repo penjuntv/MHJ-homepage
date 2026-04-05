@@ -103,6 +103,7 @@ export default function AdminBlogsPage() {
     background: active ? '#000' : 'white',
     color: active ? 'white' : '#64748B',
     fontSize: 12, fontWeight: 700, cursor: 'pointer',
+    flexShrink: 0, whiteSpace: 'nowrap' as const,
   });
 
   return (
@@ -175,7 +176,7 @@ export default function AdminBlogsPage() {
         </div>
 
         {/* 카테고리 + 상태 필터 */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="overflow-x-auto no-scrollbar" style={{ display: 'flex', gap: 8, flexWrap: 'nowrap', alignItems: 'center', paddingBottom: 4 }}>
           {CATEGORIES.map(c => (
             <button key={c} onClick={() => setCategory(c)} style={filterBtn(category === c)}>{c}</button>
           ))}
@@ -299,7 +300,7 @@ export default function AdminBlogsPage() {
             <thead>
               <tr style={{ background: '#fafafa', borderBottom: '1px solid #f1f5f9' }}>
                 {['', '', '글', '카테고리', '저자', '날짜', '상태', '조회', ''].map((h, i) => (
-                  <th key={i} style={{ padding: '12px 14px', textAlign: 'left', fontSize: 9, fontWeight: 800, letterSpacing: 3, textTransform: 'uppercase', color: '#94a3b8' }}>{h}</th>
+                  <th key={i} className={['카테고리', '저자', '날짜'].includes(h) ? 'hidden sm:table-cell' : ''} style={{ padding: '12px 14px', textAlign: 'left', fontSize: 9, fontWeight: 800, letterSpacing: 3, textTransform: 'uppercase', color: '#94a3b8' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -340,13 +341,13 @@ export default function AdminBlogsPage() {
                       </p>
                     </div>
                   </td>
-                  <td style={{ padding: '10px 14px' }}>
+                  <td className="hidden sm:table-cell" style={{ padding: '10px 14px' }}>
                     <span style={{ fontSize: 10, fontWeight: 900, color: '#4F46E5', background: '#eef2ff', borderRadius: 6, padding: '3px 8px', letterSpacing: 1 }}>
                       {blog.category}
                     </span>
                   </td>
-                  <td style={{ padding: '10px 14px', fontSize: 12, color: '#64748b', whiteSpace: 'nowrap' }}>{blog.author}</td>
-                  <td style={{ padding: '10px 14px', fontSize: 11, color: '#94a3b8', whiteSpace: 'nowrap' }}>{blog.date}</td>
+                  <td className="hidden sm:table-cell" style={{ padding: '10px 14px', fontSize: 12, color: '#64748b', whiteSpace: 'nowrap' }}>{blog.author}</td>
+                  <td className="hidden sm:table-cell" style={{ padding: '10px 14px', fontSize: 11, color: '#94a3b8', whiteSpace: 'nowrap' }}>{blog.date}</td>
                   <td style={{ padding: '10px 14px' }}><StatusBadge blog={blog} /></td>
                   <td style={{ padding: '10px 14px', fontSize: 12, color: '#4F46E5', fontWeight: 700, whiteSpace: 'nowrap' }}>
                     {(blog.view_count ?? 0) > 0 ? `${(blog.view_count ?? 0).toLocaleString()}` : '—'}
