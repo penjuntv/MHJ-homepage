@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Gemini API 호출 (캐시 없거나 만료)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent(
       `다음 글을 읽고 감성적이고 시적인 2문장 감상평을 한국어로 써줘. 독자에게 영감을 주는 에디토리얼 매거진 스타일로.
 
