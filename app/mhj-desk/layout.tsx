@@ -232,7 +232,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ─── 메인 ─── */}
-      <main style={{ flex: 1, marginLeft: isMobile ? 0 : 220, minHeight: '100vh', background: '#F8FAFC', paddingTop: isMobile ? 64 : 0 }}>
+      <main style={{ flex: 1, marginLeft: isMobile ? 0 : 220, minHeight: '100vh', background: '#F8FAFC', paddingTop: isMobile ? 64 : 0, minWidth: 0, overflowX: 'hidden' }}>
         {children}
       </main>
 
