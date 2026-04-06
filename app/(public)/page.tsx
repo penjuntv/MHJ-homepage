@@ -68,7 +68,7 @@ async function getLatestPosts(excludeIds: number[]): Promise<Blog[]> {
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
-    .limit(6);
+    .limit(9);
 
   if (excludeIds.length) {
     query = query.not('id', 'in', `(${excludeIds.join(',')})`);
@@ -130,6 +130,64 @@ async function getMagazineArticleCount(magazineId: string): Promise<number> {
   return count ?? 0;
 }
 
+async function getCategoryPosts(excludeIds: number[]): Promise<Record<string, Blog[]>> {
+  const now = new Date().toISOString();
+  const { data } = await supabase
+    .from('blogs')
+    .select('*')
+    .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
+    .order('date', { ascending: false });
+
+  if (!data) return {};
+
+  const allBlogs = data as Blog[];
+  // Count total per category (before exclusion)
+  const totalCounts: Record<string, number> = {};
+  for (const b of allBlogs) {
+    if (b.category) totalCounts[b.category] = (totalCounts[b.category] ?? 0) + 1;
+  }
+
+  // Pick up to 2 per qualifying category, excluding already-shown posts
+  const excludeSet = new Set(excludeIds);
+  const grouped: Record<string, Blog[]> = {};
+  for (const blog of allBlogs) {
+    if (!blog.category || excludeSet.has(blog.id)) continue;
+    if ((totalCounts[blog.category] ?? 0) < 2) continue;
+    if (!grouped[blog.category]) grouped[blog.category] = [];
+    if (grouped[blog.category].length < 2) {
+      grouped[blog.category].push(blog);
+    }
+  }
+
+  // Only return categories that have at least 1 post to show
+  return Object.fromEntries(
+    Object.entries(grouped).filter(([, posts]) => posts.length > 0)
+  );
+}
+
+async function getArchivePosts(excludeIds: number[], limit = 3): Promise<Blog[]> {
+  const now = new Date().toISOString();
+  const { data } = await supabase
+    .from('blogs')
+    .select('*')
+    .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`);
+
+  if (!data) return [];
+
+  const excludeSet = new Set(excludeIds);
+  const candidates = (data as Blog[]).filter(b => !excludeSet.has(b.id));
+
+  // Shuffle and pick
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+
+  return candidates.slice(0, limit);
+}
+
 
 /* ─── Page component ─── */
 
@@ -138,16 +196,28 @@ export default async function LandingPage() {
   const heroIds = heroBlogs.map(b => b.id);
 
   const latest = await getLatestPosts(heroIds);
-  const allExcludeIds = [...heroIds, ...latest.map(b => b.id)].filter(Boolean);
+  const latestExcludeIds = [...heroIds, ...latest.map(b => b.id)].filter(Boolean);
 
-  const [mostRead, latestMag] = await Promise.all([
-    getMostReadBlogs(allExcludeIds),
+  const [mostRead, latestMag, categoryPosts] = await Promise.all([
+    getMostReadBlogs(latestExcludeIds),
     getLatestMagazine(),
+    getCategoryPosts(latestExcludeIds),
   ]);
 
   const magArticleCount = latestMag ? await getMagazineArticleCount(String(latestMag.id)) : 0;
 
-  const allBlogIds = [...heroBlogs.map(b => b.id), ...latest.map(b => b.id), ...mostRead.map(b => b.id)].filter((id): id is number => typeof id === 'number');
+  // Collect all category post IDs for archive exclusion
+  const categoryPostIds = Object.values(categoryPosts).flat().map(b => b.id);
+  const allExcludeIds = [...latestExcludeIds, ...categoryPostIds];
+  const archivePosts = await getArchivePosts(allExcludeIds);
+
+  const allBlogIds = [
+    ...heroBlogs.map(b => b.id),
+    ...latest.map(b => b.id),
+    ...mostRead.map(b => b.id),
+    ...categoryPostIds,
+    ...archivePosts.map(b => b.id),
+  ].filter((id): id is number => typeof id === 'number');
   const commentCounts = await getCommentCounts(allBlogIds);
 
   const jsonLd = {
@@ -200,7 +270,7 @@ export default async function LandingPage() {
           <p
             className="font-display"
             style={{
-              fontSize: 'clamp(24px, 3vw, 32px)',
+              fontSize: 'clamp(24px, 3vw, 36px)',
               fontWeight: 900,
               fontStyle: 'italic',
               color: 'var(--text)',
@@ -211,10 +281,10 @@ export default async function LandingPage() {
             A family archive from Mairangi Bay, Auckland.
           </p>
           <p style={{
-            fontSize: 14,
+            fontSize: 15,
             color: 'var(--text-secondary)',
             lineHeight: 1.6,
-            margin: '8px 0 0',
+            margin: '12px 0 0',
           }}>
             Stories, images, and small records of a Korean family building a life in New Zealand.
           </p>
@@ -329,7 +399,7 @@ export default async function LandingPage() {
               </div>
 
               {/* Most Read — 세 번째 */}
-              <div style={{ marginTop: 32 }}>
+              <div style={{ marginTop: 40 }}>
                 <p style={{
                   fontSize: 10,
                   fontWeight: 900,
@@ -402,9 +472,19 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        {/* ═══════ §3.5 Explore by Topic ═══════ */}
+        {Object.keys(categoryPosts).length > 0 && (
+          <ExploreByTopic categoryPosts={categoryPosts} />
+        )}
+
+        {/* ═══════ §3.7 From the Archive ═══════ */}
+        {archivePosts.length > 0 && (
+          <FromTheArchive posts={archivePosts} />
+        )}
+
         {/* ═══════ §4. Magazine Feature ═══════ */}
         {latestMag && (
-          <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '48px clamp(20px, 4vw, 48px) 0' }}>
+          <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '64px clamp(20px, 4vw, 48px) 0' }}>
             <Link
               href="/magazine"
               style={{
@@ -499,7 +579,7 @@ export default async function LandingPage() {
         )}
 
         {/* ═══════ §5. Newsletter CTA (full) ═══════ */}
-        <div style={{ marginTop: 80 }}>
+        <div style={{ marginTop: 96 }}>
           <NewsletterCTA reducedPadding />
         </div>
 
@@ -697,7 +777,7 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
       </div>
 
       {/* Text */}
-      <div style={{ padding: '12px 4px 4px' }}>
+      <div style={{ padding: '14px 6px 8px' }}>
         {/* Category + Date row */}
         <div style={{
           display: 'flex',
@@ -740,16 +820,250 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
           {blog.title}
         </h3>
 
-        {/* Author + Comment count */}
+        {/* Author + Views + Comment count */}
         <p style={{
           fontSize: 11,
           color: 'var(--text-tertiary)',
           margin: '8px 0 0',
         }}>
           by {blog.author || 'Yussi'}
+          {(blog.view_count ?? 0) > 0 && ` · ${blog.view_count} ${blog.view_count === 1 ? 'view' : 'views'}`}
           {commentCount > 0 && ` · ${commentCount} ${commentCount === 1 ? 'Comment' : 'Comments'}`}
         </p>
       </div>
     </Link>
+  );
+}
+
+/* ─── Explore by Topic section ─── */
+function ExploreByTopic({ categoryPosts }: { categoryPosts: Record<string, Blog[]> }) {
+  return (
+    <section style={{
+      maxWidth: 1320,
+      width: '100%',
+      boxSizing: 'border-box' as const,
+      margin: '0 auto',
+      padding: '96px clamp(20px, 4vw, 48px) 0',
+    }}>
+      <p style={{
+        fontSize: 10,
+        fontWeight: 900,
+        letterSpacing: 5,
+        textTransform: 'uppercase',
+        color: 'var(--text-tertiary)',
+        marginBottom: 48,
+      }}>
+        Explore by Topic
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
+        {Object.entries(categoryPosts).map(([category, posts]) => (
+          <div key={category}>
+            {/* Category header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 20,
+              paddingBottom: 12,
+              borderBottom: '1px solid var(--border)',
+            }}>
+              <h3 style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: 'var(--text)',
+                letterSpacing: -0.3,
+                margin: 0,
+              }}>
+                {category}
+              </h3>
+              <Link
+                href={`/blog?category=${encodeURIComponent(category)}`}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 900,
+                  letterSpacing: 2,
+                  textTransform: 'uppercase',
+                  color: 'var(--text-secondary)',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                View All <ArrowRight size={12} />
+              </Link>
+            </div>
+
+            {/* Cards — 2 per row on desktop, 1 on mobile */}
+            <div className="explore-topic-grid">
+              {posts.map((blog) => (
+                <Link
+                  key={blog.id}
+                  href={`/blog/${blog.slug}`}
+                  style={{
+                    display: 'block',
+                    borderRadius: 12,
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-card)',
+                    padding: 12,
+                    textDecoration: 'none',
+                    transition: 'opacity 0.3s ease',
+                  }}
+                >
+                  <div style={{
+                    position: 'relative',
+                    aspectRatio: '16/10',
+                    borderRadius: 6,
+                    overflow: 'hidden',
+                  }}>
+                    <SafeImage
+                      src={blog.image_url}
+                      alt={blog.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div style={{ padding: '14px 6px 8px' }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: 8,
+                      marginBottom: 8,
+                    }}>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 900,
+                        letterSpacing: 2,
+                        textTransform: 'uppercase',
+                        color: 'var(--text-secondary)',
+                      }}>
+                        {blog.category}
+                      </span>
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 400,
+                        color: 'var(--text-secondary)',
+                      }}>
+                        {blog.date ? formatDate(blog.date) : ''}
+                      </span>
+                    </div>
+                    <h3 style={{
+                      fontSize: 18,
+                      fontWeight: 700,
+                      color: 'var(--text)',
+                      lineHeight: 1.4,
+                      letterSpacing: -0.3,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      margin: 0,
+                    }}>
+                      {blog.title}
+                    </h3>
+                    {(blog.view_count ?? 0) > 0 && (
+                      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '8px 0 0' }}>
+                        {blog.view_count} {blog.view_count === 1 ? 'view' : 'views'}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ─── From the Archive section ─── */
+function FromTheArchive({ posts }: { posts: Blog[] }) {
+  return (
+    <section style={{
+      maxWidth: 1320,
+      width: '100%',
+      boxSizing: 'border-box' as const,
+      margin: '0 auto',
+      padding: '96px clamp(20px, 4vw, 48px) 0',
+    }}>
+      <h2
+        className="font-display"
+        style={{
+          fontSize: 'clamp(24px, 3vw, 32px)',
+          fontWeight: 900,
+          fontStyle: 'italic',
+          color: 'var(--text)',
+          letterSpacing: -0.5,
+          marginBottom: 32,
+        }}
+      >
+        From the Archive
+      </h2>
+
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {posts.map((blog, i) => (
+          <Link
+            key={blog.id}
+            href={`/blog/${blog.slug}`}
+            className="archive-item"
+            style={{
+              display: 'flex',
+              gap: 16,
+              alignItems: 'center',
+              padding: '16px 0',
+              borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none',
+              textDecoration: 'none',
+              transition: 'opacity 0.3s ease',
+            }}
+          >
+            {/* Small thumbnail */}
+            <div style={{
+              position: 'relative',
+              width: 72,
+              height: 72,
+              borderRadius: 8,
+              overflow: 'hidden',
+              flexShrink: 0,
+            }}>
+              <SafeImage
+                src={blog.image_url}
+                alt={blog.title}
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            {/* Text */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{
+                fontSize: 10,
+                fontWeight: 900,
+                letterSpacing: 2,
+                textTransform: 'uppercase',
+                color: 'var(--text-secondary)',
+              }}>
+                {blog.category}
+              </span>
+              <p style={{
+                fontSize: 15,
+                fontWeight: 700,
+                color: 'var(--text)',
+                lineHeight: 1.4,
+                margin: '4px 0 0',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}>
+                {blog.title}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }

@@ -569,6 +569,11 @@ function BlogCard({ blog, onClick }: CardProps) {
         }}>
           {blog.title}
         </h3>
+        {(blog.view_count ?? 0) > 0 && (
+          <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '6px 0 0' }}>
+            {blog.view_count} {blog.view_count === 1 ? 'view' : 'views'}
+          </p>
+        )}
       </div>
     </div>
   );
