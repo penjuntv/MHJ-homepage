@@ -34,13 +34,13 @@ export async function POST(req: NextRequest) {
     // Gemini API 호출 (캐시 없거나 만료)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent(
-      `다음 글을 읽고 감성적이고 시적인 2문장 감상평을 한국어로 써줘. 독자에게 영감을 주는 에디토리얼 매거진 스타일로.
+      `Read the following post and write a poetic, evocative 2-sentence reflection in English. Use an editorial magazine tone that inspires the reader.
 
-제목: ${title}
+Title: ${title}
 
-내용: ${content.slice(0, 500)}
+Content: ${content.slice(0, 500)}
 
-감상평만 쓰고 다른 말은 하지 마.`
+Write only the reflection, nothing else.`
     );
 
     const insight = result.response.text();
