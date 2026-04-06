@@ -148,9 +148,11 @@ export default async function AboutPage() {
               <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '24px' }}>
                 {s.about_who_description_en}
               </p>
-              <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-                {s.about_who_description_kr}
-              </p>
+              {s.about_who_description_kr && (
+                <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+                  {s.about_who_description_kr}
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -396,7 +398,7 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        <NewsletterCTA />
+        <NewsletterCTA buttonText="Yussi의 이야기를 받아보세요" location="about" />
       </div>
     </>
   );

@@ -7,9 +7,11 @@ import { trackEvent } from '@/lib/analytics';
 interface Props {
   compact?: boolean;
   reducedPadding?: boolean;
+  buttonText?: string;
+  location?: string;
 }
 
-export default function NewsletterCTA({ compact = false, reducedPadding = false }: Props) {
+export default function NewsletterCTA({ compact = false, reducedPadding = false, buttonText, location }: Props) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
@@ -18,6 +20,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
     e.preventDefault();
     if (!email) return;
     setStatus('loading');
+    trackEvent('subscribe_click', { location: location || 'unknown' });
 
     const res = await fetch('/api/subscribe', {
       method: 'POST',
@@ -30,6 +33,10 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
       setEmail('');
       setName('');
       trackEvent('newsletter_subscribe', { source: compact ? 'sidebar' : 'cta' });
+      const utmSource = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('utm_source') || 'direct'
+        : 'direct';
+      trackEvent('subscribe_complete', { source: utmSource });
     } else if (res.status === 409) {
       setStatus('duplicate');
     } else {
@@ -108,7 +115,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
                   flexShrink: 0,
                 }}
               >
-                {status === 'loading' ? '...' : 'Subscribe'}
+                {status === 'loading' ? '...' : (buttonText || 'Subscribe')}
               </button>
             </div>
             <p style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
@@ -281,7 +288,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false 
                   flexShrink: 0,
                 }}
               >
-                {status === 'loading' ? '...' : 'Subscribe'}
+                {status === 'loading' ? '...' : (buttonText || 'Subscribe')}
               </button>
             </div>
 

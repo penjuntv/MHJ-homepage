@@ -219,7 +219,7 @@ export default function BlogLibrary({
 
       {/* Newsletter CTA */}
       <div style={{ margin: '96px calc(-1 * clamp(20px, 4vw, 48px)) 0' }}>
-        <NewsletterCTA />
+        <NewsletterCTA location="blog_list" />
       </div>
 
       {/* 반응형 스타일 */}

@@ -343,7 +343,7 @@ export default async function LandingPage() {
                 border: '1px solid var(--border)',
                 background: 'var(--bg-surface)',
               }}>
-                <NewsletterCTA compact />
+                <NewsletterCTA compact buttonText="Mairangi Notes 받기 →" location="homepage_mid" />
               </div>
 
               {/* About mini-card — 두 번째 */}
@@ -580,7 +580,7 @@ export default async function LandingPage() {
 
         {/* ═══════ §5. Newsletter CTA (full) ═══════ */}
         <div style={{ marginTop: 96 }}>
-          <NewsletterCTA reducedPadding />
+          <NewsletterCTA reducedPadding buttonText="매주 금요일에 만나요" location="homepage_bottom" />
         </div>
 
       </div>

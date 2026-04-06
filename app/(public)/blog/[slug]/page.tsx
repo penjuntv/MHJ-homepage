@@ -13,6 +13,7 @@ import ShareButton from '@/components/ShareButton';
 import CommentSection from './CommentSection';
 import AiInsight from '@/components/AiInsight';
 import BlogReadTracker from './BlogReadTracker';
+import ScrollDepthTracker from './ScrollDepthTracker';
 import { formatDate } from '@/lib/utils';
 
 export const revalidate = 600;
@@ -209,6 +210,7 @@ export default async function BlogDetailPage({
 
       <ViewTracker slug={blog.slug} />
       <BlogReadTracker slug={blog.slug} category={blog.category} author={blog.author} />
+      <ScrollDepthTracker slug={blog.slug} />
       <div className="animate-fade-in">
 
         {/* ── 미리보기 배너 ── */}
@@ -384,33 +386,41 @@ export default async function BlogDetailPage({
           } : undefined}>
 
             {/* 3) 본문 */}
-            {isHtml ? (
-              <div
-                className="blog-content"
-                dangerouslySetInnerHTML={{ __html: blog.content }}
-                suppressHydrationWarning
-              />
-            ) : (
-              <p style={{
-                fontSize: 16,
-                color: 'var(--text)',
-                fontWeight: 500,
-                lineHeight: 1.7,
-              }}>
-                <span style={{
-                  fontSize: '4rem',
-                  fontWeight: 900,
-                  float: 'left',
-                  marginRight: 12,
-                  lineHeight: 0.78,
-                  color: 'var(--drop-cap-color)',
-                  fontFamily: "'Playfair Display', serif",
+            <div style={{ position: 'relative' }}>
+              {/* Scroll depth sentinels */}
+              <div id="scroll-depth-25" style={{ position: 'absolute', top: '25%', height: 1 }} />
+              <div id="scroll-depth-50" style={{ position: 'absolute', top: '50%', height: 1 }} />
+              <div id="scroll-depth-75" style={{ position: 'absolute', top: '75%', height: 1 }} />
+              <div id="scroll-depth-100" style={{ position: 'absolute', bottom: 0, height: 1 }} />
+
+              {isHtml ? (
+                <div
+                  className="blog-content"
+                  dangerouslySetInnerHTML={{ __html: blog.content }}
+                  suppressHydrationWarning
+                />
+              ) : (
+                <p style={{
+                  fontSize: 16,
+                  color: 'var(--text)',
+                  fontWeight: 500,
+                  lineHeight: 1.7,
                 }}>
-                  {firstChar}
-                </span>
-                {restContent}
-              </p>
-            )}
+                  <span style={{
+                    fontSize: '4rem',
+                    fontWeight: 900,
+                    float: 'left',
+                    marginRight: 12,
+                    lineHeight: 0.78,
+                    color: 'var(--drop-cap-color)',
+                    fontFamily: "'Playfair Display', serif",
+                  }}>
+                    {firstChar}
+                  </span>
+                  {restContent}
+                </p>
+              )}
+            </div>
 
             {/* ── 인포블록 ── */}
             {blog.info_block_html && (
@@ -567,9 +577,6 @@ export default async function BlogDetailPage({
           </article>
         </div>
 
-        {/* 6) 댓글 섹션 */}
-        <CommentSection blogId={blog.id} />
-
         {/* Related Posts */}
         {relatedBlogs.length > 0 && (
           <section style={{
@@ -611,7 +618,10 @@ export default async function BlogDetailPage({
         )}
 
         {/* Newsletter CTA */}
-        <NewsletterCTA />
+        <NewsletterCTA buttonText="다음 이야기도 받아보세요" location="blog_detail" />
+
+        {/* 댓글 섹션 — 뉴스레터 CTA 아래 */}
+        <CommentSection blogId={blog.id} />
       </div>
     </>
   );
