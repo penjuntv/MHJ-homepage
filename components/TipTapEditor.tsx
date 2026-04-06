@@ -14,6 +14,7 @@ import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
 import LinkExtension from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
+import YoutubeExtension from '@tiptap/extension-youtube';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { useRef, useCallback, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase-browser';
@@ -70,35 +71,39 @@ const ImageGridNode = Node.create({
   addNodeView() { return ReactNodeViewRenderer(ImageGridView); },
 });
 
-/* ── YoutubeEmbed ── */
-const YoutubeEmbedNode = Node.create({
-  name: 'youtubeEmbed',
-  group: 'block',
-  atom: true,
-  draggable: true,
+/* ── YouTube (official extension + backward compat) ── */
+const CustomYoutube = YoutubeExtension.extend({
   addAttributes() {
     return {
-      src: {
-        default: '',
-        parseHTML: el => el.querySelector('iframe')?.getAttribute('src') || '',
-        renderHTML: () => ({}),
-      },
+      ...this.parent?.(),
+      // CSS class for frontend styling
+      HTMLAttributes: { default: { class: 'blog-youtube' } },
     };
   },
-  parseHTML() { return [{ tag: 'div.blog-youtube' }]; },
-  renderHTML({ node }) {
-    const dom = document.createElement('div');
-    dom.className = 'blog-youtube';
-    dom.style.cssText = 'margin:32px 0;border-radius:16px;overflow:hidden;aspect-ratio:16/9;';
-    const iframe = document.createElement('iframe');
-    iframe.src = node.attrs.src;
-    iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;';
-    iframe.setAttribute('allowfullscreen', '');
-    iframe.setAttribute('loading', 'lazy');
-    dom.appendChild(iframe);
-    return { dom };
+  parseHTML() {
+    return [
+      // Official format: div[data-youtube-video]
+      ...(this.parent?.() || []),
+      // Legacy format: div.blog-youtube > iframe
+      {
+        tag: 'div.blog-youtube',
+        getAttrs: (el: HTMLElement) => {
+          const iframe = el.querySelector('iframe');
+          const src = iframe?.getAttribute('src') || '';
+          const m = src.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/);
+          return m ? { src: src } : false;
+        },
+      },
+    ];
   },
-  addNodeView() { return ReactNodeViewRenderer(YoutubeEmbedView); },
+  renderHTML({ HTMLAttributes }) {
+    // Wrap in div.blog-youtube for consistent frontend styling
+    return ['div', { class: 'blog-youtube', 'data-youtube-video': '' }, ['iframe', mergeAttributes(
+      this.options.HTMLAttributes,
+      { allowfullscreen: 'true', loading: 'lazy' },
+      HTMLAttributes,
+    )]];
+  },
 });
 
 /* ── MapEmbed ── */
@@ -207,20 +212,6 @@ function ImageGridView({ node, selected }: NodeViewProps) {
             <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           </div>
         ))}
-      </div>
-    </NodeViewWrapper>
-  );
-}
-
-function YoutubeEmbedView({ node, selected }: NodeViewProps) {
-  return (
-    <NodeViewWrapper>
-      <div contentEditable={false} style={{
-        margin: '16px 0', borderRadius: 16, overflow: 'hidden',
-        aspectRatio: '16/9', background: '#000',
-        outline: selected ? '2px solid #4F46E5' : 'none', outlineOffset: 2,
-      }}>
-        <iframe src={node.attrs.src} style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} allowFullScreen loading="lazy" />
       </div>
     </NodeViewWrapper>
   );
@@ -410,8 +401,13 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 function youtubeToEmbed(url: string): string {
+  // Standard: youtube.com/watch?v=ID or youtu.be/ID
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
   if (m) return `https://www.youtube.com/embed/${m[1]}`;
+  // Shorts: youtube.com/shorts/ID
+  const shorts = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/);
+  if (shorts) return `https://www.youtube.com/embed/${shorts[1]}`;
+  // Already an embed URL
   if (url.includes('youtube.com/embed/')) return url;
   return url;
 }
@@ -536,7 +532,12 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
       LinkExtension.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder: placeholder || '글 내용을 입력하세요...' }),
       ImageGridNode,
-      YoutubeEmbedNode,
+      CustomYoutube.configure({
+        HTMLAttributes: { class: 'blog-youtube' },
+        allowFullscreen: true,
+        autoplay: false,
+        interfaceLanguage: 'ko',
+      }),
       MapEmbedNode,
       CtaButtonNode,
       CalloutBlockNode,
@@ -785,6 +786,16 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
           border-left: 3px solid #4F46E5; border-radius: 0 10px 10px 0;
           margin: 16px 0; color: #1a1a1a;
         }
+        .tiptap-editor .ProseMirror div[data-youtube-video],
+        .tiptap-editor .ProseMirror div.blog-youtube {
+          margin: 16px 0; border-radius: 8px; overflow: hidden;
+          aspect-ratio: 16/9; background: #000;
+          border: 1px solid #f1f5f9;
+        }
+        .tiptap-editor .ProseMirror div[data-youtube-video] iframe,
+        .tiptap-editor .ProseMirror div.blog-youtube iframe {
+          width: 100%; height: 100%; border: none; display: block;
+        }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
       <div className="tiptap-editor">
@@ -916,21 +927,24 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
                 onChange={e => setInsertData(d => ({ ...d, url: e.target.value }))}
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
-                    const embedSrc = youtubeToEmbed(insertData.url.trim());
-                    if (!embedSrc || !editor) return;
-                    editor.chain().focus().insertContent({ type: 'youtubeEmbed', attrs: { src: embedSrc } }).run();
+                    const url = insertData.url.trim();
+                    if (!url || !editor) return;
+                    editor.commands.setYoutubeVideo({ src: youtubeToEmbed(url) });
                     setInsertModal(null);
                   }
                 }}
-                placeholder="https://www.youtube.com/watch?v=..."
+                placeholder="https://www.youtube.com/watch?v=... 또는 Shorts URL"
                 style={{ width: '100%', padding: '13px 16px', borderRadius: 12, border: '1px solid #f1f5f9', fontSize: 14, outline: 'none', background: '#f8fafc', boxSizing: 'border-box', marginBottom: 20 }}
               />
+              <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 20, lineHeight: 1.5 }}>
+                일반 영상, Shorts, youtu.be 단축 URL 모두 지원됩니다.
+              </p>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button type="button"
                   onClick={() => {
-                    const embedSrc = youtubeToEmbed(insertData.url.trim());
-                    if (!embedSrc || !editor) return;
-                    editor.chain().focus().insertContent({ type: 'youtubeEmbed', attrs: { src: embedSrc } }).run();
+                    const url = insertData.url.trim();
+                    if (!url || !editor) return;
+                    editor.commands.setYoutubeVideo({ src: youtubeToEmbed(url) });
                     setInsertModal(null);
                   }}
                   style={{ flex: 1, padding: '13px', background: '#1a1a1a', color: 'white', borderRadius: 12, border: 'none', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>

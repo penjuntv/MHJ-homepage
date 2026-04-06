@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!blog_id || !name || !email || !content) {
-    return NextResponse.json({ error: '모든 필드를 입력해주세요.' }, { status: 400 });
+    return NextResponse.json({ error: 'All fields are required.' }, { status: 400 });
   }
 
   // 유효성 검사

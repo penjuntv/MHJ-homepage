@@ -618,7 +618,7 @@ export default async function BlogDetailPage({
         )}
 
         {/* Newsletter CTA */}
-        <NewsletterCTA buttonText="다음 이야기도 받아보세요" location="blog_detail" />
+        <NewsletterCTA buttonText="Get the next story →" location="blog_detail" />
 
         {/* 댓글 섹션 — 뉴스레터 CTA 아래 */}
         <CommentSection blogId={blog.id} />

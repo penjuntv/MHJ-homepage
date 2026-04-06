@@ -17,7 +17,7 @@ export default function UnsubscribePage() {
         color: 'var(--text-tertiary)',
         fontSize: 14,
       }}>
-        로딩 중...
+        Loading...
       </div>
     }>
       <UnsubscribeClient />

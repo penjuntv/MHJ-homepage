@@ -48,6 +48,10 @@ export default function ArticlePageRenderer({
     .apr-${uid} li { font-size: 15px; line-height: 1.8; margin-bottom: 4px; }
     .apr-${uid} blockquote { border-left: 3px solid ${accentColor}40; padding: 4px 16px; margin: 16px 0; color: ${accentColor}99; font-style: italic; }
     .apr-${uid} img { max-width: 100%; height: auto; border-radius: 4px; margin: 8px 0; cursor: pointer; }
+    .apr-${uid} .blog-youtube,
+    .apr-${uid} [data-youtube-video] { margin: 16px 0; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9; background: #000; }
+    .apr-${uid} .blog-youtube iframe,
+    .apr-${uid} [data-youtube-video] iframe { width: 100%; height: 100%; border: none; display: block; }
     @media (max-width: 600px) {
       .apr-flex-${uid} { flex-direction: column !important; }
       .apr-img-${uid}  { flex: none !important; width: 100% !important; max-height: 260px; }

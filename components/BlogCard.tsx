@@ -27,7 +27,7 @@ export default function BlogCard({ blog, onClick, staggerIndex }: Props) {
         aspectRatio: '1/1',
         position: 'relative',
         border: '1px solid var(--border)',
-        boxShadow: hovered ? '0 30px 60px rgba(0,0,0,0.15)' : '0 4px 12px rgba(0,0,0,0.04)',
+        boxShadow: hovered ? '0 8px 24px rgba(0,0,0,0.10)' : '0 4px 12px rgba(0,0,0,0.04)',
         transition: 'all 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >
@@ -38,10 +38,8 @@ export default function BlogCard({ blog, onClick, staggerIndex }: Props) {
         fill
         className="object-cover"
         style={{
-          filter: hovered
-            ? 'saturate(2.2) contrast(1.1) brightness(1.05)'
-            : 'saturate(1.2) contrast(1.05)',
-          transition: 'filter 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+          transform: hovered ? 'scale(1.02)' : 'scale(1)',
+          transition: 'transform 0.5s ease',
         }}
       />
 

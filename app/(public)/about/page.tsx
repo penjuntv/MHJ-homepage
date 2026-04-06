@@ -398,7 +398,7 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        <NewsletterCTA buttonText="Yussi의 이야기를 받아보세요" location="about" />
+        <NewsletterCTA buttonText="Read Yussi's stories →" location="about" />
       </div>
     </>
   );
