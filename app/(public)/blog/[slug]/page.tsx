@@ -343,7 +343,7 @@ export default async function BlogDetailPage({
             </Link>
             {/* AI Insight 버튼 — 참고: REFERENCE_DESIGN DetailModal 위치 */}
             <div style={{ marginLeft: 'auto' }}>
-              <AiInsight title={blog.title} content={plainText} />
+              <AiInsight title={blog.title} content={plainText} blogId={blog.id} />
             </div>
           </div>
         </div>

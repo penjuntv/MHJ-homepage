@@ -6,9 +6,10 @@ import { Sparkles, Loader2 } from 'lucide-react';
 interface Props {
   title: string;
   content: string;
+  blogId?: number;
 }
 
-export default function AiInsight({ title, content }: Props) {
+export default function AiInsight({ title, content, blogId }: Props) {
   const [insight, setInsight] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +19,7 @@ export default function AiInsight({ title, content }: Props) {
       const res = await fetch('/api/ai-insight', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify({ title, content, blog_id: blogId }),
       });
       const data = await res.json();
       setInsight(data.insight);

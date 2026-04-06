@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY ?? '');
+
+const CACHE_DAYS = 30;
 
 export async function POST(req: NextRequest) {
   /* ── 인증 체크 ── */
@@ -26,30 +26,54 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { title, content } = await req.json();
+    const { title, content, blog_id } = await req.json();
 
     if (!title || !content) {
       return NextResponse.json({ error: 'title and content are required' }, { status: 400 });
     }
 
-    const message = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 200,
-      messages: [
-        {
-          role: 'user',
-          content: `다음 글을 읽고 감성적이고 시적인 2문장 감상평을 한국어로 써줘. 독자에게 영감을 주는 에디토리얼 매거진 스타일로.
+    // blog_id가 있으면 DB 캐시 확인
+    if (blog_id) {
+      const { data: cached } = await authClient
+        .from('blogs')
+        .select('insight_kr, insight_cached_at')
+        .eq('id', blog_id)
+        .single();
+
+      if (cached?.insight_kr && cached?.insight_cached_at) {
+        const cachedAt = new Date(cached.insight_cached_at);
+        const diffDays = (Date.now() - cachedAt.getTime()) / (1000 * 60 * 60 * 24);
+        if (diffDays < CACHE_DAYS) {
+          return NextResponse.json({ insight: cached.insight_kr });
+        }
+      }
+    }
+
+    // Gemini API 호출 (캐시 없거나 만료)
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const result = await model.generateContent(
+      `다음 글을 읽고 감성적이고 시적인 2문장 감상평을 한국어로 써줘. 독자에게 영감을 주는 에디토리얼 매거진 스타일로.
 
 제목: ${title}
 
 내용: ${content.slice(0, 500)}
 
-감상평만 쓰고 다른 말은 하지 마.`,
-        },
-      ],
-    });
+감상평만 쓰고 다른 말은 하지 마.`
+    );
 
-    const insight = message.content[0].type === 'text' ? message.content[0].text : '';
+    const insight = result.response.text();
+
+    // blog_id가 있으면 DB에 캐시 저장
+    if (blog_id && insight) {
+      await authClient
+        .from('blogs')
+        .update({
+          insight_kr: insight,
+          insight_cached_at: new Date().toISOString(),
+        })
+        .eq('id', blog_id);
+    }
+
     return NextResponse.json({ insight });
   } catch (error) {
     console.error('AI Insight error:', error);
