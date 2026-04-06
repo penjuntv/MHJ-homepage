@@ -3,17 +3,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Comment } from '@/lib/types';
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m} minute${m > 1 ? 's' : ''} ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h} hour${h > 1 ? 's' : ''} ago`;
-  const d = Math.floor(h / 24);
-  if (d < 30) return `${d} day${d > 1 ? 's' : ''} ago`;
-  const mo = Math.floor(d / 30);
-  return `${mo} month${mo > 1 ? 's' : ''} ago`;
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function formatCommentDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 const CONTENT_MAX = 500;
@@ -21,12 +15,12 @@ const NAME_MAX = 30;
 const COOLDOWN_MS = 30_000;
 const COOLDOWN_KEY = 'mhj_comment_last';
 
-/* ── Author 뱃지 스타일 (achromatic, 작고 세련된) ─── */
-const authorBadgeStyle: React.CSSProperties = {
+/* ── Yussi 어드민 뱃지 스타일 ─── */
+const adminBadgeStyle: React.CSSProperties = {
   fontSize: 11,
   fontWeight: 700,
-  color: 'var(--text-secondary)',
-  border: '1px solid var(--border-medium)',
+  color: '#ffffff',
+  background: '#8A6B4F',
   borderRadius: 4,
   padding: '1px 6px',
   lineHeight: '16px',
@@ -102,7 +96,7 @@ function CommentForm({
     if (res.ok) {
       sessionStorage.setItem(COOLDOWN_KEY, String(Date.now()));
       setForm({ name: '', email: '', content: '' });
-      setToast('Your comment has been submitted and will appear after approval.');
+      setToast('Your comment has been submitted and will appear after review.');
       setTimeout(() => { setToast(''); onSubmitted(); }, 3000);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -331,7 +325,7 @@ function CommentItem({
               {comment.name}
             </p>
             {comment.is_admin && (
-              <span style={authorBadgeStyle}>Author</span>
+              <span style={adminBadgeStyle}>Yussi</span>
             )}
           </div>
           <p style={{
@@ -341,7 +335,7 @@ function CommentItem({
             fontWeight: 600,
             letterSpacing: 1,
           }}>
-            {mounted ? timeAgo(comment.created_at) : comment.created_at.slice(0, 10).replace(/-/g, '.')}
+            {formatCommentDate(comment.created_at)}
           </p>
         </div>
         <p style={{
@@ -437,7 +431,7 @@ function CommentItem({
                     {reply.name}
                   </p>
                   {reply.is_admin && (
-                    <span style={authorBadgeStyle}>Author</span>
+                    <span style={adminBadgeStyle}>Yussi</span>
                   )}
                 </div>
                 <p style={{
@@ -447,7 +441,7 @@ function CommentItem({
                   fontWeight: 600,
                   letterSpacing: 1,
                 }}>
-                  {mounted ? timeAgo(reply.created_at) : reply.created_at.slice(0, 10).replace(/-/g, '.')}
+                  {mounted ? formatCommentDate(reply.created_at) : reply.created_at.slice(0, 10).replace(/-/g, '.')}
                 </p>
               </div>
               <p style={{
@@ -542,7 +536,7 @@ export default function CommentSection({ blogId }: { blogId: number }) {
             padding: '32px 0',
             fontStyle: 'italic',
           }}>
-            No comments yet. Be the first to share your thoughts.
+            No comments yet. Be the first to leave one.
           </p>
         ) : (
           <div style={{ marginBottom: 32 }}>
