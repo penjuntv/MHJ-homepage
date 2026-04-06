@@ -46,7 +46,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   default_theme: 'system',
   social_instagram: '',
   social_facebook: '',
-  social_youtube: 'https://www.youtube.com/@penjunetv',
+  social_youtube: 'https://www.youtube.com/@mhj_nz',
   social_threads: '',
   featured_post_id: '',
 };

@@ -76,7 +76,7 @@ const organizationJsonLd = {
   sameAs: [
     'https://www.instagram.com/mhj_nz/',
     'https://www.facebook.com/minhyunjin.nz/',
-    'https://www.youtube.com/@penjunetv',
+    'https://www.youtube.com/@mhj_nz',
   ],
 };
 
