@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Sparkles, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Sparkles, Loader2, ClipboardPaste } from 'lucide-react';
+import { toast } from 'sonner';
 import type { CarouselInput, CarouselPoint } from '@/components/carousel/types';
 import StyleSelector from './StyleSelector';
 
@@ -124,7 +125,55 @@ function ensureArray(arr: string[] | undefined, count: number): string[] {
   return out.slice(0, count);
 }
 
+// Yussi Factory v5 JSON → CarouselInput patch
+// snake_case 필드명을 camelCase로 매핑. 누락된 필드는 patch에 포함하지 않아 기존 값 보존.
+function parseYussiFactoryJson(raw: string): Partial<CarouselInput> | null {
+  try {
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== 'object') return null;
+
+    const rawPoints: unknown[] = Array.isArray(data.carousel_points) ? data.carousel_points : [];
+    const points: CarouselPoint[] = rawPoints.map((raw) => {
+      const p = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+      const pickStr = (...keys: string[]): string => {
+        for (const k of keys) {
+          const v = p[k];
+          if (typeof v === 'string' && v) return v;
+        }
+        return '';
+      };
+      return {
+        title: pickStr('title'),
+        body: pickStr('body'),
+        highlight: pickStr('highlight'),
+        highlightKr: pickStr('highlightKr', 'highlight_kr'),
+        highlightZh: pickStr('highlightZh', 'highlight_zh'),
+      };
+    });
+
+    const patch: Partial<CarouselInput> = {};
+    if (typeof data.carousel_title === 'string') patch.title = data.carousel_title;
+    if (typeof data.carousel_subtitle === 'string') patch.subtitle = data.carousel_subtitle;
+    if (typeof data.carousel_title_kr === 'string') patch.titleKr = data.carousel_title_kr;
+    if (points.length > 0) patch.points = ensurePoints(points, 4);
+    if (Array.isArray(data.carousel_summary))
+      patch.summaryPoints = (data.carousel_summary as unknown[]).map((s) => String(s ?? ''));
+    if (Array.isArray(data.carousel_summary_kr))
+      patch.summaryKr = (data.carousel_summary_kr as unknown[]).map((s) => String(s ?? ''));
+    if (typeof data.carousel_yussi_take === 'string') patch.yussiTake = data.carousel_yussi_take;
+    if (typeof data.carousel_yussi_take_kr === 'string')
+      patch.yussiTakeKr = data.carousel_yussi_take_kr;
+
+    return patch;
+  } catch {
+    return null;
+  }
+}
+
 export default function CarouselEditor({ input, onChange, onGenerate, isGenerating }: Props) {
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteText, setPasteText] = useState('');
+
   const update = <K extends keyof CarouselInput>(key: K, value: CarouselInput[K]) => {
     onChange({ ...input, [key]: value });
   };
@@ -132,6 +181,18 @@ export default function CarouselEditor({ input, onChange, onGenerate, isGenerati
   const points = ensurePoints(input.points, 4);
   const summaryEn = ensureArray(input.summaryPoints, 4);
   const summaryKr = ensureArray(input.summaryKr, 4);
+
+  function handleApplyPaste() {
+    const patch = parseYussiFactoryJson(pasteText);
+    if (!patch) {
+      toast.error('JSON 형식이 올바르지 않습니다');
+      return;
+    }
+    onChange({ ...input, ...patch });
+    setPasteOpen(false);
+    setPasteText('');
+    toast.success('JSON 데이터가 적용되었습니다 — 확인 후 Generate를 누르세요');
+  }
 
   function updatePoint(idx: number, patch: Partial<CarouselPoint>) {
     const next = points.map((p, i) => (i === idx ? { ...p, ...patch } : p));
@@ -149,6 +210,134 @@ export default function CarouselEditor({ input, onChange, onGenerate, isGenerati
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* PASTE JSON */}
+      <div
+        style={{
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: 12,
+          padding: 20,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <ClipboardPaste size={14} color="#8A6B4F" />
+            <p
+              style={{
+                fontSize: 11,
+                fontWeight: 900,
+                letterSpacing: 2.5,
+                color: '#1A1A1A',
+                textTransform: 'uppercase',
+                margin: 0,
+              }}
+            >
+              Paste JSON from Yussi Factory
+            </p>
+          </div>
+          {!pasteOpen && (
+            <button
+              type="button"
+              onClick={() => setPasteOpen(true)}
+              style={{
+                padding: '10px 14px',
+                borderRadius: 10,
+                border: '1px solid #E2E8F0',
+                background: '#F8FAFC',
+                color: '#1A1A1A',
+                fontSize: 10,
+                fontWeight: 900,
+                letterSpacing: 1.5,
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Yussi Factory JSON 붙여넣기
+            </button>
+          )}
+        </div>
+
+        {pasteOpen && (
+          <>
+            <textarea
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              placeholder="Yussi Factory에서 생성된 JSON을 여기에 붙여넣으세요"
+              spellCheck={false}
+              style={{
+                width: '100%',
+                minHeight: 220,
+                padding: '12px 14px',
+                borderRadius: 10,
+                border: '1px solid #E2E8F0',
+                background: '#F8FAFC',
+                fontSize: 12,
+                color: '#1A1A1A',
+                outline: 'none',
+                boxSizing: 'border-box',
+                fontFamily:
+                  'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                resize: 'vertical',
+                lineHeight: 1.5,
+              }}
+            />
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setPasteOpen(false);
+                  setPasteText('');
+                }}
+                style={{
+                  padding: '12px 18px',
+                  borderRadius: 10,
+                  border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
+                  color: '#1A1A1A',
+                  fontSize: 11,
+                  fontWeight: 900,
+                  letterSpacing: 1.5,
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                }}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyPaste}
+                disabled={!pasteText.trim()}
+                style={{
+                  padding: '12px 18px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: pasteText.trim() ? '#1A1A1A' : '#F8FAFC',
+                  color: pasteText.trim() ? '#FFFFFF' : '#94A3B8',
+                  fontSize: 11,
+                  fontWeight: 900,
+                  letterSpacing: 1.5,
+                  textTransform: 'uppercase',
+                  cursor: pasteText.trim() ? 'pointer' : 'not-allowed',
+                }}
+              >
+                적용
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
       {/* COVER */}
       <Section title="① Cover">
         <Field label="Title (English)">
