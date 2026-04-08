@@ -9,6 +9,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Settings, Palette,
   LogOut, ExternalLink, Images, MessageCircle, Users,
   SearchCheck, LayoutList, Menu, Layers, BarChart3, Search, Link2,
+  LayoutGrid,
 } from 'lucide-react';
 
 type NavItem = { type: 'item'; href: string; label: string; icon: React.ElementType; exact?: boolean; badge?: 'comments' | 'blogs' };
@@ -23,6 +24,7 @@ const NAV: NavEntry[] = [
   { type: 'item', href: '/mhj-desk/magazines', label: '매거진', icon: BookOpen },
   { type: 'item', href: '/mhj-desk/gallery', label: '갤러리', icon: Images },
   { type: 'item', href: '/mhj-desk/hero', label: '히어로 슬라이드', icon: Layers },
+  { type: 'item', href: '/mhj-desk/carousel', label: '캐러셀', icon: LayoutGrid },
   { type: 'item', href: '/mhj-desk/seo', label: 'SEO', icon: SearchCheck },
 
   { type: 'group', label: '페이지' },
