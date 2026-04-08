@@ -297,7 +297,7 @@ export default async function LandingPage() {
             fontWeight: 900,
             letterSpacing: 5,
             textTransform: 'uppercase',
-            color: 'var(--text-tertiary)',
+            color: 'var(--text-secondary)',
             marginBottom: 32,
           }}>
             Latest
@@ -850,7 +850,7 @@ function ExploreByTopic({ categoryPosts }: { categoryPosts: Record<string, Blog[
         fontWeight: 900,
         letterSpacing: 5,
         textTransform: 'uppercase',
-        color: 'var(--text-tertiary)',
+        color: 'var(--text-secondary)',
         marginBottom: 48,
       }}>
         Explore by Topic

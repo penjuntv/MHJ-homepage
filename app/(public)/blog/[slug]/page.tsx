@@ -497,6 +497,15 @@ export default async function BlogDetailPage({
               />
             </footer>
 
+            {/* 댓글 섹션 — 본문 바로 아래, Previous/Next 앞 */}
+            <div style={{
+              borderTop: '1px solid var(--border)',
+              paddingTop: 48,
+              paddingBottom: 48,
+            }}>
+              <CommentSection blogId={blog.id} />
+            </div>
+
             {/* 이전/다음 글 네비게이션 */}
             {(adjacent.prev || adjacent.next) && (
               <nav style={{
@@ -619,9 +628,6 @@ export default async function BlogDetailPage({
 
         {/* Newsletter CTA */}
         <NewsletterCTA buttonText="Get the next story →" location="blog_detail" />
-
-        {/* 댓글 섹션 — 뉴스레터 CTA 아래 */}
-        <CommentSection blogId={blog.id} />
       </div>
     </>
   );

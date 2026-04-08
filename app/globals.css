@@ -1334,6 +1334,13 @@
   }
 }
 
+/* 모바일 밀도 조정 — Latest는 5개만 노출 (Yussi 피드백) */
+@media (max-width: 639px) {
+  .home-latest-grid > :nth-child(n+6) {
+    display: none;
+  }
+}
+
 /* Magazine mini-banner 좌우 배치 */
 .magazine-mini-grid {
   display: grid;
@@ -1407,6 +1414,13 @@ a:hover .magazine-cover-shadow img {
 @media (min-width: 640px) {
   .explore-topic-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* 모바일 밀도 조정 — 카테고리당 1개만 노출 (Yussi 피드백) */
+@media (max-width: 639px) {
+  .explore-topic-grid > :nth-child(n+2) {
+    display: none;
   }
 }
 
