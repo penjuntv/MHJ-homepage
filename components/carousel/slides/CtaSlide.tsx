@@ -4,7 +4,7 @@ import type { CarouselInput } from '../types';
 
 export function CtaSlide(input: CarouselInput) {
   const { colors } = carouselTokens;
-  const styleConfig = carouselTokens.styles[input.style] || carouselTokens.styles.default;
+  const handle = input.instagramHandle || '@mhj_nz';
 
   return (
     <div
@@ -14,117 +14,142 @@ export function CtaSlide(input: CarouselInput) {
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        background: styleConfig.bg,
-        padding: '120px 100px',
+        background: colors.accent,
+        padding: '140px 100px 100px',
         fontFamily: 'Inter, "Noto Sans KR", sans-serif',
-        alignItems: 'center',
-        justifyContent: 'center',
       }}
     >
+      {/* top third: brand */}
       <div
         style={{
-          fontSize: 36,
-          fontFamily: 'Playfair Display, serif',
-          fontWeight: 700,
-          color: colors.accent,
-          letterSpacing: 8,
-          marginBottom: 60,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          flex: 1,
         }}
       >
-        MHJ
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Playfair Display, serif',
+            fontWeight: 700,
+            fontSize: 48,
+            color: '#FFFFFF',
+            letterSpacing: 4,
+          }}
+        >
+          MHJ
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            marginTop: 12,
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            color: 'rgba(255,255,255,0.8)',
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+          }}
+        >
+          my mairangi
+        </div>
       </div>
 
+      {/* middle third: CTA */}
       <div
         style={{
-          width: 60,
-          height: 3,
-          background: colors.accent,
-          marginBottom: 50,
           display: 'flex',
-        }}
-      />
-
-      <div
-        style={{
-          fontFamily: 'Playfair Display, serif',
-          fontWeight: 700,
-          fontSize: 56,
-          lineHeight: 1.2,
-          color: styleConfig.text,
-          textAlign: 'center',
-          marginBottom: 30,
-          maxWidth: 880,
-          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
           justifyContent: 'center',
+          flex: 1.5,
         }}
       >
-        {input.ctaTitle}
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Playfair Display, serif',
+            fontStyle: 'italic',
+            fontWeight: 700,
+            fontSize: 40,
+            lineHeight: 1.3,
+            color: '#FFFFFF',
+            textAlign: 'center',
+            maxWidth: 800,
+            justifyContent: 'center',
+          }}
+        >
+          {input.ctaTitle || 'Read the full article'}
+        </div>
       </div>
 
-      <div
-        style={{
-          fontSize: 22,
-          fontFamily: '"Noto Sans KR", sans-serif',
-          color: colors.textSecondary,
-          marginBottom: 70,
-          display: 'flex',
-        }}
-      >
-        프로필 링크에서 전문 읽기 · 阅读全文请看主页链接
-      </div>
-
+      {/* bottom third: actions */}
       <div
         style={{
           display: 'flex',
-          flexDirection: 'row',
-          gap: 16,
-          marginBottom: 80,
+          flexDirection: 'column',
+          alignItems: 'center',
+          flex: 1,
+          justifyContent: 'flex-end',
+          paddingBottom: 60,
         }}
       >
-        {['💾 Save', '📩 Send', '👤 Follow'].map((cta) => (
+        {[
+          '💾  Save this for later',
+          '📩  Send to a friend',
+          `➕  Follow ${handle}`,
+        ].map((line) => (
           <div
-            key={cta}
+            key={line}
             style={{
-              background: colors.accent,
-              color: '#FFFFFF',
-              fontSize: 20,
-              fontWeight: 700,
-              padding: '18px 32px',
-              borderRadius: carouselTokens.decoration.ctaButtonRadius,
               display: 'flex',
-              marginRight: 8,
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 20,
+              color: 'rgba(255,255,255,0.95)',
+              marginBottom: 18,
+              letterSpacing: 2,
             }}
           >
-            {cta}
+            {line}
           </div>
         ))}
       </div>
 
-      <div
-        style={{
-          fontSize: 18,
-          color: colors.textSecondary,
-          letterSpacing: 3,
-          display: 'flex',
-        }}
-      >
-        {input.instagramHandle || '@mhj_nz'} · www.mhj.nz
-      </div>
-
+      {/* footer watermark */}
       <div
         style={{
           position: 'absolute',
-          bottom: 60,
-          left: 100,
-          right: 100,
+          bottom: 40,
+          left: 80,
+          right: 80,
           display: 'flex',
-          justifyContent: 'center',
-          fontSize: 14,
-          color: colors.textTertiary,
-          letterSpacing: 2,
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
-        10 / 10
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Playfair Display, serif',
+            fontSize: 14,
+            fontWeight: 700,
+            color: 'rgba(255,255,255,0.6)',
+            letterSpacing: 2,
+          }}
+        >
+          MHJ
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            color: 'rgba(255,255,255,0.6)',
+            letterSpacing: 2,
+          }}
+        >
+          10 / 10
+        </div>
       </div>
     </div>
   );

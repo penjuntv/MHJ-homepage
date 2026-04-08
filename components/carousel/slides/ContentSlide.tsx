@@ -19,7 +19,7 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
         flexDirection: 'column',
         position: 'relative',
         background: styleConfig.bg,
-        padding: '110px 100px',
+        padding: '160px 100px 100px 100px',
         fontFamily: 'Inter, "Noto Sans KR", sans-serif',
       }}
     >
@@ -27,10 +27,10 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
       <div
         style={{
           fontFamily: 'Playfair Display, serif',
+          fontStyle: 'italic',
           fontWeight: 700,
-          fontSize: 64,
-          color: colors.accent,
-          marginBottom: 24,
+          fontSize: 56,
+          color: colors.textTertiary,
           display: 'flex',
         }}
       >
@@ -39,10 +39,11 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
 
       <div
         style={{
-          width: 60,
+          width: 40,
           height: 3,
           background: colors.accent,
-          marginBottom: 36,
+          marginTop: 12,
+          marginBottom: 20,
           display: 'flex',
         }}
       />
@@ -55,7 +56,8 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
           fontSize: 48,
           lineHeight: 1.2,
           color: styleConfig.text,
-          marginBottom: 32,
+          marginBottom: 28,
+          display: 'flex',
         }}
       >
         {point.title}
@@ -65,24 +67,26 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
       <div
         style={{
           fontSize: 24,
-          lineHeight: 1.65,
+          lineHeight: 1.8,
           color: styleConfig.text,
-          marginBottom: 44,
+          marginBottom: 36,
+          display: 'flex',
         }}
       >
         {point.body}
       </div>
 
-      {/* highlight box */}
+      {/* highlight box — editorial pull-quote style */}
       {point.highlight && (
         <div
           style={{
             background: colors.highlight,
-            borderRadius: carouselTokens.decoration.highlightRadius,
-            padding: '24px 28px',
+            borderLeft: `4px solid ${colors.accent}`,
+            borderRadius: 0,
+            padding: '16px 20px',
             display: 'flex',
             flexDirection: 'column',
-            marginBottom: 20,
+            marginBottom: 16,
           }}
         >
           <div
@@ -91,6 +95,7 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
               fontWeight: 700,
               color: colors.text,
               lineHeight: 1.45,
+              display: 'flex',
             }}
           >
             {point.highlight}
@@ -105,6 +110,7 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
             fontFamily: '"Noto Sans KR", sans-serif',
             color: colors.textSecondary,
             lineHeight: 1.6,
+            display: 'flex',
           }}
         >
           {point.highlightKr}
@@ -114,21 +120,37 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
       <div
         style={{
           position: 'absolute',
-          bottom: 80,
-          left: 100,
-          right: 100,
+          bottom: 40,
+          left: 80,
+          right: 80,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontSize: 14,
-          color: colors.textTertiary,
-          letterSpacing: 2,
         }}
       >
-        <div style={{ display: 'flex', fontFamily: 'Playfair Display, serif', fontWeight: 700 }}>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Playfair Display, serif',
+            fontSize: 14,
+            fontWeight: 700,
+            color: colors.textTertiary,
+            letterSpacing: 2,
+          }}
+        >
           MHJ
         </div>
-        <div style={{ display: 'flex' }}>{slideLabel}</div>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            color: colors.textTertiary,
+            letterSpacing: 2,
+          }}
+        >
+          {slideLabel}
+        </div>
       </div>
     </div>
   );

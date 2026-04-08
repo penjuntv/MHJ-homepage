@@ -6,8 +6,7 @@ export function CoverSlide(input: CarouselInput) {
   const { colors } = carouselTokens;
   const styleConfig = carouselTokens.styles[input.style] || carouselTokens.styles.default;
   const hasCover = !!input.coverImageUrl;
-  const overlayBg = hasCover ? 'rgba(0,0,0,0.55)' : styleConfig.bg;
-  const textColor = hasCover ? '#FFFFFF' : styleConfig.text;
+  const textColor = hasCover ? '#FFFFFF' : '#1A1A1A';
 
   return (
     <div
@@ -17,7 +16,7 @@ export function CoverSlide(input: CarouselInput) {
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        background: styleConfig.bg,
+        background: hasCover ? styleConfig.bg : colors.bgWarm,
         fontFamily: 'Inter, "Noto Sans KR", sans-serif',
       }}
     >
@@ -45,25 +44,14 @@ export function CoverSlide(input: CarouselInput) {
             left: 0,
             width: 1080,
             height: 1350,
-            background: overlayBg,
+            background:
+              'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 70%)',
             display: 'flex',
           }}
         />
       )}
 
-      {/* accent line */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: carouselTokens.decoration.accentLineWidth,
-          height: 1350,
-          background: colors.accent,
-        }}
-      />
-
-      {/* category label */}
+      {/* top row: category tag + MHJ logo */}
       <div
         style={{
           position: 'absolute',
@@ -77,22 +65,28 @@ export function CoverSlide(input: CarouselInput) {
       >
         <div
           style={{
-            fontSize: 18,
-            color: hasCover ? 'rgba(255,255,255,0.7)' : colors.textSecondary,
-            letterSpacing: 5,
+            display: 'flex',
+            background: hasCover ? 'rgba(255,255,255,0.2)' : 'rgba(138,107,79,0.12)',
+            padding: '6px 14px',
+            borderRadius: 4,
+            fontSize: 11,
+            letterSpacing: 3,
             textTransform: 'uppercase',
-            fontWeight: 700,
+            color: hasCover ? '#FFFFFF' : colors.accent,
+            fontWeight: 600,
           }}
         >
           {input.category}
         </div>
         <div
           style={{
-            fontSize: 22,
+            display: 'flex',
+            fontSize: 16,
             fontFamily: 'Playfair Display, serif',
             fontWeight: 700,
             color: hasCover ? '#FFFFFF' : colors.accent,
-            letterSpacing: 3,
+            opacity: 0.9,
+            letterSpacing: 2,
           }}
         >
           MHJ
@@ -103,9 +97,9 @@ export function CoverSlide(input: CarouselInput) {
       <div
         style={{
           position: 'absolute',
-          left: 80,
-          right: 80,
-          bottom: 230,
+          left: 100,
+          right: 100,
+          bottom: 160,
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -126,7 +120,7 @@ export function CoverSlide(input: CarouselInput) {
             style={{
               marginTop: 32,
               fontSize: 26,
-              color: hasCover ? 'rgba(255,255,255,0.85)' : colors.textSecondary,
+              color: hasCover ? 'rgba(255,255,255,0.9)' : colors.textSecondary,
               lineHeight: 1.5,
             }}
           >
@@ -139,7 +133,7 @@ export function CoverSlide(input: CarouselInput) {
               marginTop: 24,
               fontSize: 22,
               fontFamily: '"Noto Sans KR", sans-serif',
-              color: hasCover ? 'rgba(255,255,255,0.75)' : colors.textSecondary,
+              color: hasCover ? 'rgba(255,255,255,0.8)' : colors.textSecondary,
             }}
           >
             {input.titleKr}
@@ -147,23 +141,41 @@ export function CoverSlide(input: CarouselInput) {
         )}
       </div>
 
-      {/* footer brand */}
+      {/* footer watermark */}
       <div
         style={{
           position: 'absolute',
-          bottom: 80,
+          bottom: 40,
           left: 80,
           right: 80,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontSize: 14,
-          color: hasCover ? 'rgba(255,255,255,0.55)' : colors.textTertiary,
-          letterSpacing: 2,
         }}
       >
-        <div style={{ display: 'flex' }}>{input.instagramHandle || '@mhj_nz'}</div>
-        <div style={{ display: 'flex' }}>01 / 10</div>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Playfair Display, serif',
+            fontSize: 14,
+            fontWeight: 700,
+            color: hasCover ? 'rgba(255,255,255,0.65)' : colors.textTertiary,
+            letterSpacing: 2,
+          }}
+        >
+          MHJ
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            color: hasCover ? 'rgba(255,255,255,0.65)' : colors.textTertiary,
+            letterSpacing: 2,
+          }}
+        >
+          01 / 10
+        </div>
       </div>
     </div>
   );
