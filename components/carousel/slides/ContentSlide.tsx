@@ -108,8 +108,9 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
         <div
           style={{
             background: colors.highlight,
-            borderLeft: mirrored ? undefined : `4px solid ${colors.accent}`,
-            borderRight: mirrored ? `4px solid ${colors.accent}` : undefined,
+            ...(mirrored
+              ? { borderRight: `4px solid ${colors.accent}` }
+              : { borderLeft: `4px solid ${colors.accent}` }),
             borderRadius: 0,
             padding: '16px 20px',
             maxWidth: maxTextWidth,

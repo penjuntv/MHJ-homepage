@@ -68,15 +68,21 @@ export function generateCaption(
   input: CarouselInput,
   hashtags: string[]
 ): { captionEn: string; captionKr?: string } {
-  const bullets = input.points
-    .map((p) => (p.highlight ? `• ${p.highlight}` : ''))
+  const points = Array.isArray(input.points) ? input.points : [];
+  const tagLine = Array.isArray(hashtags) ? hashtags.join(' ') : '';
+
+  const bullets = points
+    .map((p) => {
+      const h = (p?.highlight || '').trim();
+      return h ? `• ${h}` : '';
+    })
     .filter(Boolean);
 
   const firstHalf = bullets.slice(0, 2);
   const secondHalf = bullets.slice(2);
 
-  const hook = createHook(input.title);
-  const krLine = input.titleKr || '자세한 내용은 프로필 링크에서';
+  const hook = createHook(input.title || '');
+  const krLine = (input.titleKr || '').trim() || '자세한 내용은 프로필 링크에서';
 
   const captionEnParts: string[] = [hook, ''];
   if (firstHalf.length > 0) {
@@ -96,24 +102,27 @@ export function generateCaption(
     `🇰🇷 ${krLine}`,
     '🇨🇳 详情请看主页链接',
     '',
-    hashtags.join(' ')
+    tagLine
   );
   const captionEn = captionEnParts.join('\n');
 
-  const krBullets = input.points
-    .map((p) => (p.highlightKr ? `• ${p.highlightKr}` : ''))
+  const krBullets = points
+    .map((p) => {
+      const h = (p?.highlightKr || '').trim();
+      return h ? `• ${h}` : '';
+    })
     .filter(Boolean);
   const krFirst = krBullets.slice(0, 2);
   const krSecond = krBullets.slice(2);
 
   let captionKr: string | undefined;
-  if (input.titleKr) {
+  if (input.titleKr && input.titleKr.trim()) {
     const parts: string[] = [input.titleKr, ''];
     if (krFirst.length > 0) parts.push(krFirst.join('\n'));
     if (krSecond.length > 0) {
       parts.push('', '👉 전체 체크리스트는 스와이프하세요', '', krSecond.join('\n'));
     }
-    parts.push('', '저장 · 공유 · 댓글로 의견 나눠주세요', '', hashtags.join(' '));
+    parts.push('', '저장 · 공유 · 댓글로 의견 나눠주세요', '', tagLine);
     captionKr = parts.join('\n');
   }
 
@@ -122,30 +131,37 @@ export function generateCaption(
 
 // Alt Text 자동 생성 (10개 슬라이드) — Instagram 업로드 시 각 슬라이드 필드에 사용
 export function generateAltTexts(input: CarouselInput): string[] {
-  const fallbackTitle = input.title || 'MHJ carousel';
+  const fallbackTitle = (input.title || '').trim() || 'MHJ carousel';
+  const points = Array.isArray(input.points) ? input.points : [];
+  const summary = Array.isArray(input.summaryPoints) ? input.summaryPoints : [];
+  const pullQuote = (input.pullQuote || '').trim();
+  const yussiTake = (input.yussiTake || '').trim();
+  const subtitle = (input.subtitle || '').trim();
+  const handle = input.instagramHandle || '@mhj_nz';
+
   return [
     // 01 Cover
     `MHJ carousel cover: ${fallbackTitle}`,
     // 02 Context
-    `Why this matters: ${input.subtitle || fallbackTitle}`,
+    `Why this matters: ${subtitle || fallbackTitle}`,
     // 03-06 Content
     ...[0, 1, 2, 3].map((i) => {
-      const p = input.points[i];
-      if (!p || (!p.title && !p.highlight)) return `Point ${i + 1} of ${fallbackTitle}`;
-      return `Point ${i + 1}: ${p.title}${p.highlight ? `. ${p.highlight}` : ''}`;
+      const p = points[i];
+      const pTitle = (p?.title || '').trim();
+      const pHighlight = (p?.highlight || '').trim();
+      if (!pTitle && !pHighlight) return `Point ${i + 1} of ${fallbackTitle}`;
+      return `Point ${i + 1}: ${pTitle}${pHighlight ? `. ${pHighlight}` : ''}`;
     }),
     // 07 Visual
-    input.pullQuote
-      ? `Visual break: ${input.pullQuote}`
-      : `Visual break slide for ${fallbackTitle}`,
+    pullQuote ? `Visual break: ${pullQuote}` : `Visual break slide for ${fallbackTitle}`,
     // 08 Summary
-    `Key takeaways: ${(input.summaryPoints || []).filter(Boolean).join(', ') || fallbackTitle}`,
-    // 09 Yussi
-    `Yussi's take: ${
-      input.yussiTake ? input.yussiTake.substring(0, 100) : 'Expert perspective'
+    `Key takeaways: ${
+      summary.map((s) => (s || '').trim()).filter(Boolean).join(', ') || fallbackTitle
     }`,
+    // 09 Yussi
+    `Yussi's take: ${yussiTake ? yussiTake.substring(0, 100) : 'Expert perspective'}`,
     // 10 CTA
-    `Follow ${input.instagramHandle || '@mhj_nz'} for more. Save and share this carousel.`,
+    `Follow ${handle} for more. Save and share this carousel.`,
   ];
 }
 
