@@ -62,7 +62,7 @@ export function CtaSlide(input: CarouselInput) {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          flex: 1.5,
+          flex: 1,
         }}
       >
         <div
@@ -71,7 +71,7 @@ export function CtaSlide(input: CarouselInput) {
             fontFamily: 'Playfair Display, serif',
             fontStyle: 'italic',
             fontWeight: 700,
-            fontSize: 40,
+            fontSize: 28,
             lineHeight: 1.3,
             color: '#FFFFFF',
             textAlign: 'center',
@@ -91,7 +91,7 @@ export function CtaSlide(input: CarouselInput) {
           alignItems: 'center',
           flex: 1,
           justifyContent: 'flex-end',
-          paddingBottom: 60,
+          paddingBottom: 40,
         }}
       >
         {[
@@ -104,30 +104,15 @@ export function CtaSlide(input: CarouselInput) {
             style={{
               display: 'flex',
               fontFamily: 'Inter, sans-serif',
-              fontSize: 20,
-              color: 'rgba(255,255,255,0.95)',
-              marginBottom: 18,
-              letterSpacing: 2,
+              fontSize: 18,
+              color: 'rgba(255,255,255,0.9)',
+              marginBottom: 14,
+              letterSpacing: 1,
             }}
           >
             {line}
           </div>
         ))}
-        {input.seriesName && (
-          <div
-            style={{
-              display: 'flex',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 12,
-              color: 'rgba(255,255,255,0.7)',
-              letterSpacing: 2,
-              textTransform: 'uppercase',
-              marginTop: 20,
-            }}
-          >
-            Next in this series: {input.seriesName}
-          </div>
-        )}
       </div>
 
       {/* footer watermark */}
