@@ -14,50 +14,74 @@ export function SummarySlide(input: CarouselInput) {
         height: 1350,
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: 'center',
         position: 'relative',
         background: styleConfig.bg,
-        padding: '120px 100px',
+        padding: '140px 100px',
         fontFamily: 'Inter, "Noto Sans KR", sans-serif',
       }}
     >
       <div
         style={{
-          fontSize: 22,
+          display: 'flex',
+          fontSize: 11,
           fontWeight: 700,
           color: colors.accent,
           letterSpacing: 4,
           textTransform: 'uppercase',
-          marginBottom: 24,
+          marginBottom: 16,
         }}
       >
-        In Summary
+        Key Takeaways
       </div>
       <div
         style={{
-          fontFamily: 'Playfair Display, serif',
-          fontWeight: 700,
-          fontSize: 48,
-          lineHeight: 1.2,
-          color: styleConfig.text,
-          marginBottom: 56,
+          width: 40,
+          height: 3,
+          background: colors.accent,
+          marginBottom: 32,
+          display: 'flex',
         }}
-      >
-        Key takeaways
-      </div>
+      />
 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {points.slice(0, 4).map((p, i) => (
           <div
             key={i}
             style={{
-              fontSize: 26,
-              lineHeight: 1.5,
-              color: styleConfig.text,
-              marginBottom: 28,
+              background: '#FFFFFF',
+              border: `1px solid ${colors.border}`,
+              borderRadius: 8,
+              padding: '14px 18px',
+              marginBottom: 10,
               display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-start',
             }}
           >
-            {p}
+            <div
+              style={{
+                display: 'flex',
+                fontSize: 22,
+                fontWeight: 700,
+                color: colors.accent,
+                marginRight: 14,
+                lineHeight: 1.4,
+              }}
+            >
+              ✓
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                fontSize: 22,
+                lineHeight: 1.5,
+                color: styleConfig.text,
+                flex: 1,
+              }}
+            >
+              {p}
+            </div>
           </div>
         ))}
       </div>
@@ -66,7 +90,7 @@ export function SummarySlide(input: CarouselInput) {
         <div
           style={{
             marginTop: 24,
-            paddingTop: 28,
+            paddingTop: 24,
             borderTop: `1px solid ${colors.border}`,
             display: 'flex',
             flexDirection: 'column',
@@ -76,11 +100,11 @@ export function SummarySlide(input: CarouselInput) {
             <div
               key={i}
               style={{
-                fontSize: 18,
+                fontSize: 16,
                 fontFamily: '"Noto Sans KR", sans-serif',
                 color: colors.textSecondary,
                 lineHeight: 1.55,
-                marginBottom: 10,
+                marginBottom: 8,
                 display: 'flex',
               }}
             >
@@ -93,21 +117,37 @@ export function SummarySlide(input: CarouselInput) {
       <div
         style={{
           position: 'absolute',
-          bottom: 80,
-          left: 100,
-          right: 100,
+          bottom: 40,
+          left: 80,
+          right: 80,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontSize: 14,
-          color: colors.textTertiary,
-          letterSpacing: 2,
         }}
       >
-        <div style={{ display: 'flex', fontFamily: 'Playfair Display, serif', fontWeight: 700 }}>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Playfair Display, serif',
+            fontSize: 14,
+            fontWeight: 700,
+            color: colors.textTertiary,
+            letterSpacing: 2,
+          }}
+        >
           MHJ
         </div>
-        <div style={{ display: 'flex' }}>08 / 10</div>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            color: colors.textTertiary,
+            letterSpacing: 2,
+          }}
+        >
+          08 / 10
+        </div>
       </div>
     </div>
   );

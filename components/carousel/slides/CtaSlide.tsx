@@ -113,6 +113,21 @@ export function CtaSlide(input: CarouselInput) {
             {line}
           </div>
         ))}
+        {input.seriesName && (
+          <div
+            style={{
+              display: 'flex',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 12,
+              color: 'rgba(255,255,255,0.7)',
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+              marginTop: 20,
+            }}
+          >
+            Next in this series: {input.seriesName}
+          </div>
+        )}
       </div>
 
       {/* footer watermark */}

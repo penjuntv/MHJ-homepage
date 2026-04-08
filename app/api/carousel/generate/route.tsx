@@ -9,6 +9,7 @@ import {
   loadCarouselFonts,
   buildCarouselInputFromBlog,
   generateCaption,
+  generateAltTexts,
 } from '@/components/carousel/utils';
 import { buildSlides, fetchHashtagsForCategory } from '@/components/carousel/render';
 import type { CarouselInput, CarouselBlogRow } from '@/components/carousel/types';
@@ -61,8 +62,9 @@ export async function POST(request: NextRequest) {
 
     const hashtags = await fetchHashtagsForCategory(categoryForHashtags);
     const { captionEn, captionKr } = generateCaption(input, hashtags);
+    const altTexts = generateAltTexts(input);
 
-    return NextResponse.json({ slides, captionEn, captionKr, hashtags });
+    return NextResponse.json({ slides, captionEn, captionKr, hashtags, altTexts });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(

@@ -56,49 +56,97 @@ export function blogCategoryToHashtagCategory(category: string): string {
   return map[category] || 'storypress';
 }
 
-// 캡션 생성 (사양서 §6 템플릿)
+// 훅 생성 — 숫자가 포함되어 있으면 원문 유지, 없으면 질문형으로 강화
+function createHook(title: string): string {
+  if (!title) return '';
+  if (/\d/.test(title)) return title;
+  return `${title} — here's what most people get wrong.`;
+}
+
+// 캡션 생성 — mid-CTA 구조 (사양서 §6 + CAROUSEL_ENHANCE)
 export function generateCaption(
   input: CarouselInput,
   hashtags: string[]
 ): { captionEn: string; captionKr?: string } {
-  const highlights = input.points
-    .map((p) => `• ${p.highlight}`)
-    .filter(Boolean)
-    .join('\n');
+  const bullets = input.points
+    .map((p) => (p.highlight ? `• ${p.highlight}` : ''))
+    .filter(Boolean);
 
-  const captionEn = [
-    input.title,
+  const firstHalf = bullets.slice(0, 2);
+  const secondHalf = bullets.slice(2);
+
+  const hook = createHook(input.title);
+  const krLine = input.titleKr || '자세한 내용은 프로필 링크에서';
+
+  const captionEnParts: string[] = [hook, ''];
+  if (firstHalf.length > 0) {
+    captionEnParts.push(firstHalf.join('\n'));
+  }
+  if (secondHalf.length > 0) {
+    captionEnParts.push('', '👉 Keep swiping for the full checklist', '', secondHalf.join('\n'));
+  } else {
+    captionEnParts.push('', '👉 Keep swiping for the full story');
+  }
+  captionEnParts.push(
     '',
-    highlights,
+    '💾 Save this for when you need it',
+    "📩 Send to a friend who's planning the same",
+    '💬 What surprised you? Drop it below',
     '',
-    '💾 Save this for later',
-    '📩 Send to a friend who needs this',
-    "💬 What's your experience? Share below",
-    '',
-    `🇰🇷 ${input.titleKr || '한국어 요약은 프로필 링크에서'}`,
+    `🇰🇷 ${krLine}`,
     '🇨🇳 详情请看主页链接',
     '',
-    hashtags.join(' '),
-  ].join('\n');
+    hashtags.join(' ')
+  );
+  const captionEn = captionEnParts.join('\n');
 
-  const krHighlights = input.points
-    .map((p) => p.highlightKr)
-    .filter(Boolean)
-    .join('\n');
+  const krBullets = input.points
+    .map((p) => (p.highlightKr ? `• ${p.highlightKr}` : ''))
+    .filter(Boolean);
+  const krFirst = krBullets.slice(0, 2);
+  const krSecond = krBullets.slice(2);
 
-  const captionKr = input.titleKr
-    ? [
-        input.titleKr,
-        '',
-        krHighlights,
-        '',
-        '저장 · 공유 · 댓글로 의견 나눠주세요',
-        '',
-        hashtags.join(' '),
-      ].join('\n')
-    : undefined;
+  let captionKr: string | undefined;
+  if (input.titleKr) {
+    const parts: string[] = [input.titleKr, ''];
+    if (krFirst.length > 0) parts.push(krFirst.join('\n'));
+    if (krSecond.length > 0) {
+      parts.push('', '👉 전체 체크리스트는 스와이프하세요', '', krSecond.join('\n'));
+    }
+    parts.push('', '저장 · 공유 · 댓글로 의견 나눠주세요', '', hashtags.join(' '));
+    captionKr = parts.join('\n');
+  }
 
   return { captionEn, captionKr };
+}
+
+// Alt Text 자동 생성 (10개 슬라이드) — Instagram 업로드 시 각 슬라이드 필드에 사용
+export function generateAltTexts(input: CarouselInput): string[] {
+  const fallbackTitle = input.title || 'MHJ carousel';
+  return [
+    // 01 Cover
+    `MHJ carousel cover: ${fallbackTitle}`,
+    // 02 Context
+    `Why this matters: ${input.subtitle || fallbackTitle}`,
+    // 03-06 Content
+    ...[0, 1, 2, 3].map((i) => {
+      const p = input.points[i];
+      if (!p || (!p.title && !p.highlight)) return `Point ${i + 1} of ${fallbackTitle}`;
+      return `Point ${i + 1}: ${p.title}${p.highlight ? `. ${p.highlight}` : ''}`;
+    }),
+    // 07 Visual
+    input.pullQuote
+      ? `Visual break: ${input.pullQuote}`
+      : `Visual break slide for ${fallbackTitle}`,
+    // 08 Summary
+    `Key takeaways: ${(input.summaryPoints || []).filter(Boolean).join(', ') || fallbackTitle}`,
+    // 09 Yussi
+    `Yussi's take: ${
+      input.yussiTake ? input.yussiTake.substring(0, 100) : 'Expert perspective'
+    }`,
+    // 10 CTA
+    `Follow ${input.instagramHandle || '@mhj_nz'} for more. Save and share this carousel.`,
+  ];
 }
 
 // blogs row → CarouselInput 변환 (모든 필드 fallback 포함)

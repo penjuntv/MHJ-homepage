@@ -28,6 +28,8 @@ export interface CarouselInput {
   ctaUrl?: string;
   brandName?: string;            // default: 'MHJ'
   instagramHandle?: string;      // default: '@mhj_nz'
+  seriesName?: string;           // optional series grouping e.g. "NZ School Guide"
+  seriesNumber?: number;         // 1, 2, 3...
 }
 
 export interface CarouselSlide {

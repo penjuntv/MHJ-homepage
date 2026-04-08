@@ -69,6 +69,7 @@ export default function CarouselAdminPage() {
   const [savingBlog, setSavingBlog] = useState(false);
   const [savingContent, setSavingContent] = useState(false);
   const [caption, setCaption] = useState<CaptionState>(EMPTY_CAPTION);
+  const [altTexts, setAltTexts] = useState<string[]>([]);
   const [recentRefresh, setRecentRefresh] = useState(0);
 
   const handleSelectBlog = useCallback((row: CarouselBlogRow) => {
@@ -92,6 +93,7 @@ export default function CarouselAdminPage() {
     setSlides([]);
     setCurrentSlide(0);
     setCaption(EMPTY_CAPTION);
+    setAltTexts([]);
   }, []);
 
   const handleNewIndependent = useCallback(() => {
@@ -103,6 +105,7 @@ export default function CarouselAdminPage() {
     setSlides([]);
     setCurrentSlide(0);
     setCaption(EMPTY_CAPTION);
+    setAltTexts([]);
   }, []);
 
   async function handleGenerate() {
@@ -128,6 +131,7 @@ export default function CarouselAdminPage() {
         kr: json.captionKr || '',
         hashtags: Array.from(new Set(['#MHJnz', ...((json.hashtags as string[]) || [])])),
       });
+      setAltTexts((json.altTexts as string[]) || []);
       toast.success(`10장 슬라이드 생성 완료`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '생성 실패');
@@ -349,7 +353,7 @@ export default function CarouselAdminPage() {
             currentIndex={currentSlide}
             onIndexChange={setCurrentSlide}
           />
-          <CaptionPanel caption={caption} onChange={setCaption} />
+          <CaptionPanel caption={caption} onChange={setCaption} altTexts={altTexts} />
           <HashtagManager
             category={blogCategoryToHashtagCategory(input.category)}
             selectedHashtags={caption.hashtags}
@@ -384,6 +388,7 @@ export default function CarouselAdminPage() {
           });
           setSlides([]);
           setCurrentSlide(0);
+          setAltTexts([]);
           toast.success(`"${row.title}" 로드됨`);
         }}
       />

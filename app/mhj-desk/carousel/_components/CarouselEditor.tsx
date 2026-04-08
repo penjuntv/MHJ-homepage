@@ -163,6 +163,8 @@ function parseYussiFactoryJson(raw: string): Partial<CarouselInput> | null {
     if (typeof data.carousel_yussi_take === 'string') patch.yussiTake = data.carousel_yussi_take;
     if (typeof data.carousel_yussi_take_kr === 'string')
       patch.yussiTakeKr = data.carousel_yussi_take_kr;
+    if (typeof data.series_name === 'string') patch.seriesName = data.series_name;
+    if (typeof data.series_number === 'number') patch.seriesNumber = data.series_number;
 
     return patch;
   } catch {
@@ -376,6 +378,34 @@ export default function CarouselEditor({ input, onChange, onGenerate, isGenerati
             style={inputStyle}
           />
         </Field>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ flex: 2, minWidth: 0 }}>
+            <Field label="Series Name (optional)">
+              <input
+                type="text"
+                value={input.seriesName ?? ''}
+                onChange={(e) => update('seriesName', e.target.value || undefined)}
+                placeholder="NZ School Guide"
+                style={inputStyle}
+              />
+            </Field>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Field label="Series #">
+              <input
+                type="number"
+                min={1}
+                value={input.seriesNumber ?? ''}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  update('seriesNumber', Number.isFinite(n) && n > 0 ? n : undefined);
+                }}
+                placeholder="3"
+                style={inputStyle}
+              />
+            </Field>
+          </div>
+        </div>
         <StyleSelector value={input.style} onChange={(s) => update('style', s)} />
       </Section>
 

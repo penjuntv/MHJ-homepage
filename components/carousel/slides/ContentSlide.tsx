@@ -10,6 +10,12 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
   const slideNumber = pointIndex + 3; // 3..6
   const slideLabel = `${String(slideNumber).padStart(2, '0')} / 10`;
 
+  // pointIndex 1, 3 → 우정렬 (mirrored) / 0, 2 → 좌정렬 (default)
+  const mirrored = pointIndex % 2 === 1;
+  const showSwipeHint = pointIndex < 3; // 마지막 content(#6)에선 숨김
+
+  const maxTextWidth = 820;
+
   return (
     <div
       style={{
@@ -17,12 +23,25 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
         height: 1350,
         display: 'flex',
         flexDirection: 'column',
+        alignItems: mirrored ? 'flex-end' : 'flex-start',
         position: 'relative',
         background: styleConfig.bg,
-        padding: '160px 100px 100px 100px',
+        padding: mirrored ? '140px 100px 100px 100px' : '160px 100px 100px 100px',
         fontFamily: 'Inter, "Noto Sans KR", sans-serif',
       }}
     >
+      {/* mirrored: dashed divider at top */}
+      {mirrored && (
+        <div
+          style={{
+            alignSelf: 'stretch',
+            borderTop: '1px dashed #EDE9E3',
+            marginBottom: 24,
+            display: 'flex',
+          }}
+        />
+      )}
+
       {/* number */}
       <div
         style={{
@@ -37,16 +56,19 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
         {String(pointIndex + 1).padStart(2, '0')}
       </div>
 
-      <div
-        style={{
-          width: 40,
-          height: 3,
-          background: colors.accent,
-          marginTop: 12,
-          marginBottom: 20,
-          display: 'flex',
-        }}
-      />
+      {/* accent line — 좌정렬 버전에서만 */}
+      {!mirrored && (
+        <div
+          style={{
+            width: 40,
+            height: 3,
+            background: colors.accent,
+            marginTop: 12,
+            marginBottom: 20,
+            display: 'flex',
+          }}
+        />
+      )}
 
       {/* title */}
       <div
@@ -56,7 +78,10 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
           fontSize: 48,
           lineHeight: 1.2,
           color: styleConfig.text,
+          marginTop: mirrored ? 20 : 0,
           marginBottom: 28,
+          maxWidth: maxTextWidth,
+          textAlign: mirrored ? 'right' : 'left',
           display: 'flex',
         }}
       >
@@ -70,6 +95,8 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
           lineHeight: 1.8,
           color: styleConfig.text,
           marginBottom: 36,
+          maxWidth: maxTextWidth,
+          textAlign: mirrored ? 'right' : 'left',
           display: 'flex',
         }}
       >
@@ -81,9 +108,11 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
         <div
           style={{
             background: colors.highlight,
-            borderLeft: `4px solid ${colors.accent}`,
+            borderLeft: mirrored ? undefined : `4px solid ${colors.accent}`,
+            borderRight: mirrored ? `4px solid ${colors.accent}` : undefined,
             borderRadius: 0,
             padding: '16px 20px',
+            maxWidth: maxTextWidth,
             display: 'flex',
             flexDirection: 'column',
             marginBottom: 16,
@@ -95,6 +124,7 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
               fontWeight: 700,
               color: colors.text,
               lineHeight: 1.45,
+              textAlign: mirrored ? 'right' : 'left',
               display: 'flex',
             }}
           >
@@ -110,6 +140,8 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
             fontFamily: '"Noto Sans KR", sans-serif',
             color: colors.textSecondary,
             lineHeight: 1.6,
+            maxWidth: maxTextWidth,
+            textAlign: mirrored ? 'right' : 'left',
             display: 'flex',
           }}
         >
@@ -117,6 +149,35 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
         </div>
       )}
 
+      {/* swipe hint (bottom center) — 마지막 content 제외 */}
+      {showSwipeHint && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 80,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 10,
+              color: colors.textTertiary,
+              letterSpacing: 3,
+              textTransform: 'uppercase',
+              opacity: 0.6,
+            }}
+          >
+            swipe →
+          </div>
+        </div>
+      )}
+
+      {/* footer */}
       <div
         style={{
           position: 'absolute',

@@ -4,7 +4,6 @@ import type { CarouselInput } from '../types';
 
 export function YussiTakeSlide(input: CarouselInput) {
   const { colors } = carouselTokens;
-  const styleConfig = carouselTokens.styles[input.style] || carouselTokens.styles.default;
 
   return (
     <div
@@ -13,27 +12,22 @@ export function YussiTakeSlide(input: CarouselInput) {
         height: 1350,
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: 'center',
         position: 'relative',
-        background: styleConfig.bg,
-        padding: '120px 100px',
+        background: '#F5F0EA',
+        padding: '140px 100px',
         fontFamily: 'Inter, "Noto Sans KR", sans-serif',
       }}
     >
-      {/* Yussi badge */}
       <div
         style={{
           display: 'flex',
-          alignItems: 'center',
-          background: colors.accent,
-          color: '#FFFFFF',
-          fontSize: 18,
+          fontSize: 11,
           fontWeight: 700,
-          letterSpacing: 3,
+          color: colors.accent,
+          letterSpacing: 4,
           textTransform: 'uppercase',
-          padding: '12px 22px',
-          borderRadius: 6,
-          marginBottom: 50,
-          alignSelf: 'flex-start',
+          marginBottom: 8,
         }}
       >
         {"Yussi's Take"}
@@ -41,12 +35,25 @@ export function YussiTakeSlide(input: CarouselInput) {
 
       <div
         style={{
+          width: 40,
+          height: 3,
+          background: colors.accent,
+          marginTop: 8,
+          marginBottom: 24,
+          display: 'flex',
+        }}
+      />
+
+      <div
+        style={{
           fontFamily: 'Playfair Display, serif',
+          fontStyle: 'italic',
           fontWeight: 700,
-          fontSize: 38,
-          lineHeight: 1.45,
-          color: styleConfig.text,
-          marginBottom: 50,
+          fontSize: 24,
+          lineHeight: 1.6,
+          color: '#1A1A1A',
+          marginBottom: 28,
+          display: 'flex',
         }}
       >
         {input.yussiTake || ''}
@@ -55,9 +62,7 @@ export function YussiTakeSlide(input: CarouselInput) {
       {input.yussiTakeKr && (
         <div
           style={{
-            paddingTop: 32,
-            borderTop: `1px solid ${colors.border}`,
-            fontSize: 20,
+            fontSize: 16,
             fontFamily: '"Noto Sans KR", sans-serif',
             color: colors.textSecondary,
             lineHeight: 1.7,
@@ -71,21 +76,37 @@ export function YussiTakeSlide(input: CarouselInput) {
       <div
         style={{
           position: 'absolute',
-          bottom: 80,
-          left: 100,
-          right: 100,
+          bottom: 40,
+          left: 80,
+          right: 80,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontSize: 14,
-          color: colors.textTertiary,
-          letterSpacing: 2,
         }}
       >
-        <div style={{ display: 'flex', fontFamily: 'Playfair Display, serif', fontWeight: 700 }}>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Playfair Display, serif',
+            fontSize: 14,
+            fontWeight: 700,
+            color: colors.textTertiary,
+            letterSpacing: 2,
+          }}
+        >
           MHJ
         </div>
-        <div style={{ display: 'flex' }}>09 / 10</div>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            color: colors.textTertiary,
+            letterSpacing: 2,
+          }}
+        >
+          09 / 10
+        </div>
       </div>
     </div>
   );
