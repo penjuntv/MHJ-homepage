@@ -7,6 +7,7 @@ import { draftMode } from 'next/headers';
 import { supabase, createAdminClient } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import InlineSubscribeCTA from '@/components/InlineSubscribeCTA';
 import ViewTracker from './ViewTracker';
 import RelatedCard from './RelatedCard';
 import ShareButton from '@/components/ShareButton';
@@ -167,6 +168,17 @@ export default async function BlogDetailPage({
   const plainText = blog.content.replace(/<[^>]*>/g, '');
   const firstChar = plainText.charAt(0);
   const restContent = isHtml ? '' : blog.content.slice(1);
+
+  // 본문 중간에 InlineSubscribeCTA 삽입 (HTML 본문이고 paragraph ≥5일 때만)
+  const paragraphs = isHtml ? blog.content.split('</p>') : [];
+  const showInline = isHtml && paragraphs.length >= 5;
+  const midPoint = Math.floor(paragraphs.length / 2);
+  const firstHalfHtml = showInline
+    ? paragraphs.slice(0, midPoint).join('</p>') + '</p>'
+    : '';
+  const secondHalfHtml = showInline
+    ? paragraphs.slice(midPoint).join('</p>')
+    : '';
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -394,11 +406,27 @@ export default async function BlogDetailPage({
               <div id="scroll-depth-100" style={{ position: 'absolute', bottom: 0, height: 1 }} />
 
               {isHtml ? (
-                <div
-                  className="blog-content"
-                  dangerouslySetInnerHTML={{ __html: blog.content }}
-                  suppressHydrationWarning
-                />
+                showInline ? (
+                  <>
+                    <div
+                      className="blog-content"
+                      dangerouslySetInnerHTML={{ __html: firstHalfHtml }}
+                      suppressHydrationWarning
+                    />
+                    <InlineSubscribeCTA location="blog_inline" />
+                    <div
+                      className="blog-content"
+                      dangerouslySetInnerHTML={{ __html: secondHalfHtml }}
+                      suppressHydrationWarning
+                    />
+                  </>
+                ) : (
+                  <div
+                    className="blog-content"
+                    dangerouslySetInnerHTML={{ __html: blog.content }}
+                    suppressHydrationWarning
+                  />
+                )
               ) : (
                 <p style={{
                   fontSize: 16,
@@ -497,13 +525,21 @@ export default async function BlogDetailPage({
               />
             </footer>
 
-            {/* 댓글 섹션 — 본문 바로 아래, Previous/Next 앞 */}
+            {/* 댓글 섹션 — 본문 바로 아래 */}
             <div style={{
               borderTop: '1px solid var(--border)',
               paddingTop: 48,
               paddingBottom: 48,
             }}>
               <CommentSection blogId={blog.id} />
+            </div>
+
+            {/* Newsletter CTA — 댓글 다음, Previous/Next 앞 */}
+            <div style={{
+              borderTop: '1px solid var(--border)',
+              marginBottom: 16,
+            }}>
+              <NewsletterCTA reducedPadding buttonText="Get the free guide →" location="blog_detail" />
             </div>
 
             {/* 이전/다음 글 네비게이션 */}
@@ -625,9 +661,6 @@ export default async function BlogDetailPage({
             </div>
           </section>
         )}
-
-        {/* Newsletter CTA */}
-        <NewsletterCTA buttonText="Get the next story →" location="blog_detail" />
       </div>
     </>
   );
