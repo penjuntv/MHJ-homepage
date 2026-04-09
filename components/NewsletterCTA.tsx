@@ -78,32 +78,51 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
   if (compact) {
     return (
       <div style={{ textAlign: 'center' }}>
-        <span style={{
-          fontSize: 10,
-          fontWeight: 900,
-          letterSpacing: 5,
-          textTransform: 'uppercase',
-          color: 'var(--text-tertiary)',
-          display: 'block',
-          marginBottom: 12,
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 6,
+          marginBottom: 8,
+          flexWrap: 'wrap',
         }}>
-          Mairangi Notes
-        </span>
+          <span style={{
+            display: 'inline-block',
+            background: '#FEF3C7',
+            color: '#92400E',
+            fontSize: 9,
+            fontWeight: 700,
+            padding: '2px 8px',
+            borderRadius: 10,
+            letterSpacing: 1,
+          }}>
+            FREE
+          </span>
+          <span style={{
+            fontSize: 9,
+            fontWeight: 900,
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            color: 'var(--text-tertiary)',
+          }}>
+            NZ School Starter Pack
+          </span>
+        </div>
 
         <p style={{
-          fontSize: 14,
+          fontSize: 13,
           color: 'var(--text-secondary)',
           fontWeight: 500,
           lineHeight: 1.6,
-          marginBottom: 16,
+          marginBottom: 14,
         }}>
-          Weekly stories from Mairangi Bay.
+          Free school guide + weekly stories
         </p>
 
         {status === 'success' ? (
-          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', margin: 0 }}>
-            You&apos;re in!
-          </p>
+          <PdfDownloadBlock heading="Check your inbox!" />
+        ) : status === 'duplicate' ? (
+          <PdfDownloadBlock heading="You're already subscribed!" />
         ) : (
           <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -145,7 +164,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
                   flexShrink: 0,
                 }}
               >
-                {status === 'loading' ? '...' : (buttonText || 'Subscribe')}
+                {status === 'loading' ? '...' : (buttonText || 'Get the free guide →')}
               </button>
             </div>
             <p style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
@@ -154,11 +173,6 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
                 Privacy Policy
               </Link>.
             </p>
-            {status === 'duplicate' && (
-              <p style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
-                Already subscribed
-              </p>
-            )}
             {status === 'error' && (
               <p style={{ fontSize: 12, color: '#ef4444', textAlign: 'center', margin: 0 }}>
                 Something went wrong.
