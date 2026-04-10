@@ -13,8 +13,8 @@ export function CoverSlide(input: CarouselInput) {
   return (
     <div
       style={{
-        width: W,
-        height: H,
+        width: '100%',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -26,14 +26,14 @@ export function CoverSlide(input: CarouselInput) {
         <img
           src={input.coverImageUrl}
           alt=""
-          width={W}
-          height={H}
+          width={1080}
+          height={1350}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            width: W,
-            height: H,
+            width: '100%',
+            height: '100%',
             objectFit: 'cover',
             opacity: 0.45,
           }}

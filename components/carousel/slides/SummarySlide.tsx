@@ -13,8 +13,8 @@ export function SummarySlide(input: CarouselInput) {
   return (
     <div
       style={{
-        width: W,
-        height: H,
+        width: '100%',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
