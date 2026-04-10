@@ -19,72 +19,75 @@ export function YussiTakeSlide(input: CarouselInput) {
         justifyContent: 'center',
         position: 'relative',
         background: bgSage,
-        padding: '80px 100px',
+        padding: '0 100px',
         fontFamily: '"Noto Sans KR", sans-serif',
       }}
     >
-      {/* section label */}
-      <div
-        style={{
-          display: 'flex',
-          fontFamily: '"Noto Sans KR", sans-serif',
-          fontSize: 14,
-          fontWeight: 700,
-          color: sageAccent,
-          letterSpacing: 4,
-          textTransform: 'uppercase',
-          marginBottom: 24,
-        }}
-      >
-        {"YUSSI'S TAKE"}
-      </div>
-
-      {/* decorative open quote */}
-      <div
-        style={{
-          display: 'flex',
-          fontFamily: 'Playfair Display, serif',
-          fontSize: 72,
-          lineHeight: 1,
-          color: sageAccent,
-          marginBottom: 8,
-        }}
-      >
-        {'\u201C'}
-      </div>
-
-      {/* Yussi's comment */}
-      <div
-        style={{
-          fontFamily: 'Playfair Display, serif',
-          fontStyle: 'italic',
-          fontWeight: 400,
-          fontSize: 30,
-          lineHeight: 1.5,
-          color: textDark,
-          marginBottom: 28,
-          display: 'flex',
-        }}
-      >
-        {input.yussiTake || ''}
-      </div>
-
-      {/* Korean translation */}
-      {input.yussiTakeKr && (
+      {/* content block */}
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        {/* section label */}
         <div
           style={{
-            fontSize: 18,
+            display: 'flex',
             fontFamily: '"Noto Sans KR", sans-serif',
+            fontSize: 14,
+            fontWeight: 700,
+            color: sageAccent,
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            marginBottom: 24,
+          }}
+        >
+          {"YUSSI'S TAKE"}
+        </div>
+
+        {/* decorative open quote */}
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Playfair Display, serif',
+            fontSize: 72,
+            lineHeight: 1,
+            color: sageAccent,
+            marginBottom: 8,
+          }}
+        >
+          {'\u201C'}
+        </div>
+
+        {/* Yussi's comment */}
+        <div
+          style={{
+            fontFamily: 'Playfair Display, serif',
+            fontStyle: 'italic',
             fontWeight: 400,
-            color: '#3D2E1F',
-            opacity: 0.7,
-            lineHeight: 1.7,
+            fontSize: 30,
+            lineHeight: 1.5,
+            color: textDark,
+            marginBottom: 28,
             display: 'flex',
           }}
         >
-          {input.yussiTakeKr}
+          {input.yussiTake || ''}
         </div>
-      )}
+
+        {/* Korean translation */}
+        {input.yussiTakeKr && (
+          <div
+            style={{
+              fontSize: 18,
+              fontFamily: '"Noto Sans KR", sans-serif',
+              fontWeight: 400,
+              color: '#3D2E1F',
+              opacity: 0.7,
+              lineHeight: 1.7,
+              display: 'flex',
+            }}
+          >
+            {input.yussiTakeKr}
+          </div>
+        )}
+      </div>
 
       {/* footer */}
       <div

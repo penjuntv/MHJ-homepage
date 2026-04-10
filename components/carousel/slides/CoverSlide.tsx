@@ -40,33 +40,7 @@ export function CoverSlide(input: CarouselInput) {
         />
       )}
 
-      {/* category label — top center */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 80,
-          left: 80,
-          right: 80,
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            fontFamily: '"Noto Sans KR", sans-serif',
-            fontWeight: 700,
-            fontSize: 14,
-            letterSpacing: 4,
-            textTransform: 'uppercase',
-            color: gold,
-          }}
-        >
-          {input.category}
-        </div>
-      </div>
-
-      {/* main title — center */}
+      {/* center content block */}
       <div
         style={{
           position: 'absolute',
@@ -80,7 +54,23 @@ export function CoverSlide(input: CarouselInput) {
           alignItems: 'center',
         }}
       >
-        {/* number explosion effect */}
+        {/* category label */}
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontWeight: 700,
+            fontSize: 14,
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            color: gold,
+            marginBottom: 40,
+          }}
+        >
+          {input.category}
+        </div>
+
+        {/* number explosion effect or plain title */}
         {(() => {
           const match = input.title.match(/^(\d+)\s+(.+)$/);
           if (match) {
@@ -131,6 +121,7 @@ export function CoverSlide(input: CarouselInput) {
             </div>
           );
         })()}
+
         {input.subtitle && (
           <div
             style={{

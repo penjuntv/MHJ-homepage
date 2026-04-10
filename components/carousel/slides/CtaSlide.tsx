@@ -21,92 +21,102 @@ export function CtaSlide(input: CarouselInput) {
         alignItems: 'center',
         position: 'relative',
         background: bgBrown,
-        padding: '80px',
+        padding: '0 80px',
         fontFamily: '"Noto Sans KR", sans-serif',
       }}
     >
-      {/* logo */}
+      {/* content block */}
       <div
         style={{
           display: 'flex',
-          fontFamily: 'Playfair Display, serif',
-          fontWeight: 400,
-          fontSize: 36,
-          color: gold,
-          letterSpacing: 4,
-          marginBottom: 8,
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
         }}
       >
-        MHJ
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          fontFamily: '"Noto Sans KR", sans-serif',
-          fontSize: 12,
-          fontWeight: 400,
-          color: gold,
-          letterSpacing: 3,
-          marginBottom: 48,
-        }}
-      >
-        my mairangi
-      </div>
+        {/* logo — top of content block */}
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Playfair Display, serif',
+            fontWeight: 400,
+            fontSize: 36,
+            color: gold,
+            letterSpacing: 4,
+            marginBottom: 8,
+          }}
+        >
+          MHJ
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontSize: 12,
+            fontWeight: 400,
+            color: gold,
+            letterSpacing: 3,
+            marginBottom: 64,
+          }}
+        >
+          my mairangi
+        </div>
 
-      {/* main CTA */}
-      <div
-        style={{
-          display: 'flex',
-          fontFamily: '"Noto Sans KR", sans-serif',
-          fontWeight: 700,
-          fontSize: 28,
-          color: textLight,
-          textAlign: 'center',
-          marginBottom: 24,
-        }}
-      >
-        {input.ctaTitle || 'Read the full guide'}
-      </div>
+        {/* main CTA */}
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontWeight: 700,
+            fontSize: 28,
+            color: textLight,
+            textAlign: 'center',
+            marginBottom: 24,
+          }}
+        >
+          {input.ctaTitle || 'Read the full guide'}
+        </div>
 
-      {/* URL */}
-      <div
-        style={{
-          display: 'flex',
-          fontFamily: '"Noto Sans KR", sans-serif',
-          fontWeight: 500,
-          fontSize: 32,
-          color: gold,
-          marginBottom: 24,
-        }}
-      >
-        {input.ctaUrl || 'www.mhj.nz'}
-      </div>
+        {/* URL */}
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontWeight: 500,
+            fontSize: 32,
+            color: gold,
+            marginBottom: 24,
+          }}
+        >
+          {input.ctaUrl || 'www.mhj.nz'}
+        </div>
 
-      {/* social handle */}
-      <div
-        style={{
-          display: 'flex',
-          fontFamily: '"Noto Sans KR", sans-serif',
-          fontWeight: 400,
-          fontSize: 18,
-          color: 'rgba(250,248,245,0.6)',
-          marginBottom: 24,
-        }}
-      >
-        {handle}
-      </div>
+        {/* social handle */}
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontWeight: 400,
+            fontSize: 18,
+            color: 'rgba(250,248,245,0.6)',
+            marginBottom: 24,
+          }}
+        >
+          {handle}
+        </div>
 
-      {/* subscribe CTA */}
-      <div
-        style={{
-          display: 'flex',
-          fontFamily: '"Noto Sans KR", sans-serif',
-          fontWeight: 400,
-          fontSize: 16,
-          color: gold,
-        }}
-      >
-        Subscribe to Mairangi Notes →
+        {/* subscribe CTA */}
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontWeight: 400,
+            fontSize: 16,
+            color: gold,
+          }}
+        >
+          Subscribe to Mairangi Notes →
+        </div>
       </div>
 
       {/* footer */}

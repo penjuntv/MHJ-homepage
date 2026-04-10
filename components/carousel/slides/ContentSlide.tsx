@@ -36,105 +36,108 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
         justifyContent: 'center',
         position: 'relative',
         background: bg,
-        padding: '80px 80px 100px 80px',
+        padding: '0 80px',
         fontFamily: '"Noto Sans KR", sans-serif',
       }}
     >
-      {/* number badge — circular */}
-      <div
-        style={{
-          width: 80,
-          height: 80,
-          borderRadius: 40,
-          backgroundColor: badgeBg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 24,
-        }}
-      >
-        <span
-          style={{
-            color: badgeText,
-            fontSize: 32,
-            fontWeight: 700,
-            fontFamily: '"Noto Sans KR", sans-serif',
-            display: 'flex',
-          }}
-        >
-          {pointIndex + 1}
-        </span>
-      </div>
-
-      {/* title */}
-      <div
-        style={{
-          fontFamily: 'Playfair Display, serif',
-          fontWeight: 700,
-          fontSize: 40,
-          lineHeight: 1.2,
-          color: textDark,
-          marginBottom: 16,
-          display: 'flex',
-        }}
-      >
-        {point.title}
-      </div>
-
-      {/* body */}
-      <div
-        style={{
-          fontSize: 26,
-          fontFamily: '"Noto Sans KR", sans-serif',
-          fontWeight: 400,
-          lineHeight: 1.6,
-          color: textDark,
-          marginBottom: 24,
-          display: 'flex',
-        }}
-      >
-        {point.body}
-      </div>
-
-      {/* highlight box */}
-      {point.highlight && (
+      {/* content block */}
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        {/* number badge — circular */}
         <div
           style={{
-            backgroundColor: highlightBg,
-            padding: '20px 24px',
-            borderLeft: `5px solid ${gold}`,
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: badgeBg,
             display: 'flex',
-            flexDirection: 'column',
-            marginBottom: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 24,
           }}
         >
-          <div
+          <span
             style={{
+              color: badgeText,
+              fontSize: 32,
               fontWeight: 700,
-              fontSize: 28,
-              color: highlightTextColor,
-              lineHeight: 1.4,
+              fontFamily: '"Noto Sans KR", sans-serif',
               display: 'flex',
             }}
           >
-            {point.highlight}
-          </div>
-          {point.highlightKr && (
+            {pointIndex + 1}
+          </span>
+        </div>
+
+        {/* title */}
+        <div
+          style={{
+            fontFamily: 'Playfair Display, serif',
+            fontWeight: 700,
+            fontSize: 40,
+            lineHeight: 1.2,
+            color: textDark,
+            marginBottom: 16,
+            display: 'flex',
+          }}
+        >
+          {point.title}
+        </div>
+
+        {/* body */}
+        <div
+          style={{
+            fontSize: 26,
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontWeight: 400,
+            lineHeight: 1.6,
+            color: textDark,
+            marginBottom: 24,
+            display: 'flex',
+          }}
+        >
+          {point.body}
+        </div>
+
+        {/* highlight box */}
+        {point.highlight && (
+          <div
+            style={{
+              backgroundColor: highlightBg,
+              padding: '20px 24px',
+              borderLeft: `5px solid ${gold}`,
+              display: 'flex',
+              flexDirection: 'column',
+              marginBottom: 8,
+            }}
+          >
             <div
               style={{
-                fontSize: 20,
-                color: krColor,
-                marginTop: 8,
-                fontFamily: '"Noto Sans KR", sans-serif',
-                lineHeight: 1.5,
+                fontWeight: 700,
+                fontSize: 28,
+                color: highlightTextColor,
+                lineHeight: 1.4,
                 display: 'flex',
               }}
             >
-              {point.highlightKr}
+              {point.highlight}
             </div>
-          )}
-        </div>
-      )}
+            {point.highlightKr && (
+              <div
+                style={{
+                  fontSize: 20,
+                  color: krColor,
+                  marginTop: 8,
+                  fontFamily: '"Noto Sans KR", sans-serif',
+                  lineHeight: 1.5,
+                  display: 'flex',
+                }}
+              >
+                {point.highlightKr}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* footer */}
       <div
