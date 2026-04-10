@@ -5,7 +5,7 @@ import type { CarouselStyle } from './tokens';
 export interface CarouselPoint {
   title: string;          // English
   body: string;           // English (2-3 sentences)
-  highlight: string;      // English highlight line
+  highlight?: string;     // English highlight line (v3: unused)
   highlightKr?: string;   // 한국어
   highlightZh?: string;   // 中文
 }

@@ -6,11 +6,7 @@ import { createAdminClient } from '@/lib/supabase';
 import { blogCategoryToHashtagCategory, type CarouselFont } from './utils';
 import type { CarouselInput, CarouselSlide } from './types';
 import { CoverSlide } from './slides/CoverSlide';
-import { ContextSlide } from './slides/ContextSlide';
 import { ContentSlide } from './slides/ContentSlide';
-import { VisualBreakSlide } from './slides/VisualBreakSlide';
-import { SummarySlide } from './slides/SummarySlide';
-import { YussiTakeSlide } from './slides/YussiTakeSlide';
 import { CtaSlide } from './slides/CtaSlide';
 
 const CANVAS = { width: 1080, height: 1350 };
@@ -36,14 +32,10 @@ export async function buildSlides(
 ): Promise<CarouselSlide[]> {
   const jobs: Array<{ type: CarouselSlide['type']; jsx: React.ReactElement }> = [
     { type: 'cover', jsx: CoverSlide(input) },
-    { type: 'context', jsx: ContextSlide(input) },
-    { type: 'content', jsx: ContentSlide(input, 0) },
-    { type: 'content', jsx: ContentSlide(input, 1) },
-    { type: 'content', jsx: ContentSlide(input, 2) },
-    { type: 'content', jsx: ContentSlide(input, 3) },
-    { type: 'summary', jsx: SummarySlide(input) },
-    { type: 'yussi', jsx: YussiTakeSlide(input) },
-    { type: 'visual', jsx: VisualBreakSlide(input) },
+    ...input.points.map((_, i) => ({
+      type: 'content' as const,
+      jsx: ContentSlide(input, i),
+    })),
     { type: 'cta', jsx: CtaSlide(input) },
   ];
 
@@ -62,14 +54,7 @@ export async function buildSlideBuffers(
 ): Promise<Buffer[]> {
   const jsxList: React.ReactElement[] = [
     CoverSlide(input),
-    ContextSlide(input),
-    ContentSlide(input, 0),
-    ContentSlide(input, 1),
-    ContentSlide(input, 2),
-    ContentSlide(input, 3),
-    SummarySlide(input),
-    YussiTakeSlide(input),
-    VisualBreakSlide(input),
+    ...input.points.map((_, i) => ContentSlide(input, i)),
     CtaSlide(input),
   ];
   return Promise.all(jsxList.map((jsx) => renderSlideToPng(jsx, fonts)));

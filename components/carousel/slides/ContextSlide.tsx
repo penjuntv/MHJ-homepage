@@ -1,8 +1,6 @@
 // Slide #2 — Context (cream background, problem statement)
 import type { CarouselInput } from '../types';
 
-const W = 1080;
-const H = 1350;
 
 export function ContextSlide(input: CarouselInput) {
   const bgWarm = '#FAF8F5';
@@ -24,64 +22,54 @@ export function ContextSlide(input: CarouselInput) {
         fontFamily: '"Noto Sans KR", sans-serif',
       }}
     >
-      {/* content block */}
+      {/* category label */}
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          width: '100%',
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontWeight: 700,
+          fontSize: 14,
+          letterSpacing: 4,
+          textTransform: 'uppercase',
+          color: textMuted,
+          marginBottom: 32,
         }}
       >
-        {/* category label */}
-        <div
-          style={{
-            display: 'flex',
-            fontFamily: '"Noto Sans KR", sans-serif',
-            fontWeight: 700,
-            fontSize: 14,
-            letterSpacing: 4,
-            textTransform: 'uppercase',
-            color: textMuted,
-            marginBottom: 32,
-          }}
-        >
-          {input.category}
-        </div>
+        {input.category}
+      </div>
 
-        {/* body text */}
+      {/* body text */}
+      <div
+        style={{
+          fontSize: 24,
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontWeight: 400,
+          lineHeight: 1.6,
+          color: textDark,
+          textAlign: 'center',
+          maxWidth: 800,
+          display: 'flex',
+          marginBottom: 32,
+        }}
+      >
+        {input.subtitle || input.title}
+      </div>
+
+      {input.titleKr && (
         <div
           style={{
-            fontSize: 24,
+            fontSize: 18,
             fontFamily: '"Noto Sans KR", sans-serif',
-            fontWeight: 400,
+            color: textMuted,
             lineHeight: 1.6,
-            color: textDark,
             textAlign: 'center',
             maxWidth: 800,
             display: 'flex',
-            marginBottom: 32,
           }}
         >
-          {input.subtitle || input.title}
+          {input.titleKr}
         </div>
-
-        {input.titleKr && (
-          <div
-            style={{
-              fontSize: 18,
-              fontFamily: '"Noto Sans KR", sans-serif',
-              color: textMuted,
-              lineHeight: 1.6,
-              textAlign: 'center',
-              maxWidth: 800,
-              display: 'flex',
-            }}
-          >
-            {input.titleKr}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* bottom hint */}
       <div

@@ -1,7 +1,7 @@
 /**
- * Carousel v2 visual QA — generates 10 PNG slides without server/auth.
+ * Carousel v3 visual QA — generates 7 PNG slides without server/auth.
  * Usage: npx tsx scripts/test-carousel.ts
- * Output: /tmp/carousel-test/slide-01.png … slide-10.png
+ * Output: /tmp/carousel-test/slide-01-cover.png … slide-07-cta.png
  */
 
 import React from 'react';
@@ -14,71 +14,45 @@ import { ImageResponse } from 'next/og';
 
 // — slide components (plain functions returning JSX) —
 import { CoverSlide } from '../components/carousel/slides/CoverSlide';
-import { ContextSlide } from '../components/carousel/slides/ContextSlide';
 import { ContentSlide } from '../components/carousel/slides/ContentSlide';
-import { SummarySlide } from '../components/carousel/slides/SummarySlide';
-import { YussiTakeSlide } from '../components/carousel/slides/YussiTakeSlide';
-import { VisualBreakSlide } from '../components/carousel/slides/VisualBreakSlide';
 import { CtaSlide } from '../components/carousel/slides/CtaSlide';
 import type { CarouselInput } from '../components/carousel/types';
 
-// ──────── test data ────────
+// ──────── test data (v3 — 1 idea per slide) ────────
 const testInput: CarouselInput = {
   category: 'NZ SCHOOL GUIDE',
   style: 'default',
   title: '5 things nobody tells you before NZ school',
-  subtitle: "A real parent's checklist from Mairangi Bay",
-  titleKr: 'NZ 학교 입학 전 아무도 안 알려주는 5가지',
   points: [
     {
       title: 'Your address decides your school',
-      body: 'Every school has a zone. Inside = guaranteed. Outside = ballot. Check before you sign a rental agreement.',
-      highlight: 'Check the school zone BEFORE signing a rental',
-      highlightKr: '임대 계약 전에 학군부터 확인하세요',
+      body: 'Check the school zone before signing a rental.',
     },
     {
-      title: 'No hat, no play — seriously',
-      body: 'In Terms 1 and 4, if your child has no school hat, they sit in the shade. No playground. No field. Buy the hat first.',
-      highlight: 'Buy the hat first. Label it. Buy a spare.',
-      highlightKr: '모자를 가장 먼저 사세요. 여분도 하나 더.',
+      title: 'No hat, no play',
+      body: 'Buy the hat first. Label it. Buy a spare.',
     },
     {
       title: 'There are NO cafeterias',
-      body: 'Pack lunch every day. No microwaves. 10 min eating time then outside to play. A thermos with warm rice is fine in winter.',
-      highlight: 'Thermos with warm rice or noodles = winter hero',
-      highlightKr: '겨울에는 보온통에 따뜻한 밥이나 국수',
+      body: 'Pack lunch every day. A thermos with warm rice is your best friend.',
     },
     {
-      title: 'ESOL is free — you don\'t even apply',
-      body: 'Government-funded English support. Your child is assessed automatically in weeks 1-2. No forms, no cost.',
-      highlight: 'Ask: How many ESOL hours will my child get?',
-      highlightKr: '입학 미팅에서 ESOL 시간을 물어보세요',
+      title: 'ESOL is free',
+      body: 'Your child is assessed automatically. No forms, no cost.',
+    },
+    {
+      title: 'Stationery is provided',
+      body: 'The school supplies everything. Don\'t buy a pencil case.',
     },
   ],
-  summaryPoints: [
-    '✓ Check school zone before signing rental',
-    '✓ Hat is the #1 priority item',
-    '✓ Pack lunch every day — no microwaves',
-    '✓ ESOL happens automatically — just ask about hours',
-  ],
-  summaryKr: [
-    '✓ 임대 계약 전 학군 확인',
-    '✓ 모자가 최우선 준비물',
-    '✓ 매일 도시락 — 전자레인지 없음',
-    '✓ ESOL 자동 배정 — 시간만 확인',
-  ],
-  pullQuote: 'The things you stress about most aren\'t the real challenges.',
-  yussiTake:
-    "Starting 3 kids in NZ schools taught me that the things you stress about most aren't the real challenges. The real ones are the ones nobody mentions — like the hat rule, or packing lunch when you don't even know what Kiwi kids eat.",
-  yussiTakeKr:
-    '세 아이를 NZ 학교에 보내면서 배운 건, 가장 걱정했던 것들이 진짜 문제가 아니라는 거예요. 진짜 문제는 아무도 안 알려주는 것들이에요.',
-  ctaTitle: 'Read the full guide',
+  summaryPoints: [],
+  ctaTitle: 'Save this for later ✓',
   ctaUrl: 'www.mhj.nz',
   instagramHandle: '@mhj_nz',
 };
 
 // ──────── font loading (filesystem, no HTTP) ────────
-type FontDef = { name: string; data: ArrayBuffer; weight: 400 | 700; style: 'normal' | 'italic' };
+type FontDef = { name: string; data: ArrayBuffer; weight: 400 | 700 | 900; style: 'normal' | 'italic' };
 
 function loadFonts(): FontDef[] {
   const fontsDir = path.join(process.cwd(), 'public', 'fonts');
@@ -128,20 +102,18 @@ async function main() {
   const fonts = loadFonts();
   console.log(`  ${fonts.length} fonts loaded`);
 
+  const totalSlides = testInput.points.length + 2; // cover + contents + cta
+
   const slides: Array<{ name: string; jsx: React.ReactElement }> = [
-    { name: 'slide-01-cover',   jsx: CoverSlide(testInput) },
-    { name: 'slide-02-context', jsx: ContextSlide(testInput) },
-    { name: 'slide-03-content1', jsx: ContentSlide(testInput, 0) },
-    { name: 'slide-04-content2', jsx: ContentSlide(testInput, 1) },
-    { name: 'slide-05-content3', jsx: ContentSlide(testInput, 2) },
-    { name: 'slide-06-content4', jsx: ContentSlide(testInput, 3) },
-    { name: 'slide-07-summary', jsx: SummarySlide(testInput) },
-    { name: 'slide-08-yussi',   jsx: YussiTakeSlide(testInput) },
-    { name: 'slide-09-quote',   jsx: VisualBreakSlide(testInput) },
-    { name: 'slide-10-cta',     jsx: CtaSlide(testInput) },
+    { name: 'slide-01-cover', jsx: CoverSlide(testInput) },
+    ...testInput.points.map((_, i) => ({
+      name: `slide-${String(i + 2).padStart(2, '0')}-content${i + 1}`,
+      jsx: ContentSlide(testInput, i),
+    })),
+    { name: `slide-${String(totalSlides).padStart(2, '0')}-cta`, jsx: CtaSlide(testInput) },
   ];
 
-  console.log('Rendering 10 slides...');
+  console.log(`Rendering ${slides.length} slides...`);
   for (const { name, jsx } of slides) {
     const buf = await renderSlide(jsx, fonts);
     const filePath = path.join(outDir, `${name}.png`);
@@ -149,7 +121,7 @@ async function main() {
     console.log(`  ✓ ${filePath}  (${(buf.length / 1024).toFixed(0)} KB)`);
   }
 
-  console.log('\nDone! All 10 slides saved to /tmp/carousel-test/');
+  console.log(`\nDone! All ${slides.length} slides saved to /tmp/carousel-test/`);
 }
 
 main().catch((err) => {
