@@ -41,9 +41,9 @@ export async function buildSlides(
     { type: 'content', jsx: ContentSlide(input, 1) },
     { type: 'content', jsx: ContentSlide(input, 2) },
     { type: 'content', jsx: ContentSlide(input, 3) },
-    { type: 'visual', jsx: VisualBreakSlide(input) },
     { type: 'summary', jsx: SummarySlide(input) },
     { type: 'yussi', jsx: YussiTakeSlide(input) },
+    { type: 'visual', jsx: VisualBreakSlide(input) },
     { type: 'cta', jsx: CtaSlide(input) },
   ];
 
@@ -67,9 +67,9 @@ export async function buildSlideBuffers(
     ContentSlide(input, 1),
     ContentSlide(input, 2),
     ContentSlide(input, 3),
-    VisualBreakSlide(input),
     SummarySlide(input),
     YussiTakeSlide(input),
+    VisualBreakSlide(input),
     CtaSlide(input),
   ];
   return Promise.all(jsxList.map((jsx) => renderSlideToPng(jsx, fonts)));

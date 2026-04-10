@@ -1,121 +1,115 @@
-// Slide #10 — CTA
-import { carouselTokens } from '../tokens';
+// Slide #10 — CTA (dark brown)
 import type { CarouselInput } from '../types';
 
+const W = 1080;
+const H = 1350;
+
 export function CtaSlide(input: CarouselInput) {
-  const { colors } = carouselTokens;
+  const bgBrown = '#3D2E1F';
+  const textLight = '#FAF8F5';
+  const gold = '#C9A96E';
   const handle = input.instagramHandle || '@mhj_nz';
 
   return (
     <div
       style={{
-        width: 1080,
-        height: 1350,
+        width: W,
+        height: H,
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
         position: 'relative',
-        background: colors.accent,
-        padding: '140px 100px 100px',
-        fontFamily: 'Inter, "Noto Sans KR", sans-serif',
+        background: bgBrown,
+        padding: '80px',
+        fontFamily: '"Noto Sans KR", sans-serif',
       }}
     >
-      {/* top third: brand */}
+      {/* logo */}
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          flex: 1,
+          fontFamily: 'Playfair Display, serif',
+          fontWeight: 400,
+          fontSize: 36,
+          color: gold,
+          letterSpacing: 4,
+          marginBottom: 8,
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            fontFamily: 'Playfair Display, serif',
-            fontWeight: 700,
-            fontSize: 48,
-            color: '#FFFFFF',
-            letterSpacing: 4,
-          }}
-        >
-          MHJ
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            marginTop: 12,
-            fontFamily: 'Inter, sans-serif',
-            fontSize: 12,
-            color: 'rgba(255,255,255,0.8)',
-            letterSpacing: 4,
-            textTransform: 'uppercase',
-          }}
-        >
-          my mairangi
-        </div>
+        MHJ
       </div>
-
-      {/* middle third: CTA */}
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flex: 1,
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontSize: 12,
+          fontWeight: 400,
+          color: gold,
+          letterSpacing: 3,
+          marginBottom: 48,
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            fontFamily: 'Playfair Display, serif',
-            fontStyle: 'italic',
-            fontWeight: 700,
-            fontSize: 28,
-            lineHeight: 1.3,
-            color: '#FFFFFF',
-            textAlign: 'center',
-            maxWidth: 800,
-            justifyContent: 'center',
-          }}
-        >
-          {input.ctaTitle || 'Read the full article'}
-        </div>
+        my mairangi
       </div>
 
-      {/* bottom third: actions */}
+      {/* main CTA */}
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          flex: 1,
-          justifyContent: 'flex-end',
-          paddingBottom: 40,
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontWeight: 700,
+          fontSize: 28,
+          color: textLight,
+          textAlign: 'center',
+          marginBottom: 24,
         }}
       >
-        {[
-          '💾  Save this for later',
-          '📩  Send to a friend',
-          `➕  Follow ${handle}`,
-        ].map((line) => (
-          <div
-            key={line}
-            style={{
-              display: 'flex',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 18,
-              color: 'rgba(255,255,255,0.9)',
-              marginBottom: 14,
-              letterSpacing: 1,
-            }}
-          >
-            {line}
-          </div>
-        ))}
+        {input.ctaTitle || 'Read the full guide'}
       </div>
 
-      {/* footer watermark */}
+      {/* URL */}
+      <div
+        style={{
+          display: 'flex',
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontWeight: 500,
+          fontSize: 32,
+          color: gold,
+          marginBottom: 24,
+        }}
+      >
+        {input.ctaUrl || 'www.mhj.nz'}
+      </div>
+
+      {/* social handle */}
+      <div
+        style={{
+          display: 'flex',
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontWeight: 400,
+          fontSize: 18,
+          color: 'rgba(250,248,245,0.6)',
+          marginBottom: 24,
+        }}
+      >
+        {handle}
+      </div>
+
+      {/* subscribe CTA */}
+      <div
+        style={{
+          display: 'flex',
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontWeight: 400,
+          fontSize: 16,
+          color: gold,
+        }}
+      >
+        Subscribe to Mairangi Notes →
+      </div>
+
+      {/* footer */}
       <div
         style={{
           position: 'absolute',
@@ -133,7 +127,7 @@ export function CtaSlide(input: CarouselInput) {
             fontFamily: 'Playfair Display, serif',
             fontSize: 14,
             fontWeight: 700,
-            color: 'rgba(255,255,255,0.6)',
+            color: 'rgba(250,248,245,0.4)',
             letterSpacing: 2,
           }}
         >
@@ -142,9 +136,8 @@ export function CtaSlide(input: CarouselInput) {
         <div
           style={{
             display: 'flex',
-            fontFamily: 'Inter, sans-serif',
             fontSize: 12,
-            color: 'rgba(255,255,255,0.6)',
+            color: 'rgba(250,248,245,0.4)',
             letterSpacing: 2,
           }}
         >

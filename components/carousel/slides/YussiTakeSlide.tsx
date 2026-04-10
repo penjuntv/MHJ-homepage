@@ -1,57 +1,67 @@
-// Slide #9 — Yussi's Take
-import { carouselTokens } from '../tokens';
+// Slide #8 — Yussi's Take (sage green, italic quote)
 import type { CarouselInput } from '../types';
 
+const W = 1080;
+const H = 1350;
+
 export function YussiTakeSlide(input: CarouselInput) {
-  const { colors } = carouselTokens;
+  const bgSage = '#E8EDE5';
+  const sageAccent = '#7A9B6D';
+  const textDark = '#1A1A1A';
 
   return (
     <div
       style={{
-        width: 1080,
-        height: 1350,
+        width: W,
+        height: H,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         position: 'relative',
-        background: '#F5F0EA',
-        padding: '140px 100px',
-        fontFamily: 'Inter, "Noto Sans KR", sans-serif',
+        background: bgSage,
+        padding: '80px 100px',
+        fontFamily: '"Noto Sans KR", sans-serif',
       }}
     >
+      {/* section label */}
       <div
         style={{
           display: 'flex',
-          fontSize: 11,
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontSize: 14,
           fontWeight: 700,
-          color: colors.accent,
+          color: sageAccent,
           letterSpacing: 4,
           textTransform: 'uppercase',
+          marginBottom: 24,
+        }}
+      >
+        {"YUSSI'S TAKE"}
+      </div>
+
+      {/* decorative open quote */}
+      <div
+        style={{
+          display: 'flex',
+          fontFamily: 'Playfair Display, serif',
+          fontSize: 72,
+          lineHeight: 1,
+          color: sageAccent,
           marginBottom: 8,
         }}
       >
-        {"Yussi's Take"}
+        {'\u201C'}
       </div>
 
-      <div
-        style={{
-          width: 40,
-          height: 3,
-          background: colors.accent,
-          marginTop: 8,
-          marginBottom: 24,
-          display: 'flex',
-        }}
-      />
-
+      {/* Yussi's comment */}
       <div
         style={{
           fontFamily: 'Playfair Display, serif',
           fontStyle: 'italic',
-          fontWeight: 700,
-          fontSize: 24,
-          lineHeight: 1.6,
-          color: '#1A1A1A',
+          fontWeight: 400,
+          fontSize: 30,
+          lineHeight: 1.5,
+          color: textDark,
           marginBottom: 28,
           display: 'flex',
         }}
@@ -59,12 +69,15 @@ export function YussiTakeSlide(input: CarouselInput) {
         {input.yussiTake || ''}
       </div>
 
+      {/* Korean translation */}
       {input.yussiTakeKr && (
         <div
           style={{
-            fontSize: 16,
+            fontSize: 18,
             fontFamily: '"Noto Sans KR", sans-serif',
-            color: colors.textSecondary,
+            fontWeight: 400,
+            color: '#3D2E1F',
+            opacity: 0.7,
             lineHeight: 1.7,
             display: 'flex',
           }}
@@ -73,6 +86,7 @@ export function YussiTakeSlide(input: CarouselInput) {
         </div>
       )}
 
+      {/* footer */}
       <div
         style={{
           position: 'absolute',
@@ -90,7 +104,7 @@ export function YussiTakeSlide(input: CarouselInput) {
             fontFamily: 'Playfair Display, serif',
             fontSize: 14,
             fontWeight: 700,
-            color: colors.textTertiary,
+            color: 'rgba(122,155,109,0.5)',
             letterSpacing: 2,
           }}
         >
@@ -99,13 +113,12 @@ export function YussiTakeSlide(input: CarouselInput) {
         <div
           style={{
             display: 'flex',
-            fontFamily: 'Inter, sans-serif',
             fontSize: 12,
-            color: colors.textTertiary,
+            color: 'rgba(122,155,109,0.5)',
             letterSpacing: 2,
           }}
         >
-          09 / 10
+          08 / 10
         </div>
       </div>
     </div>

@@ -1,87 +1,80 @@
-// Slide #3-#6 — Content (4 points)
-import { carouselTokens } from '../tokens';
+// Slide #3-#6 — Content (4 points, 5-color rotation, highlight boxes)
 import type { CarouselInput, CarouselPoint } from '../types';
 
+const W = 1080;
+const H = 1350;
+
+// Background color rotation: ivory → sage → ivory → clay
+const BG_COLORS = ['#F5F0E8', '#E8EDE5', '#F5F0E8', '#D4B896'] as const;
+
 export function ContentSlide(input: CarouselInput, pointIndex: number) {
-  const { colors } = carouselTokens;
-  const styleConfig = carouselTokens.styles[input.style] || carouselTokens.styles.default;
   const point: CarouselPoint =
     input.points[pointIndex] || { title: '', body: '', highlight: '' };
-  const slideNumber = pointIndex + 3; // 3..6
+
+  const bg = BG_COLORS[pointIndex] || BG_COLORS[0];
+  const isSage = pointIndex === 1; // sage background → light badge
+  const isClay = pointIndex === 3; // clay background
+
+  const textDark = '#1A1A1A';
+  const badgeBg = isSage ? '#FAF8F5' : '#3D2E1F';
+  const badgeText = isSage ? '#3D2E1F' : '#FAF8F5';
+  const gold = '#C9A96E';
+  const highlightBg = 'rgba(201,169,110,0.25)';
+  const highlightTextColor = '#3D2E1F';
+  const krColor = '#8A6B4F';
+
+  const slideNumber = pointIndex + 3;
   const slideLabel = `${String(slideNumber).padStart(2, '0')} / 10`;
-
-  // pointIndex 1, 3 → 우정렬 (mirrored) / 0, 2 → 좌정렬 (default)
-  const mirrored = pointIndex % 2 === 1;
-  const showSwipeHint = pointIndex < 3; // 마지막 content(#6)에선 숨김
-
-  const maxTextWidth = 820;
 
   return (
     <div
       style={{
-        width: 1080,
-        height: 1350,
+        width: W,
+        height: H,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: mirrored ? 'flex-end' : 'flex-start',
+        justifyContent: 'center',
         position: 'relative',
-        background: styleConfig.bg,
-        padding: mirrored ? '140px 100px 100px 100px' : '160px 100px 100px 100px',
-        fontFamily: 'Inter, "Noto Sans KR", sans-serif',
+        background: bg,
+        padding: '80px 80px 100px 80px',
+        fontFamily: '"Noto Sans KR", sans-serif',
       }}
     >
-      {/* mirrored: dashed divider at top */}
-      {mirrored && (
-        <div
-          style={{
-            alignSelf: 'stretch',
-            borderTop: '1px dashed #EDE9E3',
-            marginBottom: 24,
-            display: 'flex',
-          }}
-        />
-      )}
-
-      {/* number */}
+      {/* number badge — circular */}
       <div
         style={{
-          fontFamily: 'Playfair Display, serif',
-          fontStyle: 'italic',
-          fontWeight: 700,
-          fontSize: 56,
-          color: colors.textTertiary,
+          width: 80,
+          height: 80,
+          borderRadius: 40,
+          backgroundColor: badgeBg,
           display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
         }}
       >
-        {String(pointIndex + 1).padStart(2, '0')}
-      </div>
-
-      {/* accent line — 좌정렬 버전에서만 */}
-      {!mirrored && (
-        <div
+        <span
           style={{
-            width: 40,
-            height: 3,
-            background: colors.accent,
-            marginTop: 12,
-            marginBottom: 20,
+            color: badgeText,
+            fontSize: 32,
+            fontWeight: 700,
+            fontFamily: '"Noto Sans KR", sans-serif',
             display: 'flex',
           }}
-        />
-      )}
+        >
+          {pointIndex + 1}
+        </span>
+      </div>
 
       {/* title */}
       <div
         style={{
           fontFamily: 'Playfair Display, serif',
           fontWeight: 700,
-          fontSize: 48,
+          fontSize: 40,
           lineHeight: 1.2,
-          color: styleConfig.text,
-          marginTop: mirrored ? 20 : 0,
-          marginBottom: 28,
-          maxWidth: maxTextWidth,
-          textAlign: mirrored ? 'right' : 'left',
+          color: textDark,
+          marginBottom: 16,
           display: 'flex',
         }}
       >
@@ -91,90 +84,55 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
       {/* body */}
       <div
         style={{
-          fontSize: 24,
-          lineHeight: 1.8,
-          color: styleConfig.text,
-          marginBottom: 36,
-          maxWidth: maxTextWidth,
-          textAlign: mirrored ? 'right' : 'left',
+          fontSize: 26,
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontWeight: 400,
+          lineHeight: 1.6,
+          color: textDark,
+          marginBottom: 24,
           display: 'flex',
         }}
       >
         {point.body}
       </div>
 
-      {/* highlight box — editorial pull-quote style */}
+      {/* highlight box */}
       {point.highlight && (
         <div
           style={{
-            background: colors.highlight,
-            ...(mirrored
-              ? { borderRight: `4px solid ${colors.accent}` }
-              : { borderLeft: `4px solid ${colors.accent}` }),
-            borderRadius: 0,
-            padding: '16px 20px',
-            maxWidth: maxTextWidth,
+            backgroundColor: highlightBg,
+            padding: '20px 24px',
+            borderLeft: `5px solid ${gold}`,
             display: 'flex',
             flexDirection: 'column',
-            marginBottom: 16,
+            marginBottom: 8,
           }}
         >
           <div
             style={{
-              fontSize: 22,
               fontWeight: 700,
-              color: colors.text,
-              lineHeight: 1.45,
-              textAlign: mirrored ? 'right' : 'left',
+              fontSize: 28,
+              color: highlightTextColor,
+              lineHeight: 1.4,
               display: 'flex',
             }}
           >
             {point.highlight}
           </div>
-        </div>
-      )}
-
-      {point.highlightKr && (
-        <div
-          style={{
-            fontSize: 18,
-            fontFamily: '"Noto Sans KR", sans-serif',
-            color: colors.textSecondary,
-            lineHeight: 1.6,
-            maxWidth: maxTextWidth,
-            textAlign: mirrored ? 'right' : 'left',
-            display: 'flex',
-          }}
-        >
-          {point.highlightKr}
-        </div>
-      )}
-
-      {/* swipe hint (bottom center) — 마지막 content 제외 */}
-      {showSwipeHint && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 80,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 10,
-              color: colors.textTertiary,
-              letterSpacing: 3,
-              textTransform: 'uppercase',
-              opacity: 0.6,
-            }}
-          >
-            swipe →
-          </div>
+          {point.highlightKr && (
+            <div
+              style={{
+                fontSize: 20,
+                color: krColor,
+                marginTop: 8,
+                fontFamily: '"Noto Sans KR", sans-serif',
+                lineHeight: 1.5,
+                display: 'flex',
+              }}
+            >
+              {point.highlightKr}
+            </div>
+          )}
         </div>
       )}
 
@@ -196,7 +154,7 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
             fontFamily: 'Playfair Display, serif',
             fontSize: 14,
             fontWeight: 700,
-            color: colors.textTertiary,
+            color: isClay ? 'rgba(61,46,31,0.5)' : '#CBD5E1',
             letterSpacing: 2,
           }}
         >
@@ -205,9 +163,8 @@ export function ContentSlide(input: CarouselInput, pointIndex: number) {
         <div
           style={{
             display: 'flex',
-            fontFamily: 'Inter, sans-serif',
             fontSize: 12,
-            color: colors.textTertiary,
+            color: isClay ? 'rgba(61,46,31,0.5)' : '#CBD5E1',
             letterSpacing: 2,
           }}
         >

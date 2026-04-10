@@ -1,57 +1,46 @@
-// Slide #1 — Cover
-import { carouselTokens } from '../tokens';
+// Slide #1 — Cover (dark brown, bold typography)
 import type { CarouselInput } from '../types';
 
+const W = 1080;
+const H = 1350;
+
 export function CoverSlide(input: CarouselInput) {
-  const { colors } = carouselTokens;
-  const styleConfig = carouselTokens.styles[input.style] || carouselTokens.styles.default;
+  const bgBrown = '#3D2E1F';
+  const textLight = '#FAF8F5';
+  const gold = '#C9A96E';
   const hasCover = !!input.coverImageUrl;
-  const textColor = hasCover ? '#FFFFFF' : '#1A1A1A';
 
   return (
     <div
       style={{
-        width: 1080,
-        height: 1350,
+        width: W,
+        height: H,
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        background: hasCover ? styleConfig.bg : colors.bgWarm,
-        fontFamily: 'Inter, "Noto Sans KR", sans-serif',
+        background: hasCover ? '#000000' : bgBrown,
+        fontFamily: '"Noto Sans KR", sans-serif',
       }}
     >
       {hasCover && (
         <img
           src={input.coverImageUrl}
-          width={1080}
-          height={1350}
+          alt=""
+          width={W}
+          height={H}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            width: 1080,
-            height: 1350,
+            width: W,
+            height: H,
             objectFit: 'cover',
+            opacity: 0.45,
           }}
         />
       )}
 
-      {hasCover && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: 1080,
-            height: 1350,
-            background:
-              'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%)',
-            display: 'flex',
-          }}
-        />
-      )}
-
-      {/* top row: category tag + MHJ logo */}
+      {/* category label — top center */}
       <div
         style={{
           position: 'absolute',
@@ -59,69 +48,99 @@ export function CoverSlide(input: CarouselInput) {
           left: 80,
           right: 80,
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <div
           style={{
             display: 'flex',
-            background: hasCover ? 'rgba(255,255,255,0.2)' : 'rgba(138,107,79,0.12)',
-            padding: '6px 14px',
-            borderRadius: 4,
-            fontSize: 11,
-            letterSpacing: 3,
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontWeight: 700,
+            fontSize: 14,
+            letterSpacing: 4,
             textTransform: 'uppercase',
-            color: hasCover ? '#FFFFFF' : colors.accent,
-            fontWeight: 600,
+            color: gold,
           }}
         >
           {input.category}
         </div>
-        <div
-          style={{
-            display: 'flex',
-            fontSize: 16,
-            fontFamily: 'Playfair Display, serif',
-            fontWeight: 700,
-            color: hasCover ? '#FFFFFF' : colors.accent,
-            opacity: 0.9,
-            letterSpacing: 2,
-          }}
-        >
-          MHJ
-        </div>
       </div>
 
-      {/* main title */}
+      {/* main title — center */}
       <div
         style={{
           position: 'absolute',
+          top: 0,
           left: 80,
           right: 80,
-          bottom: 200,
+          bottom: 0,
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
-        <div
-          style={{
-            fontFamily: 'Playfair Display, serif',
-            fontWeight: 700,
-            fontSize: input.title.length > 60 ? 56 : 72,
-            lineHeight: 1.1,
-            color: textColor,
-          }}
-        >
-          {input.title}
-        </div>
+        {/* number explosion effect */}
+        {(() => {
+          const match = input.title.match(/^(\d+)\s+(.+)$/);
+          if (match) {
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div
+                  style={{
+                    fontFamily: 'Playfair Display, serif',
+                    fontWeight: 900,
+                    fontSize: 120,
+                    lineHeight: 1,
+                    color: gold,
+                    display: 'flex',
+                  }}
+                >
+                  {match[1]}
+                </div>
+                <div
+                  style={{
+                    fontFamily: 'Playfair Display, serif',
+                    fontWeight: 700,
+                    fontSize: 36,
+                    lineHeight: 1.2,
+                    color: textLight,
+                    textAlign: 'center',
+                    display: 'flex',
+                    marginTop: 8,
+                  }}
+                >
+                  {match[2]}
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div
+              style={{
+                fontFamily: 'Playfair Display, serif',
+                fontWeight: 700,
+                fontSize: input.title.length > 40 ? 40 : 48,
+                lineHeight: 1.2,
+                color: textLight,
+                textAlign: 'center',
+                display: 'flex',
+              }}
+            >
+              {input.title}
+            </div>
+          );
+        })()}
         {input.subtitle && (
           <div
             style={{
-              marginTop: 32,
-              fontSize: 26,
-              color: hasCover ? 'rgba(255,255,255,0.9)' : colors.textSecondary,
-              lineHeight: 1.5,
+              marginTop: 28,
+              fontSize: 18,
+              fontFamily: '"Noto Sans KR", sans-serif',
+              fontWeight: 400,
+              color: gold,
+              textAlign: 'center',
+              display: 'flex',
             }}
           >
             {input.subtitle}
@@ -130,10 +149,13 @@ export function CoverSlide(input: CarouselInput) {
         {input.titleKr && (
           <div
             style={{
-              marginTop: 24,
-              fontSize: 22,
+              marginTop: 20,
+              fontSize: 18,
               fontFamily: '"Noto Sans KR", sans-serif',
-              color: hasCover ? 'rgba(255,255,255,0.8)' : colors.textSecondary,
+              fontWeight: 400,
+              color: 'rgba(250,248,245,0.7)',
+              textAlign: 'center',
+              display: 'flex',
             }}
           >
             {input.titleKr}
@@ -141,11 +163,36 @@ export function CoverSlide(input: CarouselInput) {
         )}
       </div>
 
-      {/* footer watermark */}
+      {/* SWIPE hint — bottom center */}
       <div
         style={{
           position: 'absolute',
-          bottom: 40,
+          bottom: 60,
+          left: 0,
+          right: 0,
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontWeight: 500,
+            fontSize: 14,
+            letterSpacing: 3,
+            color: 'rgba(250,248,245,0.75)',
+          }}
+        >
+          SWIPE →
+        </div>
+      </div>
+
+      {/* footer */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 30,
           left: 80,
           right: 80,
           display: 'flex',
@@ -159,7 +206,7 @@ export function CoverSlide(input: CarouselInput) {
             fontFamily: 'Playfair Display, serif',
             fontSize: 14,
             fontWeight: 700,
-            color: hasCover ? 'rgba(255,255,255,0.65)' : colors.textTertiary,
+            color: 'rgba(250,248,245,0.5)',
             letterSpacing: 2,
           }}
         >
@@ -168,9 +215,8 @@ export function CoverSlide(input: CarouselInput) {
         <div
           style={{
             display: 'flex',
-            fontFamily: 'Inter, sans-serif',
             fontSize: 12,
-            color: hasCover ? 'rgba(255,255,255,0.65)' : colors.textTertiary,
+            color: 'rgba(250,248,245,0.5)',
             letterSpacing: 2,
           }}
         >

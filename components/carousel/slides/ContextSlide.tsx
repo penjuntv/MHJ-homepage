@@ -1,75 +1,80 @@
-// Slide #2 — Why this matters (Context)
-import { carouselTokens } from '../tokens';
+// Slide #2 — Context (cream background, problem statement)
 import type { CarouselInput } from '../types';
 
+const W = 1080;
+const H = 1350;
+
 export function ContextSlide(input: CarouselInput) {
-  const { colors } = carouselTokens;
-  const styleConfig = carouselTokens.styles[input.style] || carouselTokens.styles.default;
+  const bgWarm = '#FAF8F5';
+  const textDark = '#1A1A1A';
+  const textMuted = '#8A6B4F';
 
   return (
     <div
       style={{
-        width: 1080,
-        height: 1350,
+        width: W,
+        height: H,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
+        alignItems: 'center',
         position: 'relative',
-        background: styleConfig.bg,
-        padding: '120px 100px',
-        fontFamily: 'Inter, "Noto Sans KR", sans-serif',
+        background: bgWarm,
+        padding: '100px 140px 80px 140px',
+        fontFamily: '"Noto Sans KR", sans-serif',
       }}
     >
+      {/* category label */}
       <div
         style={{
-          width: 40,
-          height: 3,
-          background: colors.accent,
-          marginBottom: 16,
           display: 'flex',
-        }}
-      />
-      <div
-        style={{
-          fontSize: 13,
+          fontFamily: '"Noto Sans KR", sans-serif',
           fontWeight: 700,
-          color: colors.accent,
+          fontSize: 14,
           letterSpacing: 4,
           textTransform: 'uppercase',
+          color: textMuted,
           marginBottom: 32,
-          display: 'flex',
         }}
       >
-        Why this matters
+        {input.category}
       </div>
+
+      {/* body text */}
       <div
         style={{
-          fontFamily: 'Playfair Display, serif',
-          fontWeight: 700,
-          fontSize: 42,
-          lineHeight: 1.25,
-          color: styleConfig.text,
+          fontSize: 24,
+          fontFamily: '"Noto Sans KR", sans-serif',
+          fontWeight: 400,
+          lineHeight: 1.6,
+          color: textDark,
+          textAlign: 'center',
+          maxWidth: 800,
           display: 'flex',
+          marginBottom: 32,
         }}
       >
         {input.subtitle || input.title}
       </div>
+
       {input.titleKr && (
         <div
           style={{
-            marginTop: 20,
-            fontSize: 22,
+            fontSize: 18,
             fontFamily: '"Noto Sans KR", sans-serif',
-            color: colors.textSecondary,
+            color: textMuted,
             lineHeight: 1.6,
+            textAlign: 'center',
+            maxWidth: 800,
             display: 'flex',
+            marginBottom: 32,
           }}
         >
           {input.titleKr}
         </div>
       )}
 
-      {/* swipe hint */}
+      {/* bottom hint */}
       <div
         style={{
           position: 'absolute',
@@ -83,18 +88,17 @@ export function ContextSlide(input: CarouselInput) {
         <div
           style={{
             display: 'flex',
-            fontFamily: 'Inter, sans-serif',
-            fontSize: 10,
-            color: colors.textTertiary,
-            letterSpacing: 3,
-            textTransform: 'uppercase',
-            opacity: 0.6,
+            fontFamily: '"Noto Sans KR", sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            color: textMuted,
           }}
         >
-          swipe →
+          {"Here's what we learned →"}
         </div>
       </div>
 
+      {/* footer */}
       <div
         style={{
           position: 'absolute',
@@ -112,7 +116,7 @@ export function ContextSlide(input: CarouselInput) {
             fontFamily: 'Playfair Display, serif',
             fontSize: 14,
             fontWeight: 700,
-            color: colors.textTertiary,
+            color: '#CBD5E1',
             letterSpacing: 2,
           }}
         >
@@ -121,9 +125,8 @@ export function ContextSlide(input: CarouselInput) {
         <div
           style={{
             display: 'flex',
-            fontFamily: 'Inter, sans-serif',
             fontSize: 12,
-            color: colors.textTertiary,
+            color: '#CBD5E1',
             letterSpacing: 2,
           }}
         >
