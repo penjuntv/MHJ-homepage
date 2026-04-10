@@ -1,16 +1,18 @@
-// Slide #1 — Cover (dark brown, number + title only)
+// Slide #1 — Cover v4: white bg, gold dashed circle with number, italic+bold title
 import type { CarouselInput } from '../types';
 
 export function CoverSlide(input: CarouselInput) {
-  const bgBrown = '#3D2E1F';
-  const textLight = '#FAF8F5';
-  const gold = '#C9A96E';
-  const totalSlides = input.points.length + 2; // cover + contents + cta
+  const totalSlides = input.points.length + 2;
 
-  // Extract leading number from title (e.g. "5 things..." → "5")
+  // Extract leading number from title (e.g. "5 things..." -> "5")
   const match = input.title.match(/^(\d+)\s+(.+)$/);
   const number = match ? match[1] : '';
   const titleText = match ? match[2] : input.title;
+
+  // Split title for italic/bold treatment: first line italic, second line bold
+  const titleParts = titleText.split(/\bbefore\b/i);
+  const line1 = titleParts[0]?.trim() || titleText;
+  const line2 = titleParts.length > 1 ? `before ${titleParts[1].trim()}` : '';
 
   return (
     <div
@@ -21,45 +23,99 @@ export function CoverSlide(input: CarouselInput) {
         alignItems: 'center',
         width: '100%',
         height: '100%',
-        padding: '0 80px',
-        backgroundColor: bgBrown,
-        textAlign: 'center',
+        backgroundColor: '#FFFFFF',
         position: 'relative',
       }}
     >
-      {/* number */}
+      {/* Gold dashed circle with number */}
       {number && (
-        <span
+        <div
           style={{
-            fontFamily: 'Playfair Display, serif',
-            fontWeight: 900,
-            fontSize: 120,
-            lineHeight: 1,
-            color: gold,
+            width: 400,
+            height: 400,
+            borderRadius: 200,
+            border: '2px dashed #C9A96E',
             display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          {number}
-        </span>
+          <span
+            style={{
+              fontFamily: 'Playfair Display, serif',
+              fontWeight: 900,
+              fontSize: 160,
+              lineHeight: 1,
+              color: '#C9A96E',
+              display: 'flex',
+            }}
+          >
+            {number}
+          </span>
+        </div>
       )}
 
-      {/* title */}
+      {/* Title line 1 — italic */}
       <span
         style={{
           fontFamily: 'Playfair Display, serif',
-          fontWeight: 700,
-          fontSize: 48,
+          fontWeight: 400,
+          fontStyle: 'italic',
+          fontSize: 40,
           lineHeight: 1.3,
-          color: textLight,
+          color: '#1A1A1A',
           textAlign: 'center',
+          marginTop: 40,
           display: 'flex',
-          marginTop: 16,
         }}
       >
-        {titleText}
+        {line1}
       </span>
 
-      {/* footer — absolute */}
+      {/* Title line 2 — bold */}
+      {line2 && (
+        <span
+          style={{
+            fontFamily: 'Playfair Display, serif',
+            fontWeight: 700,
+            fontSize: 48,
+            lineHeight: 1.3,
+            color: '#1A1A1A',
+            textAlign: 'center',
+            marginTop: 8,
+            display: 'flex',
+          }}
+        >
+          {line2}
+        </span>
+      )}
+
+      {/* SWIPE hint */}
+      <span
+        style={{
+          position: 'absolute',
+          bottom: 90,
+          fontSize: 14,
+          color: '#CBD5E1',
+          letterSpacing: 2,
+          display: 'flex',
+        }}
+      >
+        SWIPE &rarr;
+      </span>
+
+      {/* Footer line */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 70,
+          left: 80,
+          right: 80,
+          height: 1,
+          backgroundColor: '#E5E0D8',
+        }}
+      />
       <div
         style={{
           position: 'absolute',
@@ -70,35 +126,20 @@ export function CoverSlide(input: CarouselInput) {
           justifyContent: 'space-between',
           alignItems: 'center',
           fontSize: 14,
+          color: '#CBD5E1',
         }}
       >
         <span
           style={{
             fontFamily: 'Playfair Display, serif',
             fontWeight: 700,
-            color: '#8A6B4F',
             letterSpacing: 2,
             display: 'flex',
           }}
         >
           MHJ
         </span>
-        <span
-          style={{
-            color: 'rgba(250,248,245,0.5)',
-            letterSpacing: 2,
-            display: 'flex',
-          }}
-        >
-          SWIPE →
-        </span>
-        <span
-          style={{
-            color: 'rgba(250,248,245,0.4)',
-            letterSpacing: 2,
-            display: 'flex',
-          }}
-        >
+        <span style={{ letterSpacing: 2, display: 'flex' }}>
           {`01 / ${totalSlides}`}
         </span>
       </div>

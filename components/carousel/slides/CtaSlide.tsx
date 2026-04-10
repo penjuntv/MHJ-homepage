@@ -1,10 +1,7 @@
-// Slide #7 — CTA (dark brown)
+// Slide #7 — CTA v4: dark #1A1A1A background, gold accents, modern
 import type { CarouselInput } from '../types';
 
 export function CtaSlide(input: CarouselInput) {
-  const bgBrown = '#3D2E1F';
-  const textLight = '#FAF8F5';
-  const gold = '#C9A96E';
   const totalSlides = input.points.length + 2;
   const handle = input.instagramHandle || '@mhj_nz';
 
@@ -17,19 +14,17 @@ export function CtaSlide(input: CarouselInput) {
         alignItems: 'center',
         width: '100%',
         height: '100%',
-        padding: '0 80px',
-        backgroundColor: bgBrown,
-        textAlign: 'center',
+        backgroundColor: '#1A1A1A',
         position: 'relative',
       }}
     >
-      {/* logo */}
+      {/* Logo */}
       <span
         style={{
           fontFamily: 'Playfair Display, serif',
           fontWeight: 400,
-          fontSize: 48,
-          color: gold,
+          fontSize: 56,
+          color: '#C9A96E',
           letterSpacing: 4,
           display: 'flex',
         }}
@@ -37,14 +32,14 @@ export function CtaSlide(input: CarouselInput) {
         MHJ
       </span>
 
-      {/* tagline */}
+      {/* Tagline */}
       <span
         style={{
           fontFamily: '"Noto Sans KR", sans-serif',
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: 400,
-          color: gold,
-          letterSpacing: 3,
+          color: '#C9A96E',
+          letterSpacing: 4,
           marginTop: 4,
           display: 'flex',
         }}
@@ -52,18 +47,28 @@ export function CtaSlide(input: CarouselInput) {
         my mairangi
       </span>
 
+      {/* Gold divider */}
+      <div
+        style={{
+          width: 60,
+          height: 1,
+          backgroundColor: '#C9A96E',
+          marginTop: 32,
+        }}
+      />
+
       {/* CTA text */}
       <span
         style={{
           fontFamily: '"Noto Sans KR", sans-serif',
           fontWeight: 700,
-          fontSize: 36,
-          color: textLight,
-          marginTop: 40,
+          fontSize: 32,
+          color: '#FFFFFF',
+          marginTop: 32,
           display: 'flex',
         }}
       >
-        {input.ctaTitle || 'Save this for later ✓'}
+        {input.ctaTitle || 'Save this for later'}
       </span>
 
       {/* URL */}
@@ -71,8 +76,8 @@ export function CtaSlide(input: CarouselInput) {
         style={{
           fontFamily: '"Noto Sans KR", sans-serif',
           fontWeight: 500,
-          fontSize: 32,
-          color: gold,
+          fontSize: 28,
+          color: '#C9A96E',
           marginTop: 16,
           display: 'flex',
         }}
@@ -80,13 +85,13 @@ export function CtaSlide(input: CarouselInput) {
         {input.ctaUrl || 'www.mhj.nz'}
       </span>
 
-      {/* social handle */}
+      {/* Handle */}
       <span
         style={{
           fontFamily: '"Noto Sans KR", sans-serif',
           fontWeight: 400,
-          fontSize: 24,
-          color: 'rgba(250,248,245,0.5)',
+          fontSize: 20,
+          color: 'rgba(255,255,255,0.4)',
           marginTop: 12,
           display: 'flex',
         }}
@@ -94,7 +99,17 @@ export function CtaSlide(input: CarouselInput) {
         {handle}
       </span>
 
-      {/* footer — absolute */}
+      {/* Footer line */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 70,
+          left: 80,
+          right: 80,
+          height: 1,
+          backgroundColor: 'rgba(255,255,255,0.1)',
+        }}
+      />
       <div
         style={{
           position: 'absolute',
@@ -111,7 +126,7 @@ export function CtaSlide(input: CarouselInput) {
           style={{
             fontFamily: 'Playfair Display, serif',
             fontWeight: 700,
-            color: 'rgba(250,248,245,0.4)',
+            color: 'rgba(255,255,255,0.3)',
             letterSpacing: 2,
             display: 'flex',
           }}
@@ -120,7 +135,7 @@ export function CtaSlide(input: CarouselInput) {
         </span>
         <span
           style={{
-            color: 'rgba(250,248,245,0.4)',
+            color: 'rgba(255,255,255,0.3)',
             letterSpacing: 2,
             display: 'flex',
           }}

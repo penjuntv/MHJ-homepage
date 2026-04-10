@@ -1,5 +1,5 @@
 /**
- * Carousel v3 visual QA — generates 7 PNG slides without server/auth.
+ * Carousel v4 visual QA — generates 7 PNG slides with unique layouts.
  * Usage: npx tsx scripts/test-carousel.ts
  * Output: /tmp/carousel-test/slide-01-cover.png … slide-07-cta.png
  */
@@ -12,13 +12,18 @@ import fs from 'fs';
 import path from 'path';
 import { ImageResponse } from 'next/og';
 
-// — slide components (plain functions returning JSX) —
+// — slide components —
 import { CoverSlide } from '../components/carousel/slides/CoverSlide';
-import { ContentSlide } from '../components/carousel/slides/ContentSlide';
+import { ContentSlide, type SlideVariant } from '../components/carousel/slides/ContentSlide';
 import { CtaSlide } from '../components/carousel/slides/CtaSlide';
 import type { CarouselInput } from '../components/carousel/types';
 
-// ──────── test data (v3 — 1 idea per slide) ────────
+// ──────── variant mapping (same as render.tsx) ────────
+const CONTENT_VARIANTS: SlideVariant[] = [
+  'left-align', 'circle', 'list', 'keyword', 'quote',
+];
+
+// ──────── test data (v4 — 5 things) ────────
 const testInput: CarouselInput = {
   category: 'NZ SCHOOL GUIDE',
   style: 'default',
@@ -34,11 +39,12 @@ const testInput: CarouselInput = {
     },
     {
       title: 'There are NO cafeterias',
-      body: 'Pack lunch every day. A thermos with warm rice is your best friend.',
+      body: 'Pack lunch every day. No microwaves at school. Thermos with warm rice = hero.',
     },
     {
       title: 'ESOL is free',
       body: 'Your child is assessed automatically. No forms, no cost.',
+      highlight: 'FREE',
     },
     {
       title: 'Stationery is provided',
@@ -46,7 +52,7 @@ const testInput: CarouselInput = {
     },
   ],
   summaryPoints: [],
-  ctaTitle: 'Save this for later ✓',
+  ctaTitle: 'Save this for later',
   ctaUrl: 'www.mhj.nz',
   instagramHandle: '@mhj_nz',
 };
@@ -73,7 +79,10 @@ function loadFonts(): FontDef[] {
 
   if (interReg) fonts.push({ name: 'Inter', data: interReg, weight: 400, style: 'normal' });
   if (interBold) fonts.push({ name: 'Inter', data: interBold, weight: 700, style: 'normal' });
-  if (playfairBold) fonts.push({ name: 'Playfair Display', data: playfairBold, weight: 700, style: 'normal' });
+  if (playfairBold) {
+    fonts.push({ name: 'Playfair Display', data: playfairBold, weight: 700, style: 'normal' });
+    fonts.push({ name: 'Playfair Display', data: playfairBold.slice(0), weight: 900, style: 'normal' });
+  }
   if (playfairRegular) fonts.push({ name: 'Playfair Display', data: playfairRegular, weight: 400, style: 'normal' });
   if (playfairBoldItalic) fonts.push({ name: 'Playfair Display', data: playfairBoldItalic, weight: 700, style: 'italic' });
   if (notoKr) {
@@ -102,13 +111,13 @@ async function main() {
   const fonts = loadFonts();
   console.log(`  ${fonts.length} fonts loaded`);
 
-  const totalSlides = testInput.points.length + 2; // cover + contents + cta
+  const totalSlides = testInput.points.length + 2;
 
   const slides: Array<{ name: string; jsx: React.ReactElement }> = [
     { name: 'slide-01-cover', jsx: CoverSlide(testInput) },
     ...testInput.points.map((_, i) => ({
-      name: `slide-${String(i + 2).padStart(2, '0')}-content${i + 1}`,
-      jsx: ContentSlide(testInput, i),
+      name: `slide-${String(i + 2).padStart(2, '0')}-${CONTENT_VARIANTS[i]}`,
+      jsx: ContentSlide(testInput, i, CONTENT_VARIANTS[i]),
     })),
     { name: `slide-${String(totalSlides).padStart(2, '0')}-cta`, jsx: CtaSlide(testInput) },
   ];
@@ -118,7 +127,7 @@ async function main() {
     const buf = await renderSlide(jsx, fonts);
     const filePath = path.join(outDir, `${name}.png`);
     fs.writeFileSync(filePath, buf);
-    console.log(`  ✓ ${filePath}  (${(buf.length / 1024).toFixed(0)} KB)`);
+    console.log(`  \u2713 ${filePath}  (${(buf.length / 1024).toFixed(0)} KB)`);
   }
 
   console.log(`\nDone! All ${slides.length} slides saved to /tmp/carousel-test/`);

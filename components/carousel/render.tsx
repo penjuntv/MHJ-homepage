@@ -6,8 +6,12 @@ import { createAdminClient } from '@/lib/supabase';
 import { blogCategoryToHashtagCategory, type CarouselFont } from './utils';
 import type { CarouselInput, CarouselSlide } from './types';
 import { CoverSlide } from './slides/CoverSlide';
-import { ContentSlide } from './slides/ContentSlide';
+import { ContentSlide, type SlideVariant } from './slides/ContentSlide';
 import { CtaSlide } from './slides/CtaSlide';
+
+const CONTENT_VARIANTS: SlideVariant[] = [
+  'left-align', 'circle', 'list', 'keyword', 'quote',
+];
 
 const CANVAS = { width: 1080, height: 1350 };
 
@@ -34,7 +38,7 @@ export async function buildSlides(
     { type: 'cover', jsx: CoverSlide(input) },
     ...input.points.map((_, i) => ({
       type: 'content' as const,
-      jsx: ContentSlide(input, i),
+      jsx: ContentSlide(input, i, CONTENT_VARIANTS[i % CONTENT_VARIANTS.length]),
     })),
     { type: 'cta', jsx: CtaSlide(input) },
   ];
@@ -54,7 +58,7 @@ export async function buildSlideBuffers(
 ): Promise<Buffer[]> {
   const jsxList: React.ReactElement[] = [
     CoverSlide(input),
-    ...input.points.map((_, i) => ContentSlide(input, i)),
+    ...input.points.map((_, i) => ContentSlide(input, i, CONTENT_VARIANTS[i % CONTENT_VARIANTS.length])),
     CtaSlide(input),
   ];
   return Promise.all(jsxList.map((jsx) => renderSlideToPng(jsx, fonts)));
