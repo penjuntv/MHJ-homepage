@@ -45,6 +45,12 @@ export default function AdminFamilyPage() {
     // 업로드 즉시 DB에도 저장 (로컬 state 업데이트만으로는 새로고침 시 사라짐)
     await supabase.from('family_members').update({ image_url: data.publicUrl }).eq('id', id);
     toast.success('사진이 저장되었습니다.');
+    // About 페이지 캐시 갱신
+    fetch('/api/revalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/about'] }),
+    }).catch(() => {});
     setUploading(null);
   }
 
@@ -59,6 +65,12 @@ export default function AdminFamilyPage() {
     setSaving(null);
     if (error) { toast.error('저장 실패: ' + error.message); return; }
     toast.success('저장되었습니다.');
+    // About 페이지 캐시 갱신
+    fetch('/api/revalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/about'] }),
+    }).catch(() => {});
     setSaved(member.id);
     setTimeout(() => setSaved(null), 2000);
   }

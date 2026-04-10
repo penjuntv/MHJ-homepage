@@ -92,6 +92,12 @@ export default function SettingsPage() {
       toast.error('저장 실패: ' + error.message);
     } else {
       toast.success('설정이 저장되었습니다.');
+      // 공개 페이지 캐시 갱신
+      fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, all: true }),
+      }).catch(() => {});
     }
     setSaving(false);
   }
@@ -119,6 +125,14 @@ export default function SettingsPage() {
       { onConflict: 'key' }
     );
     toast.success('이미지가 업로드되었습니다.');
+    // About 페이지 캐시 갱신
+    if (imageKey.startsWith('about_')) {
+      fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/about'] }),
+      }).catch(() => {});
+    }
   }
 
   const labelStyle = {
