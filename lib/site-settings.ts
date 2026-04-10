@@ -15,7 +15,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   intro_subtitle: 'JOURNAL',
   intro_description: '세 딸과 함께하는 오클랜드 노스쇼어 라이프. 매일 마주하는 바다와 학교, 그리고 따뜻한 식탁의 기록을 나눕니다.',
   about_who_title: 'The Mairangi Family',
-  about_who_description_en: 'Life on Auckland\'s North Shore with three daughters — a journalist-turned-dad and a social work master\'s student mum, documenting our family\'s second chapter in Mairangi Bay.',
+  about_who_description_en: 'Life on Auckland\'s North Shore — a studying mum, a stay-home dad, and three daughters: Min, Hyun, and Jin. Recording our family\'s second chapter in New Zealand.',
   about_who_description_kr: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에 자리 잡은 우리 가족의 두 번째 챕터입니다. 기자 출신 아빠 PeNnY, 사회복지 석사 과정 중인 엄마 Yussi, 그리고 세 딸 Min·Hyun·Jin이 함께합니다.',
   about_who_image_url: '',
   about_vision_title: 'START TO GLOW',

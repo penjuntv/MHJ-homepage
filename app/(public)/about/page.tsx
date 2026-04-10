@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import SafeImage from '@/components/SafeImage';
 import { supabase } from '@/lib/supabase';
 import type { FamilyMember } from '@/lib/types';
@@ -11,10 +12,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
   title: 'About',
-  description: '뉴질랜드 마이랑이 베이에 사는 한국인 가족 이야기. 기자 출신 아빠, 사회복지 석사 엄마, 그리고 세 딸의 일상을 기록합니다.',
+  description: 'Meet Yussi — a social work student, mother of three, and the writer behind MHJ. Stories from a Korean family in Mairangi Bay, Auckland.',
+  authors: [{ name: 'Yussi' }],
   openGraph: {
     title: 'About',
-    description: '뉴질랜드 마이랑이 베이에 사는 한국인 가족 이야기.',
+    description: 'Meet Yussi — a social work student, mother of three, and the writer behind MHJ.',
     url: `${SITE_URL}/about`,
     images: [{ url: `${SITE_URL}/og-about.jpg`, width: 1200, height: 630 }],
   },
@@ -24,25 +26,25 @@ export const metadata: Metadata = {
 const FALLBACK_MEMBERS: FamilyMember[] = [
   {
     id: 1,
-    name: 'FIRST DAUGHTER',
-    role: 'Year 6',
-    bio: '머레이스 베이 초등학교의 든든한 첫째. 그림 그리는 것을 좋아하고 뉴질랜드의 드넓은 자연에서 새로운 영감을 찾고 있습니다.',
+    name: 'MIN',
+    role: 'Year 7',
+    bio: 'The eldest and our steadiest compass — cautious on the ground, fearless in the trees. Exploring a new world with quiet determination.',
     image_url: 'https://picsum.photos/seed/daughter1/400/500',
     sort_order: 1,
   },
   {
     id: 2,
-    name: 'SECOND DAUGHTER',
-    role: 'Year 5',
-    bio: '호기심 많은 둘째. 학교 축구팀에서 활약하며 뉴질랜드 친구들과 금방 가까워진 사교성 만점의 소녀입니다.',
+    name: 'HYUN',
+    role: 'Year 6',
+    bio: 'The golden middle — a delicate observer with a tender heart. Our glowing artist who draws, crafts, plays, and sings.',
     image_url: 'https://picsum.photos/seed/daughter2/400/500',
     sort_order: 2,
   },
   {
     id: 3,
-    name: 'THIRD DAUGHTER',
-    role: 'Year 1 (Soon)',
-    bio: '우리 집의 귀염둥이 막내. 내년 머레이스 베이 입학을 기다리며 매일 언니들의 가방을 탐내는 야심가입니다.',
+    name: 'JIN',
+    role: 'Year 1',
+    bio: 'The little one, filled with all the extroversion. Loves her family, friends, and every animal she meets.',
     image_url: 'https://picsum.photos/seed/daughter3/400/500',
     sort_order: 3,
   },
@@ -66,10 +68,11 @@ const container: React.CSSProperties = {
 /* ─ 섹션 vertical padding (§7: 96px/128px) ─ */
 const sectionPad = 'clamp(96px, 10vw, 128px) 0';
 
+const YUSSI_IMAGE_URL = 'https://vpayqdatpqajsmalpfmq.supabase.co/storage/v1/object/public/images/family/yussi_profile.png';
+
 export default async function AboutPage() {
   const [allMembers, s] = await Promise.all([getFamilyMembers(), getSiteSettings()]);
 
-  const parents  = allMembers.filter(m => m.sort_order < 0);
   const daughters = allMembers.filter(m => m.sort_order > 0);
 
   const whoImage    = s.about_who_image_url || s.about_image_url || '';
@@ -107,7 +110,7 @@ export default async function AboutPage() {
               aspectRatio: '4/5',
               borderRadius: 12,
               overflow: 'hidden',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.10)',   /* static, hover 아님 */
+              boxShadow: '0 24px 64px rgba(0,0,0,0.10)',
               position: 'relative',
               background: 'linear-gradient(135deg, var(--bg-surface), var(--border))',
             }}>
@@ -169,16 +172,16 @@ export default async function AboutPage() {
             {/* 텍스트 — slide-up 제거, 인디고 하드코딩 제거 (§6.3) */}
             <div>
               <span className="type-caption" style={{
-                color: 'var(--text-tertiary)',   /* #4f46e5 → CSS 변수 (§6.3) */
+                color: 'var(--text-tertiary)',
                 display: 'block',
-                marginBottom: 40,               /* 40 = 5×8 ✅ */
+                marginBottom: 40,
                 letterSpacing: 6,
               }}>
                 Vision & Values
               </span>
               <h2 className="type-display" style={{
                 textTransform: 'uppercase',
-                marginBottom: 48,              /* 48 = 6×8 ✅ */
+                marginBottom: 48,
                 color: 'var(--text)',
               }}>
                 {s.about_vision_title.includes(' ') ? (
@@ -194,7 +197,7 @@ export default async function AboutPage() {
               aspectRatio: '4/5',
               borderRadius: 12,
               overflow: 'hidden',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.10)',   /* static */
+              boxShadow: '0 24px 64px rgba(0,0,0,0.10)',
               position: 'relative',
             }}>
               <SafeImage
@@ -209,111 +212,140 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* ─── 3. The Parents (조건부) ─── */}
-        {parents.length > 0 && (
-          <section style={{ background: 'var(--bg)', padding: sectionPad }}>
-            <div style={container}>
+        {/* ─── 3. The Writer (Yussi) ─── */}
+        <section style={{ background: 'var(--bg)', padding: sectionPad }}>
+          <div style={container}>
 
-              {/* 헤더 */}
-              <div style={{ textAlign: 'center', marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-                <p className="type-caption" style={{
-                  color: 'var(--text-tertiary)',
-                  fontStyle: 'italic',
-                  letterSpacing: 6,
-                  marginBottom: 16,            /* 16 = 2×8 ✅ */
-                }}>
-                  The Family
-                </p>
-                <p className="type-h1" style={{
-                  fontWeight: 900,
+            {/* 섹션 헤더 */}
+            <div style={{ textAlign: 'center', marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+              <p className="type-caption" style={{
+                color: 'var(--text-tertiary)',
+                fontStyle: 'italic',
+                letterSpacing: 6,
+                marginBottom: 16,
+              }}>
+                The Family
+              </p>
+              <p className="type-h1" style={{
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                lineHeight: 1,
+                color: 'var(--text)',
+              }}>
+                THE{' '}
+                <span className="font-display" style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--text-secondary)' }}>
+                  WRITER
+                </span>
+              </p>
+            </div>
+
+            {/* 2열 그리드: 사진(좌) + 텍스트(우) */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(360px, 100%), 1fr))',
+              gap: '3rem',
+              maxWidth: 960,
+              margin: '0 auto',
+            }}>
+
+              {/* 좌측: 프로필 사진 */}
+              <div style={{
+                aspectRatio: '4/5',
+                borderRadius: 12,
+                overflow: 'hidden',
+                boxShadow: '0 24px 64px rgba(0,0,0,0.10)',
+                position: 'relative',
+                background: 'linear-gradient(135deg, var(--bg-surface), var(--border))',
+              }}>
+                <Image
+                  src={YUSSI_IMAGE_URL}
+                  alt="Yussi"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover grayscale-hover"
+                  unoptimized
+                />
+              </div>
+
+              {/* 우측: 텍스트 블록 */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+
+                {/* 이름 */}
+                <h2 className="type-h2" style={{
                   textTransform: 'uppercase',
-                  lineHeight: 1,
+                  letterSpacing: '0.08em',
+                  marginBottom: 8,
                   color: 'var(--text)',
                 }}>
-                  THE{' '}
-                  <span className="font-display" style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--text-secondary)' }}>
-                    PARENTS
-                  </span>
+                  Yussi
+                </h2>
+
+                {/* 직함 */}
+                <span className="type-caption" style={{
+                  color: 'var(--text-tertiary)',
+                  display: 'block',
+                  marginBottom: 32,
+                  letterSpacing: '3px',
+                }}>
+                  WRITER & MSW STUDENT
+                </span>
+
+                {/* 본문 3단락 */}
+                <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 16 }}>
+                  {"I'm Yussi — a mother of three girls, a social work student at Massey University, and a Korean immigrant slowly making Mairangi Bay home."}
                 </p>
+                <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 16 }}>
+                  {"I write because it's what I've done my whole life — the small, ordinary moments and the ones that are anything but. Things I want to remember and things I need to let go of. Writing is my work, and sometimes my way of self-care."}
+                </p>
+                <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 0 }}>
+                  {"This is the journal where a new chapter begins — one we're stepping into, one day at a time."}
+                </p>
+
+                {/* 인용구 블록 */}
+                <blockquote style={{
+                  borderLeft: '2px solid var(--mhj-brown, #8A6B4F)',
+                  paddingLeft: 24,
+                  marginTop: 32,
+                  marginBottom: 0,
+                  marginLeft: 0,
+                  marginRight: 0,
+                }}>
+                  <p className="font-display" style={{
+                    fontStyle: 'italic',
+                    fontSize: 'clamp(16px, 1.5vw, 18px)',
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.6,
+                    marginBottom: 8,
+                  }}>
+                    &ldquo;If you want to write, all you need is a pen, some paper, or a computer, and a little bit of guts.&rdquo;
+                  </p>
+                  <cite style={{
+                    fontSize: 13,
+                    color: 'var(--text-secondary)',
+                    fontStyle: 'normal',
+                    display: 'block',
+                  }}>
+                    — Roberta Jean Bryant
+                  </cite>
+                </blockquote>
+
+                {/* Quick Facts */}
+                <div style={{
+                  borderTop: '1px solid var(--border)',
+                  paddingTop: 16,
+                  marginTop: 24,
+                  fontSize: 13,
+                  color: 'var(--text-tertiary)',
+                  lineHeight: 1.7,
+                }}>
+                  Mairangi Bay, Auckland / Master of Social Work (in progress) / Mum to Min, Hyun &amp; Jin
+                </div>
+
               </div>
-
-              {/* 프로필 그리드 — slide-up 제거, radius 12px, role 회색 */}
-              <div className="grid grid-cols-1 sm:grid-cols-2" style={{
-                gap: 40,          /* 40 = 5×8 ✅ */
-                maxWidth: 880,    /* 880 = 110×8 ✅, 2인 레이아웃 중앙 정렬 */
-                margin: '0 auto',
-              }}>
-                {parents.map((m) => (
-                  <div key={m.id} style={{ textAlign: 'center' }}>
-
-                    {/* 프로필 이미지 — 4:5, radius 12px (§8.1), grayscale-hover 유지 (§12.1) */}
-                    <div style={{
-                      aspectRatio: '4/5',
-                      borderRadius: 12,
-                      overflow: 'hidden',
-                      marginBottom: 32,        /* 32 = 4×8 ✅ */
-                      boxShadow: '0 16px 40px rgba(0,0,0,0.08)',   /* static */
-                      position: 'relative',
-                      background: 'linear-gradient(135deg, var(--bg-surface), var(--border))',
-                    }}>
-                      {m.image_url ? (
-                        <SafeImage
-                          src={m.image_url}
-                          alt={m.name}
-                          fill
-                          sizes="(max-width: 640px) 100vw, 50vw"
-                          unoptimized={m.image_url.includes('picsum.photos')}
-                          className="object-cover grayscale-hover"
-                        />
-                      ) : (
-                        <div style={{
-                          width: '100%', height: '100%',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <span style={{
-                            fontSize: 'clamp(48px, 8vw, 72px)',
-                            fontWeight: 900,
-                            color: 'rgba(148, 163, 184, 0.4)',
-                            letterSpacing: -2,
-                            lineHeight: 1,
-                          }}>
-                            {m.name.split(' ').map((w: string) => w[0]).join('')}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <h3 className="type-h2" style={{
-                      textTransform: 'uppercase',
-                      marginBottom: 8,         /* 8 = 1×8 ✅ */
-                      color: 'var(--text)',
-                    }}>
-                      {m.name}
-                    </h3>
-                    {/* Role — 인디고 하드코딩 → CSS 변수 (§6.3) */}
-                    <span className="type-caption" style={{
-                      color: 'var(--text-tertiary)',
-                      fontWeight: 700,
-                      display: 'block',
-                      marginBottom: 24,        /* 24 = 3×8 ✅ */
-                      letterSpacing: 3,
-                    }}>
-                      {m.role}
-                    </span>
-                    <p className="type-body" style={{
-                      color: 'var(--text-secondary)',
-                      lineHeight: 1.7,
-                      padding: '0 16px',
-                    }}>
-                      {m.bio}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
             </div>
-          </section>
-        )}
+
+          </div>
+        </section>
 
         {/* ─── 4. Three Daughters ─── */}
         <section style={{ background: 'var(--bg-surface)', padding: sectionPad }}>
@@ -325,7 +357,7 @@ export default async function AboutPage() {
                 color: 'var(--text-tertiary)',
                 fontStyle: 'italic',
                 letterSpacing: 6,
-                marginBottom: 16,              /* 16 = 2×8 ✅ */
+                marginBottom: 16,
               }}>
                 The Members
               </p>
@@ -342,8 +374,8 @@ export default async function AboutPage() {
               </p>
             </div>
 
-            {/* 프로필 그리드 — 반응형 1→2→3열 (§3.1), slide-up 제거, radius 12px, role 회색 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: 40 /* 40 = 5×8 ✅ */ }}>
+            {/* 프로필 그리드 — 반응형 1→2→3열 (§3.1), radius 12px, grayscale-hover 유지 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: 40 }}>
               {daughters.map((m) => (
                 <div key={m.id} style={{ textAlign: 'center' }}>
 
@@ -352,8 +384,8 @@ export default async function AboutPage() {
                     aspectRatio: '4/5',
                     borderRadius: 12,
                     overflow: 'hidden',
-                    marginBottom: 32,          /* 32 = 4×8 ✅ */
-                    boxShadow: '0 16px 40px rgba(0,0,0,0.08)',   /* static */
+                    marginBottom: 32,
+                    boxShadow: '0 16px 40px rgba(0,0,0,0.08)',
                     position: 'relative',
                   }}>
                     <SafeImage
@@ -369,17 +401,16 @@ export default async function AboutPage() {
 
                   <h3 className="type-h2" style={{
                     textTransform: 'uppercase',
-                    marginBottom: 8,           /* 8 = 1×8 ✅ */
+                    marginBottom: 8,
                     color: 'var(--text)',
                   }}>
                     {m.name}
                   </h3>
-                  {/* Role — 인디고 하드코딩 → CSS 변수 (§6.3) */}
                   <span className="type-caption" style={{
                     color: 'var(--text-tertiary)',
                     fontWeight: 700,
                     display: 'block',
-                    marginBottom: 24,          /* 24 = 3×8 ✅ */
+                    marginBottom: 24,
                     letterSpacing: 3,
                   }}>
                     {m.role}
