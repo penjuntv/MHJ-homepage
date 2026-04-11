@@ -1,6 +1,7 @@
+// GET /api/carousel/download — DEPRECATED (v2 기준)
+// v2에서는 ExportEngine (html-to-image + JSZip) 클라이언트 다운로드 사용
+// 이 파일은 하위 호환을 위해 유지. 새 코드에서 호출 금지.
 // GET /api/carousel/download?blogId=66&format=zip
-// GET /api/carousel/download?blogId=66&format=individual&slide=0
-// 사양: docs/CAROUSEL_BUILD.md §5
 
 import { NextRequest, NextResponse } from 'next/server';
 import JSZip from 'jszip';

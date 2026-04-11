@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <!-- MHJ wordmark — brown on transparent (white) -->
+  <text x="100" y="45" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-size="42" font-weight="400" letter-spacing="0.05em" fill="#8A6B4F">MHJ</text>
+  <line x1="65" y1="56" x2="135" y2="56" stroke="#8A6B4F" stroke-width="1"/>
+  <text x="100" y="74" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="10" font-weight="400" letter-spacing="0.28em" fill="#8A6B4F">my mairangi</text>
+</svg>

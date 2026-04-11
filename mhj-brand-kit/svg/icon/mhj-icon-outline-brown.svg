@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- MHJ icon — outline brown circle, brown text -->
+  <circle cx="32" cy="32" r="31" fill="none" stroke="#8A6B4F" stroke-width="1"/>
+  <text x="32" y="37" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-size="20" font-weight="400" letter-spacing="0.05em" fill="#8A6B4F">MHJ</text>
+</svg>

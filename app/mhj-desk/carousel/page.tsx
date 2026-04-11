@@ -1,8 +1,8 @@
 'use client';
 
-// MHJ Desk → Carousel Generator
-// 사양: docs/CAROUSEL_ADMIN.md
-// Session 1 산출물(`/api/carousel/*`, `components/carousel/*`)은 호출만 함.
+// MHJ Desk → Carousel Generator v2
+// 렌더링: html-to-image (클라이언트) — Satori 서버 렌더링 교체
+// docs/CAROUSEL_V2_MASTER_PLAN.md 세션 1
 
 import { useCallback, useState } from 'react';
 import { Save, Loader2 } from 'lucide-react';
@@ -11,18 +11,21 @@ import { supabase } from '@/lib/supabase-browser';
 import {
   buildCarouselInputFromBlog,
   blogCategoryToHashtagCategory,
+  generateCaption,
+  generateAltTexts,
 } from '@/components/carousel/utils';
 import type {
   CarouselBlogRow,
   CarouselInput,
-  CarouselSlide,
+  SlideConfig,
 } from '@/components/carousel/types';
+import { convertInputToSlides } from '@/components/carousel/v2/convertInput';
+import LivePreview from '@/components/carousel/v2/LivePreview';
+import ExportEngine from '@/components/carousel/v2/ExportEngine';
 
 import BlogSelector from './_components/BlogSelector';
 import CarouselEditor from './_components/CarouselEditor';
-import CarouselPreview from './_components/CarouselPreview';
 import CaptionPanel, { type CaptionState } from './_components/CaptionPanel';
-import CarouselDownloader from './_components/CarouselDownloader';
 import HashtagManager from './_components/HashtagManager';
 import RecentList from './_components/RecentList';
 
@@ -63,7 +66,7 @@ export default function CarouselAdminPage() {
   const [blogSlug, setBlogSlug] = useState<string>('');
   const [contentId, setContentId] = useState<number | null>(null);
   const [input, setInput] = useState<CarouselInput>(EMPTY_INPUT);
-  const [slides, setSlides] = useState<CarouselSlide[]>([]);
+  const [slides, setSlides] = useState<SlideConfig[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [generating, setGenerating] = useState(false);
   const [savingBlog, setSavingBlog] = useState(false);
@@ -108,31 +111,28 @@ export default function CarouselAdminPage() {
     setAltTexts([]);
   }, []);
 
-  async function handleGenerate() {
+  // v2: 클라이언트 사이드 슬라이드 생성 (서버 API 불필요)
+  function handleGenerate() {
     if (!input.title.trim()) {
       toast.error('Title은 필수입니다');
       return;
     }
     setGenerating(true);
     try {
-      const res = await fetch('/api/carousel/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json.detail || json.error || 'generate 실패');
-      }
-      setSlides(json.slides || []);
+      const newSlides = convertInputToSlides(input);
+      setSlides(newSlides);
       setCurrentSlide(0);
+
+      // 캡션 + 해시태그 + alt texts 생성
+      const hashtags = Array.from(new Set(['#MHJnz', `#${input.category.replace(/\s+/g, '')}`]));
+      const { captionEn, captionKr } = generateCaption(input, hashtags);
       setCaption({
-        en: json.captionEn || '',
-        kr: json.captionKr || '',
-        hashtags: Array.from(new Set(['#MHJnz', ...((json.hashtags as string[]) || [])])),
+        en: captionEn,
+        kr: captionKr || '',
+        hashtags,
       });
-      setAltTexts((json.altTexts as string[]) || []);
-      toast.success(`10장 슬라이드 생성 완료`);
+      setAltTexts(generateAltTexts(input));
+      toast.success(`${newSlides.length}장 슬라이드 생성 완료`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '생성 실패');
     } finally {
@@ -160,6 +160,7 @@ export default function CarouselAdminPage() {
         carousel_cta: input.ctaTitle,
         carousel_style: input.style,
         carousel_generated_at: slides.length > 0 ? new Date().toISOString() : null,
+        // v2: slides는 SlideConfig[] — DB에는 generated_at만 기록
       })
       .eq('id', blogId);
     setSavingBlog(false);
@@ -348,7 +349,7 @@ export default function CarouselAdminPage() {
             top: 24,
           }}
         >
-          <CarouselPreview
+          <LivePreview
             slides={slides}
             currentIndex={currentSlide}
             onIndexChange={setCurrentSlide}
@@ -359,12 +360,7 @@ export default function CarouselAdminPage() {
             selectedHashtags={caption.hashtags}
             onChange={(hashtags) => setCaption({ ...caption, hashtags })}
           />
-          <CarouselDownloader
-            blogId={blogId}
-            slides={slides}
-            currentIndex={currentSlide}
-            filenameBase={filenameBase}
-          />
+          <ExportEngine slides={slides} filenameBase={filenameBase} />
         </div>
       </div>
 

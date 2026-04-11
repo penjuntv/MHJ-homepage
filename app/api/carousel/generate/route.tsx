@@ -1,7 +1,8 @@
-// POST /api/carousel/generate
+// POST /api/carousel/generate — DEPRECATED (v2 기준)
+// v2에서는 클라이언트 사이드 convertInputToSlides() 사용 (ExportEngine)
+// 이 파일은 하위 호환을 위해 유지. 새 코드에서 호출 금지.
 // Body: { blogId: number } 또는 { input: CarouselInput }
 // Response: { slides, captionEn, captionKr, hashtags }
-// 사양: docs/CAROUSEL_BUILD.md §4
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';

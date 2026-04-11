@@ -2,6 +2,55 @@
 
 import type { CarouselStyle } from './tokens';
 
+// ─── v2 Layout Types ───────────────────────────────────────────────
+export type CarouselLayoutType =
+  // 커버 (5종)
+  | 'cover-arch'
+  | 'cover-full-image'
+  | 'cover-split'
+  | 'cover-minimal'
+  | 'cover-polaroid'
+  // 콘텐츠 (8종)
+  | 'content-editorial'
+  | 'content-step'
+  | 'content-split'
+  | 'content-quote'
+  | 'content-bold-number'
+  | 'content-photo-overlay'
+  | 'content-abstract'
+  | 'content-list'
+  // 특수 (4종)
+  | 'summary-checklist'
+  | 'yussi-take'
+  | 'visual-break'
+  | 'cta-minimal'
+  // 추가 (3종)
+  | 'content-continuous-line'
+  | 'content-arch-photo'
+  | 'cover-dark';
+
+export interface SlideConfig {
+  id: number;                      // 1-10
+  layout: CarouselLayoutType;
+  title?: string;
+  subtitle?: string;
+  body?: string;
+  stepNumber?: number;
+  imageUrl?: string;
+  customImage?: string;
+  bgColor?: string;
+  textColor?: string;
+  accentColor?: string;
+}
+
+export interface CarouselV2Output {
+  slides: SlideConfig[];
+  captionEn: string;
+  captionKr?: string;
+  hashtags: string[];
+  altTexts: string[];
+}
+
 export interface CarouselPoint {
   title: string;          // English
   body: string;           // English (2-3 sentences)
