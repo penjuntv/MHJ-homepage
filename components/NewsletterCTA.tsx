@@ -296,7 +296,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             )}
 
             {/* 이메일 + 버튼 */}
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="newsletter-form-row" style={{ display: 'flex', gap: 8 }}>
               <input
                 type="email"
                 placeholder="your@email.com"

@@ -430,6 +430,7 @@ export default async function LandingPage() {
                         padding: '16px 0',
                         borderBottom: i < mostRead.length - 1 ? '1px solid var(--border)' : 'none',
                         textDecoration: 'none',
+                        color: 'inherit',
                         transition: 'opacity 0.3s ease',
                       }}
                     >

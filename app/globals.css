@@ -96,6 +96,8 @@
   --accent: #4F46E5;
 
   --bg-warm: #1E1A16;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.35);
   --newsletter-dark-bg: #FAF8F5;
   --newsletter-dark-text: #2C2218;
   --number-accent: #C9A882;
@@ -1486,6 +1488,24 @@ a:hover .magazine-cover-shadow img {
   transition: box-shadow 0.3s ease, opacity 0.3s ease;
 }
 .blog-card-hover:hover {
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--card-shadow-hover) !important;
   opacity: 0.95;
+}
+
+/* ─── 전폭 배경 유틸리티 ─── */
+.full-width-bg {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+/* ─── Newsletter form row 모바일 스태킹 ─── */
+@media (max-width: 480px) {
+  .newsletter-form-row {
+    flex-direction: column !important;
+  }
+  .newsletter-form-row input,
+  .newsletter-form-row button {
+    width: 100% !important;
+  }
 }
