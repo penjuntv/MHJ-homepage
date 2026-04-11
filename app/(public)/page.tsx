@@ -292,16 +292,19 @@ export default async function LandingPage() {
 
         {/* ═══════ §2+3. Latest Posts + Sidebar ═══════ */}
         <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '96px clamp(20px, 4vw, 48px) 0' }}>
-          <p style={{
-            fontSize: 10,
-            fontWeight: 900,
-            letterSpacing: 5,
-            textTransform: 'uppercase',
-            color: 'var(--text-secondary)',
-            marginBottom: 32,
-          }}>
-            Latest
-          </p>
+          <div style={{ marginBottom: 32 }}>
+            <p style={{
+              fontSize: 12,
+              fontWeight: 900,
+              letterSpacing: 5,
+              textTransform: 'uppercase',
+              color: 'var(--text-secondary)',
+              marginBottom: 8,
+            }}>
+              Latest
+            </p>
+            <div style={{ width: 40, height: 2, background: 'var(--mhj-brown)', marginTop: 8 }} />
+          </div>
 
           <div className="home-main-grid">
             {/* Left: Latest Posts */}
@@ -400,16 +403,19 @@ export default async function LandingPage() {
 
               {/* Most Read — 세 번째 */}
               <div style={{ marginTop: 40 }}>
-                <p style={{
-                  fontSize: 10,
-                  fontWeight: 900,
-                  letterSpacing: 5,
-                  textTransform: 'uppercase',
-                  color: 'var(--text-tertiary)',
-                  marginBottom: 24,
-                }}>
-                  Most Read
-                </p>
+                <div style={{ marginBottom: 24 }}>
+                  <p style={{
+                    fontSize: 12,
+                    fontWeight: 900,
+                    letterSpacing: 5,
+                    textTransform: 'uppercase',
+                    color: 'var(--text-tertiary)',
+                    marginBottom: 8,
+                  }}>
+                    Most Read
+                  </p>
+                  <div style={{ width: 40, height: 2, background: 'var(--mhj-brown)', marginTop: 8 }} />
+                </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {mostRead.map((blog, i) => (
@@ -430,9 +436,9 @@ export default async function LandingPage() {
                       <span
                         className="font-display"
                         style={{
-                          fontSize: 24,
+                          fontSize: 28,
                           fontWeight: 900,
-                          color: 'var(--text-tertiary)',
+                          color: 'var(--number-accent)',
                           lineHeight: 1,
                           minWidth: 32,
                           flexShrink: 0,
@@ -474,7 +480,9 @@ export default async function LandingPage() {
 
         {/* ═══════ §3.5 Explore by Topic ═══════ */}
         {Object.keys(categoryPosts).length > 0 && (
-          <ExploreByTopic categoryPosts={categoryPosts} />
+          <div style={{ background: 'var(--bg-warm)', width: '100%' }}>
+            <ExploreByTopic categoryPosts={categoryPosts} />
+          </div>
         )}
 
         {/* ═══════ §3.7 From the Archive ═══════ */}
@@ -750,6 +758,7 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
   return (
     <Link
       href={`/blog/${blog.slug}`}
+      className="blog-card-hover"
       style={{
         display: 'block',
         borderRadius: 12,
@@ -757,7 +766,6 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
         background: 'var(--bg-card)',
         padding: 12,
         textDecoration: 'none',
-        transition: 'opacity 0.3s ease',
       }}
     >
       {/* Thumbnail */}
@@ -843,18 +851,22 @@ function ExploreByTopic({ categoryPosts }: { categoryPosts: Record<string, Blog[
       width: '100%',
       boxSizing: 'border-box' as const,
       margin: '0 auto',
-      padding: '96px clamp(20px, 4vw, 48px) 0',
+      padding: '96px clamp(20px, 4vw, 48px) 96px',
     }}>
-      <p style={{
-        fontSize: 10,
-        fontWeight: 900,
-        letterSpacing: 5,
-        textTransform: 'uppercase',
-        color: 'var(--text-secondary)',
-        marginBottom: 48,
-      }}>
+      <h2
+        className="font-display"
+        style={{
+          fontSize: 28,
+          fontWeight: 900,
+          fontStyle: 'italic',
+          letterSpacing: -0.5,
+          color: 'var(--text)',
+          marginBottom: 8,
+        }}
+      >
         Explore by Topic
-      </p>
+      </h2>
+      <div style={{ width: 40, height: 2, background: 'var(--mhj-brown)', marginTop: 8, marginBottom: 48 }} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
         {Object.entries(categoryPosts).map(([category, posts]) => (
@@ -901,6 +913,7 @@ function ExploreByTopic({ categoryPosts }: { categoryPosts: Record<string, Blog[
                 <Link
                   key={blog.id}
                   href={`/blog/${blog.slug}`}
+                  className="blog-card-hover"
                   style={{
                     display: 'block',
                     borderRadius: 12,
@@ -908,7 +921,6 @@ function ExploreByTopic({ categoryPosts }: { categoryPosts: Record<string, Blog[
                     background: 'var(--bg-card)',
                     padding: 12,
                     textDecoration: 'none',
-                    transition: 'opacity 0.3s ease',
                   }}
                 >
                   <div style={{

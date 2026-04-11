@@ -184,14 +184,18 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
     );
   }
 
+  const isDarkVariant = location === 'homepage_bottom';
+
   /* ── Full version ── */
   return (
     <section style={{
-      padding: reducedPadding
-        ? 'clamp(24px, 3vw, 48px) clamp(16px, 2vw, 24px)'
-        : 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)',
-      background: 'var(--bg-surface)',
-      borderTop: '1px solid var(--border)',
+      padding: isDarkVariant
+        ? 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)'
+        : reducedPadding
+          ? 'clamp(24px, 3vw, 48px) clamp(16px, 2vw, 24px)'
+          : 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)',
+      background: isDarkVariant ? 'var(--newsletter-dark-bg)' : 'var(--bg-surface)',
+      borderTop: isDarkVariant ? 'none' : '1px solid var(--border)',
     }}>
       <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
 
@@ -206,8 +210,8 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
         }}>
           <span style={{
             display: 'inline-block',
-            background: '#FEF3C7',
-            color: '#92400E',
+            background: isDarkVariant ? 'rgba(255,255,255,0.15)' : '#FEF3C7',
+            color: isDarkVariant ? 'var(--newsletter-dark-text)' : '#92400E',
             fontSize: 10,
             fontWeight: 700,
             padding: '2px 10px',
@@ -221,7 +225,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             fontWeight: 900,
             letterSpacing: 5,
             textTransform: 'uppercase',
-            color: 'var(--text-tertiary)',
+            color: isDarkVariant ? 'rgba(250,248,245,0.6)' : 'var(--text-tertiary)',
           }}>
             NZ School Starter Pack
           </span>
@@ -235,7 +239,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             fontWeight: 900,
             fontStyle: 'italic',
             letterSpacing: -1.5,
-            color: 'var(--text)',
+            color: isDarkVariant ? 'var(--newsletter-dark-text)' : 'var(--text)',
             lineHeight: 1.1,
             marginBottom: reducedPadding ? 24 : 16,
           }}
@@ -248,14 +252,14 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
         {!reducedPadding && (
           <p style={{
             fontSize: 15,
-            color: 'var(--text-secondary)',
+            color: isDarkVariant ? 'rgba(250,248,245,0.7)' : 'var(--text-secondary)',
             fontWeight: 500,
             lineHeight: 1.7,
             marginBottom: 48,
           }}>
             Enrolment checklist, school zone guide & budget breakdown
             <br />
-            <span style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>
+            <span style={{ color: isDarkVariant ? 'rgba(250,248,245,0.4)' : 'var(--text-tertiary)', fontSize: 13 }}>
               — plus weekly stories from Mairangi Bay.
               No spam. Unsubscribe anytime.
             </span>
@@ -278,9 +282,9 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
                 style={{
                   padding: '16px 24px',
                   borderRadius: 8,
-                  border: '1px solid var(--border-strong)',
-                  background: 'var(--bg)',
-                  color: 'var(--text)',
+                  border: `1px solid ${isDarkVariant ? 'rgba(255,255,255,0.2)' : 'var(--border-medium)'}`,
+                  background: isDarkVariant ? 'rgba(255,255,255,0.08)' : 'var(--bg)',
+                  color: isDarkVariant ? 'var(--newsletter-dark-text)' : 'var(--text)',
                   fontSize: 15,
                   fontWeight: 500,
                   outline: 'none',
@@ -303,9 +307,9 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
                   flex: 1,
                   padding: '16px 24px',
                   borderRadius: 8,
-                  border: '1px solid var(--border-strong)',
-                  background: 'var(--bg)',
-                  color: 'var(--text)',
+                  border: `1px solid ${isDarkVariant ? 'rgba(255,255,255,0.2)' : 'var(--border-medium)'}`,
+                  background: isDarkVariant ? 'rgba(255,255,255,0.08)' : 'var(--bg)',
+                  color: isDarkVariant ? 'var(--newsletter-dark-text)' : 'var(--text)',
                   fontSize: 15,
                   fontWeight: 500,
                   outline: 'none',
@@ -319,9 +323,9 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
                 style={{
                   padding: '16px 24px',
                   borderRadius: 8,
-                  background: status === 'loading' ? 'rgba(0,0,0,0.4)' : 'var(--text)',
+                  background: status === 'loading' ? 'rgba(0,0,0,0.4)' : isDarkVariant ? 'var(--newsletter-dark-text)' : 'var(--text)',
                   border: 'none',
-                  color: 'var(--bg)',
+                  color: isDarkVariant ? 'var(--newsletter-dark-bg)' : 'var(--bg)',
                   fontSize: 12,
                   fontWeight: 900,
                   letterSpacing: 2,
@@ -337,9 +341,9 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             </div>
 
             {/* Privacy 동의 문구 */}
-            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
+            <p style={{ fontSize: 11, color: isDarkVariant ? 'rgba(250,248,245,0.4)' : 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
               By subscribing, you agree to our{' '}
-              <Link href="/privacy" style={{ color: 'var(--text-tertiary)', textDecoration: 'underline' }}>
+              <Link href="/privacy" style={{ color: isDarkVariant ? 'rgba(250,248,245,0.4)' : 'var(--text-tertiary)', textDecoration: 'underline' }}>
                 Privacy Policy
               </Link>.
             </p>
