@@ -113,7 +113,7 @@ export function CoverSlide(input: CarouselInput) {
           left: 80,
           right: 80,
           height: 1,
-          backgroundColor: '#E5E0D8',
+          backgroundColor: '#CBD5E1',
         }}
       />
       <div

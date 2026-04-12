@@ -16,7 +16,7 @@ function footerElements(slideNumber: number, totalSlides: number) {
         left: 80,
         right: 80,
         height: 1,
-        backgroundColor: '#E5E0D8',
+        backgroundColor: '#CBD5E1',
       }}
     />,
     // Footer text
@@ -96,7 +96,7 @@ function LeftAlignSlide(point: CarouselPoint, pointIndex: number, totalSlides: n
       {/* Gold divider */}
       <div
         style={{
-          width: 60,
+          width: 120,
           height: 3,
           backgroundColor: '#C9A96E',
           marginTop: 24,
@@ -154,9 +154,9 @@ function CircleSlide(point: CarouselPoint, pointIndex: number, totalSlides: numb
       {/* Cream circle */}
       <div
         style={{
-          width: 500,
-          height: 500,
-          borderRadius: 250,
+          width: 600,
+          height: 600,
+          borderRadius: 300,
           backgroundColor: '#FAF8F5',
           display: 'flex',
           flexDirection: 'column',
@@ -229,7 +229,7 @@ function ListSlide(point: CarouselPoint, pointIndex: number, totalSlides: number
           fontWeight: 700,
           fontSize: 14,
           letterSpacing: 4,
-          color: '#C9A96E',
+          color: '#8A6B4F',
           marginBottom: 40,
           display: 'flex',
         }}
@@ -250,33 +250,61 @@ function ListSlide(point: CarouselPoint, pointIndex: number, totalSlides: number
       >
         {point.title}
       </span>
-      {/* List items with dividers */}
-      {listItems.map((item, i) => (
-        <div key={i} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-          {i > 0 && (
+      {/* List items — 2-column with dashed dividers */}
+      {listItems.map((item, i) => {
+        const parts = item.includes(' — ') ? item.split(' — ') : [item, ''];
+        const leftText = parts[0].trim();
+        const rightText = parts[1]?.trim() || '';
+        return (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            {i > 0 && (
+              <div
+                style={{
+                  width: '100%',
+                  height: 0,
+                  borderTop: '1px dashed #E5E0D8',
+                }}
+              />
+            )}
             <div
               style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '20px 0',
                 width: '100%',
-                height: 1,
-                backgroundColor: '#E5E0D8',
               }}
-            />
-          )}
-          <span
-            style={{
-              fontFamily: '"Noto Sans KR", sans-serif',
-              fontWeight: 400,
-              fontSize: 32,
-              lineHeight: 1.5,
-              color: '#3D2E1F',
-              padding: '20px 0',
-              display: 'flex',
-            }}
-          >
-            {item}
-          </span>
-        </div>
-      ))}
+            >
+              <span
+                style={{
+                  fontFamily: '"Noto Sans KR", sans-serif',
+                  fontWeight: 400,
+                  fontSize: 32,
+                  lineHeight: 1.5,
+                  color: '#3D2E1F',
+                  display: 'flex',
+                }}
+              >
+                {leftText}
+              </span>
+              {rightText ? (
+                <span
+                  style={{
+                    fontFamily: '"Noto Sans KR", sans-serif',
+                    fontWeight: 300,
+                    fontSize: 26,
+                    color: '#8A6B4F',
+                    display: 'flex',
+                  }}
+                >
+                  {rightText}
+                </span>
+              ) : null}
+            </div>
+          </div>
+        );
+      })}
       {footerElements(slideNumber, totalSlides)}
     </div>
   );
@@ -332,11 +360,12 @@ function KeywordSlide(point: CarouselPoint, pointIndex: number, totalSlides: num
       >
         {keyword}
       </span>
-      {/* Sub title */}
+      {/* Sub title — Playfair italic for editorial contrast */}
       <span
         style={{
-          fontFamily: '"Noto Sans KR", sans-serif',
-          fontWeight: 700,
+          fontFamily: 'Playfair Display, serif',
+          fontWeight: 400,
+          fontStyle: 'italic',
           fontSize: 36,
           color: '#1A1A1A',
           marginTop: 16,
