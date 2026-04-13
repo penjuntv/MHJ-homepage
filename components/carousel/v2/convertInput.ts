@@ -1,6 +1,13 @@
-// CarouselInput → SlideConfig[] 변환 (v1 → v2 브리지)
-import type { CarouselInput } from '../types';
-import type { SlideConfig } from '../types';
+// CarouselInput → SlideConfig[] 변환 (v2 — 다양한 레이아웃 자동 배정)
+import type { CarouselInput, SlideConfig, CarouselLayoutType } from '../types';
+
+// 콘텐츠 포인트 슬라이드에 순환 배정할 레이아웃
+const CONTENT_LAYOUTS: CarouselLayoutType[] = [
+  'content-step',
+  'content-editorial',
+  'content-split',
+  'content-photo-overlay',
+];
 
 export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
   const slides: SlideConfig[] = [];
@@ -8,27 +15,29 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
   // 슬라이드 1: 커버
   slides.push({
     id: 1,
-    layout: 'cover-minimal',
+    layout: 'cover-arch',
     title: input.title || 'MHJ',
     subtitle: input.category || '',
+    imageUrl: input.coverImageUrl,
+    stepNumber: 1,
   });
 
-  // 슬라이드 2: 컨텍스트 (subtitle / 도입부)
+  // 슬라이드 2: 컨텍스트 (인용 스타일)
   slides.push({
     id: 2,
-    layout: 'content-editorial',
+    layout: 'content-quote',
     title: input.subtitle || '',
-    body: input.subtitle || '',
+    body: input.subtitle || 'Why this matters',
     stepNumber: 2,
   });
 
-  // 슬라이드 3-6: 콘텐츠 포인트
+  // 슬라이드 3-6: 콘텐츠 포인트 (다양한 레이아웃 순환)
   const points = input.points ?? [];
   for (let i = 0; i < 4; i++) {
     const pt = points[i];
     slides.push({
       id: i + 3,
-      layout: 'content-editorial',
+      layout: CONTENT_LAYOUTS[i % CONTENT_LAYOUTS.length],
       title: pt?.title || '',
       body: pt?.body || pt?.highlight || '',
       imageUrl: input.coverImageUrl,
@@ -40,7 +49,7 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
   slides.push({
     id: 7,
     layout: 'visual-break',
-    title: input.pullQuote || '',
+    title: input.pullQuote ? '' : '',
     body: input.pullQuote || '',
     imageUrl: input.visualImageUrl || input.coverImageUrl,
     stepNumber: 7,
@@ -53,6 +62,7 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
     layout: 'summary-checklist',
     title: 'Key Takeaways',
     body: summaryText,
+    subtitle: (input.summaryKr ?? []).filter(Boolean).join(' · ') || undefined,
     stepNumber: 8,
   });
 
@@ -62,6 +72,7 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
     layout: 'yussi-take',
     title: "Yussi's Take",
     body: input.yussiTake || '',
+    subtitle: input.yussiTakeKr || undefined,
     stepNumber: 9,
   });
 

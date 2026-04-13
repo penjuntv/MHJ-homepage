@@ -2,58 +2,101 @@
 
 import { forwardRef } from 'react';
 import type { SlideConfig } from '../types';
+
+// Covers (7)
 import CoverMinimal from './layouts/CoverMinimal';
+import CoverArch from './layouts/CoverArch';
+import CoverFullImage from './layouts/CoverFullImage';
+import CoverSplit from './layouts/CoverSplit';
+import CoverPolaroid from './layouts/CoverPolaroid';
+import CoverMagazine from './layouts/CoverMagazine';
+import CoverDark from './layouts/CoverDark';
+
+// Content (11)
 import ContentEditorial from './layouts/ContentEditorial';
+import ContentStep from './layouts/ContentStep';
+import ContentSplit from './layouts/ContentSplit';
+import ContentQuote from './layouts/ContentQuote';
+import ContentBoldNumber from './layouts/ContentBoldNumber';
+import ContentPhotoOverlay from './layouts/ContentPhotoOverlay';
+import ContentAbstract from './layouts/ContentAbstract';
+import ContentList from './layouts/ContentList';
+import ContentContinuousLine from './layouts/ContentContinuousLine';
+import ContentArchPhoto from './layouts/ContentArchPhoto';
+import ContentStatGrid from './layouts/ContentStatGrid';
+
+// Infographic (2)
+import ContentBarChart from './layouts/ContentBarChart';
+import ContentDonutChart from './layouts/ContentDonutChart';
+
+// Style (2)
+import ContentNeoBrutalism from './layouts/ContentNeoBrutalism';
+import ContentSocialQuote from './layouts/ContentSocialQuote';
+
+// Special (4)
+import SummaryChecklist from './layouts/SummaryChecklist';
+import YussiTake from './layouts/YussiTake';
+import VisualBreak from './layouts/VisualBreak';
 import CtaMinimal from './layouts/CtaMinimal';
+
+// Timeline (1)
+import ContentTimeline from './layouts/ContentTimeline';
 
 interface Props {
   slide: SlideConfig;
-  /** 미리보기용 scale (1080×1350 → 표시 크기). 기본 1 = 실제 크기 */
   scale?: number;
 }
 
+const LAYOUT_MAP: Record<string, React.FC<{ slide: SlideConfig }>> = {
+  // Covers
+  'cover-minimal': CoverMinimal,
+  'cover-arch': CoverArch,
+  'cover-full-image': CoverFullImage,
+  'cover-split': CoverSplit,
+  'cover-polaroid': CoverPolaroid,
+  'cover-magazine': CoverMagazine,
+  'cover-dark': CoverDark,
+
+  // Content
+  'content-editorial': ContentEditorial,
+  'content-step': ContentStep,
+  'content-split': ContentSplit,
+  'content-quote': ContentQuote,
+  'content-bold-number': ContentBoldNumber,
+  'content-photo-overlay': ContentPhotoOverlay,
+  'content-abstract': ContentAbstract,
+  'content-list': ContentList,
+  'content-continuous-line': ContentContinuousLine,
+  'content-arch-photo': ContentArchPhoto,
+  'content-stat-grid': ContentStatGrid,
+
+  // Infographic
+  'content-bar-chart': ContentBarChart,
+  'content-donut-chart': ContentDonutChart,
+
+  // Style
+  'content-neo-brutalism': ContentNeoBrutalism,
+  'content-social-quote': ContentSocialQuote,
+
+  // Special
+  'summary-checklist': SummaryChecklist,
+  'yussi-take': YussiTake,
+  'visual-break': VisualBreak,
+  'cta-minimal': CtaMinimal,
+
+  // Timeline
+  'content-timeline': ContentTimeline,
+};
+
 /**
- * SlideRenderer — SlideConfig → React DOM
+ * SlideRenderer — SlideConfig → React DOM (27 layouts)
  * ref를 attach하면 html-to-image로 캡처 가능.
- * scale prop으로 Admin 미리보기 축소 표시.
  */
 const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, scale = 1 }, ref) => {
   const W = 1080;
   const H = 1350;
 
-  let Content: React.FC<{ slide: SlideConfig }>;
-  switch (slide.layout) {
-    case 'cover-minimal':
-    case 'cover-arch':
-    case 'cover-full-image':
-    case 'cover-split':
-    case 'cover-polaroid':
-    case 'cover-dark':
-      Content = CoverMinimal;
-      break;
-    case 'content-editorial':
-    case 'content-step':
-    case 'content-split':
-    case 'content-quote':
-    case 'content-bold-number':
-    case 'content-photo-overlay':
-    case 'content-abstract':
-    case 'content-list':
-    case 'content-continuous-line':
-    case 'content-arch-photo':
-    case 'summary-checklist':
-      Content = ContentEditorial;
-      break;
-    case 'yussi-take':
-    case 'visual-break':
-      Content = ContentEditorial;
-      break;
-    case 'cta-minimal':
-      Content = CtaMinimal;
-      break;
-    default:
-      Content = CoverMinimal;
-  }
+  const Content = LAYOUT_MAP[slide.layout] ?? CoverMinimal;
 
   return (
     <div

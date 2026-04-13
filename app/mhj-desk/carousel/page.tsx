@@ -4,7 +4,7 @@
 // 렌더링: html-to-image (클라이언트) — Satori 서버 렌더링 교체
 // docs/CAROUSEL_V2_MASTER_PLAN.md 세션 1
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase-browser';
@@ -25,6 +25,7 @@ import ExportEngine from '@/components/carousel/v2/ExportEngine';
 
 import BlogSelector from './_components/BlogSelector';
 import CarouselEditor from './_components/CarouselEditor';
+import AiGeneratePanel from './_components/AiGeneratePanel';
 import CaptionPanel, { type CaptionState } from './_components/CaptionPanel';
 import HashtagManager from './_components/HashtagManager';
 import RecentList from './_components/RecentList';
@@ -61,7 +62,7 @@ const EMPTY_CAPTION: CaptionState = {
 };
 
 export default function CarouselAdminPage() {
-  const [mode, setMode] = useState<'blog' | 'independent'>('blog');
+  const [mode, setMode] = useState<'blog' | 'ai' | 'manual'>('blog');
   const [blogId, setBlogId] = useState<number | null>(null);
   const [blogSlug, setBlogSlug] = useState<string>('');
   const [contentId, setContentId] = useState<number | null>(null);
@@ -74,6 +75,50 @@ export default function CarouselAdminPage() {
   const [caption, setCaption] = useState<CaptionState>(EMPTY_CAPTION);
   const [altTexts, setAltTexts] = useState<string[]>([]);
   const [recentRefresh, setRecentRefresh] = useState(0);
+
+  // Undo/Redo — yussi-inata 패턴
+  const pastRef = useRef<SlideConfig[][]>([]);
+  const futureRef = useRef<SlideConfig[][]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [undoVersion, setUndoVersion] = useState(0); // force re-render on undo/redo state change
+
+  const pushHistory = useCallback((current: SlideConfig[]) => {
+    pastRef.current = [...pastRef.current, current];
+    futureRef.current = [];
+    setUndoVersion((n) => n + 1);
+  }, []);
+
+  const handleUpdateSlide = useCallback(
+    (index: number, patch: Partial<SlideConfig>) => {
+      setSlides((prev) => {
+        pushHistory(prev);
+        return prev.map((s, i) => (i === index ? { ...s, ...patch } : s));
+      });
+    },
+    [pushHistory],
+  );
+
+  const handleUndo = useCallback(() => {
+    if (pastRef.current.length === 0) return;
+    const previous = pastRef.current[pastRef.current.length - 1];
+    pastRef.current = pastRef.current.slice(0, -1);
+    setSlides((current) => {
+      futureRef.current = [current, ...futureRef.current];
+      return previous;
+    });
+    setUndoVersion((n) => n + 1);
+  }, []);
+
+  const handleRedo = useCallback(() => {
+    if (futureRef.current.length === 0) return;
+    const next = futureRef.current[0];
+    futureRef.current = futureRef.current.slice(1);
+    setSlides((current) => {
+      pastRef.current = [...pastRef.current, current];
+      return next;
+    });
+    setUndoVersion((n) => n + 1);
+  }, []);
 
   const handleSelectBlog = useCallback((row: CarouselBlogRow) => {
     setMode('blog');
@@ -100,7 +145,7 @@ export default function CarouselAdminPage() {
   }, []);
 
   const handleNewIndependent = useCallback(() => {
-    setMode('independent');
+    setMode('manual');
     setBlogId(null);
     setBlogSlug('independent');
     setContentId(null);
@@ -109,6 +154,46 @@ export default function CarouselAdminPage() {
     setCurrentSlide(0);
     setCaption(EMPTY_CAPTION);
     setAltTexts([]);
+  }, []);
+
+  // AI Generate 모드: Gemini가 반환한 SlideConfig[] 직접 적용
+  const handleAiSlides = useCallback((aiSlides: SlideConfig[]) => {
+    setSlides(aiSlides);
+    setCurrentSlide(0);
+    pastRef.current = [];
+    futureRef.current = [];
+    setUndoVersion((n) => n + 1);
+    // 간단한 캡션/해시태그 생성
+    setCaption({
+      en: aiSlides[0]?.title ? `${aiSlides[0].title}\n\n👉 Swipe for the full story\n\n💾 Save · 📩 Share · 💬 Comment\n\n#MHJnz` : '',
+      kr: '',
+      hashtags: ['#MHJnz'],
+    });
+    setAltTexts(aiSlides.map((s, i) => `Slide ${i + 1}: ${s.title || s.layout}`));
+  }, []);
+
+  // Manual 모드: 10개 빈 슬라이드 생성
+  const handleManualCreate = useCallback(() => {
+    const defaultLayouts: SlideConfig[] = [
+      { id: 1, layout: 'cover-minimal', title: 'Your Title Here', subtitle: 'CATEGORY', stepNumber: 1 },
+      { id: 2, layout: 'content-quote', title: '', body: 'Your quote or introduction here', stepNumber: 2 },
+      { id: 3, layout: 'content-step', title: 'Point 1', body: 'Description...', stepNumber: 3 },
+      { id: 4, layout: 'content-editorial', title: 'Point 2', body: 'Description...', stepNumber: 4 },
+      { id: 5, layout: 'content-split', title: 'Point 3', body: 'Description...', stepNumber: 5 },
+      { id: 6, layout: 'content-photo-overlay', title: 'Point 4', body: 'Description...', stepNumber: 6 },
+      { id: 7, layout: 'visual-break', title: '', body: 'A powerful quote', stepNumber: 7 },
+      { id: 8, layout: 'summary-checklist', title: 'Key Takeaways', body: 'Item 1\nItem 2\nItem 3\nItem 4', stepNumber: 8 },
+      { id: 9, layout: 'yussi-take', title: "Yussi's Take", body: 'Personal perspective...', stepNumber: 9 },
+      { id: 10, layout: 'cta-minimal', title: 'Save & share this.', subtitle: 'www.mhj.nz', stepNumber: 10 },
+    ];
+    setSlides(defaultLayouts);
+    setCurrentSlide(0);
+    pastRef.current = [];
+    futureRef.current = [];
+    setUndoVersion((n) => n + 1);
+    setCaption(EMPTY_CAPTION);
+    setAltTexts([]);
+    toast.success('10장 빈 슬라이드 생성됨 — 편집하세요');
   }, []);
 
   // v2: 클라이언트 사이드 슬라이드 생성 (서버 API 불필요)
@@ -239,19 +324,90 @@ export default function CarouselAdminPage() {
       >
         {/* LEFT: source + editor */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-          <BlogSelector
-            mode={mode}
-            selectedBlogId={blogId}
-            onSelectBlog={handleSelectBlog}
-            onNewIndependent={handleNewIndependent}
-          />
+          {/* MODE TABS — Blog | AI Generate | Manual */}
+          <div style={{
+            display: 'flex', gap: 0, background: '#F1F5F9', borderRadius: 10, padding: 3,
+          }}>
+            {([
+              { id: 'blog' as const, label: 'Blog' },
+              { id: 'ai' as const, label: 'AI Generate' },
+              { id: 'manual' as const, label: 'Manual' },
+            ]).map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setMode(tab.id);
+                  if (tab.id === 'manual') handleNewIndependent();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: mode === tab.id ? '#FFFFFF' : 'transparent',
+                  color: mode === tab.id ? '#1A1A1A' : '#64748B',
+                  fontSize: 11,
+                  fontWeight: 900,
+                  letterSpacing: 1.5,
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  boxShadow: mode === tab.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-          <CarouselEditor
-            input={input}
-            onChange={setInput}
-            onGenerate={handleGenerate}
-            isGenerating={generating}
-          />
+          {/* Blog mode */}
+          {mode === 'blog' && (
+            <>
+              <BlogSelector
+                mode="blog"
+                selectedBlogId={blogId}
+                onSelectBlog={handleSelectBlog}
+                onNewIndependent={handleNewIndependent}
+              />
+              <CarouselEditor
+                input={input}
+                onChange={setInput}
+                onGenerate={handleGenerate}
+                isGenerating={generating}
+              />
+            </>
+          )}
+
+          {/* AI Generate mode */}
+          {mode === 'ai' && (
+            <AiGeneratePanel onSlidesGenerated={handleAiSlides} />
+          )}
+
+          {/* Manual mode */}
+          {mode === 'manual' && (
+            <div style={{
+              background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: 20,
+              display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center',
+            }}>
+              <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', margin: 0, alignSelf: 'flex-start' }}>
+                Manual Mode
+              </p>
+              <p style={{ fontSize: 13, color: '#64748B', textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
+                10장의 빈 슬라이드를 생성하고, 오른쪽 편집 패널에서 레이아웃·텍스트·색상을 자유롭게 편집하세요.
+              </p>
+              <button
+                type="button"
+                onClick={handleManualCreate}
+                style={{
+                  padding: '14px 28px', borderRadius: 10, border: 'none',
+                  background: '#1A1A1A', color: '#FFFFFF',
+                  fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+                }}
+              >
+                Create 10 Empty Slides
+              </button>
+            </div>
+          )}
 
           {/* SAVE BUTTONS */}
           <div
@@ -277,7 +433,7 @@ export default function CarouselAdminPage() {
             >
               Save
             </p>
-            {mode === 'blog' && (
+            {mode === 'blog' && blogId && (
               <button
                 type="button"
                 onClick={handleSaveBlog}
@@ -353,6 +509,11 @@ export default function CarouselAdminPage() {
             slides={slides}
             currentIndex={currentSlide}
             onIndexChange={setCurrentSlide}
+            onUpdateSlide={handleUpdateSlide}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={pastRef.current.length > 0}
+            canRedo={futureRef.current.length > 0}
           />
           <CaptionPanel caption={caption} onChange={setCaption} altTexts={altTexts} />
           <HashtagManager
@@ -372,7 +533,7 @@ export default function CarouselAdminPage() {
             toast.error('이 콘텐츠는 데이터가 없습니다');
             return;
           }
-          setMode(row.blog_id ? 'blog' : 'independent');
+          setMode(row.blog_id ? 'blog' : 'manual');
           setBlogId(row.blog_id);
           setBlogSlug(row.title.replace(/\s+/g, '-').toLowerCase().slice(0, 40) || 'recent');
           setContentId(row.id);

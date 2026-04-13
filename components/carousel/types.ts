@@ -4,13 +4,14 @@ import type { CarouselStyle } from './tokens';
 
 // ─── v2 Layout Types ───────────────────────────────────────────────
 export type CarouselLayoutType =
-  // 커버 (5종)
+  // 커버 (6종)
   | 'cover-arch'
   | 'cover-full-image'
   | 'cover-split'
   | 'cover-minimal'
   | 'cover-polaroid'
-  // 콘텐츠 (8종)
+  | 'cover-magazine'
+  // 콘텐츠 (11종)
   | 'content-editorial'
   | 'content-step'
   | 'content-split'
@@ -19,15 +20,22 @@ export type CarouselLayoutType =
   | 'content-photo-overlay'
   | 'content-abstract'
   | 'content-list'
+  | 'content-stat-grid'
+  | 'content-bar-chart'
+  | 'content-donut-chart'
   // 특수 (4종)
   | 'summary-checklist'
   | 'yussi-take'
   | 'visual-break'
   | 'cta-minimal'
-  // 추가 (3종)
+  // 스타일 (3종) — yussi-inata
+  | 'content-social-quote'
+  | 'content-neo-brutalism'
   | 'content-continuous-line'
+  // 추가 (3종)
   | 'content-arch-photo'
-  | 'cover-dark';
+  | 'cover-dark'
+  | 'content-timeline';
 
 export interface SlideConfig {
   id: number;                      // 1-10
@@ -41,6 +49,12 @@ export interface SlideConfig {
   bgColor?: string;
   textColor?: string;
   accentColor?: string;
+  // v2 편집 기능 — yussi-inata에서 이식
+  imageFilter?: string;
+  textBackground?: string;
+  fontTheme?: string;
+  globalTexture?: 'none' | 'noise' | 'paper';
+  accentIcon?: string;
 }
 
 export interface CarouselV2Output {
