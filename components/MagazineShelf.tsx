@@ -1,9 +1,8 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import SafeImage from '@/components/SafeImage';
-import { ArrowRight, MousePointer2, BookOpen } from 'lucide-react';
 import type { Magazine } from '@/lib/types';
 import { trackEvent } from '@/lib/analytics';
 
@@ -13,344 +12,273 @@ interface Props {
   magazineHint?: string;
 }
 
-/* Coming Soon 판별: 현재 모든 published 매거진은 클릭 가능.
-   상세 페이지에서 표지/기사 유무에 따라 적절히 렌더링. */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const isComing = (m: Magazine) => false;
+/* 이슈별 Spine 배경색 — DB에 bg_color가 있으면 사용, 없으면 월 기반 fallback */
+function getSpineColor(m: Magazine): string {
+  if (m.bg_color) return m.bg_color;
+  const month = (m.month_name || '').toLowerCase();
+  const map: Record<string, string> = {
+    jan: '#2a3a4a', feb: '#c8a020', mar: '#1a2e1a',
+    apr: '#4a3520', may: '#2a4a3a', jun: '#3a2a4a',
+    jul: '#0f1e2d', aug: '#3a2020', sep: '#2a3a2a',
+    oct: '#4a3a1a', nov: '#1a3a3a', dec: '#071509',
+  };
+  return map[month] || '#3a3025';
+}
 
 export default function MagazineShelf({
   magazines,
-  magazineTitle = 'Magazine Shelf',
-  magazineHint = 'Scroll to explore',
+  magazineTitle,
+  magazineHint,
 }: Props) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const outerRef = useRef<HTMLDivElement>(null);
-  /* 0 = 첫 진입 시 최신 이슈(첫 번째)가 기본 펼침 */
-  const [hovered, setHovered] = useState<number | null>(0);
-  /* 클릭 애니메이션 중인 인덱스 */
-  const [clicking, setClicking] = useState<number | null>(null);
+  /* 모바일 터치: 탭으로 active 토글 */
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const router = useRouter();
 
-  /* published=true인 모든 매거진을 서가에 표시 */
-  const visibleMags = magazines;
-
-  /* 마우스 휠 → 가로 스크롤 */
-  const handleWheel = useCallback((e: WheelEvent) => {
-    if (scrollRef.current) {
-      e.preventDefault();
-      scrollRef.current.scrollLeft += e.deltaY * 0.55;
+  const handleClick = useCallback((m: Magazine, idx: number) => {
+    // 모바일: 첫 탭은 확장, 두번째 탭은 이동
+    if (activeIdx !== idx) {
+      setActiveIdx(idx);
+      return;
     }
-  }, []);
-
-  useEffect(() => {
-    const el = outerRef.current;
-    if (!el) return;
-    el.addEventListener('wheel', handleWheel, { passive: false });
-    return () => el.removeEventListener('wheel', handleWheel);
-  }, [handleWheel]);
-
-  /* 클릭: scale → 짧은 지연 후 이동 */
-  const handleClick = (m: Magazine, idx: number) => {
-    if (isComing(m)) return;
-    setClicking(idx);
     trackEvent('magazine_open', { issue_id: m.id, issue_title: m.title });
-    setTimeout(() => router.push(`/magazine/${m.id}`), 280);
-  };
+    router.push(`/magazine/${m.id}`);
+  }, [activeIdx, router]);
 
-  const somethingHovered = hovered !== null;
+  const handleOpen = useCallback((e: React.MouseEvent, m: Magazine) => {
+    e.stopPropagation();
+    trackEvent('magazine_open', { issue_id: m.id, issue_title: m.title });
+    router.push(`/magazine/${m.id}`);
+  }, [router]);
 
   return (
-    <div
-      ref={outerRef}
-      className="animate-fade-in"
-      style={{ display: 'flex', flexDirection: 'column', minHeight: '85vh', background: 'var(--shelf-bg)' }}
+    <section
+      style={{
+        padding: 'clamp(48px, 6vw, 96px) clamp(16px, 4vw, 48px)',
+        background: 'var(--bg)',
+      }}
     >
-      {/* 헤더 */}
-      <div style={{ padding: '40px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-        <h2
-          className="type-caption"
-          style={{ color: 'var(--shelf-gradient-accent)', fontStyle: 'italic', letterSpacing: 5, margin: 0, opacity: 0.8 }}
-        >
-          {magazineTitle}
-        </h2>
-        <div style={{
-          display: 'flex', fontSize: 10, fontWeight: 700,
-          color: 'var(--shelf-gradient-accent)', textTransform: 'uppercase',
-          letterSpacing: 3, alignItems: 'center', gap: 8, opacity: 0.6,
-        }}>
-          <MousePointer2 size={12} /> {magazineHint}
-        </div>
-      </div>
+      {/* 레이블 */}
+      <p
+        style={{
+          fontSize: 10,
+          fontWeight: 900,
+          letterSpacing: 5,
+          textTransform: 'uppercase',
+          color: 'var(--text-tertiary)',
+          textAlign: 'center',
+          marginBottom: 40,
+        }}
+      >
+        {magazineTitle || 'MAGAZINE'}
+      </p>
 
-      {/* ── 서가 컨테이너 ──
-          paddingTop: 48px — translateY(-20px)가 이 여백 안으로 들어와서 클리핑 안 됨
-          height: 72vh   — 여분 높이 포함 */}
-      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flexGrow: 1, display: 'flex', alignItems: 'stretch' }}>
-          <div
-            ref={scrollRef}
-            className="no-scrollbar"
-            style={{
-              display: 'flex',
-              alignItems: 'flex-end',
-              gap: 0,
-              padding: '48px 8vw 0',
-              overflowX: 'auto',
-              height: '72vh',
-              width: '100%',
-            }}
-          >
-          {visibleMags.map((item, index) => {
-            const coming    = isComing(item);
-            const isActive  = !coming && hovered === index;
-            const isClicking = clicking === index;
+      {/* 책장 */}
+      <div className="bookshelf">
+        {magazines.map((mag, idx) => {
+          const spineColor = getSpineColor(mag);
+          const isActive = activeIdx === idx;
+          const isLight = isLightColor(spineColor);
 
-            /* ── 너비 결정 ── */
-            const width = isActive
-              ? 'clamp(320px, 38vw, 480px)'
-              : 'clamp(80px, 7vw, 100px)';
+          return (
+            <div
+              key={mag.id}
+              className={`shelf-book${isActive ? ' shelf-book--active' : ''}`}
+              onClick={() => handleClick(mag, idx)}
+              onMouseEnter={() => setActiveIdx(idx)}
+              onMouseLeave={() => setActiveIdx(null)}
+              style={{ background: spineColor }}
+            >
+              {/* ── Spine (기본 표시) ── */}
+              <div className="shelf-book__spine">
+                {/* 날짜 (맨 위, vertical이므로 왼쪽 끝) */}
+                <span
+                  style={{
+                    fontSize: 8,
+                    letterSpacing: 1,
+                    color: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {mag.year} {mag.month_name}
+                </span>
 
-            /* ── 3D + 리프트 transform ── */
-            const transform = isClicking
-              ? 'perspective(1200px) translateY(-28px) scale(1.06)'
-              : isActive
-              ? 'perspective(1200px) translateY(-20px) rotateY(-3deg)'
-              : (somethingHovered && !coming)
-              ? 'scale(0.98)'
-              : 'scale(1)';
+                {/* 이슈 타이틀 */}
+                <span
+                  style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 11,
+                    fontWeight: 900,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
+                    color: isLight ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.9)',
+                    lineHeight: 1,
+                  }}
+                >
+                  {mag.title}
+                </span>
 
-            /* ── 필터 ── */
-            const filterVal = coming
-              ? 'grayscale(50%)'
-              : (somethingHovered && !isActive)
-              ? 'brightness(0.7)'
-              : 'brightness(1)';
+                {/* 이슈 번호 */}
+                <span
+                  style={{
+                    fontSize: 7,
+                    letterSpacing: 1,
+                    color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)',
+                  }}
+                >
+                  Vol.{mag.issue_number || idx + 1}
+                </span>
+              </div>
 
-            /* ── 그림자 ── */
-            /* DESIGN_RULES §11.5 예외: translateY 호버 허용 (서가 물리적 메타포) */
-            const shadow = (isActive || isClicking)
-              ? '0 20px 60px rgba(0,0,0,0.25), 0 8px 20px rgba(0,0,0,0.12)'
-              : '0 4px 12px rgba(0,0,0,0.08), inset -1px 0 0 rgba(0,0,0,0.04), inset 1px 0 0 rgba(0,0,0,0.02)';
-
-            return (
+              {/* ── Cover (호버 시 나타남) ── */}
               <div
-                key={item.id}
-                className="magazine-item"
-                onMouseEnter={() => { if (!coming) setHovered(index); }}
-                onMouseLeave={() => setHovered(null)}
-                onClick={() => handleClick(item, index)}
+                className="shelf-book__cover"
                 style={{
-                  width,
-                  cursor: coming ? 'default' : 'pointer',
-                  opacity: coming ? 0.4 : 1,
-                  transform,
-                  filter: filterVal,
-                  boxShadow: shadow,
-                  borderRight: isActive
-                    ? '1px solid rgba(0,0,0,0.06)'
-                    : '1px solid rgba(0,0,0,0.03)',
-                  background: 'var(--shelf-item-bg)',
-                  /* CSS 클래스 transition을 인라인으로 덮어씀 */
-                  transition: [
-                    'width 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
-                    'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
-                    'box-shadow 0.5s ease',
-                    'filter 0.4s ease',
-                    'opacity 0.4s ease',
-                  ].join(', '),
+                  background: spineColor,
+                  color: isLight ? '#1A1A1A' : '#FFFFFF',
                 }}
               >
-                {/* ── 배경: 이미지 or 그라디언트 ── */}
-                <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-                  {item.image_url ? (
-                    <>
-                      <SafeImage
-                        src={item.image_url}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                        style={{
-                          filter: isActive ? 'brightness(1.05)' : 'brightness(1)',
-                          transition: 'filter 0.6s',
-                        }}
-                      />
-                      <div style={{
-                        position: 'absolute', inset: 0,
-                        background: isActive ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.65)',
-                        transition: 'background 0.7s',
-                      }} />
-                      {isActive && (
-                        <div style={{
-                          position: 'absolute', inset: 0,
-                          background: 'linear-gradient(to top, rgba(5,5,20,0.95) 0%, rgba(5,5,20,0.6) 40%, rgba(5,5,20,0.1) 70%, transparent 100%)',
-                        }} />
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <div style={{
-                        position: 'absolute', inset: 0,
-                        background: isActive
-                          ? 'linear-gradient(160deg, var(--shelf-gradient-accent) 0%, var(--shelf-gradient-from) 50%, var(--shelf-item-bg) 100%)'
-                          : 'linear-gradient(160deg, var(--shelf-gradient-accent) 0%, var(--shelf-gradient-from) 100%)',
-                        transition: 'background 0.7s',
-                      }} />
-                      <div style={{
-                        position: 'absolute', top: '-30%', right: '-20%',
-                        width: '80%', height: '60%',
-                        borderRadius: '50%',
-                        background: 'rgba(255,255,255,0.08)',
-                        pointerEvents: 'none',
-                      }} />
-                    </>
+                {/* MHJ 브랜딩 */}
+                <span
+                  style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 8,
+                    fontStyle: 'italic',
+                    opacity: 0.6,
+                    marginBottom: 2,
+                  }}
+                >
+                  the
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 28,
+                    fontWeight: 900,
+                    letterSpacing: -1,
+                    lineHeight: 1,
+                    marginBottom: 2,
+                  }}
+                >
+                  MHJ
+                </span>
+                <span
+                  style={{
+                    fontSize: 5,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
+                    opacity: 0.5,
+                    marginBottom: 8,
+                  }}
+                >
+                  My Mairangi Journal
+                </span>
+
+                {/* 커버 이미지 */}
+                <div
+                  style={{
+                    width: '80%',
+                    flex: 1,
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    marginBottom: 8,
+                    minHeight: 0,
+                  }}
+                >
+                  {mag.image_url && (
+                    <SafeImage
+                      src={mag.image_url}
+                      alt={mag.title}
+                      fill
+                      className="object-cover"
+                    />
                   )}
                 </div>
 
-                {/* ── 콘텐츠 레이어 ── */}
-                <div style={{
-                  position: 'relative', zIndex: 10,
-                  height: '100%', width: '100%',
-                  display: 'flex', flexDirection: 'column',
-                  justifyContent: 'center', alignItems: 'center',
-                }}>
+                {/* 이슈 제목 */}
+                <span
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 900,
+                    letterSpacing: 1.5,
+                    textTransform: 'uppercase',
+                    textAlign: 'center',
+                    lineHeight: 1.2,
+                    marginBottom: 2,
+                  }}
+                >
+                  {mag.title}
+                </span>
 
-                  {/* Spine (비호버) */}
-                  <div style={{
-                    display: 'flex', flexDirection: 'column',
-                    justifyContent: 'space-between', alignItems: 'center',
-                    height: '100%', padding: '64px 0',
-                    position: 'absolute', inset: 0,
-                    overflow: 'hidden',
-                    opacity: isActive ? 0 : 1,
-                    transform: isActive ? 'scale(0.9)' : 'scale(1)',
-                    transition: 'all 0.5s',
-                    pointerEvents: isActive ? 'none' : 'auto',
-                  }}>
-                    {/* 연도 + 월 */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.9)', letterSpacing: 3 }}>
-                        {item.year}
-                      </span>
-                      <span style={{
-                        fontSize: 14, fontWeight: 900, color: 'white',
-                        textTransform: 'uppercase', background: 'rgba(255,255,255,0.15)',
-                        padding: '2px 8px', borderRadius: 2,
-                      }}>
-                        {item.month_name}
-                      </span>
-                    </div>
+                {/* Tagline */}
+                <span
+                  style={{
+                    fontSize: 5.5,
+                    opacity: 0.7,
+                    textAlign: 'center',
+                    marginBottom: 4,
+                  }}
+                >
+                  {mag.editor ? `Edited by ${mag.editor}` : 'A family journal'}
+                </span>
 
-                    {/* 세로 제목 */}
-                    <h3
-                      className="vertical-text spine-title"
-                      style={{
-                        textShadow: '0 0 20px rgba(148,163,184,0.3), 0 4px 16px rgba(0,0,0,0.8)',
-                        color: 'rgba(255,255,255,0.95)',
-                        letterSpacing: 3,
-                      }}
-                    >
-                      {item.title}
-                    </h3>
-
-                    {/* 하단 상태 뱃지 */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                      <div style={{ width: 1, height: 32, background: 'rgba(255,255,255,0.3)' }} />
-                      {item.pdf_url ? (
-                        <BookOpen size={12} color="rgba(255,255,255,0.6)" />
-                      ) : (item.article_count ?? 0) > 0 ? (
-                        <span style={{ fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,0.5)', letterSpacing: 1 }}>
-                          {item.article_count}
-                        </span>
-                      ) : (
-                        <span style={{ fontSize: 8, fontWeight: 900, color: 'rgba(255,255,255,0.25)', letterSpacing: 1, textTransform: 'uppercase' }}>
-                          Soon
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Cover (호버) */}
-                  <div style={{
-                    width: '100%',
-                    padding: 'clamp(24px, 4vw, 64px)',
-                    display: 'flex', flexDirection: 'column',
-                    justifyContent: 'flex-end', height: '100%',
-                    opacity: isActive ? 1 : 0,
-                    transform: isActive ? 'translateY(0)' : 'translateY(32px)',
-                    transition: 'all 0.7s 0.15s',
-                    pointerEvents: isActive ? 'auto' : 'none',
-                  }}>
-                    <div style={{ maxWidth: 400 }}>
-                      {/* 이슈 라벨 */}
-                      <span style={{
-                        background: 'rgba(0,0,0,0.4)',
-                        border: '1px solid rgba(255,255,255,0.18)',
-                        padding: '6px 16px', borderRadius: 4,
-                        fontSize: 10, fontWeight: 900,
-                        color: 'rgba(255,255,255,0.9)',
-                        letterSpacing: 3, textTransform: 'uppercase',
-                        marginBottom: 16, display: 'inline-block',
-                      }}>
-                        ISSUE {item.year} {item.month_name}
-                      </span>
-
-                      {/* 커버 제목 */}
-                      <h3 className="type-h1" style={{
-                        color: 'white', lineHeight: 0.85,
-                        textTransform: 'uppercase', marginBottom: 40,
-                        textShadow: '0 4px 30px rgba(0,0,0,0.4)',
-                      }}>
-                        {item.title}
-                      </h3>
-
-                      {/* Open Edition 버튼 */}
-                      <div style={{
-                        display: 'flex', alignItems: 'center',
-                        justifyContent: 'space-between',
-                        borderTop: '1px solid rgba(255,255,255,0.2)',
-                        paddingTop: 24,
-                      }}>
-                        <div>
-                          <span style={{
-                            fontSize: 11, fontWeight: 900, color: 'white',
-                            letterSpacing: 5, textTransform: 'uppercase', display: 'block',
-                          }}>
-                            Open Edition
-                          </span>
-                          <span style={{
-                            fontSize: 9, fontWeight: 700,
-                            color: 'rgba(255,255,255,0.45)',
-                            letterSpacing: 2, textTransform: 'uppercase',
-                          }}>
-                            {item.pdf_url
-                              ? '📖 PDF'
-                              : (item.article_count ?? 0) > 0
-                              ? `${item.article_count} articles`
-                              : 'Coming Soon'}
-                          </span>
-                        </div>
-                        <div style={{
-                          padding: 12, background: 'var(--bg)',
-                          borderRadius: '50%', color: '#000', display: 'flex',
-                        }}>
-                          <ArrowRight size={20} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
+                {/* 날짜 + Vol */}
+                <span
+                  style={{
+                    fontSize: 5,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
+                    opacity: 0.5,
+                    marginBottom: 14,
+                  }}
+                >
+                  {mag.month_name} {mag.year} · Vol.{mag.issue_number || idx + 1}
+                </span>
               </div>
-            );
-          })}
 
-          {/* 우측 여백 */}
-          <div style={{ flexShrink: 0, width: '8vw', height: 1 }} />
-          </div>
-        </div>
-        {/* 나무 선반 (shelf plank) */}
-        <div className="shelf-plank" style={{ margin: '0 8vw' }} />
+              {/* Open 버튼 */}
+              <button
+                type="button"
+                className="shelf-book__open"
+                onClick={(e) => handleOpen(e, mag)}
+              >
+                Open →
+              </button>
+            </div>
+          );
+        })}
       </div>
-    </div>
+
+      {/* 선반 판자 */}
+      <div className="bookshelf-plank" />
+
+      {/* 힌트 */}
+      {magazineHint && (
+        <p
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 3,
+            textTransform: 'uppercase',
+            color: 'var(--text-tertiary)',
+            textAlign: 'center',
+            marginTop: 32,
+            opacity: 0.5,
+          }}
+        >
+          {magazineHint}
+        </p>
+      )}
+    </section>
   );
+}
+
+/* 밝은 배경색인지 판별 (spine 텍스트 색상 결정용) */
+function isLightColor(hex: string): boolean {
+  const c = hex.replace('#', '');
+  if (c.length !== 6) return false;
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 140;
 }

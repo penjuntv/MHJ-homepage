@@ -36,12 +36,16 @@ export default function ContentSplit({ slide }: { slide: SlideConfig }) {
             Step {String(slide.stepNumber).padStart(2, '0')}
           </span>
         )}
-        <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 16px' }}>
-          {slide.title}
-        </h2>
-        <p style={{ fontFamily: bodyFont, fontSize: 14, lineHeight: 1.7, color: text, opacity: 0.8, margin: 0 }}>
-          {slide.body}
-        </p>
+        {slide.title && (
+          <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 16px' }}>
+            {slide.title}
+          </h2>
+        )}
+        {slide.body && (
+          <p style={{ fontFamily: bodyFont, fontSize: 14, lineHeight: 1.7, color: text, opacity: 0.8, margin: 0 }}>
+            {slide.body}
+          </p>
+        )}
       </div>
 
       <SlideFooter slideNumber={slide.stepNumber} accentColor={accent} />

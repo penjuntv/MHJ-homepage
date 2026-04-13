@@ -70,22 +70,24 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
       )}
 
       {/* 제목 */}
-      <h3
-        style={{
-          fontFamily: titleFont,
-          fontSize: 32,
-          fontWeight: 900,
-          fontStyle: 'italic',
-          color: text,
-          lineHeight: 1.15,
-          letterSpacing: -0.5,
-          margin: '0 0 40px',
-          position: 'relative',
-          zIndex: 2,
-        }}
-      >
-        {slide.title}
-      </h3>
+      {slide.title && (
+        <h3
+          style={{
+            fontFamily: titleFont,
+            fontSize: 32,
+            fontWeight: 900,
+            fontStyle: 'italic',
+            color: text,
+            lineHeight: 1.15,
+            letterSpacing: -0.5,
+            margin: '0 0 40px',
+            position: 'relative',
+            zIndex: 2,
+          }}
+        >
+          {slide.title}
+        </h3>
+      )}
 
       {/* 2×2 통계 그리드 */}
       <div

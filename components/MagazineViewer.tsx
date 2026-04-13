@@ -8,6 +8,7 @@ import DownloadBtn from '@/components/DownloadBtn';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
+import MagazineFlipViewer from '@/components/magazine/MagazineFlipViewer';
 import { supabase } from '@/lib/supabase-browser';
 import { trackEvent } from '@/lib/analytics';
 
@@ -520,8 +521,20 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
    메인 MagazineViewer
    ════════════════════════════════════════════ */
 export default function MagazineViewer({ magazine, articles }: Props) {
-  const router = useRouter();
   const mode = getMode(magazine, articles);
+
+  /* v2: articles-only 모드 → 3:4 FlipViewer 사용 */
+  if (mode === 'articles') {
+    return <MagazineFlipViewer magazine={magazine} articles={articles} />;
+  }
+
+  return <MagazineViewerLegacy magazine={magazine} articles={articles} />;
+}
+
+/* 기존 PDF/Empty 모드 뷰어 (hooks 포함) */
+function MagazineViewerLegacy({ magazine, articles }: Props) {
+  const mode = getMode(magazine, articles);
+  const router = useRouter();
   const hasBothModes = !!magazine.pdf_url && articles.length > 0;
   const [activeTab, setActiveTab] = useState<'articles' | 'pdf'>('articles');
   const showPdf = hasBothModes ? activeTab === 'pdf' : mode === 'pdf';

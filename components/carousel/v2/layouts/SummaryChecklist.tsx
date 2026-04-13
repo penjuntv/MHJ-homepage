@@ -20,9 +20,11 @@ export default function SummaryChecklist({ slide }: { slide: SlideConfig }) {
       <TextureOverlay texture={slide.globalTexture} />
 
       {/* Title */}
-      <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 40px', position: 'relative', zIndex: 2 }}>
-        {slide.title || 'Key Takeaways'}
-      </h2>
+      {slide.title && (
+        <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 40px', position: 'relative', zIndex: 2 }}>
+          {slide.title}
+        </h2>
+      )}
 
       {/* Divider */}
       <div style={{ width: 40, height: 2, background: accent, marginBottom: 40, position: 'relative', zIndex: 2 }} />

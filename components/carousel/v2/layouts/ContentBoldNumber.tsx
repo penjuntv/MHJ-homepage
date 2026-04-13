@@ -22,14 +22,18 @@ export default function ContentBoldNumber({ slide }: { slide: SlideConfig }) {
       </span>
 
       {/* Title */}
-      <h2 style={{ fontFamily: v2Tokens.fonts.body, fontSize: 36, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -0.5, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
-        {slide.title}
-      </h2>
+      {slide.title && (
+        <h2 style={{ fontFamily: v2Tokens.fonts.body, fontSize: 36, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -0.5, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
+          {slide.title}
+        </h2>
+      )}
 
       {/* Body */}
-      <p style={{ fontFamily: bodyFont, fontSize: 16, fontWeight: 500, lineHeight: 1.6, color: 'rgba(255,255,255,0.9)', margin: 0, position: 'relative', zIndex: 2, flex: 1 }}>
-        {slide.body}
-      </p>
+      {slide.body && (
+        <p style={{ fontFamily: bodyFont, fontSize: 16, fontWeight: 500, lineHeight: 1.6, color: 'rgba(255,255,255,0.9)', margin: 0, position: 'relative', zIndex: 2, flex: 1 }}>
+          {slide.body}
+        </p>
+      )}
 
       {/* Geometric accent — circles */}
       <svg style={{ position: 'absolute', bottom: -20, right: -20, width: 240, height: 240, opacity: 0.1, pointerEvents: 'none' }} viewBox="0 0 100 100">

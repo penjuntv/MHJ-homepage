@@ -27,9 +27,11 @@ export default function ContentDonutChart({ slide }: { slide: SlideConfig }) {
         </span>
       )}
 
-      <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, textAlign: 'center', margin: '0 0 48px', width: '100%', position: 'relative', zIndex: 2 }}>
-        {slide.title}
-      </h2>
+      {slide.title && (
+        <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, textAlign: 'center', margin: '0 0 48px', width: '100%', position: 'relative', zIndex: 2 }}>
+          {slide.title}
+        </h2>
+      )}
 
       {/* Donut chart using conic-gradient */}
       <div style={{ position: 'relative', width: 240, height: 240, borderRadius: '50%', flexShrink: 0, marginBottom: 40, boxShadow: '0 8px 32px rgba(0,0,0,0.08)', background: `conic-gradient(${accent} ${deg}deg, rgba(0,0,0,0.05) 0deg)`, zIndex: 2 }}>

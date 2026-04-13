@@ -38,9 +38,11 @@ export default function ContentSocialQuote({ slide }: { slide: SlideConfig }) {
         </div>
 
         {/* Quote text */}
-        <h3 style={{ fontFamily: bodyFont, fontSize: 18, fontWeight: 500, color: '#111827', lineHeight: 1.6, margin: '0 0 16px', whiteSpace: 'pre-line' }}>
-          {slide.title}
-        </h3>
+        {slide.title && (
+          <h3 style={{ fontFamily: bodyFont, fontSize: 18, fontWeight: 500, color: '#111827', lineHeight: 1.6, margin: '0 0 16px', whiteSpace: 'pre-line' }}>
+            {slide.title}
+          </h3>
+        )}
 
         {/* Hashtag / link */}
         {slide.body && (

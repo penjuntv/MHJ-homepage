@@ -24,9 +24,11 @@ export default function ContentNeoBrutalism({ slide }: { slide: SlideConfig }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2, marginTop: 40 }}>
         {/* Title card */}
         <div style={{ background: '#FFFFFF', border: '4px solid #1A1A1A', padding: 24, boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)', marginBottom: 32, transform: 'rotate(-1deg)' }}>
-          <h2 style={{ fontFamily: v2Tokens.fonts.mono, fontSize: 36, fontWeight: 900, color: '#1A1A1A', lineHeight: 1.1, textTransform: 'uppercase', margin: 0 }}>
-            {slide.title}
-          </h2>
+          {slide.title && (
+            <h2 style={{ fontFamily: v2Tokens.fonts.mono, fontSize: 36, fontWeight: 900, color: '#1A1A1A', lineHeight: 1.1, textTransform: 'uppercase', margin: 0 }}>
+              {slide.title}
+            </h2>
+          )}
         </div>
 
         {/* Photo */}

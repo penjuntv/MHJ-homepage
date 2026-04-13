@@ -33,9 +33,11 @@ export default function YussiTake({ slide }: { slide: SlideConfig }) {
       </div>
 
       {/* Title */}
-      <h2 style={{ fontFamily: titleFont, fontSize: 28, fontWeight: 900, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
-        {slide.title || "Yussi's Take"}
-      </h2>
+      {slide.title && (
+        <h2 style={{ fontFamily: titleFont, fontSize: 28, fontWeight: 900, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
+          {slide.title}
+        </h2>
+      )}
 
       {/* Divider */}
       <div style={{ width: 40, height: 2, background: accent, marginBottom: 24, position: 'relative', zIndex: 2 }} />

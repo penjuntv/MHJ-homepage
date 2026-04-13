@@ -26,14 +26,18 @@ export default function ContentStep({ slide }: { slide: SlideConfig }) {
       </span>
 
       {/* Title */}
-      <h2 style={{ fontFamily: titleFont, fontSize: 36, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, margin: '32px 0 24px', position: 'relative', zIndex: 2 }}>
-        {slide.title}
-      </h2>
+      {slide.title && (
+        <h2 style={{ fontFamily: titleFont, fontSize: 36, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, margin: '32px 0 24px', position: 'relative', zIndex: 2 }}>
+          {slide.title}
+        </h2>
+      )}
 
       {/* Body */}
-      <p style={{ fontFamily: bodyFont, fontSize: 15, lineHeight: 1.9, color: text, opacity: 0.85, margin: '0 0 32px', position: 'relative', zIndex: 2, flex: 1 }}>
-        {slide.body}
-      </p>
+      {slide.body && (
+        <p style={{ fontFamily: bodyFont, fontSize: 15, lineHeight: 1.9, color: text, opacity: 0.85, margin: '0 0 32px', position: 'relative', zIndex: 2, flex: 1 }}>
+          {slide.body}
+        </p>
+      )}
 
       {/* Circle photo — bottom right */}
       {imgSrc && (

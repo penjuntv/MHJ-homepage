@@ -26,9 +26,11 @@ export default function ContentAbstract({ slide }: { slide: SlideConfig }) {
       <div style={{ position: 'absolute', top: '50%', left: '50%', width: 240, height: 240, borderRadius: '50%', background: v2Tokens.palette.softBlue, opacity: 0.4, mixBlendMode: 'multiply', transform: 'translate(-50%, -50%)' }} />
 
       {/* Title */}
-      <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, textAlign: 'center', margin: '0 0 24px', position: 'relative', zIndex: 2, flexShrink: 0 }}>
-        {slide.title}
-      </h2>
+      {slide.title && (
+        <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, textAlign: 'center', margin: '0 0 24px', position: 'relative', zIndex: 2, flexShrink: 0 }}>
+          {slide.title}
+        </h2>
+      )}
 
       {/* Tilted photo */}
       {imgSrc && (

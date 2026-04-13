@@ -30,12 +30,16 @@ export default function ContentPhotoOverlay({ slide }: { slide: SlideConfig }) {
             Tip {String(slide.stepNumber).padStart(2, '0')}
           </span>
         )}
-        <h2 style={{ fontFamily: titleFont, fontSize: 30, fontWeight: 900, fontStyle: 'italic', color: v2Tokens.brand.dark, lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 16px' }}>
-          {slide.title}
-        </h2>
-        <p style={{ fontFamily: bodyFont, fontSize: 14, lineHeight: 1.7, color: v2Tokens.brand.dark, opacity: 0.85, margin: 0 }}>
-          {slide.body}
-        </p>
+        {slide.title && (
+          <h2 style={{ fontFamily: titleFont, fontSize: 30, fontWeight: 900, fontStyle: 'italic', color: v2Tokens.brand.dark, lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 16px' }}>
+            {slide.title}
+          </h2>
+        )}
+        {slide.body && (
+          <p style={{ fontFamily: bodyFont, fontSize: 14, lineHeight: 1.7, color: v2Tokens.brand.dark, opacity: 0.85, margin: 0 }}>
+            {slide.body}
+          </p>
+        )}
       </div>
 
       <SlideFooter slideNumber={slide.stepNumber} accentColor={accent} textColor="rgba(255,255,255,0.5)" />

@@ -33,9 +33,11 @@ export default function ContentBarChart({ slide }: { slide: SlideConfig }) {
         </span>
       )}
 
-      <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 40px', position: 'relative', zIndex: 2 }}>
-        {slide.title}
-      </h2>
+      {slide.title && (
+        <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 40px', position: 'relative', zIndex: 2 }}>
+          {slide.title}
+        </h2>
+      )}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center', position: 'relative', zIndex: 2 }}>
         {bars.map((bar, i) => (

@@ -38,13 +38,17 @@ export default function ContentArchPhoto({ slide }: { slide: SlideConfig }) {
             {String(slide.stepNumber).padStart(2, '0')} / 10
           </span>
         )}
-        <h2 style={{ fontFamily: titleFont, fontSize: 28, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.2, letterSpacing: -0.5, margin: '0 0 20px' }}>
-          {slide.title}
-        </h2>
+        {slide.title && (
+          <h2 style={{ fontFamily: titleFont, fontSize: 28, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.2, letterSpacing: -0.5, margin: '0 0 20px' }}>
+            {slide.title}
+          </h2>
+        )}
         <div style={{ width: 32, height: 2, background: accent, marginBottom: 20 }} />
-        <p style={{ fontFamily: bodyFont, fontSize: 14, lineHeight: 1.8, color: text, opacity: 0.8, margin: 0 }}>
-          {slide.body}
-        </p>
+        {slide.body && (
+          <p style={{ fontFamily: bodyFont, fontSize: 14, lineHeight: 1.8, color: text, opacity: 0.8, margin: 0 }}>
+            {slide.body}
+          </p>
+        )}
       </div>
 
       <SlideFooter slideNumber={slide.stepNumber} accentColor={accent} />

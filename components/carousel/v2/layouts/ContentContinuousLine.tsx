@@ -44,11 +44,13 @@ export default function ContentContinuousLine({ slide }: { slide: SlideConfig })
       )}
 
       {/* Title */}
-      <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', flexShrink: 0, ...textBgStyle }}>
-        <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: textBgStyle?.color ?? text, lineHeight: 1.15, letterSpacing: -0.5, margin: 0 }}>
-          {slide.title}
-        </h2>
-      </div>
+      {slide.title && (
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', flexShrink: 0, ...textBgStyle }}>
+          <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: textBgStyle?.color ?? text, lineHeight: 1.15, letterSpacing: -0.5, margin: 0 }}>
+            {slide.title}
+          </h2>
+        </div>
+      )}
 
       <SlideFooter slideNumber={slide.stepNumber} accentColor={accent} />
     </div>

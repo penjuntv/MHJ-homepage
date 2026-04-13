@@ -11,52 +11,73 @@ const CONTENT_LAYOUTS: CarouselLayoutType[] = [
 
 export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
   const slides: SlideConfig[] = [];
+  const blogTitle = input.title || 'MHJ';
+  const blogSubtitle = input.subtitle || '';
+  const category = input.category || 'LIFE IN AOTEAROA';
+  const imageUrl = input.coverImageUrl;
 
   // 슬라이드 1: 커버
   slides.push({
     id: 1,
     layout: 'cover-arch',
-    title: input.title || 'MHJ',
-    subtitle: input.category || '',
-    imageUrl: input.coverImageUrl,
+    title: blogTitle,
+    subtitle: category.toUpperCase(),
+    imageUrl,
     stepNumber: 1,
   });
 
-  // 슬라이드 2: 컨텍스트 (인용 스타일)
+  // 슬라이드 2: 컨텍스트
   slides.push({
     id: 2,
     layout: 'content-quote',
-    title: input.subtitle || '',
-    body: input.subtitle || 'Why this matters',
+    title: blogSubtitle || blogTitle,
+    body: blogSubtitle || `A guide for families navigating life in New Zealand.`,
     stepNumber: 2,
   });
 
-  // 슬라이드 3-6: 콘텐츠 포인트 (다양한 레이아웃 순환)
+  // 슬라이드 3-6: 콘텐츠 포인트
   const points = input.points ?? [];
+  const fallbackTitles = [
+    'What you need to know',
+    'How it works in NZ',
+    'Our experience',
+    'What we recommend',
+  ];
+  const fallbackBodies = [
+    `Here's what we learned as an immigrant family in Auckland.`,
+    `This is how the system works — and what surprised us.`,
+    `After three years in NZ, this is our honest take.`,
+    `If we could start over, this is what we'd do differently.`,
+  ];
+
   for (let i = 0; i < 4; i++) {
     const pt = points[i];
+    const hasContent = pt?.title && pt.title.trim().length > 0;
     slides.push({
       id: i + 3,
       layout: CONTENT_LAYOUTS[i % CONTENT_LAYOUTS.length],
-      title: pt?.title || '',
-      body: pt?.body || pt?.highlight || '',
-      imageUrl: input.coverImageUrl,
-      stepNumber: i + 3,
+      title: hasContent ? pt.title : fallbackTitles[i],
+      body: hasContent ? (pt.body || pt.highlight || fallbackBodies[i]) : fallbackBodies[i],
+      imageUrl,
+      stepNumber: i + 1,
     });
   }
 
-  // 슬라이드 7: 비주얼 브레이크 / pull quote
+  // 슬라이드 7: 비주얼 브레이크
   slides.push({
     id: 7,
     layout: 'visual-break',
-    title: input.pullQuote ? '' : '',
+    title: input.pullQuote || blogTitle,
     body: input.pullQuote || '',
-    imageUrl: input.visualImageUrl || input.coverImageUrl,
+    imageUrl: input.visualImageUrl || imageUrl,
     stepNumber: 7,
   });
 
   // 슬라이드 8: 요약 체크리스트
-  const summaryText = (input.summaryPoints ?? []).filter(Boolean).join('\n');
+  const summaryPoints = (input.summaryPoints ?? []).filter(Boolean);
+  const summaryText = summaryPoints.length > 0
+    ? summaryPoints.join('\n')
+    : `Research before you move\nConnect with local communities\nGive yourself time to adjust\nRead more at mhj.nz`;
   slides.push({
     id: 8,
     layout: 'summary-checklist',
@@ -71,7 +92,7 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
     id: 9,
     layout: 'yussi-take',
     title: "Yussi's Take",
-    body: input.yussiTake || '',
+    body: input.yussiTake || `As a mum of three and social work student, I believe every family deserves the time and space to find their rhythm in a new country.`,
     subtitle: input.yussiTakeKr || undefined,
     stepNumber: 9,
   });
@@ -80,9 +101,9 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
   slides.push({
     id: 10,
     layout: 'cta-minimal',
-    title: input.ctaTitle || 'Save & share this.',
+    title: input.ctaTitle || 'Was this helpful?',
     subtitle: input.ctaUrl || 'www.mhj.nz',
-    body: input.brandName ? `More stories at ${input.instagramHandle ?? '@mhj_nz'}` : undefined,
+    body: `More stories at ${input.instagramHandle ?? '@mhj_nz'}`,
     stepNumber: 10,
   });
 
