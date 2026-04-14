@@ -69,7 +69,7 @@ export default function ContentSocialQuote({ slide }: { slide: SlideConfig }) {
         </div>
       </div>
 
-      <SlideFooter slideNumber={slide.stepNumber} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
     </div>
   );
 }

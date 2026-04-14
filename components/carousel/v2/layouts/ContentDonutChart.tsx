@@ -48,7 +48,7 @@ export default function ContentDonutChart({ slide }: { slide: SlideConfig }) {
         </p>
       )}
 
-      <SlideFooter slideNumber={slide.stepNumber} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
     </div>
   );
 }

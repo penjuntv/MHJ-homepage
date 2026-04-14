@@ -53,7 +53,7 @@ export default function CoverMagazine({ slide }: { slide: SlideConfig }) {
         )}
       </div>
 
-      <SlideFooter slideNumber={slide.stepNumber ?? 1} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
     </div>
   );
 }

@@ -12,7 +12,10 @@ interface Props {
   aspectRatio?: 'portrait' | 'square';
 }
 
-/** 외부 이미지를 blob URL로 변환 (CORS 우회) */
+/**
+ * 외부 이미지를 data URL로 변환 (CORS 우회 + 로딩 대기 문제 해결)
+ * blob URL이 아닌 data URL을 직접 사용하면 img 재로딩이 불필요.
+ */
 async function convertExternalImages(container: HTMLElement): Promise<() => void> {
   const imgs = container.querySelectorAll('img');
   const originals: { img: HTMLImageElement; src: string }[] = [];
@@ -22,22 +25,43 @@ async function convertExternalImages(container: HTMLElement): Promise<() => void
       const src = img.src;
       if (!src || src.startsWith('data:') || src.startsWith('blob:')) return;
       try {
-        const res = await fetch(src, { mode: 'cors' });
+        // Supabase URL이면 프록시 경유
+        const isSupabase = src.includes('supabase.co');
+        const fetchUrl = isSupabase
+          ? `/api/carousel/proxy-image?url=${encodeURIComponent(src)}`
+          : src;
+        const res = await fetch(fetchUrl, { cache: 'no-cache' });
+        if (!res.ok) return;
         const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
+
+        // blob → data URL 변환 (FileReader)
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+
         originals.push({ img, src });
-        img.src = blobUrl;
+        img.src = dataUrl; // data URL은 즉시 사용 가능, 재로딩 불필요
+
+        // img 로딩 완료 대기 (safety)
+        if (!img.complete) {
+          await new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            setTimeout(resolve, 3000);
+          });
+        }
       } catch {
-        // 변환 실패 시 원본 유지
+        // 변환 실패 시 원본 유지 — export는 이미지 없이 진행
       }
     }),
   );
 
-  // cleanup: blob URL 해제 + 원본 복원
   return () => {
     originals.forEach(({ img, src }) => {
-      URL.revokeObjectURL(img.src);
-      img.src = src;
+      img.src = src; // 원본 복원
     });
   };
 }

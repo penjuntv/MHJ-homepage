@@ -48,7 +48,7 @@ export default function ContentSplit({ slide }: { slide: SlideConfig }) {
         )}
       </div>
 
-      <SlideFooter slideNumber={slide.stepNumber} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
     </div>
   );
 }

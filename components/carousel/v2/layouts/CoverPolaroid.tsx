@@ -40,7 +40,7 @@ export default function CoverPolaroid({ slide }: { slide: SlideConfig }) {
         </h1>
       </div>
 
-      <SlideFooter slideNumber={slide.stepNumber ?? 1} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
     </div>
   );
 }

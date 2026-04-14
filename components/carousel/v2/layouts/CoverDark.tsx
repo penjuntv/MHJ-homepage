@@ -43,7 +43,7 @@ export default function CoverDark({ slide }: { slide: SlideConfig }) {
         MHJ · my mairangi
       </p>
 
-      <SlideFooter slideNumber={slide.stepNumber ?? 1} accentColor={accent} textColor="rgba(255,255,255,0.4)" />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} textColor="rgba(255,255,255,0.4)" />
     </div>
   );
 }

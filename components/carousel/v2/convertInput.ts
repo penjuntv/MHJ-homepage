@@ -16,23 +16,30 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
   const category = input.category || 'LIFE IN AOTEAROA';
   const imageUrl = input.coverImageUrl;
 
+  // subtitle 결정: input.subtitle 우선 → category(storypress 제외) → 기본값
+  const coverSubtitle = (blogSubtitle && blogSubtitle.trim())
+    ? blogSubtitle.toUpperCase()
+    : (category && category !== 'storypress')
+      ? category.toUpperCase()
+      : 'LIFE IN AOTEAROA';
+
   // 슬라이드 1: 커버
   slides.push({
     id: 1,
+    slideNumber: 1,
     layout: 'cover-arch',
     title: blogTitle,
-    subtitle: category.toUpperCase(),
+    subtitle: coverSubtitle,
     imageUrl,
-    stepNumber: 1,
   });
 
   // 슬라이드 2: 컨텍스트
   slides.push({
     id: 2,
+    slideNumber: 2,
     layout: 'content-quote',
     title: blogSubtitle || blogTitle,
     body: blogSubtitle || `A guide for families navigating life in New Zealand.`,
-    stepNumber: 2,
   });
 
   // 슬라이드 3-6: 콘텐츠 포인트
@@ -55,22 +62,23 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
     const hasContent = pt?.title && pt.title.trim().length > 0;
     slides.push({
       id: i + 3,
+      slideNumber: i + 3,    // Footer: 03/10, 04/10, 05/10, 06/10
+      stepNumber: i + 1,     // 콘텐츠 내부: 01, 02, 03, 04
       layout: CONTENT_LAYOUTS[i % CONTENT_LAYOUTS.length],
       title: hasContent ? pt.title : fallbackTitles[i],
       body: hasContent ? (pt.body || pt.highlight || fallbackBodies[i]) : fallbackBodies[i],
       imageUrl,
-      stepNumber: i + 1,
     });
   }
 
   // 슬라이드 7: 비주얼 브레이크
   slides.push({
     id: 7,
+    slideNumber: 7,
     layout: 'visual-break',
-    title: input.pullQuote || '',
+    title: input.pullQuote || '',    // blogTitle 절대 넣지 않음
     body: input.pullQuote ? '' : 'Save this guide and share it with someone who needs it.',
     imageUrl: input.visualImageUrl || imageUrl,
-    stepNumber: 7,
   });
 
   // 슬라이드 8: 요약 체크리스트
@@ -83,31 +91,31 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
     : `Research before you move\nConnect with local communities\nGive yourself time to adjust\nRead more at mhj.nz`;
   slides.push({
     id: 8,
+    slideNumber: 8,
     layout: 'summary-checklist',
     title: 'Key Takeaways',
     body: summaryText,
     subtitle: (input.summaryKr ?? []).filter(Boolean).join(' · ') || undefined,
-    stepNumber: 8,
   });
 
   // 슬라이드 9: Yussi Take
   slides.push({
     id: 9,
+    slideNumber: 9,
     layout: 'yussi-take',
     title: "Yussi's Take",
     body: input.yussiTake || `As a mum of three and social work student, I believe every family deserves the time and space to find their rhythm in a new country.`,
     subtitle: input.yussiTakeKr || undefined,
-    stepNumber: 9,
   });
 
   // 슬라이드 10: CTA
   slides.push({
     id: 10,
+    slideNumber: 10,
     layout: 'cta-minimal',
     title: input.ctaTitle || 'Was this helpful?',
     subtitle: input.ctaUrl || 'www.mhj.nz',
     body: `More stories at ${input.instagramHandle ?? '@mhj_nz'}`,
-    stepNumber: 10,
   });
 
   return slides;

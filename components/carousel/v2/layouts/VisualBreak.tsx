@@ -43,7 +43,7 @@ export default function VisualBreak({ slide }: { slide: SlideConfig }) {
         </div>
       )}
 
-      <SlideFooter slideNumber={slide.stepNumber} accentColor={accent} textColor="rgba(255,255,255,0.4)" />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} textColor="rgba(255,255,255,0.4)" />
     </div>
   );
 }

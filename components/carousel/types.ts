@@ -43,7 +43,8 @@ export interface SlideConfig {
   title?: string;
   subtitle?: string;
   body?: string;
-  stepNumber?: number;
+  stepNumber?: number;    // 포인트 번호 (01~04) — 콘텐츠 내부 표시용
+  slideNumber?: number;   // 슬라이드 전체 순서 (1~10) — Footer 전용
   imageUrl?: string;
   customImage?: string;
   bgColor?: string;

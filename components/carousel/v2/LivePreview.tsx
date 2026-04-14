@@ -71,6 +71,7 @@ export default function LivePreview({
       const { saveAs } = await import('file-saver');
       await document.fonts.ready;
 
+      // 외부 이미지를 data URL로 변환 (CORS 우회 + 로딩 대기)
       const imgs = singleRef.current.querySelectorAll('img');
       const originals: { img: HTMLImageElement; src: string }[] = [];
       await Promise.all(
@@ -78,10 +79,28 @@ export default function LivePreview({
           const src = img.src;
           if (!src || src.startsWith('data:') || src.startsWith('blob:')) return;
           try {
-            const res = await fetch(src, { mode: 'cors' });
+            const isSupabase = src.includes('supabase.co');
+            const fetchUrl = isSupabase
+              ? `/api/carousel/proxy-image?url=${encodeURIComponent(src)}`
+              : src;
+            const res = await fetch(fetchUrl, { cache: 'no-cache' });
+            if (!res.ok) return;
             const blob = await res.blob();
+            const dataUrlStr = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
             originals.push({ img, src });
-            img.src = URL.createObjectURL(blob);
+            img.src = dataUrlStr;
+            if (!img.complete) {
+              await new Promise<void>((resolve) => {
+                img.onload = () => resolve();
+                img.onerror = () => resolve();
+                setTimeout(resolve, 3000);
+              });
+            }
           } catch { /* keep original */ }
         }),
       );
@@ -95,7 +114,6 @@ export default function LivePreview({
       });
 
       originals.forEach(({ img, src }) => {
-        URL.revokeObjectURL(img.src);
         img.src = src;
       });
 

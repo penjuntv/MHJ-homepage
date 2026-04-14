@@ -36,7 +36,7 @@ export default function CoverFullImage({ slide }: { slide: SlideConfig }) {
         </h1>
       </div>
 
-      <SlideFooter slideNumber={slide.stepNumber ?? 1} accentColor={accent} textColor="rgba(255,255,255,0.5)" />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} textColor="rgba(255,255,255,0.5)" />
     </div>
   );
 }

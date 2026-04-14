@@ -137,7 +137,7 @@ export default function CoverMinimal({ slide }: { slide: SlideConfig }) {
       {/* 골드 디바이더 하단 */}
       <div style={{ width: 40, height: 2, background: accent, marginTop: 32, position: 'relative', zIndex: 2 }} />
 
-      <SlideFooter slideNumber={slide.stepNumber ?? 1} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
     </div>
   );
 }
