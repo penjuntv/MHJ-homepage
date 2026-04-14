@@ -17,12 +17,13 @@ interface SaveBody {
   caption?: { en: string; kr?: string; hashtags: string[] };
   blogId?: number | null;
   contentId?: number;
+  slides?: unknown[];
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json().catch(() => ({}))) as SaveBody;
-    const { input, caption, blogId, contentId } = body;
+    const { input, caption, blogId, contentId, slides } = body;
 
     if (!input || !input.title) {
       return NextResponse.json({ error: 'input.title is required' }, { status: 400 });
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     const payload = {
       content_type: 'carousel',
       title: input.title,
-      data: input,
+      data: { ...input, slides: slides ?? [] },
       caption_en: caption?.en ?? '',
       caption_kr: caption?.kr ?? null,
       hashtags: caption?.hashtags ?? [],

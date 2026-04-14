@@ -1,68 +1,70 @@
 'use client';
 
-// Per-slide editing controls: Layout | Filter | BG | Font | Texture | Icon
-// Appears below the slide preview in LivePreview
+// Per-slide editing controls — yussi-inata "Editor Controls" 구조
+// 레이아웃 드롭다운 + Photo / Assets / Text / Color / Filter 액션 버튼
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import {
+  LayoutTemplate,
+  ChevronDown,
+  Upload,
+  Library,
+  Edit3,
+  Palette,
+  SlidersHorizontal,
+} from 'lucide-react';
 import type { SlideConfig, CarouselLayoutType } from '../types';
 import { IMAGE_FILTERS } from './filters';
 import { v2Tokens } from './tokens';
-import { NZ_ACCENT_ICONS, type NZAccentIconId } from './NZIcons';
+import AssetLibrary from './AssetLibrary';
+import LayoutModal from './LayoutModal';
+import type { NZAccentIconId } from './NZIcons';
 
 interface Props {
   slide: SlideConfig;
   onUpdate: (patch: Partial<SlideConfig>) => void;
 }
 
-const TAB_STYLE: React.CSSProperties = {
-  padding: '6px 10px',
-  fontSize: 9,
-  fontWeight: 900,
-  letterSpacing: 1.5,
-  textTransform: 'uppercase',
-  border: '1px solid #E2E8F0',
-  borderRadius: 6,
-  cursor: 'pointer',
-  background: '#FFFFFF',
-  color: '#64748B',
-};
-
-const TAB_ACTIVE: React.CSSProperties = {
-  ...TAB_STYLE,
-  background: '#1A1A1A',
-  color: '#FFFFFF',
-  borderColor: '#1A1A1A',
-};
-
-const LAYOUTS: { id: CarouselLayoutType; name: string; category: string }[] = [
-  { id: 'cover-minimal', name: 'Minimal', category: 'Cover' },
-  { id: 'cover-arch', name: 'Arch', category: 'Cover' },
-  { id: 'cover-full-image', name: 'Full Image', category: 'Cover' },
-  { id: 'cover-split', name: 'Split', category: 'Cover' },
-  { id: 'cover-polaroid', name: 'Polaroid', category: 'Cover' },
-  { id: 'cover-magazine', name: 'Magazine', category: 'Cover' },
-  { id: 'cover-dark', name: 'Dark', category: 'Cover' },
-  { id: 'content-editorial', name: 'Editorial', category: 'Content' },
-  { id: 'content-step', name: 'Step', category: 'Content' },
-  { id: 'content-split', name: 'Split', category: 'Content' },
-  { id: 'content-quote', name: 'Quote', category: 'Content' },
-  { id: 'content-bold-number', name: 'Bold Number', category: 'Content' },
-  { id: 'content-photo-overlay', name: 'Photo Overlay', category: 'Content' },
-  { id: 'content-abstract', name: 'Abstract', category: 'Content' },
-  { id: 'content-list', name: 'List', category: 'Content' },
-  { id: 'content-continuous-line', name: 'Line Art', category: 'Content' },
-  { id: 'content-arch-photo', name: 'Arch Photo', category: 'Content' },
-  { id: 'content-timeline', name: 'Timeline', category: 'Content' },
-  { id: 'content-stat-grid', name: 'Stat Grid', category: 'Info' },
-  { id: 'content-bar-chart', name: 'Bar Chart', category: 'Info' },
-  { id: 'content-donut-chart', name: 'Donut', category: 'Info' },
-  { id: 'content-social-quote', name: 'Social', category: 'Style' },
-  { id: 'content-neo-brutalism', name: 'Neo-Brutal', category: 'Style' },
-  { id: 'summary-checklist', name: 'Checklist', category: 'Special' },
-  { id: 'yussi-take', name: 'Yussi', category: 'Special' },
-  { id: 'visual-break', name: 'Visual', category: 'Special' },
-  { id: 'cta-minimal', name: 'CTA', category: 'Special' },
+// 사진 지원 안 하는 레이아웃
+const NO_IMAGE_LAYOUTS: CarouselLayoutType[] = [
+  'content-quote',
+  'content-bold-number',
+  'content-stat-grid',
+  'content-bar-chart',
+  'content-donut-chart',
+  'cta-minimal',
+  'content-editorial',
 ];
+
+const LAYOUT_NAMES: Record<string, string> = {
+  'cover-minimal': 'Minimal',
+  'cover-arch': 'Arch',
+  'cover-full-image': 'Full Image',
+  'cover-split': 'Split',
+  'cover-polaroid': 'Polaroid',
+  'cover-magazine': 'Magazine',
+  'cover-dark': 'Dark',
+  'content-editorial': 'Editorial',
+  'content-step': 'Step',
+  'content-split': 'Split',
+  'content-quote': 'Quote',
+  'content-bold-number': 'Bold Number',
+  'content-photo-overlay': 'Photo Overlay',
+  'content-abstract': 'Abstract',
+  'content-list': 'List',
+  'content-continuous-line': 'Line Art',
+  'content-arch-photo': 'Arch Photo',
+  'content-timeline': 'Timeline',
+  'content-stat-grid': 'Stat Grid',
+  'content-bar-chart': 'Bar Chart',
+  'content-donut-chart': 'Donut',
+  'content-social-quote': 'Social',
+  'content-neo-brutalism': 'Neo-Brutal',
+  'summary-checklist': 'Checklist',
+  'yussi-take': "Yussi's Take",
+  'visual-break': 'Visual Break',
+  'cta-minimal': 'CTA',
+};
 
 const PRESETS = Object.entries(v2Tokens.presets) as [string, { bg: string; text: string; accent: string }][];
 
@@ -72,10 +74,10 @@ const TEXTURES: { id: 'none' | 'noise' | 'paper'; name: string }[] = [
   { id: 'paper', name: 'Paper' },
 ];
 
-const FONT_THEMES: { id: string; name: string }[] = [
-  { id: 'editorial', name: 'Editorial' },
-  { id: 'modern', name: 'Modern' },
-  { id: 'tech', name: 'Tech' },
+const FONT_THEMES: { id: string; name: string; font: string }[] = [
+  { id: 'editorial', name: 'Editorial', font: "'Playfair Display', serif" },
+  { id: 'modern', name: 'Modern', font: "'Inter', sans-serif" },
+  { id: 'tech', name: 'Tech', font: 'monospace' },
 ];
 
 const TEXT_BGS: { id: string; name: string }[] = [
@@ -86,112 +88,283 @@ const TEXT_BGS: { id: string; name: string }[] = [
   { id: 'solid-dark', name: 'Solid Dark' },
 ];
 
-type Tab = 'layout' | 'text' | 'filter' | 'color' | 'font' | 'icon';
-
 export default function SlideEditPanel({ slide, onUpdate }: Props) {
-  const [tab, setTab] = useState<Tab>('layout');
+  const [isLayoutOpen, setIsLayoutOpen] = useState(false);
+  const [isAssetOpen, setIsAssetOpen] = useState(false);
+  const [isTextOpen, setIsTextOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const supportsImage = !NO_IMAGE_LAYOUTS.includes(slide.layout);
+  const hasImage = !!(slide.imageUrl || slide.customImage);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      onUpdate({ customImage: url });
+    }
+  };
+
+  const btnStyle = (active = false): React.CSSProperties => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 5,
+    padding: '6px 10px',
+    borderRadius: 6,
+    border: 'none',
+    background: active ? '#1A1A1A' : 'transparent',
+    color: active ? '#FFFFFF' : '#64748B',
+    fontSize: 11,
+    fontWeight: 600,
+    cursor: 'pointer',
+  });
 
   return (
-    <div
-      style={{
-        background: '#FFFFFF',
-        border: '1px solid #E2E8F0',
-        borderRadius: 8,
-        padding: 12,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-      }}
-    >
-      {/* Tab bar */}
-      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-        {(['layout', 'text', 'filter', 'color', 'font', 'icon'] as Tab[]).map((t) => (
+    <>
+      <div
+        style={{
+          background: '#FFFFFF',
+          border: '1px solid #EDE9E3',
+          borderRadius: 8,
+          padding: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}
+      >
+        {/* Row 1: Layout dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <button
-            key={t}
             type="button"
-            onClick={() => setTab(t)}
-            style={tab === t ? TAB_ACTIVE : TAB_STYLE}
+            onClick={() => setIsLayoutOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: '#FAF8F5',
+              border: '1px solid #EDE9E3',
+              borderRadius: 8,
+              padding: '8px 16px',
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: 'pointer',
+              color: '#1A1A1A',
+            }}
           >
-            {t}
+            <LayoutTemplate size={15} />
+            {LAYOUT_NAMES[slide.layout] || slide.layout}
+            <ChevronDown size={13} style={{ opacity: 0.5 }} />
           </button>
-        ))}
-      </div>
+        </div>
 
-      {/* Tab content */}
-      {tab === 'layout' && (
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-          {LAYOUTS.map((l) => (
-            <button
-              key={l.id}
-              type="button"
-              onClick={() => onUpdate({ layout: l.id })}
-              style={{
-                padding: '4px 8px',
-                fontSize: 9,
-                fontWeight: slide.layout === l.id ? 900 : 600,
-                borderRadius: 4,
-                border: slide.layout === l.id ? '2px solid #C9A882' : '1px solid #E2E8F0',
-                background: slide.layout === l.id ? '#FAF8F5' : '#FFFFFF',
-                color: slide.layout === l.id ? '#8A6B4F' : '#64748B',
-                cursor: 'pointer',
-                letterSpacing: 0.5,
-              }}
-            >
-              {l.name}
+        {/* Row 2: Action buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          {/* Photo upload — only if layout supports images */}
+          {supportsImage && (
+            <>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                style={{ display: 'none' }}
+              />
+              <button type="button" onClick={() => fileInputRef.current?.click()} style={btnStyle()}>
+                <Upload size={13} /> Photo
+              </button>
+            </>
+          )}
+
+          {/* Assets */}
+          {supportsImage && (
+            <button type="button" onClick={() => setIsAssetOpen(true)} style={btnStyle()}>
+              <Library size={13} /> Assets
             </button>
-          ))}
-        </div>
-      )}
+          )}
 
-      {tab === 'text' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 4px' }}>Title</p>
-            <input
-              type="text"
-              value={slide.title ?? ''}
-              onChange={(e) => onUpdate({ title: e.target.value })}
-              style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 12, color: '#1A1A1A', outline: 'none', boxSizing: 'border-box' }}
-            />
-          </div>
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 4px' }}>Subtitle</p>
-            <input
-              type="text"
-              value={slide.subtitle ?? ''}
-              onChange={(e) => onUpdate({ subtitle: e.target.value })}
-              style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 12, color: '#1A1A1A', outline: 'none', boxSizing: 'border-box' }}
-            />
-          </div>
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 4px' }}>Body</p>
-            <textarea
-              value={slide.body ?? ''}
-              onChange={(e) => onUpdate({ body: e.target.value })}
-              rows={4}
-              style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 12, color: '#1A1A1A', outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
-            />
-          </div>
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 4px' }}>Image URL</p>
-            <input
-              type="url"
-              value={slide.imageUrl ?? ''}
-              onChange={(e) => onUpdate({ imageUrl: e.target.value })}
-              placeholder="https://..."
-              style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 12, color: '#1A1A1A', outline: 'none', boxSizing: 'border-box' }}
-            />
-          </div>
-        </div>
-      )}
+          {/* Text edit */}
+          <button type="button" onClick={() => { setIsTextOpen(!isTextOpen); setIsFilterOpen(false); }} style={btnStyle(isTextOpen)}>
+            <Edit3 size={13} /> Text
+          </button>
 
-      {tab === 'filter' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {/* Image filter */}
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 6px' }}>
+          {/* Color picker */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '0 4px' }}>
+            <Palette size={13} style={{ color: '#94A3B8' }} />
+            <input
+              type="color"
+              value={slide.bgColor || '#FAF8F5'}
+              onChange={(e) => onUpdate({ bgColor: e.target.value })}
+              style={{ width: 22, height: 22, borderRadius: '50%', cursor: 'pointer', border: '2px solid #EDE9E3', padding: 0 }}
+            />
+          </div>
+
+          {/* Filter — only if image exists */}
+          {supportsImage && hasImage && (
+            <button type="button" onClick={() => { setIsFilterOpen(!isFilterOpen); setIsTextOpen(false); }} style={btnStyle(isFilterOpen)}>
+              <SlidersHorizontal size={13} /> Filter
+            </button>
+          )}
+        </div>
+
+        {/* Text editing overlay */}
+        {isTextOpen && (
+          <div
+            style={{
+              background: '#F8FAFC',
+              borderRadius: 8,
+              padding: 14,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              border: '1px solid #EDE9E3',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase' }}>
+                Edit Slide Content
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsTextOpen(false)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: 4,
+                  border: 'none',
+                  background: '#1A1A1A',
+                  color: '#FFFFFF',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                Done
+              </button>
+            </div>
+
+            {slide.stepNumber !== undefined && (
+              <div>
+                <label style={labelStyle}>Step Number</label>
+                <input
+                  type="number"
+                  value={slide.stepNumber ?? ''}
+                  onChange={(e) => onUpdate({ stepNumber: e.target.value === '' ? undefined : parseInt(e.target.value) })}
+                  style={inputStyle}
+                />
+              </div>
+            )}
+            <div>
+              <label style={labelStyle}>Subtitle</label>
+              <input
+                type="text"
+                value={slide.subtitle ?? ''}
+                onChange={(e) => onUpdate({ subtitle: e.target.value })}
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Title</label>
+              <input
+                type="text"
+                value={slide.title ?? ''}
+                onChange={(e) => onUpdate({ title: e.target.value })}
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Body</label>
+              <textarea
+                value={slide.body ?? ''}
+                onChange={(e) => onUpdate({ body: e.target.value })}
+                rows={4}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
+              />
+            </div>
+            {supportsImage && (
+              <div>
+                <label style={labelStyle}>Image URL</label>
+                <input
+                  type="url"
+                  value={slide.imageUrl ?? ''}
+                  onChange={(e) => onUpdate({ imageUrl: e.target.value })}
+                  placeholder="https://..."
+                  style={inputStyle}
+                />
+              </div>
+            )}
+
+            {/* Font Theme */}
+            <div>
+              <label style={labelStyle}>Font Theme</label>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {FONT_THEMES.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => onUpdate({ fontTheme: f.id })}
+                    style={{
+                      padding: '5px 10px',
+                      fontSize: 10,
+                      fontWeight: (slide.fontTheme || 'editorial') === f.id ? 800 : 500,
+                      borderRadius: 4,
+                      border: (slide.fontTheme || 'editorial') === f.id ? '2px solid #C9A882' : '1px solid #E2E8F0',
+                      background: (slide.fontTheme || 'editorial') === f.id ? '#FAF8F5' : '#FFFFFF',
+                      color: (slide.fontTheme || 'editorial') === f.id ? '#8A6B4F' : '#64748B',
+                      cursor: 'pointer',
+                      fontFamily: f.font,
+                    }}
+                  >
+                    {f.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Text Background */}
+            <div>
+              <label style={labelStyle}>Text Background</label>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {TEXT_BGS.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => onUpdate({ textBackground: t.id })}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: 9,
+                      fontWeight: (slide.textBackground || 'none') === t.id ? 800 : 500,
+                      borderRadius: 4,
+                      border: (slide.textBackground || 'none') === t.id ? '2px solid #C9A882' : '1px solid #E2E8F0',
+                      background: (slide.textBackground || 'none') === t.id ? '#FAF8F5' : '#FFFFFF',
+                      color: (slide.textBackground || 'none') === t.id ? '#8A6B4F' : '#64748B',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Filter panel */}
+        {isFilterOpen && (
+          <div
+            style={{
+              background: '#F8FAFC',
+              borderRadius: 8,
+              padding: 14,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              border: '1px solid #EDE9E3',
+            }}
+          >
+            <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase' }}>
               Image Filter
-            </p>
+            </span>
             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               {IMAGE_FILTERS.map((f) => (
                 <button
@@ -201,7 +374,7 @@ export default function SlideEditPanel({ slide, onUpdate }: Props) {
                   style={{
                     padding: '4px 8px',
                     fontSize: 9,
-                    fontWeight: (slide.imageFilter || 'none') === f.id ? 900 : 600,
+                    fontWeight: (slide.imageFilter || 'none') === f.id ? 800 : 500,
                     borderRadius: 4,
                     border: (slide.imageFilter || 'none') === f.id ? '2px solid #C9A882' : '1px solid #E2E8F0',
                     background: (slide.imageFilter || 'none') === f.id ? '#FAF8F5' : '#FFFFFF',
@@ -213,12 +386,10 @@ export default function SlideEditPanel({ slide, onUpdate }: Props) {
                 </button>
               ))}
             </div>
-          </div>
-          {/* Texture */}
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 6px' }}>
+
+            <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase' }}>
               Texture
-            </p>
+            </span>
             <div style={{ display: 'flex', gap: 4 }}>
               {TEXTURES.map((t) => (
                 <button
@@ -228,7 +399,7 @@ export default function SlideEditPanel({ slide, onUpdate }: Props) {
                   style={{
                     padding: '4px 8px',
                     fontSize: 9,
-                    fontWeight: (slide.globalTexture || 'none') === t.id ? 900 : 600,
+                    fontWeight: (slide.globalTexture || 'none') === t.id ? 800 : 500,
                     borderRadius: 4,
                     border: (slide.globalTexture || 'none') === t.id ? '2px solid #C9A882' : '1px solid #E2E8F0',
                     background: (slide.globalTexture || 'none') === t.id ? '#FAF8F5' : '#FFFFFF',
@@ -240,185 +411,74 @@ export default function SlideEditPanel({ slide, onUpdate }: Props) {
                 </button>
               ))}
             </div>
-          </div>
-          {/* Text Background */}
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 6px' }}>
-              Text Background
-            </p>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              {TEXT_BGS.map((t) => (
+
+            {/* Color Presets */}
+            <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase' }}>
+              Color Preset
+            </span>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {PRESETS.map(([name, preset]) => (
                 <button
-                  key={t.id}
+                  key={name}
                   type="button"
-                  onClick={() => onUpdate({ textBackground: t.id })}
+                  onClick={() => onUpdate({ bgColor: preset.bg, textColor: preset.text, accentColor: preset.accent })}
                   style={{
-                    padding: '4px 8px',
-                    fontSize: 9,
-                    fontWeight: (slide.textBackground || 'none') === t.id ? 900 : 600,
-                    borderRadius: 4,
-                    border: (slide.textBackground || 'none') === t.id ? '2px solid #C9A882' : '1px solid #E2E8F0',
-                    background: (slide.textBackground || 'none') === t.id ? '#FAF8F5' : '#FFFFFF',
-                    color: (slide.textBackground || 'none') === t.id ? '#8A6B4F' : '#64748B',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '5px 8px',
+                    borderRadius: 6,
+                    border: slide.bgColor === preset.bg ? '2px solid #C9A882' : '1px solid #EDE9E3',
+                    background: '#FFFFFF',
                     cursor: 'pointer',
                   }}
                 >
-                  {t.name}
+                  <div style={{ width: 14, height: 14, borderRadius: 3, background: preset.bg, border: '1px solid #E2E8F0' }} />
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: preset.accent }} />
+                  <span style={{ fontSize: 9, fontWeight: 600, color: '#64748B', textTransform: 'capitalize' }}>{name}</span>
                 </button>
               ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {tab === 'color' && (
-        <div>
-          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 6px' }}>
-            Color Preset
-          </p>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {PRESETS.map(([name, preset]) => (
-              <button
-                key={name}
-                type="button"
-                onClick={() =>
-                  onUpdate({
-                    bgColor: preset.bg,
-                    textColor: preset.text,
-                    accentColor: preset.accent,
-                  })
-                }
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 10px',
-                  borderRadius: 6,
-                  border: slide.bgColor === preset.bg ? '2px solid #C9A882' : '1px solid #E2E8F0',
-                  background: '#FFFFFF',
-                  cursor: 'pointer',
-                }}
-              >
-                <div
-                  style={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: 4,
-                    background: preset.bg,
-                    border: '1px solid #E2E8F0',
-                  }}
-                />
-                <div
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    background: preset.accent,
-                  }}
-                />
-                <span style={{ fontSize: 9, fontWeight: 700, color: '#64748B', textTransform: 'capitalize' }}>
-                  {name}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {tab === 'font' && (
-        <div>
-          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 6px' }}>
-            Font Theme
-          </p>
-          <div style={{ display: 'flex', gap: 4 }}>
-            {FONT_THEMES.map((f) => (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => onUpdate({ fontTheme: f.id })}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: 10,
-                  fontWeight: (slide.fontTheme || 'editorial') === f.id ? 900 : 600,
-                  borderRadius: 4,
-                  border: (slide.fontTheme || 'editorial') === f.id ? '2px solid #C9A882' : '1px solid #E2E8F0',
-                  background: (slide.fontTheme || 'editorial') === f.id ? '#FAF8F5' : '#FFFFFF',
-                  color: (slide.fontTheme || 'editorial') === f.id ? '#8A6B4F' : '#64748B',
-                  cursor: 'pointer',
-                  fontFamily:
-                    f.id === 'editorial'
-                      ? "'Playfair Display', serif"
-                      : f.id === 'tech'
-                        ? 'monospace'
-                        : "'Inter', sans-serif",
-                }}
-              >
-                {f.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {tab === 'icon' && (
-        <div>
-          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 6px' }}>
-            NZ Accent Icon
-          </p>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={() => onUpdate({ accentIcon: undefined })}
-              style={{
-                padding: '6px 10px',
-                fontSize: 9,
-                fontWeight: !slide.accentIcon ? 900 : 600,
-                borderRadius: 4,
-                border: !slide.accentIcon ? '2px solid #C9A882' : '1px solid #E2E8F0',
-                background: !slide.accentIcon ? '#FAF8F5' : '#FFFFFF',
-                color: !slide.accentIcon ? '#8A6B4F' : '#64748B',
-                cursor: 'pointer',
-              }}
-            >
-              None
-            </button>
-            {(Object.keys(NZ_ACCENT_ICONS) as NZAccentIconId[]).map((iconId) => {
-              const Icon = NZ_ACCENT_ICONS[iconId];
-              return (
-                <button
-                  key={iconId}
-                  type="button"
-                  onClick={() => onUpdate({ accentIcon: iconId })}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    padding: '4px 8px',
-                    borderRadius: 4,
-                    border: slide.accentIcon === iconId ? '2px solid #C9A882' : '1px solid #E2E8F0',
-                    background: slide.accentIcon === iconId ? '#FAF8F5' : '#FFFFFF',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <span style={{ width: 16, height: 16, color: '#8A6B4F' }}>
-                    <Icon width={16} height={16} />
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 8,
-                      fontWeight: 700,
-                      color: slide.accentIcon === iconId ? '#8A6B4F' : '#94A3B8',
-                      textTransform: 'capitalize',
-                    }}
-                  >
-                    {iconId}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Modals */}
+      <LayoutModal
+        open={isLayoutOpen}
+        onClose={() => setIsLayoutOpen(false)}
+        currentLayout={slide.layout}
+        onSelect={(layout) => onUpdate({ layout })}
+      />
+      <AssetLibrary
+        open={isAssetOpen}
+        onClose={() => setIsAssetOpen(false)}
+        onSelectPhoto={(url) => onUpdate({ customImage: url })}
+        onSelectAccent={(iconId: NZAccentIconId) => onUpdate({ accentIcon: iconId })}
+        currentAccent={slide.accentIcon}
+      />
+    </>
   );
 }
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: 9,
+  fontWeight: 800,
+  letterSpacing: 1.5,
+  color: '#94A3B8',
+  textTransform: 'uppercase',
+  marginBottom: 4,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '8px 10px',
+  borderRadius: 6,
+  border: '1px solid #EDE9E3',
+  background: '#FFFFFF',
+  fontSize: 12,
+  color: '#1A1A1A',
+  outline: 'none',
+  boxSizing: 'border-box',
+};

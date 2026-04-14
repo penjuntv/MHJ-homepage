@@ -20,7 +20,7 @@ import type {
   SlideConfig,
 } from '@/components/carousel/types';
 import { convertInputToSlides } from '@/components/carousel/v2/convertInput';
-import LivePreview from '@/components/carousel/v2/LivePreview';
+import LivePreview, { type AspectRatio } from '@/components/carousel/v2/LivePreview';
 import ExportEngine from '@/components/carousel/v2/ExportEngine';
 
 import BlogSelector from './_components/BlogSelector';
@@ -75,6 +75,7 @@ export default function CarouselAdminPage() {
   const [caption, setCaption] = useState<CaptionState>(EMPTY_CAPTION);
   const [altTexts, setAltTexts] = useState<string[]>([]);
   const [recentRefresh, setRecentRefresh] = useState(0);
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('portrait');
 
   // Undo/Redo — yussi-inata 패턴
   const pastRef = useRef<SlideConfig[][]>([]);
@@ -263,7 +264,7 @@ export default function CarouselAdminPage() {
       const res = await fetch('/api/carousel/save-content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input, caption, blogId, contentId }),
+        body: JSON.stringify({ input, caption, blogId, contentId, slides }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.detail || json.error || 'save 실패');
@@ -514,6 +515,8 @@ export default function CarouselAdminPage() {
             onRedo={handleRedo}
             canUndo={pastRef.current.length > 0}
             canRedo={futureRef.current.length > 0}
+            aspectRatio={aspectRatio}
+            onAspectRatioChange={setAspectRatio}
           />
           <CaptionPanel caption={caption} onChange={setCaption} altTexts={altTexts} />
           <HashtagManager
@@ -521,7 +524,7 @@ export default function CarouselAdminPage() {
             selectedHashtags={caption.hashtags}
             onChange={(hashtags) => setCaption({ ...caption, hashtags })}
           />
-          <ExportEngine slides={slides} filenameBase={filenameBase} />
+          <ExportEngine slides={slides} filenameBase={filenameBase} aspectRatio={aspectRatio} />
         </div>
       </div>
 
@@ -533,19 +536,31 @@ export default function CarouselAdminPage() {
             toast.error('이 콘텐츠는 데이터가 없습니다');
             return;
           }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const rawData = row.data as any;
+          const restoredInput = { ...EMPTY_INPUT, ...(rawData || {}) };
           setMode(row.blog_id ? 'blog' : 'manual');
           setBlogId(row.blog_id);
           setBlogSlug(row.title.replace(/\s+/g, '-').toLowerCase().slice(0, 40) || 'recent');
           setContentId(row.id);
-          setInput({ ...EMPTY_INPUT, ...row.data });
+          setInput(restoredInput);
           setCaption({
             en: row.caption_en || '',
             kr: row.caption_kr || '',
             hashtags: row.hashtags || ['#MHJnz'],
           });
-          setSlides([]);
+
+          // 슬라이드 복원 (저장된 slides가 있으면 사용, 없으면 재생성)
+          if (rawData?.slides && Array.isArray(rawData.slides)) {
+            setSlides(rawData.slides);
+          } else {
+            setSlides(convertInputToSlides(restoredInput));
+          }
           setCurrentSlide(0);
           setAltTexts([]);
+          // undo/redo 초기화
+          pastRef.current = [];
+          futureRef.current = [];
           toast.success(`"${row.title}" 로드됨`);
         }}
       />

@@ -9,6 +9,7 @@ import { v2Tokens } from './tokens';
 interface Props {
   slides: SlideConfig[];
   filenameBase: string;
+  aspectRatio?: 'portrait' | 'square';
 }
 
 /** 외부 이미지를 blob URL로 변환 (CORS 우회) */
@@ -41,7 +42,7 @@ async function convertExternalImages(container: HTMLElement): Promise<() => void
   };
 }
 
-export default function ExportEngine({ slides, filenameBase }: Props) {
+export default function ExportEngine({ slides, filenameBase, aspectRatio = 'portrait' }: Props) {
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -73,11 +74,12 @@ export default function ExportEngine({ slides, filenameBase }: Props) {
         const restoreImages = await convertExternalImages(el);
 
         try {
+          const exportH = aspectRatio === 'square' ? 1080 : v2Tokens.canvas.height;
           const dataUrl = await htmlToImage.toPng(el, {
             quality: 1.0,
             pixelRatio: 2,
             width: v2Tokens.canvas.width,
-            height: v2Tokens.canvas.height,
+            height: exportH,
             cacheBust: true,
           });
           const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
@@ -110,6 +112,7 @@ export default function ExportEngine({ slides, filenameBase }: Props) {
           <SlideRenderer
             key={slide.id}
             slide={slide}
+            aspectRatio={aspectRatio}
             ref={(el) => { slideRefs.current[i] = el; }}
           />
         ))}
