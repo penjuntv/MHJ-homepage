@@ -321,26 +321,21 @@ export default function MagazineShelf({
                 </span>
 
                 {/* 커버 이미지 */}
-                <div
-                  style={{
-                    width: '85%',
-                    flex: 1,
-                    borderRadius: 4,
-                    overflow: 'hidden',
-                    position: 'relative',
-                    marginBottom: 12,
-                    minHeight: 0,
-                  }}
-                >
-                  {mag.image_url && (
-                    <SafeImage
-                      src={mag.image_url}
-                      alt={mag.title}
-                      fill
-                      className="object-cover"
-                    />
-                  )}
-                </div>
+                {mag.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={mag.image_url}
+                    alt={mag.title}
+                    style={{
+                      width: '85%',
+                      maxHeight: '50%',
+                      objectFit: 'cover',
+                      borderRadius: 4,
+                      flexShrink: 0,
+                      marginBottom: 12,
+                    }}
+                  />
+                )}
 
                 {/* 이슈 제목 */}
                 <span

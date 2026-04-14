@@ -3,9 +3,6 @@
 import { useEffect, useState } from 'react';
 import { trackEvent } from '@/lib/analytics';
 
-const PDF_EN_KO = 'https://vpayqdatpqajsmalpfmq.supabase.co/storage/v1/object/public/images/lead-magnets/NZ_School_Starter_Pack.pdf';
-const PDF_EN_ZH = 'https://vpayqdatpqajsmalpfmq.supabase.co/storage/v1/object/public/images/lead-magnets/NZ_School_Starter_Pack_ZH.pdf';
-
 interface Props {
   location?: string;
 }
@@ -50,7 +47,6 @@ export default function InlineSubscribeCTA({ location = 'blog_inline' }: Props) 
   };
 
   const isDone = status === 'success' || status === 'duplicate';
-  const linkStyle = { color: '#8A6B4F', fontWeight: 600, textDecoration: 'underline' } as const;
 
   return (
     <aside style={{
@@ -68,7 +64,7 @@ export default function InlineSubscribeCTA({ location = 'blog_inline' }: Props) 
         margin: 0,
         letterSpacing: 0,
       }}>
-        📬 Free: NZ School Starter Pack
+        📬 Mairangi Notes
       </p>
       <p style={{
         fontSize: 13,
@@ -76,20 +72,13 @@ export default function InlineSubscribeCTA({ location = 'blog_inline' }: Props) 
         margin: '6px 0 14px',
         lineHeight: 1.5,
       }}>
-        Enrolment checklist + zone guide + budget breakdown for immigrant families.
+        Weekly stories from our family in Mairangi Bay.
       </p>
 
       {isDone ? (
-        <div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#2B2318', margin: '0 0 8px' }}>
-            {status === 'success' ? 'Done! 📬 Check your inbox.' : "You're already subscribed!"}
-          </p>
-          <p style={{ fontSize: 13, margin: 0, lineHeight: 1.7 }}>
-            <a href={PDF_EN_KO} target="_blank" rel="noopener noreferrer" style={linkStyle}>🇬🇧🇰🇷 English + Korean</a>
-            <span style={{ color: '#8A6B4F', margin: '0 8px' }}>|</span>
-            <a href={PDF_EN_ZH} target="_blank" rel="noopener noreferrer" style={linkStyle}>🇬🇧🇨🇳 English + Chinese</a>
-          </p>
-        </div>
+        <p style={{ fontSize: 13, fontWeight: 700, color: '#2B2318', margin: 0 }}>
+          Welcome! 📬
+        </p>
       ) : (
         <form
           onSubmit={submit}
@@ -138,7 +127,7 @@ export default function InlineSubscribeCTA({ location = 'blog_inline' }: Props) 
               transition: 'opacity 0.2s ease',
             }}
           >
-            {status === 'loading' ? '...' : 'Send me the guide →'}
+            {status === 'loading' ? '...' : 'Subscribe →'}
           </button>
         </form>
       )}

@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Heart, MessageCircle, Share2, Send } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart, MessageCircle, Share2 } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article } from '@/lib/types';
 
@@ -64,14 +64,21 @@ function CoverPage({ magazine, size = 'default' }: { magazine: Magazine; size?: 
         fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic',
         fontSize: fs.theSize, letterSpacing: 3, color: subColor,
       }}>the</span>
+
+      {/* 장식선 */}
+      <div style={{ width: 60, height: 1, backgroundColor: textColor, opacity: 0.3, margin: '8px auto' }} />
+
       <span style={{
         fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900,
         fontSize: fs.mhj, letterSpacing: -2, lineHeight: 1, color: textColor,
       }}>MHJ</span>
       <span style={{
-        fontSize: fs.label - 1, letterSpacing: 3,
-        textTransform: 'uppercase', color: subColor, marginBottom: 8,
+        fontSize: fs.label - 1, letterSpacing: 4,
+        textTransform: 'uppercase', color: subColor,
       }}>My Mairangi Journal</span>
+
+      {/* 장식선 */}
+      <div style={{ width: 60, height: 1, backgroundColor: textColor, opacity: 0.3, margin: '8px auto' }} />
 
       {/* 커버 이미지 — 네이티브 <img> 1개만, 배경 아님 */}
       {magazine.image_url ? (
@@ -80,13 +87,15 @@ function CoverPage({ magazine, size = 'default' }: { magazine: Magazine; size?: 
           src={magazine.image_url}
           alt={magazine.title}
           style={{
-            width: '80%', maxHeight: '45%', objectFit: 'cover',
-            borderRadius: 6, display: 'block', flexShrink: 0,
+            width: size === 'fullscreen' ? '80%' : '75%',
+            maxHeight: size === 'fullscreen' ? '45%' : '40%',
+            objectFit: 'cover',
+            borderRadius: 4, display: 'block', flexShrink: 0,
           }}
         />
       ) : (
         <div style={{
-          width: '80%', height: '35%', borderRadius: 6,
+          width: '75%', height: '35%', borderRadius: 4,
           backgroundColor: light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
@@ -98,20 +107,29 @@ function CoverPage({ magazine, size = 'default' }: { magazine: Magazine; size?: 
       {/* 타이틀 영역 */}
       <h2 style={{
         fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900,
-        fontSize: fs.title, letterSpacing: 3, color: textColor,
+        fontSize: fs.title, letterSpacing: 4, color: textColor,
         textTransform: 'uppercase', marginTop: 12, textAlign: 'center',
         lineHeight: 1.2, margin: '12px 0 0',
       }}>{magazine.title}</h2>
 
       {(magazine.cover_subtitle || magazine.cover_copy) && (
-        <span style={{ fontSize: fs.sub, color: subColor, textAlign: 'center' }}>
+        <span style={{ fontSize: fs.sub, fontStyle: 'italic', color: subColor, textAlign: 'center' }}>
           {magazine.cover_subtitle || magazine.cover_copy}
         </span>
       )}
 
+      {/* 장식선 */}
+      <div style={{ width: 60, height: 1, backgroundColor: textColor, opacity: 0.3, margin: '8px auto' }} />
+
       <span style={{
         fontSize: fs.date, letterSpacing: 2,
-        textTransform: 'uppercase', color: subColor, marginTop: 12,
+        textTransform: 'uppercase', color: subColor, textAlign: 'center', lineHeight: 1.6,
+      }}>
+        Mairangi Bay · Auckland · NZ
+      </span>
+      <span style={{
+        fontSize: fs.date, letterSpacing: 2,
+        textTransform: 'uppercase', color: subColor,
       }}>
         {magazine.month_name} {magazine.year} · Vol.{magazine.issue_number || '01'}
       </span>
@@ -139,33 +157,46 @@ function ContentsPage({ magazine, articles, size = 'default', onGoToPage }: {
         {magazine.title}
       </p>
       <div style={{ width: 32, height: 1, background: theme.text + '20', marginBottom: 20 }} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {articles.map((a, i) => (
-          <div
-            key={a.id}
-            onClick={(e) => {
-              e.stopPropagation();
-              onGoToPage?.(i + 2); // +2 = cover + contents
-            }}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              cursor: onGoToPage ? 'pointer' : 'default',
-              padding: '4px 6px', margin: '0 -6px',
-              borderRadius: 6,
-              transition: 'background 0.15s',
-            }}
-            onMouseEnter={(e) => { if (onGoToPage) (e.currentTarget as HTMLElement).style.background = theme.text + '08'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-          >
-            <span style={{ fontSize: s.label, fontWeight: 900, color: theme.sub, width: 24, textAlign: 'right', flexShrink: 0, fontFamily: 'serif' }}>
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <div style={{ flex: 1, borderBottom: `0.5px solid ${theme.text}15`, paddingBottom: 6 }}>
-              <p style={{ fontSize: s.body - 2, fontWeight: 700, color: theme.text, margin: 0, lineHeight: 1.3 }}>{a.title}</p>
-              <p style={{ fontSize: s.footer, color: theme.sub, margin: '2px 0 0' }}>{a.author}</p>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {articles.map((a, i) => {
+          const isLight = isLightColor(theme.bg);
+          return (
+            <div
+              key={a.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                onGoToPage?.(i + 2);
+              }}
+              style={{
+                display: 'flex', alignItems: 'baseline', gap: 8,
+                cursor: onGoToPage ? 'pointer' : 'default',
+                padding: '10px 0',
+                borderBottom: `0.5px solid ${isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={(e) => { if (onGoToPage) (e.currentTarget as HTMLElement).style.background = theme.text + '08'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            >
+              <span style={{
+                fontFamily: "'Playfair Display', serif", fontSize: s.label + 4,
+                fontWeight: 900, minWidth: 28,
+                color: isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
+              }}>
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              {/* 리더 도트 */}
+              <span style={{
+                flex: 1,
+                borderBottom: `1px dotted ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)'}`,
+                marginBottom: 4,
+              }} />
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: s.body - 2, fontWeight: 700, color: theme.text, lineHeight: 1.3 }}>{a.title}</div>
+                <div style={{ fontSize: s.footer, letterSpacing: 1, textTransform: 'uppercase', color: theme.sub, marginTop: 2 }}>{a.author}</div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <p style={{ fontSize: s.footer - 1, color: theme.sub, letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center', marginTop: 16 }}>
         The MHJ · {magazine.month_name} {magazine.year}
@@ -216,16 +247,14 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
   /* 공통 footer */
   const footer = (
     <div style={{
-      borderTop: `0.5px solid ${lineColor}`, paddingTop: 8,
+      borderTop: `0.5px solid ${lineColor}`, paddingTop: 12,
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       marginTop: 'auto', flexShrink: 0,
+      fontSize: s.footer, letterSpacing: 2, textTransform: 'uppercase', color: subColor,
     }}>
-      <span style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: subColor }}>
-        {article.author}
-      </span>
-      <span style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: subColor }}>
-        The MHJ · P.{pageIndex}
-      </span>
+      <span>{article.author}</span>
+      <span style={{ letterSpacing: 4 }}>— {pageIndex} —</span>
+      <span>The MHJ</span>
     </div>
   );
 
@@ -253,6 +282,7 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
             fontFamily: "'Playfair Display', Georgia, serif", fontSize: s.title,
             fontWeight: 900, color: textColor, lineHeight: 1.2, margin: '0 0 8px',
           }}>{article.title}</p>
+          <div style={{ width: 40, height: 2, backgroundColor: subColor, opacity: 0.5, marginBottom: 8 }} />
           <div style={{
             flex: 1, fontSize: typo.fontSize, lineHeight: typo.lineHeight,
             color: textColor, overflow: 'hidden',
@@ -292,6 +322,7 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
             fontFamily: "'Playfair Display', Georgia, serif", fontSize: s.title - 2,
             fontWeight: 900, color: textColor, lineHeight: 1.2, margin: '0 0 8px',
           }}>{article.title}</p>
+          <div style={{ width: 40, height: 2, backgroundColor: subColor, opacity: 0.5, marginBottom: 8 }} />
           <div style={{
             flex: 1, fontSize: typo.fontSize, lineHeight: typo.lineHeight,
             color: textColor, overflow: 'hidden',
@@ -304,12 +335,16 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
     );
   }
 
-  /* ── text-only 템플릿 (에세이) ── */
+  /* ── text-only 템플릿 (에세이) — 드롭캡 + 에디토리얼 타이포 ── */
+  const textForDropCap = plainText.slice(0, 800);
+  const firstChar = textForDropCap.charAt(0);
+  const restText = textForDropCap.slice(1);
+
   return (
     <div style={{
       width: '100%', height: '100%', backgroundColor: bgColor,
       display: 'flex', flexDirection: 'column',
-      padding: '24px 22px 16px', boxSizing: 'border-box',
+      padding: '32px 28px 16px', boxSizing: 'border-box',
     }}>
       <p style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: subColor, marginBottom: 8 }}>
         {article.article_type || 'Essay'}
@@ -319,13 +354,32 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
         fontWeight: 900, fontStyle: 'italic', color: textColor,
         lineHeight: 1.2, margin: '0 0 8px',
       }}>{article.title}</p>
-      <div style={{ width: 40, height: 1, background: lineColor, marginBottom: 16 }} />
+      <div style={{ width: 40, height: 2, backgroundColor: subColor, opacity: 0.5, marginBottom: 16 }} />
       <div style={{
         flex: 1, fontSize: typo.fontSize,
         lineHeight: typo.lineHeight, color: textColor, overflow: 'hidden',
         fontFamily: "'Noto Sans KR', sans-serif",
+        letterSpacing: 0.3, wordSpacing: 1,
       }}>
-        <p style={{ margin: 0 }}>{plainText.slice(0, 800)}</p>
+        {firstChar ? (
+          <p style={{ margin: 0 }}>
+            <span style={{
+              float: 'left',
+              fontFamily: "'Playfair Display', serif",
+              fontSize: '3.2em',
+              lineHeight: 0.8,
+              fontWeight: 700,
+              marginRight: 8,
+              marginTop: 4,
+              color: subColor,
+            }}>
+              {firstChar}
+            </span>
+            {restText}
+          </p>
+        ) : (
+          <p style={{ margin: 0 }}>{textForDropCap}</p>
+        )}
       </div>
       {footer}
     </div>
@@ -515,13 +569,6 @@ export default function MagazineFlipViewer({ magazine, articles }: Props) {
       >
         <Share2 size={iconSize} strokeWidth={1.5} />
       </button>
-      {/* 보내기 */}
-      <button
-        onClick={handleShare}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex' }}
-      >
-        <Send size={iconSize} strokeWidth={1.5} />
-      </button>
     </div>
   );
 
@@ -560,9 +607,10 @@ export default function MagazineFlipViewer({ magazine, articles }: Props) {
           style={{
             width: 'min(680px, 95vw)',
             aspectRatio: '3/4',
-            borderRadius: 16,
+            borderRadius: 12,
             overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
+            border: '1px solid rgba(255,255,255,0.06)',
             animation: `pageSlide${direction === 'right' ? 'In' : 'InLeft'} 0.35s ease`,
           }}
           onTouchStart={handleTouchStart}
@@ -610,11 +658,17 @@ export default function MagazineFlipViewer({ magazine, articles }: Props) {
       </div>
 
       {/* 하단 정보 */}
-      <div style={{ position: 'absolute', bottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, letterSpacing: 3, fontWeight: 700 }}>
+      <div style={{
+        position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+      }}>
+        <span style={{
+          color: 'rgba(255,255,255,0.4)', fontSize: 13,
+          letterSpacing: 4, fontVariantNumeric: 'tabular-nums',
+        }}>
           {currentPage + 1} / {totalPages}
         </span>
-        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>
+        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10, letterSpacing: 1 }}>
           ESC or click outside to close
         </span>
       </div>
@@ -682,17 +736,17 @@ export default function MagazineFlipViewer({ magazine, articles }: Props) {
           style={{
             width: 'min(520px, 70vw)',
             aspectRatio: '3/4',
-            borderRadius: 16, overflow: 'hidden',
-            border: '1px solid var(--border)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.1)',
+            borderRadius: 12, overflow: 'hidden',
+            border: '1px solid rgba(0,0,0,0.06)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
             background: 'var(--bg)',
             position: 'relative',
             cursor: 'zoom-in',
             transition: 'box-shadow 0.2s',
             animation: `pageSlide${direction === 'right' ? 'In' : 'InLeft'} 0.35s ease`,
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 48px rgba(0,0,0,0.15)'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 40px rgba(0,0,0,0.1)'; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(0,0,0,0.08)'; }}
         >
           {renderPage('default')}
         </div>
@@ -747,7 +801,7 @@ export default function MagazineFlipViewer({ magazine, articles }: Props) {
       </div>
 
       {/* 페이지 카운터 */}
-      <p style={{ fontSize: 10, color: 'var(--text-tertiary)', letterSpacing: 2, marginTop: 12 }}>
+      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: 4, marginTop: 12, fontVariantNumeric: 'tabular-nums' }}>
         {currentPage + 1} / {totalPages}
       </p>
 
@@ -757,7 +811,7 @@ export default function MagazineFlipViewer({ magazine, articles }: Props) {
       </p>
 
       {/* 데스크탑 풀스크린 힌트 */}
-      <p className="hidden md:block" style={{ fontSize: 9, color: 'var(--text-tertiary)', letterSpacing: 2, marginTop: 4, opacity: 0.5 }}>
+      <p className="hidden md:block" style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: 2, textTransform: 'uppercase', marginTop: 4, opacity: 0.5 }}>
         Click page to fullscreen · ← → keys
       </p>
 

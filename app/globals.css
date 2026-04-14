@@ -310,7 +310,8 @@
   font-weight: 900;
   float: left;
   margin-right: 16px;
-  line-height: 0.8;
+  line-height: 1;
+  margin-top: 0.05em;
   color: var(--drop-cap-color);
 }
 
@@ -639,7 +640,7 @@
   justify-content: space-between;
   padding: 20px 6px;
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  text-orientation: mixed;
   transition: opacity 0.2s ease;
   z-index: 2;
 }
@@ -954,7 +955,8 @@
   font-weight: 900;
   float: left;
   margin-right: 12px;
-  line-height: 0.78;
+  line-height: 1;
+  margin-top: 0.1em;
   color: var(--drop-cap-color);
   font-family: 'Playfair Display', serif;
 }
