@@ -14,18 +14,18 @@ export default function ContentNeoBrutalism({ slide }: { slide: SlideConfig }) {
   const bodyFont = getBodyFont(slide.fontTheme);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: 40, boxSizing: 'border-box', position: 'relative', overflow: 'hidden', border: '8px solid #1A1A1A' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: '2.5rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', border: '8px solid #1A1A1A' }}>
       {/* Tag */}
-      <div style={{ position: 'absolute', top: 20, right: 20, background: '#1A1A1A', color: '#FFFFFF', fontFamily: v2Tokens.fonts.mono, fontSize: 11, fontWeight: 700, padding: '6px 14px', border: '2px solid #1A1A1A', boxShadow: '2px 2px 0px 0px rgba(255,255,255,1)', zIndex: 2 }}>
+      <div style={{ position: 'absolute', top: 20, right: 20, background: '#1A1A1A', color: '#FFFFFF', fontFamily: v2Tokens.fonts.mono, fontSize: '0.6875rem', fontWeight: 700, padding: '0.375rem 0.875rem', border: '2px solid #1A1A1A', boxShadow: '2px 2px 0px 0px rgba(255,255,255,1)', zIndex: 2 }}>
         {slide.subtitle || 'TRENDING'}
       </div>
 
       {/* Content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2, marginTop: 40 }}>
         {/* Title card */}
-        <div style={{ background: '#FFFFFF', border: '4px solid #1A1A1A', padding: 24, boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)', marginBottom: 32, transform: 'rotate(-1deg)' }}>
+        <div style={{ background: '#FFFFFF', border: '4px solid #1A1A1A', padding: '1.5rem', boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)', marginBottom: 32, transform: 'rotate(-1deg)' }}>
           {slide.title && (
-            <h2 style={{ fontFamily: v2Tokens.fonts.mono, fontSize: 36, fontWeight: 900, color: '#1A1A1A', lineHeight: 1.1, textTransform: 'uppercase', margin: 0 }}>
+            <h2 style={{ fontFamily: v2Tokens.fonts.mono, fontSize: '2.25rem', fontWeight: 900, color: '#1A1A1A', lineHeight: 1.1, textTransform: 'uppercase', margin: 0 }}>
               {slide.title}
             </h2>
           )}
@@ -40,8 +40,8 @@ export default function ContentNeoBrutalism({ slide }: { slide: SlideConfig }) {
 
         {/* Body */}
         {slide.body && (
-          <div style={{ marginTop: 32, background: v2Tokens.palette.peach, border: '4px solid #1A1A1A', padding: 16, boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}>
-            <p style={{ fontFamily: bodyFont, fontSize: 14, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.5, margin: 0 }}>
+          <div style={{ marginTop: 32, background: v2Tokens.palette.peach, border: '4px solid #1A1A1A', padding: '1rem', boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}>
+            <p style={{ fontFamily: bodyFont, fontSize: '0.875rem', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.5, margin: 0 }}>
               {slide.body}
             </p>
           </div>

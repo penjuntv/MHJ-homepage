@@ -17,10 +17,6 @@ interface Props {
   canRedo?: boolean;
 }
 
-const PREVIEW_SCALE = 0.25;
-const PREVIEW_W = 1080 * PREVIEW_SCALE;
-const PREVIEW_H = 1350 * PREVIEW_SCALE;
-
 export default function LivePreview({
   slides,
   currentIndex,
@@ -160,8 +156,9 @@ export default function LivePreview({
 
         <div
           style={{
-            width: PREVIEW_W,
-            height: PREVIEW_H,
+            width: '100%',
+            maxWidth: 600,
+            aspectRatio: '4 / 5',
             overflow: 'hidden',
             borderRadius: 6,
             flexShrink: 0,
@@ -169,16 +166,7 @@ export default function LivePreview({
             boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
           }}
         >
-          <div
-            style={{
-              width: 1080,
-              height: 1350,
-              transform: `scale(${PREVIEW_SCALE})`,
-              transformOrigin: 'top left',
-            }}
-          >
-            <SlideRenderer slide={slide} />
-          </div>
+          <SlideRenderer slide={slide} preview />
         </div>
 
         <button

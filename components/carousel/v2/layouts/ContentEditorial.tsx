@@ -31,7 +31,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
         background: bg,
         display: 'flex',
         flexDirection: 'column',
-        padding: '80px 80px 70px',
+        padding: '5rem 5rem 4.375rem',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
@@ -67,7 +67,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: 10,
+            fontSize: '0.625rem',
             fontWeight: 900,
             letterSpacing: 4,
             textTransform: 'uppercase',
@@ -86,7 +86,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
         <h2
           style={{
             fontFamily: titleFont,
-            fontSize: 32,
+            fontSize: '2rem',
             fontWeight: 900,
             fontStyle: slide.fontTheme === 'tech' ? 'normal' : 'italic',
             color: text,
@@ -111,7 +111,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
             <span
               style={{
                 fontFamily: v2Tokens.fonts.display,
-                fontSize: 80,
+                fontSize: '5.5rem',
                 fontWeight: 900,
                 color: accent,
                 lineHeight: 0.85,
@@ -125,7 +125,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
             <p
               style={{
                 fontFamily: bodyFont,
-                fontSize: 15,
+                fontSize: '0.9375rem',
                 lineHeight: 2.1,
                 color: textBgStyle?.color ?? text,
                 margin: 0,
@@ -139,7 +139,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
           <p
             style={{
               fontFamily: bodyFont,
-              fontSize: 15,
+              fontSize: '0.9375rem',
               lineHeight: 2.1,
               color: textBgStyle?.color ?? text,
               margin: 0,

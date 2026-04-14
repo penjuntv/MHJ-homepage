@@ -26,7 +26,7 @@ export default function CoverMinimal({ slide }: { slide: SlideConfig }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '80px 80px 70px',
+        padding: '5rem 5rem 4.375rem',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
@@ -70,7 +70,7 @@ export default function CoverMinimal({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: 11,
+            fontSize: '0.6875rem',
             fontWeight: 900,
             letterSpacing: 5,
             textTransform: 'uppercase',
@@ -119,7 +119,7 @@ export default function CoverMinimal({ slide }: { slide: SlideConfig }) {
       <h1
         style={{
           fontFamily: titleFont,
-          fontSize: imgSrc ? 48 : 64,
+          fontSize: imgSrc ? '3rem' : '4rem',
           fontWeight: 900,
           fontStyle: 'italic',
           color: text,

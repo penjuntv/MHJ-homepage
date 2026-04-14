@@ -24,17 +24,17 @@ export default function ContentBarChart({ slide }: { slide: SlideConfig }) {
   const bars = parseBarData(slide.body);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: '80px 80px 70px', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', color: '#FFFFFF' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', color: '#FFFFFF' }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {slide.subtitle && (
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: 10, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, marginBottom: 24, position: 'relative', zIndex: 2 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, marginBottom: 24, position: 'relative', zIndex: 2 }}>
           {slide.subtitle}
         </span>
       )}
 
       {slide.title && (
-        <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 40px', position: 'relative', zIndex: 2 }}>
+        <h2 style={{ fontFamily: titleFont, fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 40px', position: 'relative', zIndex: 2 }}>
           {slide.title}
         </h2>
       )}
@@ -42,7 +42,7 @@ export default function ContentBarChart({ slide }: { slide: SlideConfig }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center', position: 'relative', zIndex: 2 }}>
         {bars.map((bar, i) => (
           <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: v2Tokens.fonts.body, fontSize: 13, fontWeight: 600, opacity: 0.9 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: v2Tokens.fonts.body, fontSize: '0.8125rem', fontWeight: 600, opacity: 0.9 }}>
               <span>{bar.label}</span>
               <span style={{ color: accent }}>{bar.value}</span>
             </div>

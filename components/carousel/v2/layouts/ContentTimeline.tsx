@@ -21,12 +21,12 @@ export default function ContentTimeline({ slide }: { slide: SlideConfig }) {
   }
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: '80px 80px 70px', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {/* Title */}
       {slide.title && (
-        <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 40px', position: 'relative', zIndex: 2 }}>
+        <h2 style={{ fontFamily: titleFont, fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 40px', position: 'relative', zIndex: 2 }}>
           {slide.title}
         </h2>
       )}
@@ -41,10 +41,10 @@ export default function ContentTimeline({ slide }: { slide: SlideConfig }) {
             {/* Dot */}
             <div style={{ position: 'absolute', left: -28, top: 4, width: 12, height: 12, borderRadius: '50%', background: accent, flexShrink: 0, border: `3px solid ${bg}`, boxShadow: `0 0 0 2px ${accent}` }} />
             <div>
-              <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: 12, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: accent, margin: '0 0 6px' }}>
+              <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: accent, margin: '0 0 6px' }}>
                 {item.label}
               </p>
-              <p style={{ fontFamily: bodyFont, fontSize: 14, lineHeight: 1.6, color: text, opacity: 0.8, margin: 0 }}>
+              <p style={{ fontFamily: bodyFont, fontSize: '0.875rem', lineHeight: 1.6, color: text, opacity: 0.8, margin: 0 }}>
                 {item.desc}
               </p>
             </div>

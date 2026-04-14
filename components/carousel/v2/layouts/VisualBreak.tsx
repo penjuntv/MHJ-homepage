@@ -31,12 +31,12 @@ export default function VisualBreak({ slide }: { slide: SlideConfig }) {
 
       {/* Central quote */}
       {(slide.title || slide.body) && (
-        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 80px', maxWidth: 800, ...(textBgStyle ?? {}) }}>
-          <p style={{ fontFamily: titleFont, fontSize: 30, fontWeight: 700, fontStyle: 'italic', color: textBgStyle?.color ?? '#FFFFFF', lineHeight: 1.5, textAlign: 'center', margin: 0, textShadow: textBgStyle ? 'none' : '0 2px 20px rgba(0,0,0,0.4)' }}>
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 5rem', maxWidth: 800, ...(textBgStyle ?? {}) }}>
+          <p style={{ fontFamily: titleFont, fontSize: '1.875rem', fontWeight: 700, fontStyle: 'italic', color: textBgStyle?.color ?? '#FFFFFF', lineHeight: 1.5, textAlign: 'center', margin: 0, textShadow: textBgStyle ? 'none' : '0 2px 20px rgba(0,0,0,0.4)' }}>
             {slide.body || slide.title}
           </p>
           {slide.body && slide.title && (
-            <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: 13, fontWeight: 700, color: accent, marginTop: 24, textAlign: 'center' }}>
+            <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.8125rem', fontWeight: 700, color: accent, marginTop: 24, textAlign: 'center' }}>
               — {slide.title}
             </p>
           )}

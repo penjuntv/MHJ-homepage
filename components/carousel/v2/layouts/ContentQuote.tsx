@@ -25,7 +25,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '80px 80px 70px',
+        padding: '5rem 5rem 4.375rem',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
@@ -41,7 +41,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
           top: 60,
           left: 60,
           fontFamily: v2Tokens.fonts.display,
-          fontSize: 180,
+          fontSize: '7.5rem',
           color: accent,
           opacity: 0.12,
           lineHeight: 0.8,
@@ -57,7 +57,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: 10,
+            fontSize: '0.625rem',
             fontWeight: 900,
             letterSpacing: 4,
             textTransform: 'uppercase',
@@ -77,7 +77,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: titleFont,
-            fontSize: 30,
+            fontSize: '1.875rem',
             fontStyle: 'italic',
             fontWeight: 700,
             color: textBgStyle?.color ?? text,
@@ -95,7 +95,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: 13,
+            fontSize: '0.8125rem',
             fontWeight: 700,
             color: accent,
             marginTop: 32,
@@ -115,7 +115,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
           bottom: 80,
           right: 60,
           fontFamily: v2Tokens.fonts.display,
-          fontSize: 180,
+          fontSize: '7.5rem',
           color: accent,
           opacity: 0.12,
           lineHeight: 0.8,

@@ -17,7 +17,7 @@ export default function ContentAbstract({ slide }: { slide: SlideConfig }) {
   const filterStyle = getFilterStyle(slide.imageFilter);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 60px 70px', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '5rem 3.75rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {/* Abstract shapes — 3 overlapping circles */}
@@ -27,7 +27,7 @@ export default function ContentAbstract({ slide }: { slide: SlideConfig }) {
 
       {/* Title */}
       {slide.title && (
-        <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, textAlign: 'center', margin: '0 0 24px', position: 'relative', zIndex: 2, flexShrink: 0 }}>
+        <h2 style={{ fontFamily: titleFont, fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, textAlign: 'center', margin: '0 0 24px', position: 'relative', zIndex: 2, flexShrink: 0 }}>
           {slide.title}
         </h2>
       )}
@@ -44,7 +44,7 @@ export default function ContentAbstract({ slide }: { slide: SlideConfig }) {
       {/* Body */}
       {slide.body && (
         <div style={{ position: 'relative', zIndex: 2, background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', padding: 16, borderRadius: 12, border: '1px solid rgba(255,255,255,0.5)', flexShrink: 0 }}>
-          <p style={{ fontFamily: bodyFont, fontSize: 13, fontStyle: 'italic', lineHeight: 1.6, color: text, textAlign: 'center', margin: 0 }}>
+          <p style={{ fontFamily: bodyFont, fontSize: '0.8125rem', fontStyle: 'italic', lineHeight: 1.6, color: text, textAlign: 'center', margin: 0 }}>
             {slide.body}
           </p>
         </div>

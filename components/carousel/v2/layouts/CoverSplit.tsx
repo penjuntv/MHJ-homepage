@@ -28,11 +28,11 @@ export default function CoverSplit({ slide }: { slide: SlideConfig }) {
       </div>
 
       {/* Bottom: text 45% */}
-      <div style={{ flex: 1, padding: '40px 80px 70px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: 10, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, display: 'block', marginBottom: 16, flexShrink: 0 }}>
+      <div style={{ flex: 1, padding: '2.5rem 5rem 4.375rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, display: 'block', marginBottom: 16, flexShrink: 0 }}>
           {slide.subtitle || 'NEW GUIDE'}
         </span>
-        <h1 style={{ fontFamily: titleFont, fontSize: 44, fontWeight: 900, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -1.5, margin: 0, flexShrink: 0 }}>
+        <h1 style={{ fontFamily: titleFont, fontSize: '2.75rem', fontWeight: 900, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -1.5, margin: 0, flexShrink: 0 }}>
           {slide.title || 'MHJ'}
         </h1>
       </div>

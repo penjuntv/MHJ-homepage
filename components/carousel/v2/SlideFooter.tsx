@@ -28,7 +28,7 @@ export default function SlideFooter({
         left: 0,
         right: 0,
         height: 70,
-        padding: '0 80px',
+        padding: '0 5rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -38,7 +38,7 @@ export default function SlideFooter({
       <span
         style={{
           fontFamily: v2Tokens.fonts.display,
-          fontSize: 16,
+          fontSize: '1rem',
           fontWeight: 700,
           fontStyle: 'italic',
           color: accent,
@@ -51,7 +51,7 @@ export default function SlideFooter({
         <span
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: 11,
+            fontSize: '0.6875rem',
             fontWeight: 600,
             color: muted,
             letterSpacing: 2,

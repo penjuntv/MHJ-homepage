@@ -17,13 +17,13 @@ export default function CoverArch({ slide }: { slide: SlideConfig }) {
   const filterStyle = getFilterStyle(slide.imageFilter);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '80px 80px 70px', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', textAlign: 'center' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', textAlign: 'center' }}>
       <TextureOverlay texture={slide.globalTexture} />
       <AccentDecoration iconId={slide.accentIcon} color={accent} opacity={0.06} size={120} position="bottom-left" />
 
       {/* Category */}
       {slide.subtitle && (
-        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: text, opacity: 0.5, margin: 0, position: 'relative', zIndex: 2, flexShrink: 0 }}>
+        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: text, opacity: 0.5, margin: 0, position: 'relative', zIndex: 2, flexShrink: 0 }}>
           {slide.subtitle}
         </p>
       )}
@@ -37,7 +37,7 @@ export default function CoverArch({ slide }: { slide: SlideConfig }) {
 
       {/* Title */}
       <div style={{ position: 'relative', zIndex: 2, flexShrink: 0 }}>
-        <h1 style={{ fontFamily: titleFont, fontSize: 44, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.1, letterSpacing: -1.5, margin: 0, whiteSpace: 'pre-line' }}>
+        <h1 style={{ fontFamily: titleFont, fontSize: '2.75rem', fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.1, letterSpacing: -1.5, margin: 0, whiteSpace: 'pre-line' }}>
           {slide.title || 'MHJ'}
         </h1>
       </div>

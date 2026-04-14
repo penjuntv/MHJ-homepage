@@ -41,7 +41,7 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
         background: bg,
         display: 'flex',
         flexDirection: 'column',
-        padding: '80px 80px 70px',
+        padding: '5rem 5rem 4.375rem',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
@@ -55,7 +55,7 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
         <span
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: 10,
+            fontSize: '0.625rem',
             fontWeight: 900,
             letterSpacing: 4,
             textTransform: 'uppercase',
@@ -74,7 +74,7 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
         <h3
           style={{
             fontFamily: titleFont,
-            fontSize: 32,
+            fontSize: '2rem',
             fontWeight: 900,
             fontStyle: 'italic',
             color: text,
@@ -114,7 +114,7 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
             <span
               style={{
                 fontFamily: v2Tokens.fonts.display,
-                fontSize: 48,
+                fontSize: '3rem',
                 fontWeight: 900,
                 color: accent,
                 letterSpacing: -2,
@@ -127,7 +127,7 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
             <span
               style={{
                 fontFamily: v2Tokens.fonts.body,
-                fontSize: 12,
+                fontSize: '0.75rem',
                 fontWeight: 600,
                 color: text,
                 opacity: 0.7,

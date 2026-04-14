@@ -21,7 +21,7 @@ export default function ContentSplit({ slide }: { slide: SlideConfig }) {
       <TextureOverlay texture={slide.globalTexture} />
 
       {/* Top: photo with rounded top corners */}
-      <div style={{ height: '55%', width: '100%', padding: '20px 20px 0', boxSizing: 'border-box', flexShrink: 0 }}>
+      <div style={{ height: '55%', width: '100%', padding: '1.25rem 1.25rem 0', boxSizing: 'border-box', flexShrink: 0 }}>
         <div style={{ width: '100%', height: '100%', borderRadius: '40px 40px 0 0', overflow: 'hidden', background: 'rgba(0,0,0,0.05)' }}>
           {imgSrc && (
             <img src={imgSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: filterStyle }} />
@@ -30,19 +30,19 @@ export default function ContentSplit({ slide }: { slide: SlideConfig }) {
       </div>
 
       {/* Bottom: text */}
-      <div style={{ flex: 1, padding: '40px 80px 70px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
+      <div style={{ flex: 1, padding: '2.5rem 5rem 4.375rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
         {slide.stepNumber != null && (
-          <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: 10, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: accent, marginBottom: 12 }}>
+          <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: accent, marginBottom: 12 }}>
             Step {String(slide.stepNumber).padStart(2, '0')}
           </span>
         )}
         {slide.title && (
-          <h2 style={{ fontFamily: titleFont, fontSize: 32, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 16px' }}>
+          <h2 style={{ fontFamily: titleFont, fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 16px' }}>
             {slide.title}
           </h2>
         )}
         {slide.body && (
-          <p style={{ fontFamily: bodyFont, fontSize: 14, lineHeight: 1.7, color: text, opacity: 0.8, margin: 0 }}>
+          <p style={{ fontFamily: bodyFont, fontSize: '0.875rem', lineHeight: 1.7, color: text, opacity: 0.8, margin: 0 }}>
             {slide.body}
           </p>
         )}

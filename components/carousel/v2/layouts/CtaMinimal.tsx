@@ -23,7 +23,7 @@ export default function CtaMinimal({ slide }: { slide: SlideConfig }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '80px 80px 70px',
+        padding: '5rem 5rem 4.375rem',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
@@ -64,7 +64,7 @@ export default function CtaMinimal({ slide }: { slide: SlideConfig }) {
       <p
         style={{
           fontFamily: v2Tokens.fonts.display,
-          fontSize: 48,
+          fontSize: '3rem',
           fontWeight: 900,
           fontStyle: 'italic',
           color: accent,
@@ -80,7 +80,7 @@ export default function CtaMinimal({ slide }: { slide: SlideConfig }) {
       <p
         style={{
           fontFamily: v2Tokens.fonts.body,
-          fontSize: 10,
+          fontSize: '0.625rem',
           fontWeight: 900,
           letterSpacing: 5,
           textTransform: 'uppercase',
@@ -102,7 +102,7 @@ export default function CtaMinimal({ slide }: { slide: SlideConfig }) {
       <h2
         style={{
           fontFamily: titleFont,
-          fontSize: 32,
+          fontSize: '2rem',
           fontWeight: 900,
           fontStyle: 'italic',
           color: text,
@@ -121,7 +121,7 @@ export default function CtaMinimal({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: 14,
+            fontSize: '0.875rem',
             color: text,
             opacity: 0.7,
             lineHeight: 1.7,
@@ -141,7 +141,7 @@ export default function CtaMinimal({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: 13,
+            fontSize: '0.8125rem',
             fontWeight: 700,
             color: accent,
             letterSpacing: 1,
@@ -159,7 +159,7 @@ export default function CtaMinimal({ slide }: { slide: SlideConfig }) {
       <p
         style={{
           fontFamily: v2Tokens.fonts.body,
-          fontSize: 12,
+          fontSize: '0.75rem',
           fontWeight: 700,
           letterSpacing: 2,
           color: text,
