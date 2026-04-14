@@ -77,7 +77,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
             zIndex: 2,
           }}
         >
-          {String(slide.stepNumber).padStart(2, '0')} / 10
+          {String(slide.stepNumber).padStart(2, '0')}
         </p>
       )}
 

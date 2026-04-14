@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Undo2, Redo2, Download } from 'lucide-react';
+import { toast } from 'sonner';
 import type { SlideConfig } from '../types';
 import SlideRenderer from './SlideRenderer';
 import SlideEditPanel from './SlideEditPanel';
@@ -58,15 +59,42 @@ export default function LivePreview({
       const htmlToImage = await import('html-to-image');
       const { saveAs } = await import('file-saver');
       await document.fonts.ready;
+
+      // 외부 이미지 blob URL 변환 (CORS 우회)
+      const imgs = singleRef.current.querySelectorAll('img');
+      const originals: { img: HTMLImageElement; src: string }[] = [];
+      await Promise.all(
+        Array.from(imgs).map(async (img) => {
+          const src = img.src;
+          if (!src || src.startsWith('data:') || src.startsWith('blob:')) return;
+          try {
+            const res = await fetch(src, { mode: 'cors' });
+            const blob = await res.blob();
+            originals.push({ img, src });
+            img.src = URL.createObjectURL(blob);
+          } catch { /* 원본 유지 */ }
+        }),
+      );
+
       const dataUrl = await htmlToImage.toPng(singleRef.current, {
         quality: 1.0,
         pixelRatio: 2,
         width: 1080,
         height: 1350,
+        cacheBust: true,
       });
+
+      // blob URL 정리
+      originals.forEach(({ img, src }) => {
+        URL.revokeObjectURL(img.src);
+        img.src = src;
+      });
+
       saveAs(dataUrl, `slide_${String(currentIndex + 1).padStart(2, '0')}.png`);
+      toast.success('PNG 다운로드 완료');
     } catch (err) {
       console.error('Single download error:', err);
+      toast.error('다운로드 실패: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setDownloading(false);
     }

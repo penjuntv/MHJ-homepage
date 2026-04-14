@@ -523,18 +523,15 @@
 /* ─── 서가 v2: Bookshelf (Yussi 목업 기반) ─── */
 .bookshelf {
   position: relative;
-  max-width: 1320px;
-  margin: 0 auto;
   border: 1px solid #d4ccc0;
   border-bottom: none;
   border-radius: 4px 4px 0 0;
   padding: 48px 40px 0;
-  min-height: 60vh;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0;
   perspective: 800px;
   overflow-x: auto;
@@ -581,8 +578,6 @@
 /* 선반 판자 */
 .bookshelf-plank {
   position: relative;
-  max-width: 1320px;
-  margin: 0 auto;
   height: 28px;
   background: linear-gradient(180deg, #c4b89a 0%, #b8ac8e 100%);
   border-top: 2px solid #b0a488;
@@ -706,7 +701,6 @@
 @media (max-width: 1023px) and (min-width: 768px) {
   .bookshelf {
     padding: 32px 24px 0;
-    min-height: 35vh;
   }
   .shelf-book {
     flex: 0 0 60px;

@@ -155,24 +155,6 @@ export default function CtaMinimal({ slide }: { slide: SlideConfig }) {
         </p>
       )}
 
-      {/* 하단 핸들 */}
-      <p
-        style={{
-          fontFamily: v2Tokens.fonts.body,
-          fontSize: '0.75rem',
-          fontWeight: 700,
-          letterSpacing: 2,
-          color: text,
-          opacity: 0.5,
-          margin: '32px 0 0',
-          textAlign: 'center',
-          position: 'relative',
-          zIndex: 2,
-        }}
-      >
-        @mhj_nz
-      </p>
-
       <SlideFooter slideNumber={slide.stepNumber ?? 10} accentColor={accent} textColor={text} />
     </div>
   );

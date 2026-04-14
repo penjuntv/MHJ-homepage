@@ -45,7 +45,7 @@ export default function SummaryChecklist({ slide }: { slide: SlideConfig }) {
 
       {/* Korean summary at bottom */}
       {slide.subtitle && (
-        <p style={{ fontFamily: v2Tokens.fonts.bodyKr, fontSize: '0.8125rem', color: accent, opacity: 0.8, marginTop: 32, lineHeight: 1.6, position: 'relative', zIndex: 2 }}>
+        <p style={{ fontFamily: v2Tokens.fonts.bodyKr, fontSize: '0.9375rem', color: accent, opacity: 0.8, marginTop: 32, lineHeight: 1.6, position: 'relative', zIndex: 2 }}>
           {slide.subtitle}
         </p>
       )}

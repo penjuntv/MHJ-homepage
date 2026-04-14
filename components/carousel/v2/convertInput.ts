@@ -67,14 +67,17 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
   slides.push({
     id: 7,
     layout: 'visual-break',
-    title: input.pullQuote || blogTitle,
-    body: input.pullQuote || '',
+    title: input.pullQuote || '',
+    body: input.pullQuote ? '' : 'Save this guide and share it with someone who needs it.',
     imageUrl: input.visualImageUrl || imageUrl,
     stepNumber: 7,
   });
 
   // 슬라이드 8: 요약 체크리스트
-  const summaryPoints = (input.summaryPoints ?? []).filter(Boolean);
+  // ✓ 접두사 제거 — 표시는 SummaryChecklist 레이아웃이 담당
+  const summaryPoints = (input.summaryPoints ?? [])
+    .filter(Boolean)
+    .map(s => s.replace(/^[✓✔]\s*/, ''));
   const summaryText = summaryPoints.length > 0
     ? summaryPoints.join('\n')
     : `Research before you move\nConnect with local communities\nGive yourself time to adjust\nRead more at mhj.nz`;

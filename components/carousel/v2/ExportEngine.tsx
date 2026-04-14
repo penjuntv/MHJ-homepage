@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { toast } from 'sonner';
 import type { SlideConfig } from '../types';
 import SlideRenderer from './SlideRenderer';
 import { v2Tokens } from './tokens';
@@ -8,6 +9,36 @@ import { v2Tokens } from './tokens';
 interface Props {
   slides: SlideConfig[];
   filenameBase: string;
+}
+
+/** 외부 이미지를 blob URL로 변환 (CORS 우회) */
+async function convertExternalImages(container: HTMLElement): Promise<() => void> {
+  const imgs = container.querySelectorAll('img');
+  const originals: { img: HTMLImageElement; src: string }[] = [];
+
+  await Promise.all(
+    Array.from(imgs).map(async (img) => {
+      const src = img.src;
+      if (!src || src.startsWith('data:') || src.startsWith('blob:')) return;
+      try {
+        const res = await fetch(src, { mode: 'cors' });
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        originals.push({ img, src });
+        img.src = blobUrl;
+      } catch {
+        // 변환 실패 시 원본 유지
+      }
+    }),
+  );
+
+  // cleanup: blob URL 해제 + 원본 복원
+  return () => {
+    originals.forEach(({ img, src }) => {
+      URL.revokeObjectURL(img.src);
+      img.src = src;
+    });
+  };
 }
 
 export default function ExportEngine({ slides, filenameBase }: Props) {
@@ -31,29 +62,38 @@ export default function ExportEngine({ slides, filenameBase }: Props) {
       const { saveAs } = fileSaverModule;
       const zip = new JSZip();
 
+      // 웹폰트 로딩 완료 대기 (한 번만)
+      await document.fonts.ready;
+
       for (let i = 0; i < slides.length; i++) {
         const el = slideRefs.current[i];
         if (!el) continue;
 
-        // 웹폰트 로딩 완료 대기
-        await document.fonts.ready;
+        // 외부 이미지를 blob URL로 변환 (CORS 우회)
+        const restoreImages = await convertExternalImages(el);
 
-        const dataUrl = await htmlToImage.toPng(el, {
-          quality: 1.0,
-          pixelRatio: 2,
-          width: v2Tokens.canvas.width,
-          height: v2Tokens.canvas.height,
-        });
-        const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
-        zip.file(`${filenameBase}_${String(i + 1).padStart(2, '0')}.png`, base64, { base64: true });
+        try {
+          const dataUrl = await htmlToImage.toPng(el, {
+            quality: 1.0,
+            pixelRatio: 2,
+            width: v2Tokens.canvas.width,
+            height: v2Tokens.canvas.height,
+            cacheBust: true,
+          });
+          const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+          zip.file(`${filenameBase}_${String(i + 1).padStart(2, '0')}.png`, base64, { base64: true });
+        } finally {
+          restoreImages();
+        }
         setProgress(i + 1);
       }
 
       const blob = await zip.generateAsync({ type: 'blob' });
       saveAs(blob, `${filenameBase}.zip`);
+      toast.success(`${slides.length}장 ZIP 다운로드 완료`);
     } catch (err) {
       console.error('ExportEngine error:', err);
-      alert('Export 실패: ' + (err instanceof Error ? err.message : String(err)));
+      toast.error('Export 실패: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setExporting(false);
       setProgress(0);

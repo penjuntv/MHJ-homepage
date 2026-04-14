@@ -219,6 +219,7 @@ export default function MagazineShelf({
       </p>
 
       {/* 데스크탑/태블릿: 책장 서가 UI (md+ 표시) */}
+      <div style={{ width: 'fit-content', minWidth: 400, maxWidth: 1320, margin: '0 auto' }}>
       <div className="bookshelf">
         {magazines.map((mag, idx) => {
           const spineColor = getSpineColor(mag);
@@ -397,6 +398,7 @@ export default function MagazineShelf({
 
       {/* 선반 판자 (데스크탑/태블릿) */}
       <div className="bookshelf-plank" />
+      </div>
 
       {/* 모바일: 2열 카드 그리드 (767px 이하) */}
       <div className="block md:hidden">

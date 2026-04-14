@@ -26,7 +26,7 @@ export default function YussiTake({ slide }: { slide: SlideConfig }) {
           <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.875rem', fontWeight: 700, color: '#FFFFFF', margin: 0, lineHeight: 1.2 }}>
             Yussi
           </p>
-          <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.6875rem', color: 'rgba(255,255,255,0.7)', margin: '4px 0 0', lineHeight: 1.2 }}>
+          <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', margin: '4px 0 0', lineHeight: 1.2 }}>
             Social Work Student & Mum of 3
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function YussiTake({ slide }: { slide: SlideConfig }) {
 
       {/* Korean at bottom */}
       {slide.subtitle && (
-        <p style={{ fontFamily: v2Tokens.fonts.bodyKr, fontSize: '0.8125rem', color: accent, opacity: 0.8, marginTop: 24, lineHeight: 1.6, position: 'relative', zIndex: 2 }}>
+        <p style={{ fontFamily: v2Tokens.fonts.bodyKr, fontSize: '0.9375rem', color: accent, opacity: 0.8, marginTop: 24, lineHeight: 1.6, position: 'relative', zIndex: 2 }}>
           {slide.subtitle}
         </p>
       )}

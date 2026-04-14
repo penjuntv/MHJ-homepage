@@ -26,37 +26,95 @@ function getScale(size: ViewSize) {
 }
 
 /* ════════════════════════════════
-   커버 페이지
+   밝은 배경색 판별
+   ════════════════════════════════ */
+function isLightColor(hex: string): boolean {
+  const c = hex.replace('#', '');
+  if (c.length !== 6) return false;
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 140;
+}
+
+/* ════════════════════════════════
+   커버 페이지 — 단색 배경 + 구조화된 레이아웃
    ════════════════════════════════ */
 function CoverPage({ magazine, size = 'default' }: { magazine: Magazine; size?: ViewSize }) {
-  const theme = getTheme(magazine);
-  const s = getScale(size);
+  const bgColor = magazine.bg_color || '#FAF8F5';
+  const light = isLightColor(bgColor);
+  const textColor = light ? '#3a2000' : '#f0f0f0';
+  const subColor = light ? 'rgba(58,32,0,0.45)' : 'rgba(255,255,255,0.45)';
+
+  const fs = size === 'fullscreen'
+    ? { mhj: 56, title: 24, sub: 12, label: 10, date: 9, theSize: 14 }
+    : size === 'mobile'
+    ? { mhj: 36, title: 16, sub: 10, label: 8, date: 7, theSize: 10 }
+    : { mhj: 44, title: 20, sub: 10, label: 8, date: 8, theSize: 12 };
+
   return (
     <div style={{
-      width: '100%', height: '100%', background: theme.bg,
+      width: '100%', height: '100%', backgroundColor: bgColor,
       display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center', padding: '5%', boxSizing: 'border-box',
-      position: 'relative', overflow: 'hidden',
+      justifyContent: 'center', padding: '24px 20px', boxSizing: 'border-box',
+      gap: 4,
     }}>
-      {magazine.image_url && (
-        <div style={{ position: 'absolute', inset: 0 }}>
-          <SafeImage src={magazine.image_url} alt={magazine.title} fill className="object-cover" style={{ opacity: 0.25 }} />
+      {/* MHJ 브랜딩 */}
+      <span style={{
+        fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic',
+        fontSize: fs.theSize, letterSpacing: 3, color: subColor,
+      }}>the</span>
+      <span style={{
+        fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900,
+        fontSize: fs.mhj, letterSpacing: -2, lineHeight: 1, color: textColor,
+      }}>MHJ</span>
+      <span style={{
+        fontSize: fs.label - 1, letterSpacing: 3,
+        textTransform: 'uppercase', color: subColor, marginBottom: 8,
+      }}>My Mairangi Journal</span>
+
+      {/* 커버 이미지 — 네이티브 <img> 1개만, 배경 아님 */}
+      {magazine.image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={magazine.image_url}
+          alt={magazine.title}
+          style={{
+            width: '80%', maxHeight: '45%', objectFit: 'cover',
+            borderRadius: 6, display: 'block', flexShrink: 0,
+          }}
+        />
+      ) : (
+        <div style={{
+          width: '80%', height: '35%', borderRadius: 6,
+          backgroundColor: light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <span style={{ fontSize: 10, color: subColor }}>cover photo</span>
         </div>
       )}
-      <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', width: '100%' }}>
-        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: s.label, fontStyle: 'italic', color: theme.text, opacity: 0.5, marginBottom: 2 }}>the</p>
-        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: s.coverTitle, fontWeight: 900, color: theme.text, letterSpacing: -1, lineHeight: 1, marginBottom: 8 }}>MHJ</p>
-        <p style={{ fontSize: s.footer, letterSpacing: 3, textTransform: 'uppercase', color: theme.text, opacity: 0.4, marginBottom: 24 }}>My Mairangi Journal</p>
-        {magazine.image_url && (
-          <div style={{ width: '65%', aspectRatio: '4/3', margin: '0 auto 20px', borderRadius: 6, overflow: 'hidden', position: 'relative', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
-            <SafeImage src={magazine.image_url} alt={magazine.title} fill className="object-cover" />
-          </div>
-        )}
-        <p style={{ fontSize: s.body, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: theme.text, marginBottom: 4 }}>{magazine.title}</p>
-        <p style={{ fontSize: s.footer, color: theme.sub, letterSpacing: 2, textTransform: 'uppercase' }}>
-          {magazine.month_name} {magazine.year} · Vol.{magazine.issue_number || '01'}
-        </p>
-      </div>
+
+      {/* 타이틀 영역 */}
+      <h2 style={{
+        fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900,
+        fontSize: fs.title, letterSpacing: 3, color: textColor,
+        textTransform: 'uppercase', marginTop: 12, textAlign: 'center',
+        lineHeight: 1.2, margin: '12px 0 0',
+      }}>{magazine.title}</h2>
+
+      {(magazine.cover_subtitle || magazine.cover_copy) && (
+        <span style={{ fontSize: fs.sub, color: subColor, textAlign: 'center' }}>
+          {magazine.cover_subtitle || magazine.cover_copy}
+        </span>
+      )}
+
+      <span style={{
+        fontSize: fs.date, letterSpacing: 2,
+        textTransform: 'uppercase', color: subColor, marginTop: 12,
+      }}>
+        {magazine.month_name} {magazine.year} · Vol.{magazine.issue_number || '01'}
+      </span>
     </div>
   );
 }
@@ -117,45 +175,159 @@ function ContentsPage({ magazine, articles, size = 'default', onGoToPage }: {
 }
 
 /* ════════════════════════════════
-   아티클 페이지
+   아티클 페이지 — 템플릿별 레이아웃
    ════════════════════════════════ */
+
+/* 콘텐츠 길이에 따라 폰트 크기 + line-height 조절 — 3:4 프레임을 빈틈없이 채움 */
+function getAdaptiveTypo(contentLength: number, base: number): { fontSize: number; lineHeight: number } {
+  if (contentLength < 100) return { fontSize: base + 14, lineHeight: 2.8 };
+  if (contentLength < 200) return { fontSize: base + 12, lineHeight: 2.6 };
+  if (contentLength < 350) return { fontSize: base + 10, lineHeight: 2.4 };
+  if (contentLength < 500) return { fontSize: base + 7,  lineHeight: 2.3 };
+  if (contentLength < 700) return { fontSize: base + 4,  lineHeight: 2.1 };
+  return { fontSize: base, lineHeight: 1.9 };
+}
+
 function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
   article: Article; magazine: Magazine; pageIndex: number; size?: ViewSize;
 }) {
-  const theme = getTheme(magazine);
+  const bgColor = magazine.bg_color || '#FAF8F5';
+  const light = isLightColor(bgColor);
+  const textColor = light ? '#3a2000' : '#f0f0f0';
+  const subColor = light ? 'rgba(58,32,0,0.45)' : 'rgba(255,255,255,0.45)';
+  const lineColor = light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
   const s = getScale(size);
-  const imageSrc = article.article_images?.[0] || article.image_url || '';
 
-  return (
+  const imageSrc = article.article_images?.[0] || article.image_url || '';
+  const plainText = (article.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const articleType = (article.article_type || 'article').toLowerCase();
+  const hasImage = !!imageSrc;
+
+  /* 템플릿 결정 */
+  const template: 'photo-hero' | 'split' | 'text-only' =
+    articleType === 'photo-hero' ? 'photo-hero' :
+    articleType === 'split' ? (hasImage ? 'split' : 'text-only') :
+    hasImage && plainText.length < 300 ? 'photo-hero' :
+    hasImage ? 'split' :
+    'text-only';
+
+  const typo = getAdaptiveTypo(plainText.length, s.body);
+
+  /* 공통 footer */
+  const footer = (
     <div style={{
-      width: '100%', height: '100%', background: theme.bg,
-      display: 'flex', flexDirection: 'column',
-      padding: '5% 5%', boxSizing: 'border-box',
+      borderTop: `0.5px solid ${lineColor}`, paddingTop: 8,
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      marginTop: 'auto', flexShrink: 0,
     }}>
-      <p style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: theme.sub, marginBottom: 8 }}>
-        {article.article_type || 'Article'}
-      </p>
-      <p style={{ fontFamily: "'Playfair Display', serif", fontSize: s.title, fontWeight: 900, color: theme.text, lineHeight: 1.2, marginBottom: 12 }}>
-        {article.title}
-      </p>
-      {imageSrc && (
-        <div style={{ width: '100%', aspectRatio: '16/10', borderRadius: 6, overflow: 'hidden', position: 'relative', marginBottom: 12, flexShrink: 0 }}>
+      <span style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: subColor }}>
+        {article.author}
+      </span>
+      <span style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: subColor }}>
+        The MHJ · P.{pageIndex}
+      </span>
+    </div>
+  );
+
+  /* ── photo-hero 템플릿 ── */
+  if (template === 'photo-hero') {
+    return (
+      <div style={{
+        width: '100%', height: '100%', backgroundColor: bgColor,
+        display: 'flex', flexDirection: 'column',
+        boxSizing: 'border-box', overflow: 'hidden',
+      }}>
+        {/* 히어로 이미지: 상단 55% */}
+        <div style={{
+          width: '100%', height: '55%', position: 'relative', flexShrink: 0,
+          overflow: 'hidden',
+        }}>
           <SafeImage src={imageSrc} alt={article.title} fill className="object-cover" />
         </div>
-      )}
-      <div style={{ flex: 1, fontSize: s.body, lineHeight: 1.8, color: theme.text, overflow: 'hidden' }}>
-        <p style={{ margin: 0 }}>
-          {(article.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 600)}
-        </p>
+        {/* 텍스트 영역 */}
+        <div style={{
+          flex: 1, padding: '20px 22px 16px',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          <p style={{
+            fontFamily: "'Playfair Display', Georgia, serif", fontSize: s.title,
+            fontWeight: 900, color: textColor, lineHeight: 1.2, margin: '0 0 8px',
+          }}>{article.title}</p>
+          <div style={{
+            flex: 1, fontSize: typo.fontSize, lineHeight: typo.lineHeight,
+            color: textColor, overflow: 'hidden',
+          }}>
+            <p style={{ margin: 0 }}>{plainText.slice(0, 500)}</p>
+          </div>
+          {footer}
+        </div>
       </div>
+    );
+  }
+
+  /* ── split 템플릿 (사진 상단 40% + 텍스트 하단) ── */
+  if (template === 'split') {
+    return (
       <div style={{
-        borderTop: `0.5px solid ${theme.text}20`, paddingTop: 8,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        marginTop: 'auto', flexShrink: 0,
+        width: '100%', height: '100%', backgroundColor: bgColor,
+        display: 'flex', flexDirection: 'column',
+        boxSizing: 'border-box', overflow: 'hidden',
       }}>
-        <span style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: theme.sub }}>{article.author}</span>
-        <span style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: theme.sub }}>The MHJ · P.{pageIndex}</span>
+        {/* 이미지 상단 40% */}
+        <div style={{
+          width: '100%', height: '40%', position: 'relative', flexShrink: 0,
+          overflow: 'hidden',
+        }}>
+          <SafeImage src={imageSrc} alt={article.title} fill className="object-cover" />
+        </div>
+        {/* 텍스트 */}
+        <div style={{
+          flex: 1, padding: '20px 22px 16px',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          <p style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: subColor, marginBottom: 6 }}>
+            {article.article_type || 'Article'}
+          </p>
+          <p style={{
+            fontFamily: "'Playfair Display', Georgia, serif", fontSize: s.title - 2,
+            fontWeight: 900, color: textColor, lineHeight: 1.2, margin: '0 0 8px',
+          }}>{article.title}</p>
+          <div style={{
+            flex: 1, fontSize: typo.fontSize, lineHeight: typo.lineHeight,
+            color: textColor, overflow: 'hidden',
+          }}>
+            <p style={{ margin: 0 }}>{plainText.slice(0, 600)}</p>
+          </div>
+          {footer}
+        </div>
       </div>
+    );
+  }
+
+  /* ── text-only 템플릿 (에세이) ── */
+  return (
+    <div style={{
+      width: '100%', height: '100%', backgroundColor: bgColor,
+      display: 'flex', flexDirection: 'column',
+      padding: '24px 22px 16px', boxSizing: 'border-box',
+    }}>
+      <p style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: subColor, marginBottom: 8 }}>
+        {article.article_type || 'Essay'}
+      </p>
+      <p style={{
+        fontFamily: "'Playfair Display', Georgia, serif", fontSize: s.title,
+        fontWeight: 900, fontStyle: 'italic', color: textColor,
+        lineHeight: 1.2, margin: '0 0 8px',
+      }}>{article.title}</p>
+      <div style={{ width: 40, height: 1, background: lineColor, marginBottom: 16 }} />
+      <div style={{
+        flex: 1, fontSize: typo.fontSize,
+        lineHeight: typo.lineHeight, color: textColor, overflow: 'hidden',
+        fontFamily: "'Noto Sans KR', sans-serif",
+      }}>
+        <p style={{ margin: 0 }}>{plainText.slice(0, 800)}</p>
+      </div>
+      {footer}
     </div>
   );
 }
@@ -359,7 +531,7 @@ export default function MagazineFlipViewer({ magazine, articles }: Props) {
       className="mag-fullscreen-overlay"
       onClick={() => setIsFullscreen(false)}
       style={{
-        position: 'fixed', inset: 0, zIndex: 100,
+        position: 'fixed', inset: 0, zIndex: 200,
         background: 'rgba(0,0,0,0.9)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexDirection: 'column',
@@ -599,7 +771,7 @@ export default function MagazineFlipViewer({ magazine, articles }: Props) {
           background: 'rgba(0,0,0,0.8)', color: 'white',
           fontSize: 13, fontWeight: 600,
           padding: '10px 20px', borderRadius: 999,
-          zIndex: 150,
+          zIndex: 250,
           animation: 'toastIn 0.3s ease',
         }}>
           {showToast}
