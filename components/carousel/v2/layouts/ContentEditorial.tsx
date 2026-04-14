@@ -105,7 +105,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
       <div style={{ width: 40, height: 2, background: accent, marginBottom: 28, position: 'relative', zIndex: 2 }} />
 
       {/* 드롭캡 + 본문 */}
-      <div style={{ flex: 1, position: 'relative', zIndex: 2, ...textBgStyle }}>
+      <div style={{ position: 'relative', zIndex: 2, ...textBgStyle }}>
         {first && (
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
             <span
@@ -149,6 +149,29 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
           </p>
         )}
       </div>
+
+      {/* Highlight callout */}
+      {slide.highlight && (
+        <div style={{
+          borderLeft: `3px solid ${accent}`,
+          borderRadius: '0 8px 8px 0',
+          padding: '14px 20px',
+          background: `${accent}14`,
+          marginTop: 24,
+          position: 'relative',
+          zIndex: 2,
+          flex: 1,
+        }}>
+          <p style={{ fontFamily: titleFont, fontSize: '1rem', fontStyle: 'italic', fontWeight: 700, color: text, lineHeight: 1.55, margin: 0 }}>
+            {slide.highlight}
+          </p>
+          {slide.subtitle && (
+            <p style={{ fontFamily: bodyFont, fontSize: '0.8125rem', color: accent, lineHeight: 1.5, margin: '8px 0 0', opacity: 0.9 }}>
+              {slide.subtitle}
+            </p>
+          )}
+        </div>
+      )}
 
       <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
     </div>

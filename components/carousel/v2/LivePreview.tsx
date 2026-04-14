@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Undo2, Redo2, Download, Grid2x2, Maximize2, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import type { SlideConfig } from '../types';
@@ -38,6 +38,19 @@ export default function LivePreview({
   const [downloading, setDownloading] = useState(false);
   const [viewMode, setViewMode] = useState<'single' | 'grid'>('single');
   const [ratioOpen, setRatioOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // 모바일 전환 시 그리드 모드 해제
+  useEffect(() => {
+    if (isMobile && viewMode === 'grid') setViewMode('single');
+  }, [isMobile, viewMode]);
 
   if (!slides.length) {
     return (
@@ -170,21 +183,23 @@ export default function LivePreview({
           >
             <Maximize2 size={12} />
           </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('grid')}
-            title="Grid view"
-            style={{
-              padding: 4,
-              background: viewMode === 'grid' ? '#1A1A1A' : 'none',
-              border: '1px solid #E2E8F0',
-              borderRadius: 4,
-              cursor: 'pointer',
-              color: viewMode === 'grid' ? '#FFFFFF' : '#94A3B8',
-            }}
-          >
-            <Grid2x2 size={12} />
-          </button>
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              title="Grid view"
+              style={{
+                padding: 4,
+                background: viewMode === 'grid' ? '#1A1A1A' : 'none',
+                border: '1px solid #E2E8F0',
+                borderRadius: 4,
+                cursor: 'pointer',
+                color: viewMode === 'grid' ? '#FFFFFF' : '#94A3B8',
+              }}
+            >
+              <Grid2x2 size={12} />
+            </button>
+          )}
 
           {/* Undo/Redo */}
           {(onUndo || onRedo) && (

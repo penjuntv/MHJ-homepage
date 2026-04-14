@@ -551,7 +551,7 @@ export default function CarouselAdminPage() {
           });
 
           // 슬라이드 복원 (저장된 slides가 있으면 사용, 없으면 재생성)
-          if (rawData?.slides && Array.isArray(rawData.slides)) {
+          if (rawData?.slides && Array.isArray(rawData.slides) && rawData.slides.length > 0) {
             setSlides(rawData.slides);
           } else {
             setSlides(convertInputToSlides(restoredInput));

@@ -213,6 +213,27 @@
   .body-lock {
     overflow: hidden;
   }
+
+  /* StoryPress Editorial Divider */
+  .sp-divider {
+    width: 60px;
+    height: 1px;
+    background: #E2E8F0;
+    margin: 40px auto;
+    position: relative;
+  }
+
+  .sp-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 6px;
+    height: 6px;
+    background: #E2E8F0;
+    border: 1px solid var(--bg);
+  }
 }
 
 /* ─── 키프레임 애니메이션 (Tailwind 보완) ─── */

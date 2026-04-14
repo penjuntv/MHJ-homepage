@@ -56,6 +56,7 @@ export interface SlideConfig {
   fontTheme?: string;
   globalTexture?: 'none' | 'noise' | 'paper';
   accentIcon?: string;
+  highlight?: string;   // 핵심 요점 (callout 박스로 표시)
 }
 
 export interface CarouselV2Output {

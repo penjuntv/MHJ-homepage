@@ -38,8 +38,9 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
     id: 2,
     slideNumber: 2,
     layout: 'content-quote',
-    title: blogSubtitle || blogTitle,
+    subtitle: coverSubtitle,               // 카테고리 라벨 (상단 소문자)
     body: blogSubtitle || `A guide for families navigating life in New Zealand.`,
+    // title 없음 → attribution 줄 미표시
   });
 
   // 슬라이드 3-6: 콘텐츠 포인트
@@ -66,7 +67,9 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
       stepNumber: i + 1,     // 콘텐츠 내부: 01, 02, 03, 04
       layout: CONTENT_LAYOUTS[i % CONTENT_LAYOUTS.length],
       title: hasContent ? pt.title : fallbackTitles[i],
-      body: hasContent ? (pt.body || pt.highlight || fallbackBodies[i]) : fallbackBodies[i],
+      body: hasContent ? (pt.body || fallbackBodies[i]) : fallbackBodies[i],
+      highlight: hasContent ? (pt.highlight || undefined) : undefined,
+      subtitle: hasContent ? (pt.highlightKr || undefined) : undefined,
       imageUrl,
     });
   }

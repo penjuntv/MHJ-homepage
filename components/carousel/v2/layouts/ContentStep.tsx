@@ -34,9 +34,32 @@ export default function ContentStep({ slide }: { slide: SlideConfig }) {
 
       {/* Body */}
       {slide.body && (
-        <p style={{ fontFamily: bodyFont, fontSize: '0.9375rem', lineHeight: 1.9, color: text, opacity: 0.85, margin: '0 0 32px', position: 'relative', zIndex: 2, flex: 1 }}>
+        <p style={{ fontFamily: bodyFont, fontSize: '0.9375rem', lineHeight: 1.9, color: text, opacity: 0.85, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
           {slide.body}
         </p>
+      )}
+
+      {/* Highlight callout */}
+      {slide.highlight && (
+        <div style={{
+          borderLeft: `3px solid ${accent}`,
+          borderRadius: '0 8px 8px 0',
+          padding: '14px 20px',
+          background: `${accent}14`,
+          marginBottom: 24,
+          position: 'relative',
+          zIndex: 2,
+          flex: 1,
+        }}>
+          <p style={{ fontFamily: titleFont, fontSize: '1rem', fontStyle: 'italic', fontWeight: 700, color: text, lineHeight: 1.55, margin: 0 }}>
+            {slide.highlight}
+          </p>
+          {slide.subtitle && (
+            <p style={{ fontFamily: bodyFont, fontSize: '0.8125rem', color: accent, lineHeight: 1.5, margin: '8px 0 0', opacity: 0.9 }}>
+              {slide.subtitle}
+            </p>
+          )}
+        </div>
       )}
 
       {/* Circle photo — bottom right */}

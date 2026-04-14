@@ -36,9 +36,27 @@ export default function ContentPhotoOverlay({ slide }: { slide: SlideConfig }) {
           </h2>
         )}
         {slide.body && (
-          <p style={{ fontFamily: bodyFont, fontSize: '0.875rem', lineHeight: 1.7, color: v2Tokens.brand.dark, opacity: 0.85, margin: 0 }}>
+          <p style={{ fontFamily: bodyFont, fontSize: '0.875rem', lineHeight: 1.7, color: v2Tokens.brand.dark, opacity: 0.85, margin: slide.highlight ? '0 0 16px' : 0 }}>
             {slide.body}
           </p>
+        )}
+        {/* Highlight callout */}
+        {slide.highlight && (
+          <div style={{
+            borderLeft: `3px solid ${accent}`,
+            borderRadius: '0 6px 6px 0',
+            padding: '12px 16px',
+            background: `${accent}20`,
+          }}>
+            <p style={{ fontFamily: titleFont, fontSize: '0.9375rem', fontStyle: 'italic', fontWeight: 700, color: v2Tokens.brand.dark, lineHeight: 1.5, margin: 0 }}>
+              {slide.highlight}
+            </p>
+            {slide.subtitle && (
+              <p style={{ fontFamily: bodyFont, fontSize: '0.75rem', color: accent, lineHeight: 1.5, margin: '6px 0 0', opacity: 0.9 }}>
+                {slide.subtitle}
+              </p>
+            )}
+          </div>
         )}
       </div>
 

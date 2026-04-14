@@ -157,7 +157,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </p>
           <h1
             className="font-display"
-            style={{ fontSize: 'clamp(56px, 10vw, 120px)', fontWeight: 900, fontStyle: 'italic', letterSpacing: -4, lineHeight: 0.88, color: 'var(--text)', marginBottom: 28 }}
+            style={{ fontSize: 'clamp(56px, 10vw, 120px)', fontWeight: 900, fontStyle: 'italic', letterSpacing: -4, lineHeight: 0.88, color: 'var(--text)', marginBottom: 28, maxWidth: 800 }}
           >
             {title}
           </h1>
@@ -252,6 +252,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           )}
         </div>
       </section>
+
+      <div className="sp-divider" />
 
       {/* ─── Features (Why StoryPress) — 데스크탑 4열 ─── */}
       <section
@@ -353,6 +355,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         </div>
       </section>
 
+      <div className="sp-divider" />
+
       {/* ─── How It Works ─── */}
       <section
         className="sp-steps-bg"
@@ -425,10 +429,11 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             marginTop: 56,
             fontFamily: 'var(--font-display, serif)',
           }}>
-            &ldquo;Other apps end at a lesson. StoryPress ends with a book.&rdquo;
           </p>
         </div>
       </section>
+
+      <div className="sp-divider" />
 
       {/* ─── A Growing Library ─── */}
       <section
@@ -541,6 +546,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         </div>
       </section>
 
+      <div className="sp-divider" />
+
       {/* ─── Built on Research — 데스크탑 3열 ─── */}
       <section
         style={{
@@ -624,6 +631,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </div>
         </div>
       </section>
+
+      <div className="sp-divider" />
 
       {/* ─── Our Story — 2컬럼 레이아웃 ─── */}
       <section
@@ -724,6 +733,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         </div>
       </section>
 
+      <div className="sp-divider" />
+
       {/* ─── 인용문 ─── */}
       <section
         style={{
@@ -766,6 +777,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </blockquote>
         </div>
       </section>
+
+      <div className="sp-divider" />
 
       {/* ─── FAQ ─── */}
       <StoryPressFAQ />
