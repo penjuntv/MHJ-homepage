@@ -73,18 +73,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session && !isLogin) {
         router.replace('/mhj-desk/login');
-      } else {
-        setReady(true);
-        if (session) {
-          Promise.all([
-            supabase.from('comments').select('*', { count: 'exact', head: true }).eq('approved', false),
-            supabase.from('blogs').select('*', { count: 'exact', head: true }),
-          ]).then(([{ count: pc }, { count: bc }]) => {
-            setPendingComments(pc ?? 0);
-            setBlogCount(bc ?? 0);
-          });
-        }
+        return;
       }
+      setReady(true);
+      if (session) {
+        Promise.all([
+          supabase.from('comments').select('*', { count: 'exact', head: true }).eq('approved', false),
+          supabase.from('blogs').select('*', { count: 'exact', head: true }),
+        ]).then(([{ count: pc }, { count: bc }]) => {
+          setPendingComments(pc ?? 0);
+          setBlogCount(bc ?? 0);
+        });
+      }
+    }).catch(() => {
+      if (!isLogin) router.replace('/mhj-desk/login');
     });
   }, [isLogin, router]);
 
