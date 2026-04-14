@@ -28,7 +28,7 @@ export default function ContentBarChart({ slide }: { slide: SlideConfig }) {
       <TextureOverlay texture={slide.globalTexture} />
 
       {slide.subtitle && (
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, marginBottom: 24, position: 'relative', zIndex: 2 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, marginBottom: 24, position: 'relative', zIndex: 2 }}>
           {slide.subtitle}
         </span>
       )}

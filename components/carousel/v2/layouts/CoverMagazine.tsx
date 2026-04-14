@@ -25,10 +25,10 @@ export default function CoverMagazine({ slide }: { slide: SlideConfig }) {
 
       {/* Header row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 2, flexShrink: 0, padding: '0 20px' }}>
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.5625rem', letterSpacing: 5, textTransform: 'uppercase', color: text, opacity: 0.5 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.6875rem', letterSpacing: 5, textTransform: 'uppercase', color: text, opacity: 0.5 }}>
           {slide.subtitle || 'ISSUE 01'}
         </span>
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.5625rem', letterSpacing: 5, textTransform: 'uppercase', color: text, opacity: 0.5 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.6875rem', letterSpacing: 5, textTransform: 'uppercase', color: text, opacity: 0.5 }}>
           VOL. {slide.stepNumber || 1}
         </span>
       </div>

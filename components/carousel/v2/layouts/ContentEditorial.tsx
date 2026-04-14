@@ -67,7 +67,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: '0.625rem',
+            fontSize: '0.75rem',
             fontWeight: 900,
             letterSpacing: 4,
             textTransform: 'uppercase',

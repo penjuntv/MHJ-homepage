@@ -29,7 +29,7 @@ export default function ContentContinuousLine({ slide }: { slide: SlideConfig })
 
       {/* Subtitle */}
       {slide.subtitle && (
-        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: text, opacity: 0.5, marginBottom: 32, position: 'relative', zIndex: 2, flexShrink: 0 }}>
+        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: text, opacity: 0.5, marginBottom: 32, position: 'relative', zIndex: 2, flexShrink: 0 }}>
           {slide.subtitle}
         </p>
       )}

@@ -26,7 +26,7 @@ export default function ContentPhotoOverlay({ slide }: { slide: SlideConfig }) {
       {/* Glass card */}
       <div style={{ position: 'relative', zIndex: 2, margin: '0 24px 94px', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', padding: 32, borderRadius: 32, boxShadow: '0 8px 32px rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.6)' }}>
         {slide.stepNumber != null && (
-          <span style={{ display: 'inline-block', fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: '#FFFFFF', background: accent, padding: '6px 14px', borderRadius: 20, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <span style={{ display: 'inline-block', fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: '#FFFFFF', background: accent, padding: '6px 14px', borderRadius: 20, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
             {String(slide.stepNumber).padStart(2, '0')}
           </span>
         )}

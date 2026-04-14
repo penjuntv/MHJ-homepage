@@ -32,7 +32,7 @@ export default function ContentSplit({ slide }: { slide: SlideConfig }) {
       {/* Bottom: text */}
       <div style={{ flex: 1, padding: '2.5rem 5rem 4.375rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
         {slide.stepNumber != null && (
-          <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: accent, marginBottom: 12 }}>
+          <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: accent, marginBottom: 12 }}>
             {String(slide.stepNumber).padStart(2, '0')}
           </span>
         )}

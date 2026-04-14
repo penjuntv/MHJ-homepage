@@ -32,7 +32,7 @@ export default function CoverPolaroid({ slide }: { slide: SlideConfig }) {
 
       {/* Text below */}
       <div style={{ textAlign: 'center', position: 'relative', zIndex: 2, flexShrink: 0 }}>
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, display: 'block', marginBottom: 16 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, display: 'block', marginBottom: 16 }}>
           {slide.subtitle || 'NEW GUIDE'}
         </span>
         <h1 style={{ fontFamily: titleFont, fontSize: '2.5rem', fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.1, letterSpacing: -1, margin: 0 }}>

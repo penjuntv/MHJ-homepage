@@ -23,7 +23,7 @@ export default function CoverArch({ slide }: { slide: SlideConfig }) {
 
       {/* Category */}
       {slide.subtitle && (
-        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: text, opacity: 0.5, margin: 0, position: 'relative', zIndex: 2, flexShrink: 0 }}>
+        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: text, opacity: 0.5, margin: 0, position: 'relative', zIndex: 2, flexShrink: 0 }}>
           {slide.subtitle}
         </p>
       )}

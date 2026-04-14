@@ -143,7 +143,7 @@ export default function LivePreview({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <p
           style={{
-            fontSize: 9,
+            fontSize: 11,
             fontWeight: 900,
             letterSpacing: 3,
             color: '#94A3B8',
@@ -283,7 +283,7 @@ export default function LivePreview({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span
               style={{
-                fontSize: 9,
+                fontSize: 11,
                 fontWeight: 900,
                 letterSpacing: 2,
                 textTransform: 'uppercase',
@@ -356,7 +356,7 @@ export default function LivePreview({
                   right: 4,
                   background: 'rgba(0,0,0,0.5)',
                   color: '#FFFFFF',
-                  fontSize: 9,
+                  fontSize: 11,
                   fontWeight: 700,
                   padding: '2px 6px',
                   borderRadius: 3,

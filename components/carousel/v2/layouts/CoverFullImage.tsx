@@ -28,7 +28,7 @@ export default function CoverFullImage({ slide }: { slide: SlideConfig }) {
 
       {/* Glass card at bottom */}
       <div style={{ position: 'relative', zIndex: 2, ...(textBgStyle ?? { background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', padding: '2rem', borderRadius: 24, border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }) }}>
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, display: 'block', marginBottom: 16 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, display: 'block', marginBottom: 16 }}>
           {slide.subtitle || 'NEW GUIDE'}
         </span>
         <h1 style={{ fontFamily: titleFont, fontSize: '2.75rem', fontWeight: 900, fontStyle: 'italic', color: textBgStyle?.color ?? '#FFFFFF', lineHeight: 1.1, letterSpacing: -1.5, margin: 0 }}>

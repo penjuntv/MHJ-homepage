@@ -22,7 +22,7 @@ export default function CoverDark({ slide }: { slide: SlideConfig }) {
 
       {/* Category */}
       {slide.subtitle && (
-        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 6, textTransform: 'uppercase', color: accent, margin: '0 0 40px', textAlign: 'center', position: 'relative', zIndex: 2 }}>
+        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 6, textTransform: 'uppercase', color: accent, margin: '0 0 40px', textAlign: 'center', position: 'relative', zIndex: 2 }}>
           {slide.subtitle}
         </p>
       )}
@@ -39,7 +39,7 @@ export default function CoverDark({ slide }: { slide: SlideConfig }) {
       <div style={{ width: 48, height: 1, background: accent, marginTop: 40, position: 'relative', zIndex: 2 }} />
 
       {/* Brand */}
-      <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.625rem', fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#FFFFFF', opacity: 0.3, marginTop: 40, textAlign: 'center', position: 'relative', zIndex: 2 }}>
+      <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#FFFFFF', opacity: 0.3, marginTop: 40, textAlign: 'center', position: 'relative', zIndex: 2 }}>
         MHJ · my mairangi
       </p>
 
