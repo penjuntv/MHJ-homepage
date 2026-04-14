@@ -25,6 +25,152 @@ function getSpineColor(m: Magazine): string {
   return map[month] || '#3a3025';
 }
 
+/* 밝은 배경색인지 판별 (spine 텍스트 색상 결정용) */
+function isLightColor(hex: string): boolean {
+  const c = hex.replace('#', '');
+  if (c.length !== 6) return false;
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 140;
+}
+
+/* ─── 모바일 카드 그리드 ─── */
+function MobileShelfGrid({ magazines }: { magazines: Magazine[] }) {
+  const router = useRouter();
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: 12,
+        padding: '0 16px',
+      }}
+    >
+      {magazines.map((mag) => {
+        const spineColor = getSpineColor(mag);
+        const isLight = isLightColor(spineColor);
+
+        return (
+          <div
+            key={mag.id}
+            onClick={() => {
+              trackEvent('magazine_open', { issue_id: mag.id, issue_title: mag.title });
+              router.push(`/magazine/${mag.id}`);
+            }}
+            style={{
+              borderRadius: 12,
+              overflow: 'hidden',
+              cursor: 'pointer',
+              background: spineColor,
+              position: 'relative',
+            }}
+          >
+            {/* 커버 이미지 또는 fallback */}
+            <div style={{ aspectRatio: '3/4', position: 'relative', overflow: 'hidden' }}>
+              {mag.image_url ? (
+                <SafeImage
+                  src={mag.image_url}
+                  alt={mag.title}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 4,
+                    color: isLight ? '#1A1A1A' : '#FFFFFF',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'Playfair Display', Georgia, serif",
+                      fontSize: 32,
+                      fontWeight: 900,
+                      letterSpacing: -1,
+                      lineHeight: 1,
+                    }}
+                  >
+                    MHJ
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: 1.5,
+                      textTransform: 'uppercase',
+                      textAlign: 'center',
+                      padding: '0 8px',
+                      opacity: 0.8,
+                    }}
+                  >
+                    {mag.title}
+                  </span>
+                </div>
+              )}
+              {/* 하단 그라디언트 오버레이 (이미지 위 텍스트 가독성용) */}
+              {mag.image_url && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '60%',
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+                  }}
+                />
+              )}
+            </div>
+
+            {/* 텍스트 */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: '10px 12px',
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 14,
+                  fontWeight: 900,
+                  color: '#FFFFFF',
+                  margin: '0 0 2px',
+                  lineHeight: 1.2,
+                  letterSpacing: -0.3,
+                }}
+              >
+                {mag.title}
+              </p>
+              <p
+                style={{
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.6)',
+                  margin: 0,
+                  letterSpacing: 1,
+                }}
+              >
+                {mag.month_name} {mag.year}
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── 데스크탑/태블릿 서가 ─── */
 export default function MagazineShelf({
   magazines,
   magazineTitle,
@@ -72,7 +218,7 @@ export default function MagazineShelf({
         {magazineTitle || 'MAGAZINE'}
       </p>
 
-      {/* 책장 */}
+      {/* 데스크탑/태블릿: 책장 서가 UI (md+ 표시) */}
       <div className="bookshelf">
         {magazines.map((mag, idx) => {
           const spineColor = getSpineColor(mag);
@@ -90,10 +236,10 @@ export default function MagazineShelf({
             >
               {/* ── Spine (기본 표시) ── */}
               <div className="shelf-book__spine">
-                {/* 날짜 (맨 위, vertical이므로 왼쪽 끝) */}
+                {/* 날짜 */}
                 <span
                   style={{
-                    fontSize: 8,
+                    fontSize: 10,
                     letterSpacing: 1,
                     color: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)',
                     whiteSpace: 'nowrap',
@@ -106,7 +252,7 @@ export default function MagazineShelf({
                 <span
                   style={{
                     fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: 11,
+                    fontSize: 14,
                     fontWeight: 900,
                     letterSpacing: 2,
                     textTransform: 'uppercase',
@@ -120,7 +266,7 @@ export default function MagazineShelf({
                 {/* 이슈 번호 */}
                 <span
                   style={{
-                    fontSize: 7,
+                    fontSize: 8,
                     letterSpacing: 1,
                     color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)',
                   }}
@@ -141,7 +287,7 @@ export default function MagazineShelf({
                 <span
                   style={{
                     fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: 8,
+                    fontSize: 10,
                     fontStyle: 'italic',
                     opacity: 0.6,
                     marginBottom: 2,
@@ -152,22 +298,22 @@ export default function MagazineShelf({
                 <span
                   style={{
                     fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: 28,
+                    fontSize: 42,
                     fontWeight: 900,
                     letterSpacing: -1,
                     lineHeight: 1,
-                    marginBottom: 2,
+                    marginBottom: 4,
                   }}
                 >
                   MHJ
                 </span>
                 <span
                   style={{
-                    fontSize: 5,
+                    fontSize: 7,
                     letterSpacing: 2,
                     textTransform: 'uppercase',
                     opacity: 0.5,
-                    marginBottom: 8,
+                    marginBottom: 12,
                   }}
                 >
                   My Mairangi Journal
@@ -176,12 +322,12 @@ export default function MagazineShelf({
                 {/* 커버 이미지 */}
                 <div
                   style={{
-                    width: '80%',
+                    width: '85%',
                     flex: 1,
-                    borderRadius: 2,
+                    borderRadius: 4,
                     overflow: 'hidden',
                     position: 'relative',
-                    marginBottom: 8,
+                    marginBottom: 12,
                     minHeight: 0,
                   }}
                 >
@@ -198,13 +344,13 @@ export default function MagazineShelf({
                 {/* 이슈 제목 */}
                 <span
                   style={{
-                    fontSize: 9,
+                    fontSize: 14,
                     fontWeight: 900,
                     letterSpacing: 1.5,
                     textTransform: 'uppercase',
                     textAlign: 'center',
                     lineHeight: 1.2,
-                    marginBottom: 2,
+                    marginBottom: 4,
                   }}
                 >
                   {mag.title}
@@ -213,10 +359,10 @@ export default function MagazineShelf({
                 {/* Tagline */}
                 <span
                   style={{
-                    fontSize: 5.5,
+                    fontSize: 10,
                     opacity: 0.7,
                     textAlign: 'center',
-                    marginBottom: 4,
+                    marginBottom: 6,
                   }}
                 >
                   {mag.editor ? `Edited by ${mag.editor}` : 'A family journal'}
@@ -225,11 +371,11 @@ export default function MagazineShelf({
                 {/* 날짜 + Vol */}
                 <span
                   style={{
-                    fontSize: 5,
+                    fontSize: 9,
                     letterSpacing: 2,
                     textTransform: 'uppercase',
                     opacity: 0.5,
-                    marginBottom: 14,
+                    marginBottom: 16,
                   }}
                 >
                   {mag.month_name} {mag.year} · Vol.{mag.issue_number || idx + 1}
@@ -249,8 +395,13 @@ export default function MagazineShelf({
         })}
       </div>
 
-      {/* 선반 판자 */}
+      {/* 선반 판자 (데스크탑/태블릿) */}
       <div className="bookshelf-plank" />
+
+      {/* 모바일: 2열 카드 그리드 (767px 이하) */}
+      <div className="block md:hidden">
+        <MobileShelfGrid magazines={magazines} />
+      </div>
 
       {/* 힌트 */}
       {magazineHint && (
@@ -271,14 +422,4 @@ export default function MagazineShelf({
       )}
     </section>
   );
-}
-
-/* 밝은 배경색인지 판별 (spine 텍스트 색상 결정용) */
-function isLightColor(hex: string): boolean {
-  const c = hex.replace('#', '');
-  if (c.length !== 6) return false;
-  const r = parseInt(c.substring(0, 2), 16);
-  const g = parseInt(c.substring(2, 4), 16);
-  const b = parseInt(c.substring(4, 6), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 > 140;
 }

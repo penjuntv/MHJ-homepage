@@ -523,13 +523,13 @@
 /* ─── 서가 v2: Bookshelf (Yussi 목업 기반) ─── */
 .bookshelf {
   position: relative;
-  max-width: 900px;
+  max-width: 1320px;
   margin: 0 auto;
   border: 1px solid #d4ccc0;
   border-bottom: none;
   border-radius: 4px 4px 0 0;
-  padding: 32px 20px 0;
-  min-height: 300px;
+  padding: 48px 40px 0;
+  min-height: 60vh;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -581,9 +581,9 @@
 /* 선반 판자 */
 .bookshelf-plank {
   position: relative;
-  max-width: 900px;
+  max-width: 1320px;
   margin: 0 auto;
-  height: 18px;
+  height: 28px;
   background: linear-gradient(180deg, #c4b89a 0%, #b8ac8e 100%);
   border-top: 2px solid #b0a488;
   border-radius: 0 0 4px 4px;
@@ -593,10 +593,10 @@
 .bookshelf-plank::after {
   content: '';
   position: absolute;
-  bottom: -8px;
+  bottom: -10px;
   left: 0;
   right: 0;
-  height: 8px;
+  height: 10px;
   background: linear-gradient(180deg, #b8ac8e 0%, #a89a7e 100%);
   border-radius: 0 0 4px 4px;
 }
@@ -609,17 +609,17 @@
   background: linear-gradient(180deg, #2e2820 0%, #221e18 100%);
 }
 
-/* 개별 책 */
+/* 개별 책 — 데스크탑: 45vh 높이, spine 70px → cover 280px */
 .shelf-book {
   position: relative;
-  flex: 0 0 48px;
-  width: 48px;
-  height: 240px;
-  margin-left: 3px;
+  flex: 0 0 70px;
+  width: 70px;
+  height: clamp(360px, 45vh, 500px);
+  margin-left: 4px;
   cursor: pointer;
   transform-style: preserve-3d;
-  transition: flex-basis 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-              width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+  transition: flex-basis 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              width 0.8s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.3s ease,
               box-shadow 0.3s ease;
   box-shadow: 2px 0 6px rgba(0,0,0,0.15);
@@ -628,8 +628,8 @@
 .shelf-book:first-child { margin-left: 0; }
 .shelf-book:hover,
 .shelf-book.shelf-book--active {
-  flex: 0 0 140px;
-  width: 140px;
+  flex: 0 0 280px;
+  width: 280px;
   transform: rotateY(-3deg) translateZ(8px);
   box-shadow: 6px 4px 20px rgba(0,0,0,0.25);
 }
@@ -642,7 +642,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 4px;
+  padding: 20px 6px;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   transition: opacity 0.2s ease;
@@ -661,9 +661,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 10px 10px;
+  padding: 16px 14px 14px;
   opacity: 0;
-  transition: opacity 0.25s 0.1s ease;
+  transition: opacity 0.25s 0.15s ease;
   z-index: 3;
   overflow: hidden;
 }
@@ -675,7 +675,7 @@
 /* Open 버튼 */
 .shelf-book__open {
   position: absolute;
-  bottom: 8px;
+  bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
   opacity: 0;
@@ -684,8 +684,8 @@
   background: rgba(255,255,255,0.92);
   border: 1px solid rgba(0,0,0,0.1);
   border-radius: 999px;
-  padding: 4px 12px;
-  font-size: 8px;
+  padding: 8px 18px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   color: #1A1A1A;
@@ -702,8 +702,34 @@
   border-color: rgba(255,255,255,0.1);
 }
 
+/* 태블릿 */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .bookshelf {
+    padding: 32px 24px 0;
+    min-height: 35vh;
+  }
+  .shelf-book {
+    flex: 0 0 60px;
+    width: 60px;
+    height: clamp(280px, 35vh, 400px);
+  }
+  .shelf-book:hover,
+  .shelf-book.shelf-book--active {
+    flex: 0 0 220px;
+    width: 220px;
+  }
+}
+
+/* 모바일: 서가 숨기고 카드 그리드 사용 */
+@media (max-width: 767px) {
+  .bookshelf,
+  .bookshelf-plank {
+    display: none !important;
+  }
+}
+
 /* 모바일: 터치 탭으로 활성 */
-@media (hover: none) {
+@media (hover: none) and (min-width: 768px) {
   .shelf-book { transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
 }
 
