@@ -31,7 +31,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
         background: bg,
         display: 'flex',
         flexDirection: 'column',
-        padding: '5rem 5rem 4.375rem',
+        padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`,
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
@@ -45,7 +45,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
         <div
           style={{
             width: '100%',
-            height: 360,
+            height: 420,
             borderRadius: 12,
             overflow: 'hidden',
             marginBottom: 32,
@@ -67,9 +67,10 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: '0.75rem',
+            fontSize: v2Tokens.fontSize.label,
             fontWeight: 900,
-            letterSpacing: 4,
+            letterSpacing: v2Tokens.letterSpacing.label,
+            lineHeight: v2Tokens.lineHeight.label,
             textTransform: 'uppercase',
             color: accent,
             margin: '0 0 16px',
@@ -86,15 +87,16 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
         <h2
           style={{
             fontFamily: titleFont,
-            fontSize: '2rem',
+            fontSize: v2Tokens.fontSize.title,
             fontWeight: 900,
             fontStyle: slide.fontTheme === 'tech' ? 'normal' : 'italic',
             color: text,
-            lineHeight: 1.2,
-            letterSpacing: -0.5,
+            lineHeight: v2Tokens.lineHeight.title,
+            letterSpacing: v2Tokens.letterSpacing.hero,
             margin: '0 0 24px',
             position: 'relative',
             zIndex: 2,
+            textWrap: 'balance' as const,
           }}
         >
           {slide.title}
@@ -125,8 +127,8 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
             <p
               style={{
                 fontFamily: bodyFont,
-                fontSize: '0.9375rem',
-                lineHeight: 2.1,
+                fontSize: v2Tokens.fontSize.body,
+                lineHeight: v2Tokens.lineHeight.body,
                 color: textBgStyle?.color ?? text,
                 margin: 0,
               }}
@@ -139,8 +141,8 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
           <p
             style={{
               fontFamily: bodyFont,
-              fontSize: '0.9375rem',
-              lineHeight: 2.1,
+              fontSize: v2Tokens.fontSize.body,
+              lineHeight: v2Tokens.lineHeight.body,
               color: textBgStyle?.color ?? text,
               margin: 0,
             }}
@@ -162,11 +164,11 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
           zIndex: 2,
           flex: 1,
         }}>
-          <p style={{ fontFamily: titleFont, fontSize: '1rem', fontStyle: 'italic', fontWeight: 700, color: text, lineHeight: 1.55, margin: 0 }}>
+          <p style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.bodySmall, fontStyle: 'italic', fontWeight: 700, color: text, lineHeight: v2Tokens.lineHeight.bodySmall, margin: 0 }}>
             {slide.highlight}
           </p>
           {slide.subtitle && (
-            <p style={{ fontFamily: bodyFont, fontSize: '0.8125rem', color: accent, lineHeight: 1.5, margin: '8px 0 0', opacity: 0.9 }}>
+            <p style={{ fontFamily: bodyFont, fontSize: v2Tokens.fontSize.caption, color: accent, lineHeight: v2Tokens.lineHeight.caption, margin: '8px 0 0', opacity: 0.9 }}>
               {slide.subtitle}
             </p>
           )}

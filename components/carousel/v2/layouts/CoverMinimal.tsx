@@ -26,7 +26,7 @@ export default function CoverMinimal({ slide }: { slide: SlideConfig }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '5rem 5rem 4.375rem',
+        padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`,
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
@@ -70,9 +70,10 @@ export default function CoverMinimal({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: '0.6875rem',
+            fontSize: v2Tokens.fontSize.label,
             fontWeight: 900,
-            letterSpacing: 5,
+            letterSpacing: v2Tokens.letterSpacing.label,
+            lineHeight: v2Tokens.lineHeight.label,
             textTransform: 'uppercase',
             color: accent,
             margin: '0 0 24px',
@@ -92,9 +93,9 @@ export default function CoverMinimal({ slide }: { slide: SlideConfig }) {
       {imgSrc && (
         <div
           style={{
-            width: 280,
-            height: 320,
-            borderRadius: '140px 140px 0 0',
+            width: 380,
+            height: 440,
+            borderRadius: '190px 190px 0 0',
             overflow: 'hidden',
             marginBottom: 32,
             position: 'relative',
@@ -119,13 +120,14 @@ export default function CoverMinimal({ slide }: { slide: SlideConfig }) {
       <h1
         style={{
           fontFamily: titleFont,
-          fontSize: imgSrc ? '3rem' : '4rem',
+          fontSize: imgSrc ? v2Tokens.fontSize.title : v2Tokens.fontSize.heroTitle,
           fontWeight: 900,
           fontStyle: 'italic',
           color: text,
-          lineHeight: 1.1,
-          letterSpacing: -2,
+          lineHeight: v2Tokens.lineHeight.heroTitle,
+          letterSpacing: v2Tokens.letterSpacing.hero,
           textAlign: 'center',
+          textWrap: 'balance' as const,
           margin: 0,
           position: 'relative',
           zIndex: 2,

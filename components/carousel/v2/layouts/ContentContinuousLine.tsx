@@ -18,7 +18,7 @@ export default function ContentContinuousLine({ slide }: { slide: SlideConfig })
   const textBgStyle = getTextBgStyle(slide.textBackground);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {/* SVG line art background */}
@@ -29,7 +29,7 @@ export default function ContentContinuousLine({ slide }: { slide: SlideConfig })
 
       {/* Subtitle */}
       {slide.subtitle && (
-        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: text, opacity: 0.5, marginBottom: 32, position: 'relative', zIndex: 2, flexShrink: 0 }}>
+        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.label, fontWeight: 900, letterSpacing: v2Tokens.letterSpacing.label, lineHeight: v2Tokens.lineHeight.label, textTransform: 'uppercase', color: text, opacity: 0.5, marginBottom: 32, position: 'relative', zIndex: 2, flexShrink: 0 }}>
           {slide.subtitle}
         </p>
       )}
@@ -46,7 +46,7 @@ export default function ContentContinuousLine({ slide }: { slide: SlideConfig })
       {/* Title */}
       {slide.title && (
         <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', flexShrink: 0, ...textBgStyle }}>
-          <h2 style={{ fontFamily: titleFont, fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', color: textBgStyle?.color ?? text, lineHeight: 1.15, letterSpacing: -0.5, margin: 0 }}>
+          <h2 style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.title, fontWeight: 900, fontStyle: 'italic', color: textBgStyle?.color ?? text, lineHeight: v2Tokens.lineHeight.title, letterSpacing: v2Tokens.letterSpacing.hero, margin: 0, textWrap: 'balance' as const }}>
             {slide.title}
           </h2>
         </div>

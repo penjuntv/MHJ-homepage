@@ -13,24 +13,24 @@ export default function ContentBoldNumber({ slide }: { slide: SlideConfig }) {
   const bodyFont = getBodyFont(slide.fontTheme);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {/* Giant number */}
-      <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '8rem', fontWeight: 900, color: accent, lineHeight: 0.9, letterSpacing: -8, display: 'block', marginBottom: 16, position: 'relative', zIndex: 2 }}>
+      <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.decorNumber, fontWeight: 900, color: accent, lineHeight: 0.9, letterSpacing: -8, display: 'block', marginBottom: 16, position: 'relative', zIndex: 2 }}>
         {slide.stepNumber != null ? slide.stepNumber : '5'}
       </span>
 
       {/* Title */}
       {slide.title && (
-        <h2 style={{ fontFamily: v2Tokens.fonts.body, fontSize: '2.25rem', fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, letterSpacing: -0.5, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
+        <h2 style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.title, fontWeight: 900, color: '#FFFFFF', lineHeight: v2Tokens.lineHeight.title, letterSpacing: v2Tokens.letterSpacing.hero, margin: '0 0 24px', position: 'relative', zIndex: 2, textWrap: 'balance' as const }}>
           {slide.title}
         </h2>
       )}
 
       {/* Body */}
       {slide.body && (
-        <p style={{ fontFamily: bodyFont, fontSize: '1rem', fontWeight: 500, lineHeight: 1.6, color: 'rgba(255,255,255,0.9)', margin: 0, position: 'relative', zIndex: 2, flex: 1 }}>
+        <p style={{ fontFamily: bodyFont, fontSize: v2Tokens.fontSize.body, fontWeight: 500, lineHeight: v2Tokens.lineHeight.body, color: 'rgba(255,255,255,0.9)', margin: 0, position: 'relative', zIndex: 2, flex: 1 }}>
           {slide.body}
         </p>
       )}

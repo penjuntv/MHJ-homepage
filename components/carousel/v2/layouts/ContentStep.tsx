@@ -17,24 +17,24 @@ export default function ContentStep({ slide }: { slide: SlideConfig }) {
   const filterStyle = getFilterStyle(slide.imageFilter);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {/* Giant step number background */}
-      <span style={{ position: 'absolute', top: 40, left: 50, fontFamily: v2Tokens.fonts.display, fontSize: '8rem', fontWeight: 900, color: accent, opacity: 0.12, lineHeight: 1, pointerEvents: 'none', zIndex: 0 }}>
+      <span style={{ position: 'absolute', top: 40, left: 50, fontFamily: v2Tokens.fonts.display, fontSize: v2Tokens.fontSize.decorNumber, fontWeight: 900, color: accent, opacity: 0.12, lineHeight: 1, pointerEvents: 'none', zIndex: 0 }}>
         {slide.stepNumber != null ? String(slide.stepNumber).padStart(2, '0') : '01'}
       </span>
 
       {/* Title */}
       {slide.title && (
-        <h2 style={{ fontFamily: titleFont, fontSize: '2.25rem', fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, margin: '32px 0 24px', position: 'relative', zIndex: 2 }}>
+        <h2 style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.title, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: v2Tokens.lineHeight.title, letterSpacing: v2Tokens.letterSpacing.hero, margin: '32px 0 24px', position: 'relative', zIndex: 2, textWrap: 'balance' as const }}>
           {slide.title}
         </h2>
       )}
 
       {/* Body */}
       {slide.body && (
-        <p style={{ fontFamily: bodyFont, fontSize: '0.9375rem', lineHeight: 1.9, color: text, opacity: 0.85, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
+        <p style={{ fontFamily: bodyFont, fontSize: v2Tokens.fontSize.body, lineHeight: v2Tokens.lineHeight.body, color: text, opacity: 0.85, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
           {slide.body}
         </p>
       )}
@@ -51,11 +51,11 @@ export default function ContentStep({ slide }: { slide: SlideConfig }) {
           zIndex: 2,
           flex: 1,
         }}>
-          <p style={{ fontFamily: titleFont, fontSize: '1rem', fontStyle: 'italic', fontWeight: 700, color: text, lineHeight: 1.55, margin: 0 }}>
+          <p style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.bodySmall, fontStyle: 'italic', fontWeight: 700, color: text, lineHeight: v2Tokens.lineHeight.bodySmall, margin: 0 }}>
             {slide.highlight}
           </p>
           {slide.subtitle && (
-            <p style={{ fontFamily: bodyFont, fontSize: '0.8125rem', color: accent, lineHeight: 1.5, margin: '8px 0 0', opacity: 0.9 }}>
+            <p style={{ fontFamily: bodyFont, fontSize: v2Tokens.fontSize.caption, color: accent, lineHeight: v2Tokens.lineHeight.caption, margin: '8px 0 0', opacity: 0.9 }}>
               {slide.subtitle}
             </p>
           )}
@@ -64,7 +64,7 @@ export default function ContentStep({ slide }: { slide: SlideConfig }) {
 
       {/* Circle photo — bottom right */}
       {imgSrc && (
-        <div style={{ width: 200, height: 200, borderRadius: '50%', overflow: 'hidden', border: `6px solid ${bg}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', alignSelf: 'flex-end', flexShrink: 0, position: 'relative', zIndex: 2, background: 'rgba(0,0,0,0.05)' }}>
+        <div style={{ width: 240, height: 240, borderRadius: '50%', overflow: 'hidden', border: `6px solid ${bg}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', alignSelf: 'flex-end', flexShrink: 0, position: 'relative', zIndex: 2, background: 'rgba(0,0,0,0.05)' }}>
           <img src={imgSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: filterStyle }} />
         </div>
       )}

@@ -13,7 +13,7 @@ export default function ContentSocialQuote({ slide }: { slide: SlideConfig }) {
   const bodyFont = getBodyFont(slide.fontTheme);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #F9FAFB, #E5E7EB)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '5rem 3.75rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #F9FAFB, #E5E7EB)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       {/* Card */}
       <div style={{ background: '#FFFFFF', width: '100%', borderRadius: 20, padding: '2rem', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', border: '1px solid #F3F4F6', position: 'relative', zIndex: 2 }}>
         {/* Header: avatar + name */}
@@ -24,29 +24,29 @@ export default function ContentSocialQuote({ slide }: { slide: SlideConfig }) {
             )}
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.875rem', fontWeight: 700, color: '#111827', margin: 0, lineHeight: 1 }}>
+            <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.label, fontWeight: 700, color: '#111827', margin: 0, lineHeight: v2Tokens.lineHeight.label }}>
               {slide.subtitle || 'MHJ · Yussi'}
             </p>
-            <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', color: '#6B7280', margin: '4px 0 0', lineHeight: 1 }}>
+            <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.caption, color: '#6B7280', margin: '4px 0 0', lineHeight: v2Tokens.lineHeight.caption }}>
               @mhj_nz
             </p>
           </div>
           {/* MHJ brand mark instead of Twitter */}
-          <span style={{ fontFamily: v2Tokens.fonts.display, fontSize: '1.25rem', fontWeight: 700, fontStyle: 'italic', color: accent }}>
+          <span style={{ fontFamily: v2Tokens.fonts.display, fontSize: v2Tokens.fontSize.subtitle, fontWeight: 700, fontStyle: 'italic', color: accent }}>
             MHJ
           </span>
         </div>
 
         {/* Quote text */}
         {slide.title && (
-          <h3 style={{ fontFamily: bodyFont, fontSize: '1.125rem', fontWeight: 500, color: '#111827', lineHeight: 1.6, margin: '0 0 16px', whiteSpace: 'pre-line' }}>
+          <h3 style={{ fontFamily: bodyFont, fontSize: v2Tokens.fontSize.subtitle, fontWeight: 500, color: '#111827', lineHeight: v2Tokens.lineHeight.subtitle, letterSpacing: v2Tokens.letterSpacing.hero, textWrap: 'balance' as const, margin: '0 0 16px', whiteSpace: 'pre-line' }}>
             {slide.title}
           </h3>
         )}
 
         {/* Hashtag / link */}
         {slide.body && (
-          <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.875rem', color: accent, margin: 0 }}>
+          <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.caption, color: accent, lineHeight: v2Tokens.lineHeight.caption, margin: 0 }}>
             {slide.body}
           </p>
         )}

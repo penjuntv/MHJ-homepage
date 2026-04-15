@@ -13,7 +13,7 @@ export default function CoverDark({ slide }: { slide: SlideConfig }) {
   const titleFont = getTitleFont(slide.fontTheme);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       <TextureOverlay texture={slide.globalTexture} />
       <AccentDecoration iconId={slide.accentIcon} color={accent} opacity={0.05} size={320} position="center" />
 
@@ -22,7 +22,7 @@ export default function CoverDark({ slide }: { slide: SlideConfig }) {
 
       {/* Category */}
       {slide.subtitle && (
-        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 6, textTransform: 'uppercase', color: accent, margin: '0 0 40px', textAlign: 'center', position: 'relative', zIndex: 2 }}>
+        <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.label, fontWeight: 900, letterSpacing: v2Tokens.letterSpacing.label, lineHeight: v2Tokens.lineHeight.label, textTransform: 'uppercase', color: accent, margin: '0 0 40px', textAlign: 'center', position: 'relative', zIndex: 2 }}>
           {slide.subtitle}
         </p>
       )}
@@ -31,7 +31,7 @@ export default function CoverDark({ slide }: { slide: SlideConfig }) {
       <div style={{ width: 48, height: 1, background: accent, marginBottom: 40, position: 'relative', zIndex: 2 }} />
 
       {/* Title */}
-      <h1 style={{ fontFamily: titleFont, fontSize: '3.5rem', fontWeight: 900, fontStyle: 'italic', color: accent, lineHeight: 1.1, letterSpacing: -2, textAlign: 'center', margin: 0, position: 'relative', zIndex: 2 }}>
+      <h1 style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.heroTitle, fontWeight: 900, fontStyle: 'italic', color: accent, lineHeight: v2Tokens.lineHeight.heroTitle, letterSpacing: v2Tokens.letterSpacing.hero, textAlign: 'center', textWrap: 'balance' as const, margin: 0, position: 'relative', zIndex: 2 }}>
         {slide.title || 'MHJ'}
       </h1>
 
@@ -39,7 +39,7 @@ export default function CoverDark({ slide }: { slide: SlideConfig }) {
       <div style={{ width: 48, height: 1, background: accent, marginTop: 40, position: 'relative', zIndex: 2 }} />
 
       {/* Brand */}
-      <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#FFFFFF', opacity: 0.3, marginTop: 40, textAlign: 'center', position: 'relative', zIndex: 2 }}>
+      <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.caption, fontWeight: 900, letterSpacing: v2Tokens.letterSpacing.label, lineHeight: v2Tokens.lineHeight.caption, textTransform: 'uppercase', color: '#FFFFFF', opacity: 0.3, marginTop: 40, textAlign: 'center', position: 'relative', zIndex: 2 }}>
         MHJ · my mairangi
       </p>
 

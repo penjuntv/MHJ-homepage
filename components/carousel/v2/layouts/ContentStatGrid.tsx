@@ -41,7 +41,7 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
         background: bg,
         display: 'flex',
         flexDirection: 'column',
-        padding: '5rem 5rem 4.375rem',
+        padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`,
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
@@ -55,9 +55,10 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
         <span
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: '0.75rem',
+            fontSize: v2Tokens.fontSize.label,
             fontWeight: 900,
-            letterSpacing: 4,
+            letterSpacing: v2Tokens.letterSpacing.label,
+            lineHeight: v2Tokens.lineHeight.label,
             textTransform: 'uppercase',
             color: accent,
             marginBottom: 24,
@@ -74,15 +75,16 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
         <h3
           style={{
             fontFamily: titleFont,
-            fontSize: '2rem',
+            fontSize: v2Tokens.fontSize.title,
             fontWeight: 900,
             fontStyle: 'italic',
             color: text,
-            lineHeight: 1.15,
-            letterSpacing: -0.5,
+            lineHeight: v2Tokens.lineHeight.title,
+            letterSpacing: v2Tokens.letterSpacing.hero,
             margin: '0 0 40px',
             position: 'relative',
             zIndex: 2,
+            textWrap: 'balance' as const,
           }}
         >
           {slide.title}
@@ -127,11 +129,12 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
             <span
               style={{
                 fontFamily: v2Tokens.fonts.body,
-                fontSize: '0.75rem',
+                fontSize: v2Tokens.fontSize.label,
                 fontWeight: 600,
                 color: text,
                 opacity: 0.7,
-                lineHeight: 1.4,
+                letterSpacing: v2Tokens.letterSpacing.label,
+                lineHeight: v2Tokens.lineHeight.label,
               }}
             >
               {stat.label}

@@ -18,17 +18,17 @@ export default function ContentDonutChart({ slide }: { slide: SlideConfig }) {
   const deg = (percentage / 100) * 360;
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {slide.subtitle && (
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, marginBottom: 24, width: '100%', textAlign: 'left', position: 'relative', zIndex: 2 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.label, fontWeight: 900, letterSpacing: v2Tokens.letterSpacing.label, lineHeight: v2Tokens.lineHeight.label, textTransform: 'uppercase', color: accent, marginBottom: 24, width: '100%', textAlign: 'left', position: 'relative', zIndex: 2 }}>
           {slide.subtitle}
         </span>
       )}
 
       {slide.title && (
-        <h2 style={{ fontFamily: titleFont, fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.15, letterSpacing: -0.5, textAlign: 'center', margin: '0 0 48px', width: '100%', position: 'relative', zIndex: 2 }}>
+        <h2 style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.title, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: v2Tokens.lineHeight.title, letterSpacing: v2Tokens.letterSpacing.hero, textAlign: 'center', margin: '0 0 48px', width: '100%', position: 'relative', zIndex: 2, textWrap: 'balance' as const }}>
           {slide.title}
         </h2>
       )}
@@ -43,7 +43,7 @@ export default function ContentDonutChart({ slide }: { slide: SlideConfig }) {
       </div>
 
       {slide.body && (
-        <p style={{ fontFamily: bodyFont, fontSize: '0.875rem', lineHeight: 1.6, color: text, opacity: 0.8, textAlign: 'center', maxWidth: '90%', margin: 0, position: 'relative', zIndex: 2 }}>
+        <p style={{ fontFamily: bodyFont, fontSize: v2Tokens.fontSize.bodySmall, lineHeight: v2Tokens.lineHeight.bodySmall, color: text, opacity: 0.8, textAlign: 'center', maxWidth: '90%', margin: 0, position: 'relative', zIndex: 2 }}>
           {slide.body}
         </p>
       )}

@@ -25,7 +25,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '5rem 5rem 4.375rem',
+        padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`,
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'hidden',
@@ -41,7 +41,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
           top: 60,
           left: 60,
           fontFamily: v2Tokens.fonts.display,
-          fontSize: '7.5rem',
+          fontSize: v2Tokens.fontSize.decorQuote,
           color: accent,
           opacity: 0.12,
           lineHeight: 0.8,
@@ -57,9 +57,10 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: '0.75rem',
+            fontSize: v2Tokens.fontSize.label,
             fontWeight: 900,
-            letterSpacing: 4,
+            letterSpacing: v2Tokens.letterSpacing.label,
+            lineHeight: v2Tokens.lineHeight.label,
             textTransform: 'uppercase',
             color: accent,
             margin: '0 0 32px',
@@ -77,13 +78,14 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: titleFont,
-            fontSize: '1.875rem',
+            fontSize: v2Tokens.fontSize.subtitle,
             fontStyle: 'italic',
             fontWeight: 700,
             color: textBgStyle?.color ?? text,
-            lineHeight: 1.5,
+            lineHeight: v2Tokens.lineHeight.subtitle,
             textAlign: 'center',
             margin: 0,
+            textWrap: 'balance' as const,
           }}
         >
           {slide.body || slide.title || ''}
@@ -95,7 +97,8 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
         <p
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: '0.8125rem',
+            fontSize: v2Tokens.fontSize.caption,
+            lineHeight: v2Tokens.lineHeight.caption,
             fontWeight: 700,
             color: accent,
             marginTop: 32,
@@ -115,7 +118,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
           bottom: 80,
           right: 60,
           fontFamily: v2Tokens.fonts.display,
-          fontSize: '7.5rem',
+          fontSize: v2Tokens.fontSize.decorQuote,
           color: accent,
           opacity: 0.12,
           lineHeight: 0.8,

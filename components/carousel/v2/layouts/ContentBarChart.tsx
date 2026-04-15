@@ -24,17 +24,17 @@ export default function ContentBarChart({ slide }: { slide: SlideConfig }) {
   const bars = parseBarData(slide.body);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', color: '#FFFFFF' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden', color: '#FFFFFF' }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {slide.subtitle && (
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, marginBottom: 24, position: 'relative', zIndex: 2 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.label, fontWeight: 900, letterSpacing: v2Tokens.letterSpacing.label, lineHeight: v2Tokens.lineHeight.label, textTransform: 'uppercase', color: accent, marginBottom: 24, position: 'relative', zIndex: 2 }}>
           {slide.subtitle}
         </span>
       )}
 
       {slide.title && (
-        <h2 style={{ fontFamily: titleFont, fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 40px', position: 'relative', zIndex: 2 }}>
+        <h2 style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.title, fontWeight: 900, fontStyle: 'italic', lineHeight: v2Tokens.lineHeight.title, letterSpacing: v2Tokens.letterSpacing.hero, margin: '0 0 40px', position: 'relative', zIndex: 2, textWrap: 'balance' as const }}>
           {slide.title}
         </h2>
       )}
@@ -42,7 +42,7 @@ export default function ContentBarChart({ slide }: { slide: SlideConfig }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center', position: 'relative', zIndex: 2 }}>
         {bars.map((bar, i) => (
           <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: v2Tokens.fonts.body, fontSize: '0.8125rem', fontWeight: 600, opacity: 0.9 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.caption, lineHeight: v2Tokens.lineHeight.caption, fontWeight: 600, opacity: 0.9 }}>
               <span>{bar.label}</span>
               <span style={{ color: accent }}>{bar.value}</span>
             </div>

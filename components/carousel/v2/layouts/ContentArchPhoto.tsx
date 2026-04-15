@@ -17,7 +17,7 @@ export default function ContentArchPhoto({ slide }: { slide: SlideConfig }) {
   const filterStyle = getFilterStyle(slide.imageFilter);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'row', padding: '5rem 3.75rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', gap: 40 }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'row', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden', gap: 40 }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {/* Left: arch-clipped photo */}
@@ -34,18 +34,18 @@ export default function ContentArchPhoto({ slide }: { slide: SlideConfig }) {
       {/* Right: text */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
         {slide.stepNumber != null && (
-          <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: accent, marginBottom: 16 }}>
+          <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.label, fontWeight: 900, letterSpacing: v2Tokens.letterSpacing.label, lineHeight: v2Tokens.lineHeight.label, textTransform: 'uppercase', color: accent, marginBottom: 16 }}>
             {String(slide.stepNumber).padStart(2, '0')} / 10
           </span>
         )}
         {slide.title && (
-          <h2 style={{ fontFamily: titleFont, fontSize: '1.75rem', fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.2, letterSpacing: -0.5, margin: '0 0 20px' }}>
+          <h2 style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.title, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: v2Tokens.lineHeight.title, letterSpacing: v2Tokens.letterSpacing.hero, margin: '0 0 20px', textWrap: 'balance' as const }}>
             {slide.title}
           </h2>
         )}
         <div style={{ width: 32, height: 2, background: accent, marginBottom: 20 }} />
         {slide.body && (
-          <p style={{ fontFamily: bodyFont, fontSize: '0.875rem', lineHeight: 1.8, color: text, opacity: 0.8, margin: 0 }}>
+          <p style={{ fontFamily: bodyFont, fontSize: v2Tokens.fontSize.bodySmall, lineHeight: v2Tokens.lineHeight.bodySmall, color: text, opacity: 0.8, margin: 0 }}>
             {slide.body}
           </p>
         )}

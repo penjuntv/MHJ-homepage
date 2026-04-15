@@ -13,20 +13,20 @@ export default function YussiTake({ slide }: { slide: SlideConfig }) {
   const bodyFont = getBodyFont(slide.fontTheme);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       <TextureOverlay texture={slide.globalTexture} />
 
       {/* Profile area */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32, position: 'relative', zIndex: 2 }}>
         {/* Profile circle */}
         <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '2px solid rgba(255,255,255,0.5)' }}>
-          <span style={{ fontFamily: v2Tokens.fonts.display, fontSize: '1.25rem', fontWeight: 700, fontStyle: 'italic', color: '#FFFFFF' }}>Y</span>
+          <span style={{ fontFamily: v2Tokens.fonts.display, fontSize: v2Tokens.fontSize.bodySmall, fontWeight: 700, fontStyle: 'italic', color: '#FFFFFF' }}>Y</span>
         </div>
         <div>
-          <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.875rem', fontWeight: 700, color: '#FFFFFF', margin: 0, lineHeight: 1.2 }}>
+          <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.bodySmall, fontWeight: 700, color: '#FFFFFF', margin: 0, lineHeight: v2Tokens.lineHeight.label }}>
             Yussi
           </p>
-          <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', margin: '4px 0 0', lineHeight: 1.2 }}>
+          <p style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.caption, color: 'rgba(255,255,255,0.7)', margin: '4px 0 0', lineHeight: v2Tokens.lineHeight.caption }}>
             Social Work Student & Mum of 3
           </p>
         </div>
@@ -34,7 +34,7 @@ export default function YussiTake({ slide }: { slide: SlideConfig }) {
 
       {/* Title */}
       {slide.title && (
-        <h2 style={{ fontFamily: titleFont, fontSize: '1.75rem', fontWeight: 900, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.15, letterSpacing: -0.5, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
+        <h2 style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.subtitle, fontWeight: 900, fontStyle: 'italic', color: '#FFFFFF', lineHeight: v2Tokens.lineHeight.subtitle, letterSpacing: v2Tokens.letterSpacing.hero, textWrap: 'balance' as const, margin: '0 0 24px', position: 'relative', zIndex: 2 }}>
           {slide.title}
         </h2>
       )}
@@ -44,14 +44,14 @@ export default function YussiTake({ slide }: { slide: SlideConfig }) {
 
       {/* Quote-style body */}
       <div style={{ flex: 1, position: 'relative', zIndex: 2 }}>
-        <p style={{ fontFamily: bodyFont, fontSize: '1rem', fontStyle: 'italic', lineHeight: 1.8, color: '#FFFFFF', opacity: 0.95, margin: 0 }}>
+        <p style={{ fontFamily: bodyFont, fontSize: v2Tokens.fontSize.body, fontStyle: 'italic', lineHeight: v2Tokens.lineHeight.body, color: '#FFFFFF', opacity: 0.95, margin: 0 }}>
           {slide.body}
         </p>
       </div>
 
       {/* Korean at bottom */}
       {slide.subtitle && (
-        <p style={{ fontFamily: v2Tokens.fonts.bodyKr, fontSize: '0.9375rem', color: accent, opacity: 0.8, marginTop: 24, lineHeight: 1.6, position: 'relative', zIndex: 2 }}>
+        <p style={{ fontFamily: v2Tokens.fonts.bodyKr, fontSize: v2Tokens.fontSize.caption, color: accent, opacity: 0.8, marginTop: 24, lineHeight: v2Tokens.lineHeight.caption, position: 'relative', zIndex: 2 }}>
           {slide.subtitle}
         </p>
       )}

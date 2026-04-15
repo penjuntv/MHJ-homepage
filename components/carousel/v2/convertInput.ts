@@ -107,7 +107,7 @@ export function convertInputToSlides(input: CarouselInput): SlideConfig[] {
     slideNumber: 9,
     layout: 'yussi-take',
     title: "Yussi's Take",
-    body: input.yussiTake || `As a mum of three and social work student, I believe every family deserves the time and space to find their rhythm in a new country.`,
+    body: input.yussiTake || `Every family deserves time and space to find their rhythm in a new country.`,
     subtitle: input.yussiTakeKr || undefined,
   });
 

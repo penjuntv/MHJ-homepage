@@ -17,7 +17,7 @@ export default function CoverPolaroid({ slide }: { slide: SlideConfig }) {
   const filterStyle = getFilterStyle(slide.imageFilter);
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '5rem 5rem 4.375rem', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${v2Tokens.safeZone.top} ${v2Tokens.safeZone.sides} ${v2Tokens.safeZone.bottom}`, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
       <TextureOverlay texture={slide.globalTexture} />
       <AccentDecoration iconId={slide.accentIcon} color={accent} opacity={0.06} size={100} position="top-right" />
 
@@ -32,10 +32,10 @@ export default function CoverPolaroid({ slide }: { slide: SlideConfig }) {
 
       {/* Text below */}
       <div style={{ textAlign: 'center', position: 'relative', zIndex: 2, flexShrink: 0 }}>
-        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: '0.75rem', fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: accent, display: 'block', marginBottom: 16 }}>
+        <span style={{ fontFamily: v2Tokens.fonts.body, fontSize: v2Tokens.fontSize.label, fontWeight: 900, letterSpacing: v2Tokens.letterSpacing.label, lineHeight: v2Tokens.lineHeight.label, textTransform: 'uppercase', color: accent, display: 'block', marginBottom: 16 }}>
           {slide.subtitle || 'NEW GUIDE'}
         </span>
-        <h1 style={{ fontFamily: titleFont, fontSize: '2.5rem', fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: 1.1, letterSpacing: -1, margin: 0 }}>
+        <h1 style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.heroTitle, fontWeight: 900, fontStyle: 'italic', color: text, lineHeight: v2Tokens.lineHeight.heroTitle, letterSpacing: v2Tokens.letterSpacing.hero, textWrap: 'balance' as const, margin: 0 }}>
           {slide.title || 'MHJ'}
         </h1>
       </div>

@@ -27,8 +27,8 @@ export default function SlideFooter({
         bottom: 0,
         left: 0,
         right: 0,
-        height: 70,
-        padding: '0 5rem',
+        height: 90,
+        padding: `0 ${v2Tokens.safeZone.sides}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -38,7 +38,7 @@ export default function SlideFooter({
       <span
         style={{
           fontFamily: v2Tokens.fonts.display,
-          fontSize: '1rem',
+          fontSize: '1.25rem',
           fontWeight: 700,
           fontStyle: 'italic',
           color: accent,
@@ -51,11 +51,11 @@ export default function SlideFooter({
         <span
           style={{
             fontFamily: v2Tokens.fonts.body,
-            fontSize: '0.6875rem',
+            fontSize: '1rem',
             fontWeight: 600,
             color: muted,
             letterSpacing: 2,
-            opacity: 0.6,
+            opacity: 0.7,
           }}
         >
           {String(slideNumber).padStart(2, '0')} / {String(totalSlides).padStart(2, '0')}
