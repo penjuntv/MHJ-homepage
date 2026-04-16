@@ -4,7 +4,7 @@
 // 렌더링: html-to-image (클라이언트) — Satori 서버 렌더링 교체
 // docs/CAROUSEL_V2_MASTER_PLAN.md 세션 1
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase-browser';
@@ -13,6 +13,7 @@ import {
   blogCategoryToHashtagCategory,
   generateCaption,
   generateAltTexts,
+  getDefaultAspectRatio,
 } from '@/components/carousel/utils';
 import type {
   CarouselBlogRow,
@@ -76,6 +77,7 @@ export default function CarouselAdminPage() {
   const [altTexts, setAltTexts] = useState<string[]>([]);
   const [recentRefresh, setRecentRefresh] = useState(0);
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('portrait');
+  const recommendedRatio = useMemo(() => getDefaultAspectRatio(input.category), [input.category]);
 
   // Undo/Redo — yussi-inata 패턴
   const pastRef = useRef<SlideConfig[][]>([]);
@@ -127,8 +129,6 @@ export default function CarouselAdminPage() {
     setBlogSlug(row.slug || `blog-${row.id}`);
     setContentId(null);
     const built = buildCarouselInputFromBlog(row);
-    // 빈 carousel_*면 buildCarouselInputFromBlog가 비어있는 points/summary를 만든다.
-    // UI에서 4개씩 채우려면 EMPTY_INPUT의 빈 슬롯을 머지.
     setInput({
       ...EMPTY_INPUT,
       ...built,
@@ -139,6 +139,7 @@ export default function CarouselAdminPage() {
         built.summaryKr && built.summaryKr.length > 0 ? built.summaryKr : EMPTY_INPUT.summaryKr,
       category: row.category,
     });
+    setAspectRatio(getDefaultAspectRatio(row.category));
     setSlides([]);
     setCurrentSlide(0);
     setCaption(EMPTY_CAPTION);
@@ -278,7 +279,7 @@ export default function CarouselAdminPage() {
     }
   }
 
-  const filenameBase = `mhj-carousel-${blogSlug || 'untitled'}`;
+  const filenameBase = `mhj-carousel-${blogSlug || 'untitled'}-${aspectRatio === 'square' ? '1x1' : '4x5'}`;
 
   return (
     <div
@@ -309,7 +310,7 @@ export default function CarouselAdminPage() {
             color: '#94A3B8',
           }}
         >
-          Instagram 캐러셀 10장 자동 생성
+          Instagram 캐러셀 자동 생성
         </p>
       </header>
 
@@ -375,6 +376,9 @@ export default function CarouselAdminPage() {
                 onChange={setInput}
                 onGenerate={handleGenerate}
                 isGenerating={generating}
+                aspectRatio={aspectRatio}
+                onAspectRatioChange={setAspectRatio}
+                recommendedRatio={recommendedRatio}
               />
             </>
           )}

@@ -22,6 +22,8 @@ interface Props {
   onAspectRatioChange?: (ratio: AspectRatio) => void;
 }
 
+const CANVAS_W = 1080;
+
 export default function LivePreview({
   slides,
   currentIndex,
@@ -35,10 +37,16 @@ export default function LivePreview({
   onAspectRatioChange,
 }: Props) {
   const singleRef = useRef<HTMLDivElement>(null);
+  const singleContainerRef = useRef<HTMLDivElement>(null);
+  const gridContainerRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [viewMode, setViewMode] = useState<'single' | 'grid'>('single');
   const [ratioOpen, setRatioOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [singleScale, setSingleScale] = useState(0.4);
+  const [gridScale, setGridScale] = useState(0.2);
+
+  const canvasH = aspectRatio === 'square' ? 1080 : 1350;
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -47,10 +55,34 @@ export default function LivePreview({
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // 모바일 전환 시 그리드 모드 해제
   useEffect(() => {
     if (isMobile && viewMode === 'grid') setViewMode('single');
   }, [isMobile, viewMode]);
+
+  // Single view scale
+  useEffect(() => {
+    const el = singleContainerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(entries => {
+      const w = entries[0].contentRect.width;
+      setSingleScale(w / CANVAS_W);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Grid view scale
+  useEffect(() => {
+    const el = gridContainerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(entries => {
+      const w = entries[0].contentRect.width;
+      const cellW = (w - 10) / 2; // 2 columns, 10px gap
+      setGridScale(cellW / CANVAS_W);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   if (!slides.length) {
     return (
@@ -73,7 +105,6 @@ export default function LivePreview({
 
   const totalSlides = slides.length;
   const slide = { ...slides[currentIndex], slideNumber: currentIndex + 1, totalSlides };
-  const ar = aspectRatio === 'square' ? '1 / 1' : '4 / 5';
   const exportW = 1080;
   const exportH = aspectRatio === 'square' ? 1080 : 1350;
 
@@ -88,7 +119,6 @@ export default function LivePreview({
       if (typeof saveAs !== 'function') throw new Error('file-saver saveAs not available');
       await document.fonts.ready;
 
-      // 외부 이미지를 data URL로 변환 (CORS 우회 + 로딩 대기)
       const imgs = singleRef.current.querySelectorAll('img');
       const originals: { img: HTMLImageElement; src: string }[] = [];
       await Promise.all(
@@ -124,10 +154,13 @@ export default function LivePreview({
 
       const dataUrl = await htmlToImage.toPng(singleRef.current, {
         quality: 1.0,
-        pixelRatio: 2,
+        pixelRatio: 1,
         width: exportW,
         height: exportH,
+        canvasWidth: exportW * 2,
+        canvasHeight: exportH * 2,
         cacheBust: true,
+        backgroundColor: '#FFFFFF',
       });
 
       originals.forEach(({ img, src }) => {
@@ -171,7 +204,6 @@ export default function LivePreview({
           Preview — Live
         </p>
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          {/* View toggle */}
           <button
             type="button"
             onClick={() => setViewMode('single')}
@@ -205,7 +237,6 @@ export default function LivePreview({
             </button>
           )}
 
-          {/* Undo/Redo */}
           {(onUndo || onRedo) && (
             <>
               <div style={{ width: 1, height: 16, background: '#E2E8F0', margin: '0 2px' }} />
@@ -249,7 +280,7 @@ export default function LivePreview({
       {/* Single view mode */}
       {viewMode === 'single' && (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, justifyContent: 'center' }}>
             <button
               type="button"
               onClick={() => onIndexChange(Math.max(0, currentIndex - 1))}
@@ -261,24 +292,26 @@ export default function LivePreview({
                 color: currentIndex === 0 ? '#CBD5E1' : '#1A1A1A',
                 padding: 4,
                 flexShrink: 0,
+                marginTop: canvasH * singleScale * 0.45,
               }}
             >
               <ChevronLeft size={16} />
             </button>
 
             <div
+              ref={singleContainerRef}
               style={{
                 width: '100%',
                 maxWidth: 600,
-                aspectRatio: ar,
                 overflow: 'hidden',
                 borderRadius: 6,
                 flexShrink: 0,
                 position: 'relative',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+                height: canvasH * singleScale,
               }}
             >
-              <SlideRenderer slide={slide} preview />
+              <SlideRenderer slide={slide} scale={singleScale} aspectRatio={aspectRatio} />
             </div>
 
             <button
@@ -292,6 +325,7 @@ export default function LivePreview({
                 color: currentIndex === slides.length - 1 ? '#CBD5E1' : '#1A1A1A',
                 padding: 4,
                 flexShrink: 0,
+                marginTop: canvasH * singleScale * 0.45,
               }}
             >
               <ChevronRight size={16} />
@@ -345,6 +379,7 @@ export default function LivePreview({
       {/* Grid view mode */}
       {viewMode === 'grid' && (
         <div
+          ref={gridContainerRef}
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
@@ -358,16 +393,17 @@ export default function LivePreview({
               onClick={() => { onIndexChange(i); setViewMode('single'); }}
               style={{
                 position: 'relative',
-                aspectRatio: ar,
                 overflow: 'hidden',
                 borderRadius: 6,
                 border: i === currentIndex ? '2px solid #C9A882' : '2px solid transparent',
                 cursor: 'pointer',
                 padding: 0,
                 boxShadow: '0 1px 6px rgba(0,0,0,0.08)',
+                height: canvasH * gridScale,
+                background: 'transparent',
               }}
             >
-              <SlideRenderer slide={{ ...s, slideNumber: i + 1, totalSlides }} preview />
+              <SlideRenderer slide={{ ...s, slideNumber: i + 1, totalSlides }} scale={gridScale} aspectRatio={aspectRatio} />
               <div
                 style={{
                   position: 'absolute',
@@ -388,7 +424,7 @@ export default function LivePreview({
         </div>
       )}
 
-      {/* Export bar: Download PNG + Download All ZIP + Aspect ratio */}
+      {/* Export bar: Download PNG + Aspect ratio */}
       <div
         style={{
           display: 'flex',
@@ -420,7 +456,6 @@ export default function LivePreview({
           PNG
         </button>
 
-        {/* Aspect ratio dropdown */}
         {onAspectRatioChange && (
           <div style={{ position: 'relative', marginLeft: 'auto' }}>
             <button
@@ -489,9 +524,9 @@ export default function LivePreview({
         )}
       </div>
 
-      {/* Hidden full-size renderer for single-slide export */}
-      <div style={{ position: 'fixed', left: -9999, top: -9999, opacity: 0, pointerEvents: 'none' }}>
-        <SlideRenderer ref={singleRef} slide={slide} aspectRatio={aspectRatio} />
+      {/* Hidden 1:1 scale renderer for single-slide PNG export */}
+      <div style={{ position: 'fixed', left: -99999, top: 0, opacity: 0, pointerEvents: 'none', zIndex: -1 }}>
+        <SlideRenderer ref={singleRef} slide={slide} scale={1} aspectRatio={aspectRatio} />
       </div>
 
       {/* Per-slide edit panel */}

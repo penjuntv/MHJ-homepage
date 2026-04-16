@@ -159,7 +159,7 @@ export default function CtaMinimal({ slide }: { slide: SlideConfig }) {
         </p>
       )}
 
-      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} textColor={text} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} totalSlides={slide.totalSlides} accentColor={accent} textColor={text} />
     </div>
   );
 }

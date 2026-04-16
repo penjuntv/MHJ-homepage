@@ -41,6 +41,13 @@ export async function loadCarouselFonts(origin: string): Promise<CarouselFont[]>
   return fonts;
 }
 
+// 카테고리별 기본 비율 추천
+export function getDefaultAspectRatio(category: string): 'portrait' | 'square' {
+  const photoFirst = ['travelers', 'life in aotearoa'];
+  if (photoFirst.includes(category?.toLowerCase())) return 'square';
+  return 'portrait';
+}
+
 // 블로그 카테고리 → 해시태그 카테고리 매핑 (사양서 §6)
 export function blogCategoryToHashtagCategory(category: string): string {
   const map: Record<string, string> = {

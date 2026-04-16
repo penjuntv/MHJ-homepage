@@ -45,9 +45,6 @@ import ContentTimeline from './layouts/ContentTimeline';
 interface Props {
   slide: SlideConfig;
   scale?: number;
-  /** true → 100% width/height for responsive preview (parent controls size via aspect-ratio) */
-  preview?: boolean;
-  /** Export aspect ratio — 'portrait' (4:5, 1080x1350) or 'square' (1:1, 1080x1080) */
   aspectRatio?: 'portrait' | 'square';
 }
 
@@ -96,26 +93,8 @@ const LAYOUT_MAP: Record<string, React.FC<{ slide: SlideConfig }>> = {
  * SlideRenderer — SlideConfig → React DOM (27 layouts)
  * ref를 attach하면 html-to-image로 캡처 가능.
  */
-const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, scale = 1, preview = false, aspectRatio = 'portrait' }, ref) => {
+const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, scale = 1, aspectRatio = 'portrait' }, ref) => {
   const Content = LAYOUT_MAP[slide.layout] ?? CoverMinimal;
-
-  if (preview) {
-    return (
-      <div
-        ref={ref}
-        style={{
-          width: '100%',
-          height: '100%',
-          overflow: 'hidden',
-          position: 'relative',
-          fontFamily: "'Inter', system-ui, sans-serif",
-        }}
-      >
-        <Content slide={slide} />
-      </div>
-    );
-  }
-
   const W = 1080;
   const H = aspectRatio === 'square' ? 1080 : 1350;
 
@@ -131,6 +110,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, scale = 1, pre
         overflow: 'hidden',
         position: 'relative',
         fontFamily: "'Inter', system-ui, sans-serif",
+        background: '#FFFFFF',
       }}
     >
       <Content slide={slide} />

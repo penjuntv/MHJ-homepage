@@ -41,7 +41,7 @@ export default function ContentBoldNumber({ slide }: { slide: SlideConfig }) {
         <circle cx="100" cy="100" r="40" fill="none" stroke="#FFFFFF" strokeWidth="8" />
       </svg>
 
-      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} textColor="rgba(255,255,255,0.4)" />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} totalSlides={slide.totalSlides} accentColor={accent} textColor="rgba(255,255,255,0.4)" />
     </div>
   );
 }

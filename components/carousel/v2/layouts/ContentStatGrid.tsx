@@ -143,7 +143,7 @@ export default function ContentStatGrid({ slide }: { slide: SlideConfig }) {
         ))}
       </div>
 
-      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} totalSlides={slide.totalSlides} accentColor={accent} />
     </div>
   );
 }

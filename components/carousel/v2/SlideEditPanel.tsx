@@ -12,6 +12,7 @@ import {
   Edit3,
   Palette,
   SlidersHorizontal,
+  Sparkles,
 } from 'lucide-react';
 import type { SlideConfig, CarouselLayoutType } from '../types';
 import { IMAGE_FILTERS } from './filters';
@@ -177,10 +178,17 @@ export default function SlideEditPanel({ slide, onUpdate }: Props) {
             </>
           )}
 
-          {/* Assets */}
+          {/* Assets — with photos (image-supporting layouts) */}
           {supportsImage && (
             <button type="button" onClick={() => setIsAssetOpen(true)} style={btnStyle()}>
               <Library size={13} /> Assets
+            </button>
+          )}
+
+          {/* Accent only — for layouts without image support */}
+          {!supportsImage && (
+            <button type="button" onClick={() => setIsAssetOpen(true)} style={btnStyle()}>
+              <Sparkles size={13} /> Accent
             </button>
           )}
 
@@ -456,6 +464,7 @@ export default function SlideEditPanel({ slide, onUpdate }: Props) {
         onSelectPhoto={(url) => onUpdate({ customImage: url })}
         onSelectAccent={(iconId: NZAccentIconId) => onUpdate({ accentIcon: iconId })}
         currentAccent={slide.accentIcon}
+        accentOnly={!supportsImage}
       />
     </>
   );

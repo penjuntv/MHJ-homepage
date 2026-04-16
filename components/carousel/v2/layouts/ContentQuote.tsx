@@ -130,7 +130,7 @@ export default function ContentQuote({ slide }: { slide: SlideConfig }) {
         {'\u201C'}
       </span>
 
-      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} totalSlides={slide.totalSlides} accentColor={accent} />
     </div>
   );
 }

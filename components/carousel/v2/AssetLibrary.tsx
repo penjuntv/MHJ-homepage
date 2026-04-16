@@ -13,6 +13,7 @@ interface Props {
   onSelectPhoto: (url: string) => void;
   onSelectAccent: (iconId: NZAccentIconId) => void;
   currentAccent?: string;
+  accentOnly?: boolean;
 }
 
 const ASSET_PHOTOS = [
@@ -51,8 +52,8 @@ const ACCENT_ENTRIES: { id: NZAccentIconId; name: string }[] = [
   { id: 'blob', name: 'Organic Blob' },
 ];
 
-export default function AssetLibrary({ open, onClose, onSelectPhoto, onSelectAccent, currentAccent }: Props) {
-  const [tab, setTab] = useState<'photos' | 'accents'>('photos');
+export default function AssetLibrary({ open, onClose, onSelectPhoto, onSelectAccent, currentAccent, accentOnly = false }: Props) {
+  const [tab, setTab] = useState<'photos' | 'accents'>(accentOnly ? 'accents' : 'photos');
 
   if (!open) return null;
 
@@ -108,27 +109,29 @@ export default function AssetLibrary({ open, onClose, onSelectPhoto, onSelectAcc
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 8, padding: '12px 20px 0', flexShrink: 0 }}>
-          {(['photos', 'accents'] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTab(t)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: 8,
-                border: 'none',
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: 'pointer',
-                background: tab === t ? '#1A1A1A' : '#F1F5F9',
-                color: tab === t ? '#FFFFFF' : '#64748B',
-              }}
-            >
-              {t === 'photos' ? 'Photos' : 'Accents & Shapes'}
-            </button>
-          ))}
-        </div>
+        {!accentOnly && (
+          <div style={{ display: 'flex', gap: 8, padding: '12px 20px 0', flexShrink: 0 }}>
+            {(['photos', 'accents'] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  border: 'none',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  background: tab === t ? '#1A1A1A' : '#F1F5F9',
+                  color: tab === t ? '#FFFFFF' : '#64748B',
+                }}
+              >
+                {t === 'photos' ? 'Photos' : 'Accents & Shapes'}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Content */}
         <div style={{ overflow: 'auto', padding: '16px 20px 20px', flex: 1 }}>

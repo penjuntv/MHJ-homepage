@@ -111,7 +111,10 @@ export default function ExportEngine({ slides, filenameBase, aspectRatio = 'port
             pixelRatio: 1,
             width: v2Tokens.canvas.width,
             height: exportH,
+            canvasWidth: v2Tokens.canvas.width * 2,
+            canvasHeight: exportH * 2,
             cacheBust: true,
+            backgroundColor: '#FFFFFF',
           });
           const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
           zip.file(`${filenameBase}_${String(i + 1).padStart(2, '0')}.png`, base64, { base64: true });
@@ -139,11 +142,12 @@ export default function ExportEngine({ slides, filenameBase, aspectRatio = 'port
   return (
     <div>
       {/* 숨겨진 실제 크기 슬라이드 (html-to-image 캡처용) */}
-      <div style={{ position: 'fixed', left: -9999, top: -9999, opacity: 0, pointerEvents: 'none' }}>
+      <div style={{ position: 'fixed', left: -99999, top: 0, opacity: 0, pointerEvents: 'none', zIndex: -1 }}>
         {slides.map((slide, i) => (
           <SlideRenderer
             key={slide.id}
             slide={{ ...slide, slideNumber: i + 1, totalSlides: slides.length }}
+            scale={1}
             aspectRatio={aspectRatio}
             ref={(el) => { slideRefs.current[i] = el; }}
           />

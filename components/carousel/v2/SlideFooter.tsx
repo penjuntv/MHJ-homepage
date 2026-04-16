@@ -13,7 +13,7 @@ interface Props {
 
 export default function SlideFooter({
   slideNumber,
-  totalSlides = 10,
+  totalSlides,
   accentColor,
   textColor,
 }: Props) {
@@ -47,7 +47,7 @@ export default function SlideFooter({
       >
         MHJ
       </span>
-      {slideNumber != null && (
+      {slideNumber != null && totalSlides != null && (
         <span
           style={{
             fontFamily: v2Tokens.fonts.body,

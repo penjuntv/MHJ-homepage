@@ -11,6 +11,9 @@ interface Props {
   onChange: (next: CarouselInput) => void;
   onGenerate: () => void;
   isGenerating: boolean;
+  aspectRatio?: 'portrait' | 'square';
+  onAspectRatioChange?: (ratio: 'portrait' | 'square') => void;
+  recommendedRatio?: 'portrait' | 'square';
 }
 
 const inputStyle: React.CSSProperties = {
@@ -172,7 +175,10 @@ function parseYussiFactoryJson(raw: string): Partial<CarouselInput> | null {
   }
 }
 
-export default function CarouselEditor({ input, onChange, onGenerate, isGenerating }: Props) {
+export default function CarouselEditor({
+  input, onChange, onGenerate, isGenerating,
+  aspectRatio = 'portrait', onAspectRatioChange, recommendedRatio,
+}: Props) {
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteText, setPasteText] = useState('');
 
@@ -571,6 +577,87 @@ export default function CarouselEditor({ input, onChange, onGenerate, isGenerati
         </Field>
       </Section>
 
+      {/* ASPECT RATIO SELECTOR */}
+      {onAspectRatioChange && (
+        <div
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            borderRadius: 12,
+            padding: 16,
+          }}
+        >
+          <p style={{
+            fontSize: 10, fontWeight: 900, letterSpacing: 3,
+            color: '#94A3B8', textTransform: 'uppercase',
+            margin: '0 0 12px',
+          }}>Aspect Ratio</p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {([
+              {
+                id: 'portrait' as const,
+                label: '4:5 Portrait',
+                size: '1080 × 1350',
+                desc: 'More text space · higher feed engagement',
+              },
+              {
+                id: 'square' as const,
+                label: '1:1 Square',
+                size: '1080 × 1080',
+                desc: 'Photo-first · gallery aesthetic',
+              },
+            ]).map((opt) => {
+              const selected = aspectRatio === opt.id;
+              const recommended = recommendedRatio === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => onAspectRatioChange(opt.id)}
+                  style={{
+                    position: 'relative',
+                    padding: 14,
+                    borderRadius: 10,
+                    border: selected ? '2px solid #8A6B4F' : '1px solid #EDE9E3',
+                    background: selected ? '#FAF8F5' : '#FFFFFF',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {recommended && (
+                    <span style={{
+                      position: 'absolute', top: -8, right: 8,
+                      background: '#8A6B4F', color: '#FFF',
+                      fontSize: 8, fontWeight: 900, letterSpacing: 1.5,
+                      padding: '2px 6px', borderRadius: 3, textTransform: 'uppercase',
+                    }}>Recommended</span>
+                  )}
+                  <div style={{
+                    width: opt.id === 'square' ? 36 : 32,
+                    height: opt.id === 'square' ? 36 : 40,
+                    background: selected ? '#8A6B4F' : '#EDE9E3',
+                    borderRadius: 3,
+                    marginBottom: 8,
+                  }} />
+                  <p style={{
+                    fontSize: 13, fontWeight: 800, color: '#1A1A1A', margin: '0 0 2px',
+                  }}>{opt.label}</p>
+                  <p style={{
+                    fontSize: 10, color: '#94A3B8', margin: '0 0 6px',
+                    fontFamily: 'monospace',
+                  }}>{opt.size}</p>
+                  <p style={{
+                    fontSize: 10, color: '#64748B', lineHeight: 1.4, margin: 0,
+                  }}>{opt.desc}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* GENERATE BUTTON */}
       <button
         type="button"
@@ -599,7 +686,7 @@ export default function CarouselEditor({ input, onChange, onGenerate, isGenerati
         ) : (
           <Sparkles size={14} />
         )}
-        {isGenerating ? '생성 중... (10~30초)' : 'Generate 10 Slides'}
+        {isGenerating ? '생성 중...' : 'Generate Slides'}
       </button>
     </div>
   );

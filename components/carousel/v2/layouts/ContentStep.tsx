@@ -74,7 +74,7 @@ export default function ContentStep({ slide }: { slide: SlideConfig }) {
         <path d="M5 12h14M12 5l7 7-7 7" />
       </svg>
 
-      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} totalSlides={slide.totalSlides} accentColor={accent} />
     </div>
   );
 }
