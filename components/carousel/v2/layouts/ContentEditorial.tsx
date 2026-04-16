@@ -45,7 +45,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
         <div
           style={{
             width: '100%',
-            height: 420,
+            height: 320,
             borderRadius: 12,
             overflow: 'hidden',
             marginBottom: 32,
@@ -106,19 +106,19 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
       {/* 구분선 */}
       <div style={{ width: 40, height: 2, background: accent, marginBottom: 28, position: 'relative', zIndex: 2 }} />
 
-      {/* 드롭캡 + 본문 */}
-      <div style={{ position: 'relative', zIndex: 2, ...textBgStyle }}>
+      {/* 드롭캡 + 본문 — flex:1 + overflow:hidden → Footer 겹침 방지 */}
+      <div style={{ position: 'relative', zIndex: 2, flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', ...textBgStyle }}>
         {first && (
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
             <span
               style={{
                 fontFamily: v2Tokens.fonts.display,
-                fontSize: '5.5rem',
+                fontSize: '4rem',
                 fontWeight: 900,
                 color: accent,
                 lineHeight: 0.85,
                 marginRight: 8,
-                marginTop: 6,
+                marginTop: 4,
                 flexShrink: 0,
               }}
             >
@@ -131,6 +131,10 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
                 lineHeight: v2Tokens.lineHeight.body,
                 color: textBgStyle?.color ?? text,
                 margin: 0,
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 3,
+                overflow: 'hidden',
               }}
             >
               {rest}
@@ -145,12 +149,15 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
               lineHeight: v2Tokens.lineHeight.body,
               color: textBgStyle?.color ?? text,
               margin: 0,
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 3,
+              overflow: 'hidden',
             }}
           >
             {body}
           </p>
         )}
-      </div>
 
       {/* Highlight callout */}
       {slide.highlight && (
@@ -160,9 +167,7 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
           padding: '14px 20px',
           background: `${accent}14`,
           marginTop: 24,
-          position: 'relative',
-          zIndex: 2,
-          flex: 1,
+          flexShrink: 0,
         }}>
           <p style={{ fontFamily: titleFont, fontSize: v2Tokens.fontSize.bodySmall, fontStyle: 'italic', fontWeight: 700, color: text, lineHeight: v2Tokens.lineHeight.bodySmall, margin: 0 }}>
             {slide.highlight}
@@ -174,8 +179,9 @@ export default function ContentEditorial({ slide }: { slide: SlideConfig }) {
           )}
         </div>
       )}
+      </div>
 
-      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} accentColor={accent} />
+      <SlideFooter slideNumber={slide.slideNumber ?? slide.id} totalSlides={slide.totalSlides} accentColor={accent} />
     </div>
   );
 }

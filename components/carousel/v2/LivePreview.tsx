@@ -71,7 +71,8 @@ export default function LivePreview({
     );
   }
 
-  const slide = slides[currentIndex];
+  const totalSlides = slides.length;
+  const slide = { ...slides[currentIndex], slideNumber: currentIndex + 1, totalSlides };
   const ar = aspectRatio === 'square' ? '1 / 1' : '4 / 5';
   const exportW = 1080;
   const exportH = aspectRatio === 'square' ? 1080 : 1350;
@@ -81,7 +82,10 @@ export default function LivePreview({
     setDownloading(true);
     try {
       const htmlToImage = await import('html-to-image');
-      const { saveAs } = await import('file-saver');
+      const fileSaverModule = await import('file-saver');
+      const fsMod = fileSaverModule as unknown as { saveAs?: (data: Blob | string, name: string) => void; default?: (data: Blob | string, name: string) => void };
+      const saveAs = fsMod.saveAs ?? fsMod.default;
+      if (typeof saveAs !== 'function') throw new Error('file-saver saveAs not available');
       await document.fonts.ready;
 
       // 외부 이미지를 data URL로 변환 (CORS 우회 + 로딩 대기)
@@ -363,7 +367,7 @@ export default function LivePreview({
                 boxShadow: '0 1px 6px rgba(0,0,0,0.08)',
               }}
             >
-              <SlideRenderer slide={s} preview />
+              <SlideRenderer slide={{ ...s, slideNumber: i + 1, totalSlides }} preview />
               <div
                 style={{
                   position: 'absolute',
@@ -486,7 +490,7 @@ export default function LivePreview({
       </div>
 
       {/* Hidden full-size renderer for single-slide export */}
-      <div style={{ position: 'fixed', left: -9999, top: -9999, visibility: 'hidden', pointerEvents: 'none' }}>
+      <div style={{ position: 'fixed', left: -9999, top: -9999, opacity: 0, pointerEvents: 'none' }}>
         <SlideRenderer ref={singleRef} slide={slide} aspectRatio={aspectRatio} />
       </div>
 
