@@ -25,6 +25,11 @@ import PhotoEssayTemplate  from '@/components/magazine/templates/PhotoEssayTempl
 import Story2Template      from '@/components/magazine/templates/Story2Template';
 import TextOnlyTemplate    from '@/components/magazine/templates/TextOnlyTemplate';
 import SplitTemplate       from '@/components/magazine/templates/SplitTemplate';
+import CoverTemplate       from '@/components/magazine/templates/CoverTemplate';
+import TitleCardTemplate   from '@/components/magazine/templates/TitleCardTemplate';
+import SidebarTemplate     from '@/components/magazine/templates/SidebarTemplate';
+import DirectoryTemplate   from '@/components/magazine/templates/DirectoryTemplate';
+import PullQuoteTemplate   from '@/components/magazine/templates/PullQuoteTemplate';
 import type { ArticlePreviewData } from '@/components/magazine/templates/shared';
 import { TEMPLATE_PHOTO_COUNT } from '@/components/magazine/templates/shared';
 
@@ -59,6 +64,11 @@ const TEMPLATE_META: { key: string; label: string; desc: string; photos: number 
   { key: 'story-2',      label: 'Story-2',      desc: '사진 2장+본문',    photos: 2 },
   { key: 'text-only',    label: 'Essay',        desc: '사진 없는 에세이', photos: 0 },
   { key: 'split',        label: 'Split',        desc: '좌우 분할',        photos: 3 },
+  { key: 'cover',        label: 'Cover',        desc: '풀 블리드 표지',   photos: 1 },
+  { key: 'title-card',   label: 'Title Card',   desc: '여백 타이포',      photos: 0 },
+  { key: 'sidebar',      label: 'Sidebar',      desc: '본문+사이드바',    photos: 0 },
+  { key: 'directory',    label: 'Directory',    desc: '3단 목차',         photos: 0 },
+  { key: 'pull-quote',   label: 'Pull Quote',   desc: '인용구 페이지',    photos: 0 },
 ];
 
 const STATUS_CONFIG: Record<ArticleStatus, { label: string; bg: string; color: string }> = {
@@ -112,6 +122,11 @@ function renderTemplate(
     case 'story-2':     return <Story2Template     {...props} />;
     case 'text-only':   return <TextOnlyTemplate   {...props} />;
     case 'split':       return <SplitTemplate      {...props} />;
+    case 'cover':       return <CoverTemplate      {...props} />;
+    case 'title-card':  return <TitleCardTemplate  {...props} />;
+    case 'sidebar':     return <SidebarTemplate    {...props} />;
+    case 'directory':   return <DirectoryTemplate  {...props} />;
+    case 'pull-quote':  return <PullQuoteTemplate  {...props} />;
     default:            return <ClassicTemplate    {...props} />;
   }
 }
@@ -1238,6 +1253,66 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
       {line('45%', '2px', '#9CA3AF')}
       {line('85%', '3px', '#D1D5DB')}
       {line('90%')}{line('80%')}{line('90%')}{line('75%')}{line('85%')}
+    </div>
+  );
+  if (tplKey === 'cover') return (
+    <div style={{ ...style, padding: 0, position: 'relative' }}>
+      <div style={{ position: 'absolute', inset: 0, background: '#374151', borderRadius: '2px' }} />
+      <div style={{ position: 'absolute', top: '6px', left: '7px', fontSize: '9px', fontWeight: 900, color: 'white', letterSpacing: '1px' }}>MHJ</div>
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent 55%)', borderRadius: '2px' }} />
+      <div style={{ position: 'absolute', left: '7px', right: '7px', bottom: '6px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {line('70%', '4px', 'rgba(255,255,255,0.9)')}
+        {line('50%', '2px', 'rgba(255,255,255,0.6)')}
+      </div>
+    </div>
+  );
+  if (tplKey === 'title-card') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '4px', justifyContent: 'center', alignItems: 'center' }}>
+      {line('30%', '2px', '#D1D5DB')}
+      <div style={{ height: '3px' }} />
+      {line('60%', '4px', '#374151')}
+      {line('70%', '4px', '#374151')}
+      <div style={{ height: '2px' }} />
+      {line('55%', '2px', '#D1D5DB')}
+      <div style={{ width: '12px', height: '1px', background: '#9CA3AF', margin: '3px 0' }} />
+      {line('25%', '2px', '#D1D5DB')}
+    </div>
+  );
+  if (tplKey === 'sidebar') return (
+    <div style={{ ...style, flexDirection: 'row', gap: '4px' }}>
+      <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+        {line('80%', '3px', '#D1D5DB')}
+        {line('95%')}{line('85%')}{line('90%')}{line('70%')}
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center', background: '#F3F1EC', borderLeft: '2px solid #9CA3AF', padding: '3px' }}>
+        {line('70%', '2px', '#9CA3AF')}
+        {line('90%')}{line('75%')}{line('85%')}
+      </div>
+    </div>
+  );
+  if (tplKey === 'directory') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '4px' }}>
+      {line('40%', '3px', '#374151')}
+      {line('25%', '1px', '#9CA3AF')}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+        {[0,1,2].map(i => (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+            <div style={{ fontSize: '8px', color: '#9CA3AF', fontStyle: 'italic', fontWeight: 900 }}>0{i+1}</div>
+            {line('90%', '2px', '#374151')}
+            {line('70%', '1px', '#D1D5DB')}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  if (tplKey === 'pull-quote') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '3px', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+      <span style={{ position: 'absolute', top: '4px', left: '10px', fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: '28px', color: '#9CA3AF', opacity: 0.4, lineHeight: 1 }}>“</span>
+      {line('70%', '4px', '#374151')}
+      {line('85%', '4px', '#374151')}
+      {line('55%', '4px', '#374151')}
+      <div style={{ height: '4px' }} />
+      {line('25%', '2px', '#9CA3AF')}
     </div>
   );
   /* split */

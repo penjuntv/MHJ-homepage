@@ -1,5 +1,11 @@
 'use client';
 import { useId } from 'react';
+import CoverTemplate from './templates/CoverTemplate';
+import TitleCardTemplate from './templates/TitleCardTemplate';
+import SidebarTemplate from './templates/SidebarTemplate';
+import DirectoryTemplate from './templates/DirectoryTemplate';
+import PullQuoteTemplate from './templates/PullQuoteTemplate';
+import type { ArticlePreviewData } from './templates/shared';
 
 export interface ArticlePageRendererProps {
   template?: string | null;
@@ -12,6 +18,9 @@ export interface ArticlePageRendererProps {
   bgColor?: string;
   hideTitle?: boolean;
 }
+
+/* v2 신규 템플릿 목록 — templates/*.tsx 단일 구현을 사용 */
+const V2_TEMPLATES = new Set(['cover', 'title-card', 'sidebar', 'directory', 'pull-quote']);
 
 function stripHtmlLength(html: string): number {
   return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().length;
@@ -31,6 +40,25 @@ export default function ArticlePageRenderer({
   const uid = useId().replace(/:/g, 'd');
   const tpl = template ?? 'classic';
   const hasImages = images.length > 0;
+
+  /* ─── v2 신규 템플릿(cover/title-card/sidebar/directory/pull-quote): 단일 구현 ─── */
+  if (V2_TEMPLATES.has(tpl)) {
+    const article: ArticlePreviewData = {
+      title: title ?? '',
+      author: author ?? '',
+      content,
+      article_images: images,
+      image_captions: captions,
+      image_url: images[0] ?? '',
+      template: tpl,
+    };
+    const props = { article, accentColor, bgColor, hideTitle };
+    if (tpl === 'cover')       return <CoverTemplate      {...props} />;
+    if (tpl === 'title-card')  return <TitleCardTemplate  {...props} />;
+    if (tpl === 'sidebar')     return <SidebarTemplate    {...props} />;
+    if (tpl === 'directory')   return <DirectoryTemplate  {...props} />;
+    if (tpl === 'pull-quote')  return <PullQuoteTemplate  {...props} />;
+  }
 
   /* ── 갤러리 모드 감지: 이미지 3장 이상 + content 200자 미만 ── */
   const contentLen = stripHtmlLength(content);
