@@ -8,6 +8,7 @@ import DownloadBtn from '@/components/DownloadBtn';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
+import MagazinePage from '@/components/magazine/MagazinePage';
 import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
 import MagazineReadingMode from '@/components/magazine/MagazineReadingMode';
 import { supabase } from '@/lib/supabase-browser';
@@ -284,18 +285,20 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={article.pdf_url} alt={article.title} style={{ width: '100%', display: 'block', maxHeight: '55vh', objectFit: 'contain', background: '#F5F0EB' }} />
               ) : (
-                <div style={{ width: 420, minHeight: 594, margin: '0 auto', background: bgColor }}>
-                  <ArticlePageRenderer
-                    template={article.template ?? 'classic'}
-                    title={article.title}
-                    author={article.author}
-                    content={article.content}
-                    images={(article.article_images ?? []).filter(Boolean) as string[]}
-                    captions={((article as Article & { image_captions?: string[] }).image_captions ?? [])}
-                    accentColor={accentColor}
-                    bgColor={bgColor}
-                    hideTitle={false}
-                  />
+                <div style={{ width: '100%', maxWidth: 420, margin: '0 auto' }}>
+                  <MagazinePage bgColor={bgColor}>
+                    <ArticlePageRenderer
+                      template={article.template ?? 'classic'}
+                      title={article.title}
+                      author={article.author}
+                      content={article.content}
+                      images={(article.article_images ?? []).filter(Boolean) as string[]}
+                      captions={((article as Article & { image_captions?: string[] }).image_captions ?? [])}
+                      accentColor={accentColor}
+                      bgColor={bgColor}
+                      hideTitle={false}
+                    />
+                  </MagazinePage>
                 </div>
               )}
             </>
@@ -306,18 +309,20 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
             const pg = extraPages[currentPage - 2];
             if (!pg) return null;
             return (
-              <div style={{ width: 420, minHeight: 594, margin: '0 auto', background: bgColor }}>
-                <ArticlePageRenderer
-                  template={pg.template ?? article.template ?? 'classic'}
-                  title={article.title}
-                  author={article.author}
-                  content={pg.content}
-                  images={(pg.images ?? []).filter(Boolean) as string[]}
-                  captions={pg.captions ?? []}
-                  accentColor={accentColor}
-                  bgColor={bgColor}
-                  hideTitle={true}
-                />
+              <div style={{ width: '100%', maxWidth: 420, margin: '0 auto' }}>
+                <MagazinePage bgColor={bgColor}>
+                  <ArticlePageRenderer
+                    template={pg.template ?? article.template ?? 'classic'}
+                    title={article.title}
+                    author={article.author}
+                    content={pg.content}
+                    images={(pg.images ?? []).filter(Boolean) as string[]}
+                    captions={pg.captions ?? []}
+                    accentColor={accentColor}
+                    bgColor={bgColor}
+                    hideTitle={true}
+                  />
+                </MagazinePage>
               </div>
             );
           })()}

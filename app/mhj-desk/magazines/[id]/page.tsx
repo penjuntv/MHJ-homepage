@@ -17,6 +17,7 @@ import { ACCENT_PRESETS, COVER_FILTERS, DEFAULT_CONTRIBUTORS } from '@/lib/magaz
 import ImageCropModal from '@/components/admin/ImageCropModal';
 import CoverPreview from '@/components/magazine/CoverPreview';
 import TocPreview from '@/components/magazine/TocPreview';
+import MagazinePage from '@/components/magazine/MagazinePage';
 import DownloadBtn from '@/components/DownloadBtn';
 import PhotoHeroTemplate   from '@/components/magazine/templates/PhotoHeroTemplate';
 import ClassicTemplate     from '@/components/magazine/templates/ClassicTemplate';
@@ -904,26 +905,30 @@ export default function MagazineDetailPage() {
 
                   {/* 현재 포커스 페이지 미리보기 (템플릿 기반) */}
                   {focusedPageIdx === null ? (
-                    <div ref={previewDivRef} style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden', background: 'white' }}>
-                      {renderTemplate(inlineForm.template, {
-                        title: inlineForm.title,
-                        author: inlineForm.author,
-                        content: inlineForm.content,
-                        article_images: (inlineForm.article_images ?? []).filter(Boolean),
-                        image_url: '',
-                        template: inlineForm.template,
-                      } as ArticlePreviewData, accentCol, bgCol)}
+                    <div ref={previewDivRef} style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden' }}>
+                      <MagazinePage bgColor={bgCol}>
+                        {renderTemplate(inlineForm.template, {
+                          title: inlineForm.title,
+                          author: inlineForm.author,
+                          content: inlineForm.content,
+                          article_images: (inlineForm.article_images ?? []).filter(Boolean),
+                          image_url: '',
+                          template: inlineForm.template,
+                        } as ArticlePreviewData, accentCol, bgCol)}
+                      </MagazinePage>
                     </div>
                   ) : focusedExtraPage ? (
-                    <div style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden', background: 'white' }}>
-                      {renderTemplate(focusedExtraPage.template ?? inlineForm.template, {
-                        title: inlineForm.title,
-                        author: inlineForm.author,
-                        content: focusedExtraPage.content,
-                        article_images: (focusedExtraPage.images ?? []).filter(Boolean),
-                        image_url: '',
-                        template: focusedExtraPage.template ?? inlineForm.template,
-                      } as ArticlePreviewData, accentCol, bgCol, true)}
+                    <div style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden' }}>
+                      <MagazinePage bgColor={bgCol}>
+                        {renderTemplate(focusedExtraPage.template ?? inlineForm.template, {
+                          title: inlineForm.title,
+                          author: inlineForm.author,
+                          content: focusedExtraPage.content,
+                          article_images: (focusedExtraPage.images ?? []).filter(Boolean),
+                          image_url: '',
+                          template: focusedExtraPage.template ?? inlineForm.template,
+                        } as ArticlePreviewData, accentCol, bgCol, true)}
+                      </MagazinePage>
                     </div>
                   ) : null}
 
@@ -1003,7 +1008,11 @@ export default function MagazineDetailPage() {
             return {
               label: `P.${idx + 1} · ${article.author}`,
               artId: article.id,
-              content: renderTemplate(tpl, artData, accentCol, bgCol),
+              content: (
+                <MagazinePage bgColor={bgCol}>
+                  {renderTemplate(tpl, artData, accentCol, bgCol)}
+                </MagazinePage>
+              ),
             };
           }),
         ];

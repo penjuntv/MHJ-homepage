@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Heart, Share2, List } from 'lucide-react';
 import { supabase } from '@/lib/supabase-browser';
 import ArticlePageRenderer from './ArticlePageRenderer';
+import MagazinePage from './MagazinePage';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
 
 interface PageItem {
@@ -30,35 +31,38 @@ function CoverPage({ magazine }: { magazine: Magazine }) {
   const subColor = light ? 'rgba(58,32,0,0.45)' : 'rgba(255,255,255,0.45)';
 
   return (
-    <div style={{
-      background: bgColor, padding: '48px 40px',
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      gap: 8, textAlign: 'center',
-    }}>
-      <span style={{ fontFamily: "'Playfair Display',serif", fontStyle: 'italic', fontSize: 13, letterSpacing: 3, color: subColor }}>the</span>
-      <div style={{ width: 48, height: 1, background: textColor, opacity: 0.2, margin: '4px auto' }} />
-      <span style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: textColor }}>MHJ</span>
-      <span style={{ fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: subColor }}>My Mairangi Journal</span>
-      <div style={{ width: 48, height: 1, background: textColor, opacity: 0.2, margin: '8px auto' }} />
+    <MagazinePage bgColor={bgColor}>
+      <div style={{
+        width: '100%', height: '100%',
+        padding: '48px 40px', boxSizing: 'border-box',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        gap: 8, textAlign: 'center',
+      }}>
+        <span style={{ fontFamily: "'Playfair Display',serif", fontStyle: 'italic', fontSize: 13, letterSpacing: 3, color: subColor }}>the</span>
+        <div style={{ width: 48, height: 1, background: textColor, opacity: 0.2, margin: '4px auto' }} />
+        <span style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: textColor }}>MHJ</span>
+        <span style={{ fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: subColor }}>My Mairangi Journal</span>
+        <div style={{ width: 48, height: 1, background: textColor, opacity: 0.2, margin: '8px auto' }} />
 
-      {magazine.image_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={magazine.image_url}
-          alt={magazine.title}
-          style={{ width: '72%', maxWidth: 320, aspectRatio: '3/4', objectFit: 'cover', borderRadius: 8, margin: '12px 0' }}
-        />
-      )}
+        {magazine.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={magazine.image_url}
+            alt={magazine.title}
+            style={{ width: '72%', maxWidth: 320, aspectRatio: '3/4', objectFit: 'cover', borderRadius: 8, margin: '12px 0' }}
+          />
+        )}
 
-      <h2 style={{
-        fontFamily: "'Playfair Display',serif", fontWeight: 900,
-        fontSize: 'clamp(18px,3vw,24px)', letterSpacing: 4,
-        color: textColor, textTransform: 'uppercase', lineHeight: 1.2, margin: '8px 0 0',
-      }}>{magazine.title}</h2>
-      <span style={{ fontSize: 10, letterSpacing: 3, color: subColor, textTransform: 'uppercase' }}>
-        Mairangi Bay · Auckland · {magazine.month_name} {magazine.year}
-      </span>
-    </div>
+        <h2 style={{
+          fontFamily: "'Playfair Display',serif", fontWeight: 900,
+          fontSize: 'clamp(18px,3vw,24px)', letterSpacing: 4,
+          color: textColor, textTransform: 'uppercase', lineHeight: 1.2, margin: '8px 0 0',
+        }}>{magazine.title}</h2>
+        <span style={{ fontSize: 10, letterSpacing: 3, color: subColor, textTransform: 'uppercase' }}>
+          Mairangi Bay · Auckland · {magazine.month_name} {magazine.year}
+        </span>
+      </div>
+    </MagazinePage>
   );
 }
 
@@ -75,7 +79,8 @@ function TocPage({ magazine, articles, onGoToArticle }: {
   const lineColor = light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
 
   return (
-    <div style={{ background: bgColor, padding: '40px 36px' }}>
+    <MagazinePage bgColor={bgColor}>
+      <div style={{ width: '100%', height: '100%', padding: '40px 36px', boxSizing: 'border-box', overflow: 'hidden' }}>
       <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: subColor, margin: '0 0 6px' }}>Contents</p>
       <p style={{
         fontFamily: "'Playfair Display',serif", fontSize: 'clamp(18px,3vw,24px)',
@@ -118,7 +123,8 @@ function TocPage({ magazine, articles, onGoToArticle }: {
       <p style={{ fontSize: 9, color: subColor, letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center', marginTop: 24 }}>
         The MHJ · {magazine.month_name} {magazine.year}
       </p>
-    </div>
+      </div>
+    </MagazinePage>
   );
 }
 
@@ -300,23 +306,25 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
       const isExtra = p.type === 'extra' && !!pg;
 
       return (
-        <ArticlePageRenderer
-          template={isExtra ? (pg.template ?? art.template ?? 'classic') : (art.template ?? 'classic')}
-          title={isExtra ? undefined : art.title}
-          author={art.author}
-          content={isExtra ? pg.content : art.content}
-          images={isExtra
-            ? ((pg.images ?? []).filter(Boolean) as string[])
-            : ((art.article_images ?? []).filter(Boolean) as string[])
-          }
-          captions={isExtra
-            ? (pg.captions ?? [])
-            : ((art as Article & { image_captions?: string[] }).image_captions ?? [])
-          }
-          accentColor={accentColor}
-          bgColor={bgColor}
-          hideTitle={isExtra}
-        />
+        <MagazinePage bgColor={bgColor}>
+          <ArticlePageRenderer
+            template={isExtra ? (pg.template ?? art.template ?? 'classic') : (art.template ?? 'classic')}
+            title={isExtra ? undefined : art.title}
+            author={art.author}
+            content={isExtra ? pg.content : art.content}
+            images={isExtra
+              ? ((pg.images ?? []).filter(Boolean) as string[])
+              : ((art.article_images ?? []).filter(Boolean) as string[])
+            }
+            captions={isExtra
+              ? (pg.captions ?? [])
+              : ((art as Article & { image_captions?: string[] }).image_captions ?? [])
+            }
+            accentColor={accentColor}
+            bgColor={bgColor}
+            hideTitle={isExtra}
+          />
+        </MagazinePage>
       );
     }
 
@@ -510,7 +518,11 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
 
       {/* ── 페이지 캔버스 ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 20px 16px' }}>
-        <div style={{ width: '100%', maxWidth: 680, position: 'relative' }}>
+        <div style={{
+          width: '100%',
+          maxWidth: 'min(620px, calc((100vh - 200px) * 42 / 55))',
+          position: 'relative',
+        }}>
 
           {/* 좌 화살표 (캔버스 왼쪽 바깥) */}
           <button
@@ -527,23 +539,21 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
               color: isFirst ? '#CBD5E1' : '#4A3F35',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.2s',
+              zIndex: 3,
             }}
           >
             <ChevronLeft size={18} />
           </button>
 
-          {/* 페이지 본체 */}
+          {/* 페이지 본체 — MagazinePage가 aspect-ratio 42:55 + overflow hidden을 담당 */}
           <div
             ref={pageRef}
             key={`page-${currentPage}-${direction}`}
             style={{
               width: '100%',
-              background: bgColor,
               borderRadius: 12,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.06)',
               overflow: 'hidden',
-              maxHeight: 'calc(100vh - 200px)',
-              overflowY: 'auto',
               animation: direction === 'next'
                 ? 'spreadSlideInRight 0.28s ease'
                 : 'spreadSlideInLeft 0.28s ease',
