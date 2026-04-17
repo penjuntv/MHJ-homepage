@@ -120,7 +120,8 @@ function renderTemplate(
     case 'photo-hero':  return <PhotoHeroTemplate  {...props} />;
     case 'photo-essay': return <PhotoEssayTemplate {...props} />;
     case 'story-2':     return <Story2Template     {...props} />;
-    case 'text-only':   return <TextOnlyTemplate   {...props} />;
+    case 'text-only':
+    case 'essay':       return <TextOnlyTemplate   {...props} />;
     case 'split':       return <SplitTemplate      {...props} />;
     case 'cover':       return <CoverTemplate      {...props} />;
     case 'title-card':  return <TitleCardTemplate  {...props} />;
