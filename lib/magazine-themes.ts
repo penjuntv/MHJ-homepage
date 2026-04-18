@@ -48,3 +48,14 @@ export function getFilterCss(key: string): string {
 
 // 기본 기여자
 export const DEFAULT_CONTRIBUTORS = ['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'] as const;
+
+// 과월호 PNG 시리즈 이슈 목록 —
+// Yussi가 기사별 PNG 시리즈로 올린 이슈들. 이 이슈들은 기사를 template 렌더링
+// 대신 article_images[] PNG를 직접 이미지 뷰어로 표시한다.
+// (이슈 판정은 content 길이가 아닌 magazine_id 기준)
+export const LEGACY_PNG_ISSUES = ['2025-12', '2026-01'] as const;
+
+export function isLegacyPngIssue(magazineId: string | null | undefined): boolean {
+  if (!magazineId) return false;
+  return (LEGACY_PNG_ISSUES as readonly string[]).includes(magazineId);
+}

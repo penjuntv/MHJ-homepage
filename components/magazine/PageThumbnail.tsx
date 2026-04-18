@@ -6,6 +6,7 @@ import TocPreview from './TocPreview';
 import ArticlePageRenderer from './ArticlePageRenderer';
 import type { Magazine, Article } from '@/lib/types';
 import type { StyleOverrides } from './templates/shared';
+import { isLegacyPngIssue } from '@/lib/magazine-themes';
 
 export type PageThumbnailType = 'cover' | 'toc' | 'article';
 
@@ -50,6 +51,43 @@ export default function PageThumbnail({
   }, [pageType]);
 
   const bg = magazine.bg_color ?? '#FDFCFA';
+  const isLegacyPng = isLegacyPngIssue(magazine.id);
+
+  // Legacy PNG 이슈 (2025-12, 2026-01): 기사 썸네일은 article_images[0] 이미지를
+  // 직접 object-fit: cover로 렌더. ArticlePageRenderer로 template 렌더링하지 않는다.
+  if (pageType === 'article' && isLegacyPng) {
+    const src =
+      (article?.article_images ?? []).filter(Boolean)[0] ??
+      article?.image_url ??
+      '';
+    return (
+      <div
+        ref={wrapRef}
+        style={{
+          aspectRatio: '42 / 55',
+          width: '100%',
+          overflow: 'hidden',
+          position: 'relative',
+          background: bg,
+          borderRadius: 2,
+        }}
+      >
+        {src ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={src}
+            alt={article?.title ?? ''}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div

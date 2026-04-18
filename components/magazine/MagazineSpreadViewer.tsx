@@ -8,11 +8,14 @@ import ArticlePageRenderer from './ArticlePageRenderer';
 import MagazinePage from './MagazinePage';
 import type { StyleOverrides } from './templates/shared';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
+import { isLegacyPngIssue } from '@/lib/magazine-themes';
 
 interface PageItem {
-  type: 'cover' | 'toc' | 'article' | 'extra';
+  type: 'cover' | 'toc' | 'article' | 'extra' | 'legacy-png';
   article?: Article;
   articlePage?: ArticlePage;
+  imageUrl?: string;
+  imageIndex?: number;  // 기사 내 PNG 인덱스 (0-based)
 }
 
 function isLightColor(hex: string): boolean {
@@ -162,6 +165,7 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
 
   const accentColor = magazine.accent_color || '#8A6B4F';
   const bgColor = magazine.bg_color || '#FDFCFA';
+  const isLegacyPng = isLegacyPngIssue(magazine.id);
 
   /* ─── pages 로드 ─── */
   useEffect(() => {
@@ -170,6 +174,32 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
       setPages([{ type: 'cover' }, { type: 'toc' }]);
       return;
     }
+
+    // Legacy PNG 이슈 (2025-12, 2026-01): 각 기사를 article_images[] 순서대로
+    // legacy-png 페이지로 확장. article_pages(extra)는 무시.
+    if (isLegacyPng) {
+      const flat: PageItem[] = [
+        { type: 'cover' },
+        { type: 'toc' },
+        ...sorted.flatMap((article): PageItem[] => {
+          const imgs = (article.article_images ?? []).filter(Boolean) as string[];
+          const list = imgs.length
+            ? imgs
+            : article.image_url
+              ? [article.image_url]
+              : [];
+          return list.map((src, i) => ({
+            type: 'legacy-png' as const,
+            article,
+            imageIndex: i,
+            imageUrl: src,
+          }));
+        }),
+      ];
+      setPages(flat);
+      return;
+    }
+
     supabase
       .from('article_pages')
       .select('*')
@@ -196,7 +226,7 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
         ];
         setPages(flat);
       });
-  }, [magazine.id, sorted]);
+  }, [magazine.id, sorted, isLegacyPng]);
 
   /* ─── URL ?page 초기화 (pages 로드 후) ─── */
   useEffect(() => {
@@ -355,12 +385,48 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
           magazine={magazine}
           articles={sorted}
           onGoToArticle={(idx) => {
+            const targetId = sorted[idx]?.id;
+            if (targetId == null) return;
             const articlePageIdx = pages.findIndex(
-              (pg, i) => i >= 2 && pg.type === 'article' && sorted.findIndex(a => a.id === pg.article?.id) === idx
+              (pg, i) =>
+                i >= 2 &&
+                (pg.type === 'article' || pg.type === 'legacy-png') &&
+                pg.article?.id === targetId
             );
             if (articlePageIdx >= 0) goToPage(articlePageIdx);
           }}
         />
+      );
+    }
+
+    if (p.type === 'legacy-png' && p.imageUrl) {
+      // 과월호 PNG 시리즈 — 이미지 한 장을 페이지 전체에 contain
+      return (
+        <MagazinePage bgColor={bgColor} showHeader={false} showFooter={false}>
+          <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: bgColor,
+            overflow: 'hidden',
+          }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={p.imageUrl}
+              alt={p.article?.title ?? ''}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          </div>
+        </MagazinePage>
       );
     }
 
@@ -559,7 +625,10 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
                   ))}
                   {sorted.map((art, idx) => {
                     const artPageIdx = pages.findIndex(
-                      (pg, i) => i >= 2 && pg.type === 'article' && pg.article?.id === art.id,
+                      (pg, i) =>
+                        i >= 2 &&
+                        (pg.type === 'article' || pg.type === 'legacy-png') &&
+                        pg.article?.id === art.id,
                     );
                     const isCurrent = pages[currentPage]?.article?.id === art.id;
                     return (
