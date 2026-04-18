@@ -296,7 +296,7 @@ const SHELF_CSS = `
   color: var(--spine-ink, #FDFCFA);
   opacity: 0.55;
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  /* ISO 6357 / BS 6738: top-to-bottom, 제목과 방향 통일 */
 }
 
 .shelf-book-badge {
