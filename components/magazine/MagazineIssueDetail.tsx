@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article } from '@/lib/types';
 import { ChevronLeft } from 'lucide-react';
+import PageThumbnail from './PageThumbnail';
 
 interface Props {
   magazine: Magazine;
@@ -155,7 +156,7 @@ const DETAIL_CSS = `
 
 .mid-thumb {
   position: relative;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 42 / 55;
   background: #FAF8F5;
   overflow: hidden;
 }
@@ -188,17 +189,6 @@ const DETAIL_CSS = `
   font-size: 12px; font-weight: 400;
   color: #9B9590;
   margin: 0;
-}
-
-.mid-thumb-placeholder {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #FAF8F5 0%, #EDE9E3 100%);
-  color: #9B9590;
-  font-family: "Playfair Display", serif;
-  font-style: italic;
-  font-size: 28px;
-  opacity: 0.5;
 }
 
 .mid-footer-cta {
@@ -309,9 +299,49 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
             </h2>
 
             <div className="mid-grid">
+              {/* Cover 페이지 썸네일 */}
+              <Link
+                href={`/magazine/${magazine.id}?page=1`}
+                className="mid-card"
+              >
+                <div className="mid-thumb">
+                  <PageThumbnail pageType="cover" magazine={magazine} />
+                </div>
+                <div className="mid-card-meta">
+                  <p
+                    className="mid-kicker"
+                    style={{ color: magazine.accent_color || '#8A6B4F' }}
+                  >
+                    Cover
+                  </p>
+                  <h3 className="mid-card-title">{magazine.title}</h3>
+                  <p className="mid-card-author">{magazine.month_name} {magazine.year}</p>
+                </div>
+              </Link>
+
+              {/* Contents (TOC) 페이지 썸네일 */}
+              <Link
+                href={`/magazine/${magazine.id}?page=2`}
+                className="mid-card"
+              >
+                <div className="mid-thumb">
+                  <PageThumbnail pageType="toc" magazine={magazine} articles={mainArticles} />
+                </div>
+                <div className="mid-card-meta">
+                  <p
+                    className="mid-kicker"
+                    style={{ color: magazine.accent_color || '#8A6B4F' }}
+                  >
+                    Contents
+                  </p>
+                  <h3 className="mid-card-title">Inside This Issue</h3>
+                  <p className="mid-card-author">{articleCount} article{articleCount !== 1 ? 's' : ''}</p>
+                </div>
+              </Link>
+
+              {/* 기사 페이지 썸네일 */}
               {mainArticles.map((art, i) => {
                 const pageNum = pageMap[art.id] ?? (3 + i);
-                const cover = (art.article_images ?? []).filter(Boolean)[0] ?? art.image_url ?? null;
                 return (
                   <Link
                     key={art.id}
@@ -319,19 +349,7 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
                     className="mid-card"
                   >
                     <div className="mid-thumb">
-                      {cover ? (
-                        <SafeImage
-                          src={cover}
-                          alt={art.title}
-                          fill
-                          sizes="(max-width: 599px) 100vw, (max-width: 959px) 50vw, 33vw"
-                          style={{ objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <div className="mid-thumb-placeholder">
-                          <span>{String(i + 1).padStart(2, '0')}</span>
-                        </div>
-                      )}
+                      <PageThumbnail pageType="article" magazine={magazine} article={art} />
                     </div>
                     <div className="mid-card-meta">
                       <p

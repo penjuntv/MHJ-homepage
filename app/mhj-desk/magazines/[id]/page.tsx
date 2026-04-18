@@ -1295,7 +1295,7 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
   const line = (w: string, h = '2px', bg = '#E5E7EB') => (
     <div style={{ height: h, background: bg, borderRadius: '1px', width: w, flexShrink: 0 }} />
   );
-  const style: React.CSSProperties = { display: 'flex', height: '100%', padding: '8px', boxSizing: 'border-box' };
+  const style: React.CSSProperties = { display: 'flex', height: '100%', padding: '5px', boxSizing: 'border-box' };
 
   if (tplKey === 'photo-hero') return (
     <div style={{ ...style, flexDirection: 'column', gap: '4px' }}>
@@ -1608,7 +1608,7 @@ function InlineForm({
             return (
               <button key={t.key} type="button" onClick={() => setForm({ template: t.key })}
                 style={{ padding: 0, borderRadius: '10px', cursor: 'pointer', overflow: 'hidden', border: selected ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: selected ? `${accentColor}10` : 'white', transition: 'background 0.15s, border-color 0.15s' }}>
-                <div style={{ height: '90px', overflow: 'hidden', background: selected ? 'white' : '#F8FAFC' }}>
+                <div style={{ aspectRatio: '42 / 55', overflow: 'hidden', background: selected ? 'white' : '#F8FAFC' }}>
                   <TemplateDiagram tplKey={t.key} />
                 </div>
                 <div style={{ padding: '6px 6px 7px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2px' }}>
