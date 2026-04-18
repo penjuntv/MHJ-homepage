@@ -172,6 +172,8 @@ export default function MagazineDetailPage() {
   const [formError, setFormError]          = useState('');
   const [uploadingContent, setUploadingContent] = useState(false);
   const [uploadingSlotIdx, setUploadingSlotIdx] = useState<number | null>(null);
+  const [cropSlotFile, setCropSlotFile] = useState<{ file: File; slotIdx: number } | null>(null);
+  const [cropPageSlotFile, setCropPageSlotFile] = useState<{ file: File; pageIdx: number; slotIdx: number } | null>(null);
 
   /* ─── 추가 페이지 (article_pages) ─── */
   const [articlePages, setArticlePages] = useState<ArticlePage[]>([]);
@@ -343,10 +345,11 @@ export default function MagazineDetailPage() {
     setUploadingContent(false);
   }
 
-  async function uploadArticleSlotImage(file: File, slotIdx: number) {
+  async function uploadArticleSlotImage(fileOrBlob: File | Blob, slotIdx: number, fileName?: string) {
     setUploadingSlotIdx(slotIdx);
-    const path = `articles/${Date.now()}_slot${slotIdx}.${file.name.split('.').pop()}`;
-    const { error } = await supabase.storage.from('images').upload(path, file);
+    const name = fileName ?? (fileOrBlob instanceof File ? fileOrBlob.name : 'slot.jpg');
+    const path = `articles/${Date.now()}_slot${slotIdx}.${name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, fileOrBlob);
     if (!error) {
       const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
       setInlineForm(p => {
@@ -417,10 +420,11 @@ export default function MagazineDetailPage() {
   }
 
   /* ─── 페이지 이미지 업로드 ─── */
-  async function uploadPageSlotImage(file: File, pageIdx: number, slotIdx: number) {
+  async function uploadPageSlotImage(fileOrBlob: File | Blob, pageIdx: number, slotIdx: number, fileName?: string) {
     setUploadingPageSlot({ pageIdx, slotIdx });
-    const path = `articles/${Date.now()}_page${pageIdx}_slot${slotIdx}.${file.name.split('.').pop()}`;
-    const { error } = await supabase.storage.from('images').upload(path, file);
+    const name = fileName ?? (fileOrBlob instanceof File ? fileOrBlob.name : 'slot.jpg');
+    const path = `articles/${Date.now()}_page${pageIdx}_slot${slotIdx}.${name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('images').upload(path, fileOrBlob);
     if (!error) {
       const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
       setArticlePages(prev => prev.map((p, i) => {
@@ -866,21 +870,25 @@ export default function MagazineDetailPage() {
                         />
                       </div>
                     )}
-                    {/* ─── 추가 페이지 섹션 ─── */}
+                    {/* ─── 추가 페이지 섹션 (기본 접힘) ─── */}
                     {isSelected && !inlineIsNew && (
-                      <ArticlePagesSection
-                        pages={articlePages}
-                        setPages={setArticlePages}
-                        saving={savingPages}
-                        onSave={saveArticlePages}
-                        uploadingSlot={uploadingPageSlot}
-                        onImageUpload={(pi, si) => {
-                          pendingPageSlot.current = { pageIdx: pi, slotIdx: si };
-                          pageSlotRef.current?.click();
-                        }}
-                        accentColor={accentCol}
-                        onFocusPage={setFocusedPageIdx}
-                      />
+                      <div style={{ marginTop: '10px' }}>
+                        <CollapsibleSection title={`추가 페이지 (${articlePages.length}장)`}>
+                          <ArticlePagesSection
+                            pages={articlePages}
+                            setPages={setArticlePages}
+                            saving={savingPages}
+                            onSave={saveArticlePages}
+                            uploadingSlot={uploadingPageSlot}
+                            onImageUpload={(pi, si) => {
+                              pendingPageSlot.current = { pageIdx: pi, slotIdx: si };
+                              pageSlotRef.current?.click();
+                            }}
+                            accentColor={accentCol}
+                            onFocusPage={setFocusedPageIdx}
+                          />
+                        </CollapsibleSection>
+                      </div>
                     )}
                   </div>
                 );
@@ -910,7 +918,7 @@ export default function MagazineDetailPage() {
           </div>
 
           {/* ─── 우: 실시간 프리뷰 (스티키, 현재 포커스 페이지만) ─── */}
-          <div className="article-preview-panel" style={{ position: 'sticky', top: '80px', overflowY: 'auto', maxHeight: 'calc(100vh - 100px)', minWidth: 0 }}>
+          <div className="article-preview-panel" style={{ position: 'sticky', top: '80px', minWidth: 0, width: '100%', maxWidth: 620, minHeight: 0, margin: '0 auto', alignSelf: 'start' }}>
             {inlineForm ? (() => {
               const totalPageCount = 1 + articlePages.length;
               const focusedExtraPage = focusedPageIdx !== null ? articlePages[focusedPageIdx] : null;
@@ -1143,9 +1151,9 @@ export default function MagazineDetailPage() {
       <input ref={extraImgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadExtraCoverImage(f); e.target.value = ''; }} />
       <input ref={contentFileRef} type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadContentFile(f); e.target.value = ''; }} />
       <input ref={slotImgRef} type="file" accept="image/*" style={{ display: 'none' }}
-        onChange={e => { const f = e.target.files?.[0]; if (f) uploadArticleSlotImage(f, pendingSlot.current); e.target.value = ''; }} />
+        onChange={e => { const f = e.target.files?.[0]; if (f) setCropSlotFile({ file: f, slotIdx: pendingSlot.current }); e.target.value = ''; }} />
       <input ref={pageSlotRef} type="file" accept="image/*" style={{ display: 'none' }}
-        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPageSlotImage(f, pendingPageSlot.current.pageIdx, pendingPageSlot.current.slotIdx); e.target.value = ''; }} />
+        onChange={e => { const f = e.target.files?.[0]; if (f) setCropPageSlotFile({ file: f, pageIdx: pendingPageSlot.current.pageIdx, slotIdx: pendingPageSlot.current.slotIdx }); e.target.value = ''; }} />
 
       {/* ─── 토스트 ─── */}
       {toast && (
@@ -1162,6 +1170,42 @@ export default function MagazineDetailPage() {
           onCropComplete={(blob, name) => { setCropCoverFile(null); uploadMagCover(blob, name); }}
           onSkip={(file) => { setCropCoverFile(null); uploadMagCover(file); }}
           onCancel={() => setCropCoverFile(null)}
+        />
+      )}
+
+      {cropSlotFile && (
+        <ImageCropModal
+          imageFile={cropSlotFile.file}
+          defaultAspect={16 / 10}
+          onCropComplete={(blob, name) => {
+            const slotIdx = cropSlotFile.slotIdx;
+            setCropSlotFile(null);
+            uploadArticleSlotImage(blob, slotIdx, name);
+          }}
+          onSkip={(file) => {
+            const slotIdx = cropSlotFile.slotIdx;
+            setCropSlotFile(null);
+            uploadArticleSlotImage(file, slotIdx);
+          }}
+          onCancel={() => setCropSlotFile(null)}
+        />
+      )}
+
+      {cropPageSlotFile && (
+        <ImageCropModal
+          imageFile={cropPageSlotFile.file}
+          defaultAspect={16 / 10}
+          onCropComplete={(blob, name) => {
+            const { pageIdx, slotIdx } = cropPageSlotFile;
+            setCropPageSlotFile(null);
+            uploadPageSlotImage(blob, pageIdx, slotIdx, name);
+          }}
+          onSkip={(file) => {
+            const { pageIdx, slotIdx } = cropPageSlotFile;
+            setCropPageSlotFile(null);
+            uploadPageSlotImage(file, pageIdx, slotIdx);
+          }}
+          onCancel={() => setCropPageSlotFile(null)}
         />
       )}
     </div>
@@ -1224,14 +1268,15 @@ function SpreadPage({ label, children, filename, onEdit, onPreview }: {
 /* ─── 템플릿 레이아웃 다이어그램 ─── */
 function TemplateDiagram({ tplKey }: { tplKey: string }) {
   const photo = (label: string, radius = '2px') => (
-    <div style={{ background: '#374151', borderRadius: radius, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-      <span style={{ fontSize: '9px', fontWeight: 900, color: 'white', lineHeight: 1 }}>{label}</span>
+    <div style={{ background: '#374151', borderRadius: radius, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px', width: '100%', height: '100%' }}>
+      <ImageIcon size={10} color="rgba(255,255,255,0.75)" strokeWidth={2} />
+      <span style={{ fontSize: '7px', fontWeight: 900, color: 'rgba(255,255,255,0.75)', lineHeight: 1 }}>{label}</span>
     </div>
   );
   const line = (w: string, h = '2px', bg = '#E5E7EB') => (
     <div style={{ height: h, background: bg, borderRadius: '1px', width: w, flexShrink: 0 }} />
   );
-  const style: React.CSSProperties = { display: 'flex', height: '100%', padding: '7px', boxSizing: 'border-box' };
+  const style: React.CSSProperties = { display: 'flex', height: '100%', padding: '8px', boxSizing: 'border-box' };
 
   if (tplKey === 'photo-hero') return (
     <div style={{ ...style, flexDirection: 'column', gap: '4px' }}>
@@ -1346,6 +1391,35 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
   );
 }
 
+/* ─── 접이식 섹션 헬퍼 ─── */
+function CollapsibleSection({
+  title, defaultOpen = false, children,
+}: {
+  title: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div style={{ border: '1px solid #F1F5F9', borderRadius: '10px', background: 'white', overflow: 'hidden' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '10px 14px', background: 'transparent', border: 'none', cursor: 'pointer',
+          fontSize: '10px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase',
+          color: '#1A1A1A',
+        }}
+      >
+        <span>{title}</span>
+        {open ? <ChevronUp size={14} color="#94A3B8" /> : <ChevronDown size={14} color="#94A3B8" />}
+      </button>
+      {open && <div style={{ padding: '4px 14px 14px', borderTop: '1px solid #F8FAFC' }}>{children}</div>}
+    </div>
+  );
+}
+
 /* ════════════════════════════════════════════
    인라인 편집 폼 컴포넌트
    ════════════════════════════════════════════ */
@@ -1386,24 +1460,27 @@ function InlineForm({
         </div>
       </div>
 
-      {/* 템플릿 선택 */}
-      <div>
-        <label style={labelStyle}>템플릿</label>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
-          {TEMPLATE_META.map(t => (
-            <button key={t.key} type="button" onClick={() => setForm({ template: t.key })}
-              style={{ padding: 0, borderRadius: '8px', cursor: 'pointer', overflow: 'hidden', border: form.template === t.key ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: 'white', transition: 'all 0.15s' }}>
-              <div style={{ height: '72px', overflow: 'hidden', background: '#F8FAFC' }}>
-                <TemplateDiagram tplKey={t.key} />
-              </div>
-              <div style={{ padding: '4px 6px', textAlign: 'center' }}>
-                <p style={{ fontSize: '8px', fontWeight: 900, color: form.template === t.key ? accentColor : '#94A3B8', margin: 0, textTransform: 'uppercase' }}>{t.label}</p>
-                <p style={{ fontSize: '7px', color: '#CBD5E1', margin: 0 }}>사진 {t.photos}장</p>
-              </div>
-            </button>
-          ))}
+      {/* 템플릿 선택 (기본 열림) */}
+      <CollapsibleSection title="템플릿" defaultOpen>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+          {TEMPLATE_META.map(t => {
+            const selected = form.template === t.key;
+            return (
+              <button key={t.key} type="button" onClick={() => setForm({ template: t.key })}
+                style={{ padding: 0, borderRadius: '10px', cursor: 'pointer', overflow: 'hidden', border: selected ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: selected ? `${accentColor}10` : 'white', transition: 'background 0.15s, border-color 0.15s' }}>
+                <div style={{ height: '90px', overflow: 'hidden', background: selected ? 'white' : '#F8FAFC' }}>
+                  <TemplateDiagram tplKey={t.key} />
+                </div>
+                <div style={{ padding: '6px 6px 7px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <p style={{ fontSize: '9px', fontWeight: 900, color: selected ? accentColor : '#1A1A1A', margin: 0, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.label}</p>
+                  <p style={{ fontSize: '8px', color: '#94A3B8', margin: 0, lineHeight: 1.3 }}>{t.desc}</p>
+                  <p style={{ fontSize: '7px', fontWeight: 700, color: '#CBD5E1', margin: 0, letterSpacing: '1px' }}>사진 {t.photos}장</p>
+                </div>
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </CollapsibleSection>
 
       {/* 제목 */}
       <div>
@@ -1469,12 +1546,12 @@ function InlineForm({
         </div>
       </div>
 
-      {/* 기사 사진 슬롯 */}
+      {/* 기사 사진 슬롯 (기본 열림) */}
       {photoCount > 0 && (
-        <div>
-          <label style={labelStyle}>
-            기사 사진 <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}>({(form.article_images ?? []).filter(Boolean).length}/{photoCount}장)</span>
-          </label>
+        <CollapsibleSection
+          title={`기사 사진 (${(form.article_images ?? []).filter(Boolean).length}/${photoCount})`}
+          defaultOpen
+        >
           <div style={{ display: 'grid', gridTemplateColumns: photoCount === 1 ? '1fr' : 'repeat(2, 1fr)', gap: '8px' }}>
             {Array.from({ length: photoCount }, (_, i) => {
               const src = form.article_images?.[i] ?? '';
@@ -1512,20 +1589,18 @@ function InlineForm({
               );
             })}
           </div>
-        </div>
+        </CollapsibleSection>
       )}
 
-      {/* 본문 TipTap */}
-      <div>
-        <label style={labelStyle}>텍스트 본문</label>
+      {/* 본문 TipTap (기본 접힘) */}
+      <CollapsibleSection title="텍스트 본문">
         <Suspense fallback={<div style={{ ...inputStyle, minHeight: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1' }}><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /></div>}>
           <TipTapEditor content={form.content} onChange={html => setForm({ content: html })} placeholder="기사 텍스트..." />
         </Suspense>
-      </div>
+      </CollapsibleSection>
 
-      {/* 콘텐츠 파일 */}
-      <div>
-        <label style={labelStyle}>콘텐츠 파일 <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#CBD5E1' }}>(이미지 or PDF)</span></label>
+      {/* 콘텐츠 파일 (기본 접힘) */}
+      <CollapsibleSection title="콘텐츠 파일 (이미지 / PDF)">
         <div onClick={onContentUpload} style={{ border: '2px dashed #F1F5F9', borderRadius: '10px', padding: '10px', textAlign: 'center', cursor: 'pointer', background: '#F8FAFC' }}>
           {form.pdf_url ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px' }}>
@@ -1549,7 +1624,7 @@ function InlineForm({
             </div>
           )}
         </div>
-      </div>
+      </CollapsibleSection>
 
       {/* 스타일 조정 패널 (접이식) */}
       <StyleOverridePanel

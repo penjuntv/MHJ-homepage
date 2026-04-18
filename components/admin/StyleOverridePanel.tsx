@@ -19,7 +19,7 @@ const BG_OPTIONS: { value: string | null; label: string; swatch: string }[] = [
 ];
 
 export default function StyleOverridePanel({ value, onChange, accentColor = '#8A6B4F' }: Props) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const patch = (p: Partial<StyleOverrides>) => {
     const next = { ...value, ...p };
