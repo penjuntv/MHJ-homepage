@@ -80,7 +80,6 @@ function TocPage({ magazine, articles, onGoToArticle }: {
   const light = isLightColor(bgColor);
   const textColor = light ? '#3a2000' : '#f0f0f0';
   const subColor = light ? 'rgba(58,32,0,0.45)' : 'rgba(255,255,255,0.45)';
-  const lineColor = light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
 
   return (
     <MagazinePage bgColor={bgColor} showHeader={false} showFooter={false}>
