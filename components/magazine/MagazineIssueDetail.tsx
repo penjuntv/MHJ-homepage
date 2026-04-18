@@ -119,6 +119,22 @@ const DETAIL_CSS = `
 }
 .mid-cta:hover { opacity: 0.88; }
 
+.mid-pdf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #9B9590;
+  text-decoration: none;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.mid-pdf-link:hover { color: #1A1A1A; text-decoration: underline; }
+
 .mid-section-label {
   font-family: "Inter", sans-serif;
   font-size: 11px; font-weight: 600;
@@ -288,6 +304,16 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
             <Link href={`/magazine/${magazine.id}?page=1`} className="mid-cta">
               Start Reading →
             </Link>
+            {magazine.pdf_url && (
+              <a
+                href={magazine.pdf_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mid-pdf-link"
+              >
+                ↓ Download Full Issue (PDF)
+              </a>
+            )}
           </div>
         </section>
 

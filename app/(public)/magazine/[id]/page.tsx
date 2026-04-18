@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
 import MagazineViewer from '@/components/MagazineViewer';
+import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
 import MagazineIssueDetail from '@/components/magazine/MagazineIssueDetail';
+import { isLegacyPngIssue } from '@/lib/magazine-themes';
 
 interface Props {
   params: { id: string };
@@ -128,7 +130,10 @@ export default async function MagazineIssuePage({ params, searchParams }: Props)
     })),
   };
 
-  const isArticlesMode = !magazine.pdf_url && articles.length > 0;
+  const isLegacy = isLegacyPngIssue(magazine.id);
+  // Legacy PNG 이슈는 pdf_url이 있어도 2월/3월호와 동일한 articles 플로우로 취급
+  // (이슈 상세 → SpreadViewer). PDF 접근은 MagazineIssueDetail의 다운로드 링크로 유지.
+  const isArticlesMode = (isLegacy || !magazine.pdf_url) && articles.length > 0;
   const hasPageParam = typeof searchParams?.page !== 'undefined';
 
   /* 이슈 상세 페이지 (articles 모드 + ?page 없음) */
@@ -139,6 +144,17 @@ export default async function MagazineIssuePage({ params, searchParams }: Props)
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
         <MagazineIssueDetail magazine={magazine} articles={articles} pageMap={pageMap} />
+      </>
+    );
+  }
+
+  /* Legacy PNG + ?page → SpreadViewer 직결 (MagazineViewer의 PDF 모드 우회, 중간 모달 제거) */
+  if (isLegacy && articles.length > 0) {
+    return (
+      <>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+        <MagazineSpreadViewer magazine={magazine} articles={articles} />
       </>
     );
   }
