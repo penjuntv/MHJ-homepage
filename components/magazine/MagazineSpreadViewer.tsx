@@ -98,28 +98,29 @@ function TocPage({ magazine, articles, onGoToArticle }: {
             type="button"
             onClick={() => onGoToArticle(i)}
             style={{
-              display: 'flex', alignItems: 'baseline', gap: 8,
-              padding: '11px 0',
-              borderBottom: `0.5px solid ${lineColor}`,
+              display: 'flex', alignItems: 'baseline', gap: 12,
+              padding: '14px 0',
               background: 'none', border: 'none',
-              borderBottomWidth: '0.5px', borderBottomStyle: 'solid',
-              borderBottomColor: lineColor,
-              cursor: 'pointer', textAlign: 'left',
+              cursor: 'pointer', textAlign: 'left', width: '100%',
               transition: 'opacity 0.15s',
             }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.7'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
           >
-            <span style={{
-              fontFamily: "'Playfair Display',serif", fontSize: 13,
-              fontWeight: 900, minWidth: 28, color: light ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
-            }}>
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <span style={{ flex: 1, borderBottom: `1px dotted ${lineColor}`, marginBottom: 3 }} />
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: textColor, lineHeight: 1.3 }}>{a.title}</div>
-              <div style={{ fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: subColor, marginTop: 2 }}>{a.author}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontFamily: "'Playfair Display',serif",
+                fontSize: 17, fontWeight: 700,
+                color: textColor,
+                lineHeight: 1.25,
+                letterSpacing: '-0.01em',
+                marginBottom: 4,
+              }}>{a.title}</div>
+              <div style={{
+                fontSize: 10, fontWeight: 600,
+                letterSpacing: 2, textTransform: 'uppercase',
+                color: subColor,
+              }}>{a.author}</div>
             </div>
           </button>
         ))}
