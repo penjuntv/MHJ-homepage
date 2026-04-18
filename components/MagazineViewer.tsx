@@ -10,7 +10,6 @@ import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import MagazinePage from '@/components/magazine/MagazinePage';
 import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
-import MagazineReadingMode from '@/components/magazine/MagazineReadingMode';
 import { supabase } from '@/lib/supabase-browser';
 import { trackEvent } from '@/lib/analytics';
 
@@ -526,31 +525,12 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
 /* ════════════════════════════════════════════
    메인 MagazineViewer
    ════════════════════════════════════════════ */
-/* ── 듀얼 뷰어: 데스크톱 스프레드 / 모바일 읽기 모드 ── */
-function DualMagazineViewer({ magazine, articles }: Props) {
-  const [isMobile, setIsMobile] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  // SSR: 마운트 전에는 데스크톱 기본값으로 렌더링
-  if (!mounted) return <MagazineSpreadViewer magazine={magazine} articles={articles} />;
-  if (isMobile) return <MagazineReadingMode magazine={magazine} articles={articles} />;
-  return <MagazineSpreadViewer magazine={magazine} articles={articles} />;
-}
-
 export default function MagazineViewer({ magazine, articles }: Props) {
   const mode = getMode(magazine, articles);
 
-  /* articles 모드 → 새 듀얼 뷰어 (데스크톱: 스프레드, 모바일: 읽기 모드) */
+  /* articles 모드 → 데스크톱/모바일 공통 페이지 넘김 뷰어 */
   if (mode === 'articles') {
-    return <DualMagazineViewer magazine={magazine} articles={articles} />;
+    return <MagazineSpreadViewer magazine={magazine} articles={articles} />;
   }
 
   return <MagazineViewerLegacy magazine={magazine} articles={articles} />;

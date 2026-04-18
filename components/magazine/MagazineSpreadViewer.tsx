@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Heart, Share2, List } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart, Share2, List, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase-browser';
 import ArticlePageRenderer from './ArticlePageRenderer';
 import MagazinePage from './MagazinePage';
@@ -31,7 +31,7 @@ function CoverPage({ magazine }: { magazine: Magazine }) {
   const subColor = light ? 'rgba(58,32,0,0.45)' : 'rgba(255,255,255,0.45)';
 
   return (
-    <MagazinePage bgColor={bgColor}>
+    <MagazinePage bgColor={bgColor} showHeader={false} showFooter={false}>
       <div style={{
         width: '100%', height: '100%',
         padding: '48px 40px', boxSizing: 'border-box',
@@ -79,7 +79,7 @@ function TocPage({ magazine, articles, onGoToArticle }: {
   const lineColor = light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
 
   return (
-    <MagazinePage bgColor={bgColor}>
+    <MagazinePage bgColor={bgColor} showHeader={false} showFooter={false}>
       <div style={{ width: '100%', height: '100%', padding: '40px 36px', boxSizing: 'border-box', overflow: 'hidden' }}>
       <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: subColor, margin: '0 0 6px' }}>Contents</p>
       <p style={{
@@ -136,9 +136,15 @@ interface Props {
   articles: Article[];
 }
 
+const SWIPE_THRESHOLD = 0.22;   // 페이지 너비의 22% 이상 스와이프 시 넘김
+const AUTO_HIDE_MS = 3000;
+
 export default function MagazineSpreadViewer({ magazine, articles }: Props) {
   const router = useRouter();
-  const sorted = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const sorted = useMemo(
+    () => [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+    [articles],
+  );
 
   const [pages, setPages] = useState<PageItem[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -146,12 +152,17 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
   const [tocOpen, setTocOpen] = useState(false);
   const [liked, setLiked] = useState(false);
   const [showToast, setShowToast] = useState<string | null>(null);
-  const pageRef = useRef<HTMLDivElement>(null);
+  const [uiVisible, setUiVisible] = useState(true);
 
-  const accentColor = magazine.accent_color || '#2C1F14';
-  const bgColor = magazine.bg_color || '#FDFBF8';
+  const pageBodyRef = useRef<HTMLDivElement>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchCurrentX = useRef<number | null>(null);
 
-  /* article_pages 로드 후 pages 배열 구성 */
+  const accentColor = magazine.accent_color || '#8A6B4F';
+  const bgColor = magazine.bg_color || '#FDFCFA';
+
+  /* ─── pages 로드 ─── */
   useEffect(() => {
     const ids = sorted.map(a => a.id);
     if (ids.length === 0) {
@@ -184,9 +195,21 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
         ];
         setPages(flat);
       });
-  }, [magazine.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [magazine.id, sorted]);
 
-  /* 좋아요 로드 */
+  /* ─── URL ?page 초기화 (pages 로드 후) ─── */
+  useEffect(() => {
+    if (pages.length === 0) return;
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const p = parseInt(params.get('page') ?? '1', 10);
+    if (Number.isFinite(p) && p >= 1) {
+      const clamped = Math.min(Math.max(p - 1, 0), pages.length - 1);
+      setCurrentPage(clamped);
+    }
+  }, [pages.length]);
+
+  /* ─── 좋아요 로드 ─── */
   useEffect(() => {
     try {
       const saved = JSON.parse(sessionStorage.getItem('mag_spread_liked') ?? '{}');
@@ -194,26 +217,60 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
     } catch { /* ignore */ }
   }, [magazine.id]);
 
-  /* toast 자동 닫기 */
+  /* ─── toast 자동 닫기 ─── */
   useEffect(() => {
     if (!showToast) return;
     const t = setTimeout(() => setShowToast(null), 2000);
     return () => clearTimeout(t);
   }, [showToast]);
 
-  /* 네비게이션 */
+  /* ─── UI 자동 숨김 ─── */
+  const resetHideTimer = useCallback(() => {
+    setUiVisible(true);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => {
+      // TOC 열려 있으면 숨기지 않음
+      setUiVisible(prev => (tocOpen ? prev : false));
+    }, AUTO_HIDE_MS);
+  }, [tocOpen]);
+
+  useEffect(() => {
+    resetHideTimer();
+    const activity = () => resetHideTimer();
+    window.addEventListener('mousemove', activity, { passive: true });
+    window.addEventListener('keydown', activity);
+    window.addEventListener('touchstart', activity, { passive: true });
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+      window.removeEventListener('mousemove', activity);
+      window.removeEventListener('keydown', activity);
+      window.removeEventListener('touchstart', activity);
+    };
+  }, [resetHideTimer]);
+
+  // TOC 열리면 항상 보이게
+  useEffect(() => {
+    if (tocOpen) setUiVisible(true);
+  }, [tocOpen]);
+
+  /* ─── 네비게이션 ─── */
   const goToPage = useCallback((n: number) => {
     if (n < 0 || n >= pages.length) return;
     setDirection(n > currentPage ? 'next' : 'prev');
     setCurrentPage(n);
-    // 페이지 상단 스크롤
-    pageRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // URL ?page 동기화 (replaceState로 re-render 방지)
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', String(n + 1));
+      window.history.replaceState(null, '', url.toString());
+    }
   }, [currentPage, pages.length]);
 
   const goNext = useCallback(() => goToPage(currentPage + 1), [currentPage, goToPage]);
   const goPrev = useCallback(() => goToPage(currentPage - 1), [currentPage, goToPage]);
 
-  /* 키보드 */
+  /* ─── 키보드 ─── */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -228,31 +285,32 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
     return () => window.removeEventListener('keydown', handler);
   }, [goNext, goPrev, router, tocOpen]);
 
-  /* 현재 아티클 인덱스 계산 (TOC 드롭다운용) */
-  function getArticleIdxForPage(pageIdx: number): number | null {
-    const p = pages[pageIdx];
-    if (!p || p.type === 'cover' || p.type === 'toc') return null;
-    if (p.article) return sorted.findIndex(a => a.id === p.article!.id);
-    return null;
+  /* ─── 터치 스와이프 ─── */
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+    touchCurrentX.current = e.touches[0].clientX;
   }
-
-  /* 현재 페이지 라벨 */
-  function getPageLabel(): string {
-    const p = pages[currentPage];
-    if (!p) return '';
-    if (p.type === 'cover') return 'Cover';
-    if (p.type === 'toc') return 'Contents';
-    if (p.article) {
-      const idx = sorted.findIndex(a => a.id === p.article!.id);
-      const suffix = p.type === 'extra' && p.articlePage ? ` · p.${p.articlePage.page_number + 1}` : '';
-      return `${String(idx + 1).padStart(2, '0')}. ${p.article.title}${suffix}`;
+  function onTouchMove(e: React.TouchEvent) {
+    touchCurrentX.current = e.touches[0].clientX;
+  }
+  function onTouchEnd() {
+    if (touchStartX.current === null || touchCurrentX.current === null) return;
+    const dx = touchCurrentX.current - touchStartX.current;
+    const width = pageBodyRef.current?.offsetWidth ?? 0;
+    const ratio = width > 0 ? Math.abs(dx) / width : 0;
+    if (ratio > SWIPE_THRESHOLD) {
+      if (dx < 0) goNext();
+      else goPrev();
     }
-    return '';
+    touchStartX.current = null;
+    touchCurrentX.current = null;
   }
 
-  /* 공유 */
+  /* ─── 공유 ─── */
   async function handleShare() {
-    const url = `https://www.mhj.nz/magazine/${magazine.id}`;
+    const url = typeof window !== 'undefined'
+      ? window.location.href
+      : `https://www.mhj.nz/magazine/${magazine.id}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: magazine.title, url });
@@ -263,7 +321,7 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
     } catch { /* cancelled */ }
   }
 
-  /* 좋아요 */
+  /* ─── 좋아요 ─── */
   function toggleLike() {
     const next = !liked;
     setLiked(next);
@@ -275,7 +333,13 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
     } catch { /* ignore */ }
   }
 
-  /* 페이지 콘텐츠 렌더링 */
+  /* ─── 헤더/푸터 메타 ─── */
+  const totalPages = pages.length;
+  const isFirst = currentPage === 0;
+  const isLast = currentPage === totalPages - 1 || totalPages === 0;
+  const issueInfo = `MHJ · ${(magazine.month_name ?? '').toUpperCase()} ${magazine.year ?? ''}`.trim();
+
+  /* ─── 현재 페이지 렌더링 ─── */
   function renderContent() {
     const p = pages[currentPage];
     if (!p) return null;
@@ -290,7 +354,6 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
           magazine={magazine}
           articles={sorted}
           onGoToArticle={(idx) => {
-            // articles start at page index 2
             const articlePageIdx = pages.findIndex(
               (pg, i) => i >= 2 && pg.type === 'article' && sorted.findIndex(a => a.id === pg.article?.id) === idx
             );
@@ -304,11 +367,27 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
       const art = p.article;
       const pg = p.articlePage;
       const isExtra = p.type === 'extra' && !!pg;
+      const activeTemplate = isExtra ? (pg.template ?? art.template ?? 'classic') : (art.template ?? 'classic');
+
+      const realPageNum = currentPage + 1;
+      const isLeftPage = realPageNum % 2 === 0;
+      const isFullBleed = activeTemplate === 'cover';
+      const showHeader = !isFullBleed;
+      const showFooter = !isFullBleed;
+      const sectionName = art.title ?? '';
 
       return (
-        <MagazinePage bgColor={bgColor}>
+        <MagazinePage
+          bgColor={bgColor}
+          showHeader={showHeader}
+          showFooter={showFooter}
+          pageNumber={realPageNum}
+          isLeftPage={isLeftPage}
+          issueInfo={issueInfo}
+          sectionName={sectionName}
+        >
           <ArticlePageRenderer
-            template={isExtra ? (pg.template ?? art.template ?? 'classic') : (art.template ?? 'classic')}
+            template={activeTemplate}
             title={isExtra ? undefined : art.title}
             author={art.author}
             content={isExtra ? pg.content : art.content}
@@ -331,350 +410,423 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
     return null;
   }
 
-  const totalPages = pages.length;
-  const isFirst = currentPage === 0;
-  const isLast = currentPage === totalPages - 1;
-
-  /* dot 렌더링 (최대 10개) */
-  function renderDots() {
-    if (totalPages <= 1) return null;
-    const maxDots = 10;
-    if (totalPages <= maxDots) {
-      return pages.map((_, i) => (
-        <button
-          key={i}
-          type="button"
-          onClick={() => goToPage(i)}
-          style={{
-            width: i === currentPage ? 16 : 6,
-            height: 6,
-            borderRadius: 3,
-            background: i === currentPage ? accentColor : `${accentColor}30`,
-            border: 'none',
-            cursor: 'pointer',
-            padding: 0,
-            transition: 'all 0.2s ease',
-          }}
-        />
-      ));
-    }
-    // 많을 때 현재 위치만 표시
-    return (
-      <span style={{ fontSize: 11, fontWeight: 700, color: `${accentColor}80`, letterSpacing: 2 }}>
-        {currentPage + 1} / {totalPages}
-      </span>
-    );
-  }
+  /* ─── UI 색상 (다크 뷰어 배경 위) ─── */
+  const barText = 'rgba(253,252,250,0.92)';
+  const barSub = 'rgba(253,252,250,0.55)';
+  const barHover = 'rgba(253,252,250,1)';
+  const barBg = 'rgba(10,10,10,0.6)';
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F5F0EB', display: 'flex', flexDirection: 'column' }}>
+    <div style={{
+      minHeight: '100vh',
+      background: '#0A0A0A',
+      display: 'flex', flexDirection: 'column',
+      color: barText,
+      position: 'relative',
+    }}>
+      <style>{`
+        @keyframes mvSlideInRight { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes mvSlideInLeft  { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
+      `}</style>
 
       {/* ── 상단 바 ── */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(250,248,245,0.92)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(0,0,0,0.06)',
-        padding: '0 20px',
-        height: 52,
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 40,
+        padding: '14px 20px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        background: `linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 100%)`,
+        backdropFilter: uiVisible ? 'blur(4px)' : undefined,
+        WebkitBackdropFilter: uiVisible ? 'blur(4px)' : undefined,
+        opacity: uiVisible || tocOpen ? 1 : 0,
+        pointerEvents: uiVisible || tocOpen ? 'auto' : 'none',
+        transition: 'opacity 280ms ease',
       }}>
-        {/* 뒤로가기 */}
+        {/* 좌: 서가로 돌아가기 */}
         <button
           type="button"
           onClick={() => router.push('/magazine')}
           style={{
-            display: 'flex', alignItems: 'center', gap: 4,
+            display: 'flex', alignItems: 'center', gap: 5,
             background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 11, fontWeight: 900, letterSpacing: 2,
-            textTransform: 'uppercase', color: '#8A6B4F',
-            padding: '4px 0', flexShrink: 0,
+            fontFamily: '"Inter", sans-serif',
+            fontSize: 11, fontWeight: 600, letterSpacing: '0.2em',
+            textTransform: 'uppercase', color: barText,
+            padding: '6px 8px', flexShrink: 0,
           }}
         >
           <ChevronLeft size={14} />
           Magazine
         </button>
 
-        {/* 제목 */}
+        {/* 중앙: 매거진 제목 */}
         <div style={{ flex: 1, textAlign: 'center', minWidth: 0 }}>
           <p style={{
-            fontFamily: "'Playfair Display',serif", fontWeight: 900,
-            fontSize: 13, letterSpacing: 2, color: '#1A1A1A',
+            fontFamily: '"Inter", sans-serif',
+            fontSize: 14, fontWeight: 500, letterSpacing: '0.05em',
+            color: barText,
             margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {magazine.title}
           </p>
-          {getPageLabel() && (
-            <p style={{
-              fontSize: 9, fontWeight: 700, letterSpacing: 2,
-              color: '#9C8B7A', textTransform: 'uppercase',
-              margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {getPageLabel()}
-            </p>
-          )}
         </div>
 
-        {/* TOC 버튼 */}
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          <button
-            type="button"
-            onClick={() => setTocOpen(o => !o)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              background: tocOpen ? accentColor : 'none',
-              border: `1px solid ${tocOpen ? accentColor : 'rgba(0,0,0,0.1)'}`,
-              borderRadius: 6, cursor: 'pointer',
-              fontSize: 10, fontWeight: 900, letterSpacing: 1.5,
-              textTransform: 'uppercase', color: tocOpen ? '#fff' : '#64748B',
-              padding: '5px 10px',
-            }}
-          >
-            <List size={12} />
-            Contents
-          </button>
+        {/* 우: 페이지 / TOC / 좋아요 / 공유 / 닫기 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+          <span style={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: 12, fontWeight: 400, letterSpacing: '0.05em',
+            color: barSub,
+            whiteSpace: 'nowrap',
+            minWidth: 54, textAlign: 'right',
+          }}>
+            {totalPages > 0 ? `${currentPage + 1} / ${totalPages}` : '—'}
+          </span>
 
-          {/* TOC 드롭다운 */}
-          {tocOpen && (
-            <>
-              <div
-                style={{ position: 'fixed', inset: 0, zIndex: 49 }}
-                onClick={() => setTocOpen(false)}
-              />
-              <div style={{
-                position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-                background: '#FFFFFF',
-                border: '1px solid rgba(0,0,0,0.08)',
-                borderRadius: 12,
-                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                zIndex: 60,
-                minWidth: 240, maxWidth: 320,
-                overflow: 'hidden',
-              }}>
-                <div style={{ padding: '12px 16px 8px', borderBottom: '1px solid #F1F5F9' }}>
-                  <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', margin: 0 }}>
-                    {magazine.title}
-                  </p>
-                </div>
-                {/* Cover / Contents */}
-                {[
-                  { label: 'Cover', idx: 0 },
-                  { label: 'Contents', idx: 1 },
-                ].map(item => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => { goToPage(item.idx); setTocOpen(false); }}
-                    style={{
-                      display: 'block', width: '100%', padding: '10px 16px',
-                      background: currentPage === item.idx ? '#FAF8F5' : 'none',
-                      border: 'none', cursor: 'pointer', textAlign: 'left',
-                      fontSize: 11, fontWeight: currentPage === item.idx ? 900 : 600,
-                      color: currentPage === item.idx ? accentColor : '#64748B',
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-                {/* Articles */}
-                {sorted.map((art, idx) => {
-                  const artPageIdx = pages.findIndex(
-                    (pg, i) => i >= 2 && pg.type === 'article' && pg.article?.id === art.id
-                  );
-                  const isCurrent = getArticleIdxForPage(currentPage) === idx;
-                  return (
+          {/* TOC */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setTocOpen(o => !o)}
+              aria-label="Contents"
+              style={{
+                background: tocOpen ? 'rgba(253,252,250,0.18)' : 'transparent',
+                border: '1px solid rgba(253,252,250,0.25)',
+                borderRadius: 6, cursor: 'pointer',
+                color: barText,
+                padding: '6px 8px',
+                display: 'flex', alignItems: 'center',
+                transition: 'background 0.15s ease',
+              }}
+              onMouseEnter={e => { if (!tocOpen) (e.currentTarget as HTMLElement).style.background = 'rgba(253,252,250,0.10)'; }}
+              onMouseLeave={e => { if (!tocOpen) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            >
+              <List size={14} />
+            </button>
+
+            {tocOpen && (
+              <>
+                <div
+                  style={{ position: 'fixed', inset: 0, zIndex: 49 }}
+                  onClick={() => setTocOpen(false)}
+                />
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: 10,
+                  boxShadow: '0 12px 36px rgba(0,0,0,0.35)',
+                  zIndex: 60,
+                  minWidth: 260, maxWidth: 340,
+                  overflow: 'hidden',
+                }}>
+                  <div style={{ padding: '12px 16px 8px', borderBottom: '1px solid #F1F5F9' }}>
+                    <p style={{
+                      fontFamily: '"Inter", sans-serif',
+                      fontSize: 9, fontWeight: 700, letterSpacing: '0.3em',
+                      color: '#94A3B8', textTransform: 'uppercase', margin: 0,
+                    }}>
+                      {magazine.title}
+                    </p>
+                  </div>
+                  {[
+                    { label: 'Cover', idx: 0 },
+                    { label: 'Contents', idx: 1 },
+                  ].map(item => (
                     <button
-                      key={art.id}
+                      key={item.label}
                       type="button"
-                      onClick={() => { if (artPageIdx >= 0) goToPage(artPageIdx); setTocOpen(false); }}
+                      onClick={() => { goToPage(item.idx); setTocOpen(false); }}
                       style={{
-                        display: 'flex', alignItems: 'baseline', gap: 8,
-                        width: '100%', padding: '10px 16px',
-                        background: isCurrent ? '#FAF8F5' : 'none',
+                        display: 'block', width: '100%', padding: '10px 16px',
+                        background: currentPage === item.idx ? '#FAF8F5' : 'none',
                         border: 'none', cursor: 'pointer', textAlign: 'left',
-                        borderTop: '1px solid #F8FAFC',
+                        fontFamily: '"Inter", sans-serif',
+                        fontSize: 11, fontWeight: currentPage === item.idx ? 700 : 500,
+                        color: currentPage === item.idx ? accentColor : '#1A1A1A',
                       }}
                     >
-                      <span style={{ fontSize: 9, fontWeight: 900, color: '#CBD5E1', minWidth: 20 }}>
-                        {String(idx + 1).padStart(2, '0')}
-                      </span>
-                      <div>
-                        <div style={{ fontSize: 12, fontWeight: isCurrent ? 900 : 600, color: isCurrent ? accentColor : '#1A1A1A' }}>
-                          {art.title}
-                        </div>
-                        <div style={{ fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: '#94A3B8', marginTop: 1 }}>
-                          {art.author}
-                        </div>
-                      </div>
+                      {item.label}
                     </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                  ))}
+                  {sorted.map((art, idx) => {
+                    const artPageIdx = pages.findIndex(
+                      (pg, i) => i >= 2 && pg.type === 'article' && pg.article?.id === art.id,
+                    );
+                    const isCurrent = pages[currentPage]?.article?.id === art.id;
+                    return (
+                      <button
+                        key={art.id}
+                        type="button"
+                        onClick={() => { if (artPageIdx >= 0) goToPage(artPageIdx); setTocOpen(false); }}
+                        style={{
+                          display: 'flex', alignItems: 'baseline', gap: 10,
+                          width: '100%', padding: '10px 16px',
+                          background: isCurrent ? '#FAF8F5' : 'none',
+                          border: 'none', cursor: 'pointer', textAlign: 'left',
+                          borderTop: '1px solid #F8FAFC',
+                        }}
+                      >
+                        <span style={{
+                          fontFamily: '"Playfair Display", serif',
+                          fontSize: 11, fontWeight: 900, fontStyle: 'italic',
+                          color: '#CBD5E1', minWidth: 22,
+                        }}>
+                          {String(idx + 1).padStart(2, '0')}
+                        </span>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{
+                            fontFamily: '"Inter", sans-serif',
+                            fontSize: 12, fontWeight: isCurrent ? 700 : 500,
+                            color: isCurrent ? accentColor : '#1A1A1A',
+                            lineHeight: 1.3,
+                          }}>
+                            {art.title}
+                          </div>
+                          <div style={{
+                            fontFamily: '"Inter", sans-serif',
+                            fontSize: 9, letterSpacing: '0.18em',
+                            textTransform: 'uppercase', color: '#94A3B8', marginTop: 2,
+                          }}>
+                            {art.author}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Like */}
+          <button
+            type="button"
+            onClick={toggleLike}
+            aria-label="Like"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center',
+              color: barText, padding: 4,
+            }}
+          >
+            <Heart size={15} fill={liked ? '#EF4444' : 'none'} color={liked ? '#EF4444' : barText} />
+          </button>
+
+          {/* Share */}
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label="Share"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center',
+              color: barText, padding: 4,
+            }}
+          >
+            <Share2 size={14} />
+          </button>
+
+          {/* 닫기 */}
+          <button
+            type="button"
+            onClick={() => router.push('/magazine')}
+            aria-label="Close"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center',
+              color: barText, padding: 4,
+            }}
+          >
+            <X size={16} />
+          </button>
         </div>
       </div>
 
       {/* ── 페이지 캔버스 ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 20px 16px' }}>
+      <div style={{
+        flex: 1,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        padding: '72px 4vw 64px',
+        boxSizing: 'border-box',
+      }}>
         <div style={{
           width: '100%',
-          maxWidth: 'min(620px, calc((100vh - 200px) * 42 / 55))',
+          maxWidth: 'min(620px, calc((100vh - 160px) * 42 / 55))',
           position: 'relative',
         }}>
-
-          {/* 좌 화살표 (캔버스 왼쪽 바깥) */}
+          {/* 좌 화살표 (데스크톱: 페이지 바깥) */}
           <button
             type="button"
             onClick={goPrev}
             disabled={isFirst}
-            aria-label="이전 페이지"
+            aria-label="Previous page"
+            className="mv-nav-side mv-nav-prev"
             style={{
               position: 'absolute', left: -52, top: '50%',
               transform: 'translateY(-50%)',
               width: 40, height: 40, borderRadius: '50%',
-              background: isFirst ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.08)',
-              border: 'none', cursor: isFirst ? 'not-allowed' : 'pointer',
-              color: isFirst ? '#CBD5E1' : '#4A3F35',
+              background: 'rgba(253,252,250,0.08)',
+              border: '1px solid rgba(253,252,250,0.15)',
+              cursor: isFirst ? 'default' : 'pointer',
+              color: barText,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.2s',
+              opacity: isFirst ? 0 : (uiVisible ? 0.72 : 0.35),
+              transition: 'opacity 200ms ease',
               zIndex: 3,
+              pointerEvents: isFirst ? 'none' : 'auto',
             }}
+            onMouseEnter={e => { if (!isFirst) (e.currentTarget as HTMLElement).style.opacity = '1'; }}
+            onMouseLeave={e => { if (!isFirst) (e.currentTarget as HTMLElement).style.opacity = uiVisible ? '0.72' : '0.35'; }}
           >
             <ChevronLeft size={18} />
           </button>
 
-          {/* 페이지 본체 — MagazinePage가 aspect-ratio 42:55 + overflow hidden을 담당 */}
+          {/* 우 화살표 (데스크톱: 페이지 바깥) */}
+          <button
+            type="button"
+            onClick={goNext}
+            disabled={isLast}
+            aria-label="Next page"
+            className="mv-nav-side mv-nav-next"
+            style={{
+              position: 'absolute', right: -52, top: '50%',
+              transform: 'translateY(-50%)',
+              width: 40, height: 40, borderRadius: '50%',
+              background: 'rgba(253,252,250,0.08)',
+              border: '1px solid rgba(253,252,250,0.15)',
+              cursor: isLast ? 'default' : 'pointer',
+              color: barText,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: isLast ? 0 : (uiVisible ? 0.72 : 0.35),
+              transition: 'opacity 200ms ease',
+              zIndex: 3,
+              pointerEvents: isLast ? 'none' : 'auto',
+            }}
+            onMouseEnter={e => { if (!isLast) (e.currentTarget as HTMLElement).style.opacity = '1'; }}
+            onMouseLeave={e => { if (!isLast) (e.currentTarget as HTMLElement).style.opacity = uiVisible ? '0.72' : '0.35'; }}
+          >
+            <ChevronRight size={18} />
+          </button>
+
+          {/* 페이지 본체 — 터치/스와이프 */}
           <div
-            ref={pageRef}
+            ref={pageBodyRef}
             key={`page-${currentPage}-${direction}`}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
             style={{
               width: '100%',
-              borderRadius: 12,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.06)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.30), 0 2px 10px rgba(0,0,0,0.2)',
               overflow: 'hidden',
               animation: direction === 'next'
-                ? 'spreadSlideInRight 0.28s ease'
-                : 'spreadSlideInLeft 0.28s ease',
+                ? 'mvSlideInRight 0.32s ease'
+                : 'mvSlideInLeft 0.32s ease',
+              touchAction: 'pan-y',
             }}
           >
             {renderContent()}
           </div>
 
-          {/* 우 화살표 */}
+          {/* 모바일 터치 존 (보이지 않음) + 하단 chevron pair */}
+          <div
+            className="mv-touch-zone mv-touch-prev"
+            onClick={goPrev}
+            aria-hidden
+            style={{
+              position: 'absolute', top: 0, left: 0, bottom: 0, width: '15%',
+              cursor: isFirst ? 'default' : 'pointer',
+              zIndex: 2,
+            }}
+          />
+          <div
+            className="mv-touch-zone mv-touch-next"
+            onClick={goNext}
+            aria-hidden
+            style={{
+              position: 'absolute', top: 0, right: 0, bottom: 0, width: '15%',
+              cursor: isLast ? 'default' : 'pointer',
+              zIndex: 2,
+            }}
+          />
+        </div>
+
+        {/* ── 모바일 하단 chevron ── */}
+        <div
+          className="mv-mobile-bottom"
+          style={{
+            marginTop: 16,
+            display: 'none',
+            alignItems: 'center', justifyContent: 'center', gap: 28,
+          }}
+        >
+          <button
+            type="button"
+            onClick={goPrev}
+            disabled={isFirst}
+            aria-label="Previous page"
+            style={{
+              width: 44, height: 44, borderRadius: '50%',
+              background: 'rgba(253,252,250,0.1)',
+              border: '1px solid rgba(253,252,250,0.2)',
+              color: barText,
+              opacity: isFirst ? 0.25 : 1,
+              cursor: isFirst ? 'default' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <ChevronLeft size={18} />
+          </button>
           <button
             type="button"
             onClick={goNext}
             disabled={isLast}
-            aria-label="다음 페이지"
+            aria-label="Next page"
             style={{
-              position: 'absolute', right: -52, top: '50%',
-              transform: 'translateY(-50%)',
-              width: 40, height: 40, borderRadius: '50%',
-              background: isLast ? 'rgba(0,0,0,0.04)' : accentColor,
-              border: 'none', cursor: isLast ? 'not-allowed' : 'pointer',
-              color: isLast ? '#CBD5E1' : '#fff',
+              width: 44, height: 44, borderRadius: '50%',
+              background: 'rgba(253,252,250,0.1)',
+              border: '1px solid rgba(253,252,250,0.2)',
+              color: barText,
+              opacity: isLast ? 0.25 : 1,
+              cursor: isLast ? 'default' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.2s',
             }}
           >
             <ChevronRight size={18} />
           </button>
         </div>
 
-        {/* ── 하단 네비게이션 바 ── */}
-        <div style={{
-          width: '100%', maxWidth: 680,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '20px 0 8px',
-        }}>
-          {/* 이전 버튼 */}
-          <button
-            type="button"
-            onClick={goPrev}
-            disabled={isFirst}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              background: 'none', border: 'none', cursor: isFirst ? 'not-allowed' : 'pointer',
-              fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase',
-              color: isFirst ? '#CBD5E1' : '#8A6B4F', padding: '4px 0',
-            }}
-          >
-            <ChevronLeft size={12} /> Prev
-          </button>
-
-          {/* 중앙: 도트 인디케이터 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 280 }}>
-            {renderDots()}
-          </div>
-
-          {/* 오른쪽: Next + 액션 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={isLast}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                background: 'none', border: 'none', cursor: isLast ? 'not-allowed' : 'pointer',
-                fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase',
-                color: isLast ? '#CBD5E1' : '#8A6B4F', padding: '4px 0',
-              }}
-            >
-              Next <ChevronRight size={12} />
-            </button>
-
-            <div style={{ width: 1, height: 14, background: 'rgba(0,0,0,0.1)' }} />
-
-            {/* 좋아요 */}
-            <button
-              type="button"
-              onClick={toggleLike}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
-            >
-              <Heart
-                size={16}
-                fill={liked ? '#EF4444' : 'none'}
-                color={liked ? '#EF4444' : '#9C8B7A'}
-                style={{ transition: 'all 0.2s' }}
-              />
-            </button>
-
-            {/* 공유 */}
-            <button
-              type="button"
-              onClick={handleShare}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#9C8B7A', padding: 0 }}
-            >
-              <Share2 size={15} />
-            </button>
-          </div>
-        </div>
+        <style>{`
+          @media (max-width: 767px) {
+            .mv-nav-side { display: none !important; }
+            .mv-mobile-bottom { display: flex !important; }
+          }
+          @media (min-width: 768px) {
+            .mv-touch-zone { display: none; }
+          }
+        `}</style>
       </div>
 
-      {/* toast */}
+      {/* Toast */}
       {showToast && (
         <div style={{
-          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-          background: '#1A1A1A', color: '#fff',
-          fontSize: 12, fontWeight: 700, padding: '10px 20px', borderRadius: 8,
-          zIndex: 999, letterSpacing: 1,
+          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(26,26,26,0.92)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          color: '#FDFCFA',
+          fontFamily: '"Inter", sans-serif',
+          fontSize: 12, fontWeight: 600,
+          padding: '12px 22px', borderRadius: 10,
+          zIndex: 999, letterSpacing: '0.05em',
+          border: '1px solid rgba(253,252,250,0.1)',
         }}>
           {showToast}
         </div>
       )}
 
-      <style>{`
-        @keyframes spreadSlideInRight {
-          from { opacity: 0; transform: translateX(24px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes spreadSlideInLeft {
-          from { opacity: 0; transform: translateX(-24px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-      `}</style>
+      {/* 사용하지 않는 변수 경고 방지 */}
+      <span style={{ display: 'none' }}>{barHover}{barBg}</span>
     </div>
   );
 }
