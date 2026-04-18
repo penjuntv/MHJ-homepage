@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article } from '@/lib/types';
 import { ChevronLeft } from 'lucide-react';
 import PageThumbnail from './PageThumbnail';
@@ -262,27 +261,8 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
               className="mid-cover"
               style={{ background: magazine.bg_color || '#FAF8F5' }}
             >
-              {magazine.image_url ? (
-                <SafeImage
-                  src={magazine.image_url}
-                  alt={magazine.title}
-                  fill
-                  sizes="(max-width: 767px) 280px, 360px"
-                  style={{ objectFit: 'cover' }}
-                />
-              ) : (
-                <div
-                  style={{
-                    position: 'absolute', inset: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontFamily: '"Playfair Display", serif',
-                    fontWeight: 900, fontSize: 48,
-                    color: '#9B9590', opacity: 0.4,
-                  }}
-                >
-                  MHJ
-                </div>
-              )}
+              {/* 완성본 표지 레이아웃 (MHJ 로고 + 타이틀 + 발행월) */}
+              <PageThumbnail pageType="cover" magazine={magazine} />
             </div>
           </div>
 

@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import SafeImage from '@/components/SafeImage';
 import type { Magazine } from '@/lib/types';
 import { trackEvent } from '@/lib/analytics';
+import PageThumbnail from '@/components/magazine/PageThumbnail';
 
 interface Props {
   magazines: Magazine[];
@@ -88,17 +88,9 @@ function BookSpine({ magazine, isLatest }: { magazine: Magazine; isLatest: boole
         </span>
       </div>
 
-      {/* Hover: 표지 */}
+      {/* Hover: 완성본 표지 (MHJ 로고 + 타이틀 + 발행월) */}
       <div className="shelf-book-cover">
-        {magazine.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={magazine.image_url} alt={magazine.title} />
-        ) : (
-          <div className="shelf-book-cover-placeholder">
-            <span className="ms-placeholder-mhj">MHJ</span>
-            <span className="ms-placeholder-title">{magazine.title}</span>
-          </div>
-        )}
+        <PageThumbnail pageType="cover" magazine={magazine} />
       </div>
     </Link>
   );
@@ -121,20 +113,8 @@ function ShelfCard({ magazine, isLatest }: { magazine: Magazine; isLatest: boole
         style={{ background: magazine.bg_color ?? '#FAF8F5' }}
       >
         {isLatest && <span className="ms-badge">Latest</span>}
-        {magazine.image_url ? (
-          <SafeImage
-            src={magazine.image_url}
-            alt={magazine.title}
-            fill
-            sizes="(max-width: 599px) 50vw, (max-width: 959px) 33vw, 25vw"
-            style={{ objectFit: 'cover' }}
-          />
-        ) : (
-          <div className="ms-cover-placeholder">
-            <span className="ms-placeholder-mhj">MHJ</span>
-            <span className="ms-placeholder-title">{magazine.title}</span>
-          </div>
-        )}
+        {/* 완성본 표지 (MHJ 로고 + 타이틀 + 발행월) */}
+        <PageThumbnail pageType="cover" magazine={magazine} />
       </div>
       <div className="ms-meta">
         <h3 className="ms-card-title">{magazine.title || 'Untitled'}</h3>
