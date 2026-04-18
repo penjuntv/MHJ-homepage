@@ -12,13 +12,33 @@ interface Props {
   searchParams: { page?: string };
 }
 
-async function buildPageMap(articles: Article[]): Promise<Record<number, number>> {
+async function buildPageMap(
+  articles: Article[],
+  options?: { isLegacy?: boolean },
+): Promise<Record<number, number>> {
   const mainArticles = articles
     .filter((a) => a.article_type === 'article' || !a.article_type)
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   if (mainArticles.length === 0) return {};
 
+  // Legacy PNG 이슈 (2025-12, 2026-01): 각 기사가 article_images.length 페이지를 차지.
+  // article_pages 테이블은 사용하지 않으므로 DB 쿼리 불필요.
+  // MagazineSpreadViewer의 legacy-png pages 구성(hotfix3)과 일치:
+  //   [cover, toc, 기사1-img1, 기사1-img2, ..., 기사2-img1, ...]
+  if (options?.isLegacy) {
+    const map: Record<number, number> = {};
+    let cur = 3; // cover=1, toc=2, first article=3
+    for (const art of mainArticles) {
+      map[art.id] = cur;
+      const imgs = (art.article_images ?? []).filter(Boolean) as string[];
+      const len = imgs.length > 0 ? imgs.length : art.image_url ? 1 : 0;
+      cur += Math.max(1, len); // 이미지 0장이어도 최소 1페이지 점유 (안전장치)
+    }
+    return map;
+  }
+
+  // 기본: article_pages 테이블 기반 누적 (2026-02, 2026-03)
   const ids = mainArticles.map((a) => a.id);
   const { data } = await supabase
     .from('article_pages')
@@ -138,7 +158,7 @@ export default async function MagazineIssuePage({ params, searchParams }: Props)
 
   /* 이슈 상세 페이지 (articles 모드 + ?page 없음) */
   if (isArticlesMode && !hasPageParam) {
-    const pageMap = await buildPageMap(articles);
+    const pageMap = await buildPageMap(articles, { isLegacy });
     return (
       <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
