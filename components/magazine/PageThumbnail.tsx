@@ -23,9 +23,9 @@ const NATIVE_W: Record<PageThumbnailType, number> = {
   article: 620,      // MagazinePage / ArticlePageRenderer 기준 (42:55)
 };
 const NATIVE_H: Record<PageThumbnailType, number> = {
-  cover: 594,
-  toc: 594,
-  article: Math.round(620 * 55 / 42),  // 812
+  cover: 550,                           // 420 × 55/42 = 42:55 정확
+  toc: 550,
+  article: Math.round(620 * 55 / 42),   // 812
 };
 
 export default function PageThumbnail({

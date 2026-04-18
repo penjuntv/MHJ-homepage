@@ -55,7 +55,7 @@ export default function CoverPreview({
     <div style={{
       position: 'relative',
       width: '420px',
-      height: '594px',
+      height: '550px',
       overflow: 'hidden',
       borderRadius: '8px',
       background: bg_color,

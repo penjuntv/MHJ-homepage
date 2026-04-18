@@ -35,7 +35,7 @@ export default function TocPreview({
     <div style={{
       position: 'relative',
       width: '420px',
-      height: '594px',
+      height: '550px',
       overflow: 'hidden',
       borderRadius: '12px',
       background: theme.bg,
