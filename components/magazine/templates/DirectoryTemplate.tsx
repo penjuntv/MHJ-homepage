@@ -1,5 +1,5 @@
 'use client';
-import { parseDirectoryItems, type NewTemplateProps } from './shared';
+import { getDirectoryItems, type NewTemplateProps } from './shared';
 
 export default function DirectoryTemplate({
   article,
@@ -7,7 +7,7 @@ export default function DirectoryTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const items = parseDirectoryItems(article.content ?? '');
+  const items = getDirectoryItems(article);
   const heading = hideTitle ? '' : article.title || 'Contents';
 
   return (
@@ -86,64 +86,90 @@ export default function DirectoryTemplate({
             목록을 HTML 리스트(&lt;ul&gt; / &lt;ol&gt;)로 작성하면 디렉토리 항목으로 표시됩니다.
           </div>
         ) : (
-          items.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.3em',
-                overflow: 'hidden',
-                minWidth: 0,
-              }}
-            >
+          items.map((item, i) => {
+            const number = item.number?.trim() || String(i + 1).padStart(2, '0');
+            return (
               <div
+                key={i}
                 style={{
-                  fontFamily: '"Playfair Display", serif',
-                  fontStyle: 'italic',
-                  fontWeight: 400,
-                  fontSize: 'clamp(18px, 2.4vw, 28px)',
-                  color: accentColor,
-                  opacity: 0.35,
-                  lineHeight: 1,
-                }}
-              >
-                {String(i + 1).padStart(2, '0')}
-              </div>
-              <div
-                style={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontWeight: 800,
-                  fontSize: 'clamp(9px, 1vw, 12px)',
-                  color: '#1A1A1A',
-                  lineHeight: 1.3,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.3em',
                   overflow: 'hidden',
+                  minWidth: 0,
                 }}
               >
-                {item.title}
-              </div>
-              {item.desc && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    justifyContent: 'space-between',
+                    gap: '0.4em',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: '"Playfair Display", serif',
+                      fontStyle: 'italic',
+                      fontWeight: 400,
+                      fontSize: 'clamp(18px, 2.4vw, 28px)',
+                      color: accentColor,
+                      opacity: 0.35,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {number}
+                  </div>
+                  {typeof item.page === 'number' && (
+                    <div
+                      style={{
+                        fontFamily: '"Inter", sans-serif',
+                        fontWeight: 600,
+                        fontSize: 'clamp(8px, 0.9vw, 10px)',
+                        letterSpacing: '0.15em',
+                        color: accentColor,
+                        opacity: 0.7,
+                      }}
+                    >
+                      p.{item.page}
+                    </div>
+                  )}
+                </div>
                 <div
                   style={{
                     fontFamily: '"Inter", sans-serif',
-                    fontWeight: 400,
-                    fontSize: 'clamp(7px, 0.85vw, 10px)',
-                    color: '#9B9590',
-                    lineHeight: 1.4,
+                    fontWeight: 800,
+                    fontSize: 'clamp(9px, 1vw, 12px)',
+                    color: '#1A1A1A',
+                    lineHeight: 1.3,
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
                   }}
                 >
-                  {item.desc}
+                  {item.title}
                 </div>
-              )}
-            </div>
-          ))
+                {item.description && (
+                  <div
+                    style={{
+                      fontFamily: '"Inter", sans-serif',
+                      fontWeight: 400,
+                      fontSize: 'clamp(7px, 0.85vw, 10px)',
+                      color: '#9B9590',
+                      lineHeight: 1.4,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {item.description}
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
 

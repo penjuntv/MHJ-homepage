@@ -1,22 +1,13 @@
 'use client';
-import { extractBlockquote, stripTags, type NewTemplateProps } from './shared';
-
-function pickQuote(html: string): string {
-  const blockquote = extractBlockquote(html);
-  if (blockquote) return blockquote;
-  const plain = stripTags(html);
-  if (!plain) return '';
-  const firstSentence = plain.split(/[.!?。…]\s+/)[0];
-  return firstSentence.length > 220 ? firstSentence.slice(0, 220) + '…' : firstSentence;
-}
+import { getPullQuote, type NewTemplateProps } from './shared';
 
 export default function PullQuoteTemplate({
   article,
   accentColor = '#8A6B4F',
   bgColor = '#FDFCFA',
 }: NewTemplateProps) {
-  const quote = pickQuote(article.content ?? '');
-  const attribution = article.author;
+  const { text: quote, attribution: quoteAttr } = getPullQuote(article);
+  const attribution = quoteAttr || article.author;
 
   return (
     <div

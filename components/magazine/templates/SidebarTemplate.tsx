@@ -1,6 +1,6 @@
 'use client';
 import { useId } from 'react';
-import { splitBySidebarMarker, type NewTemplateProps } from './shared';
+import { getSidebarContent, type NewTemplateProps } from './shared';
 
 export default function SidebarTemplate({
   article,
@@ -9,19 +9,7 @@ export default function SidebarTemplate({
   hideTitle,
 }: NewTemplateProps) {
   const uid = useId().replace(/:/g, 'd');
-  const { main, sidebar } = splitBySidebarMarker(article.content ?? '');
-
-  const sidebarFallback =
-    !sidebar && article.image_captions?.length
-      ? '<ul>' +
-        article.image_captions
-          .filter(Boolean)
-          .map((c) => `<li>${c}</li>`)
-          .join('') +
-        '</ul>'
-      : '';
-
-  const sidebarContent = sidebar || sidebarFallback || '';
+  const { title: sidebarTitle, body: sidebarContent, main } = getSidebarContent(article);
 
   return (
     <div
@@ -122,7 +110,7 @@ export default function SidebarTemplate({
             flexShrink: 0,
           }}
         >
-          Notes
+          {sidebarTitle || 'Notes'}
         </div>
 
         <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>

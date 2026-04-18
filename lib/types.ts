@@ -41,7 +41,22 @@ export interface Article {
   image_captions?: string[] | null;  // 각 이미지의 캡션
   article_status?: 'draft' | 'complete' | 'published' | null;
   style_overrides?: Record<string, unknown> | null; // 3A: 기사별 스타일 오버라이드 (StyleOverrides JSON)
+  // 2D new fields — 템플릿 전용 입력 필드
+  kicker?: string | null;              // TitleCard/PhotoHero 카테고리 라벨
+  subtitle?: string | null;            // TitleCard/PhotoHero standfirst
+  sidebar_title?: string | null;       // Sidebar 박스 제목
+  sidebar_body?: string | null;        // Sidebar 박스 본문 (HTML 가능)
+  directory_items?: DirectoryItem[] | null; // Directory 항목 배열
+  quote_text?: string | null;          // PullQuote 인용 본문
+  quote_attribution?: string | null;   // PullQuote 인용 출처
   created_at?: string;
+}
+
+export interface DirectoryItem {
+  number?: string;        // '01' 자동 padded (수동 편집 가능)
+  title: string;
+  page?: number;
+  description?: string;
 }
 
 export interface ArticleReaction {

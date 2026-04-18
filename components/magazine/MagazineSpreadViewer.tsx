@@ -404,6 +404,13 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
             bgColor={bgColor}
             hideTitle={isExtra}
             styleOverrides={(art.style_overrides as StyleOverrides | null) ?? undefined}
+            kicker={art.kicker}
+            subtitle={art.subtitle}
+            sidebarTitle={art.sidebar_title}
+            sidebarBody={art.sidebar_body}
+            directoryItems={art.directory_items}
+            quoteText={art.quote_text}
+            quoteAttribution={art.quote_attribution}
           />
         </MagazinePage>
       );

@@ -1,6 +1,6 @@
 'use client';
 import { useId } from 'react';
-import { firstParagraph, getImageSlots, overrideTitleClamp, type NewTemplateProps } from './shared';
+import { extractKicker, extractSubtitle, getImageSlots, overrideTitleClamp, type NewTemplateProps } from './shared';
 
 /* 배경 루미넌스로 어두운 배경 판정 (WCAG 근사) */
 function isDarkBg(hex: string): boolean {
@@ -20,7 +20,8 @@ export default function PhotoHeroTemplate({
 }: NewTemplateProps) {
   const uid = useId().replace(/:/g, 'd');
   const [slot] = getImageSlots(article, 1);
-  const standfirst = firstParagraph(article.content ?? '').slice(0, 220);
+  const kicker = extractKicker(article) ?? 'Feature';
+  const standfirst = extractSubtitle(article);
 
   const so = article.style_overrides ?? {};
   const bg = so.bgColor ?? bgColor;
@@ -130,7 +131,7 @@ export default function PhotoHeroTemplate({
             flexShrink: 0,
           }}
         >
-          Feature
+          {kicker}
         </div>
 
         {!hideTitle && (

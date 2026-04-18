@@ -11,6 +11,7 @@ import SidebarTemplate from './templates/SidebarTemplate';
 import DirectoryTemplate from './templates/DirectoryTemplate';
 import PullQuoteTemplate from './templates/PullQuoteTemplate';
 import type { ArticlePreviewData, StyleOverrides } from './templates/shared';
+import type { DirectoryItem } from '@/lib/types';
 
 export interface ArticlePageRendererProps {
   template?: string | null;
@@ -23,6 +24,14 @@ export interface ArticlePageRendererProps {
   bgColor?: string;
   hideTitle?: boolean;
   styleOverrides?: StyleOverrides | null;
+  // 2D: 템플릿 전용 필드 (DB 값, getter fallback과 함께 동작)
+  kicker?: string | null;
+  subtitle?: string | null;
+  sidebarTitle?: string | null;
+  sidebarBody?: string | null;
+  directoryItems?: DirectoryItem[] | null;
+  quoteText?: string | null;
+  quoteAttribution?: string | null;
 }
 
 function stripHtmlLength(html: string): number {
@@ -135,6 +144,13 @@ export default function ArticlePageRenderer({
   bgColor = '#FDFCFA',
   hideTitle = false,
   styleOverrides,
+  kicker,
+  subtitle,
+  sidebarTitle,
+  sidebarBody,
+  directoryItems,
+  quoteText,
+  quoteAttribution,
 }: ArticlePageRendererProps) {
   /* 갤러리 모드 자동 감지 */
   const isGalleryMode = images.length >= 3 && stripHtmlLength(content) < 200;
@@ -163,6 +179,13 @@ export default function ArticlePageRenderer({
     image_url: images[0] ?? '',
     template: template ?? 'classic',
     style_overrides: styleOverrides ?? null,
+    kicker,
+    subtitle,
+    sidebar_title: sidebarTitle,
+    sidebar_body: sidebarBody,
+    directory_items: directoryItems,
+    quote_text: quoteText,
+    quote_attribution: quoteAttribution,
   };
   const props = { article, accentColor, bgColor, hideTitle };
 

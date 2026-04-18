@@ -7,7 +7,7 @@ import SafeImage from '@/components/SafeImage';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
-import type { Magazine, Article, ArticlePage } from '@/lib/types';
+import type { Magazine, Article, ArticlePage, DirectoryItem } from '@/lib/types';
 import {
   ChevronLeft, Plus, Trash2, X, Upload, Loader2, Check,
   ChevronUp, ChevronDown, ExternalLink, BookOpen, AlertCircle,
@@ -56,6 +56,14 @@ type ArticleInput = {
   article_images: string[];
   image_positions: string[];
   style_overrides: StyleOverrides;
+  // 2D: 템플릿 전용 입력 필드
+  kicker: string;
+  subtitle: string;
+  sidebar_title: string;
+  sidebar_body: string;
+  directory_items: DirectoryItem[];
+  quote_text: string;
+  quote_attribution: string;
 };
 
 /* ─── 상수 ─── */
@@ -95,6 +103,10 @@ const EMPTY_FORM = (magazineId: string, nextOrder: number): ArticleInput => ({
   article_type: 'article', sort_order: nextOrder,
   template: 'classic', article_status: 'draft', article_images: [], image_positions: [],
   style_overrides: {},
+  kicker: '', subtitle: '',
+  sidebar_title: '', sidebar_body: '',
+  directory_items: [],
+  quote_text: '', quote_attribution: '',
 });
 
 /* ─── 공통 스타일 ─── */
@@ -513,6 +525,13 @@ export default function MagazineDetailPage() {
       article_images: (article as Article & { article_images?: string[] }).article_images ?? [],
       image_positions: (article as Article & { image_positions?: string[] }).image_positions ?? [],
       style_overrides: (article.style_overrides as StyleOverrides) ?? {},
+      kicker: article.kicker ?? '',
+      subtitle: article.subtitle ?? '',
+      sidebar_title: article.sidebar_title ?? '',
+      sidebar_body: article.sidebar_body ?? '',
+      directory_items: article.directory_items ?? [],
+      quote_text: article.quote_text ?? '',
+      quote_attribution: article.quote_attribution ?? '',
     });
   }
 
@@ -1391,6 +1410,127 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
   );
 }
 
+/* ─── 디렉토리 항목 편집기 (2D) ─── */
+function DirectoryItemsEditor({
+  items, onChange, accentColor = '#8A6B4F',
+}: {
+  items: DirectoryItem[];
+  onChange: (next: DirectoryItem[]) => void;
+  accentColor?: string;
+}) {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const patch = (idx: number, delta: Partial<DirectoryItem>) => {
+    onChange(items.map((it, i) => (i === idx ? { ...it, ...delta } : it)));
+  };
+  const remove = (idx: number) => onChange(items.filter((_, i) => i !== idx));
+  const move = (idx: number, dir: 'up' | 'down') => {
+    const swap = dir === 'up' ? idx - 1 : idx + 1;
+    if (swap < 0 || swap >= items.length) return;
+    const next = [...items];
+    [next[idx], next[swap]] = [next[swap], next[idx]];
+    onChange(next);
+  };
+  const add = () => onChange([...items, { number: pad(items.length + 1), title: '' }]);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {items.length === 0 && (
+        <p style={{ fontSize: '11px', color: '#94A3B8', textAlign: 'center', padding: '14px 8px', margin: 0, fontStyle: 'italic' }}>
+          목차 항목이 없습니다. 아래 버튼으로 추가하세요.
+        </p>
+      )}
+      {items.map((item, i) => (
+        <div
+          key={i}
+          style={{
+            border: '1px solid #F1F5F9',
+            borderRadius: '10px',
+            padding: '10px',
+            background: '#FAFAF9',
+            display: 'flex', flexDirection: 'column', gap: '6px',
+          }}
+        >
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <input
+              value={item.number ?? ''}
+              onChange={e => patch(i, { number: e.target.value })}
+              placeholder={pad(i + 1)}
+              style={{ ...inputStyle, width: '60px', textAlign: 'center', padding: '7px 8px', fontSize: '12px' }}
+              aria-label="항목 번호"
+            />
+            <input
+              type="number"
+              value={item.page ?? ''}
+              onChange={e => patch(i, { page: e.target.value ? Number(e.target.value) : undefined })}
+              placeholder="p."
+              style={{ ...inputStyle, width: '70px', textAlign: 'center', padding: '7px 8px', fontSize: '12px' }}
+              aria-label="페이지 번호"
+            />
+            <div style={{ flex: 1 }} />
+            <button
+              type="button"
+              onClick={() => move(i, 'up')}
+              disabled={i === 0}
+              style={{ padding: '5px', background: 'white', border: '1px solid #F1F5F9', borderRadius: '6px', cursor: i === 0 ? 'default' : 'pointer', opacity: i === 0 ? 0.3 : 1, display: 'flex', color: '#64748B' }}
+              aria-label="위로 이동"
+            >
+              <ChevronUp size={12} />
+            </button>
+            <button
+              type="button"
+              onClick={() => move(i, 'down')}
+              disabled={i === items.length - 1}
+              style={{ padding: '5px', background: 'white', border: '1px solid #F1F5F9', borderRadius: '6px', cursor: i === items.length - 1 ? 'default' : 'pointer', opacity: i === items.length - 1 ? 0.3 : 1, display: 'flex', color: '#64748B' }}
+              aria-label="아래로 이동"
+            >
+              <ChevronDown size={12} />
+            </button>
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              style={{ padding: '5px', background: '#FEF2F2', border: '1px solid #FEE2E2', borderRadius: '6px', cursor: 'pointer', color: '#EF4444', display: 'flex' }}
+              aria-label="항목 삭제"
+            >
+              <X size={12} />
+            </button>
+          </div>
+          <input
+            value={item.title}
+            onChange={e => patch(i, { title: e.target.value })}
+            placeholder="항목 제목"
+            style={inputStyle}
+          />
+          <textarea
+            value={item.description ?? ''}
+            onChange={e => patch(i, { description: e.target.value })}
+            placeholder="설명 (선택)"
+            rows={2}
+            style={{ ...inputStyle, resize: 'vertical' }}
+          />
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={add}
+        style={{
+          padding: '10px',
+          background: 'white',
+          border: `1.5px dashed ${accentColor}`,
+          borderRadius: '10px',
+          color: accentColor,
+          fontSize: '11px',
+          fontWeight: 800,
+          letterSpacing: '1.5px',
+          textTransform: 'uppercase',
+          cursor: 'pointer',
+        }}
+      >
+        + 항목 추가
+      </button>
+    </div>
+  );
+}
+
 /* ─── 접이식 섹션 헬퍼 ─── */
 function CollapsibleSection({
   title, defaultOpen = false, children,
@@ -1481,6 +1621,104 @@ function InlineForm({
           })}
         </div>
       </CollapsibleSection>
+
+      {/* 2D: 템플릿별 전용 필드 */}
+      {(form.template === 'title-card' || form.template === 'photo-hero') && (
+        <CollapsibleSection title="타이틀 · 소제목" defaultOpen>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div>
+              <label style={labelStyle}>Kicker (카테고리 라벨)</label>
+              <input
+                value={form.kicker}
+                onChange={e => setForm({ kicker: e.target.value })}
+                placeholder={form.template === 'photo-hero' ? 'Feature / Essay / Story' : 'Title Card'}
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Subtitle (standfirst)</label>
+              <textarea
+                value={form.subtitle}
+                onChange={e => setForm({ subtitle: e.target.value })}
+                placeholder="기사 소제목 또는 스탠드퍼스트 (최대 220자 권장)"
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical' }}
+              />
+              <p style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px', marginBottom: 0 }}>
+                비우면 본문 첫 단락이 자동으로 사용됩니다.
+              </p>
+            </div>
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {form.template === 'sidebar' && (
+        <CollapsibleSection title="사이드바 콘텐츠" defaultOpen>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div>
+              <label style={labelStyle}>Sidebar Title</label>
+              <input
+                value={form.sidebar_title}
+                onChange={e => setForm({ sidebar_title: e.target.value })}
+                placeholder="Notes / References / Tips"
+                style={inputStyle}
+              />
+              <p style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px', marginBottom: 0 }}>
+                비우면 &quot;Notes&quot;가 기본 표시됩니다.
+              </p>
+            </div>
+            <div>
+              <label style={labelStyle}>Sidebar Body (HTML 가능)</label>
+              <textarea
+                value={form.sidebar_body}
+                onChange={e => setForm({ sidebar_body: e.target.value })}
+                placeholder="&lt;ul&gt;&lt;li&gt;항목 1&lt;/li&gt;&lt;/ul&gt;"
+                rows={5}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'monospace', fontSize: '12px' }}
+              />
+            </div>
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {form.template === 'directory' && (
+        <CollapsibleSection title={`목차 항목 (${form.directory_items.length})`} defaultOpen>
+          <DirectoryItemsEditor
+            items={form.directory_items}
+            onChange={(next) => setForm({ directory_items: next })}
+            accentColor={accentColor}
+          />
+        </CollapsibleSection>
+      )}
+
+      {form.template === 'pull-quote' && (
+        <CollapsibleSection title="인용구" defaultOpen>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div>
+              <label style={labelStyle}>Quote Text</label>
+              <textarea
+                value={form.quote_text}
+                onChange={e => setForm({ quote_text: e.target.value })}
+                placeholder="인용할 문장을 입력하세요."
+                rows={4}
+                style={{ ...inputStyle, resize: 'vertical' }}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Attribution</label>
+              <input
+                value={form.quote_attribution}
+                onChange={e => setForm({ quote_attribution: e.target.value })}
+                placeholder="— Yussi"
+                style={inputStyle}
+              />
+              <p style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px', marginBottom: 0 }}>
+                비우면 저자(author) 값이 기본 표시됩니다.
+              </p>
+            </div>
+          </div>
+        </CollapsibleSection>
+      )}
 
       {/* 제목 */}
       <div>

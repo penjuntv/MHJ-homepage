@@ -1,5 +1,5 @@
 'use client';
-import { firstParagraph, type NewTemplateProps } from './shared';
+import { extractKicker, extractSubtitle, type NewTemplateProps } from './shared';
 
 export default function TitleCardTemplate({
   article,
@@ -7,7 +7,8 @@ export default function TitleCardTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const standfirst = firstParagraph(article.content ?? '').slice(0, 220);
+  const kicker = extractKicker(article) ?? 'Story';
+  const standfirst = extractSubtitle(article);
 
   return (
     <div
@@ -35,7 +36,7 @@ export default function TitleCardTemplate({
             marginBottom: '1.6em',
           }}
         >
-          Title Card
+          {kicker}
         </div>
 
         {!hideTitle && article.title && (

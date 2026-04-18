@@ -41,6 +41,14 @@ export interface ArticlePreviewData {
   template?: string;
   image_captions?: string[];
   style_overrides?: StyleOverrides | null;
+  // 2D: 템플릿 전용 입력 필드 (DB 값 우선, 없으면 content 파서 fallback)
+  kicker?: string | null;
+  subtitle?: string | null;
+  sidebar_title?: string | null;
+  sidebar_body?: string | null;
+  directory_items?: DirectoryItem[] | null;
+  quote_text?: string | null;
+  quote_attribution?: string | null;
 }
 
 /* style_overrides 기반 CSS clamp/value 계산 헬퍼 */
@@ -104,10 +112,8 @@ export function extractBlockquote(html: string): string | null {
   return match ? stripTags(match[1]) : null;
 }
 
-export interface DirectoryItem {
-  title: string;
-  desc?: string;
-}
+export type { DirectoryItem } from '@/lib/types';
+import type { DirectoryItem } from '@/lib/types';
 
 export function parseDirectoryItems(html: string): DirectoryItem[] {
   if (!html) return [];
@@ -120,13 +126,13 @@ export function parseDirectoryItems(html: string): DirectoryItem[] {
     if (strongMatch) {
       const title = stripTags(strongMatch[1]);
       const rest = stripTags(inner.replace(strongMatch[0], ''));
-      items.push({ title, desc: rest || undefined });
+      items.push({ title, description: rest || undefined });
     } else {
       const text = stripTags(inner);
       const [title, ...restParts] = text.split(/[—–\-:·]\s+/);
       items.push({
         title: title.trim(),
-        desc: restParts.length ? restParts.join(' — ').trim() : undefined,
+        description: restParts.length ? restParts.join(' — ').trim() : undefined,
       });
     }
   }
@@ -137,7 +143,7 @@ export function parseDirectoryItems(html: string): DirectoryItem[] {
       const text = stripTags(p);
       if (!text) continue;
       const [title, ...rest] = text.split(/[—–\-:·]\s+/);
-      items.push({ title: title.trim(), desc: rest.join(' — ').trim() || undefined });
+      items.push({ title: title.trim(), description: rest.join(' — ').trim() || undefined });
     }
   }
   return items;
@@ -166,4 +172,55 @@ export function getImageSlots(article: ArticlePreviewData, count: number): { src
     src: imgs[i] ?? null,
     pos: positions[i] || 'center',
   }));
+}
+
+// ── 2D getters: DB 값 우선 + 기존 파서 fallback ──────────────────────────
+
+export function extractKicker(a: ArticlePreviewData): string | null {
+  return a.kicker?.trim() || null;
+}
+
+export function extractSubtitle(a: ArticlePreviewData): string {
+  if (a.subtitle?.trim()) return a.subtitle.trim();
+  return firstParagraph(a.content ?? '').slice(0, 220);
+}
+
+export function getDirectoryItems(a: ArticlePreviewData): DirectoryItem[] {
+  if (Array.isArray(a.directory_items) && a.directory_items.length) {
+    return a.directory_items;
+  }
+  return parseDirectoryItems(a.content ?? '');
+}
+
+export function getSidebarContent(a: ArticlePreviewData): { title: string; body: string; main: string } {
+  if (a.sidebar_title?.trim() || a.sidebar_body?.trim()) {
+    return {
+      title: a.sidebar_title?.trim() ?? '',
+      body: a.sidebar_body ?? '',
+      main: a.content ?? '',
+    };
+  }
+  const { main, sidebar } = splitBySidebarMarker(a.content ?? '');
+  let body = sidebar;
+  if (!body && a.image_captions?.length) {
+    body = '<ul>' + a.image_captions.filter(Boolean).map(c => `<li>${c}</li>`).join('') + '</ul>';
+  }
+  return { title: '', body, main };
+}
+
+export function getPullQuote(a: ArticlePreviewData): { text: string; attribution: string } {
+  if (a.quote_text?.trim()) {
+    return {
+      text: a.quote_text.trim(),
+      attribution: (a.quote_attribution ?? '').trim(),
+    };
+  }
+  // fallback: <blockquote> 우선, 없으면 첫 문장 220자 clamp
+  const blockquote = extractBlockquote(a.content ?? '');
+  if (blockquote) return { text: blockquote, attribution: '' };
+  const plain = stripTags(a.content ?? '');
+  if (!plain) return { text: '', attribution: '' };
+  const firstSentence = plain.split(/[.!?。…]\s+/)[0];
+  const text = firstSentence.length > 220 ? firstSentence.slice(0, 220) + '…' : firstSentence;
+  return { text, attribution: '' };
 }

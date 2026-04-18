@@ -334,7 +334,12 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
                       )}
                     </div>
                     <div className="mid-card-meta">
-                      <p className="mid-kicker">{kickerFor(art.template)}</p>
+                      <p
+                        className="mid-kicker"
+                        style={{ color: magazine.accent_color || '#8A6B4F' }}
+                      >
+                        {art.kicker?.trim() || kickerFor(art.template)}
+                      </p>
                       <h3 className="mid-card-title">{art.title || 'Untitled'}</h3>
                       <p className="mid-card-author">{art.author || 'MHJ'}</p>
                     </div>
