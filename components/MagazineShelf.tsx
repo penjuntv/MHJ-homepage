@@ -275,7 +275,7 @@ const SHELF_CSS = `
 }
 .shelf-book-spine-text {
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  /* ISO 6357 / BS 6738: top-to-bottom (제목 첫 글자가 책등 상단에) */
   font-family: "Playfair Display", serif;
   font-weight: 700;
   font-size: 13px;
