@@ -241,7 +241,7 @@ const SHELF_CSS = `
 }
 .shelf-book:hover,
 .shelf-book:focus-visible {
-  width: 240px;
+  width: 260px;
   transform: translateY(-14px) rotateY(-2deg) translateZ(8px);
   z-index: 2;
   box-shadow:
