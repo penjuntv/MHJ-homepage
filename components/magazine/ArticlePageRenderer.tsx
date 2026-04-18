@@ -10,7 +10,7 @@ import TitleCardTemplate from './templates/TitleCardTemplate';
 import SidebarTemplate from './templates/SidebarTemplate';
 import DirectoryTemplate from './templates/DirectoryTemplate';
 import PullQuoteTemplate from './templates/PullQuoteTemplate';
-import type { ArticlePreviewData } from './templates/shared';
+import type { ArticlePreviewData, StyleOverrides } from './templates/shared';
 
 export interface ArticlePageRendererProps {
   template?: string | null;
@@ -22,6 +22,7 @@ export interface ArticlePageRendererProps {
   accentColor?: string;
   bgColor?: string;
   hideTitle?: boolean;
+  styleOverrides?: StyleOverrides | null;
 }
 
 function stripHtmlLength(html: string): number {
@@ -133,6 +134,7 @@ export default function ArticlePageRenderer({
   accentColor = '#8A6B4F',
   bgColor = '#FDFCFA',
   hideTitle = false,
+  styleOverrides,
 }: ArticlePageRendererProps) {
   /* 갤러리 모드 자동 감지 */
   const isGalleryMode = images.length >= 3 && stripHtmlLength(content) < 200;
@@ -160,6 +162,7 @@ export default function ArticlePageRenderer({
     image_captions: captions,
     image_url: images[0] ?? '',
     template: template ?? 'classic',
+    style_overrides: styleOverrides ?? null,
   };
   const props = { article, accentColor, bgColor, hideTitle };
 

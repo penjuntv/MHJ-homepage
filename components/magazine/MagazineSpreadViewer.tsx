@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Heart, Share2, List, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase-browser';
 import ArticlePageRenderer from './ArticlePageRenderer';
 import MagazinePage from './MagazinePage';
+import type { StyleOverrides } from './templates/shared';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
 
 interface PageItem {
@@ -402,6 +403,7 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
             accentColor={accentColor}
             bgColor={bgColor}
             hideTitle={isExtra}
+            styleOverrides={(art.style_overrides as StyleOverrides | null) ?? undefined}
           />
         </MagazinePage>
       );

@@ -22,6 +22,14 @@ export const ACCENT_PRESETS = [
   { label: 'Warm Grey',  value: '#57534E' },
 ] as const;
 
+// 바이블 §4 시즌 악센트 4색 (매거진 이슈별 테마)
+export const SEASONAL_ACCENTS = [
+  { key: 'sage',   label: 'Sage (Spring)',  value: '#7D8E7F' },
+  { key: 'ocean',  label: 'Ocean (Summer)', value: '#5B7E95' },
+  { key: 'sienna', label: 'Sienna (Autumn)', value: '#C17B4A' },
+  { key: 'slate',  label: 'Slate (Winter)', value: '#6B7B8D' },
+] as const;
+
 // 사진 필터 6종 (CSS filter 값)
 export const COVER_FILTERS = [
   { key: 'none',   label: 'Original',  css: 'none' },

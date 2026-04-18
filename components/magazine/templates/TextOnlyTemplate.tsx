@@ -1,6 +1,7 @@
 'use client';
 import { useId } from 'react';
 import type { NewTemplateProps } from './shared';
+import { overrideTitleClamp, overrideBodyClamp, overrideLineHeight } from './shared';
 
 export default function TextOnlyTemplate({
   article,
@@ -13,12 +14,26 @@ export default function TextOnlyTemplate({
     article.content ||
     '<p>에세이 본문을 작성해 주세요. 첫 글자는 자동으로 드롭캡으로 표시됩니다.</p>';
 
+  const so = article.style_overrides ?? {};
+  const titleClamp = overrideTitleClamp(so, 'clamp(22px, 3vw, 32px)');
+  const bodyClamp = overrideBodyClamp(so, 'clamp(11px, 1.3vw, 15px)');
+  const lh = overrideLineHeight(so, 1.65);
+  const bg = so.bgColor ?? bgColor;
+  const align: 'left' | 'center' = so.textAlign ?? 'left';
+  const dropCap = so.dropCap !== false; // 기본 on (명시적 false일 때만 끔)
+  const dropLines = so.dropCapLines ?? 3;
+  const dropFont = dropLines === 5 ? 'clamp(68px, 9.6vw, 110px)'
+    : dropLines === 4 ? 'clamp(54px, 7.6vw, 88px)'
+    : 'clamp(42px, 5.8vw, 68px)';
+  const showDivider = so.divider !== false; // 기본 on
+  const dividerW = so.dividerWeight ?? 1;
+
   return (
     <div
       style={{
         width: '100%',
         height: '100%',
-        background: bgColor,
+        background: bg,
         padding: '8% 8%',
         boxSizing: 'border-box',
         overflow: 'hidden',
@@ -27,11 +42,11 @@ export default function TextOnlyTemplate({
       }}
     >
       <style>{`
-        .essay-${uid} { overflow: hidden; }
+        .essay-${uid} { overflow: hidden; text-align: ${align}; }
         .essay-${uid} p {
           margin: 0 0 1em;
-          font-size: clamp(11px, 1.3vw, 15px);
-          line-height: 1.65;
+          font-size: ${bodyClamp};
+          line-height: ${lh};
           color: #1A1A1A;
         }
         .essay-${uid} strong { font-weight: 700; color: #1A1A1A; }
@@ -43,16 +58,18 @@ export default function TextOnlyTemplate({
           color: rgba(26,26,26,0.72);
           font-style: italic;
         }
+        ${dropCap ? `
         .essay-${uid} p:first-of-type::first-letter {
           float: left;
           font-family: "Playfair Display", serif;
           font-weight: 900;
-          font-size: clamp(42px, 5.8vw, 68px);
+          font-size: ${dropFont};
           color: ${accentColor};
           line-height: 0.82;
           margin-right: 0.12em;
           margin-top: 0.08em;
         }
+        ` : ''}
       `}</style>
 
       <div
@@ -62,6 +79,7 @@ export default function TextOnlyTemplate({
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
+          textAlign: align,
         }}
       >
         <div
@@ -75,7 +93,7 @@ export default function TextOnlyTemplate({
             textTransform: 'uppercase',
             marginBottom: '1em',
             paddingBottom: '0.8em',
-            borderBottom: `1px solid ${accentColor}33`,
+            borderBottom: showDivider ? `${dividerW}px solid ${accentColor}33` : 'none',
           }}
         >
           Essay
@@ -88,7 +106,7 @@ export default function TextOnlyTemplate({
               fontFamily: '"Playfair Display", serif',
               fontWeight: 900,
               fontStyle: 'italic',
-              fontSize: 'clamp(22px, 3vw, 32px)',
+              fontSize: titleClamp,
               color: '#1A1A1A',
               lineHeight: 1.1,
               marginBottom: '1em',
@@ -110,7 +128,7 @@ export default function TextOnlyTemplate({
           style={{
             marginTop: '1.2em',
             paddingTop: '0.8em',
-            borderTop: `1px solid ${accentColor}22`,
+            borderTop: showDivider ? `${dividerW}px solid ${accentColor}22` : 'none',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',

@@ -19,6 +19,18 @@ export function stripHtml(html: string): string {
 
 // ── New API (Phase 3) ──────────────────────────────────────────────────
 
+export interface StyleOverrides {
+  titleSize?: number;        // 24~48 px (clamp 상한 기준)
+  bodySize?: number;         // 8~14 px
+  lineHeight?: number;       // 130~180 (percent)
+  bgColor?: string;          // 페이지 배경 override (Core 팔레트 중 하나)
+  textAlign?: 'left' | 'center';
+  dropCap?: boolean;
+  dropCapLines?: number;     // 3~5
+  divider?: boolean;
+  dividerWeight?: number;    // 0.5 | 1 (px)
+}
+
 export interface ArticlePreviewData {
   title: string;
   author: string;
@@ -28,6 +40,29 @@ export interface ArticlePreviewData {
   image_url?: string;
   template?: string;
   image_captions?: string[];
+  style_overrides?: StyleOverrides | null;
+}
+
+/* style_overrides 기반 CSS clamp/value 계산 헬퍼 */
+export function overrideTitleClamp(so: StyleOverrides | null | undefined, fallback: string): string {
+  const t = so?.titleSize;
+  if (!t) return fallback;
+  const min = Math.round(t * 0.6);
+  const vw = (t / 620 * 100).toFixed(1);
+  return `clamp(${min}px, ${vw}vw, ${t}px)`;
+}
+
+export function overrideBodyClamp(so: StyleOverrides | null | undefined, fallback: string): string {
+  const b = so?.bodySize;
+  if (!b) return fallback;
+  const min = (b * 0.9).toFixed(1);
+  const vw = (b / 620 * 100).toFixed(2);
+  const max = (b * 1.1).toFixed(1);
+  return `clamp(${min}px, ${vw}vw, ${max}px)`;
+}
+
+export function overrideLineHeight(so: StyleOverrides | null | undefined, fallback: number): number {
+  return so?.lineHeight ? so.lineHeight / 100 : fallback;
 }
 
 export interface NewTemplateProps {

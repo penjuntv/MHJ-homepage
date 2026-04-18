@@ -1,5 +1,5 @@
 'use client';
-import { firstParagraph, getImageSlots, type NewTemplateProps } from './shared';
+import { firstParagraph, getImageSlots, overrideTitleClamp, type NewTemplateProps } from './shared';
 
 export default function CoverTemplate({
   article,
@@ -11,6 +11,10 @@ export default function CoverTemplate({
   const subtitle = firstParagraph(article.content ?? '').slice(0, 160);
   const hasImage = !!slot.src;
 
+  const so = article.style_overrides ?? {};
+  const bg = so.bgColor ?? bgColor;
+  const titleClamp = overrideTitleClamp(so, 'clamp(28px, 5.4vw, 56px)');
+
   return (
     <div
       style={{
@@ -18,7 +22,7 @@ export default function CoverTemplate({
         height: '100%',
         position: 'relative',
         overflow: 'hidden',
-        background: hasImage ? '#1A1A1A' : bgColor,
+        background: hasImage ? '#1A1A1A' : bg,
         color: '#FDFCFA',
       }}
     >
@@ -114,7 +118,7 @@ export default function CoverTemplate({
               style={{
                 fontFamily: '"Playfair Display", serif',
                 fontWeight: 900,
-                fontSize: 'clamp(28px, 5.4vw, 56px)',
+                fontSize: titleClamp,
                 lineHeight: 1.04,
                 color: '#FDFCFA',
                 margin: 0,

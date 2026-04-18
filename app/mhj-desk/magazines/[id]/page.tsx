@@ -13,7 +13,7 @@ import {
   ChevronUp, ChevronDown, ExternalLink, BookOpen, AlertCircle,
   FileText, Image as ImageIcon, ZoomIn, ZoomOut,
 } from 'lucide-react';
-import { ACCENT_PRESETS, COVER_FILTERS, DEFAULT_CONTRIBUTORS } from '@/lib/magazine-themes';
+import { ACCENT_PRESETS, COVER_FILTERS, DEFAULT_CONTRIBUTORS, SEASONAL_ACCENTS } from '@/lib/magazine-themes';
 import ImageCropModal from '@/components/admin/ImageCropModal';
 import CoverPreview from '@/components/magazine/CoverPreview';
 import TocPreview from '@/components/magazine/TocPreview';
@@ -30,8 +30,9 @@ import TitleCardTemplate   from '@/components/magazine/templates/TitleCardTempla
 import SidebarTemplate     from '@/components/magazine/templates/SidebarTemplate';
 import DirectoryTemplate   from '@/components/magazine/templates/DirectoryTemplate';
 import PullQuoteTemplate   from '@/components/magazine/templates/PullQuoteTemplate';
-import type { ArticlePreviewData } from '@/components/magazine/templates/shared';
+import type { ArticlePreviewData, StyleOverrides } from '@/components/magazine/templates/shared';
 import { TEMPLATE_PHOTO_COUNT } from '@/components/magazine/templates/shared';
+import StyleOverridePanel from '@/components/admin/StyleOverridePanel';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
@@ -54,6 +55,7 @@ type ArticleInput = {
   article_status: ArticleStatus;
   article_images: string[];
   image_positions: string[];
+  style_overrides: StyleOverrides;
 };
 
 /* ─── 상수 ─── */
@@ -92,6 +94,7 @@ const EMPTY_FORM = (magazineId: string, nextOrder: number): ArticleInput => ({
   image_url: '', content: '', pdf_url: '',
   article_type: 'article', sort_order: nextOrder,
   template: 'classic', article_status: 'draft', article_images: [], image_positions: [],
+  style_overrides: {},
 });
 
 /* ─── 공통 스타일 ─── */
@@ -369,7 +372,7 @@ export default function MagazineDetailPage() {
     if (!inlineIsNew && selectedArtId) {
       const { error } = await supabase.from('articles').update(formToSave).eq('id', selectedArtId);
       if (error) { setFormError(error.message); setSavingArticle(false); return; }
-      setArticles(prev => prev.map(a => a.id === selectedArtId ? { ...a, ...formToSave } : a));
+      setArticles(prev => prev.map(a => a.id === selectedArtId ? ({ ...a, ...formToSave } as Article) : a));
       showToast('기사가 저장되었습니다.');
     } else {
       const { data, error } = await supabase.from('articles').insert(formToSave).select().single();
@@ -505,6 +508,7 @@ export default function MagazineDetailPage() {
       article_status: ((article as Article & { article_status?: string }).article_status as ArticleStatus) ?? 'draft',
       article_images: (article as Article & { article_images?: string[] }).article_images ?? [],
       image_positions: (article as Article & { image_positions?: string[] }).image_positions ?? [],
+      style_overrides: (article.style_overrides as StyleOverrides) ?? {},
     });
   }
 
@@ -678,10 +682,22 @@ export default function MagazineDetailPage() {
                   <input type="color" value={magForm.accent_color} onChange={e => setMagForm(p => ({ ...p, accent_color: e.target.value }))} style={{ width: '40px', height: '40px', borderRadius: '8px', border: '1px solid #F1F5F9', cursor: 'pointer', padding: '2px', flexShrink: 0 }} />
                   <input value={magForm.accent_color} onChange={e => setMagForm(p => ({ ...p, accent_color: e.target.value }))} style={{ ...inputStyle, width: '130px', fontFamily: 'monospace' }} />
                 </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
                   {ACCENT_PRESETS.map(preset => (
                     <button key={preset.value} type="button" onClick={() => setMagForm(p => ({ ...p, accent_color: preset.value }))} title={preset.label}
                       style={{ width: '26px', height: '26px', borderRadius: '50%', cursor: 'pointer', border: 'none', background: preset.value, outline: magForm.accent_color === preset.value ? `3px solid ${preset.value}` : 'none', outlineOffset: '2px', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                  ))}
+                </div>
+                <p style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '3px', color: '#9B9590', textTransform: 'uppercase', margin: '0 0 6px' }}>
+                  Seasonal (Bible §4)
+                </p>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                  {SEASONAL_ACCENTS.map(preset => (
+                    <button key={preset.value} type="button" onClick={() => setMagForm(p => ({ ...p, accent_color: preset.value }))} title={preset.label}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px 4px 4px', borderRadius: '999px', cursor: 'pointer', border: magForm.accent_color === preset.value ? `2px solid #8A6B4F` : '2px solid #F1F5F9', background: 'white', fontSize: '10px', fontWeight: 600, color: '#1A1A1A' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: preset.value, display: 'inline-block' }} />
+                      {preset.label.replace(/\s*\(.+\)$/, '')}
+                    </button>
                   ))}
                 </div>
                 <p style={sectionTitle}>배경색</p>
@@ -930,6 +946,7 @@ export default function MagazineDetailPage() {
                           article_images: (inlineForm.article_images ?? []).filter(Boolean),
                           image_url: '',
                           template: inlineForm.template,
+                          style_overrides: inlineForm.style_overrides ?? {},
                         } as ArticlePreviewData, accentCol, bgCol)}
                       </MagazinePage>
                     </div>
@@ -943,6 +960,7 @@ export default function MagazineDetailPage() {
                           article_images: (focusedExtraPage.images ?? []).filter(Boolean),
                           image_url: '',
                           template: focusedExtraPage.template ?? inlineForm.template,
+                          style_overrides: inlineForm.style_overrides ?? {},
                         } as ArticlePreviewData, accentCol, bgCol, true)}
                       </MagazinePage>
                     </div>
@@ -1020,6 +1038,7 @@ export default function MagazineDetailPage() {
               article_images: (article as Article & { article_images?: string[] }).article_images ?? [],
               image_positions: (article as Article & { image_positions?: string[] }).image_positions ?? [],
               template: tpl,
+              style_overrides: (article.style_overrides as StyleOverrides | null) ?? {},
             };
             return {
               label: `P.${idx + 1} · ${article.author}`,
@@ -1531,6 +1550,13 @@ function InlineForm({
           )}
         </div>
       </div>
+
+      {/* 스타일 조정 패널 (접이식) */}
+      <StyleOverridePanel
+        value={form.style_overrides ?? {}}
+        onChange={(so) => setForm({ style_overrides: so })}
+        accentColor={accentColor}
+      />
 
       {/* 에러 */}
       {error && (

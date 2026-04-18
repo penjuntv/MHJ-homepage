@@ -1,6 +1,12 @@
 'use client';
 import { useId } from 'react';
-import { getImageSlots, type NewTemplateProps } from './shared';
+import {
+  getImageSlots,
+  overrideTitleClamp,
+  overrideBodyClamp,
+  overrideLineHeight,
+  type NewTemplateProps,
+} from './shared';
 
 export default function ClassicTemplate({
   article,
@@ -15,12 +21,25 @@ export default function ClassicTemplate({
     article.content ||
     '<p>본문을 작성해 주세요. 첫 글자는 드롭캡으로 표시됩니다.</p>';
 
+  const so = article.style_overrides ?? {};
+  const titleClamp = overrideTitleClamp(so, 'clamp(20px, 2.5vw, 28px)');
+  const bodyClamp = overrideBodyClamp(so, 'clamp(11px, 1.15vw, 14px)');
+  const lh = overrideLineHeight(so, 1.62);
+  const bg = so.bgColor ?? bgColor;
+  const dropCap = so.dropCap !== false;
+  const dropLines = so.dropCapLines ?? 3;
+  const dropFont = dropLines === 5 ? 'clamp(60px, 8.2vw, 96px)'
+    : dropLines === 4 ? 'clamp(48px, 6.5vw, 78px)'
+    : 'clamp(38px, 5.2vw, 60px)';
+  const showDivider = so.divider !== false;
+  const dividerW = so.dividerWeight ?? 1;
+
   return (
     <div
       style={{
         width: '100%',
         height: '100%',
-        background: bgColor,
+        background: bg,
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
         columnGap: '1.7%',
@@ -32,8 +51,8 @@ export default function ClassicTemplate({
       <style>{`
         .cls-body-${uid} p {
           margin: 0 0 0.85em;
-          font-size: clamp(11px, 1.15vw, 14px);
-          line-height: 1.62;
+          font-size: ${bodyClamp};
+          line-height: ${lh};
           color: #1A1A1A;
         }
         .cls-body-${uid} strong { font-weight: 700; }
@@ -45,16 +64,18 @@ export default function ClassicTemplate({
           color: rgba(26,26,26,0.72);
           font-style: italic;
         }
+        ${dropCap ? `
         .cls-body-${uid} p:first-of-type::first-letter {
           float: left;
           font-family: "Playfair Display", serif;
           font-weight: 900;
-          font-size: clamp(38px, 5.2vw, 60px);
+          font-size: ${dropFont};
           color: ${accentColor};
           line-height: 0.82;
           margin-right: 0.12em;
           margin-top: 0.06em;
         }
+        ` : ''}
       `}</style>
 
       {/* 좌 6col: 이미지 또는 여백 */}
@@ -131,7 +152,7 @@ export default function ClassicTemplate({
             style={{
               fontFamily: '"Playfair Display", serif',
               fontWeight: 900,
-              fontSize: 'clamp(20px, 2.5vw, 28px)',
+              fontSize: titleClamp,
               color: '#1A1A1A',
               lineHeight: 1.1,
               marginBottom: '0.8em',
@@ -152,7 +173,7 @@ export default function ClassicTemplate({
           style={{
             marginTop: '1em',
             paddingTop: '0.8em',
-            borderTop: `1px solid ${accentColor}22`,
+            borderTop: showDivider ? `${dividerW}px solid ${accentColor}22` : 'none',
             fontFamily: '"Inter", sans-serif',
             fontSize: 'clamp(8px, 0.9vw, 10px)',
             fontWeight: 600,

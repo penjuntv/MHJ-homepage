@@ -1,6 +1,6 @@
 'use client';
 import { useId } from 'react';
-import { firstParagraph, getImageSlots, type NewTemplateProps } from './shared';
+import { firstParagraph, getImageSlots, overrideTitleClamp, type NewTemplateProps } from './shared';
 
 /* 배경 루미넌스로 어두운 배경 판정 (WCAG 근사) */
 function isDarkBg(hex: string): boolean {
@@ -21,7 +21,13 @@ export default function PhotoHeroTemplate({
   const uid = useId().replace(/:/g, 'd');
   const [slot] = getImageSlots(article, 1);
   const standfirst = firstParagraph(article.content ?? '').slice(0, 220);
-  const isDark = isDarkBg(bgColor);
+
+  const so = article.style_overrides ?? {};
+  const bg = so.bgColor ?? bgColor;
+  const align: 'left' | 'center' = so.textAlign ?? 'left';
+  const titleClamp = overrideTitleClamp(so, 'clamp(22px, 3.4vw, 38px)');
+
+  const isDark = isDarkBg(bg);
   const ink = isDark ? '#FDFCFA' : '#1A1A1A';
   const warm = isDark ? 'rgba(253,252,250,0.6)' : '#9B9590';
 
@@ -30,11 +36,12 @@ export default function PhotoHeroTemplate({
       style={{
         width: '100%',
         height: '100%',
-        background: bgColor,
+        background: bg,
         display: 'flex',
         flexDirection: 'column',
         boxSizing: 'border-box',
         overflow: 'hidden',
+        textAlign: align,
       }}
     >
       <style>{`
@@ -131,7 +138,7 @@ export default function PhotoHeroTemplate({
             style={{
               fontFamily: '"Playfair Display", serif',
               fontWeight: 900,
-              fontSize: 'clamp(22px, 3.4vw, 38px)',
+              fontSize: titleClamp,
               lineHeight: 1.06,
               color: ink,
               marginBottom: '0.55em',

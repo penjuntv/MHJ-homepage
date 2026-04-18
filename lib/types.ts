@@ -38,7 +38,9 @@ export interface Article {
   template?: string | null;         // 기사 템플릿 키 (classic/split/photo-hero/...)
   article_images?: string[] | null; // 추가 기사 이미지 배열
   image_positions?: string[] | null; // 각 이미지의 object-position
+  image_captions?: string[] | null;  // 각 이미지의 캡션
   article_status?: 'draft' | 'complete' | 'published' | null;
+  style_overrides?: Record<string, unknown> | null; // 3A: 기사별 스타일 오버라이드 (StyleOverrides JSON)
   created_at?: string;
 }
 
