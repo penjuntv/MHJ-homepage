@@ -1,4 +1,5 @@
 'use client';
+import { useLayoutEffect, useRef, useState } from 'react';
 import MagazinePage from './MagazinePage';
 import CoverPreview from './CoverPreview';
 import TocPreview from './TocPreview';
@@ -13,23 +14,46 @@ interface PageThumbnailProps {
   magazine: Magazine;
   article?: Article;          // pageType === 'article'
   articles?: Article[];       // pageType === 'toc' (목차 구성)
-  scale?: number;             // 0.18 (그리드 minmax 140 기준)
 }
 
-const PAGE_W = 620;
-const PAGE_H = Math.round(PAGE_W * 55 / 42); // 812
+const NATIVE_W: Record<PageThumbnailType, number> = {
+  cover: 420,        // CoverPreview fixed 420x594
+  toc: 420,          // TocPreview fixed 420x594
+  article: 620,      // MagazinePage / ArticlePageRenderer 기준 (42:55)
+};
+const NATIVE_H: Record<PageThumbnailType, number> = {
+  cover: 594,
+  toc: 594,
+  article: Math.round(620 * 55 / 42),  // 812
+};
 
 export default function PageThumbnail({
   pageType,
   magazine,
   article,
   articles,
-  scale = 0.18,
 }: PageThumbnailProps) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.25);
+
+  useLayoutEffect(() => {
+    if (!wrapRef.current) return;
+    const el = wrapRef.current;
+    const update = () => {
+      const w = el.offsetWidth;
+      if (w > 0) setScale(w / NATIVE_W[pageType]);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [pageType]);
+
   const bg = magazine.bg_color ?? '#FDFCFA';
 
   return (
     <div
+      ref={wrapRef}
       style={{
         aspectRatio: '42 / 55',
         width: '100%',
@@ -46,8 +70,8 @@ export default function PageThumbnail({
           left: 0,
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
-          width: `${PAGE_W}px`,
-          height: `${PAGE_H}px`,
+          width: `${NATIVE_W[pageType]}px`,
+          height: `${NATIVE_H[pageType]}px`,
           pointerEvents: 'none',
           userSelect: 'none',
         }}
