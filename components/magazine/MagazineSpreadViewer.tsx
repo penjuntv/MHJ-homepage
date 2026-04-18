@@ -626,10 +626,10 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
             <Share2 size={14} />
           </button>
 
-          {/* 닫기 */}
+          {/* 닫기 → 이슈 상세 페이지 */}
           <button
             type="button"
-            onClick={() => router.push('/magazine')}
+            onClick={() => router.push(`/magazine/${magazine.id}`)}
             aria-label="Close"
             style={{
               background: 'none', border: 'none', cursor: 'pointer',

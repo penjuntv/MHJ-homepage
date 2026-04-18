@@ -3,9 +3,38 @@ import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
 import MagazineViewer from '@/components/MagazineViewer';
+import MagazineIssueDetail from '@/components/magazine/MagazineIssueDetail';
 
 interface Props {
   params: { id: string };
+  searchParams: { page?: string };
+}
+
+async function buildPageMap(articles: Article[]): Promise<Record<number, number>> {
+  const mainArticles = articles
+    .filter((a) => a.article_type === 'article' || !a.article_type)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+  if (mainArticles.length === 0) return {};
+
+  const ids = mainArticles.map((a) => a.id);
+  const { data } = await supabase
+    .from('article_pages')
+    .select('article_id')
+    .in('article_id', ids);
+
+  const extraCount = new Map<number, number>();
+  (data ?? []).forEach((ep: { article_id: number }) => {
+    extraCount.set(ep.article_id, (extraCount.get(ep.article_id) ?? 0) + 1);
+  });
+
+  const map: Record<number, number> = {};
+  let cur = 3; // cover=1, toc=2, first article=3
+  for (const art of mainArticles) {
+    map[art.id] = cur;
+    cur += 1 + (extraCount.get(art.id) ?? 0);
+  }
+  return map;
 }
 
 /* ─── Fallback 데이터 ─── */
@@ -66,7 +95,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function MagazineIssuePage({ params }: Props) {
+export default async function MagazineIssuePage({ params, searchParams }: Props) {
   const magazine = await getMagazine(params.id);
   if (!magazine) notFound();
 
@@ -99,6 +128,22 @@ export default async function MagazineIssuePage({ params }: Props) {
     })),
   };
 
+  const isArticlesMode = !magazine.pdf_url && articles.length > 0;
+  const hasPageParam = typeof searchParams?.page !== 'undefined';
+
+  /* 이슈 상세 페이지 (articles 모드 + ?page 없음) */
+  if (isArticlesMode && !hasPageParam) {
+    const pageMap = await buildPageMap(articles);
+    return (
+      <>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+        <MagazineIssueDetail magazine={magazine} articles={articles} pageMap={pageMap} />
+      </>
+    );
+  }
+
+  /* PDF/empty 모드 또는 ?page 있을 때 → 기존 뷰어 경로 */
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
