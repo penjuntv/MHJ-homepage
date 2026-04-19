@@ -1659,8 +1659,14 @@ function InlineForm({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                 {cat.templates.map(t => {
                   const selected = form.template === t.key;
+                  const handleSelect = () => {
+                    const patch: Partial<ArticleInput> = { template: t.key };
+                    if (t.key === 'mums-note') patch.title = "Mum's Note";
+                    else if (t.key === 'little-note') patch.title = 'Little Note';
+                    setForm(patch);
+                  };
                   return (
-                    <button key={t.key} type="button" onClick={() => setForm({ template: t.key })}
+                    <button key={t.key} type="button" onClick={handleSelect}
                       style={{ padding: 0, borderRadius: '10px', cursor: 'pointer', overflow: 'hidden', border: selected ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: selected ? `${accentColor}10` : 'white', transition: 'background 0.15s, border-color 0.15s' }}>
                       <div style={{ aspectRatio: '42 / 55', overflow: 'hidden', background: selected ? 'white' : '#F8FAFC' }}>
                         <TemplateDiagram tplKey={t.key} />
@@ -1777,11 +1783,63 @@ function InlineForm({
         </CollapsibleSection>
       )}
 
-      {/* 제목 */}
-      <div>
-        <label style={labelStyle}>제목 *</label>
-        <input value={form.title} onChange={e => setForm({ title: e.target.value })} placeholder="기사 제목" style={inputStyle} />
-      </div>
+      {/* Little Note 전용 — 인용구 + 서명 (content 대신) */}
+      {form.template === 'little-note' && (
+        <CollapsibleSection title="인용구 · 서명" defaultOpen>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div>
+              <label style={labelStyle}>Quote</label>
+              <textarea
+                value={form.quote_text}
+                onChange={e => setForm({ quote_text: e.target.value })}
+                placeholder="아이의 말 / 짧은 닫는 인용구"
+                rows={4}
+                style={{ ...inputStyle, resize: 'vertical' }}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Signature</label>
+              <input
+                value={form.quote_attribution}
+                onChange={e => setForm({ quote_attribution: e.target.value })}
+                placeholder="예: Min (7세)"
+                style={inputStyle}
+              />
+              <p style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px', marginBottom: 0 }}>
+                앞에 em-dash(—)가 자동으로 붙습니다. 비우면 저자(author)가 사용됩니다.
+              </p>
+            </div>
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {/* 제목 — mums-note / little-note는 고정 타이틀 */}
+      {(form.template === 'mums-note' || form.template === 'little-note') ? (
+        <div>
+          <label style={labelStyle}>타이틀 (고정)</label>
+          <div style={{
+            ...inputStyle,
+            background: '#F8FAFC',
+            color: '#64748B',
+            fontFamily: '"Playfair Display", serif',
+            fontStyle: 'italic',
+            fontWeight: 700,
+            display: 'flex', alignItems: 'center', gap: '8px',
+            cursor: 'not-allowed',
+          }}>
+            <AlertCircle size={12} style={{ color: '#CBD5E1' }} />
+            {form.template === 'mums-note' ? "Mum's Note" : 'Little Note'}
+            <span style={{ marginLeft: 'auto', fontFamily: 'inherit', fontSize: '10px', fontWeight: 400, color: '#CBD5E1', fontStyle: 'normal' }}>
+              변경 불가
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <label style={labelStyle}>제목 *</label>
+          <input value={form.title} onChange={e => setForm({ title: e.target.value })} placeholder="기사 제목" style={inputStyle} />
+        </div>
+      )}
 
       {/* 저자 + 날짜 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -1887,12 +1945,14 @@ function InlineForm({
         </CollapsibleSection>
       )}
 
-      {/* 본문 TipTap (기본 접힘) */}
-      <CollapsibleSection title="텍스트 본문">
-        <Suspense fallback={<div style={{ ...inputStyle, minHeight: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1' }}><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /></div>}>
-          <TipTapEditor content={form.content} onChange={html => setForm({ content: html })} placeholder="기사 텍스트..." />
-        </Suspense>
-      </CollapsibleSection>
+      {/* 본문 TipTap — little-note는 인용구로 대체되므로 숨김 */}
+      {form.template !== 'little-note' && (
+        <CollapsibleSection title="텍스트 본문" defaultOpen={form.template === 'mums-note'}>
+          <Suspense fallback={<div style={{ ...inputStyle, minHeight: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1' }}><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /></div>}>
+            <TipTapEditor content={form.content} onChange={html => setForm({ content: html })} placeholder={form.template === 'mums-note' ? "Yussi의 여는 에세이 — 첫 글자는 자동 드롭캡." : "기사 텍스트..."} />
+          </Suspense>
+        </CollapsibleSection>
+      )}
 
       {/* 콘텐츠 파일 (기본 접힘) */}
       <CollapsibleSection title="콘텐츠 파일 (이미지 / PDF)">

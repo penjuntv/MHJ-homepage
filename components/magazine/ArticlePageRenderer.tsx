@@ -10,6 +10,8 @@ import TitleCardTemplate from './templates/TitleCardTemplate';
 import SidebarTemplate from './templates/SidebarTemplate';
 import DirectoryTemplate from './templates/DirectoryTemplate';
 import PullQuoteTemplate from './templates/PullQuoteTemplate';
+import MumsNoteTemplate from './templates/MumsNoteTemplate';
+import LittleNoteTemplate from './templates/LittleNoteTemplate';
 import type { ArticlePreviewData, StyleOverrides } from './templates/shared';
 import type { DirectoryItem } from '@/lib/types';
 
@@ -195,22 +197,25 @@ export default function ArticlePageRenderer({
   /* 템플릿 dispatch — 어드민과 라이브가 동일한 templates/*.tsx 사용 */
   const rawTpl = template ?? 'classic';
   // Phase 1 alias: 'free' / 'essay' → TextOnlyTemplate (사진 없는 에세이)
-  // Phase 2 신규 8종(mums-note, little-note, middle, feature-half, left, right,
-  // special, sidebar)은 별도 템플릿 구현 전까지 classic fallback
+  // Phase 2 구현된 것: mums-note, little-note
+  // 남은 Phase 2~5 신규(middle, feature-half, left, right, special, sidebar)는
+  // 별도 템플릿 구현 전까지 classic fallback
   const tpl = rawTpl === 'essay' || rawTpl === 'free' ? 'text-only' : rawTpl;
 
   switch (tpl) {
-    case 'text-only':   return <TextOnlyTemplate   {...props} />;
-    case 'photo-hero':  return <PhotoHeroTemplate  {...props} />;
-    case 'photo-essay': return <PhotoEssayTemplate {...props} />;
-    case 'split':       return <SplitTemplate      {...props} />;
-    case 'story-2':     return <Story2Template     {...props} />;
-    case 'cover':       return <CoverTemplate      {...props} />;
-    case 'title-card':  return <TitleCardTemplate  {...props} />;
-    case 'sidebar':     return <SidebarTemplate    {...props} />;
-    case 'directory':   return <DirectoryTemplate  {...props} />;
-    case 'pull-quote':  return <PullQuoteTemplate  {...props} />;
+    case 'text-only':    return <TextOnlyTemplate    {...props} />;
+    case 'photo-hero':   return <PhotoHeroTemplate   {...props} />;
+    case 'photo-essay':  return <PhotoEssayTemplate  {...props} />;
+    case 'split':        return <SplitTemplate       {...props} />;
+    case 'story-2':      return <Story2Template      {...props} />;
+    case 'cover':        return <CoverTemplate       {...props} />;
+    case 'title-card':   return <TitleCardTemplate   {...props} />;
+    case 'sidebar':      return <SidebarTemplate     {...props} />;
+    case 'directory':    return <DirectoryTemplate   {...props} />;
+    case 'pull-quote':   return <PullQuoteTemplate   {...props} />;
+    case 'mums-note':    return <MumsNoteTemplate    {...props} />;
+    case 'little-note':  return <LittleNoteTemplate  {...props} />;
     case 'classic':
-    default:            return <ClassicTemplate    {...props} />;
+    default:             return <ClassicTemplate     {...props} />;
   }
 }
