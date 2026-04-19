@@ -75,7 +75,7 @@ export default async function AboutPage() {
 
   const daughters = allMembers.filter(m => m.sort_order > 0);
 
-  const whoImage    = s.about_who_image_url || s.about_image_url || '';
+  const whoImage = s.about_who_image_url || s.about_image_url || '';
   const visionImage = s.about_image_url || '';
 
   const breadcrumbLd = {

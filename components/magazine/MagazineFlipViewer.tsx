@@ -18,9 +18,9 @@ function getTheme(mag: Magazine) {
 type ViewSize = 'default' | 'fullscreen' | 'mobile';
 function getScale(size: ViewSize) {
   const scales = {
-    default:    { title: 21, body: 14, label: 10, footer: 9,  heading: 20, coverTitle: 36 },
+    default: { title: 21, body: 14, label: 10, footer: 9, heading: 20, coverTitle: 36 },
     fullscreen: { title: 26, body: 16, label: 12, footer: 10, heading: 24, coverTitle: 44 },
-    mobile:     { title: 20, body: 14, label: 10, footer: 9,  heading: 18, coverTitle: 32 },
+    mobile: { title: 20, body: 14, label: 10, footer: 9, heading: 18, coverTitle: 32 },
   };
   return scales[size];
 }
@@ -49,8 +49,8 @@ function CoverPage({ magazine, size = 'default' }: { magazine: Magazine; size?: 
   const fs = size === 'fullscreen'
     ? { mhj: 56, title: 24, sub: 12, label: 10, date: 9, theSize: 14 }
     : size === 'mobile'
-    ? { mhj: 36, title: 16, sub: 10, label: 8, date: 7, theSize: 10 }
-    : { mhj: 44, title: 20, sub: 10, label: 8, date: 8, theSize: 12 };
+      ? { mhj: 36, title: 16, sub: 10, label: 8, date: 7, theSize: 10 }
+      : { mhj: 44, title: 20, sub: 10, label: 8, date: 8, theSize: 12 };
 
   return (
     <div style={{
@@ -214,8 +214,8 @@ function getAdaptiveTypo(contentLength: number, base: number): { fontSize: numbe
   if (contentLength < 100) return { fontSize: base + 14, lineHeight: 2.8 };
   if (contentLength < 200) return { fontSize: base + 12, lineHeight: 2.6 };
   if (contentLength < 350) return { fontSize: base + 10, lineHeight: 2.4 };
-  if (contentLength < 500) return { fontSize: base + 7,  lineHeight: 2.3 };
-  if (contentLength < 700) return { fontSize: base + 4,  lineHeight: 2.1 };
+  if (contentLength < 500) return { fontSize: base + 7, lineHeight: 2.3 };
+  if (contentLength < 700) return { fontSize: base + 4, lineHeight: 2.1 };
   return { fontSize: base, lineHeight: 1.9 };
 }
 
@@ -237,10 +237,10 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
   /* 템플릿 결정 */
   const template: 'photo-hero' | 'split' | 'text-only' =
     articleType === 'photo-hero' ? 'photo-hero' :
-    articleType === 'split' ? (hasImage ? 'split' : 'text-only') :
-    hasImage && plainText.length < 300 ? 'photo-hero' :
-    hasImage ? 'split' :
-    'text-only';
+      articleType === 'split' ? (hasImage ? 'split' : 'text-only') :
+        hasImage && plainText.length < 300 ? 'photo-hero' :
+          hasImage ? 'split' :
+            'text-only';
 
   const typo = getAdaptiveTypo(plainText.length, s.body);
 

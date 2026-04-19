@@ -11,6 +11,9 @@
 - Supabase DDL/DML 실행 금지
 - Vercel 환경변수·배포 설정 변경 금지
 - /mhj-desk 에서 데이터 저장·삭제 금지 (읽기·탐색만 허용)
+- 코드 변경 제안(Files Modified/Files With Changes) 금지 — 보고서에 텍스트로만 기술
+- Accept/Reject 선택지를 만드는 어떤 행위도 금지
+
 
 ## ✅ 허용된 작업
 

@@ -1190,9 +1190,9 @@ function ArticleThumbnail({ article, isActive }: { article: Article; isActive: b
 
   // article_type별 아이콘 + 배경
   const iconMap: Record<string, { icon: React.ReactNode; bg: string; color: string }> = {
-    cover:    { icon: <ImageIcon size={16} />,  bg: '#C7D2FE', color: '#4F46E5' },
-    contents: { icon: <AlignLeft size={16} />,  bg: '#DDD6FE', color: '#7C3AED' },
-    article:  { icon: <BookOpen size={16} />,   bg: '#E0E7FF', color: '#4F46E5' },
+    cover: { icon: <ImageIcon size={16} />, bg: '#C7D2FE', color: '#4F46E5' },
+    contents: { icon: <AlignLeft size={16} />, bg: '#DDD6FE', color: '#7C3AED' },
+    article: { icon: <BookOpen size={16} />, bg: '#E0E7FF', color: '#4F46E5' },
   };
   const fallback = iconMap[article.article_type ?? 'article'] ?? iconMap.article;
 

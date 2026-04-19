@@ -245,86 +245,85 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
 }) {
   return (
     <div style={{ position: 'relative' }}>
-    <div
-      className="no-scrollbar"
-      style={{
-        display: 'flex',
-        flexWrap: 'nowrap',
-        gap: 8,
-        overflowX: 'auto',
-        padding: '12px 0',
-      }}
-    >
-      {/* All Stories pill */}
-      {(() => {
-        const isActive = selected === 'All';
-        return (
-          <button
-            key="all"
-            onClick={() => onChange('All')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: 20,
-              border: `1px solid ${isActive ? 'var(--text)' : 'var(--border-medium)'}`,
-              cursor: 'pointer',
-              fontSize: 11,
-              fontWeight: isActive ? 800 : 500,
-              letterSpacing: '1px',
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              background: isActive ? 'var(--text)' : 'transparent',
-              color: isActive ? 'var(--bg)' : 'var(--text-secondary)',
-              transition: 'background 0.18s, color 0.18s, border-color 0.18s',
-            }}
-          >
-            All Stories ({totalCount})
-          </button>
-        );
-      })()}
+      <div
+        className="no-scrollbar"
+        style={{
+          display: 'flex',
+          flexWrap: 'nowrap',
+          gap: 8,
+          overflowX: 'auto',
+          padding: '12px 0',
+        }}
+      >
+        {/* All Stories pill */}
+        {(() => {
+          const isActive = selected === 'All';
+          return (
+            <button
+              key="all"
+              onClick={() => onChange('All')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 20,
+                border: `1px solid ${isActive ? 'var(--text)' : 'var(--border-medium)'}`,
+                cursor: 'pointer',
+                fontSize: 11,
+                fontWeight: isActive ? 800 : 500,
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                background: isActive ? 'var(--text)' : 'transparent',
+                color: isActive ? 'var(--bg)' : 'var(--text-secondary)',
+                transition: 'background 0.18s, color 0.18s, border-color 0.18s',
+              }}
+            >
+              All Stories ({totalCount})
+            </button>
+          );
+        })()}
 
-      {/* Category pills */}
-      {ALL_CATEGORIES.map((cat) => {
-        const isActive = selected === cat;
-        const count = categoryCounts[cat] ?? 0;
-        const isEmpty = count === 0;
-        return (
-          <button
-            key={cat}
-            onClick={() => onChange(cat)}
-            style={{
-              padding: '6px 14px',
-              borderRadius: 20,
-              border: `1px ${isEmpty ? 'dashed' : 'solid'} ${
-                isActive ? 'var(--text)' : isEmpty ? 'var(--border)' : 'var(--border-medium)'
-              }`,
-              cursor: 'pointer',
-              fontSize: 11,
-              fontWeight: isActive ? 800 : 500,
-              letterSpacing: '1px',
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              background: isActive ? 'var(--text)' : 'transparent',
-              color: isActive ? 'var(--bg)' : isEmpty ? 'var(--text-tertiary)' : 'var(--text-secondary)',
-              transition: 'background 0.18s, color 0.18s, border-color 0.18s',
-            }}
-          >
-            {cat}
-          </button>
-        );
-      })}
-    </div>
-    {/* 스크롤 힌트: 우측 페이드 */}
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      width: 48,
-      height: '100%',
-      background: 'linear-gradient(to right, transparent, var(--bg))',
-      pointerEvents: 'none',
-    }} />
+        {/* Category pills */}
+        {ALL_CATEGORIES.map((cat) => {
+          const isActive = selected === cat;
+          const count = categoryCounts[cat] ?? 0;
+          const isEmpty = count === 0;
+          return (
+            <button
+              key={cat}
+              onClick={() => onChange(cat)}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 20,
+                border: `1px ${isEmpty ? 'dashed' : 'solid'} ${isActive ? 'var(--text)' : isEmpty ? 'var(--border)' : 'var(--border-medium)'
+                  }`,
+                cursor: 'pointer',
+                fontSize: 11,
+                fontWeight: isActive ? 800 : 500,
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                background: isActive ? 'var(--text)' : 'transparent',
+                color: isActive ? 'var(--bg)' : isEmpty ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                transition: 'background 0.18s, color 0.18s, border-color 0.18s',
+              }}
+            >
+              {cat}
+            </button>
+          );
+        })}
+      </div>
+      {/* 스크롤 힌트: 우측 페이드 */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 48,
+        height: '100%',
+        background: 'linear-gradient(to right, transparent, var(--bg))',
+        pointerEvents: 'none',
+      }} />
     </div>
   );
 }

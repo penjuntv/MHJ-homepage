@@ -50,7 +50,7 @@ export default function AdminFamilyPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/about'] }),
-    }).catch(() => {});
+    }).catch(() => { });
     setUploading(null);
   }
 
@@ -70,7 +70,7 @@ export default function AdminFamilyPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/about'] }),
-    }).catch(() => {});
+    }).catch(() => { });
     setSaved(member.id);
     setTimeout(() => setSaved(null), 2000);
   }

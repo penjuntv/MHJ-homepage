@@ -48,87 +48,87 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px clamp(24px, 4vw, 80px)' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px clamp(24px, 4vw, 80px)' }}>
 
-        {/* Back */}
-        <Link href="/blog" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 12,
-          padding: '16px 20px', background: 'var(--bg-surface)',
-          borderRadius: 999, fontWeight: 900, fontSize: 10,
-          letterSpacing: 3, textTransform: 'uppercase',
-          textDecoration: 'none', color: 'var(--text)', marginBottom: 64,
-          transition: 'background 0.2s',
-        }}>
-          <ArrowLeft size={18} /> Back to Library
-        </Link>
-
-        {/* 헤더 */}
-        <div style={{ marginBottom: 64 }}>
-          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
-            Tag
-          </p>
-          <h1 className="font-display font-black" style={{
-            fontSize: 'clamp(40px, 7vw, 96px)',
-            letterSpacing: '-3px',
-            lineHeight: 0.9,
-            fontStyle: 'italic',
-            color: 'var(--text)',
+          {/* Back */}
+          <Link href="/blog" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 12,
+            padding: '16px 20px', background: 'var(--bg-surface)',
+            borderRadius: 999, fontWeight: 900, fontSize: 10,
+            letterSpacing: 3, textTransform: 'uppercase',
+            textDecoration: 'none', color: 'var(--text)', marginBottom: 64,
+            transition: 'background 0.2s',
           }}>
-            #{tag}
-          </h1>
-          <p style={{ marginTop: 20, fontSize: 14, color: 'var(--text-secondary)', fontWeight: 600 }}>
-            {blogs.length} {blogs.length === 1 ? 'post' : 'posts'}
-          </p>
-        </div>
+            <ArrowLeft size={18} /> Back to Library
+          </Link>
 
-        {/* 글 목록 */}
-        {blogs.length === 0 ? (
-          <p style={{ fontSize: 16, color: 'var(--text-tertiary)', textAlign: 'center', padding: '80px 0' }}>
-            No posts with this tag.
-          </p>
-        ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))',
-            gap: 24,
-          }}>
-            {blogs.map(blog => (
-              <Link key={blog.id} href={`/blog/${blog.slug}`} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  background: 'var(--bg-card)',
-                  borderRadius: 12,
-                  overflow: 'hidden',
-                  transition: 'transform 0.3s, box-shadow 0.3s',
-                }} className="blog-tag-card">
-                  <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}>
-                    <SafeImage
-                      src={blog.image_url}
-                      alt={blog.title}
-                      fill
-                      className="object-cover"
-                      style={{ transition: 'transform 0.5s' }}
-                    />
-                    <div style={{
-                      position: 'absolute', inset: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)',
-                    }} />
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px' }}>
-                      <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 3, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 8 }}>
-                        {blog.category} · {blog.date}
-                      </p>
-                      <p style={{ fontSize: 'clamp(16px, 2vw, 20px)', fontWeight: 900, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.5px' }}>
-                        {blog.title}
-                      </p>
+          {/* 헤더 */}
+          <div style={{ marginBottom: 64 }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
+              Tag
+            </p>
+            <h1 className="font-display font-black" style={{
+              fontSize: 'clamp(40px, 7vw, 96px)',
+              letterSpacing: '-3px',
+              lineHeight: 0.9,
+              fontStyle: 'italic',
+              color: 'var(--text)',
+            }}>
+              #{tag}
+            </h1>
+            <p style={{ marginTop: 20, fontSize: 14, color: 'var(--text-secondary)', fontWeight: 600 }}>
+              {blogs.length} {blogs.length === 1 ? 'post' : 'posts'}
+            </p>
+          </div>
+
+          {/* 글 목록 */}
+          {blogs.length === 0 ? (
+            <p style={{ fontSize: 16, color: 'var(--text-tertiary)', textAlign: 'center', padding: '80px 0' }}>
+              No posts with this tag.
+            </p>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))',
+              gap: 24,
+            }}>
+              {blogs.map(blog => (
+                <Link key={blog.id} href={`/blog/${blog.slug}`} style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    background: 'var(--bg-card)',
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                    transition: 'transform 0.3s, box-shadow 0.3s',
+                  }} className="blog-tag-card">
+                    <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}>
+                      <SafeImage
+                        src={blog.image_url}
+                        alt={blog.title}
+                        fill
+                        className="object-cover"
+                        style={{ transition: 'transform 0.5s' }}
+                      />
+                      <div style={{
+                        position: 'absolute', inset: 0,
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)',
+                      }} />
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px' }}>
+                        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 3, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 8 }}>
+                          {blog.category} · {blog.date}
+                        </p>
+                        <p style={{ fontSize: 'clamp(16px, 2vw, 20px)', fontWeight: 900, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.5px' }}>
+                          {blog.title}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 }

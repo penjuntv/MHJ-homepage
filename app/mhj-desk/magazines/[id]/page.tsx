@@ -27,9 +27,9 @@ import StyleOverridePanel from '@/components/admin/StyleOverridePanel';
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
 /* ─── 타입 ─── */
-type ArticleType   = 'cover' | 'contents' | 'article';
+type ArticleType = 'cover' | 'contents' | 'article';
 type ArticleStatus = 'draft' | 'complete' | 'published';
-type TabKey        = 'cover' | 'articles' | 'spread';
+type TabKey = 'cover' | 'articles' | 'spread';
 
 type ArticleInput = {
   magazine_id: string;
@@ -64,35 +64,35 @@ const TEMPLATE_CATEGORIES: { key: string; label: string; templates: TemplateMeta
   {
     key: 'corner', label: '고정 코너',
     templates: [
-      { key: 'mums-note',    label: "Mum's Note",   desc: '여는 에세이',   photos: 1 },
-      { key: 'little-notes', label: 'Little Notes', desc: '닫는 인용',     photos: 1 },
+      { key: 'mums-note', label: "Mum's Note", desc: '여는 에세이', photos: 1 },
+      { key: 'little-notes', label: 'Little Notes', desc: '닫는 인용', photos: 1 },
     ],
   },
   {
     key: 'main', label: '메인 기사',
     templates: [
-      { key: 'middle',       label: 'Middle',       desc: '상단 풀블리드',   photos: 1 },
-      { key: 'feature-half', label: 'Feature Half', desc: '하단 풀블리드',   photos: 1 },
-      { key: 'left',         label: 'Left',         desc: '좌측 이미지 3장', photos: 3 },
-      { key: 'right',        label: 'Right',        desc: '우측 이미지 3장', photos: 3 },
+      { key: 'middle', label: 'Middle', desc: '상단 풀블리드', photos: 1 },
+      { key: 'feature-half', label: 'Feature Half', desc: '하단 풀블리드', photos: 1 },
+      { key: 'left', label: 'Left', desc: '좌측 이미지 3장', photos: 3 },
+      { key: 'right', label: 'Right', desc: '우측 이미지 3장', photos: 3 },
     ],
   },
   {
     key: 'special', label: '그달의 사진',
     templates: [
-      { key: 'special',      label: 'Special',      desc: '9장 그리드',      photos: 9 },
+      { key: 'special', label: 'Special', desc: '9장 그리드', photos: 9 },
     ],
   },
   {
     key: 'research', label: '리서치',
     templates: [
-      { key: 'sidebar',      label: 'Sidebar',      desc: '본문 + 인포블록', photos: 0 },
+      { key: 'sidebar', label: 'Sidebar', desc: '본문 + 인포블록', photos: 0 },
     ],
   },
   {
     key: 'free', label: '자유 편집',
     templates: [
-      { key: 'free',         label: 'Free',         desc: '사진 없는 에세이', photos: 0 },
+      { key: 'free', label: 'Free', desc: '사진 없는 에세이', photos: 0 },
     ],
   },
 ];
@@ -107,15 +107,15 @@ const LEGACY_TEMPLATES = [
 ];
 
 const STATUS_CONFIG: Record<ArticleStatus, { label: string; bg: string; color: string }> = {
-  draft:     { label: '초안',   bg: '#F1F5F9', color: '#64748B' },
-  complete:  { label: '완료',   bg: '#FEF9C3', color: '#A16207' },
+  draft: { label: '초안', bg: '#F1F5F9', color: '#64748B' },
+  complete: { label: '완료', bg: '#FEF9C3', color: '#A16207' },
   published: { label: '발행됨', bg: '#DCFCE7', color: '#16A34A' },
 };
 
 const TYPE_CONFIG: Record<ArticleType, { label: string; bg: string; color: string }> = {
-  cover:    { label: 'COVER',    bg: '#F59E0B', color: 'white' },
+  cover: { label: 'COVER', bg: '#F59E0B', color: 'white' },
   contents: { label: 'CONTENTS', bg: '#4F46E5', color: 'white' },
-  article:  { label: 'ARTICLE',  bg: '#94A3B8', color: 'white' },
+  article: { label: 'ARTICLE', bg: '#94A3B8', color: 'white' },
 };
 
 const TODAY = new Date()
@@ -192,7 +192,7 @@ export default function MagazineDetailPage() {
   const [magazine, setMagazine] = useState<Magazine | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [toast, setToast]     = useState('');
+  const [toast, setToast] = useState('');
 
   /* ─── 탭 ─── */
   const [tab, setTab] = useState<TabKey>('cover');
@@ -204,19 +204,19 @@ export default function MagazineDetailPage() {
     accent_color: '#1A1A1A', bg_color: '#F5F0EA', cover_filter: 'none', cover_copy: '',
     cover_images: [] as string[], issue_number: '01',
   });
-  const [savingMag, setSavingMag]               = useState(false);
-  const [uploadingMagPdf, setUploadingMagPdf]   = useState(false);
+  const [savingMag, setSavingMag] = useState(false);
+  const [uploadingMagPdf, setUploadingMagPdf] = useState(false);
   const [uploadingMagCover, setUploadingMagCover] = useState(false);
   const [uploadingExtraImg, setUploadingExtraImg] = useState(false);
   const [cropCoverFile, setCropCoverFile] = useState<File | null>(null);
-  const [newContributor, setNewContributor]      = useState('');
+  const [newContributor, setNewContributor] = useState('');
 
   /* ─── 인라인 기사 편집 ─── */
-  const [selectedArtId, setSelectedArtId]  = useState<number | null>(null);
-  const [inlineForm, setInlineForm]        = useState<ArticleInput | null>(null);
-  const [inlineIsNew, setInlineIsNew]      = useState(false);
-  const [savingArticle, setSavingArticle]  = useState(false);
-  const [formError, setFormError]          = useState('');
+  const [selectedArtId, setSelectedArtId] = useState<number | null>(null);
+  const [inlineForm, setInlineForm] = useState<ArticleInput | null>(null);
+  const [inlineIsNew, setInlineIsNew] = useState(false);
+  const [savingArticle, setSavingArticle] = useState(false);
+  const [formError, setFormError] = useState('');
   const [uploadingContent, setUploadingContent] = useState(false);
   const [uploadingSlotIdx, setUploadingSlotIdx] = useState<number | null>(null);
   const [cropSlotFile, setCropSlotFile] = useState<{ file: File; slotIdx: number } | null>(null);
@@ -237,13 +237,13 @@ export default function MagazineDetailPage() {
   const [modalZoom, setModalZoom] = useState(100);
 
   /* ─── refs ─── */
-  const magPdfRef       = useRef<HTMLInputElement>(null);
-  const magCoverRef     = useRef<HTMLInputElement>(null);
-  const extraImgRef     = useRef<HTMLInputElement>(null);
-  const contentFileRef  = useRef<HTMLInputElement>(null);
-  const slotImgRef      = useRef<HTMLInputElement>(null);
-  const pendingSlot     = useRef<number>(0);
-  const pageSlotRef     = useRef<HTMLInputElement>(null);
+  const magPdfRef = useRef<HTMLInputElement>(null);
+  const magCoverRef = useRef<HTMLInputElement>(null);
+  const extraImgRef = useRef<HTMLInputElement>(null);
+  const contentFileRef = useRef<HTMLInputElement>(null);
+  const slotImgRef = useRef<HTMLInputElement>(null);
+  const pendingSlot = useRef<number>(0);
+  const pageSlotRef = useRef<HTMLInputElement>(null);
   const pendingPageSlot = useRef<{ pageIdx: number; slotIdx: number }>({ pageIdx: 0, slotIdx: 0 });
 
   /* ─── Tab 2 live preview ref ─── */
@@ -638,9 +638,9 @@ export default function MagazineDetailPage() {
       <div style={{ padding: '0 clamp(24px,4vw,48px)', borderBottom: '1px solid #F1F5F9', marginBottom: '32px' }}>
         <div style={{ display: 'flex', gap: '4px' }}>
           {([
-            { key: 'cover',    label: '📋 표지 & 설정' },
+            { key: 'cover', label: '📋 표지 & 설정' },
             { key: 'articles', label: '✍️ 기사 편집' },
-            { key: 'spread',   label: '🔍 전체 미리보기' },
+            { key: 'spread', label: '🔍 전체 미리보기' },
           ] as { key: TabKey; label: string }[]).map(t => (
             <button key={t.key} onClick={() => setTab(t.key)} style={{
               padding: '12px 20px', fontSize: '12px', fontWeight: 900, letterSpacing: '1px',
@@ -1360,7 +1360,7 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
   if (tplKey === 'photo-essay') return (
     <div style={{ ...style, flexDirection: 'column', gap: '4px' }}>
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '3px' }}>
-        {['A','B','C','D'].map(l => <div key={l} style={{ minHeight: 0 }}>{photo(l)}</div>)}
+        {['A', 'B', 'C', 'D'].map(l => <div key={l} style={{ minHeight: 0 }}>{photo(l)}</div>)}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         {line('80%')}{line('60%')}
@@ -1423,9 +1423,9 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
       {line('40%', '3px', '#374151')}
       {line('25%', '1px', '#9CA3AF')}
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
-        {[0,1,2].map(i => (
+        {[0, 1, 2].map(i => (
           <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-            <div style={{ fontSize: '8px', color: '#9CA3AF', fontStyle: 'italic', fontWeight: 900 }}>0{i+1}</div>
+            <div style={{ fontSize: '8px', color: '#9CA3AF', fontStyle: 'italic', fontWeight: 900 }}>0{i + 1}</div>
             {line('90%', '2px', '#374151')}
             {line('70%', '1px', '#D1D5DB')}
           </div>
@@ -1522,7 +1522,7 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
   if (tplKey === 'special') return (
     <div style={{ ...style, padding: '3px' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: 'repeat(3, 1fr)', gap: '2px', width: '100%', height: '100%' }}>
-        {['A','B','C','D','E','F','G','H','I'].map(l => (
+        {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].map(l => (
           <div key={l} style={{ minHeight: 0 }}>{photo(l, '1px')}</div>
         ))}
       </div>
@@ -2011,7 +2011,7 @@ function InlineForm({
               const pos = form.image_positions?.[i] ?? 'center';
               const isUp = uploadingSlotIdx === i;
               const POS_LABELS: Record<string, string> = { 'top left': '좌상', 'top': '상', 'top right': '우상', 'left': '좌', 'center': '중', 'right': '우', 'bottom left': '좌하', 'bottom': '하', 'bottom right': '우하' };
-              const POS_GRID = ['top left','top','top right','left','center','right','bottom left','bottom','bottom right'];
+              const POS_GRID = ['top left', 'top', 'top right', 'left', 'center', 'right', 'bottom left', 'bottom', 'bottom right'];
               return (
                 <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <div onClick={() => !isUp && onSlotUpload(i)} style={{ border: '2px dashed #F1F5F9', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', background: '#F8FAFC', aspectRatio: '4/3', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -2216,7 +2216,7 @@ function ArticlePagesSection({
                     const pos = page.image_positions?.[si] ?? 'center';
                     const isUp = uploadingSlot?.pageIdx === pi && uploadingSlot?.slotIdx === si;
                     const POS_LABELS: Record<string, string> = { 'top left': '좌상', 'top': '상', 'top right': '우상', 'left': '좌', 'center': '중', 'right': '우', 'bottom left': '좌하', 'bottom': '하', 'bottom right': '우하' };
-                    const POS_GRID = ['top left','top','top right','left','center','right','bottom left','bottom','bottom right'];
+                    const POS_GRID = ['top left', 'top', 'top right', 'left', 'center', 'right', 'bottom left', 'bottom', 'bottom right'];
                     return (
                       <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <div onClick={() => !isUp && onImageUpload(pi, si)}
@@ -2225,9 +2225,9 @@ function ArticlePagesSection({
                             // eslint-disable-next-line @next/next/no-img-element
                             ? <img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: pos }} />
                             : <div style={{ color: '#CBD5E1', textAlign: 'center' }}>
-                                {isUp ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={14} />}
-                                <p style={{ fontSize: '9px', fontWeight: 700, margin: '2px 0 0' }}>사진 {si + 1}</p>
-                              </div>
+                              {isUp ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={14} />}
+                              <p style={{ fontSize: '9px', fontWeight: 700, margin: '2px 0 0' }}>사진 {si + 1}</p>
+                            </div>
                           }
                           {src && (
                             <button type="button" onClick={e => { e.stopPropagation(); const imgs = [...(page.images ?? [])]; imgs[si] = ''; updatePage(pi, { images: imgs }); }}

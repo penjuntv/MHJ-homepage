@@ -11,6 +11,8 @@
 
 # next.js
 /.next/
+/.next.bak2/
+/.next.old/
 /out/
 
 # production
@@ -35,6 +37,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code (session files)
+.claude/scheduled_tasks.lock
 
 # playwright & screenshots
 .playwright-mcp/
