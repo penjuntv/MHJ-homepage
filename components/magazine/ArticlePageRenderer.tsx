@@ -12,6 +12,8 @@ import DirectoryTemplate from './templates/DirectoryTemplate';
 import PullQuoteTemplate from './templates/PullQuoteTemplate';
 import MumsNoteTemplate from './templates/MumsNoteTemplate';
 import LittleNotesTemplate from './templates/LittleNotesTemplate';
+import MiddleTemplate from './templates/MiddleTemplate';
+import FeatureHalfTemplate from './templates/FeatureHalfTemplate';
 import type { ArticlePreviewData, StyleOverrides } from './templates/shared';
 import type { DirectoryItem } from '@/lib/types';
 
@@ -217,6 +219,8 @@ export default function ArticlePageRenderer({
     case 'pull-quote':   return <PullQuoteTemplate   {...props} />;
     case 'mums-note':    return <MumsNoteTemplate    {...props} />;
     case 'little-notes': return <LittleNotesTemplate {...props} />;
+    case 'middle':       return <MiddleTemplate      {...props} />;
+    case 'feature-half': return <FeatureHalfTemplate {...props} />;
     case 'classic':
     default:             return <ClassicTemplate     {...props} />;
   }
