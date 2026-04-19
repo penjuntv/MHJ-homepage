@@ -39,7 +39,7 @@ export default function MagazinePage({
 
   return (
     <div
-      className={className}
+      className={`mag-page-root${className ? ' ' + className : ''}`}
       style={{
         aspectRatio: PAGE_ASPECT_RATIO,
         background: bgColor,

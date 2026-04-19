@@ -191,7 +191,10 @@ export default function ArticlePageRenderer({
 
   /* 템플릿 dispatch — 어드민과 라이브가 동일한 templates/*.tsx 사용 */
   const rawTpl = template ?? 'classic';
-  const tpl = rawTpl === 'essay' ? 'text-only' : rawTpl;
+  // Phase 1 alias: 'free' / 'essay' → TextOnlyTemplate (사진 없는 에세이)
+  // Phase 2 신규 8종(mums-note, little-note, middle, feature-half, left, right,
+  // special, sidebar)은 별도 템플릿 구현 전까지 classic fallback
+  const tpl = rawTpl === 'essay' || rawTpl === 'free' ? 'text-only' : rawTpl;
 
   switch (tpl) {
     case 'text-only':   return <TextOnlyTemplate   {...props} />;

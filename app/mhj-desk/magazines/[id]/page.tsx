@@ -66,19 +66,54 @@ type ArticleInput = {
   quote_attribution: string;
 };
 
-/* ─── 상수 ─── */
-const TEMPLATE_META: { key: string; label: string; desc: string; photos: number }[] = [
-  { key: 'photo-hero',   label: 'Photo Hero',   desc: '풀블리드 사진',    photos: 1 },
-  { key: 'classic',      label: 'Classic',      desc: '상단 사진+드롭캡', photos: 1 },
-  { key: 'photo-essay',  label: 'Photo Essay',  desc: '다크 사진 그리드', photos: 4 },
-  { key: 'story-2',      label: 'Story-2',      desc: '사진 2장+본문',    photos: 2 },
-  { key: 'text-only',    label: 'Essay',        desc: '사진 없는 에세이', photos: 0 },
-  { key: 'split',        label: 'Split',        desc: '좌우 분할',        photos: 3 },
-  { key: 'cover',        label: 'Cover',        desc: '풀 블리드 표지',   photos: 1 },
-  { key: 'title-card',   label: 'Title Card',   desc: '여백 타이포',      photos: 0 },
-  { key: 'sidebar',      label: 'Sidebar',      desc: '본문+사이드바',    photos: 0 },
-  { key: 'directory',    label: 'Directory',    desc: '3단 목차',         photos: 0 },
-  { key: 'pull-quote',   label: 'Pull Quote',   desc: '인용구 페이지',    photos: 0 },
+/* ─── 템플릿 카테고리 (Phase 1 v2) ───
+   Phase 2-5에서 각 템플릿의 실제 렌더러 구현 예정.
+   현재 렌더링은 classic fallback (sidebar/free 제외 — 이미 구현됨). */
+type TemplateMeta = { key: string; label: string; desc: string; photos: number };
+const TEMPLATE_CATEGORIES: { key: string; label: string; templates: TemplateMeta[] }[] = [
+  {
+    key: 'corner', label: '고정 코너',
+    templates: [
+      { key: 'mums-note',    label: "Mum's Note",   desc: '여는 에세이',   photos: 0 },
+      { key: 'little-note',  label: 'Little Note',  desc: '닫는 인용',     photos: 0 },
+    ],
+  },
+  {
+    key: 'main', label: '메인 기사',
+    templates: [
+      { key: 'middle',       label: 'Middle',       desc: '상단 풀블리드',   photos: 1 },
+      { key: 'feature-half', label: 'Feature Half', desc: '하단 풀블리드',   photos: 1 },
+      { key: 'left',         label: 'Left',         desc: '좌측 이미지 3장', photos: 3 },
+      { key: 'right',        label: 'Right',        desc: '우측 이미지 3장', photos: 3 },
+    ],
+  },
+  {
+    key: 'special', label: '그달의 사진',
+    templates: [
+      { key: 'special',      label: 'Special',      desc: '9장 그리드',      photos: 9 },
+    ],
+  },
+  {
+    key: 'research', label: '리서치',
+    templates: [
+      { key: 'sidebar',      label: 'Sidebar',      desc: '본문 + 인포블록', photos: 0 },
+    ],
+  },
+  {
+    key: 'free', label: '자유 편집',
+    templates: [
+      { key: 'free',         label: 'Free',         desc: '사진 없는 에세이', photos: 0 },
+    ],
+  },
+];
+
+/* 평탄화 (label lookup 호환) */
+const TEMPLATE_META: TemplateMeta[] = TEMPLATE_CATEGORIES.flatMap(c => c.templates);
+
+/* Legacy 값 — 드롭다운에서 숨기되 기존 기사가 이 값을 가지면 안내 표시 */
+const LEGACY_TEMPLATES = [
+  'text-only', 'essay', 'classic', 'split', 'photo-hero', 'photo-essay',
+  'story-2', 'cover', 'title-card', 'directory', 'pull-quote',
 ];
 
 const STATUS_CONFIG: Record<ArticleStatus, { label: string; bg: string; color: string }> = {
@@ -1600,25 +1635,46 @@ function InlineForm({
         </div>
       </div>
 
-      {/* 템플릿 선택 (기본 열림) */}
+      {/* 템플릿 선택 (기본 열림) — 카테고리 구조 */}
       <CollapsibleSection title="템플릿" defaultOpen>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-          {TEMPLATE_META.map(t => {
-            const selected = form.template === t.key;
-            return (
-              <button key={t.key} type="button" onClick={() => setForm({ template: t.key })}
-                style={{ padding: 0, borderRadius: '10px', cursor: 'pointer', overflow: 'hidden', border: selected ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: selected ? `${accentColor}10` : 'white', transition: 'background 0.15s, border-color 0.15s' }}>
-                <div style={{ aspectRatio: '42 / 55', overflow: 'hidden', background: selected ? 'white' : '#F8FAFC' }}>
-                  <TemplateDiagram tplKey={t.key} />
-                </div>
-                <div style={{ padding: '6px 6px 7px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <p style={{ fontSize: '9px', fontWeight: 900, color: selected ? accentColor : '#1A1A1A', margin: 0, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.label}</p>
-                  <p style={{ fontSize: '8px', color: '#94A3B8', margin: 0, lineHeight: 1.3 }}>{t.desc}</p>
-                  <p style={{ fontSize: '7px', fontWeight: 700, color: '#CBD5E1', margin: 0, letterSpacing: '1px' }}>사진 {t.photos}장</p>
-                </div>
-              </button>
-            );
-          })}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* Legacy 안내 배너 */}
+          {LEGACY_TEMPLATES.includes(form.template) && (
+            <div style={{ padding: '8px 12px', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '8px', fontSize: '11px', color: '#92400E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <AlertCircle size={12} />
+              <span>현재 template: <strong>{form.template}</strong> (legacy). 아래 신규 카테고리에서 재선택 권장.</span>
+            </div>
+          )}
+
+          {TEMPLATE_CATEGORIES.map(cat => (
+            <div key={cat.key}>
+              <p style={{
+                fontSize: '9px', fontWeight: 900, letterSpacing: '3px',
+                color: '#94A3B8', textTransform: 'uppercase',
+                margin: '0 0 8px', paddingLeft: '2px',
+              }}>
+                {cat.label}
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                {cat.templates.map(t => {
+                  const selected = form.template === t.key;
+                  return (
+                    <button key={t.key} type="button" onClick={() => setForm({ template: t.key })}
+                      style={{ padding: 0, borderRadius: '10px', cursor: 'pointer', overflow: 'hidden', border: selected ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: selected ? `${accentColor}10` : 'white', transition: 'background 0.15s, border-color 0.15s' }}>
+                      <div style={{ aspectRatio: '42 / 55', overflow: 'hidden', background: selected ? 'white' : '#F8FAFC' }}>
+                        <TemplateDiagram tplKey={t.key} />
+                      </div>
+                      <div style={{ padding: '6px 6px 7px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <p style={{ fontSize: '9px', fontWeight: 900, color: selected ? accentColor : '#1A1A1A', margin: 0, textTransform: 'uppercase', letterSpacing: '1px' }}>{t.label}</p>
+                        <p style={{ fontSize: '8px', color: '#94A3B8', margin: 0, lineHeight: 1.3 }}>{t.desc}</p>
+                        <p style={{ fontSize: '7px', fontWeight: 700, color: '#CBD5E1', margin: 0, letterSpacing: '1px' }}>사진 {t.photos}장</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </CollapsibleSection>
 

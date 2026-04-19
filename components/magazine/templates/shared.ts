@@ -81,6 +81,7 @@ export interface NewTemplateProps {
 }
 
 export const TEMPLATE_PHOTO_COUNT: Record<string, number> = {
+  // Legacy (Phase 1 이전)
   'photo-hero': 1,
   'classic': 1,
   'photo-essay': 4,
@@ -89,9 +90,18 @@ export const TEMPLATE_PHOTO_COUNT: Record<string, number> = {
   'split': 3,
   'cover': 1,
   'title-card': 0,
-  'sidebar': 0,
   'directory': 0,
   'pull-quote': 0,
+  // Phase 1 v2 (신규 8종 + free alias)
+  'mums-note': 0,
+  'little-note': 0,
+  'middle': 1,
+  'feature-half': 1,
+  'left': 3,
+  'right': 3,
+  'special': 9,
+  'sidebar': 0,
+  'free': 0,
 };
 
 // ── HTML helpers for v2 templates (T01, T04, T08, T11, T12) ─────────────

@@ -15,16 +15,17 @@ export default function TextOnlyTemplate({
     '<p>에세이 본문을 작성해 주세요. 첫 글자는 자동으로 드롭캡으로 표시됩니다.</p>';
 
   const so = article.style_overrides ?? {};
-  const titleClamp = overrideTitleClamp(so, 'clamp(22px, 3vw, 32px)');
-  const bodyClamp = overrideBodyClamp(so, 'clamp(11px, 1.3vw, 15px)');
+  // Phase 1: cqw 기반 (컨테이너 width 기준) 폰트 — 썸네일/뷰어에서 일관된 비율
+  const titleClamp = overrideTitleClamp(so, 'var(--mag-font-title)');
+  const bodyClamp = overrideBodyClamp(so, 'var(--mag-font-body)');
   const lh = overrideLineHeight(so, 1.65);
   const bg = so.bgColor ?? bgColor;
   const align: 'left' | 'center' = so.textAlign ?? 'left';
   const dropCap = so.dropCap !== false; // 기본 on (명시적 false일 때만 끔)
   const dropLines = so.dropCapLines ?? 3;
-  const dropFont = dropLines === 5 ? 'clamp(68px, 9.6vw, 110px)'
-    : dropLines === 4 ? 'clamp(54px, 7.6vw, 88px)'
-    : 'clamp(42px, 5.8vw, 68px)';
+  const dropFont = dropLines === 5 ? 'clamp(32px, 14cqw, 100px)'
+    : dropLines === 4 ? 'clamp(26px, 11cqw, 82px)'
+    : 'clamp(20px, 8.5cqw, 64px)';
   const showDivider = so.divider !== false; // 기본 on
   const dividerW = so.dividerWeight ?? 1;
 
@@ -34,7 +35,8 @@ export default function TextOnlyTemplate({
         width: '100%',
         height: '100%',
         background: bg,
-        padding: '8% 8%',
+        /* Phase 1 공통 여백: 좌우 5% / 상하 48px */
+        padding: 'var(--mag-page-padding-y) var(--mag-page-padding-x)',
         boxSizing: 'border-box',
         overflow: 'hidden',
         display: 'flex',
@@ -87,7 +89,7 @@ export default function TextOnlyTemplate({
             flexShrink: 0,
             fontFamily: '"Inter", sans-serif',
             fontWeight: 600,
-            fontSize: 'clamp(7px, 0.9vw, 10px)',
+            fontSize: 'var(--mag-font-meta)',
             letterSpacing: '0.35em',
             color: accentColor,
             textTransform: 'uppercase',
@@ -138,10 +140,10 @@ export default function TextOnlyTemplate({
           <span
             style={{
               fontFamily: '"Inter", sans-serif',
-              fontSize: 'clamp(8px, 0.95vw, 11px)',
+              fontSize: 'var(--mag-font-meta)',
               fontWeight: 600,
               letterSpacing: '0.2em',
-              color: '#9B9590',
+              color: 'var(--mag-meta-color)',
               textTransform: 'uppercase',
             }}
           >
@@ -151,7 +153,7 @@ export default function TextOnlyTemplate({
             style={{
               fontFamily: '"Playfair Display", serif',
               fontWeight: 900,
-              fontSize: 'clamp(11px, 1.2vw, 14px)',
+              fontSize: 'var(--mag-font-meta)',
               color: accentColor,
               opacity: 0.55,
             }}

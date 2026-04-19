@@ -1522,6 +1522,42 @@ a:hover .magazine-cover-shadow img {
   margin-right: calc(50% - 50vw);
 }
 
+/* ─── Magazine Template System v2 (Phase 1 공통 인프라) ───
+   모든 매거진 페이지 템플릿의 공통 변수. 썸네일/뷰어 어디에서든
+   container width 기준(cqw)으로 타이포 비율 유지. */
+:root {
+  /* 여백 */
+  --mag-page-padding-x: 5%;
+  --mag-page-padding-y: 48px;
+
+  /* 폰트 스케일 (cqw: container query width 기준)
+     매거진 페이지 컨테이너(420px 썸네일 / 620px 뷰어) 내부에서 비율 유지.
+     clamp 최솟값 = 모바일 가독성 하한, 최댓값 = 4K/와이드 상한 */
+  --mag-font-title:    clamp(18px, 6cqw, 56px);
+  --mag-font-subtitle: clamp(10px, 1.5cqw, 16px);
+  --mag-font-body:     clamp(11px, 2.2cqw, 18px);
+  --mag-font-meta:     clamp(9px, 1.4cqw, 14px);
+  --mag-font-quote:    clamp(14px, 3cqw, 24px);
+
+  /* 색 */
+  --mag-title-divider: rgba(0, 0, 0, 0.1);
+  --mag-body-color: #1A1A1A;
+  --mag-meta-color: #9B9590;
+}
+
+.dark {
+  --mag-title-divider: rgba(255, 255, 255, 0.12);
+  --mag-body-color: #E5E5E5;
+  --mag-meta-color: #9B9590;
+}
+
+/* 매거진 페이지 루트 컨테이너 — 이 선언이 적용되는 요소의 width를
+   기준으로 cqw 단위가 계산됨. MagazinePage.tsx의 최상위 div에 적용. */
+.mag-page-root {
+  container-type: inline-size;
+  container-name: mag-page;
+}
+
 /* ─── Newsletter form row 모바일 스태킹 ─── */
 @media (max-width: 480px) {
   .newsletter-form-row {
