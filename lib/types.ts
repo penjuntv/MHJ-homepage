@@ -187,3 +187,14 @@ export interface GalleryItem {
   sort_order: number;
   created_at?: string;
 }
+
+export interface LandingPhoto {
+  id: number;
+  image_url: string;
+  caption?: string | null;
+  photographer?: string | null;
+  published: boolean;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+}

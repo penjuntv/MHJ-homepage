@@ -47,14 +47,16 @@ export async function GET() {
     }
   }
 
-  // ── B. Fallback: Supabase gallery 테이블 최신 6개 ───────────
+  // ── B. Fallback: Supabase landing_photos 테이블 최신 8개 ─────
   try {
     const supabase = getSupabaseAdmin();
     const { data } = await supabase
-      .from('gallery')
+      .from('landing_photos')
       .select('id, image_url, caption')
-      .order('created_at', { ascending: false })
-      .limit(6);
+      .eq('published', true)
+      .order('sort_order', { ascending: true })
+      .order('id', { ascending: false })
+      .limit(8);
 
     if (data?.length) {
       const posts = data.map((item) => ({
@@ -66,7 +68,7 @@ export async function GET() {
         media_type: 'IMAGE',
         caption: item.caption,
       }));
-      return NextResponse.json({ source: 'gallery', posts });
+      return NextResponse.json({ source: 'landing_photos', posts });
     }
   } catch {
     // fall through
