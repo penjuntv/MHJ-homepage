@@ -77,18 +77,19 @@ export default function MumsNoteTemplate({
         </h1>
       </div>
 
-      {/* 오너먼트 이미지 */}
-      <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', padding: '1.2em 0' }}>
+      {/* 오너먼트 이미지 — 구분선과 충분히 떨어뜨리고(margin-top 5cqw),
+          장식 역할이므로 본 이미지보다 작게(30%) */}
+      <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', marginTop: '5cqw', marginBottom: '1.2em' }}>
         {ornament ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={ornament}
             alt=""
-            style={{ maxWidth: '40%', maxHeight: '28cqh', width: 'auto', height: 'auto', objectFit: 'contain', display: 'block' }}
+            style={{ maxWidth: '30%', maxHeight: '22cqh', width: 'auto', height: 'auto', objectFit: 'contain', display: 'block' }}
           />
         ) : (
           <div style={{
-            width: '28%', aspectRatio: '1 / 1',
+            width: '22%', aspectRatio: '1 / 1',
             borderRadius: '50%',
             border: `1px dashed ${accentColor}44`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',

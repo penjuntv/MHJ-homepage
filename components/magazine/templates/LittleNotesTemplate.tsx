@@ -45,8 +45,8 @@ export default function LittleNotesTemplate({
         </h1>
       </div>
 
-      {/* 이미지 */}
-      <div style={{ flex: '0 1 auto', display: 'flex', justifyContent: 'center', padding: '1.1em 0 1em' }}>
+      {/* 이미지 — 구분선과 충분히 떨어뜨림 (margin-top 5cqw) */}
+      <div style={{ flex: '0 1 auto', display: 'flex', justifyContent: 'center', marginTop: '5cqw', marginBottom: '1em' }}>
         {image ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
@@ -94,6 +94,7 @@ export default function LittleNotesTemplate({
             lineHeight: 1.45,
             color: 'var(--mag-body-color)',
             margin: 0,
+            whiteSpace: 'pre-line',
           }}
         >
           {quoteText || '인용구를 입력해 주세요.'}
