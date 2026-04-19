@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const revalidate = 3600; // 1시간 캐시
+// Vercel CDN edge 캐시 방지 — landing_photos Admin 교체 즉시 반영.
+// 매 요청마다 서버에서 DB 조회 (쿼리 가벼움, limit 8).
+// Instagram Graph API fetch는 내부에서 `next: { revalidate: 3600 }`로 따로
+// 1시간 캐시 유지.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface InstagramPost {
   id: string;
