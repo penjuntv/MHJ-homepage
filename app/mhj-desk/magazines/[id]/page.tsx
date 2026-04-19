@@ -694,7 +694,7 @@ export default function MagazineDetailPage() {
                   {(magForm.cover_images ?? []).map((url, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <div style={{ width: '40px', height: '52px', borderRadius: '4px', overflow: 'hidden', background: '#F1F5F9', flexShrink: 0, position: 'relative' }}>
-                        {url ? <SafeImage src={url} alt="" fill style={{ objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: '#E2E8F0' }} />}
+                        {url ? <SafeImage src={url} alt="" fill sizes="40px" style={{ objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: '#E2E8F0' }} />}
                       </div>
                       <input value={url} onChange={e => { const imgs = [...(magForm.cover_images ?? [])]; imgs[idx] = e.target.value; setMagForm(p => ({ ...p, cover_images: imgs })); }} placeholder="이미지 URL" style={{ ...inputStyle, flex: 1 }} />
                       <button type="button" onClick={() => setMagForm(p => ({ ...p, cover_images: (p.cover_images ?? []).filter((_, i) => i !== idx) }))} style={{ padding: '7px', background: 'white', border: '1px solid #FEE2E2', borderRadius: '8px', color: '#EF4444', cursor: 'pointer', flexShrink: 0, display: 'flex' }}>
@@ -722,7 +722,7 @@ export default function MagazineDetailPage() {
                 <p style={sectionTitle}>표지 이미지 (서가 커버)</p>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div style={{ width: '72px', height: '96px', borderRadius: '8px', overflow: 'hidden', background: '#F1F5F9', flexShrink: 0, position: 'relative' }}>
-                    {magForm.image_url ? <SafeImage src={magForm.image_url} alt="" fill style={{ objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={18} color="#CBD5E1" /></div>}
+                    {magForm.image_url ? <SafeImage src={magForm.image_url} alt="" fill sizes="72px" style={{ objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={18} color="#CBD5E1" /></div>}
                   </div>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <input value={magForm.image_url} onChange={e => setMagForm(p => ({ ...p, image_url: e.target.value }))} placeholder="이미지 URL" style={inputStyle} />
@@ -892,7 +892,7 @@ export default function MagazineDetailPage() {
                     <div onClick={() => selectArticle(article)} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', background: isSelected ? '#F0F4FF' : '#F8FAFC', border: isSelected ? '1.5px solid #4F46E5' : '1px solid #F1F5F9', cursor: 'pointer', transition: 'all 0.15s' }}>
                       <span style={{ fontSize: '11px', fontWeight: 900, color: '#CBD5E1', width: '20px', textAlign: 'center', flexShrink: 0 }}>{idx + 1}</span>
                       <div style={{ width: '40px', height: '54px', borderRadius: '6px', overflow: 'hidden', background: '#E2E8F0', flexShrink: 0, position: 'relative' }}>
-                        {article.image_url ? <SafeImage src={article.image_url} alt="" fill style={{ objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={14} color="#CBD5E1" /></div>}
+                        {article.image_url ? <SafeImage src={article.image_url} alt="" fill sizes="40px" style={{ objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={14} color="#CBD5E1" /></div>}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', gap: '4px', marginBottom: '3px', flexWrap: 'wrap' }}>

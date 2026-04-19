@@ -102,6 +102,7 @@ export default function HeroCarousel({ slides }: Props) {
                   src={slide.image_url || ''}
                   alt={slide.title}
                   fill
+                  sizes="100vw"
                   className="object-cover"
                   style={{ filter: 'saturate(1.4) contrast(1.05)' }}
                   priority={i === 0}

@@ -86,6 +86,7 @@ function ArticleCard({ article, staggerClass, onClick }: CardProps) {
           src={article.image_url}
           alt={article.title}
           fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className={`object-cover vivid-hover`}
         />
         {/* 어두운 오버레이 */}

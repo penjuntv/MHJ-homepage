@@ -521,6 +521,7 @@ export default async function LandingPage() {
                     src={latestMag.image_url}
                     alt={latestMag.title}
                     fill
+                    sizes="135px"
                     className="object-cover"
                   />
                 </div>
@@ -632,6 +633,7 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                 src={main.og_image_url || main.image_url}
                 alt={main.title}
                 fill
+                sizes="(max-width: 1024px) 100vw, 66vw"
                 className="object-cover"
               />
             </div>
@@ -715,6 +717,7 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                     src={blog.image_url}
                     alt={blog.title}
                     fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 140px, 200px"
                     className="object-cover"
                   />
                 </div>
@@ -780,6 +783,7 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
           src={blog.image_url}
           alt={blog.title}
           fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover"
           style={{ transition: 'transform 0.5s ease' }}
         />
@@ -934,6 +938,7 @@ function ExploreByTopic({ categoryPosts }: { categoryPosts: Record<string, Blog[
                       src={blog.image_url}
                       alt={blog.title}
                       fill
+                      sizes="(max-width: 1024px) 100vw, 50vw"
                       className="object-cover"
                     />
                   </div>
@@ -1045,6 +1050,7 @@ function FromTheArchive({ posts }: { posts: Blog[] }) {
                 src={blog.image_url}
                 alt={blog.title}
                 fill
+                sizes="120px"
                 className="object-cover"
               />
             </div>

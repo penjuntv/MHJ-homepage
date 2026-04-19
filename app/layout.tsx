@@ -55,9 +55,11 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.webmanifest',
   appleWebApp: {
-    capable: true,
     statusBarStyle: 'default',
     title: 'MHJ',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
   },
 };
 

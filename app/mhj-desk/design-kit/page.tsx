@@ -237,6 +237,7 @@ export default function DesignKitPage() {
                       src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=300"
                       alt="vivid demo"
                       fill
+                      sizes="120px"
                       className="object-cover"
                       style={{
                         filter: vividDemo ? 'saturate(2.2) contrast(1.1) brightness(1.05)' : 'saturate(1.2) contrast(1.05)',
@@ -253,6 +254,7 @@ export default function DesignKitPage() {
                       src="https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=300"
                       alt="grayscale demo"
                       fill
+                      sizes="120px"
                       className="object-cover grayscale-hover"
                     />
                   </div>
@@ -362,7 +364,7 @@ function BlogCardDemo() {
         transition: 'all 0.7s',
       }}
     >
-      <SafeImage src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600" alt="demo" fill className="object-cover" />
+      <SafeImage src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600" alt="demo" fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover" />
       <div style={{
         position: 'absolute', inset: 0,
         background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)',
@@ -398,7 +400,7 @@ function ArticleCardDemo() {
         boxShadow: hovered ? '0 30px 60px rgba(0,0,0,0.15)' : '0 15px 40px rgba(0,0,0,0.08)',
         transition: 'box-shadow 0.5s',
       }}>
-        <SafeImage src="https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600" alt="demo" fill className="object-cover" style={{ filter: 'saturate(1.2) contrast(1.05)' }} />
+        <SafeImage src="https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600" alt="demo" fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover" style={{ filter: 'saturate(1.2) contrast(1.05)' }} />
         <div style={{
           position: 'absolute', inset: 0,
           background: hovered ? 'transparent' : 'rgba(0,0,0,0.2)',

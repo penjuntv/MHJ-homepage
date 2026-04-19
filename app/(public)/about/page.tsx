@@ -122,6 +122,7 @@ export default async function AboutPage() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   unoptimized={whoImage.includes('picsum.photos')}
                   className="object-cover"
+                  priority
                 />
               ) : (
                 <div style={{

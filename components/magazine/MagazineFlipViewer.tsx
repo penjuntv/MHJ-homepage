@@ -271,7 +271,7 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
           width: '100%', height: '55%', position: 'relative', flexShrink: 0,
           overflow: 'hidden',
         }}>
-          <SafeImage src={imageSrc} alt={article.title} fill className="object-cover" />
+          <SafeImage src={imageSrc} alt={article.title} fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" />
         </div>
         {/* 텍스트 영역 */}
         <div style={{
@@ -308,7 +308,7 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
           width: '100%', height: '40%', position: 'relative', flexShrink: 0,
           overflow: 'hidden',
         }}>
-          <SafeImage src={imageSrc} alt={article.title} fill className="object-cover" />
+          <SafeImage src={imageSrc} alt={article.title} fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" />
         </div>
         {/* 텍스트 */}
         <div style={{

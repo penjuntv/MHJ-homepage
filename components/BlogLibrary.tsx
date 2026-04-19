@@ -358,6 +358,7 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
           src={blog.image_url}
           alt={blog.title}
           fill
+          sizes="(max-width: 1024px) 100vw, 66vw"
           className="object-cover"
           priority
           style={{
@@ -459,6 +460,7 @@ function RecentStoryItem({ blog, isLast, onClick }: { blog: Blog; isLast: boolea
           src={blog.image_url}
           alt={blog.title}
           fill
+          sizes="56px"
           className="object-cover"
           style={{
             transform: hovered ? 'scale(1.05)' : 'scale(1)',
@@ -526,6 +528,7 @@ function BlogCard({ blog, onClick }: CardProps) {
           src={blog.image_url}
           alt={blog.title}
           fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
           className="object-cover"
           style={{
             transform: hovered ? 'scale(1.03)' : 'scale(1)',
@@ -712,6 +715,7 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
           src={blog.image_url}
           alt={blog.title}
           fill
+          sizes="280px"
           className="object-cover"
           style={{
             transform: hovered ? 'scale(1.02)' : 'scale(1)',

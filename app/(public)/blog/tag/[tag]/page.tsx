@@ -106,6 +106,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
                         src={blog.image_url}
                         alt={blog.title}
                         fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover"
                         style={{ transition: 'transform 0.5s' }}
                       />

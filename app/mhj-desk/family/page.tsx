@@ -125,7 +125,7 @@ export default function AdminFamilyPage() {
             onClick={() => fileRefs.current[member.id]?.click()}
           >
             {member.image_url ? (
-              <SafeImage src={member.image_url} alt={member.name} fill className="object-cover" />
+              <SafeImage src={member.image_url} alt={member.name} fill sizes="(max-width: 640px) 100vw, 300px" className="object-cover" />
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                 <Upload size={24} color="#CBD5E1" />

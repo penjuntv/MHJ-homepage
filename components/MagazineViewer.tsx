@@ -817,7 +817,7 @@ function MagazineViewerLegacy({ magazine, articles }: Props) {
                 {/* 매거진 커버 */}
                 {magazine.image_url && (
                   <div style={{ aspectRatio: '3/4', position: 'relative', borderRadius: 10, overflow: 'hidden', marginBottom: 16, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-                    <SafeImage src={magazine.image_url} alt={magazine.title} fill className="object-cover" />
+                    <SafeImage src={magazine.image_url} alt={magazine.title} fill sizes="360px" className="object-cover" />
                   </div>
                 )}
 
@@ -1091,9 +1091,9 @@ function ArticleGridCard({ article, onOpen, magazineLabel, magazineCoverUrl, lik
             // eslint-disable-next-line @next/next/no-img-element
             <img src={article.pdf_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : hasOwnImage ? (
-            <SafeImage src={article.image_url} alt={article.title} fill className="object-cover" />
+            <SafeImage src={article.image_url} alt={article.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
           ) : isFallback ? (
-            <SafeImage src={fallbackSrc} alt={article.title} fill className="object-cover" style={{ filter: 'brightness(0.85) saturate(0.7)' }} />
+            <SafeImage src={fallbackSrc} alt={article.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" style={{ filter: 'brightness(0.85) saturate(0.7)' }} />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: 5, color: 'rgba(139,115,85,0.3)', textTransform: 'uppercase', margin: 0 }}>MHJ</p>

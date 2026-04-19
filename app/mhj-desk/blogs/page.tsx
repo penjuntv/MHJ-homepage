@@ -211,7 +211,7 @@ export default function AdminBlogsPage() {
               {/* 이미지 */}
               <div style={{ aspectRatio: '3/2', position: 'relative', background: '#f1f5f9', overflow: 'hidden' }}>
                 {blog.image_url ? (
-                  <Image src={blog.image_url} alt={blog.title} fill style={{ objectFit: 'cover' }} />
+                  <Image src={blog.image_url} alt={blog.title} fill sizes="(max-width: 768px) 100vw, 400px" style={{ objectFit: 'cover' }} />
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#cbd5e1', fontSize: 11 }}>No Image</div>
                 )}

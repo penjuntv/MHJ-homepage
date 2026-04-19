@@ -36,6 +36,7 @@ export default function BlogCard({ blog, onClick, staggerIndex }: Props) {
         src={blog.image_url}
         alt={blog.title}
         fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         className="object-cover"
         style={{
           transform: hovered ? 'scale(1.02)' : 'scale(1)',
