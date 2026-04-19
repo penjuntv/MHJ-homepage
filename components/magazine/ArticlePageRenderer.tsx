@@ -11,7 +11,7 @@ import SidebarTemplate from './templates/SidebarTemplate';
 import DirectoryTemplate from './templates/DirectoryTemplate';
 import PullQuoteTemplate from './templates/PullQuoteTemplate';
 import MumsNoteTemplate from './templates/MumsNoteTemplate';
-import LittleNoteTemplate from './templates/LittleNoteTemplate';
+import LittleNotesTemplate from './templates/LittleNotesTemplate';
 import type { ArticlePreviewData, StyleOverrides } from './templates/shared';
 import type { DirectoryItem } from '@/lib/types';
 
@@ -194,13 +194,15 @@ export default function ArticlePageRenderer({
   };
   const props = { article, accentColor, bgColor, hideTitle };
 
-  /* 템플릿 dispatch — 어드민과 라이브가 동일한 templates/*.tsx 사용 */
+  /* 템플릿 dispatch — 어드민 미리보기와 라이브가 동일 경로(이 함수) 사용 */
   const rawTpl = template ?? 'classic';
-  // Phase 1 alias: 'free' / 'essay' → TextOnlyTemplate (사진 없는 에세이)
-  // Phase 2 구현된 것: mums-note, little-note
-  // 남은 Phase 2~5 신규(middle, feature-half, left, right, special, sidebar)는
-  // 별도 템플릿 구현 전까지 classic fallback
-  const tpl = rawTpl === 'essay' || rawTpl === 'free' ? 'text-only' : rawTpl;
+  // alias 정리:
+  //  - 'essay' / 'free' → text-only (사진 없는 에세이)
+  //  - 'little-note'    → little-notes (legacy 호환, 2026-04 rename)
+  const tpl =
+    rawTpl === 'essay' || rawTpl === 'free' ? 'text-only'
+    : rawTpl === 'little-note' ? 'little-notes'
+    : rawTpl;
 
   switch (tpl) {
     case 'text-only':    return <TextOnlyTemplate    {...props} />;
@@ -214,7 +216,7 @@ export default function ArticlePageRenderer({
     case 'directory':    return <DirectoryTemplate   {...props} />;
     case 'pull-quote':   return <PullQuoteTemplate   {...props} />;
     case 'mums-note':    return <MumsNoteTemplate    {...props} />;
-    case 'little-note':  return <LittleNoteTemplate  {...props} />;
+    case 'little-notes': return <LittleNotesTemplate {...props} />;
     case 'classic':
     default:             return <ClassicTemplate     {...props} />;
   }

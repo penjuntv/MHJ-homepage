@@ -93,8 +93,9 @@ export const TEMPLATE_PHOTO_COUNT: Record<string, number> = {
   'directory': 0,
   'pull-quote': 0,
   // Phase 1 v2 (신규 8종 + free alias)
-  'mums-note': 1,   // 오너먼트 1장
-  'little-note': 1, // 아이 그림/사진 1장
+  'mums-note': 1,    // 오너먼트 1장
+  'little-notes': 1, // 아이 그림/사진 1장
+  'little-note': 1,  // legacy alias → little-notes
   'middle': 1,
   'feature-half': 1,
   'left': 3,

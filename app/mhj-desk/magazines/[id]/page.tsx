@@ -18,20 +18,8 @@ import ImageCropModal from '@/components/admin/ImageCropModal';
 import CoverPreview from '@/components/magazine/CoverPreview';
 import TocPreview from '@/components/magazine/TocPreview';
 import MagazinePage from '@/components/magazine/MagazinePage';
+import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import DownloadBtn from '@/components/DownloadBtn';
-import PhotoHeroTemplate   from '@/components/magazine/templates/PhotoHeroTemplate';
-import ClassicTemplate     from '@/components/magazine/templates/ClassicTemplate';
-import PhotoEssayTemplate  from '@/components/magazine/templates/PhotoEssayTemplate';
-import Story2Template      from '@/components/magazine/templates/Story2Template';
-import TextOnlyTemplate    from '@/components/magazine/templates/TextOnlyTemplate';
-import SplitTemplate       from '@/components/magazine/templates/SplitTemplate';
-import CoverTemplate       from '@/components/magazine/templates/CoverTemplate';
-import TitleCardTemplate   from '@/components/magazine/templates/TitleCardTemplate';
-import SidebarTemplate     from '@/components/magazine/templates/SidebarTemplate';
-import DirectoryTemplate   from '@/components/magazine/templates/DirectoryTemplate';
-import PullQuoteTemplate   from '@/components/magazine/templates/PullQuoteTemplate';
-import MumsNoteTemplate    from '@/components/magazine/templates/MumsNoteTemplate';
-import LittleNoteTemplate  from '@/components/magazine/templates/LittleNoteTemplate';
 import type { ArticlePreviewData, StyleOverrides } from '@/components/magazine/templates/shared';
 import { TEMPLATE_PHOTO_COUNT } from '@/components/magazine/templates/shared';
 import StyleOverridePanel from '@/components/admin/StyleOverridePanel';
@@ -76,8 +64,8 @@ const TEMPLATE_CATEGORIES: { key: string; label: string; templates: TemplateMeta
   {
     key: 'corner', label: '고정 코너',
     templates: [
-      { key: 'mums-note',    label: "Mum's Note",   desc: '여는 에세이',   photos: 0 },
-      { key: 'little-note',  label: 'Little Note',  desc: '닫는 인용',     photos: 0 },
+      { key: 'mums-note',    label: "Mum's Note",   desc: '여는 에세이',   photos: 1 },
+      { key: 'little-notes', label: 'Little Notes', desc: '닫는 인용',     photos: 1 },
     ],
   },
   {
@@ -159,7 +147,10 @@ const labelStyle: React.CSSProperties = {
   marginBottom: '5px',
 };
 
-/* ─── 템플릿 렌더 헬퍼 ─── */
+/* ─── 템플릿 렌더 헬퍼 ───
+   Admin 미리보기와 라이브 렌더가 동일 경로를 쓰도록 ArticlePageRenderer로 위임.
+   이전에는 별도 switch 유지 → Phase 2에서 새 템플릿 추가할 때 한 쪽만 업데이트돼
+   Admin 미리보기가 default(ClassicTemplate)로 빠지는 이슈 발생. */
 function renderTemplate(
   tpl: string,
   artData: ArticlePreviewData,
@@ -167,24 +158,28 @@ function renderTemplate(
   bgColor?: string,
   hideTitle?: boolean,
 ) {
-  const props = { article: artData, accentColor, bgColor, hideTitle };
-  switch (tpl) {
-    case 'photo-hero':   return <PhotoHeroTemplate   {...props} />;
-    case 'photo-essay':  return <PhotoEssayTemplate  {...props} />;
-    case 'story-2':      return <Story2Template      {...props} />;
-    case 'text-only':
-    case 'essay':
-    case 'free':         return <TextOnlyTemplate    {...props} />;
-    case 'split':        return <SplitTemplate       {...props} />;
-    case 'cover':        return <CoverTemplate       {...props} />;
-    case 'title-card':   return <TitleCardTemplate   {...props} />;
-    case 'sidebar':      return <SidebarTemplate     {...props} />;
-    case 'directory':    return <DirectoryTemplate   {...props} />;
-    case 'pull-quote':   return <PullQuoteTemplate   {...props} />;
-    case 'mums-note':    return <MumsNoteTemplate    {...props} />;
-    case 'little-note':  return <LittleNoteTemplate  {...props} />;
-    default:             return <ClassicTemplate     {...props} />;
-  }
+  return (
+    <ArticlePageRenderer
+      template={tpl}
+      title={artData.title}
+      author={artData.author}
+      content={artData.content}
+      images={(artData.article_images ?? []).filter(Boolean) as string[]}
+      imagePositions={artData.image_positions ?? []}
+      captions={artData.image_captions ?? []}
+      accentColor={accentColor}
+      bgColor={bgColor}
+      hideTitle={hideTitle}
+      styleOverrides={artData.style_overrides}
+      kicker={artData.kicker}
+      subtitle={artData.subtitle}
+      sidebarTitle={artData.sidebar_title}
+      sidebarBody={artData.sidebar_body}
+      directoryItems={artData.directory_items}
+      quoteText={artData.quote_text}
+      quoteAttribution={artData.quote_attribution}
+    />
+  );
 }
 
 /* ════════════════════════════════════════════
@@ -1012,9 +1007,17 @@ export default function MagazineDetailPage() {
                           author: inlineForm.author,
                           content: inlineForm.content,
                           article_images: (inlineForm.article_images ?? []).filter(Boolean),
+                          image_positions: inlineForm.image_positions ?? [],
                           image_url: '',
                           template: inlineForm.template,
                           style_overrides: inlineForm.style_overrides ?? {},
+                          kicker: inlineForm.kicker,
+                          subtitle: inlineForm.subtitle,
+                          sidebar_title: inlineForm.sidebar_title,
+                          sidebar_body: inlineForm.sidebar_body,
+                          directory_items: inlineForm.directory_items,
+                          quote_text: inlineForm.quote_text,
+                          quote_attribution: inlineForm.quote_attribution,
                         } as ArticlePreviewData, accentCol, bgCol)}
                       </MagazinePage>
                     </div>
@@ -1457,7 +1460,7 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
       {line('100%', '1px', '#E5E7EB')}
     </div>
   );
-  if (tplKey === 'little-note') return (
+  if (tplKey === 'little-notes' || tplKey === 'little-note') return (
     <div style={{ ...style, flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
       {/* 타이틀 + 구분선 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', width: '100%', alignItems: 'center' }}>
@@ -1759,7 +1762,7 @@ function InlineForm({
                   const handleSelect = () => {
                     const patch: Partial<ArticleInput> = { template: t.key };
                     if (t.key === 'mums-note') patch.title = "Mum's Note";
-                    else if (t.key === 'little-note') patch.title = 'Little Note';
+                    else if (t.key === 'little-notes') patch.title = 'Little Notes';
                     setForm(patch);
                   };
                   return (
@@ -1880,8 +1883,8 @@ function InlineForm({
         </CollapsibleSection>
       )}
 
-      {/* Little Note 전용 — 인용구 + 서명 (content 대신) */}
-      {form.template === 'little-note' && (
+      {/* Little Notes 전용 — 인용구 + 서명 (content 대신) */}
+      {(form.template === 'little-notes' || form.template === 'little-note') && (
         <CollapsibleSection title="인용구 · 서명" defaultOpen>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div>
@@ -1910,8 +1913,8 @@ function InlineForm({
         </CollapsibleSection>
       )}
 
-      {/* 제목 — mums-note / little-note는 고정 타이틀 */}
-      {(form.template === 'mums-note' || form.template === 'little-note') ? (
+      {/* 제목 — mums-note / little-notes는 고정 타이틀 */}
+      {(form.template === 'mums-note' || form.template === 'little-notes' || form.template === 'little-note') ? (
         <div>
           <label style={labelStyle}>타이틀 (고정)</label>
           <div style={{
@@ -1925,7 +1928,7 @@ function InlineForm({
             cursor: 'not-allowed',
           }}>
             <AlertCircle size={12} style={{ color: '#CBD5E1' }} />
-            {form.template === 'mums-note' ? "Mum's Note" : 'Little Note'}
+            {form.template === 'mums-note' ? "Mum's Note" : 'Little Notes'}
             <span style={{ marginLeft: 'auto', fontFamily: 'inherit', fontSize: '10px', fontWeight: 400, color: '#CBD5E1', fontStyle: 'normal' }}>
               변경 불가
             </span>
@@ -2042,8 +2045,8 @@ function InlineForm({
         </CollapsibleSection>
       )}
 
-      {/* 본문 TipTap — little-note는 인용구로 대체되므로 숨김 */}
-      {form.template !== 'little-note' && (
+      {/* 본문 TipTap — little-notes는 인용구로 대체되므로 숨김 */}
+      {form.template !== 'little-notes' && form.template !== 'little-note' && (
         <CollapsibleSection title="텍스트 본문" defaultOpen={form.template === 'mums-note'}>
           <Suspense fallback={<div style={{ ...inputStyle, minHeight: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1' }}><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /></div>}>
             <TipTapEditor content={form.content} onChange={html => setForm({ content: html })} placeholder={form.template === 'mums-note' ? "Yussi의 여는 에세이 — 첫 글자는 자동 드롭캡." : "기사 텍스트..."} />

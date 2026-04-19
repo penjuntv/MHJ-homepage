@@ -2,9 +2,9 @@
 import type { NewTemplateProps } from './shared';
 import { getPullQuote } from './shared';
 
-const FIXED_TITLE = 'Little Note';
+const FIXED_TITLE = 'Little Notes';
 
-export default function LittleNoteTemplate({
+export default function LittleNotesTemplate({
   article,
   accentColor = '#8A6B4F',
   bgColor = '#FDFCFA',
