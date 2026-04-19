@@ -30,6 +30,8 @@ import TitleCardTemplate   from '@/components/magazine/templates/TitleCardTempla
 import SidebarTemplate     from '@/components/magazine/templates/SidebarTemplate';
 import DirectoryTemplate   from '@/components/magazine/templates/DirectoryTemplate';
 import PullQuoteTemplate   from '@/components/magazine/templates/PullQuoteTemplate';
+import MumsNoteTemplate    from '@/components/magazine/templates/MumsNoteTemplate';
+import LittleNoteTemplate  from '@/components/magazine/templates/LittleNoteTemplate';
 import type { ArticlePreviewData, StyleOverrides } from '@/components/magazine/templates/shared';
 import { TEMPLATE_PHOTO_COUNT } from '@/components/magazine/templates/shared';
 import StyleOverridePanel from '@/components/admin/StyleOverridePanel';
@@ -167,18 +169,21 @@ function renderTemplate(
 ) {
   const props = { article: artData, accentColor, bgColor, hideTitle };
   switch (tpl) {
-    case 'photo-hero':  return <PhotoHeroTemplate  {...props} />;
-    case 'photo-essay': return <PhotoEssayTemplate {...props} />;
-    case 'story-2':     return <Story2Template     {...props} />;
+    case 'photo-hero':   return <PhotoHeroTemplate   {...props} />;
+    case 'photo-essay':  return <PhotoEssayTemplate  {...props} />;
+    case 'story-2':      return <Story2Template      {...props} />;
     case 'text-only':
-    case 'essay':       return <TextOnlyTemplate   {...props} />;
-    case 'split':       return <SplitTemplate      {...props} />;
-    case 'cover':       return <CoverTemplate      {...props} />;
-    case 'title-card':  return <TitleCardTemplate  {...props} />;
-    case 'sidebar':     return <SidebarTemplate    {...props} />;
-    case 'directory':   return <DirectoryTemplate  {...props} />;
-    case 'pull-quote':  return <PullQuoteTemplate  {...props} />;
-    default:            return <ClassicTemplate    {...props} />;
+    case 'essay':
+    case 'free':         return <TextOnlyTemplate    {...props} />;
+    case 'split':        return <SplitTemplate       {...props} />;
+    case 'cover':        return <CoverTemplate       {...props} />;
+    case 'title-card':   return <TitleCardTemplate   {...props} />;
+    case 'sidebar':      return <SidebarTemplate     {...props} />;
+    case 'directory':    return <DirectoryTemplate   {...props} />;
+    case 'pull-quote':   return <PullQuoteTemplate   {...props} />;
+    case 'mums-note':    return <MumsNoteTemplate    {...props} />;
+    case 'little-note':  return <LittleNoteTemplate  {...props} />;
+    default:             return <ClassicTemplate     {...props} />;
   }
 }
 
@@ -1433,6 +1438,98 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
       {line('55%', '4px', '#374151')}
       <div style={{ height: '4px' }} />
       {line('25%', '2px', '#9CA3AF')}
+    </div>
+  );
+  if (tplKey === 'mums-note') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+      {/* 타이틀 + 구분선 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', width: '100%', alignItems: 'center' }}>
+        {line('55%', '3px', '#374151')}
+        {line('100%', '1px', '#E5E7EB')}
+      </div>
+      {/* 오너먼트 원 */}
+      <div style={{ width: '22%', aspectRatio: '1 / 1', borderRadius: '50%', border: '1px solid #9CA3AF', margin: '1px 0' }} />
+      {/* 본문 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', width: '100%', alignItems: 'center' }}>
+        {line('90%')}{line('85%')}{line('92%')}{line('65%')}
+      </div>
+      {/* 하단 구분선 */}
+      {line('100%', '1px', '#E5E7EB')}
+    </div>
+  );
+  if (tplKey === 'little-note') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+      {/* 타이틀 + 구분선 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', width: '100%', alignItems: 'center' }}>
+        {line('55%', '3px', '#374151')}
+        {line('100%', '1px', '#E5E7EB')}
+      </div>
+      {/* 이미지 */}
+      <div style={{ width: '38%', aspectRatio: '4 / 5' }}>{photo('A', '2px')}</div>
+      {/* 따옴표 + 인용 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', width: '100%', alignItems: 'center', position: 'relative' }}>
+        <span style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: '14px', color: '#9CA3AF', opacity: 0.5, lineHeight: 0.5 }}>“</span>
+        {line('75%', '2px', '#374151')}
+        {line('55%', '2px', '#374151')}
+      </div>
+      {/* 하단 구분선 */}
+      {line('100%', '1px', '#E5E7EB')}
+    </div>
+  );
+  if (tplKey === 'middle') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '4px' }}>
+      <div style={{ flex: 1.2, width: '100%' }}>{photo('A', '2px')}</div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+        {line('70%', '3px', '#D1D5DB')}{line('90%')}{line('80%')}{line('85%')}
+      </div>
+    </div>
+  );
+  if (tplKey === 'feature-half') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '4px' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+        {line('70%', '3px', '#D1D5DB')}{line('90%')}{line('80%')}{line('85%')}
+      </div>
+      <div style={{ flex: 1.2, width: '100%' }}>{photo('A', '2px')}</div>
+    </div>
+  );
+  if (tplKey === 'left') return (
+    <div style={{ ...style, flexDirection: 'row', gap: '4px' }}>
+      <div style={{ width: '42%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        <div style={{ flex: 1 }}>{photo('A', '2px')}</div>
+        <div style={{ flex: 1 }}>{photo('B', '2px')}</div>
+        <div style={{ flex: 1 }}>{photo('C', '2px')}</div>
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+        {line('90%', '3px', '#D1D5DB')}{line('85%')}{line('90%')}{line('70%')}
+      </div>
+    </div>
+  );
+  if (tplKey === 'right') return (
+    <div style={{ ...style, flexDirection: 'row', gap: '4px' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+        {line('90%', '3px', '#D1D5DB')}{line('85%')}{line('90%')}{line('70%')}
+      </div>
+      <div style={{ width: '42%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        <div style={{ flex: 1 }}>{photo('A', '2px')}</div>
+        <div style={{ flex: 1 }}>{photo('B', '2px')}</div>
+        <div style={{ flex: 1 }}>{photo('C', '2px')}</div>
+      </div>
+    </div>
+  );
+  if (tplKey === 'special') return (
+    <div style={{ ...style, padding: '3px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: 'repeat(3, 1fr)', gap: '2px', width: '100%', height: '100%' }}>
+        {['A','B','C','D','E','F','G','H','I'].map(l => (
+          <div key={l} style={{ minHeight: 0 }}>{photo(l, '1px')}</div>
+        ))}
+      </div>
+    </div>
+  );
+  if (tplKey === 'free') return (
+    <div style={{ ...style, flexDirection: 'column', gap: '3px', justifyContent: 'center' }}>
+      {line('45%', '2px', '#9CA3AF')}
+      {line('85%', '3px', '#D1D5DB')}
+      {line('90%')}{line('80%')}{line('90%')}{line('75%')}{line('85%')}
     </div>
   );
   /* split */
