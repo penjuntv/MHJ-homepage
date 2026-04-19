@@ -59,8 +59,8 @@ export default function MumsNoteTemplate({
         }
       `}</style>
 
-      {/* 상단 타이틀 */}
-      <div style={{ flexShrink: 0, textAlign: 'center', paddingBottom: '0.9em', borderBottom: '1px solid var(--mag-title-divider)' }}>
+      {/* 상단 타이틀 — 좌측 정렬 (MHJ 매거진 규칙) */}
+      <div style={{ flexShrink: 0, textAlign: 'left', paddingBottom: '0.9em', borderBottom: '1px solid var(--mag-title-divider)' }}>
         <h1
           style={{
             fontFamily: '"Playfair Display", serif',
