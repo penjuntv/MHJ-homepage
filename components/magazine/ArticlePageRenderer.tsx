@@ -19,6 +19,7 @@ export interface ArticlePageRendererProps {
   author?: string;
   content?: string;
   images?: string[];
+  imagePositions?: string[];
   captions?: string[];
   accentColor?: string;
   bgColor?: string;
@@ -139,6 +140,7 @@ export default function ArticlePageRenderer({
   author,
   content = '',
   images = [],
+  imagePositions = [],
   captions = [],
   accentColor = '#8A6B4F',
   bgColor = '#FDFCFA',
@@ -175,6 +177,7 @@ export default function ArticlePageRenderer({
     author: author ?? '',
     content,
     article_images: images,
+    image_positions: imagePositions,
     image_captions: captions,
     image_url: images[0] ?? '',
     template: template ?? 'classic',

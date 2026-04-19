@@ -165,6 +165,7 @@ export interface ArticlePage {
   template: string;      // classic/photo-hero/photo-essay/gallery/text-only/split
   content: string;
   images: string[];
+  image_positions?: string[] | null;
   caption?: string | null;
   captions?: string[] | null;   // 사진별 캡션 (images[i] ↔ captions[i])
 }

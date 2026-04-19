@@ -462,6 +462,10 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
               ? ((pg.images ?? []).filter(Boolean) as string[])
               : ((art.article_images ?? []).filter(Boolean) as string[])
             }
+            imagePositions={isExtra
+              ? (pg.image_positions ?? [])
+              : (art.image_positions ?? [])
+            }
             captions={isExtra
               ? (pg.captions ?? [])
               : ((art as Article & { image_captions?: string[] }).image_captions ?? [])

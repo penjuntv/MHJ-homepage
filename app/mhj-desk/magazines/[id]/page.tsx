@@ -455,6 +455,7 @@ export default function MagazineDetailPage() {
         template: p.template,
         content: p.content,
         images: p.images,
+        image_positions: p.image_positions ?? [],
         caption: p.caption ?? null,
         captions: p.captions ?? [],
       }));
@@ -2021,43 +2022,73 @@ function ArticlePagesSection({
               </div>
             </div>
 
-            {/* 템플릿 선택 */}
+            {/* 템플릿 선택 — 카테고리별 + Legacy 안내 */}
             <div style={{ marginBottom: '10px' }}>
               <label style={labelStyle}>템플릿</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
-                {TEMPLATE_META.map(t => (
-                  <button key={t.key} type="button" onClick={() => updatePage(pi, { template: t.key, images: [] })}
-                    style={{ padding: '5px 4px', borderRadius: '6px', cursor: 'pointer', border: page.template === t.key ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: 'white', fontSize: '9px', fontWeight: 900, color: page.template === t.key ? accentColor : '#94A3B8', transition: 'all 0.15s' }}>
-                    {t.label}
-                  </button>
-                ))}
-              </div>
+              {LEGACY_TEMPLATES.includes(page.template) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 8px', marginBottom: '6px', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '6px', fontSize: '10px', color: '#92400E' }}>
+                  <AlertCircle size={11} style={{ flexShrink: 0 }} />
+                  <span>현재 <strong>{page.template}</strong> (legacy) — 새 템플릿으로 교체 권장</span>
+                </div>
+              )}
+              {TEMPLATE_CATEGORIES.map(cat => (
+                <div key={cat.key} style={{ marginBottom: '6px' }}>
+                  <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '2px', color: '#CBD5E1', textTransform: 'uppercase', margin: '0 0 3px' }}>{cat.label}</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(cat.templates.length, 3)}, 1fr)`, gap: '4px' }}>
+                    {cat.templates.map(t => (
+                      <button key={t.key} type="button" onClick={() => updatePage(pi, { template: t.key, images: [], image_positions: [] })}
+                        style={{ padding: '5px 4px', borderRadius: '6px', cursor: 'pointer', border: page.template === t.key ? `2px solid ${accentColor}` : '2px solid #F1F5F9', background: 'white', fontSize: '9px', fontWeight: 900, color: page.template === t.key ? accentColor : '#94A3B8', transition: 'all 0.15s' }}>
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* 이미지 슬롯 */}
+            {/* 이미지 슬롯 + 9-point 포지션 */}
             {photoCount > 0 && (
               <div style={{ marginBottom: '10px' }}>
                 <label style={labelStyle}>사진 ({(page.images ?? []).filter(Boolean).length}/{photoCount})</label>
                 <div style={{ display: 'grid', gridTemplateColumns: photoCount === 1 ? '1fr' : 'repeat(2, 1fr)', gap: '6px' }}>
                   {Array.from({ length: photoCount }, (_, si) => {
                     const src = page.images?.[si] ?? '';
+                    const pos = page.image_positions?.[si] ?? 'center';
                     const isUp = uploadingSlot?.pageIdx === pi && uploadingSlot?.slotIdx === si;
+                    const POS_LABELS: Record<string, string> = { 'top left': '좌상', 'top': '상', 'top right': '우상', 'left': '좌', 'center': '중', 'right': '우', 'bottom left': '좌하', 'bottom': '하', 'bottom right': '우하' };
+                    const POS_GRID = ['top left','top','top right','left','center','right','bottom left','bottom','bottom right'];
                     return (
-                      <div key={si} onClick={() => !isUp && onImageUpload(pi, si)}
-                        style={{ border: '2px dashed #F1F5F9', borderRadius: '6px', overflow: 'hidden', cursor: 'pointer', background: '#F8FAFC', aspectRatio: '4/3', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {src
-                          // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                          : <div style={{ color: '#CBD5E1', textAlign: 'center' }}>
-                              {isUp ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={14} />}
-                              <p style={{ fontSize: '9px', fontWeight: 700, margin: '2px 0 0' }}>사진 {si + 1}</p>
-                            </div>
-                        }
+                      <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div onClick={() => !isUp && onImageUpload(pi, si)}
+                          style={{ border: '2px dashed #F1F5F9', borderRadius: '6px', overflow: 'hidden', cursor: 'pointer', background: '#F8FAFC', aspectRatio: '4/3', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {src
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: pos }} />
+                            : <div style={{ color: '#CBD5E1', textAlign: 'center' }}>
+                                {isUp ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <ImageIcon size={14} />}
+                                <p style={{ fontSize: '9px', fontWeight: 700, margin: '2px 0 0' }}>사진 {si + 1}</p>
+                              </div>
+                          }
+                          {src && (
+                            <button type="button" onClick={e => { e.stopPropagation(); const imgs = [...(page.images ?? [])]; imgs[si] = ''; updatePage(pi, { images: imgs }); }}
+                              style={{ position: 'absolute', top: '3px', right: '3px', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer', color: 'white', display: 'flex' }}>
+                              <X size={10} />
+                            </button>
+                          )}
+                        </div>
                         {src && (
-                          <button type="button" onClick={e => { e.stopPropagation(); const imgs = [...(page.images ?? [])]; imgs[si] = ''; updatePage(pi, { images: imgs }); }}
-                            style={{ position: 'absolute', top: '3px', right: '3px', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer', color: 'white', display: 'flex' }}>
-                            <X size={10} />
-                          </button>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px' }}>
+                            {POS_GRID.map(p => (
+                              <button key={p} type="button" onClick={() => {
+                                const positions = [...(page.image_positions ?? [])];
+                                positions[si] = p;
+                                updatePage(pi, { image_positions: positions });
+                              }}
+                                style={{ padding: '3px 2px', border: pos === p ? '1.5px solid #4F46E5' : '1px solid #F1F5F9', borderRadius: '4px', background: pos === p ? '#EEF2FF' : 'white', cursor: 'pointer', fontSize: '8px', fontWeight: 700, color: pos === p ? '#4F46E5' : '#CBD5E1', lineHeight: 1 }}>
+                                {POS_LABELS[p]}
+                              </button>
+                            ))}
+                          </div>
                         )}
                       </div>
                     );
@@ -2066,16 +2097,12 @@ function ArticlePagesSection({
               </div>
             )}
 
-            {/* 본문 */}
+            {/* 본문 — TipTap (메인 기사와 동일) */}
             <div style={{ marginBottom: '8px' }}>
               <label style={labelStyle}>본문</label>
-              <textarea
-                value={page.content}
-                onChange={e => updatePage(pi, { content: e.target.value })}
-                rows={4}
-                placeholder="페이지 본문 텍스트..."
-                style={{ ...inputStyle, resize: 'vertical' }}
-              />
+              <Suspense fallback={<div style={{ ...inputStyle, minHeight: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1' }}><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /></div>}>
+                <TipTapEditor content={page.content} onChange={html => updatePage(pi, { content: html })} placeholder="페이지 본문 텍스트..." />
+              </Suspense>
             </div>
 
             {/* 사진별 캡션 */}
