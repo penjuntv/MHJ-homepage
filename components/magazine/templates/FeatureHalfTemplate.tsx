@@ -47,6 +47,17 @@ export default function FeatureHalfTemplate({
           color: rgba(26,26,26,0.72);
           font-style: italic;
         }
+        ${article.style_overrides?.dropCap ? `
+        .fh-${uid} p:first-of-type::first-letter {
+          float: left;
+          font-family: "Playfair Display", serif;
+          font-weight: 900;
+          font-size: clamp(40px, 11cqw, 88px);
+          line-height: 0.85;
+          color: var(--mag-body-color);
+          margin-right: 0.12em;
+          margin-top: 0.04em;
+        }` : ''}
       `}</style>
 
       {/* 상단 타이틀 + 구분선 */}
