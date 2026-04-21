@@ -47,6 +47,7 @@ next-env.d.ts
 !public/icon-*.png
 !public/icons/*.png
 !public/favicon.ico
+!docs/qa/**/*.png
 *.jpg.tmp
 
 # Temp QA scripts (auto-generated)
