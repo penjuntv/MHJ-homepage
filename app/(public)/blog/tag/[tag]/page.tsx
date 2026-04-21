@@ -15,6 +15,7 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
     title: `Posts tagged #${tag}`,
     description: `Posts tagged #${tag} on MHJ`,
     alternates: { canonical: `${SITE_URL}/blog/tag/${tag}` },
+    robots: { index: false, follow: true },
   };
 }
 
