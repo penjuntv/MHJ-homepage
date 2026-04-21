@@ -48,3 +48,17 @@ next-env.d.ts
 !public/icons/*.png
 !public/favicon.ico
 *.jpg.tmp
+
+# Temp QA scripts (auto-generated)
+/dom_check.mjs
+/fix_qa.mjs
+/get_user.mjs
+/playwright_script.mjs
+/run_qa*.mjs
+
+# Local backups
+*.bak
+
+# Secrets / ephemeral auth
+magiclink.txt
+*.magiclink
