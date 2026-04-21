@@ -7,6 +7,7 @@
 
 ## 기술 스택
 Next.js 14 (App Router) · TypeScript · Tailwind CSS · Supabase (DB+Storage+Auth) · TipTap · Resend · Vercel
+AI: @google/generative-ai (Gemini 2.0 Flash) — AI Insight 감상평 생성 + Carousel 텍스트 분석
 개발 서버: localhost:3003 고정
 
 ## 핵심 규칙 (모든 작업에 적용)
@@ -18,7 +19,8 @@ Next.js 14 (App Router) · TypeScript · Tailwind CSS · Supabase (DB+Storage+Au
 6. 다크 모드 — CSS 변수 사용 (하드코딩 금지)
 7. 호버 효과 — translateY 금지, opacity/미세 scale만
 8. 카드 radius — 12px (32-50px 절대 금지)
-9. Admin UI 변경 시 → 반드시 public 페이지 연동 확인
+9. Admin UI 경로: app/mhj-desk/ (코드베이스 내 실제 디렉토리 기준)
+10. Admin UI 변경 시 → 반드시 public 페이지 연동 확인
 10. 단일 quotes in SQL → 이중 quotes('')로 이스케이프
 
 ## 참조 문서 (필요할 때만 읽기)
@@ -32,7 +34,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind CSS · Supabase (DB+Storage+Au
 | 워크플로우 | `docs/WORKFLOW.md` | 작업 순서/규칙 확인 시 |
 
 ## 현재 상태 스냅샷
-- 블로그 22개, 매거진 5+1개, 아티클 19개, 갤러리 60개
+- 블로그 22개, 매거진 5+1개, 아티클 19개, 갤러리 60개 (2026-03 기준)
 - 라이브: www.mhj.nz
 - GitHub: penjuntv/MHJ-homepage
 - Supabase 프로젝트: vpayqdatpqajsmalpfmq
