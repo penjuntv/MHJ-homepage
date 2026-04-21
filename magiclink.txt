@@ -1,0 +1,1 @@
+https://vpayqdatpqajsmalpfmq.supabase.co/auth/v1/verify?token=38b5994b2d68a5e1f3cbbd12012a76123f580b7c572d5eb6918becdb&type=magiclink&redirect_to=https://mhj-yutudy.vercel.app

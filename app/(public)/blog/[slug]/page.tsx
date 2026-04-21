@@ -361,7 +361,7 @@ export default async function BlogDetailPage({
         </div>
 
         {/* ── 2) 대표 이미지 (720px 읽기 영역) ── */}
-        <div style={{
+        <figure style={{
           maxWidth: 720,
           margin: '0 auto',
           padding: '0 clamp(20px, 4vw, 32px)',
@@ -383,7 +383,21 @@ export default async function BlogDetailPage({
               priority
             />
           </div>
-        </div>
+          {blog.cover_caption && (
+            <figcaption
+              style={{
+                marginTop: 12,
+                fontSize: 12,
+                fontStyle: 'italic',
+                letterSpacing: '0.03em',
+                textAlign: 'center',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              {blog.cover_caption}
+            </figcaption>
+          )}
+        </figure>
 
         {/* ── 3) 본문 콘텐츠 ── */}
         <div style={{

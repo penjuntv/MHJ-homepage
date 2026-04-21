@@ -112,6 +112,7 @@ export default function BlogForm({ initial }: Props) {
   const [uploading, setUploading] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [error, setError] = useState('');
+  const [coverCaption, setCoverCaption] = useState<string>(initial?.cover_caption ?? '');
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [tagInput, setTagInput] = useState('');
   const [scheduleMode, setScheduleMode] = useState<ScheduleMode>(
@@ -312,7 +313,13 @@ export default function BlogForm({ initial }: Props) {
       publishAt = null;
     }
 
-    const payload = { ...form, tags, publish_at: publishAt, published: shouldPublish };
+    const payload = {
+      ...form,
+      tags,
+      publish_at: publishAt,
+      published: shouldPublish,
+      cover_caption: coverCaption.trim() || null,
+    };
 
     let blogId: number | undefined;
     if (isEdit) {
@@ -519,6 +526,23 @@ export default function BlogForm({ initial }: Props) {
               { id: 'detail', label: 'Detail', ratio: '21:9',  description: '글 상세 하단 이미지 — 위아래가 많이 잘립니다' },
             ]}
           />
+          <div style={{ marginTop: 12 }}>
+            <label style={labelStyle}>
+              커버 이미지 캡션{' '}
+              <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(선택)</span>
+            </label>
+            <input
+              type="text"
+              value={coverCaption}
+              onChange={(e) => setCoverCaption(e.target.value)}
+              maxLength={120}
+              placeholder="예: Photograph by Yussi, Mairangi Bay"
+              style={inputStyle}
+            />
+            <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 6 }}>
+              상세 페이지 커버 이미지 아래에 이탤릭 한 줄로 표시됩니다. 비워두면 표시되지 않습니다.
+            </p>
+          </div>
         </div>
 
         {/* 내용 */}

@@ -90,6 +90,7 @@ export interface Blog {
   hero_order?: number;
   created_at?: string;
   info_block_html?: string | null;
+  cover_caption?: string | null;
 }
 
 export interface Comment {
