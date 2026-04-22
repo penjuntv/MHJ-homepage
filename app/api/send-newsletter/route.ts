@@ -8,6 +8,20 @@ import {
 } from '@/lib/newsletter-template';
 import type { BlogPostInfo, MailrangiNotesData } from '@/lib/newsletter-template';
 
+function addUtmToMhjLinks(html: string, issueNumber: number | undefined): string {
+  const campaign = `mairangi-notes-${issueNumber ?? 'unknown'}`;
+  const utm = `utm_source=newsletter&utm_medium=email&utm_campaign=${campaign}`;
+  return html.replace(
+    /href="(https?:\/\/(?:www\.)?mhj\.nz[^"]*?)"/g,
+    (match, url) => {
+      if (url.includes('/unsubscribe')) return match;
+      if (url.includes('utm_source=')) return match;
+      const separator = url.includes('?') ? '&' : '?';
+      return `href="${url}${separator}${utm}"`;
+    }
+  );
+}
+
 /* ── DB row 타입 ── */
 interface NewsletterRow {
   id: number;
@@ -197,12 +211,16 @@ export async function POST(req: NextRequest) {
   /* ── Resend 배치 발송 ── */
   const emails = recipients.map((r) => {
     // Personalize unsubscribe URL per subscriber (paths ① and ②)
-    const html = baseMailData
+    const rendered = baseMailData
       ? renderMailrangiNotes({
           ...baseMailData,
           unsubscribeUrl: `https://www.mhj.nz/unsubscribe?email=${encodeURIComponent(r.email)}`,
         })
       : htmlBody;
+    // UTM 자동 추가 (paths ① and ②만; 레거시 ③은 issueNumber 불명이므로 스킵)
+    const html = baseMailData
+      ? addUtmToMhjLinks(rendered, baseMailData.issueNumber)
+      : rendered;
 
     return {
       from: 'Yussi from MHJ <hello@mhj.nz>',
