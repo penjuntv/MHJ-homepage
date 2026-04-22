@@ -5,7 +5,7 @@
 # Welcome Sequence (완료)
 lib/welcome-emails.ts
 app/api/subscribe/route.ts
-# app/api/process-welcome-sequence/route.ts  ← 임시 해제 (2026-04-22 fallback fix)
+app/api/process-welcome-sequence/route.ts  # 완료 2026-04-22 welcome step 0 fallback 추가됨
 vercel.json
 
 # 푸터 리디자인 (완료) — 브랜드 적용으로 보호 해제
