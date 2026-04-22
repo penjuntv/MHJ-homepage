@@ -12,7 +12,7 @@ function addUtmToMhjLinks(html: string, issueNumber: number | undefined): string
   const campaign = `mairangi-notes-${issueNumber ?? 'unknown'}`;
   const utm = `utm_source=newsletter&utm_medium=email&utm_campaign=${campaign}`;
   return html.replace(
-    /href="(https?:\/\/(?:www\.)?mhj\.nz[^"]*?)"/g,
+    /href="(https?:\/\/(?:[a-z0-9-]+\.)?mhj\.nz[^"]*?)"/g,
     (match, url) => {
       if (url.includes('/unsubscribe')) return match;
       if (url.includes('utm_source=')) return match;
