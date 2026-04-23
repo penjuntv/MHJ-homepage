@@ -264,7 +264,7 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
               onClick={() => onChange('All')}
               style={{
                 padding: '6px 14px',
-                borderRadius: 20,
+                borderRadius: 8,
                 border: `1px solid ${isActive ? 'var(--text)' : 'var(--border-medium)'}`,
                 cursor: 'pointer',
                 fontSize: 11,
@@ -294,7 +294,7 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
               onClick={() => onChange(cat)}
               style={{
                 padding: '6px 14px',
-                borderRadius: 20,
+                borderRadius: 8,
                 border: `1px ${isEmpty ? 'dashed' : 'solid'} ${isActive ? 'var(--text)' : isEmpty ? 'var(--border)' : 'var(--border-medium)'
                   }`,
                 cursor: 'pointer',
@@ -729,7 +729,7 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           borderRadius: 4,
           fontSize: 10, fontWeight: 900, lineHeight: 1,
-          background: rank <= 3 ? '#4F46E5' : '#E5E7EB',
+          background: rank <= 3 ? '#8A6B4F' : '#E5E7EB',
           color: rank <= 3 ? '#FFFFFF' : '#4B5563',
         }}>
           {rank}
