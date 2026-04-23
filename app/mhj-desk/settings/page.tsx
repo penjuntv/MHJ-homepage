@@ -53,12 +53,74 @@ const SOCIAL_META: Record<string, { label: string; icon: React.ReactNode; placeh
   },
 };
 
-const ALL_KEYS = [...SETTING_KEYS, ...SOCIAL_KEYS, ...IMAGE_KEYS.map(i => i.key)];
+// 에디토리얼 섹션 (세션 1 추가) — 섹션별 개별 저장
+type EditorialSection = {
+  id: 'editor_note' | 'children' | 'pillar' | 'newsletter_cta';
+  title: string;
+  hint: string;
+  revalidatePaths: string[];
+  fields: Array<{
+    key: string;
+    label: string;
+    type: 'input' | 'textarea' | 'date';
+    rows?: number;
+    placeholder?: string;
+  }>;
+};
+
+const EDITORIAL_SECTIONS: EditorialSection[] = [
+  {
+    id: 'editor_note',
+    title: "EDITOR'S NOTE",
+    hint: '홈 Hero 아래 에디터 노트 — PeNnY가 매주 업데이트',
+    revalidatePaths: ['/'],
+    fields: [
+      { key: 'editor_note', label: '본문', type: 'textarea', rows: 6, placeholder: '이번 주, 마이랑이 베이에서…' },
+      { key: 'editor_note_updated_at', label: '업데이트 일자', type: 'date' },
+    ],
+  },
+  {
+    id: 'children',
+    title: "CHILDREN'S NOTES",
+    hint: 'Footer/About에 노출되는 Min · Hyun · Jin 한 줄 코멘트',
+    revalidatePaths: ['/'],
+    fields: [
+      { key: 'child_m_note', label: 'Min', type: 'textarea', rows: 2, placeholder: 'Min의 한 줄 코멘트' },
+      { key: 'child_h_note', label: 'Hyun', type: 'textarea', rows: 2, placeholder: 'Hyun의 한 줄 코멘트' },
+      { key: 'child_j_note', label: 'Jin', type: 'textarea', rows: 2, placeholder: 'Jin의 한 줄 코멘트' },
+    ],
+  },
+  {
+    id: 'pillar',
+    title: 'PILLAR INTROS',
+    hint: '카테고리 페이지 상단 인트로 (Whanau / Local Guide)',
+    revalidatePaths: ['/'],
+    fields: [
+      { key: 'pillar_whanau_intro', label: 'Whanau 인트로', type: 'textarea', rows: 3 },
+      { key: 'pillar_localguide_intro', label: 'Local Guide 인트로', type: 'textarea', rows: 3 },
+    ],
+  },
+  {
+    id: 'newsletter_cta',
+    title: 'NEWSLETTER CTA',
+    hint: '기사 말미/홈 하단 뉴스레터 CTA 카피 두 줄',
+    revalidatePaths: ['/'],
+    fields: [
+      { key: 'newsletter_cta_copy_a', label: '첫 줄', type: 'input' },
+      { key: 'newsletter_cta_copy_b', label: '두 번째 줄', type: 'input' },
+    ],
+  },
+];
+
+const EDITORIAL_KEYS = EDITORIAL_SECTIONS.flatMap(s => s.fields.map(f => f.key));
+
+const ALL_KEYS = [...SETTING_KEYS, ...SOCIAL_KEYS, ...IMAGE_KEYS.map(i => i.key), ...EDITORIAL_KEYS];
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingSection, setSavingSection] = useState<string | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -104,6 +166,28 @@ export default function SettingsPage() {
 
   function handleReset() {
     setSettings({ ...DEFAULT_SETTINGS });
+  }
+
+  async function handleSaveSection(sectionId: string, keys: string[], paths: string[]) {
+    setSavingSection(sectionId);
+    const rows = keys.map(key => ({
+      key,
+      value: settings[key] ?? DEFAULT_SETTINGS[key] ?? '',
+      description: SETTING_DESCRIPTIONS[key] ?? null,
+    }));
+    const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'key' });
+    if (error) {
+      toast.error('저장 실패: ' + error.message);
+      setSavingSection(null);
+      return;
+    }
+    toast.success('저장되었습니다.');
+    fetch('/api/revalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths }),
+    }).catch(() => {});
+    setSavingSection(null);
   }
 
   async function handleImageUpload(imageKey: string, folder: string, file: File) {
@@ -169,6 +253,86 @@ export default function SettingsPage() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+        {/* ── Editorial 섹션 (세션 1: 섹션별 개별 저장) ── */}
+        {EDITORIAL_SECTIONS.map(section => {
+          const sectionSaving = savingSection === section.id;
+          return (
+            <div
+              key={section.id}
+              style={{
+                background: 'white', borderRadius: '24px',
+                border: '1px solid #F1F5F9', overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '20px 28px', borderBottom: '1px solid #F1F5F9',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+                }}
+              >
+                <div>
+                  <p style={{ fontSize: '12px', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', color: '#1A1A1A', margin: 0 }}>
+                    {section.title}
+                  </p>
+                  <p style={{ fontSize: '11px', color: '#94A3B8', margin: '2px 0 0' }}>
+                    {section.hint}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleSaveSection(section.id, section.fields.map(f => f.key), section.revalidatePaths)}
+                  disabled={sectionSaving}
+                  className="font-black uppercase"
+                  style={{
+                    background: '#000', color: '#fff', border: 'none',
+                    borderRadius: '8px', padding: '10px 18px',
+                    fontSize: '10px', letterSpacing: '2px',
+                    cursor: sectionSaving ? 'not-allowed' : 'pointer',
+                    opacity: sectionSaving ? 0.6 : 1,
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {sectionSaving
+                    ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> 저장 중</>
+                    : <><Save size={12} /> 섹션 저장</>
+                  }
+                </button>
+              </div>
+
+              <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {section.fields.map(field => (
+                  <div key={field.key}>
+                    <label style={labelStyle}>{field.label}</label>
+                    {field.type === 'textarea' ? (
+                      <textarea
+                        value={settings[field.key] ?? ''}
+                        onChange={e => set(field.key, e.target.value)}
+                        rows={field.rows ?? 3}
+                        placeholder={field.placeholder}
+                        style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.7' }}
+                      />
+                    ) : field.type === 'date' ? (
+                      <input
+                        type="date"
+                        value={settings[field.key] ?? ''}
+                        onChange={e => set(field.key, e.target.value)}
+                        style={inputStyle}
+                      />
+                    ) : (
+                      <input
+                        value={settings[field.key] ?? ''}
+                        onChange={e => set(field.key, e.target.value)}
+                        placeholder={field.placeholder}
+                        style={inputStyle}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
 
         {/* ── 소셜 미디어 섹션 ── */}
         <div style={{

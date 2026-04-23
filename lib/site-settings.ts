@@ -49,6 +49,16 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   social_youtube: 'https://www.youtube.com/@mhj_nz',
   social_threads: '',
   featured_post_id: '',
+  // 에디토리얼 레이어 (세션 1 추가)
+  editor_note: '',
+  editor_note_updated_at: '',
+  child_m_note: '',
+  child_h_note: '',
+  child_j_note: '',
+  newsletter_cta_copy_a: '한 달에 두어 번, 조용한 편지를 보냅니다.',
+  newsletter_cta_copy_b: '다음 편지를 가장 먼저 받아보세요.',
+  pillar_whanau_intro: '',
+  pillar_localguide_intro: '',
 };
 
 // 설명 매핑
@@ -93,6 +103,16 @@ export const SETTING_DESCRIPTIONS: Record<string, string> = {
   social_facebook: 'Facebook URL (비워두면 숨김)',
   social_youtube: 'YouTube URL (비워두면 숨김)',
   social_threads: 'Threads URL (비워두면 숨김)',
+  // 에디토리얼 레이어 (세션 1 추가)
+  editor_note: '홈 Hero 아래 에디터 노트 본문 — PeNnY가 매주 업데이트',
+  editor_note_updated_at: '에디터 노트 최근 업데이트 ISO 일자 (예: 2026-04-24)',
+  child_m_note: 'Footer/About에 노출되는 Min 한 줄 코멘트',
+  child_h_note: 'Footer/About에 노출되는 Hyun 한 줄 코멘트',
+  child_j_note: 'Footer/About에 노출되는 Jin 한 줄 코멘트',
+  newsletter_cta_copy_a: '뉴스레터 CTA 첫 줄 — 기사 말미/홈 하단',
+  newsletter_cta_copy_b: '뉴스레터 CTA 두 번째 줄',
+  pillar_whanau_intro: 'Whanau(가족) 카테고리 페이지 상단 인트로',
+  pillar_localguide_intro: 'Local Guide 카테고리 페이지 상단 인트로',
 };
 
 export async function getSiteSettings(): Promise<Record<string, string>> {
