@@ -1816,32 +1816,35 @@ function InlineForm({
       )}
 
       {form.template === 'sidebar' && (
-        <CollapsibleSection title="사이드바 콘텐츠" defaultOpen>
+        <CollapsibleSection title="인포블록 콘텐츠" defaultOpen>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div>
-              <label style={labelStyle}>Sidebar Title</label>
+              <label style={labelStyle}>Sidebar Title (소제목, optional)</label>
               <input
                 value={form.sidebar_title}
                 onChange={e => setForm({ sidebar_title: e.target.value })}
-                placeholder="Notes / References / Tips"
+                placeholder="References / Tips / 참고"
                 style={inputStyle}
               />
-              <p style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px', marginBottom: 0 }}>
-                비우면 &quot;Notes&quot;가 기본 표시됩니다.
-              </p>
             </div>
             <div>
-              <label style={labelStyle}>Sidebar Body (HTML 가능)</label>
-              <textarea
-                value={form.sidebar_body}
-                onChange={e => setForm({ sidebar_body: e.target.value })}
-                placeholder="&lt;ul&gt;&lt;li&gt;항목 1&lt;/li&gt;&lt;/ul&gt;"
-                rows={5}
-                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'monospace', fontSize: '12px' }}
-              />
+              <label style={labelStyle}>Sidebar Body (인포블록 본문)</label>
+              <Suspense fallback={<div style={{ ...inputStyle, minHeight: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1' }}><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /></div>}>
+                <TipTapEditor
+                  content={form.sidebar_body}
+                  onChange={html => setForm({ sidebar_body: html })}
+                  placeholder="리스트, 링크, 이미지 삽입 가능. 하단 사진이 필요하면 본문 에디터에서 2열/3열 이미지 블록 사용."
+                />
+              </Suspense>
             </div>
           </div>
         </CollapsibleSection>
+      )}
+
+      {form.template === 'special' && (
+        <div style={{ padding: '10px 12px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px', fontSize: '11px', color: '#166534' }}>
+          사진 9장 권장. 부족하면 빈 셀로 표시됩니다. 9-point 위치 조정은 아래 기사 사진 섹션에서.
+        </div>
       )}
 
       {form.template === 'directory' && (
