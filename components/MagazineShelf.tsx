@@ -317,6 +317,10 @@ const SHELF_CSS = `
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   white-space: nowrap;
 }
+/* badge(~28px) 아래에 MHJ 텍스트가 오도록 — 배지 있는 책에만 적용 */
+.shelf-book-badge ~ .shelf-book-spine .shelf-book-spine-top {
+  margin-top: 20px;
+}
 
 .shelf-book-cover {
   position: absolute;
