@@ -14,6 +14,8 @@ import MumsNoteTemplate from './templates/MumsNoteTemplate';
 import LittleNotesTemplate from './templates/LittleNotesTemplate';
 import MiddleTemplate from './templates/MiddleTemplate';
 import FeatureHalfTemplate from './templates/FeatureHalfTemplate';
+import LeftTemplate from './templates/LeftTemplate';
+import RightTemplate from './templates/RightTemplate';
 import type { ArticlePreviewData, StyleOverrides } from './templates/shared';
 import type { DirectoryItem } from '@/lib/types';
 
@@ -158,8 +160,12 @@ export default function ArticlePageRenderer({
   quoteText,
   quoteAttribution,
 }: ArticlePageRendererProps) {
-  /* 갤러리 모드 자동 감지 */
-  const isGalleryMode = images.length >= 3 && stripHtmlLength(content) < 200;
+  /* 갤러리 모드 자동 감지: left/right는 의도적으로 3장+본문 구조이므로 제외 */
+  const isGalleryMode =
+    images.length >= 3 &&
+    stripHtmlLength(content) < 200 &&
+    template !== 'left' &&
+    template !== 'right';
   if (isGalleryMode) {
     return (
       <GalleryStack
@@ -221,6 +227,8 @@ export default function ArticlePageRenderer({
     case 'little-notes': return <LittleNotesTemplate {...props} />;
     case 'middle':       return <MiddleTemplate      {...props} />;
     case 'feature-half': return <FeatureHalfTemplate {...props} />;
+    case 'left':         return <LeftTemplate        {...props} />;
+    case 'right':        return <RightTemplate       {...props} />;
     case 'classic':
     default:             return <ClassicTemplate     {...props} />;
   }
