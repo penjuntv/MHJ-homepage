@@ -144,7 +144,7 @@ const SHELF_CSS = `
   box-sizing: border-box;
 }
 .ms-container {
-  max-width: 1080px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -173,7 +173,7 @@ const SHELF_CSS = `
 .ms-bookshelf {
   display: none;
   position: relative;
-  padding: 28px 40px 12px;
+  padding: 36px 52px 16px;
   background:
     linear-gradient(180deg, #5B4426 0%, #6E5433 45%, #4A361E 100%);
   box-shadow:
@@ -202,8 +202,8 @@ const SHELF_CSS = `
   /* 바닥 선반 depth */
   content: '';
   position: absolute;
-  left: 0; right: 0; bottom: -6px;
-  height: 6px;
+  left: 0; right: 0; bottom: -8px;
+  height: 8px;
   background: linear-gradient(180deg, #3a2b17 0%, #1e1408 100%);
   box-shadow: 0 2px 6px rgba(0,0,0,0.35);
 }
@@ -211,7 +211,7 @@ const SHELF_CSS = `
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  min-height: 360px;
+  min-height: 468px;
   overflow-x: auto;
   overflow-y: visible;
   padding: 10px 0 4px;
@@ -223,8 +223,8 @@ const SHELF_CSS = `
 
 .shelf-book {
   position: relative;
-  width: 56px;
-  height: 340px;
+  width: 72px;
+  height: 440px;
   background: var(--spine-color, #3a3025);
   flex-shrink: 0;
   text-decoration: none;
@@ -241,8 +241,8 @@ const SHELF_CSS = `
 }
 .shelf-book:hover,
 .shelf-book:focus-visible {
-  width: 260px;
-  transform: translateY(-14px) rotateY(-2deg) translateZ(8px);
+  width: 338px;
+  transform: translateY(-18px) rotateY(-2deg) translateZ(10px);
   z-index: 2;
   box-shadow:
     0 24px 38px -12px rgba(0,0,0,0.55),
@@ -253,7 +253,7 @@ const SHELF_CSS = `
 .shelf-book-spine {
   position: absolute;
   inset: 0;
-  padding: 14px 6px;
+  padding: 18px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -268,7 +268,7 @@ const SHELF_CSS = `
 .shelf-book-spine-top {
   font-family: "Playfair Display", serif;
   font-weight: 900;
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 0.04em;
   color: var(--spine-ink, #FDFCFA);
   opacity: 0.82;
@@ -278,18 +278,18 @@ const SHELF_CSS = `
   /* ISO 6357 / BS 6738: top-to-bottom (제목 첫 글자가 책등 상단에) */
   font-family: "Playfair Display", serif;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 17px;
   letter-spacing: 0.04em;
   line-height: 1;
   color: var(--spine-ink, #FDFCFA);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 240px;
+  max-height: 312px;
 }
 .shelf-book-spine-date {
   font-family: "Inter", sans-serif;
-  font-size: 7px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -301,18 +301,18 @@ const SHELF_CSS = `
 
 .shelf-book-badge {
   position: absolute;
-  top: 8px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
   background: #FDFCFA;
   color: #8A6B4F;
   font-family: "Inter", sans-serif;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 2px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   white-space: nowrap;
