@@ -8,6 +8,7 @@ import { supabase, createAdminClient } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
+import { getNZSeasonLabel } from '@/lib/date-helpers';
 import ViewTracker from './ViewTracker';
 import RelatedCard from './RelatedCard';
 import ShareButton from '@/components/ShareButton';
@@ -159,8 +160,9 @@ export default async function BlogDetailPage({
     : await getBlog(params.slug);
   if (!blog) notFound();
 
+  const isLetter = Boolean(blog.letter_to);
   const adminDb = createAdminClient();
-  const [relatedBlogs, adjacent, latestNewsletterRes, settings] = await Promise.all([
+  const [relatedBlogs, adjacent, latestNewsletterRes, settings, nextStoryRes] = await Promise.all([
     getRelatedBlogs(blog.category, blog.slug),
     getAdjacentBlogs(blog.id),
     adminDb
@@ -171,8 +173,23 @@ export default async function BlogDetailPage({
       .limit(1)
       .maybeSingle(),
     getSiteSettings(),
+    // 세션 5: 같은 카테고리의 이전(=더 오래된) 글, 편지 글 제외. 편지 글에서는 skip.
+    !isLetter
+      ? adminDb
+          .from('blogs')
+          .select('title, slug, image_url, date')
+          .eq('category', blog.category)
+          .eq('published', true)
+          .is('letter_to', null)
+          .lt('date', blog.date)
+          .neq('slug', blog.slug)
+          .order('date', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
   const latestNewsletter = latestNewsletterRes.data as { subject: string; issue_number: string } | null;
+  const nextStory = nextStoryRes.data as { title: string; slug: string; image_url: string; date: string } | null;
   const ctaCopyB = settings.newsletter_cta_copy_b || 'Be the first to receive our next letter.';
 
   const isHtml = blog.content.includes('<') && blog.content.includes('>');
@@ -297,8 +314,14 @@ export default async function BlogDetailPage({
             </p>
           )}
 
-          {/* Dateline — 카테고리 대형 Playfair italic (매거진 chapter head) */}
-          <p className="blog-dateline font-display">{blog.category}</p>
+          {/* Dateline — 편지: Dear X. 대형 / 일반: 카테고리 Playfair italic (세션 2 + 5) */}
+          {isLetter ? (
+            <p className="blog-dateline letter-salutation-large font-display">
+              Dear {blog.letter_to}.
+            </p>
+          ) : (
+            <p className="blog-dateline font-display">{blog.category}</p>
+          )}
 
           {/* 1) 대형 제목 */}
           <h1
@@ -402,7 +425,7 @@ export default async function BlogDetailPage({
 
         {/* ── 3) 본문 콘텐츠 ── */}
         <div style={{
-          maxWidth: 720,
+          maxWidth: isLetter ? 640 : 720,
           margin: '0 auto',
           padding: '0 clamp(20px, 4vw, 32px)',
         }}>
@@ -472,6 +495,14 @@ export default async function BlogDetailPage({
               </div>
             )}
 
+            {/* 편지 sign-off (세션 5) */}
+            {isLetter && (
+              <div className="blog-letter-signoff">
+                &mdash; Mum, from Mairangi<br />
+                {getNZSeasonLabel(blog.date)}
+              </div>
+            )}
+
             {/* 푸터: Back + Share */}
             <footer style={{
               display: 'flex',
@@ -517,6 +548,21 @@ export default async function BlogDetailPage({
             }}>
               <CommentSection blogId={blog.id} />
             </div>
+
+            {/* Next Story (세션 5) — 편지 글에는 노출 안 함 */}
+            {!isLetter && nextStory && (
+              <section className="next-story">
+                <p className="next-story-label">Next Story</p>
+                <Link href={`/blog/${nextStory.slug}`} className="next-story-card">
+                  <div className="next-story-image">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={nextStory.image_url} alt={nextStory.title} />
+                  </div>
+                  <h3 className="next-story-title">{nextStory.title}</h3>
+                  <time className="next-story-date">{formatDate(nextStory.date)}</time>
+                </Link>
+              </section>
+            )}
 
             {/* 지난 편지 hint + inline-thin CTA (세션 4) */}
             {latestNewsletter?.subject && (

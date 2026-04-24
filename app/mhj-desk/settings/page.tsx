@@ -92,12 +92,14 @@ const EDITORIAL_SECTIONS: EditorialSection[] = [
   },
   {
     id: 'pillar',
-    title: 'PILLAR INTROS',
-    hint: '카테고리 페이지 상단 인트로 (Whanau / Local Guide)',
+    title: 'PILLAR SUBTITLES',
+    hint: '홈 4개 기둥 그리드에 Playfair italic으로 표시되는 한 줄 소개',
     revalidatePaths: ['/'],
     fields: [
-      { key: 'pillar_whanau_intro', label: 'Whanau 인트로', type: 'textarea', rows: 3 },
-      { key: 'pillar_localguide_intro', label: 'Local Guide 인트로', type: 'textarea', rows: 3 },
+      { key: 'pillar_storypress_intro',   label: 'StoryPress (Little 15 Mins)',              type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
+      { key: 'pillar_aotearoa_intro',     label: 'Aotearoa (Travelers + Life in Aotearoa)',  type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
+      { key: 'pillar_homelearning_intro', label: 'Home Learning',                             type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
+      { key: 'pillar_whanau_intro',       label: 'Whānau (Whānau + Settlement)',              type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
     ],
   },
   {

@@ -1897,3 +1897,302 @@ a:hover .magazine-cover-shadow img {
   background: white;
   display: block;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   세션 5: 홈 4개 기둥 / Next Story / 편지 글 렌더링
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── 홈 Pillars 그리드 ─── */
+.home-pillars {
+  max-width: 1320px;
+  margin: 96px auto 0;
+  padding: 0 clamp(20px, 4vw, 48px);
+}
+.home-pillars-header {
+  margin-bottom: 24px;
+}
+.home-pillars-label {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.home-pillars-rule {
+  width: 40px;
+  height: 2px;
+  background: var(--mhj-brown);
+}
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 0.5px solid var(--border-strong);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.pillar-cell {
+  padding: 28px 24px 48px;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-right: 0.5px solid var(--border-strong);
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+.pillar-cell:last-child { border-right: none; }
+.pillar-cell:hover { background: var(--bg-surface); }
+
+.pillar-name {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 18px;
+  color: var(--mhj-brown);
+  line-height: 1.25;
+  margin: 0 0 10px;
+}
+.dark .pillar-name { color: var(--mhj-brown-dark); }
+
+.pillar-subtitle {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0 0 18px;
+}
+
+.pillar-latest-title {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.55;
+  margin: 0 0 4px;
+  flex: 1;
+}
+
+.pillar-latest-date {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.pillar-read-arrow {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--mhj-brown);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.dark .pillar-read-arrow { color: var(--mhj-brown-dark); }
+.pillar-cell:hover .pillar-read-arrow { opacity: 1; }
+
+.pillar-empty {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  margin-top: auto;
+}
+
+@media (max-width: 768px) {
+  .home-pillars { margin-top: 64px; padding: 0 20px; }
+  .pillar-grid { grid-template-columns: repeat(2, 1fr); }
+  .pillar-cell {
+    border-right: 0.5px solid var(--border-strong);
+    border-bottom: 0.5px solid var(--border-strong);
+    min-height: 220px;
+  }
+  .pillar-cell:nth-child(2n) { border-right: none; }
+  .pillar-cell:nth-last-child(-n+2) { border-bottom: none; }
+}
+
+/* ─── Blog 상세 "Next Story" ─── */
+.next-story {
+  max-width: 720px;
+  margin: 64px auto 0;
+}
+.next-story-label {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 0 0 16px;
+}
+.next-story-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease;
+}
+.next-story-card:hover { opacity: 0.85; }
+.next-story-image {
+  width: 100%;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  background: var(--bg-surface);
+}
+.next-story-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.next-story-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.3;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+.next-story-date {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* ─── Journal 그리드 편지 카드 ─── */
+.letter-card {
+  aspect-ratio: 5/4;
+  border-radius: 6px;
+  border: 0.5px solid var(--border-strong);
+  background: #EDE7DD;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+}
+.dark .letter-card { background: #2A241C; border-color: #3D342A; }
+
+.letter-stamp {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--mhj-brown);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dark .letter-stamp { border-color: var(--mhj-brown-dark); }
+.letter-stamp-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--mhj-brown);
+}
+.dark .letter-stamp-dot { background: var(--mhj-brown-dark); }
+
+.letter-dateline {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--mhj-brown);
+  margin-bottom: 14px;
+  text-align: center;
+}
+.dark .letter-dateline { color: var(--mhj-brown-dark); }
+
+.letter-salutation {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 48px;
+  color: var(--text);
+  line-height: 1;
+  text-align: center;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.letter-hover-preview {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: #EDE7DD;
+  padding: 16px 20px;
+  border-top: 0.5px solid var(--border-strong);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.dark .letter-hover-preview { background: #2A241C; }
+
+.letter-card:hover .letter-salutation {
+  transform: translateY(-12px);
+  opacity: 0.35;
+}
+.letter-card:hover .letter-hover-preview {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.letter-hover-preview-text {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+.letter-hover-sig {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--mhj-brown);
+  margin: 6px 0 0;
+  text-align: right;
+}
+.dark .letter-hover-sig { color: var(--mhj-brown-dark); }
+
+/* ─── Blog 상세 편지 글 변주 ─── */
+/* 편지 글에서는 .blog-dateline이 "Dear X." 대형 → 세션 2/4의 clamp(18,22)를 덮어씀 */
+.blog-dateline.letter-salutation-large {
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.05;
+  letter-spacing: 0;
+  text-transform: none;
+  margin: 0 0 32px;
+}
+
+.blog-letter-signoff {
+  max-width: 640px;
+  margin: 48px auto 0;
+  padding-top: 24px;
+  border-top: 0.5px solid var(--border-strong);
+  text-align: right;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--mhj-brown);
+  line-height: 1.6;
+}
+.dark .blog-letter-signoff { color: var(--mhj-brown-dark); }

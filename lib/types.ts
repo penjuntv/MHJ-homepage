@@ -91,6 +91,7 @@ export interface Blog {
   created_at?: string;
   info_block_html?: string | null;
   cover_caption?: string | null;
+  letter_to?: 'M' | 'H' | 'J' | null;
 }
 
 export interface Comment {

@@ -190,11 +190,17 @@ export default function BlogLibrary({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {blogs.map((b) => (
-            <BlogCard
-              key={b.id}
-              blog={b}
-              onClick={() => router.push(`/blog/${b.slug}`)}
-            />
+            b.letter_to
+              ? <LetterCard
+                  key={b.id}
+                  blog={b}
+                  onClick={() => router.push(`/blog/${b.slug}`)}
+                />
+              : <BlogCard
+                  key={b.id}
+                  blog={b}
+                  onClick={() => router.push(`/blog/${b.slug}`)}
+                />
           ))}
         </div>
       )}
@@ -570,6 +576,34 @@ function BlogCard({ blog, onClick }: CardProps) {
             {blog.view_count} {blog.view_count === 1 ? 'view' : 'views'}
           </p>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════
+   Letter Card — 편지 글 (letter_to='M'|'H'|'J') (세션 5)
+   ════════════════════════════════════════════ */
+function LetterCard({ blog, onClick }: CardProps) {
+  const excerpt = (blog.content ?? '').replace(/<[^>]+>/g, '').slice(0, 100);
+  return (
+    <div
+      onClick={onClick}
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') onClick(); }}
+      className="letter-card"
+    >
+      <div className="letter-stamp">
+        <div className="letter-stamp-dot" />
+      </div>
+      <div className="letter-dateline">
+        Letter &middot; To {blog.letter_to} &middot; {formatDate(blog.date)}
+      </div>
+      <div className="letter-salutation">Dear {blog.letter_to}.</div>
+      <div className="letter-hover-preview">
+        <p className="letter-hover-preview-text">{excerpt}</p>
+        <p className="letter-hover-sig">&mdash; Mum, from Mairangi</p>
       </div>
     </div>
   );

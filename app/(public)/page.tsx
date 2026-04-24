@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, createAdminClient } from '@/lib/supabase';
 import type { Blog, Magazine } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { formatDate } from '@/lib/utils';
 import { getSiteSettings } from '@/lib/site-settings';
+import { PILLARS } from '@/lib/pillars';
 
 export const revalidate = 300;
 
@@ -207,6 +208,28 @@ export default async function LandingPage() {
   ]);
   const ctaCopyA = settings.newsletter_cta_copy_a || 'A quiet letter, a few times a month.';
 
+  // 세션 5: 4개 기둥 최신 글 1편씩 (letter_to IS NULL)
+  const admin = createAdminClient();
+  const nowIso = new Date().toISOString();
+  const pillarPostsRaw = await Promise.all(
+    PILLARS.map((p) =>
+      admin
+        .from('blogs')
+        .select('title, slug, date, category')
+        .in('category', p.categories as unknown as string[])
+        .eq('published', true)
+        .is('letter_to', null)
+        .or(`publish_at.is.null,publish_at.lte.${nowIso}`)
+        .order('date', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    )
+  );
+  const pillarPosts = PILLARS.map((pillar, i) => ({
+    pillar,
+    latest: pillarPostsRaw[i].data as { title: string; slug: string; date: string; category: string } | null,
+  }));
+
   const magArticleCount = latestMag ? await getMagazineArticleCount(String(latestMag.id)) : 0;
 
   // Collect all category post IDs for archive exclusion
@@ -292,6 +315,35 @@ export default async function LandingPage() {
             Stories, images, and small records of a Korean family building a life in New Zealand.
           </p>
         </div>
+
+        {/* ═══════ §1.7. Pillars 4-column grid (세션 5) ═══════ */}
+        <section className="home-pillars">
+          <div className="home-pillars-header">
+            <p className="home-pillars-label">Four Pillars</p>
+            <div className="home-pillars-rule" />
+          </div>
+          <div className="pillar-grid">
+            {pillarPosts.map(({ pillar, latest }) => {
+              const subtitle = settings[pillar.subtitleKey] || '';
+              const href = latest ? `/blog/${latest.slug}` : '/blog';
+              return (
+                <Link key={pillar.id} href={href} className="pillar-cell">
+                  <h3 className="pillar-name">{pillar.name}</h3>
+                  {subtitle && <p className="pillar-subtitle">{subtitle}</p>}
+                  {latest ? (
+                    <>
+                      <p className="pillar-latest-title">{latest.title}</p>
+                      <time className="pillar-latest-date">{formatDate(latest.date)}</time>
+                      <span className="pillar-read-arrow">READ →</span>
+                    </>
+                  ) : (
+                    <p className="pillar-empty">Coming soon</p>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
 
         {/* ═══════ §2+3. Latest Posts + Sidebar ═══════ */}
         <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '96px clamp(20px, 4vw, 48px) 0' }}>

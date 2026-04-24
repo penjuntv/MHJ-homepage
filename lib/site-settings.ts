@@ -59,6 +59,10 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   newsletter_cta_copy_b: '다음 편지를 가장 먼저 받아보세요.',
   pillar_whanau_intro: '',
   pillar_localguide_intro: '',
+  // 세션 5: 4개 기둥 소개글 (pillar_whanau는 재활용)
+  pillar_storypress_intro: '',
+  pillar_aotearoa_intro: '',
+  pillar_homelearning_intro: '',
 };
 
 // 설명 매핑
@@ -111,8 +115,11 @@ export const SETTING_DESCRIPTIONS: Record<string, string> = {
   child_j_note: 'Footer/About에 노출되는 Jin 한 줄 코멘트',
   newsletter_cta_copy_a: '뉴스레터 CTA 첫 줄 — 기사 말미/홈 하단',
   newsletter_cta_copy_b: '뉴스레터 CTA 두 번째 줄',
-  pillar_whanau_intro: 'Whanau(가족) 카테고리 페이지 상단 인트로',
-  pillar_localguide_intro: 'Local Guide 카테고리 페이지 상단 인트로',
+  pillar_whanau_intro: 'Whānau 기둥 소개 (Whānau + Settlement)',
+  pillar_localguide_intro: 'Local Guide 카테고리 페이지 상단 인트로 (DEPRECATED — 세션 5 이후 미사용)',
+  pillar_storypress_intro: 'StoryPress 기둥 소개 (Little 15 Mins)',
+  pillar_aotearoa_intro: 'Aotearoa 기둥 소개 (Travelers + Life in Aotearoa)',
+  pillar_homelearning_intro: 'Home Learning 기둥 소개',
 };
 
 export async function getSiteSettings(): Promise<Record<string, string>> {
