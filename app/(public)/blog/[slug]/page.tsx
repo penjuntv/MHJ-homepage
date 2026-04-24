@@ -166,8 +166,6 @@ export default async function BlogDetailPage({
 
   const isHtml = blog.content.includes('<') && blog.content.includes('>');
   const plainText = blog.content.replace(/<[^>]*>/g, '');
-  const firstChar = plainText.charAt(0);
-  const restContent = isHtml ? '' : blog.content.slice(1);
 
   // 본문 중간에 InlineSubscribeCTA 삽입 (HTML 본문이고 paragraph ≥5일 때만)
   const paragraphs = isHtml ? blog.content.split('</p>') : [];
@@ -298,6 +296,9 @@ export default async function BlogDetailPage({
               {blog.sponsor_name ? `Sponsored by ${blog.sponsor_name}` : 'Sponsored Content'}
             </p>
           )}
+
+          {/* Dateline — 카테고리 대형 Playfair italic (매거진 chapter head) */}
+          <p className="blog-dateline font-display">{blog.category}</p>
 
           {/* 1) 대형 제목 */}
           <h1
@@ -443,25 +444,9 @@ export default async function BlogDetailPage({
                   />
                 )
               ) : (
-                <p style={{
-                  fontSize: 16,
-                  color: 'var(--text)',
-                  fontWeight: 500,
-                  lineHeight: 1.7,
-                }}>
-                  <span style={{
-                    fontSize: '4rem',
-                    fontWeight: 900,
-                    float: 'left',
-                    marginRight: 12,
-                    lineHeight: 0.78,
-                    color: 'var(--drop-cap-color)',
-                    fontFamily: "'Playfair Display', serif",
-                  }}>
-                    {firstChar}
-                  </span>
-                  {restContent}
-                </p>
+                <div className="blog-content">
+                  <p>{blog.content}</p>
+                </div>
               )}
             </div>
 

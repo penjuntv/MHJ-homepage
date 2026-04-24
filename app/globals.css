@@ -764,15 +764,74 @@
   line-height: 1.7;
 }
 .blog-content p { margin: 0 0 24px; }
+.blog-content > p:first-of-type {
+  font-size: 19px;
+  line-height: 1.65;
+}
+@media (max-width: 640px) {
+  .blog-content > p:first-of-type { font-size: 18px; }
+}
 .blog-content > p:first-of-type::first-letter {
-  font-size: 4rem;
-  font-weight: 900;
-  float: left;
-  margin-right: 12px;
-  line-height: 1;
-  margin-top: 0.1em;
-  color: var(--drop-cap-color);
   font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 64px;
+  line-height: 0.72;
+  float: left;
+  margin-right: 10px;
+  margin-top: 6px;
+  color: var(--mhj-brown);
+}
+.dark .blog-content > p:first-of-type::first-letter {
+  color: var(--mhj-brown-dark);
+}
+
+/* 블로그 상세 상단 Dateline — 카테고리 Playfair italic 대형 (§5.3 예외) */
+.blog-dateline {
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--mhj-brown);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  margin: 0 0 24px;
+  word-break: keep-all;
+}
+.dark .blog-dateline { color: var(--mhj-brown-dark); }
+
+/* MHJ 로고 hover — Min / Hyun / Jin stagger */
+.mhj-logo-letters {
+  display: inline-flex;
+  gap: 0;
+}
+.mhj-logo-letter-group {
+  position: relative;
+  display: inline-block;
+}
+.mhj-logo-child-name {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translate(-50%, -4px);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 10px;
+  color: var(--mhj-brown);
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.dark .mhj-logo-child-name { color: var(--mhj-brown-dark); }
+.mhj-logo-letters:hover .mhj-logo-child-name {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.mhj-logo-letters:hover .mhj-logo-child-name[data-idx="0"] { transition-delay: 0s; }
+.mhj-logo-letters:hover .mhj-logo-child-name[data-idx="1"] { transition-delay: 0.08s; }
+.mhj-logo-letters:hover .mhj-logo-child-name[data-idx="2"] { transition-delay: 0.16s; }
+@media (hover: none) {
+  .mhj-logo-child-name { display: none; }
 }
 .blog-content h2 {
   font-size: clamp(24px, 3vw, 36px);

@@ -90,9 +90,15 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
           style={{ padding: '0 clamp(24px, 4vw, 40px)', height: '72px' }}
         >
           {/* ── MHJ 브랜드 로고 ── */}
-          <Link href="/" className="flex flex-col items-start" onClick={closeMobile} style={{ textDecoration: 'none' }}>
+          <Link
+            href="/"
+            className="flex flex-col items-start"
+            onClick={closeMobile}
+            style={{ textDecoration: 'none' }}
+            aria-label="MHJ - My Mairangi"
+          >
             <span
-              className="font-display"
+              className="mhj-logo-letters font-display"
               style={{
                 fontSize: 32,
                 fontWeight: 400,
@@ -101,7 +107,14 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
                 lineHeight: 1,
               }}
             >
-              MHJ
+              {(['M', 'H', 'J'] as const).map((ch, idx) => (
+                <span key={ch} className="mhj-logo-letter-group">
+                  <span>{ch}</span>
+                  <span className="mhj-logo-child-name" data-idx={idx}>
+                    {ch === 'M' ? 'Min' : ch === 'H' ? 'Hyun' : 'Jin'}
+                  </span>
+                </span>
+              ))}
             </span>
             <span
               style={{
