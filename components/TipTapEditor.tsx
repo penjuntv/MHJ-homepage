@@ -186,6 +186,43 @@ const CalloutBlockNode = Node.create({
   },
 });
 
+/* ── PullQuote (세션 3) ── */
+const PullQuoteNode = Node.create({
+  name: 'pullQuote',
+  group: 'block',
+  content: 'inline*',
+  defining: true,
+  addAttributes() {
+    return {
+      variant: {
+        default: 'centered',
+        parseHTML: el => (el as HTMLElement).getAttribute('data-variant') || 'centered',
+        renderHTML: attrs => ({ 'data-variant': attrs.variant }),
+      },
+    };
+  },
+  parseHTML() {
+    return [
+      {
+        tag: 'figure.pull-quote',
+        getAttrs: el => ({
+          variant: (el as HTMLElement).getAttribute('data-variant') || 'centered',
+        }),
+      },
+      // Yussi Factory 등 외부 붙여넣기 호환
+      { tag: 'figure > blockquote', priority: 51 },
+    ];
+  },
+  renderHTML({ node }) {
+    const variant = node.attrs.variant === 'margin' ? 'margin' : 'centered';
+    return [
+      'figure',
+      { class: `pull-quote pull-quote--${variant}`, 'data-variant': variant },
+      ['blockquote', { class: 'pull-quote__body' }, 0],
+    ];
+  },
+});
+
 
 /* ════════════════════════════════════════
    CUSTOM NODE VIEWS
@@ -298,9 +335,11 @@ function ImageToolbar({ align, width, updateAttributes }: {
 function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
   const align: string = node.attrs.align ?? 'center';
   const width: string = node.attrs.width ?? '100%';
+  const caption: string = node.attrs.caption ?? '';
+  const showCaptionInput = selected || !!caption;
   const justifyMap: Record<string, string> = { left: 'flex-start', center: 'center', right: 'flex-end' };
   return (
-    <NodeViewWrapper style={{ display: 'flex', justifyContent: justifyMap[align] ?? 'center', margin: '16px 0' }}>
+    <NodeViewWrapper style={{ display: 'flex', flexDirection: 'column', alignItems: justifyMap[align] === 'flex-start' ? 'flex-start' : justifyMap[align] === 'flex-end' ? 'flex-end' : 'center', margin: '16px 0' }}>
       <div contentEditable={false} style={{ position: 'relative', width, transition: 'width 0.2s', flexShrink: 0 }}>
         {selected && <ImageToolbar align={align} width={width} updateAttributes={updateAttributes} />}
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -309,6 +348,22 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
             outline: selected ? '2px solid #4F46E5' : 'none', outlineOffset: 2, transition: 'outline 0.15s' }}
         />
       </div>
+      {showCaptionInput && (
+        <input
+          contentEditable={false}
+          type="text"
+          value={caption}
+          onChange={e => updateAttributes({ caption: e.target.value })}
+          placeholder="장소, 시간 — 한 문장 (선택)"
+          style={{
+            width, maxWidth: '100%', marginTop: 8, padding: '4px 2px',
+            border: 'none', outline: 'none', background: 'transparent',
+            fontFamily: 'var(--font-inter), Inter, sans-serif',
+            fontSize: 12, fontStyle: 'italic', textAlign: 'center',
+            color: caption ? '#64748B' : '#CBD5E1',
+          }}
+        />
+      )}
     </NodeViewWrapper>
   );
 }
@@ -319,9 +374,41 @@ const CustomImage = ImageExtension.extend({
       ...this.parent?.(),
       align: { default: 'center', parseHTML: el => el.getAttribute('data-align') ?? 'center', renderHTML: attrs => ({ 'data-align': attrs.align }) },
       width: { default: '100%', parseHTML: el => el.getAttribute('data-width') ?? '100%', renderHTML: attrs => ({ 'data-width': attrs.width }) },
+      caption: {
+        default: '',
+        // img의 조상 figure.blog-figure에서 figcaption 텍스트 수집 (붙여넣기/역직렬화 호환)
+        parseHTML: el => {
+          const parentFig = (el as HTMLElement).closest('figure.blog-figure');
+          const cap = parentFig?.querySelector(':scope > figcaption');
+          return cap?.textContent?.trim() || '';
+        },
+        renderHTML: () => ({}),
+      },
     };
   },
-  renderHTML({ HTMLAttributes }) { return ['img', mergeAttributes(HTMLAttributes)]; },
+  parseHTML() {
+    return [
+      // caption 포함 figure 래퍼를 우선 매칭 → 내부 img가 caption 속성을 흡수
+      { tag: 'figure.blog-figure > img', priority: 60 },
+      { tag: 'img[src]' },
+    ];
+  },
+  renderHTML({ node, HTMLAttributes }) {
+    const caption = (node.attrs.caption ?? '').toString().trim();
+    const align = node.attrs.align ?? 'center';
+    const imgAttrs = mergeAttributes(HTMLAttributes, {
+      'data-align': align,
+      'data-width': node.attrs.width ?? '100%',
+    });
+    if (caption) {
+      return [
+        'figure', { class: 'blog-figure', 'data-align': align },
+        ['img', imgAttrs],
+        ['figcaption', {}, caption],
+      ];
+    }
+    return ['img', imgAttrs];
+  },
   addNodeView() { return ReactNodeViewRenderer(ImageNodeView); },
 });
 
@@ -541,6 +628,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
       MapEmbedNode,
       CtaButtonNode,
       CalloutBlockNode,
+      PullQuoteNode,
     ],
     content,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
@@ -755,6 +843,31 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
                 <span style={{ color: '#64748b' }}><MessageSquare size={14} /></span>
                 콜아웃 박스
               </button>
+              <div style={{ height: 1, background: '#f1f5f9', margin: '4px 6px' }} />
+              {([
+                { variant: 'centered' as const, label: 'Pull Quote — Centered' },
+                { variant: 'margin' as const, label: 'Pull Quote — Margin' },
+              ]).map(item => (
+                <button key={item.variant} type="button"
+                  onClick={() => {
+                    if (!editor) return;
+                    editor.chain().focus().insertContent({
+                      type: 'pullQuote',
+                      attrs: { variant: item.variant },
+                      content: [{ type: 'text', text: '여기에 인용구를 입력하세요' }],
+                    }).run();
+                    setShowInsertMenu(false);
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    width: '100%', padding: '9px 12px', borderRadius: 8,
+                    border: 'none', background: 'none', cursor: 'pointer',
+                    fontSize: 13, fontWeight: 600, color: '#1a1a1a', textAlign: 'left',
+                  }}>
+                  <span style={{ color: '#64748b' }}><Quote size={14} /></span>
+                  {item.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -795,6 +908,28 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
         .tiptap-editor .ProseMirror div[data-youtube-video] iframe,
         .tiptap-editor .ProseMirror div.blog-youtube iframe {
           width: 100%; height: 100%; border: none; display: block;
+        }
+        .tiptap-editor .ProseMirror figure.pull-quote {
+          border-top: 1px solid #e2e8f0;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 20px 0;
+          margin: 20px 0;
+          text-align: center;
+        }
+        .tiptap-editor .ProseMirror figure.pull-quote[data-variant="margin"] {
+          float: right;
+          width: 40%;
+          margin: 8px 0 16px 24px;
+          padding: 0 0 0 16px;
+          text-align: left;
+          border-top: 0; border-bottom: 0;
+          border-left: 1px solid #e2e8f0;
+        }
+        .tiptap-editor .ProseMirror figure.pull-quote blockquote {
+          border: 0; padding: 0; margin: 0;
+          font-family: 'Playfair Display', serif;
+          font-style: italic; font-weight: 300;
+          font-size: 18px; line-height: 1.55; color: #1a1a1a;
         }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
