@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createAdminClient } from '@/lib/supabase';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
 import { formatDate } from '@/lib/utils';
@@ -21,38 +21,47 @@ interface NewsletterRow {
 }
 
 async function getIssue(issue: string): Promise<NewsletterRow | null> {
-  // issue는 issue_number (예: '01') 또는 숫자 id 둘 다 허용
-  const { data: byIssue } = await supabase
-    .from('newsletters')
-    .select('id, subject, content, issue_number, sent_at, preheader')
-    .eq('status', 'sent')
-    .eq('issue_number', issue)
-    .maybeSingle();
-
-  if (byIssue) return byIssue as NewsletterRow;
-
+  const db = createAdminClient();
   const asNum = Number(issue);
+
+  // 1) issue_number로 매칭 (text/number 스키마 변화에 대응해 두 형태 모두 시도)
+  const candidates: Array<string | number> = Number.isFinite(asNum) && asNum > 0
+    ? [asNum, issue]
+    : [issue];
+
+  for (const candidate of candidates) {
+    const { data } = await db
+      .from('newsletters')
+      .select('id, subject, content, issue_number, sent_at, preheader')
+      .eq('status', 'sent')
+      .eq('issue_number', candidate)
+      .maybeSingle();
+    if (data) return data as NewsletterRow;
+  }
+
+  // 2) fallback: numeric id 매칭
   if (Number.isFinite(asNum) && asNum > 0) {
-    const { data: byId } = await supabase
+    const { data } = await db
       .from('newsletters')
       .select('id, subject, content, issue_number, sent_at, preheader')
       .eq('status', 'sent')
       .eq('id', asNum)
       .maybeSingle();
-    if (byId) return byId as NewsletterRow;
+    if (data) return data as NewsletterRow;
   }
   return null;
 }
 
 export async function generateStaticParams() {
-  const { data } = await supabase
+  const db = createAdminClient();
+  const { data } = await db
     .from('newsletters')
     .select('issue_number')
     .eq('status', 'sent');
   return (data ?? [])
-    .map((n: { issue_number: string | null }) => n.issue_number)
-    .filter((v): v is string => !!v)
-    .map((issue) => ({ issue }));
+    .map((n: { issue_number: string | number | null }) => n.issue_number)
+    .filter((v): v is string | number => v !== null && v !== undefined)
+    .map((issue) => ({ issue: String(issue) }));
 }
 
 export async function generateMetadata({
@@ -84,7 +93,7 @@ export default async function NewsletterIssuePage({
   if (!nl) notFound();
 
   const settings = await getSiteSettings();
-  const ctaCopyB = settings.newsletter_cta_copy_b || '다음 편지를 가장 먼저 받아보세요.';
+  const ctaCopyB = settings.newsletter_cta_copy_b || 'Be the first to receive our next letter.';
 
   return (
     <article className="mn-issue-page">

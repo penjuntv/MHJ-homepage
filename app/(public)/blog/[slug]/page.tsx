@@ -159,10 +159,11 @@ export default async function BlogDetailPage({
     : await getBlog(params.slug);
   if (!blog) notFound();
 
+  const adminDb = createAdminClient();
   const [relatedBlogs, adjacent, latestNewsletterRes, settings] = await Promise.all([
     getRelatedBlogs(blog.category, blog.slug),
     getAdjacentBlogs(blog.id),
-    supabase
+    adminDb
       .from('newsletters')
       .select('subject, issue_number')
       .eq('status', 'sent')
@@ -172,7 +173,7 @@ export default async function BlogDetailPage({
     getSiteSettings(),
   ]);
   const latestNewsletter = latestNewsletterRes.data as { subject: string; issue_number: string } | null;
-  const ctaCopyB = settings.newsletter_cta_copy_b || '다음 편지를 가장 먼저 받아보세요.';
+  const ctaCopyB = settings.newsletter_cta_copy_b || 'Be the first to receive our next letter.';
 
   const isHtml = blog.content.includes('<') && blog.content.includes('>');
   const plainText = blog.content.replace(/<[^>]*>/g, '');
@@ -523,7 +524,7 @@ export default async function BlogDetailPage({
                 href={`/mairangi-notes/${latestNewsletter.issue_number}`}
                 className="latest-newsletter-hint"
               >
-                지난 편지: &ldquo;{latestNewsletter.subject}&rdquo;
+                Last letter: &ldquo;{latestNewsletter.subject}&rdquo;
               </Link>
             )}
             <NewsletterCTA

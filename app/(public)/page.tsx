@@ -205,7 +205,7 @@ export default async function LandingPage() {
     getCategoryPosts(latestExcludeIds),
     getSiteSettings(),
   ]);
-  const ctaCopyA = settings.newsletter_cta_copy_a || '한 달에 두어 번, 조용한 편지를 보냅니다.';
+  const ctaCopyA = settings.newsletter_cta_copy_a || 'A quiet letter, a few times a month.';
 
   const magArticleCount = latestMag ? await getMagazineArticleCount(String(latestMag.id)) : 0;
 

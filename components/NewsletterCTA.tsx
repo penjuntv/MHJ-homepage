@@ -48,7 +48,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
 
   /* ── Inline-thin variant (세션 4, 기사 끝) ── */
   if (variant === 'inline-thin') {
-    const inlineCopy = copy || '한 달에 두어 번, 조용한 편지를 보냅니다.';
+    const inlineCopy = copy || 'A quiet letter, a few times a month.';
     return (
       <section className="newsletter-cta-inline">
         <p className="cta-copy">{inlineCopy}</p>
