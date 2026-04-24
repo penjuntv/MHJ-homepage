@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import type { Blog, Magazine } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { formatDate } from '@/lib/utils';
+import { getSiteSettings } from '@/lib/site-settings';
 
 export const revalidate = 300;
 
@@ -198,11 +199,13 @@ export default async function LandingPage() {
   const latest = await getLatestPosts(heroIds);
   const latestExcludeIds = [...heroIds, ...latest.map(b => b.id)].filter(Boolean);
 
-  const [mostRead, latestMag, categoryPosts] = await Promise.all([
+  const [mostRead, latestMag, categoryPosts, settings] = await Promise.all([
     getMostReadBlogs(latestExcludeIds),
     getLatestMagazine(),
     getCategoryPosts(latestExcludeIds),
+    getSiteSettings(),
   ]);
+  const ctaCopyA = settings.newsletter_cta_copy_a || '한 달에 두어 번, 조용한 편지를 보냅니다.';
 
   const magArticleCount = latestMag ? await getMagazineArticleCount(String(latestMag.id)) : 0;
 
@@ -339,19 +342,8 @@ export default async function LandingPage() {
 
             {/* Right: Sidebar */}
             <aside style={{ position: 'sticky', top: 80, alignSelf: 'start' }}>
-              {/* Newsletter CTA (compact) — 첫 번째 */}
+              {/* About mini-card */}
               <div style={{
-                padding: 24,
-                borderRadius: 12,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-surface)',
-              }}>
-                <NewsletterCTA compact buttonText="Subscribe →" location="homepage_mid" />
-              </div>
-
-              {/* About mini-card — 두 번째 */}
-              <div style={{
-                marginTop: 32,
                 padding: 24,
                 borderRadius: 12,
                 border: '1px solid var(--border)',
@@ -588,9 +580,9 @@ export default async function LandingPage() {
           </section>
         )}
 
-        {/* ═══════ §5. Newsletter CTA (full) ═══════ */}
+        {/* ═══════ §5. Newsletter CTA (full, hero-dark) ═══════ */}
         <div style={{ marginTop: 96 }}>
-          <NewsletterCTA reducedPadding buttonText="Subscribe →" location="homepage_bottom" />
+          <NewsletterCTA reducedPadding buttonText="Subscribe →" location="homepage_bottom" copy={ctaCopyA} />
         </div>
 
       </div>

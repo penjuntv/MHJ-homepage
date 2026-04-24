@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import type { Magazine } from '@/lib/types';
 import MagazineShelf from '@/components/MagazineShelf';
-import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
 
 export const revalidate = 3600;
@@ -71,7 +70,6 @@ export default async function MagazinePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <MagazineShelf magazines={magazines} magazineTitle={s.magazine_title} magazineHint={s.magazine_hint} />
-      <NewsletterCTA />
     </>
   );
 }

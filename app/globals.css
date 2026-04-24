@@ -787,13 +787,13 @@
 
 /* 블로그 상세 상단 Dateline — 카테고리 Playfair italic 대형 (§5.3 예외) */
 .blog-dateline {
-  font-size: clamp(40px, 6vw, 64px);
+  font-size: clamp(18px, 2.5vw, 22px);
   font-weight: 300;
   font-style: italic;
   color: var(--mhj-brown);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
   line-height: 1;
-  margin: 0 0 24px;
+  margin: 0 0 16px;
   word-break: keep-all;
 }
 .dark .blog-dateline { color: var(--mhj-brown-dark); }
@@ -823,15 +823,19 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .dark .mhj-logo-child-name { color: var(--mhj-brown-dark); }
-.mhj-logo-letters:hover .mhj-logo-child-name {
-  opacity: 1;
-  transform: translate(-50%, 0);
+/* 마우스 포인팅 디바이스(데스크톱)에서만 hover stagger 발동 */
+@media (hover: hover) and (pointer: fine) {
+  .mhj-logo-letters:hover .mhj-logo-child-name {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  .mhj-logo-letters:hover .mhj-logo-child-name[data-idx="0"] { transition-delay: 0s; }
+  .mhj-logo-letters:hover .mhj-logo-child-name[data-idx="1"] { transition-delay: 0.08s; }
+  .mhj-logo-letters:hover .mhj-logo-child-name[data-idx="2"] { transition-delay: 0.16s; }
 }
-.mhj-logo-letters:hover .mhj-logo-child-name[data-idx="0"] { transition-delay: 0s; }
-.mhj-logo-letters:hover .mhj-logo-child-name[data-idx="1"] { transition-delay: 0.08s; }
-.mhj-logo-letters:hover .mhj-logo-child-name[data-idx="2"] { transition-delay: 0.16s; }
-@media (hover: none) {
-  .mhj-logo-child-name { display: none; }
+/* 터치/coarse 포인터(iPhone, iPad, Android): 완전 숨김 (sticky hover 방지) */
+@media (hover: none), (pointer: coarse) {
+  .mhj-logo-child-name { display: none !important; }
 }
 .blog-content h2 {
   font-size: clamp(24px, 3vw, 36px);
@@ -885,7 +889,17 @@
 /* 본문 이미지 figure */
 .blog-content figure.blog-body-image { margin: 24px 0; }
 .blog-content figure.blog-body-image img { width: 100%; height: auto; border-radius: 8px; display: block; margin: 0; }
-.blog-content figure.blog-body-image figcaption { margin-top: 8px; font-size: 13px; font-style: italic; color: var(--text-secondary); text-align: center; line-height: 1.5; }
+/* figcaption 통일 — 세션 4: blog-body-image(기존 13px) + blog-figure(세션3 11px)를 11px Inter italic로 통합 */
+.blog-content figure.blog-body-image figcaption,
+.blog-content figure.blog-figure figcaption {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.5;
+}
 
 /* ── Pull Quote (세션 3) ── */
 .blog-content .pull-quote {
@@ -931,15 +945,7 @@
   border-radius: 8px;
   display: block;
 }
-.blog-content figure.blog-figure figcaption {
-  font-family: var(--font-inter), Inter, sans-serif;
-  font-size: 11px;
-  font-style: italic;
-  color: var(--text-tertiary);
-  text-align: center;
-  margin-top: 8px;
-  line-height: 1.5;
-}
+/* figure.blog-figure figcaption은 위 통합 규칙 참조 (세션 4) */
 .blog-content figure.blog-figure[data-align="left"] { float: left; max-width: 50%; margin: 8px 24px 16px 0; }
 .blog-content figure.blog-figure[data-align="right"] { float: right; max-width: 50%; margin: 8px 0 16px 24px; }
 /* Callout */
@@ -1682,4 +1688,212 @@ a:hover .magazine-cover-shadow img {
   .newsletter-form-row button {
     width: 100% !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   세션 4: inline-thin CTA / 지난 편지 hint / Mairangi Notes
+   ═══════════════════════════════════════════════════════════ */
+
+.newsletter-cta-inline {
+  max-width: 720px;
+  margin: 48px auto 0;
+  padding: 20px 0;
+  border-top: 0.5px solid var(--border-strong);
+  border-bottom: 0.5px solid var(--border-strong);
+  background: transparent;
+  text-align: center;
+}
+.newsletter-cta-inline .cta-copy {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--text);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+.newsletter-cta-inline .cta-form {
+  display: inline-flex;
+  gap: 8px;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+}
+.newsletter-cta-inline input[type="email"] {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  min-width: 0;
+  font-family: inherit;
+}
+.newsletter-cta-inline button[type="submit"] {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.newsletter-cta-inline button[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (max-width: 480px) {
+  .newsletter-cta-inline .cta-form { flex-direction: column; }
+  .newsletter-cta-inline .cta-form input[type="email"],
+  .newsletter-cta-inline .cta-form button[type="submit"] { width: 100%; }
+}
+
+/* 지난 편지 hint (블로그 상세 CTA 위 한 줄) */
+.latest-newsletter-hint {
+  display: block;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  text-decoration: none;
+  margin: 48px auto 0;
+  max-width: 720px;
+  transition: color 0.2s;
+}
+.latest-newsletter-hint:hover { color: var(--text); }
+.latest-newsletter-hint + .newsletter-cta-inline {
+  margin-top: 12px;
+}
+
+/* ─── /mairangi-notes 아카이브 ─── */
+.mn-page {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(64px, 8vw, 120px) clamp(20px, 4vw, 48px);
+}
+.mn-header {
+  max-width: 720px;
+  margin: 0 auto 64px;
+  text-align: center;
+}
+.mn-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(40px, 5vw, 56px);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  margin: 0 0 16px;
+}
+.mn-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+.mn-subscriber-count {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 24px 0 0;
+}
+.mn-list {
+  max-width: 720px;
+  margin: 0 auto;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.mn-list li {
+  border-bottom: 0.5px solid var(--border-strong);
+}
+.mn-list li:first-child {
+  border-top: 0.5px solid var(--border-strong);
+}
+.mn-list a {
+  display: block;
+  padding: 32px 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s;
+}
+.mn-list a:hover { background: var(--bg-surface); }
+.mn-issue-num {
+  display: block;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--mhj-brown);
+  margin-bottom: 8px;
+}
+.dark .mn-issue-num { color: var(--mhj-brown-dark); }
+.mn-issue-subject {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  font-size: clamp(20px, 2.4vw, 24px);
+  color: var(--text);
+  line-height: 1.3;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+.mn-issue-preheader {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+.mn-list time {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+}
+
+/* ─── /mairangi-notes/[issue] 상세 ─── */
+.mn-issue-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(48px, 6vw, 96px) clamp(20px, 4vw, 32px);
+}
+.mn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: none;
+  margin-bottom: 48px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  transition: color 0.2s, border-color 0.2s;
+}
+.mn-back:hover { color: var(--text); border-color: var(--border-strong); }
+.mn-issue-header {
+  margin-bottom: 32px;
+}
+.mn-issue-frame {
+  width: 100%;
+  min-height: 2400px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  display: block;
 }

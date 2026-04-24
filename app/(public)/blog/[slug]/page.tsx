@@ -7,7 +7,7 @@ import { draftMode } from 'next/headers';
 import { supabase, createAdminClient } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
-import InlineSubscribeCTA from '@/components/InlineSubscribeCTA';
+import { getSiteSettings } from '@/lib/site-settings';
 import ViewTracker from './ViewTracker';
 import RelatedCard from './RelatedCard';
 import ShareButton from '@/components/ShareButton';
@@ -159,24 +159,23 @@ export default async function BlogDetailPage({
     : await getBlog(params.slug);
   if (!blog) notFound();
 
-  const [relatedBlogs, adjacent] = await Promise.all([
+  const [relatedBlogs, adjacent, latestNewsletterRes, settings] = await Promise.all([
     getRelatedBlogs(blog.category, blog.slug),
     getAdjacentBlogs(blog.id),
+    supabase
+      .from('newsletters')
+      .select('subject, issue_number')
+      .eq('status', 'sent')
+      .order('sent_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    getSiteSettings(),
   ]);
+  const latestNewsletter = latestNewsletterRes.data as { subject: string; issue_number: string } | null;
+  const ctaCopyB = settings.newsletter_cta_copy_b || '다음 편지를 가장 먼저 받아보세요.';
 
   const isHtml = blog.content.includes('<') && blog.content.includes('>');
   const plainText = blog.content.replace(/<[^>]*>/g, '');
-
-  // 본문 중간에 InlineSubscribeCTA 삽입 (HTML 본문이고 paragraph ≥5일 때만)
-  const paragraphs = isHtml ? blog.content.split('</p>') : [];
-  const showInline = isHtml && paragraphs.length >= 5;
-  const midPoint = Math.floor(paragraphs.length / 2);
-  const firstHalfHtml = showInline
-    ? paragraphs.slice(0, midPoint).join('</p>') + '</p>'
-    : '';
-  const secondHalfHtml = showInline
-    ? paragraphs.slice(midPoint).join('</p>')
-    : '';
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -422,27 +421,11 @@ export default async function BlogDetailPage({
               <div id="scroll-depth-100" style={{ position: 'absolute', bottom: 0, height: 1 }} />
 
               {isHtml ? (
-                showInline ? (
-                  <>
-                    <div
-                      className="blog-content"
-                      dangerouslySetInnerHTML={{ __html: firstHalfHtml }}
-                      suppressHydrationWarning
-                    />
-                    <InlineSubscribeCTA location="blog_inline" />
-                    <div
-                      className="blog-content"
-                      dangerouslySetInnerHTML={{ __html: secondHalfHtml }}
-                      suppressHydrationWarning
-                    />
-                  </>
-                ) : (
-                  <div
-                    className="blog-content"
-                    dangerouslySetInnerHTML={{ __html: blog.content }}
-                    suppressHydrationWarning
-                  />
-                )
+                <div
+                  className="blog-content"
+                  dangerouslySetInnerHTML={{ __html: blog.content }}
+                  suppressHydrationWarning
+                />
               ) : (
                 <div className="blog-content">
                   <p>{blog.content}</p>
@@ -534,13 +517,21 @@ export default async function BlogDetailPage({
               <CommentSection blogId={blog.id} />
             </div>
 
-            {/* Newsletter CTA — 댓글 다음, Previous/Next 앞 */}
-            <div style={{
-              borderTop: '1px solid var(--border)',
-              marginBottom: 16,
-            }}>
-              <NewsletterCTA reducedPadding buttonText="Get the free guide →" location="blog_detail" />
-            </div>
+            {/* 지난 편지 hint + inline-thin CTA (세션 4) */}
+            {latestNewsletter?.subject && (
+              <Link
+                href={`/mairangi-notes/${latestNewsletter.issue_number}`}
+                className="latest-newsletter-hint"
+              >
+                지난 편지: &ldquo;{latestNewsletter.subject}&rdquo;
+              </Link>
+            )}
+            <NewsletterCTA
+              variant="inline-thin"
+              copy={ctaCopyB}
+              location="blog_detail"
+              buttonText="Subscribe →"
+            />
 
             {/* 이전/다음 글 네비게이션 */}
             {(adjacent.prev || adjacent.next) && (

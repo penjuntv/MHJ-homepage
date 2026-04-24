@@ -5,7 +5,6 @@ import SafeImage from './SafeImage';
 import { useRouter } from 'next/navigation';
 import type { Blog } from '@/lib/types';
 import { BLOG_CATEGORIES } from '@/lib/constants';
-import NewsletterCTA from './NewsletterCTA';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
@@ -216,11 +215,6 @@ export default function BlogLibrary({
           onBlogClick={(slug) => router.push(`/blog/${slug}`)}
         />
       )}
-
-      {/* Newsletter CTA */}
-      <div style={{ margin: '96px calc(-1 * clamp(20px, 4vw, 48px)) 0' }}>
-        <NewsletterCTA location="blog_list" />
-      </div>
 
       {/* 반응형 스타일 */}
       <style jsx>{`

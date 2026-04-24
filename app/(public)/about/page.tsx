@@ -4,7 +4,6 @@ import SafeImage from '@/components/SafeImage';
 import { supabase } from '@/lib/supabase';
 import type { FamilyMember } from '@/lib/types';
 import { getSiteSettings } from '@/lib/site-settings';
-import NewsletterCTA from '@/components/NewsletterCTA';
 
 export const revalidate = 3600;
 
@@ -429,8 +428,6 @@ export default async function AboutPage() {
 
           </div>
         </section>
-
-        <NewsletterCTA buttonText="Read Yussi's stories →" location="about" />
       </div>
     </>
   );

@@ -9,9 +9,11 @@ interface Props {
   reducedPadding?: boolean;
   buttonText?: string;
   location?: string;
+  variant?: 'hero-dark' | 'inline-thin';
+  copy?: string;
 }
 
-export default function NewsletterCTA({ compact = false, reducedPadding = false, buttonText, location }: Props) {
+export default function NewsletterCTA({ compact = false, reducedPadding = false, buttonText, location, variant, copy }: Props) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
@@ -43,6 +45,39 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
       setStatus('error');
     }
   };
+
+  /* ── Inline-thin variant (세션 4, 기사 끝) ── */
+  if (variant === 'inline-thin') {
+    const inlineCopy = copy || '한 달에 두어 번, 조용한 편지를 보냅니다.';
+    return (
+      <section className="newsletter-cta-inline">
+        <p className="cta-copy">{inlineCopy}</p>
+        {status === 'success' || status === 'duplicate' ? (
+          <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', margin: 0 }}>
+            Welcome! Check your inbox 📬
+          </p>
+        ) : (
+          <form onSubmit={submit} className="cta-form">
+            <input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <button type="submit" disabled={status === 'loading'}>
+              {status === 'loading' ? '...' : (buttonText || 'Subscribe →')}
+            </button>
+          </form>
+        )}
+        {status === 'error' && (
+          <p style={{ fontSize: 12, color: '#ef4444', textAlign: 'center', margin: '8px 0 0' }}>
+            Something went wrong.
+          </p>
+        )}
+      </section>
+    );
+  }
 
   /* ── Compact version (sidebar) ── */
   if (compact) {
@@ -160,6 +195,20 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
         }}>
           Mairangi Notes
         </p>
+
+        {/* site_settings 주입 카피 (세션 4) */}
+        {copy && (
+          <p className="font-display" style={{
+            fontSize: 18,
+            fontStyle: 'italic',
+            fontWeight: 300,
+            lineHeight: 1.5,
+            color: isDarkVariant ? 'rgba(250,248,245,0.85)' : 'var(--text-secondary)',
+            marginBottom: reducedPadding ? 16 : 20,
+          }}>
+            {copy}
+          </p>
+        )}
 
         {/* 헤드라인 — max 56px (DESIGN_RULES §5.3) */}
         <h2

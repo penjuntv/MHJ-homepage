@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase';
@@ -252,6 +253,8 @@ export async function POST(req: NextRequest) {
         sent_at: new Date().toISOString(),
         recipient_count: successCount,
       }).eq('id', dbId);
+      // 발송 성공 후 Mairangi Notes 아카이브 캐시 갱신 (세션 4)
+      revalidatePath('/mairangi-notes');
     }
 
     return NextResponse.json({ ok: true, sent: successCount });
