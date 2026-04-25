@@ -10,10 +10,10 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
   title: 'Magazine',
-  description: '뉴질랜드 마이랑이 가족의 월간 라이프 매거진. 매달 새로운 이슈로 기록하는 오클랜드 노스쇼어의 일상.',
+  description: 'MHJ Magazine — quarterly issues from a family in Mairangi Bay, Auckland. Stories, photos, and essays on life in Aotearoa.',
   openGraph: {
     title: 'Magazine',
-    description: '뉴질랜드 마이랑이 가족의 월간 라이프 매거진.',
+    description: 'MHJ Magazine — quarterly issues from a family in Mairangi Bay, Auckland. Stories, photos, and essays on life in Aotearoa.',
     url: `${SITE_URL}/magazine`,
     images: [{ url: `${SITE_URL}/og-magazine.jpg`, width: 1200, height: 630 }],
   },

@@ -32,12 +32,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   if (category) canonical.searchParams.set('category', category);
   if (page > 1) canonical.searchParams.set('page', String(page));
 
+  const description = "Yussi's personal archive: observations from the everyday, perspectives on education, and essays from a life in progress.";
+
   return {
     title,
-    description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
+    description,
     openGraph: {
       title: title,
-      description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
+      description,
       url: canonical.toString(),
       images: [{ url: `${SITE_URL}/og-blog.jpg`, width: 1200, height: 630 }],
     },
@@ -166,8 +168,8 @@ export default async function BlogPage({ searchParams }: Props) {
     '@type': 'Blog',
     name: 'MHJ Blog Library',
     url: `${SITE_URL}/blog`,
-    description: 'Yussi의 개인 서재. 사회복지 석사 과정, 육아, 뉴질랜드 일상을 기록합니다.',
-    inLanguage: 'ko',
+    description: "Yussi's personal archive: observations from the everyday, perspectives on education, and essays from a life in progress.",
+    inLanguage: 'en',
     author: { '@type': 'Person', name: 'Yussi' },
     publisher: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
     blogPost: paginated.blogs.slice(0, 10).map((b) => ({

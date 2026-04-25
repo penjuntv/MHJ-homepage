@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import UnsubscribeClient from './_client';
 
 export const metadata = {
-  title: '구독 해지 — Mairangi Notes',
+  title: 'Unsubscribe — Mairangi Notes',
   robots: 'noindex',
 };
 

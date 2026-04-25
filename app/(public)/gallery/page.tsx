@@ -10,10 +10,10 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
   title: 'Photo Gallery',
-  description: '마이랑이 베이에서 담아낸 우리 가족의 순간들.',
+  description: 'Through their eyes — a photo gallery from Mairangi Bay. Captured by Min, Hyun, Jin, PeNnY, and Yussi.',
   openGraph: {
     title: 'Photo Gallery',
-    description: '마이랑이 베이에서 담아낸 우리 가족의 순간들.',
+    description: 'Through their eyes — a photo gallery from Mairangi Bay. Captured by Min, Hyun, Jin, PeNnY, and Yussi.',
     url: `${SITE_URL}/gallery`,
     images: [{ url: `${SITE_URL}/og-gallery.jpg`, width: 1200, height: 630 }],
   },
