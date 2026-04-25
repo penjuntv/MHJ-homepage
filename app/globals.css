@@ -1647,8 +1647,8 @@ a:hover .magazine-cover-shadow img {
    모든 매거진 페이지 템플릿의 공통 변수. 썸네일/뷰어 어디에서든
    container width 기준(cqw)으로 타이포 비율 유지. */
 :root {
-  /* 여백 */
-  --mag-page-padding-x: 5%;
+  /* 여백 — x: 6cqw = 36px @600px viewer (TOC 기준), y: TOC top 40px → 48px 유지 */
+  --mag-page-padding-x: clamp(28px, 6cqw, 48px);
   --mag-page-padding-y: 48px;
 
   /* 폰트 스케일 (cqw: container query width 기준)

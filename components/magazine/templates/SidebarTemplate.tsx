@@ -115,14 +115,14 @@ export default function SidebarTemplate({
           <div className={`sb-main-${uid}`} dangerouslySetInnerHTML={{ __html: content }} />
         </div>
 
-        {/* 우: 인포블록 — 좌측 컬럼 높이의 ~2/3 수직 제한 */}
+        {/* 우: 인포블록 — 페이지 전체 높이 */}
         <div
           className={`sb-side-col-${uid}`}
           style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}
         >
           <div
             style={{
-              maxHeight: '66%',
+              flex: 1,
               overflow: 'hidden',
               background: `${accentColor}08`,
               border: `1px solid ${accentColor}22`,

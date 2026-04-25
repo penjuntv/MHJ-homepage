@@ -7,6 +7,8 @@ const FIXED_TITLE = 'Little Notes';
 /* 리듬 간격 — 구분선↔이미지 = 이미지↔따옴표 = 따옴표↔인용문
    3개 gap을 동일값으로 맞춰 시각적 리듬 형성 (PeNnY 지시). */
 const GAP = 'clamp(16px, 4cqw, 32px)';
+/* 구분선↔이미지 상단 여백 — GAP × 3 (PeNnY 지시) */
+const TOP_GAP = 'clamp(48px, 12cqw, 96px)';
 
 export default function LittleNotesTemplate({
   article,
@@ -49,8 +51,8 @@ export default function LittleNotesTemplate({
         </h1>
       </div>
 
-      {/* 이미지 — gap 1: 구분선↔이미지 */}
-      <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center', marginTop: GAP }}>
+      {/* 이미지 — gap 1: 구분선↔이미지 (3배 확대) */}
+      <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center', marginTop: TOP_GAP }}>
         {image ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img

@@ -4,6 +4,8 @@ import { getImageSlots, type NewTemplateProps } from './shared';
 
 /* 타이틀↔그리드 = 그리드↔본문 gap */
 const GAP = 'clamp(16px, 4cqw, 32px)';
+/* 구분선↔9장 그리드 상단 여백 — GAP × 3 (PeNnY 지시) */
+const TOP_GAP = 'clamp(48px, 12cqw, 96px)';
 /* 사진 셀 사이 gap — 타일 느낌, 작게 */
 const GRID_GAP = 'clamp(4px, 1cqw, 12px)';
 
@@ -70,8 +72,8 @@ export default function SpecialTemplate({
         </div>
       )}
 
-      {/* 9장 3×3 정사각 그리드 — 중앙 정렬, 페이지 폭의 ~65% */}
-      <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center', marginTop: GAP }}>
+      {/* 9장 3×3 정사각 그리드 — 중앙 정렬, 페이지 폭의 ~65%, 구분선 아래 3배 간격 */}
+      <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center', marginTop: TOP_GAP }}>
         <div
           style={{
             width: '65%',
