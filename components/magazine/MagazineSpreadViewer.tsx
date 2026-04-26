@@ -83,7 +83,7 @@ function TocPage({ magazine, articles, onGoToArticle }: {
 
   return (
     <MagazinePage bgColor={bgColor} showHeader={false} showFooter={false}>
-      <div style={{ width: '100%', height: '100%', padding: '40px 36px', boxSizing: 'border-box', overflow: 'hidden' }}>
+      <div style={{ width: '100%', height: '100%', padding: '40px 32px', boxSizing: 'border-box', overflow: 'hidden' }}>
       <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: subColor, margin: '0 0 6px' }}>Contents</p>
       <p style={{
         fontFamily: "'Playfair Display',serif", fontSize: 'clamp(18px,3vw,24px)',
