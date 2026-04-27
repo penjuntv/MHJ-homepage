@@ -58,7 +58,7 @@ export default function LittleNotesTemplate({
           <img
             src={image}
             alt=""
-            style={{ maxWidth: '45%', maxHeight: '40cqh', width: 'auto', height: 'auto', objectFit: 'contain', display: 'block' }}
+            style={{ maxWidth: '58%', maxHeight: '52cqh', width: 'auto', height: 'auto', objectFit: 'contain', display: 'block' }}
           />
         ) : (
           <div style={{

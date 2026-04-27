@@ -20,7 +20,7 @@ export default function ColumnLayoutTemplate({
   const imageColumn = (
     <div
       className={`col-imgs-${uid}`}
-      style={{ display: 'flex', flexDirection: 'column', gap: GAP, minHeight: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '4px', minHeight: 0 }}
     >
       {slots.map((slot, i) =>
         slot.src ? (

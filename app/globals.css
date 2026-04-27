@@ -1666,9 +1666,12 @@ a:hover .magazine-cover-shadow img {
   --mag-meta-color: #9B9590;
 }
 
-.dark {
-  --mag-title-divider: rgba(255, 255, 255, 0.12);
-  --mag-body-color: #E5E5E5;
+/* 매거진 페이지는 항상 라이트 톤 배경(bg_color)이므로 다크모드 변수를
+   .mag-page-root scope 내에서 라이트 값으로 복원. 다크모드 토글이 활성화돼도
+   매거진 본문/구분선이 흐릿해지지 않도록 함. */
+.dark .mag-page-root {
+  --mag-title-divider: rgba(0, 0, 0, 0.1);
+  --mag-body-color: #1A1A1A;
   --mag-meta-color: #9B9590;
 }
 

@@ -53,7 +53,7 @@ function CoverPage({ magazine }: { magazine: Magazine }) {
           <img
             src={magazine.image_url}
             alt={magazine.title}
-            style={{ width: '72%', maxWidth: 320, aspectRatio: '3/4', objectFit: 'cover', borderRadius: 8, margin: '12px 0' }}
+            style={{ width: '100%', aspectRatio: '4/5', objectFit: 'cover', borderRadius: 8, margin: '12px 0' }}
           />
         )}
 
