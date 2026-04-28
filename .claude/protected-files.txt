@@ -15,3 +15,20 @@ vercel.json
 # app/mhj-desk/blogs/
 app/mhj-desk/newsletters/
 app/mhj-desk/subscribers/
+
+## 7. 보호 파일 현황 (.claude/protected-files.txt)
+
+세션 시작 전 수정 대상 파일이 이 목록에 있는지 확인할 것.
+있으면 Claude Code 프롬프트에 "해제 → 수정 → 재보호" 패턴 명시.
+
+현재 보호 파일 (2026-04-22 기준):
+- lib/welcome-emails.ts (Welcome 템플릿)
+- app/api/subscribe/route.ts (silent catch 버그 보유, 추후 수정 대상)
+- app/api/process-welcome-sequence/route.ts (완료 2026-04-22, step 0 fallback 포함)
+- vercel.json
+- app/mhj-desk/newsletters/
+- app/mhj-desk/subscribers/
+
+해제된 파일 (참고):
+- components/Footer.tsx (브랜드 적용으로 해제)
+- app/mhj-desk/blogs/ (브랜드 적용으로 해제)
