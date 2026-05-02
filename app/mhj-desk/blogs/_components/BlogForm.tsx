@@ -353,14 +353,16 @@ export default function BlogForm({ initial }: Props) {
       });
     }
 
-    // On-demand revalidation
+    // On-demand revalidation + IndexNow (published일 때만)
     try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
       await fetch('/api/revalidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET,
           paths: [`/blog/${form.slug}`, '/', '/blog'],
+          ...(shouldPublish ? { indexNowUrls: [`${siteUrl}/blog/${form.slug}`] } : {}),
         }),
       });
     } catch { /* revalidation 실패해도 저장은 성공 */ }

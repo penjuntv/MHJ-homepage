@@ -25,6 +25,19 @@ export default function AdminMagazinesPage() {
   async function togglePublished(id: string, current: boolean) {
     await supabase.from('magazines').update({ published: !current }).eq('id', id);
     setMagazines(prev => prev.map(m => m.id === id ? { ...m, published: !current } : m));
+    try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+      await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET,
+          paths: ['/magazine', `/magazine/${id}`, '/'],
+          // current=true이면 숨기기(→unpublish), current=false이면 공개(→publish)
+          ...(!current ? { indexNowUrls: [`${siteUrl}/magazine/${id}`] } : {}),
+        }),
+      });
+    } catch { /* revalidation 실패해도 토글은 성공 */ }
   }
 
   async function deleteMagazine(id: string) {

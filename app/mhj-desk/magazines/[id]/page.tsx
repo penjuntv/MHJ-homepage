@@ -332,12 +332,14 @@ export default function MagazineDetailPage() {
       showToast('표지 정보가 저장되었습니다.');
       await fetchData();
       try {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
         await fetch('/api/revalidate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET,
             paths: ['/magazine', `/magazine/${id}`, '/'],
+            indexNowUrls: [`${siteUrl}/magazine/${id}`],
           }),
         });
       } catch { /* revalidation 실패해도 저장은 성공 */ }
