@@ -246,22 +246,70 @@ export default async function LandingPage() {
   ].filter((id): id is number => typeof id === 'number');
   const commentCounts = await getCommentCounts(allBlogIds);
 
-  const jsonLd = {
+  const websiteLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'MHJ',
+    name: 'My Mairangi Journal',
+    alternateName: 'MHJ',
     url: SITE_URL,
-    description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진.',
-    inLanguage: 'ko',
+    description: 'A family archive from Mairangi Bay, Auckland. Stories, images, and small records of a Korean family building a life in New Zealand.',
+    inLanguage: ['en', 'ko'],
     publisher: {
       '@type': 'Organization',
-      name: 'MHJ',
+      name: 'My Mairangi Journal',
       url: SITE_URL,
-      sameAs: [`${SITE_URL}/about`],
     },
     potentialAction: {
-      '@type': 'ReadAction',
-      target: [`${SITE_URL}/blog`, `${SITE_URL}/magazine`],
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/blog?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  const organizationLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'My Mairangi Journal',
+    alternateName: 'MHJ',
+    url: SITE_URL,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE_URL}/icon-192.png`,
+      width: 192,
+      height: 192,
+    },
+    description: 'A family archive from Mairangi Bay, Auckland — stories, images, and small records of a Korean family building a life in New Zealand.',
+    foundingLocation: {
+      '@type': 'Place',
+      name: 'Mairangi Bay, Auckland, New Zealand',
+    },
+    sameAs: [
+      `${SITE_URL}/about`,
+      `${SITE_URL}/magazine`,
+      `${SITE_URL}/blog`,
+    ],
+  };
+
+  const personLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Yussi',
+    jobTitle: 'Writer, MSW Student',
+    url: `${SITE_URL}/about`,
+    worksFor: {
+      '@type': 'Organization',
+      name: 'My Mairangi Journal',
+      url: SITE_URL,
+    },
+    description: 'A mother of three, social work student at Massey University, and writer of My Mairangi Journal — a family archive from Mairangi Bay, Auckland.',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Mairangi Bay',
+      addressRegion: 'Auckland',
+      addressCountry: 'NZ',
     },
   };
 
@@ -269,7 +317,15 @@ export default async function LandingPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }}
       />
       <div className="animate-fade-in">
 

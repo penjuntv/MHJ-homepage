@@ -200,7 +200,7 @@ export default async function BlogDetailPage({
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE_URL}/blog` },
+      { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE_URL}/blog` },
       { '@type': 'ListItem', position: 3, name: blog.title },
     ],
   };
@@ -208,20 +208,39 @@ export default async function BlogDetailPage({
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/blog/${blog.slug}`,
+    },
     headline: blog.title,
-    author: { '@type': 'Person', name: blog.author },
+    description: blog.meta_description || plainText.slice(0, 160),
+    image: {
+      '@type': 'ImageObject',
+      url: blog.og_image_url || blog.image_url,
+      width: 1200,
+      height: 630,
+    },
     datePublished: blog.created_at ?? blog.date,
     dateModified: blog.created_at ?? blog.date,
     url: `${SITE_URL}/blog/${blog.slug}`,
-    image: blog.og_image_url || blog.image_url,
-    description: blog.meta_description || plainText.slice(0, 160),
-    keywords: blog.category,
-    inLanguage: 'en',
+    author: {
+      '@type': 'Person',
+      name: blog.author || 'Yussi',
+      url: `${SITE_URL}/about`,
+    },
     publisher: {
       '@type': 'Organization',
-      name: 'MHJ',
+      name: 'My Mairangi Journal',
       url: SITE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/icon-192.png`,
+        width: 192,
+        height: 192,
+      },
     },
+    keywords: [blog.category, ...(blog.tags ?? [])].filter(Boolean).join(', '),
+    inLanguage: 'en',
   };
 
   return (

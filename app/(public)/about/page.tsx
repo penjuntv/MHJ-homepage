@@ -82,8 +82,55 @@ export default async function AboutPage() {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'About' },
+      { '@type': 'ListItem', position: 2, name: 'About', item: `${SITE_URL}/about` },
     ],
+  };
+
+  const aboutPageLd = {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: 'About — My Mairangi Journal',
+    url: `${SITE_URL}/about`,
+    description: 'Meet Yussi — a social work student, mother of three, and the writer behind My Mairangi Journal. Stories from a Korean family in Mairangi Bay, Auckland.',
+    inLanguage: 'en',
+    publisher: {
+      '@type': 'Organization',
+      name: 'My Mairangi Journal',
+      url: SITE_URL,
+    },
+    breadcrumb: breadcrumbLd,
+  };
+
+  const personLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Yussi',
+    jobTitle: 'Writer & Social Work Student',
+    url: `${SITE_URL}/about`,
+    image: {
+      '@type': 'ImageObject',
+      url: YUSSI_IMAGE_URL,
+    },
+    worksFor: {
+      '@type': 'Organization',
+      name: 'My Mairangi Journal',
+      url: SITE_URL,
+    },
+    description: "A mother of three girls, a social work student at Massey University, and a Korean immigrant making Mairangi Bay home. Writer and creator of My Mairangi Journal.",
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Mairangi Bay',
+      addressRegion: 'Auckland',
+      addressCountry: 'NZ',
+    },
+    nationality: {
+      '@type': 'Country',
+      name: 'South Korea',
+    },
+    alumniOf: {
+      '@type': 'EducationalOrganization',
+      name: 'Massey University',
+    },
   };
 
   return (
@@ -91,6 +138,14 @@ export default async function AboutPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutPageLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }}
       />
       <div className="animate-fade-in">
 

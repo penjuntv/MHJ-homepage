@@ -139,13 +139,28 @@ export default async function MagazineIssuePage({ params, searchParams }: Props)
     name: magazine.title,
     issueNumber: `${magazine.year}-${magazine.month_name}`,
     datePublished: magazine.created_at ?? `${magazine.year}`,
-    publisher: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
-    image: magazine.image_url,
+    publisher: {
+      '@type': 'Organization',
+      name: 'My Mairangi Journal',
+      url: SITE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/icon-192.png`,
+        width: 192,
+        height: 192,
+      },
+    },
+    image: {
+      '@type': 'ImageObject',
+      url: magazine.image_url,
+      width: 800,
+      height: 1000,
+    },
     url: `${SITE_URL}/magazine/${params.id}`,
+    inLanguage: 'en',
     hasPart: articles.map((a) => ({
       '@type': 'Article',
       name: a.title,
-      author: { '@type': 'Person', name: a.author },
       datePublished: a.date,
     })),
   };
