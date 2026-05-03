@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { createAdminClient } from '@/lib/supabase';
+import { createPublicAdminClient } from '@/lib/supabase';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
 import { formatDate } from '@/lib/utils';
@@ -29,7 +29,7 @@ interface NewsletterRow {
 }
 
 export default async function MairangiNotesPage() {
-  const db = createAdminClient();
+  const db = createPublicAdminClient();
   const [newslettersRes, subscribersRes, settings] = await Promise.all([
     db
       .from('newsletters')

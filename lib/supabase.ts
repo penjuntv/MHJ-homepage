@@ -28,3 +28,14 @@ export function createAdminClient() {
     }
   );
 }
+
+// 공개 페이지용 — service_role key 사용해 RLS 우회는 하되,
+// fetch에 cache: 'no-store'를 박지 않아 Next.js Data Cache(ISR)와 호환됨.
+// 공개 페이지(예: /, /mairangi-notes)에서 데이터를 읽을 때만 사용할 것.
+// admin UI나 API route에서는 createAdminClient()를 그대로 사용.
+export function createPublicAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://placeholder.supabase.co',
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? 'placeholder',
+  );
+}

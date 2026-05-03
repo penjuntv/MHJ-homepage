@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { draftMode } from 'next/headers';
-import { supabase, createAdminClient } from '@/lib/supabase';
+import { supabase, createAdminClient, createPublicAdminClient } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -161,7 +161,7 @@ export default async function BlogDetailPage({
   if (!blog) notFound();
 
   const isLetter = Boolean(blog.letter_to);
-  const adminDb = createAdminClient();
+  const adminDb = createPublicAdminClient();
   const [relatedBlogs, adjacent, latestNewsletterRes, settings, nextStoryRes] = await Promise.all([
     getRelatedBlogs(blog.category, blog.slug),
     getAdjacentBlogs(blog.id),

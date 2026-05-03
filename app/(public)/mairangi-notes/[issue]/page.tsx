@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { createAdminClient } from '@/lib/supabase';
+import { createPublicAdminClient } from '@/lib/supabase';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
 import { formatDate } from '@/lib/utils';
@@ -21,7 +21,7 @@ interface NewsletterRow {
 }
 
 async function getIssue(issue: string): Promise<NewsletterRow | null> {
-  const db = createAdminClient();
+  const db = createPublicAdminClient();
   const asNum = Number(issue);
 
   // 1) issue_number로 매칭 (text/number 스키마 변화에 대응해 두 형태 모두 시도)
@@ -53,7 +53,7 @@ async function getIssue(issue: string): Promise<NewsletterRow | null> {
 }
 
 export async function generateStaticParams() {
-  const db = createAdminClient();
+  const db = createPublicAdminClient();
   const { data } = await db
     .from('newsletters')
     .select('issue_number')

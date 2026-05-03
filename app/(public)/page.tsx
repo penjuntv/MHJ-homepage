@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
-import { supabase, createAdminClient } from '@/lib/supabase';
+import { supabase, createPublicAdminClient } from '@/lib/supabase';
 import type { Blog, Magazine } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { formatDate } from '@/lib/utils';
@@ -209,7 +209,7 @@ export default async function LandingPage() {
   const ctaCopyA = settings.newsletter_cta_copy_a || 'A quiet letter, a few times a month.';
 
   // 세션 5: 4개 기둥 최신 글 1편씩 (letter_to IS NULL)
-  const admin = createAdminClient();
+  const admin = createPublicAdminClient();
   const nowIso = new Date().toISOString();
   const pillarPostsRaw = await Promise.all(
     PILLARS.map((p) =>
