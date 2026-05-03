@@ -1,0 +1,323 @@
+ℹ️  LLM provider: google
+
+📚 Loaded 53 published blogs
+
+═══════════════════════════════════════════════════
+PHASE 1 — Bold-paragraph → H2 conversion
+═══════════════════════════════════════════════════
+  [education-001]  no bold-heading patterns
+  [year-7-intermediate-school-nz-curriculum]  no bold-heading patterns
+  [year-7-english-mathematics-nz]  no bold-heading patterns
+  [year-7-science-social-studies-nz]  no bold-heading patterns
+  [why-we-learn-at-home]  no bold-heading patterns
+  [setting-personal-routines]  no bold-heading patterns
+  [when-the-plan-meets-reality]  no bold-heading patterns
+  [back-to-school-what]  no bold-heading patterns
+  [settlement-002]  no bold-heading patterns
+  [settlement-003]  no bold-heading patterns
+  [settlement-004]  no bold-heading patterns
+  [settlement-005]  no bold-heading patterns
+  [settlement-006]  no bold-heading patterns
+  [landing-home]  no bold-heading patterns
+  [settlement-008]  no bold-heading patterns
+  [girls-001]  no bold-heading patterns
+  [girls-002]  no bold-heading patterns
+  [girls-003]  no bold-heading patterns
+  [girls-004]  no bold-heading patterns
+  [locals-001]  no bold-heading patterns
+  [locals-002]  no bold-heading patterns
+  [the-word-cards]  no bold-heading patterns
+  [the-app-we-dreamt-of]  no bold-heading patterns
+  [shes-already-there]  no bold-heading patterns
+  [oh-just-you-today]  no bold-heading patterns
+  [fearless-four]  no bold-heading patterns
+  [i-want-to-go-back]  no bold-heading patterns
+  [we-hit-pause]  no bold-heading patterns
+  [being-the-only-one]  no bold-heading patterns
+  [what-we-tried-nothing-quite-fit]  no bold-heading patterns
+  [so-we-made-our-own]  no bold-heading patterns
+  [between-sunshine-and-gale-force]  no bold-heading patterns
+  [jins-first-term-report-year-1-nz]  no bold-heading patterns
+  [ncea-is-changing-no-more-levels-no-more-credits]  no bold-heading patterns
+  [orewa-surf-sounds-2026-fireworks-at-shore]  no bold-heading patterns
+  [night-market-tuesdays]  no bold-heading patterns
+  [love-you-too-mummy-monster]  no bold-heading patterns
+  [tricky-egg-hunt-for-easter]  4 conversion(s):
+    → <h2>Stage One: The Hunt</h2>
+    → <h2>Stage Two: The Book Quiz</h2>
+    → <h2>Stage Three: The Sentence</h2>
+    → <h2>Stage Four: The Treasure</h2>
+    ✅ Updated in Supabase
+  [families-in-parks-summer-fun]  no bold-heading patterns
+  [how-our-study-plan-fell-apart-again]  no bold-heading patterns
+  [the-homework-book]  3 conversion(s):
+    → <h2>The Alphabet</h2>
+    → <h2>Heart Words</h2>
+    → <h2>Speed Words</h2>
+    ✅ Updated in Supabase
+  [growing-without-a-score]  no bold-heading patterns
+  [word-fun-at-dinner]  no bold-heading patterns
+  [the-fox-the-storm-and-the-bread-bowl]  no bold-heading patterns
+  [library-tour-albany-village-library]  no bold-heading patterns
+  [starting-school-in-new-zealand]  3 conversion(s):
+    → <h2>1. The basic structure</h2>
+    → <h2>2. Starting school — Year 0 and Year 1</h2>
+    → <h2>3. Transferring in — How long and where to?</h2>
+    ✅ Updated in Supabase
+  [a-quiet-week-before-the-break-ends]  no bold-heading patterns
+  [ikea-nz-grown-ups-also-dream-at-ikea]  no bold-heading patterns
+  [term-2-a-new-beginning]  no bold-heading patterns
+  [library-tour-glenfield-library]  no bold-heading patterns
+  [a-slow-long-weekend]  no bold-heading patterns
+  [what-s-in-the-lunchbox]  no bold-heading patterns
+  [intermediate-guide-specialist-subjects]  no bold-heading patterns
+
+  Phase 1 total: 10 H2(s) converted
+
+═══════════════════════════════════════════════════
+PHASE 2 — LLM H2 insertion (50 blog(s))
+═══════════════════════════════════════════════════
+  [education-001]  (1/50)
+    → INSERT "<h2>Labelling All the Things</h2>" before ¶2
+    → INSERT "<h2>Keeping Supplies Topped Up</h2>" before ¶3
+    ✅ Updated in Supabase
+  [year-7-intermediate-school-nz-curriculum]  (2/50)
+    → INSERT "<h2>Diving into the Curriculum</h2>" before ¶2
+    → INSERT "<h2>Understanding Intermediate's Focus</h2>" before ¶4
+    ✅ Updated in Supabase
+  [year-7-english-mathematics-nz]  (3/50)
+    → INSERT "<h2>Understanding the English Strands</h2>" before ¶2
+    ✅ Updated in Supabase
+  [year-7-science-social-studies-nz]  (4/50)
+    → INSERT "<h2>Year 7 Science: The Strands</h2>" before ¶1
+    → INSERT "<h2>Social Studies' Big Shift</h2>" before ¶4
+    ✅ Updated in Supabase
+  [why-we-learn-at-home]  (5/50)
+    → INSERT "<h2>Why we're learning at home again</h2>" before ¶2
+    → INSERT "<h2>Meeting Each Child's Unique Needs</h2>" before ¶3
+    → INSERT "<h2>Our Plan: Cultivating Independence</h2>" before ¶4
+    ✅ Updated in Supabase
+  [setting-personal-routines]  (6/50)
+    → INSERT "<h2>Year 7 Home Learning for Min</h2>" before ¶1
+    → INSERT "<h2>Building Hyun's Vocabulary Foundation</h2>" before ¶5
+    → INSERT "<h2>The System Behind Our Routines</h2>" before ¶7
+    ✅ Updated in Supabase
+  [when-the-plan-meets-reality]  (7/50)
+    → INSERT "<h2>The Older Child's First Week</h2>" before ¶1
+    → INSERT "<h2>The Younger Child's Enthusiasm</h2>" before ¶4
+    → INSERT "<h2>Flexibility: Our Greatest Advantage</h2>" before ¶7
+    ✅ Updated in Supabase
+  [back-to-school-what]  (8/50)
+    → INSERT "<h2>A Sudden Shift to IELTS</h2>" before ¶7
+    → INSERT "<h2>More Than Just a Degree</h2>" before ¶12
+    ✅ Updated in Supabase
+  [settlement-002]  (9/50)
+    → INSERT "<h2>Planning Our House Move</h2>" before ¶1
+    → INSERT "<h2>Our Staggered Family Arrival</h2>" before ¶3
+    → INSERT "<h2>The Big Moving Day</h2>" before ¶4
+    ✅ Updated in Supabase
+  [settlement-003]  (10/50)
+    → INSERT "<h2>Our Departure Day Arrives</h2>" before ¶2
+    → INSERT "<h2>Beginning Our Long Journey</h2>" before ¶3
+    → INSERT "<h2>A Last Look at Home</h2>" before ¶4
+    ✅ Updated in Supabase
+  [settlement-004]  (11/50)
+    → INSERT "<h2>Kiwi Kindness to the Rescue</h2>" before ¶2
+    → INSERT "<h2>Weather Woes and Hotel Happenings</h2>" before ¶3
+    ✅ Updated in Supabase
+  [settlement-005]  (12/50)
+    → INSERT "<h2>Securing Our Rental Home</h2>" before ¶2
+    → INSERT "<h2>Well-Prepared Beginner's Luck</h2>" before ¶3
+    ✅ Updated in Supabase
+  [settlement-006]  (13/50)
+    → INSERT "<h2>More Sisters Join School</h2>" before ¶2
+    → INSERT "<h2>Barefoot Kids and Sea Light</h2>" before ¶3
+    ✅ Updated in Supabase
+  [landing-home]  (14/50)
+    → INSERT "<h2>More Furniture, More Family</h2>" before ¶1
+    → INSERT "<h2>Settling into Mairangi Life</h2>" before ¶2
+    → INSERT "<h2>The True Meaning of Home</h2>" before ¶3
+    ✅ Updated in Supabase
+  [settlement-008]  (15/50)
+    → INSERT "<h2>Our Last Weekend Unpacking</h2>" before ¶1
+    → INSERT "<h2>Saying Goodbye at the Airport</h2>" before ¶2
+    → INSERT "<h2>Making Our House a Home</h2>" before ¶3
+    ✅ Updated in Supabase
+  [girls-001]  (16/50)
+    → INSERT "<h2>The Kiwi Way to Play</h2>" before ¶1
+    → INSERT "<h2>Our Girls Get Brave</h2>" before ¶3
+    ✅ Updated in Supabase
+  [girls-002]  (17/50)
+    → INSERT "<h2>Festival Fun and Hangeul Names</h2>" before ¶3
+    → INSERT "<h2>A Parent's Festival Perspective</h2>" before ¶4
+    ✅ Updated in Supabase
+  [girls-003]  (18/50)
+    → INSERT "<h2>Dad Answers the Call</h2>" before ¶1
+    → INSERT "<h2>Learning the Ropes Together</h2>" before ¶2
+    → INSERT "<h2>The First Unforgettable Goal</h2>" before ¶3
+    → INSERT "<h2>Medals and Lasting Glory</h2>" before ¶4
+    ✅ Updated in Supabase
+  [girls-004]  (19/50)
+    → INSERT "<h2>Celebrating at the Disco</h2>" before ¶3
+    → INSERT "<h2>Growing Up, Moving On</h2>" before ¶4
+    ✅ Updated in Supabase
+  [locals-001]  (20/50)
+    → INSERT "<h2>A Day of Cultural Discovery</h2>" before ¶2
+    → INSERT "<h2>Family Fun and Reflections</h2>" before ¶5
+    ✅ Updated in Supabase
+  [locals-002]  (21/50)
+    → INSERT "<h2>Journey to Ruakākā's Unique Shore</h2>" before ¶1
+    → INSERT "<h2>Fishing and Kids' Beach Fun</h2>" before ¶2
+    → INSERT "<h2>Sashimi and A Beachfront Lunch</h2>" before ¶3
+    ✅ Updated in Supabase
+  [the-word-cards]  (22/50)
+    → INSERT "<h2>The Stories Kept Growing</h2>" before ¶3
+    → INSERT "<h2>Our Big Learning Realisation</h2>" before ¶4
+    ✅ Updated in Supabase
+  [the-app-we-dreamt-of]  (23/50)
+    → INSERT "<h2>Setting Our Screen Time Limits</h2>" before ¶1
+    → INSERT "<h2>How Learning Comes to Life</h2>" before ¶3
+    → INSERT "<h2>Learning Beyond the Screen</h2>" before ¶6
+    ✅ Updated in Supabase
+  [shes-already-there]  (24/50)
+    → INSERT "<h2>Her First Day Experience</h2>" before ¶1
+    → INSERT "<h2>The Immigrant Parent Experience</h2>" before ¶4
+    → INSERT "<h2>StoryPress: A Family Solution</h2>" before ¶5
+    ✅ Updated in Supabase
+  [oh-just-you-today]  (25/50)
+    → INSERT "<h2>Beyond the Conference Format</h2>" before ¶4
+    → INSERT "<h2>Where Is Your Child Right Now?</h2>" before ¶6
+    → INSERT "<h2>Time to Step Forward</h2>" before ¶11
+    ✅ Updated in Supabase
+  [fearless-four]  (26/50)
+    → INSERT "<h2>Her Fearless Little Spirit</h2>" before ¶3
+    → INSERT "<h2>When Her Words Emerged</h2>" before ¶5
+    → INSERT "<h2>The Move to Aotearoa</h2>" before ¶6
+    ✅ Updated in Supabase
+  [i-want-to-go-back]  (27/50)
+    → INSERT "<h2>Finding Her First Kindy</h2>" before ¶1
+    → INSERT "<h2>Facing the Language Barrier</h2>" before ¶3
+    → INSERT "<h2>Her First English Words</h2>" before ¶5
+    ✅ Updated in Supabase
+  [we-hit-pause]  (28/50)
+    → INSERT "<h2>When Language Felt Unsettling</h2>" before ¶1
+    → INSERT "<h2>Her Unique Way to Speak</h2>" before ¶4
+    → INSERT "<h2>A Quiet Decision Made</h2>" before ¶6
+    ✅ Updated in Supabase
+  [being-the-only-one]  (29/50)
+    → INSERT "<h2>A life of tagging along</h2>" before ¶3
+    → INSERT "<h2>Our only child plan</h2>" before ¶4
+    ✅ Updated in Supabase
+  [what-we-tried-nothing-quite-fit]  (30/50)
+    → INSERT "<h2>Diving into Books and Reading</h2>" before ¶1
+    → INSERT "<h2>Worksheets and Learning Apps</h2>" before ¶3
+    → INSERT "<h2>What We Learned Along the Way</h2>" before ¶5
+    ✅ Updated in Supabase
+  [so-we-made-our-own]  (31/50)
+    → INSERT "<h2>Our Vocabulary App Plan</h2>" before ¶1
+    → INSERT "<h2>Bringing Our Cards to Life</h2>" before ¶2
+    → INSERT "<h2>Seeing Jin's Delight</h2>" before ¶3
+    → INSERT "<h2>Playing and Learning Together</h2>" before ¶4
+    ✅ Updated in Supabase
+  [between-sunshine-and-gale-force]  (32/50)
+    → INSERT "<h2>Thirty-Three Hour Storm</h2>" before ¶1
+    → INSERT "<h2>Clear Skies, Giant Bubbles</h2>" before ¶2
+    ✅ Updated in Supabase
+  [jins-first-term-report-year-1-nz]  (33/50)
+    → INSERT "<h2>Insights into Her Early Learning</h2>" before ¶2
+    → INSERT "<h2>School Communication and Next Steps</h2>" before ¶4
+    ✅ Updated in Supabase
+  [ncea-is-changing-no-more-levels-no-more-credits]  (34/50)
+    → INSERT "<h2>What's Changing with NCEA</h2>" before ¶2
+    → INSERT "<h2>Still Many Questions Remain</h2>" before ¶5
+    → INSERT "<h2>What Can You Do Now?</h2>" before ¶6
+    ✅ Updated in Supabase
+  [orewa-surf-sounds-2026-fireworks-at-shore]  (35/50)
+    → INSERT "<h2>Anticipating the Fireworks Show</h2>" before ¶3
+    → INSERT "<h2>Our Orewa Fireworks Display</h2>" before ¶4
+    ✅ Updated in Supabase
+  [night-market-tuesdays]  (36/50)
+    → INSERT "<h2>Our Weekly Night Market Trip</h2>" before ¶1
+    → INSERT "<h2>Our Favourite Savoury Eats</h2>" before ¶3
+    → INSERT "<h2>Saving Room for Market Desserts</h2>" before ¶4
+    → INSERT "<h2>A Taste of Home in Auckland</h2>" before ¶5
+    ✅ Updated in Supabase
+  [love-you-too-mummy-monster]  (37/50)
+    → INSERT "<h2>Learning English at School</h2>" before ¶2
+    → INSERT "<h2>Our Children's Bilingual World</h2>" before ¶4
+    → INSERT "<h2>Supporting Literacy at Home</h2>" before ¶5
+    → INSERT "<h2>Reflecting on Bilingual Growth</h2>" before ¶7
+    ✅ Updated in Supabase
+  [families-in-parks-summer-fun]  (38/50)
+    → INSERT "<h2>Giant Games in the Park</h2>" before ¶1
+    → INSERT "<h2>The Families in Parks Programme</h2>" before ¶2
+    ✅ Updated in Supabase
+  [how-our-study-plan-fell-apart-again]  (39/50)
+    → INSERT "<h2>What learning carried on</h2>" before ¶2
+    → INSERT "<h2>Half a success is enough</h2>" before ¶3
+    → INSERT "<h2>Planning for real life</h2>" before ¶5
+    ✅ Updated in Supabase
+  [growing-without-a-score]  (40/50)
+    → INSERT "<h2>Kiwi Kids and Their Hobbies</h2>" before ¶5
+    → INSERT "<h2>Balancing Diligence and Wellbeing</h2>" before ¶10
+    ✅ Updated in Supabase
+  [word-fun-at-dinner]  (41/50)
+    → INSERT "<h2>Keeping the Word Fun Going</h2>" before ¶4
+    → INSERT "<h2>Why This Learning Worked</h2>" before ¶7
+    ✅ Updated in Supabase
+  [the-fox-the-storm-and-the-bread-bowl]  (42/50)
+    → INSERT "<h2>Our Auckland Cyclone Preparations</h2>" before ¶1
+    → INSERT "<h2>Our Holiday Kitchen Routine</h2>" before ¶4
+    → INSERT "<h2>Reading and Our Library Finds</h2>" before ¶7
+    ✅ Updated in Supabase
+  [library-tour-albany-village-library]  (43/50)
+    → INSERT "<h2>Playtime at Kell Park</h2>" before ¶2
+    ✅ Updated in Supabase
+  [a-quiet-week-before-the-break-ends]  (44/50)
+    → INSERT "<h2>The Kids' Holiday Hustle</h2>" before ¶1
+    → INSERT "<h2>Our Quiet Family Meals</h2>" before ¶2
+    → INSERT "<h2>An Outing for Sotbap</h2>" before ¶3
+    ✅ Updated in Supabase
+  [ikea-nz-grown-ups-also-dream-at-ikea]  (45/50)
+    → INSERT "<h2>Exploring the IKEA Showrooms</h2>" before ¶1
+    → INSERT "<h2>Our Swedish Restaurant Experience</h2>" before ¶4
+    → INSERT "<h2>Our IKEA Shopping Haul</h2>" before ¶5
+    ✅ Updated in Supabase
+  [term-2-a-new-beginning]  (46/50)
+    → INSERT "<h2>A New Social Dynamic</h2>" before ¶1
+    → INSERT "<h2>Connecting in Calm Moments</h2>" before ¶2
+    → INSERT "<h2>Family and Friend Support</h2>" before ¶4
+    ✅ Updated in Supabase
+  [library-tour-glenfield-library]  (47/50)
+    → INSERT "<h2>A Generous Children's Section</h2>" before ¶1
+    → INSERT "<h2>Finding Our Korean Books</h2>" before ¶2
+    → INSERT "<h2>Streamlined Borrowing and Returns</h2>" before ¶3
+    → INSERT "<h2>A Multicultural Meeting Place</h2>" before ¶4
+    ✅ Updated in Supabase
+  [a-slow-long-weekend]  (48/50)
+    → INSERT "<h2>Friends Visit for Dinner</h2>" before ¶2
+    → INSERT "<h2>The Final Day of Rest</h2>" before ¶3
+    ✅ Updated in Supabase
+  [what-s-in-the-lunchbox]  (49/50)
+    → INSERT "<h2>Learning Each Other's Cultures</h2>" before ¶2
+    → INSERT "<h2>Diversity in Every Lunchbox</h2>" before ¶4
+    → INSERT "<h2>Our Children, Unique and Equal</h2>" before ¶6
+    ✅ Updated in Supabase
+  [intermediate-guide-specialist-subjects]  (50/50)
+    → INSERT "<h2>Our School's Subject Range</h2>" before ¶1
+    → INSERT "<h2>Min's Term 1 Experience</h2>" before ¶2
+    → INSERT "<h2>Why No Choice Worked</h2>" before ¶3
+    ✅ Updated in Supabase
+
+  Phase 2 total: 131 H2(s) inserted
+
+═══════════════════════════════════════════════════
+SUMMARY
+═══════════════════════════════════════════════════
+  Phase 1 H2s converted : 10
+  Phase 2 H2s inserted  : 131
+  Total H2s added       : 141
+  Already had H2s       : 0
+
+  📄 Log written to scripts/output/h2-insert-2026-05-02.json
+     (contains full_content_before for rollback if needed)
