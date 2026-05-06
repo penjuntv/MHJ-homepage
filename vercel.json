@@ -4,5 +4,11 @@
       "path": "/api/process-welcome-sequence",
       "schedule": "0 21 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/magazine/test-capture/route.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  }
 }
