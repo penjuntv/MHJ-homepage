@@ -98,7 +98,7 @@ function GalleryStack({
           {!hideTitle && title && (
             <div
               style={{
-                fontFamily: '"Playfair Display", serif',
+                fontFamily: '"Playfair Display", "Noto Sans KR", serif',
                 fontWeight: 900,
                 fontSize: 'clamp(16px, 2vw, 22px)',
                 color: '#1A1A1A',

@@ -159,7 +159,7 @@ export default function SplitTemplate({
         {!hideTitle && (
           <div
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
               fontSize: 'clamp(20px, 2.6vw, 30px)',
               color: '#1A1A1A',

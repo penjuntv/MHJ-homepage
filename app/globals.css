@@ -64,6 +64,9 @@
   --card-radius: 24px;
   --card-pad: clamp(16px, 2vw, 24px);
 
+  /* ── 폰트 패밀리 변수 (Serverless Chromium 폰트 폴백 보장) ── */
+  --font-display: "Playfair Display", "Noto Sans KR", serif;
+
   /* ── Typography Scale (5단계) ── */
   --fs-display: clamp(40px, 5vw, 56px);
   /* 페이지 타이틀 — font-display, italic 권장 / §5.3 최대 72px */
@@ -146,7 +149,7 @@
 
   /* Display 폰트 */
   .font-display {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Playfair Display', 'Noto Sans KR', serif;
   }
 
   /* 세로 텍스트 (서가 spine) */

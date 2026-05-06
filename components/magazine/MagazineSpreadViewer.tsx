@@ -42,9 +42,9 @@ function CoverPage({ magazine }: { magazine: Magazine }) {
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         gap: 8, textAlign: 'center',
       }}>
-        <span style={{ fontFamily: "'Playfair Display',serif", fontStyle: 'italic', fontSize: 13, letterSpacing: 3, color: subColor }}>the</span>
+        <span style={{ fontFamily: "'Playfair Display','Noto Sans KR',serif", fontStyle: 'italic', fontSize: 13, letterSpacing: 3, color: subColor }}>the</span>
         <div style={{ width: 48, height: 1, background: textColor, opacity: 0.2, margin: '4px auto' }} />
-        <span style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: textColor }}>MHJ</span>
+        <span style={{ fontFamily: "'Playfair Display','Noto Sans KR',serif", fontWeight: 900, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: textColor }}>MHJ</span>
         <span style={{ fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: subColor }}>My Mairangi Journal</span>
         <div style={{ width: 48, height: 1, background: textColor, opacity: 0.2, margin: '8px auto' }} />
 
@@ -58,7 +58,7 @@ function CoverPage({ magazine }: { magazine: Magazine }) {
         )}
 
         <h2 style={{
-          fontFamily: "'Playfair Display',serif", fontWeight: 900,
+          fontFamily: "'Playfair Display','Noto Sans KR',serif", fontWeight: 900,
           fontSize: 'clamp(18px,3vw,24px)', letterSpacing: 4,
           color: textColor, textTransform: 'uppercase', lineHeight: 1.2, margin: '8px 0 0',
         }}>{magazine.title}</h2>
@@ -86,7 +86,7 @@ function TocPage({ magazine, articles, onGoToArticle }: {
       <div style={{ width: '100%', height: '100%', padding: '40px 32px', boxSizing: 'border-box', overflow: 'hidden' }}>
       <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: subColor, margin: '0 0 6px' }}>Contents</p>
       <p style={{
-        fontFamily: "'Playfair Display',serif", fontSize: 'clamp(18px,3vw,24px)',
+        fontFamily: "'Playfair Display','Noto Sans KR',serif", fontSize: 'clamp(18px,3vw,24px)',
         fontWeight: 900, fontStyle: 'italic', color: textColor, lineHeight: 1.1, margin: '0 0 20px',
       }}>{magazine.title}</p>
       <div style={{ width: 32, height: 1, background: textColor, opacity: 0.15, marginBottom: 20 }} />
@@ -108,7 +108,7 @@ function TocPage({ magazine, articles, onGoToArticle }: {
           >
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
-                fontFamily: "'Playfair Display',serif",
+                fontFamily: "'Playfair Display','Noto Sans KR',serif",
                 fontSize: 17, fontWeight: 700,
                 color: textColor,
                 lineHeight: 1.25,
@@ -649,7 +649,7 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
                         }}
                       >
                         <span style={{
-                          fontFamily: '"Playfair Display", serif',
+                          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
                           fontSize: 11, fontWeight: 900, fontStyle: 'italic',
                           color: '#CBD5E1', minWidth: 22,
                         }}>

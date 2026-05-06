@@ -61,7 +61,7 @@ function CoverPage({ magazine, size = 'default' }: { magazine: Magazine; size?: 
     }}>
       {/* MHJ 브랜딩 */}
       <span style={{
-        fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic',
+        fontFamily: "'Playfair Display', 'Noto Sans KR', Georgia, serif", fontStyle: 'italic',
         fontSize: fs.theSize, letterSpacing: 3, color: subColor,
       }}>the</span>
 
@@ -69,7 +69,7 @@ function CoverPage({ magazine, size = 'default' }: { magazine: Magazine; size?: 
       <div style={{ width: 60, height: 1, backgroundColor: textColor, opacity: 0.3, margin: '8px auto' }} />
 
       <span style={{
-        fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900,
+        fontFamily: "'Playfair Display', 'Noto Sans KR', Georgia, serif", fontWeight: 900,
         fontSize: fs.mhj, letterSpacing: -2, lineHeight: 1, color: textColor,
       }}>MHJ</span>
       <span style={{
@@ -106,7 +106,7 @@ function CoverPage({ magazine, size = 'default' }: { magazine: Magazine; size?: 
 
       {/* 타이틀 영역 */}
       <h2 style={{
-        fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900,
+        fontFamily: "'Playfair Display', 'Noto Sans KR', Georgia, serif", fontWeight: 900,
         fontSize: fs.title, letterSpacing: 4, color: textColor,
         textTransform: 'uppercase', marginTop: 12, textAlign: 'center',
         lineHeight: 1.2, margin: '12px 0 0',
@@ -153,7 +153,7 @@ function ContentsPage({ magazine, articles, size = 'default', onGoToPage }: {
       padding: '6% 5%', boxSizing: 'border-box',
     }}>
       <p style={{ fontSize: s.footer, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: theme.sub, marginBottom: 8 }}>Contents</p>
-      <p style={{ fontFamily: "'Playfair Display', serif", fontSize: s.heading, fontWeight: 900, fontStyle: 'italic', color: theme.text, marginBottom: 20, lineHeight: 1.1 }}>
+      <p style={{ fontFamily: "'Playfair Display', 'Noto Sans KR', serif", fontSize: s.heading, fontWeight: 900, fontStyle: 'italic', color: theme.text, marginBottom: 20, lineHeight: 1.1 }}>
         {magazine.title}
       </p>
       <div style={{ width: 32, height: 1, background: theme.text + '20', marginBottom: 20 }} />
@@ -178,7 +178,7 @@ function ContentsPage({ magazine, articles, size = 'default', onGoToPage }: {
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
             >
               <span style={{
-                fontFamily: "'Playfair Display', serif", fontSize: s.label + 4,
+                fontFamily: "'Playfair Display', 'Noto Sans KR', serif", fontSize: s.label + 4,
                 fontWeight: 900, minWidth: 28,
                 color: isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
               }}>
@@ -279,7 +279,7 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
           display: 'flex', flexDirection: 'column',
         }}>
           <p style={{
-            fontFamily: "'Playfair Display', Georgia, serif", fontSize: s.title,
+            fontFamily: "'Playfair Display', 'Noto Sans KR', Georgia, serif", fontSize: s.title,
             fontWeight: 900, color: textColor, lineHeight: 1.2, margin: '0 0 8px',
           }}>{article.title}</p>
           <div style={{ width: 40, height: 2, backgroundColor: subColor, opacity: 0.5, marginBottom: 8 }} />
@@ -319,7 +319,7 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
             {article.article_type || 'Article'}
           </p>
           <p style={{
-            fontFamily: "'Playfair Display', Georgia, serif", fontSize: s.title - 2,
+            fontFamily: "'Playfair Display', 'Noto Sans KR', Georgia, serif", fontSize: s.title - 2,
             fontWeight: 900, color: textColor, lineHeight: 1.2, margin: '0 0 8px',
           }}>{article.title}</p>
           <div style={{ width: 40, height: 2, backgroundColor: subColor, opacity: 0.5, marginBottom: 8 }} />
@@ -350,7 +350,7 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
         {article.article_type || 'Essay'}
       </p>
       <p style={{
-        fontFamily: "'Playfair Display', Georgia, serif", fontSize: s.title,
+        fontFamily: "'Playfair Display', 'Noto Sans KR', Georgia, serif", fontSize: s.title,
         fontWeight: 900, fontStyle: 'italic', color: textColor,
         lineHeight: 1.2, margin: '0 0 8px',
       }}>{article.title}</p>
@@ -365,7 +365,7 @@ function ArticlePage({ article, magazine, pageIndex, size = 'default' }: {
           <p style={{ margin: 0 }}>
             <span style={{
               float: 'left',
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: "'Playfair Display', 'Noto Sans KR', serif",
               fontSize: '3.2em',
               lineHeight: 0.8,
               fontWeight: 700,

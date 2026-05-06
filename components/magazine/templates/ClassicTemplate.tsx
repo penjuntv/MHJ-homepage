@@ -67,7 +67,7 @@ export default function ClassicTemplate({
         ${dropCap ? `
         .cls-body-${uid} p:first-of-type::first-letter {
           float: left;
-          font-family: "Playfair Display", serif;
+          font-family: "Playfair Display", "Noto Sans KR", serif;
           font-weight: 900;
           font-size: ${dropFont};
           color: ${accentColor};
@@ -150,7 +150,7 @@ export default function ClassicTemplate({
         {!hideTitle && (
           <div
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
               fontSize: titleClamp,
               color: '#1A1A1A',

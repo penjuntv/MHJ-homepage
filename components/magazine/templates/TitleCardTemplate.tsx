@@ -42,7 +42,7 @@ export default function TitleCardTemplate({
         {!hideTitle && article.title && (
           <div
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
               fontSize: 'clamp(28px, 4.8vw, 50px)',
               lineHeight: 1.08,

@@ -127,7 +127,7 @@ export default function Story2Template({
         {!hideTitle && (
           <div
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
               fontSize: 'clamp(18px, 2.3vw, 26px)',
               color: '#1A1A1A',

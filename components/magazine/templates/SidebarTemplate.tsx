@@ -82,7 +82,7 @@ export default function SidebarTemplate({
         >
           <h1
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontStyle: 'italic',
               fontWeight: 900,
               fontSize: 'var(--mag-font-title)',
@@ -198,7 +198,7 @@ export default function SidebarTemplate({
         </span>
         <span
           style={{
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontSize: 'var(--mag-font-meta)',
             color: accentColor,

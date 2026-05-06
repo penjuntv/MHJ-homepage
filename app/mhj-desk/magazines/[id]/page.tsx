@@ -1437,7 +1437,7 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
   );
   if (tplKey === 'pull-quote') return (
     <div style={{ ...style, flexDirection: 'column', gap: '3px', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-      <span style={{ position: 'absolute', top: '4px', left: '10px', fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: '28px', color: '#9CA3AF', opacity: 0.4, lineHeight: 1 }}>“</span>
+      <span style={{ position: 'absolute', top: '4px', left: '10px', fontFamily: '"Playfair Display", "Noto Sans KR", serif', fontStyle: 'italic', fontSize: '28px', color: '#9CA3AF', opacity: 0.4, lineHeight: 1 }}>“</span>
       {line('70%', '4px', '#374151')}
       {line('85%', '4px', '#374151')}
       {line('55%', '4px', '#374151')}
@@ -1473,7 +1473,7 @@ function TemplateDiagram({ tplKey }: { tplKey: string }) {
       <div style={{ width: '38%', aspectRatio: '4 / 5' }}>{photo('A', '2px')}</div>
       {/* 따옴표 + 인용 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', width: '100%', alignItems: 'center', position: 'relative' }}>
-        <span style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: '14px', color: '#9CA3AF', opacity: 0.5, lineHeight: 0.5 }}>“</span>
+        <span style={{ fontFamily: '"Playfair Display", "Noto Sans KR", serif', fontStyle: 'italic', fontSize: '14px', color: '#9CA3AF', opacity: 0.5, lineHeight: 0.5 }}>“</span>
         {line('75%', '2px', '#374151')}
         {line('55%', '2px', '#374151')}
       </div>
@@ -1926,7 +1926,7 @@ function InlineForm({
             ...inputStyle,
             background: '#F8FAFC',
             color: '#64748B',
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontWeight: 700,
             display: 'flex', alignItems: 'center', gap: '8px',

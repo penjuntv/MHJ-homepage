@@ -57,7 +57,7 @@ export default function SpecialTemplate({
         >
           <h1
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontStyle: 'italic',
               fontWeight: 900,
               fontSize: 'var(--mag-font-title)',
@@ -110,7 +110,7 @@ export default function SpecialTemplate({
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: `${accentColor}66`,
-                  fontFamily: '"Playfair Display", serif',
+                  fontFamily: '"Playfair Display", "Noto Sans KR", serif',
                   fontStyle: 'italic',
                   fontSize: 'var(--mag-font-meta)',
                 }}
@@ -155,7 +155,7 @@ export default function SpecialTemplate({
         </span>
         <span
           style={{
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontSize: 'var(--mag-font-meta)',
             color: accentColor,

@@ -37,7 +37,7 @@ export default function PullQuoteTemplate({
             position: 'absolute',
             top: '-0.35em',
             left: '-0.2em',
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontWeight: 400,
             fontSize: 'clamp(60px, 10vw, 120px)',
@@ -53,7 +53,7 @@ export default function PullQuoteTemplate({
         <blockquote
           style={{
             margin: 0,
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontWeight: 400,
             fontSize: 'clamp(18px, 2.8vw, 32px)',

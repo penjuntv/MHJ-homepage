@@ -50,7 +50,7 @@ export default function FeatureHalfTemplate({
         ${article.style_overrides?.dropCap ? `
         .fh-${uid} p:first-of-type::first-letter {
           float: left;
-          font-family: "Playfair Display", serif;
+          font-family: "Playfair Display", "Noto Sans KR", serif;
           font-weight: 900;
           font-size: clamp(40px, 11cqw, 88px);
           line-height: 0.85;
@@ -65,7 +65,7 @@ export default function FeatureHalfTemplate({
         <div style={{ flexShrink: 0, textAlign: 'left', paddingBottom: '0.9em', borderBottom: '1px solid var(--mag-title-divider)' }}>
           <h1
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontStyle: 'italic',
               fontWeight: 900,
               fontSize: 'var(--mag-font-title)',
@@ -112,7 +112,7 @@ export default function FeatureHalfTemplate({
               alignItems: 'center',
               justifyContent: 'center',
               color: `${accentColor}88`,
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontStyle: 'italic',
               fontSize: 'var(--mag-font-meta)',
             }}
@@ -148,7 +148,7 @@ export default function FeatureHalfTemplate({
         </span>
         <span
           style={{
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontSize: 'var(--mag-font-meta)',
             color: accentColor,

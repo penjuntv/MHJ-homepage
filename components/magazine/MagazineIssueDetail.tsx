@@ -74,7 +74,7 @@ const DETAIL_CSS = `
 }
 
 .mid-title {
-  font-family: "Playfair Display", serif;
+  font-family: "Playfair Display", "Noto Sans KR", serif;
   font-weight: 900;
   font-size: clamp(28px, 4.5vw, 44px);
   line-height: 1.05;
@@ -188,7 +188,7 @@ const DETAIL_CSS = `
   margin: 0;
 }
 .mid-card-title {
-  font-family: "Playfair Display", serif;
+  font-family: "Playfair Display", "Noto Sans KR", serif;
   font-weight: 700;
   font-size: 18px;
   line-height: 1.25;

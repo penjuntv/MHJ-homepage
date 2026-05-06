@@ -70,7 +70,7 @@ export default function CoverPreview({
       {/* 상단: 브랜딩 */}
       <div style={{ textAlign: 'center', paddingTop: '28px', paddingBottom: '10px', flexShrink: 0 }}>
         <div style={{
-          fontFamily: 'var(--font-display, "Playfair Display", serif)',
+          fontFamily: 'var(--font-display, "Playfair Display", "Noto Sans KR", serif)',
           fontStyle: 'italic',
           fontWeight: 400,
           fontSize: '14px',
@@ -82,7 +82,7 @@ export default function CoverPreview({
           the
         </div>
         <div style={{
-          fontFamily: 'var(--font-display, "Playfair Display", serif)',
+          fontFamily: 'var(--font-display, "Playfair Display", "Noto Sans KR", serif)',
           fontWeight: 900,
           fontSize: '72px',
           color: accentHex,
@@ -141,7 +141,7 @@ export default function CoverPreview({
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <div style={{
-              fontFamily: 'var(--font-display, "Playfair Display", serif)',
+              fontFamily: 'var(--font-display, "Playfair Display", "Noto Sans KR", serif)',
               fontStyle: 'italic',
               fontSize: '13px',
               color: '#BDB0A0',
@@ -188,7 +188,7 @@ export default function CoverPreview({
       }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontFamily: 'var(--font-display, "Playfair Display", serif)',
+            fontFamily: 'var(--font-display, "Playfair Display", "Noto Sans KR", serif)',
             fontWeight: 900,
             fontSize: '28px',
             color: accentHex,
@@ -239,7 +239,7 @@ export default function CoverPreview({
             {month_name}
           </div>
           <div style={{
-            fontFamily: 'var(--font-display, "Playfair Display", serif)',
+            fontFamily: 'var(--font-display, "Playfair Display", "Noto Sans KR", serif)',
             fontWeight: 900, fontSize: '20px', color: accentHex, lineHeight: 1,
           }}>
             {year}

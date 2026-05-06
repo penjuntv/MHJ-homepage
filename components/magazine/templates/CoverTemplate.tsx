@@ -65,7 +65,7 @@ export default function CoverTemplate({
           top: '6.5%',
           left: '8.6%',
           color: '#FDFCFA',
-          fontFamily: '"Playfair Display", serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 400,
           fontSize: 'clamp(22px, 3.2vw, 38px)',
           letterSpacing: '0.08em',
@@ -116,7 +116,7 @@ export default function CoverTemplate({
             </div>
             <div
               style={{
-                fontFamily: '"Playfair Display", serif',
+                fontFamily: '"Playfair Display", "Noto Sans KR", serif',
                 fontWeight: 900,
                 fontSize: titleClamp,
                 lineHeight: 1.04,

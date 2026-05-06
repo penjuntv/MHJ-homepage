@@ -54,7 +54,7 @@ export default function TocPreview({
           Contents
         </div>
         <div style={{
-          fontFamily: 'var(--font-display, "Playfair Display", serif)',
+          fontFamily: 'var(--font-display, "Playfair Display", "Noto Sans KR", serif)',
           fontWeight: 900, fontSize: '36px', color: theme.primary,
           letterSpacing: '-0.5px', lineHeight: 1.0, marginBottom: '8px',
         }}>
@@ -89,7 +89,7 @@ export default function TocPreview({
               {/* 제목 + 저자 — 왼쪽 정렬 */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
-                  fontFamily: 'var(--font-display, "Playfair Display", serif)',
+                  fontFamily: 'var(--font-display, "Playfair Display", "Noto Sans KR", serif)',
                   fontSize: '17px', fontWeight: 700, color: theme.primary,
                   lineHeight: 1.25, marginBottom: '4px',
                   letterSpacing: '-0.01em',
@@ -111,7 +111,7 @@ export default function TocPreview({
               {/* 페이지 번호 — 미세 */}
               {article.page_start && (
                 <div style={{
-                  fontFamily: 'var(--font-display, "Playfair Display", serif)',
+                  fontFamily: 'var(--font-display, "Playfair Display", "Noto Sans KR", serif)',
                   fontSize: '13px', fontWeight: 500, fontStyle: 'italic',
                   color: `${theme.primary}60`,
                   flexShrink: 0,
@@ -131,7 +131,7 @@ export default function TocPreview({
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
         <div style={{
-          fontFamily: 'var(--font-display, "Playfair Display", serif)',
+          fontFamily: 'var(--font-display, "Playfair Display", "Noto Sans KR", serif)',
           fontWeight: 900, fontSize: '14px', color: theme.primary,
         }}>
           The MHJ
