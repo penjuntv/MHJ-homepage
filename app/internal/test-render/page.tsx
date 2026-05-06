@@ -202,7 +202,7 @@ export default async function TestRenderPage({ searchParams }: Props) {
               아자차카타파하 — 모든 한글 자모가 정확히 표현되어야 합니다.
             </p>
             <div className="callout">
-              <p>"따뜻하되 세련된, 감성적이되 지적인 에디토리얼 톤으로 가족의 일상을 기록합니다."</p>
+              <p>&ldquo;따뜻하되 세련된, 감성적이되 지적인 에디토리얼 톤으로 가족의 일상을 기록합니다.&rdquo;</p>
             </div>
           </div>
 
