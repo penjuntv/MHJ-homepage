@@ -927,7 +927,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
         }
         .tiptap-editor .ProseMirror figure.pull-quote blockquote {
           border: 0; padding: 0; margin: 0;
-          font-family: 'Playfair Display', serif;
+          font-family: 'Playfair Display', 'Noto Sans KR', serif;
           font-style: italic; font-weight: 300;
           font-size: 18px; line-height: 1.55; color: #1a1a1a;
         }

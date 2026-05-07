@@ -143,7 +143,7 @@ export default function DetailModal({ item, onClose }: Props) {
                       margin-right: 16px;
                       line-height: 0.8;
                       color: var(--drop-cap-color);
-                      font-family: 'Playfair Display', serif;
+                      font-family: 'Playfair Display', 'Noto Sans KR', serif;
                     }
                     .detail-html-content h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 800; margin: 32px 0 16px; color: var(--text); }
                     .detail-html-content h3 { font-size: clamp(20px, 2.5vw, 28px); font-weight: 700; margin: 24px 0 12px; color: var(--text); }

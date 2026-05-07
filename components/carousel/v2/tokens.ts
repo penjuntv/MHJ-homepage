@@ -75,7 +75,7 @@ export const v2Tokens = {
   },
 
   fonts: {
-    display: "'Playfair Display', Georgia, serif",
+    display: "'Playfair Display', 'Noto Sans KR', Georgia, serif",
     body: "'Inter', system-ui, sans-serif",
     bodyKr: "'Noto Sans KR', sans-serif",
     mono: "'JetBrains Mono', 'SF Mono', monospace",

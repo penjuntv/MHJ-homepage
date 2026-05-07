@@ -43,7 +43,7 @@ export function CoverSlide(input: CarouselInput) {
         >
           <span
             style={{
-              fontFamily: 'Playfair Display, serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
               fontSize: 160,
               lineHeight: 1,
@@ -59,7 +59,7 @@ export function CoverSlide(input: CarouselInput) {
       {/* Title line 1 — italic */}
       <span
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 400,
           fontStyle: 'italic',
           fontSize: 40,
@@ -77,7 +77,7 @@ export function CoverSlide(input: CarouselInput) {
       {line2 && (
         <span
           style={{
-            fontFamily: 'Playfair Display, serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontWeight: 700,
             fontSize: 48,
             lineHeight: 1.3,
@@ -131,7 +131,7 @@ export function CoverSlide(input: CarouselInput) {
       >
         <span
           style={{
-            fontFamily: 'Playfair Display, serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontWeight: 700,
             letterSpacing: 2,
             display: 'flex',

@@ -27,7 +27,7 @@ export function VisualBreakSlide(input: CarouselInput) {
       <div
         style={{
           display: 'flex',
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontStyle: 'italic',
           fontWeight: 400,
           fontSize: 36,
@@ -85,7 +85,7 @@ export function VisualBreakSlide(input: CarouselInput) {
         <div
           style={{
             display: 'flex',
-            fontFamily: 'Playfair Display, serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontSize: 14,
             fontWeight: 700,
             color: '#CBD5E1',

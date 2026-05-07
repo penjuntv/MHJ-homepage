@@ -775,7 +775,7 @@
   .blog-content > p:first-of-type { font-size: 18px; }
 }
 .blog-content > p:first-of-type::first-letter {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-weight: 900;
   font-size: 64px;
   line-height: 0.72;
@@ -815,7 +815,7 @@
   left: 50%;
   bottom: -14px;
   transform: translate(-50%, -4px);
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-weight: 300;
   font-size: 10px;
@@ -917,7 +917,7 @@
   border: 0;
   padding: 0;
   margin: 0;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-weight: 300;
   font-size: 22px;
@@ -1710,7 +1710,7 @@ a:hover .magazine-cover-shadow img {
   text-align: center;
 }
 .newsletter-cta-inline .cta-copy {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-size: 14px;
   color: var(--text);
@@ -1763,7 +1763,7 @@ a:hover .magazine-cover-shadow img {
 /* 지난 편지 hint (블로그 상세 CTA 위 한 줄) */
 .latest-newsletter-hint {
   display: block;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-size: 12px;
   color: var(--text-secondary);
@@ -1790,7 +1790,7 @@ a:hover .magazine-cover-shadow img {
   text-align: center;
 }
 .mn-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-weight: 300;
   font-size: clamp(40px, 5vw, 56px);
@@ -1847,7 +1847,7 @@ a:hover .magazine-cover-shadow img {
 }
 .dark .mn-issue-num { color: var(--mhj-brown-dark); }
 .mn-issue-subject {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-weight: 400;
   font-size: clamp(20px, 2.4vw, 24px);
   color: var(--text);
@@ -1955,7 +1955,7 @@ a:hover .magazine-cover-shadow img {
 .pillar-cell:hover { background: var(--bg-surface); }
 
 .pillar-name {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-weight: 400;
   font-size: 18px;
@@ -1966,7 +1966,7 @@ a:hover .magazine-cover-shadow img {
 .dark .pillar-name { color: var(--mhj-brown-dark); }
 
 .pillar-subtitle {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-weight: 300;
   font-size: 12px;
@@ -2060,7 +2060,7 @@ a:hover .magazine-cover-shadow img {
   display: block;
 }
 .next-story-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-weight: 400;
   font-size: 20px;
   line-height: 1.3;
@@ -2124,7 +2124,7 @@ a:hover .magazine-cover-shadow img {
 .dark .letter-dateline { color: var(--mhj-brown-dark); }
 
 .letter-salutation {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-weight: 300;
   font-size: 48px;
@@ -2167,7 +2167,7 @@ a:hover .magazine-cover-shadow img {
   margin: 0;
 }
 .letter-hover-sig {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-size: 11px;
   color: var(--mhj-brown);
@@ -2195,7 +2195,7 @@ a:hover .magazine-cover-shadow img {
   padding-top: 24px;
   border-top: 0.5px solid var(--border-strong);
   text-align: right;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
   font-style: italic;
   font-size: 13px;
   color: var(--mhj-brown);

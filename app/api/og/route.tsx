@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   ].filter(Boolean) as { name: string; data: ArrayBuffer; weight: 700 | 400; style: 'normal' }[];
 
   const titleFont = notoData ? '"Noto Sans KR", sans-serif' : 'sans-serif';
-  const logoFont = playfairRegularData ? '"Playfair Display", serif' : 'serif';
+  const logoFont = playfairRegularData ? '"Playfair Display", "Noto Sans KR", serif' : 'serif';
 
   return new ImageResponse(
     (

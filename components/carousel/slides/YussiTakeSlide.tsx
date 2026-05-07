@@ -41,7 +41,7 @@ export function YussiTakeSlide(input: CarouselInput) {
       <div
         style={{
           display: 'flex',
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontSize: 72,
           lineHeight: 1,
           color: sageAccent,
@@ -54,7 +54,7 @@ export function YussiTakeSlide(input: CarouselInput) {
       {/* Yussi's comment */}
       <div
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontStyle: 'italic',
           fontWeight: 400,
           fontSize: 30,
@@ -99,7 +99,7 @@ export function YussiTakeSlide(input: CarouselInput) {
         <div
           style={{
             display: 'flex',
-            fontFamily: 'Playfair Display, serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontSize: 14,
             fontWeight: 700,
             color: 'rgba(122,155,109,0.5)',

@@ -24,7 +24,7 @@ export const carouselTokens = {
     highlight: '#FEF3C7',
   },
   typography: {
-    display: 'Playfair Display',
+    display: '"Playfair Display", "Noto Sans KR", serif',
     body: 'Inter',
     bodyKr: 'Noto Sans KR',
     bodyZh: 'Noto Sans SC',
