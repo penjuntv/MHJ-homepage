@@ -39,10 +39,9 @@ const TYPE_CONFIG: Record<CaptureType, {
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-export async function POST(req: NextRequest) {
-  const start = Date.now();
-
-  // ── 1. 인증: 어드민 세션 OR 임시 검증 헤더 (Stage 4 Vercel 검증 후 제거) ──
+// 인증: 어드민 세션 OR 임시 검증 시크릿(헤더/쿼리)
+// (Stage 4 검증용 임시 우회 — Stage 5 진입 전 제거 예정)
+async function isAuthorized(req: NextRequest, querySecret?: string | null): Promise<boolean> {
   const cookieStore = cookies();
   const authClient = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -55,41 +54,30 @@ export async function POST(req: NextRequest) {
     },
   );
   const { data: { user } } = await authClient.auth.getUser();
-  const headerSecret = req.headers.get('x-capture-secret');
+  if (user) return true;
+
   const envSecret = process.env.CAPTURE_SECRET;
-  const headerSecretValid = !!envSecret && !!headerSecret && headerSecret === envSecret;
-  if (!user && !headerSecretValid) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!envSecret) return false;
+  const headerSecret = req.headers.get('x-capture-secret');
+  if (headerSecret && headerSecret === envSecret) return true;
+  if (querySecret && querySecret === envSecret) return true;
+  return false;
+}
 
-  // ── 2. 입력 파싱·검증 ──
-  let body: { type?: string; id?: string | number; magazine_id?: string };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
-  const { type, id, magazine_id } = body;
-  if (!type || id === undefined || id === null || id === '' || !magazine_id) {
-    return NextResponse.json(
-      { error: 'Missing required fields: type, id, magazine_id' },
-      { status: 400 },
-    );
-  }
-  if (type !== 'article' && type !== 'page' && type !== 'cover') {
-    return NextResponse.json(
-      { error: `Invalid type: ${type}. Expected 'article' | 'page' | 'cover'` },
-      { status: 400 },
-    );
-  }
-
+async function runCapture(params: {
+  type: CaptureType;
+  id: string | number;
+  magazine_id: string;
+}): Promise<NextResponse> {
+  const start = Date.now();
+  const { type, id, magazine_id } = params;
   const config = TYPE_CONFIG[type];
   const captureSecret = process.env.CAPTURE_SECRET;
   if (!captureSecret) {
     return NextResponse.json({ error: 'CAPTURE_SECRET not configured' }, { status: 500 });
   }
 
-  // ── 3. /internal/render/{path}/{id} HTML fetch ──
+  // ── /internal/render/{path}/{id} HTML fetch ──
   const baseUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : 'http://localhost:3003';
@@ -123,7 +111,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── 4. Puppeteer 캡처 ──
+  // ── Puppeteer 캡처 ──
   let screenshot: Uint8Array;
   try {
     const isVercel = !!process.env.VERCEL;
@@ -184,7 +172,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message, durationMs }, { status: 500 });
   }
 
-  // ── 5. Storage 업로드 (옛 timestamp 파일 삭제 후) ──
+  // ── Storage 업로드 (옛 timestamp 파일 삭제 후) ──
   const timestamp = Date.now();
   const folderPath = `magazines/${magazine_id}`;
   const fileName = `${type}-${id}-${timestamp}.png`;
@@ -220,7 +208,7 @@ export async function POST(req: NextRequest) {
 
   const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(storagePath);
 
-  // ── 6. DB 업데이트 (type별 컬럼 분기) ──
+  // ── DB 업데이트 (type별 컬럼 분기) ──
   const { error: dbError } = await supabase
     .from(config.table)
     .update({
@@ -253,4 +241,73 @@ export async function POST(req: NextRequest) {
     durationMs,
     memoryUsageMb,
   });
+}
+
+function validateInput(
+  type: unknown,
+  id: unknown,
+  magazine_id: unknown,
+): { ok: true; type: CaptureType; id: string | number; magazine_id: string } | { ok: false; res: NextResponse } {
+  if (!type || id === undefined || id === null || id === '' || !magazine_id) {
+    return {
+      ok: false,
+      res: NextResponse.json(
+        { error: 'Missing required fields: type, id, magazine_id' },
+        { status: 400 },
+      ),
+    };
+  }
+  if (type !== 'article' && type !== 'page' && type !== 'cover') {
+    return {
+      ok: false,
+      res: NextResponse.json(
+        { error: `Invalid type: ${String(type)}. Expected 'article' | 'page' | 'cover'` },
+        { status: 400 },
+      ),
+    };
+  }
+  return {
+    ok: true,
+    type: type as CaptureType,
+    id: id as string | number,
+    magazine_id: String(magazine_id),
+  };
+}
+
+export async function POST(req: NextRequest) {
+  if (!(await isAuthorized(req))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let body: { type?: string; id?: string | number; magazine_id?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const v = validateInput(body.type, body.id, body.magazine_id);
+  if (!v.ok) return v.res;
+
+  return runCapture({ type: v.type, id: v.id, magazine_id: v.magazine_id });
+}
+
+// TEMPORARY: GET handler for Vercel MCP verification (web_fetch_vercel_url is
+// GET-only). Remove after Stage 4 verification passes, before Stage 5.
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const querySecret = searchParams.get('secret');
+
+  if (!(await isAuthorized(req, querySecret))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const v = validateInput(
+    searchParams.get('type'),
+    searchParams.get('id'),
+    searchParams.get('magazine_id'),
+  );
+  if (!v.ok) return v.res;
+
+  return runCapture({ type: v.type, id: v.id, magazine_id: v.magazine_id });
 }
