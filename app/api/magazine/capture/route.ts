@@ -42,7 +42,7 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   const start = Date.now();
 
-  // ── 1. 어드민 세션 인증 ──
+  // ── 1. 인증: 어드민 세션 OR 임시 검증 헤더 (Stage 4 Vercel 검증 후 제거) ──
   const cookieStore = cookies();
   const authClient = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -55,7 +55,10 @@ export async function POST(req: NextRequest) {
     },
   );
   const { data: { user } } = await authClient.auth.getUser();
-  if (!user) {
+  const headerSecret = req.headers.get('x-capture-secret');
+  const envSecret = process.env.CAPTURE_SECRET;
+  const headerSecretValid = !!envSecret && !!headerSecret && headerSecret === envSecret;
+  if (!user && !headerSecretValid) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
