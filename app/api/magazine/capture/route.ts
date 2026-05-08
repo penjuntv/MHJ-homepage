@@ -103,7 +103,9 @@ async function runCapture(params: {
 
   let html: string;
   try {
-    const res = await fetch(renderUrl, { cache: 'no-store', headers: fetchHeaders, redirect: 'manual' });
+    // redirect는 기본값('follow') 유지 — Vercel SSO bypass cookie 흐름:
+    // 1차 응답 307 + Set-Cookie + Location → 2차 자동 fetch에 cookie 첨부되어 200
+    const res = await fetch(renderUrl, { cache: 'no-store', headers: fetchHeaders });
     if (!res.ok) {
       const locationHeader = res.headers.get('location');
       const setCookieHeader = res.headers.get('set-cookie');
