@@ -83,39 +83,64 @@ async function runCapture(params: {
     : 'http://localhost:3003';
   const renderUrl = `${baseUrl}/internal/render/${config.renderPath}/${encodeURIComponent(String(id))}?token=${encodeURIComponent(captureSecret)}`;
 
+  // TEMPORARY: Stage 4 진단 — 응답 body에 fetch 컨텍스트 직접 노출 (검증 후 제거)
+  const fetchHeaders: Record<string, string> = {};
+  if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+    fetchHeaders['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+    fetchHeaders['x-vercel-set-bypass-cookie'] = 'true';
+  }
+  const diag = {
+    renderUrl,
+    vercelUrl: process.env.VERCEL_URL ?? null,
+    bypassSecretLength: process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.length ?? 0,
+    captureSecretLength: process.env.CAPTURE_SECRET?.length ?? 0,
+    headerKeys: Object.keys(fetchHeaders),
+    vercelEnv: process.env.VERCEL_ENV ?? null,
+    vercelTargetEnv: process.env.VERCEL_TARGET_ENV ?? null,
+    nodeVersion: process.version,
+  };
+  console.log('[capture] fetch diagnostic', diag);
+
   let html: string;
   try {
-    const fetchHeaders: Record<string, string> = {};
-    if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
-      fetchHeaders['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
-      fetchHeaders['x-vercel-set-bypass-cookie'] = 'true';
-    }
-    // TEMPORARY: Stage 4 진단 로그 — 검증 후 제거
-    console.log('[capture] fetch diagnostic', {
-      renderUrl,
-      vercelUrl: process.env.VERCEL_URL ?? null,
-      bypassSecretLength: process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.length ?? 0,
-      headerKeys: Object.keys(fetchHeaders),
-    });
-    const res = await fetch(renderUrl, { cache: 'no-store', headers: fetchHeaders });
+    const res = await fetch(renderUrl, { cache: 'no-store', headers: fetchHeaders, redirect: 'manual' });
     if (!res.ok) {
+      const locationHeader = res.headers.get('location');
+      const setCookieHeader = res.headers.get('set-cookie');
       return NextResponse.json(
-        { error: `Render fetch failed: ${res.status} ${res.statusText}`, renderUrl },
+        {
+          error: `Render fetch failed: ${res.status} ${res.statusText}`,
+          diag,
+          response: {
+            status: res.status,
+            statusText: res.statusText,
+            location: locationHeader,
+            setCookiePresent: !!setCookieHeader,
+            contentType: res.headers.get('content-type'),
+          },
+        },
         { status: 500 },
       );
     }
     html = await res.text();
   } catch (e) {
-    console.error('[capture] fetch failed', {
-      renderUrl,
-      vercelUrl: process.env.VERCEL_URL ?? null,
-      bypassSecretLength: process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.length ?? 0,
-      error: e instanceof Error ? { name: e.name, message: e.message, cause: (e as { cause?: unknown }).cause } : String(e),
-    });
-    return NextResponse.json(
-      { error: `Render fetch error: ${e instanceof Error ? e.message : String(e)}` },
-      { status: 500 },
-    );
+    const errInfo =
+      e instanceof Error
+        ? {
+            name: e.name,
+            message: e.message,
+            cause:
+              (e as { cause?: unknown }).cause instanceof Error
+                ? {
+                    name: ((e as { cause: Error }).cause).name,
+                    message: ((e as { cause: Error }).cause).message,
+                    code: ((e as { cause: Error & { code?: string } }).cause).code ?? null,
+                  }
+                : (e as { cause?: unknown }).cause ?? null,
+          }
+        : { message: String(e) };
+    console.error('[capture] fetch failed', { diag, error: errInfo });
+    return NextResponse.json({ error: 'Render fetch error', diag, errorInfo: errInfo }, { status: 500 });
   }
   if (!html || html.length < 1000) {
     return NextResponse.json(
