@@ -39,9 +39,7 @@ const TYPE_CONFIG: Record<CaptureType, {
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-// 인증: 어드민 세션 OR 임시 검증 시크릿(헤더/쿼리)
-// (Stage 4 검증용 임시 우회 — Stage 5 진입 전 제거 예정)
-async function isAuthorized(req: NextRequest, querySecret?: string | null): Promise<boolean> {
+async function isAuthorized(): Promise<boolean> {
   const cookieStore = cookies();
   const authClient = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -54,14 +52,7 @@ async function isAuthorized(req: NextRequest, querySecret?: string | null): Prom
     },
   );
   const { data: { user } } = await authClient.auth.getUser();
-  if (user) return true;
-
-  const envSecret = process.env.CAPTURE_SECRET;
-  if (!envSecret) return false;
-  const headerSecret = req.headers.get('x-capture-secret');
-  if (headerSecret && headerSecret === envSecret) return true;
-  if (querySecret && querySecret === envSecret) return true;
-  return false;
+  return !!user;
 }
 
 async function runCapture(params: {
@@ -83,66 +74,27 @@ async function runCapture(params: {
     : 'http://localhost:3003';
   const renderUrl = `${baseUrl}/internal/render/${config.renderPath}/${encodeURIComponent(String(id))}?token=${encodeURIComponent(captureSecret)}`;
 
-  // TEMPORARY: Stage 4 진단 — 응답 body에 fetch 컨텍스트 직접 노출 (검증 후 제거)
   const fetchHeaders: Record<string, string> = {};
   if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
     fetchHeaders['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
     fetchHeaders['x-vercel-set-bypass-cookie'] = 'true';
   }
-  const diag = {
-    renderUrl,
-    vercelUrl: process.env.VERCEL_URL ?? null,
-    bypassSecretLength: process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.length ?? 0,
-    captureSecretLength: process.env.CAPTURE_SECRET?.length ?? 0,
-    headerKeys: Object.keys(fetchHeaders),
-    vercelEnv: process.env.VERCEL_ENV ?? null,
-    vercelTargetEnv: process.env.VERCEL_TARGET_ENV ?? null,
-    nodeVersion: process.version,
-  };
-  console.log('[capture] fetch diagnostic', diag);
 
   let html: string;
   try {
-    // redirect는 기본값('follow') 유지 — Vercel SSO bypass cookie 흐름:
-    // 1차 응답 307 + Set-Cookie + Location → 2차 자동 fetch에 cookie 첨부되어 200
     const res = await fetch(renderUrl, { cache: 'no-store', headers: fetchHeaders });
     if (!res.ok) {
-      const locationHeader = res.headers.get('location');
-      const setCookieHeader = res.headers.get('set-cookie');
       return NextResponse.json(
-        {
-          error: `Render fetch failed: ${res.status} ${res.statusText}`,
-          diag,
-          response: {
-            status: res.status,
-            statusText: res.statusText,
-            location: locationHeader,
-            setCookiePresent: !!setCookieHeader,
-            contentType: res.headers.get('content-type'),
-          },
-        },
+        { error: `Render fetch failed: ${res.status} ${res.statusText}` },
         { status: 500 },
       );
     }
     html = await res.text();
   } catch (e) {
-    const errInfo =
-      e instanceof Error
-        ? {
-            name: e.name,
-            message: e.message,
-            cause:
-              (e as { cause?: unknown }).cause instanceof Error
-                ? {
-                    name: ((e as { cause: Error }).cause).name,
-                    message: ((e as { cause: Error }).cause).message,
-                    code: ((e as { cause: Error & { code?: string } }).cause).code ?? null,
-                  }
-                : (e as { cause?: unknown }).cause ?? null,
-          }
-        : { message: String(e) };
-    console.error('[capture] fetch failed', { diag, error: errInfo });
-    return NextResponse.json({ error: 'Render fetch error', diag, errorInfo: errInfo }, { status: 500 });
+    return NextResponse.json(
+      { error: `Render fetch error: ${e instanceof Error ? e.message : String(e)}` },
+      { status: 500 },
+    );
   }
   if (!html || html.length < 1000) {
     return NextResponse.json(
@@ -315,7 +267,7 @@ function validateInput(
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAuthorized(req))) {
+  if (!(await isAuthorized())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -327,26 +279,6 @@ export async function POST(req: NextRequest) {
   }
 
   const v = validateInput(body.type, body.id, body.magazine_id);
-  if (!v.ok) return v.res;
-
-  return runCapture({ type: v.type, id: v.id, magazine_id: v.magazine_id });
-}
-
-// TEMPORARY: GET handler for Vercel MCP verification (web_fetch_vercel_url is
-// GET-only). Remove after Stage 4 verification passes, before Stage 5.
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const querySecret = searchParams.get('secret');
-
-  if (!(await isAuthorized(req, querySecret))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const v = validateInput(
-    searchParams.get('type'),
-    searchParams.get('id'),
-    searchParams.get('magazine_id'),
-  );
   if (!v.ok) return v.res;
 
   return runCapture({ type: v.type, id: v.id, magazine_id: v.magazine_id });
