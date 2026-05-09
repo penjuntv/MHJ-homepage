@@ -137,7 +137,7 @@ export default function PhotoHeroTemplate({
         {!hideTitle && (
           <div
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
               fontSize: titleClamp,
               lineHeight: 1.06,

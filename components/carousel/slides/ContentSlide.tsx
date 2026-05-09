@@ -36,7 +36,7 @@ function footerElements(slideNumber: number, totalSlides: number) {
     >
       <span
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 700,
           letterSpacing: 2,
           display: 'flex',
@@ -82,7 +82,7 @@ function LeftAlignSlide(point: CarouselPoint, pointIndex: number, totalSlides: n
       </span>
       <span
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 700,
           fontSize: 52,
           lineHeight: 1.2,
@@ -167,7 +167,7 @@ function CircleSlide(point: CarouselPoint, pointIndex: number, totalSlides: numb
       >
         <span
           style={{
-            fontFamily: 'Playfair Display, serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontWeight: 700,
             fontSize: 56,
             lineHeight: 1.2,
@@ -239,7 +239,7 @@ function ListSlide(point: CarouselPoint, pointIndex: number, totalSlides: number
       {/* Title */}
       <span
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 700,
           fontSize: 48,
           lineHeight: 1.2,
@@ -350,7 +350,7 @@ function KeywordSlide(point: CarouselPoint, pointIndex: number, totalSlides: num
       {/* Giant keyword */}
       <span
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 900,
           fontSize: 120,
           lineHeight: 1,
@@ -363,7 +363,7 @@ function KeywordSlide(point: CarouselPoint, pointIndex: number, totalSlides: num
       {/* Sub title — Playfair italic for editorial contrast */}
       <span
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 400,
           fontStyle: 'italic',
           fontSize: 36,
@@ -433,7 +433,7 @@ function QuoteSlide(point: CarouselPoint, pointIndex: number, totalSlides: numbe
       {/* Decorative quote mark */}
       <span
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 400,
           fontSize: 120,
           lineHeight: 1,
@@ -447,7 +447,7 @@ function QuoteSlide(point: CarouselPoint, pointIndex: number, totalSlides: numbe
       {/* Quote text — italic */}
       <span
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 700,
           fontStyle: 'italic',
           fontSize: 48,

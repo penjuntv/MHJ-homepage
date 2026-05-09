@@ -9,7 +9,7 @@ const FONTS = {
     body: "'Inter', system-ui, sans-serif",
   },
   editorial: {
-    title: "'Playfair Display', Georgia, serif",
+    title: "'Playfair Display', 'Noto Sans KR', Georgia, serif",
     body: "'Inter', system-ui, sans-serif",
   },
   tech: {

@@ -63,7 +63,7 @@ export default function TextOnlyTemplate({
         ${dropCap ? `
         .essay-${uid} p:first-of-type::first-letter {
           float: left;
-          font-family: "Playfair Display", serif;
+          font-family: "Playfair Display", "Noto Sans KR", serif;
           font-weight: 900;
           font-size: ${dropFont};
           color: ${accentColor};
@@ -105,7 +105,7 @@ export default function TextOnlyTemplate({
           <div
             style={{
               flexShrink: 0,
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
               fontStyle: 'italic',
               fontSize: titleClamp,
@@ -151,7 +151,7 @@ export default function TextOnlyTemplate({
           </span>
           <span
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
               fontSize: 'var(--mag-font-meta)',
               color: accentColor,

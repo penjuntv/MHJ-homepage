@@ -139,7 +139,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
                 paddingLeft: '48px',
                 paddingBottom: '16px',
                 fontSize: 'clamp(28px, 5vw, 56px)',
-                fontFamily: 'var(--font-playfair), "Playfair Display", Georgia, serif',
+                fontFamily: 'var(--font-playfair), "Playfair Display", "Noto Sans KR", Georgia, serif',
                 fontWeight: 900,
                 fontStyle: 'italic',
                 color: 'var(--text)',

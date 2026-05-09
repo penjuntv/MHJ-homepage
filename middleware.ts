@@ -9,6 +9,15 @@ const PUBLIC_PATHS = [
 ];
 
 export async function middleware(request: NextRequest) {
+  // 캡처 렌더 라우트: CAPTURE_SECRET 검증만, Supabase 세션 불필요
+  if (request.nextUrl.pathname.startsWith('/internal/render/')) {
+    const token = request.nextUrl.searchParams.get('token');
+    if (!token || token !== process.env.CAPTURE_SECRET) {
+      return new NextResponse(null, { status: 404 });
+    }
+    return NextResponse.next();
+  }
+
   if (PUBLIC_PATHS.some(p => request.nextUrl.pathname.startsWith(p))) {
     return NextResponse.next();
   }
@@ -48,5 +57,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/mhj-desk/:path*'],
+  matcher: ['/mhj-desk/:path*', '/internal/render/:path*'],
 };

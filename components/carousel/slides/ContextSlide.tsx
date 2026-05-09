@@ -110,7 +110,7 @@ export function ContextSlide(input: CarouselInput) {
         <div
           style={{
             display: 'flex',
-            fontFamily: 'Playfair Display, serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontSize: 14,
             fontWeight: 700,
             color: '#CBD5E1',

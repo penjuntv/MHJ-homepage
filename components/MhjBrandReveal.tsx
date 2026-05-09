@@ -68,7 +68,7 @@ export default function MhjBrandReveal() {
           line-height: 1;
         }
         .mhj-bl {
-          font-family: 'Playfair Display', serif;
+          font-family: 'Playfair Display', 'Noto Sans KR', serif;
           font-weight: 900;
           font-style: italic;
           font-size: 82px;
@@ -84,7 +84,7 @@ export default function MhjBrandReveal() {
           font-size: 66px;
         }
         .mhj-tl {
-          font-family: 'Playfair Display', serif;
+          font-family: 'Playfair Display', 'Noto Sans KR', serif;
           font-weight: 300;
           font-style: italic;
           font-size: 50px;
@@ -107,7 +107,7 @@ export default function MhjBrandReveal() {
           opacity: 1;
         }
         .mhj-cm {
-          font-family: 'Playfair Display', serif;
+          font-family: 'Playfair Display', 'Noto Sans KR', serif;
           font-weight: 400;
           font-style: italic;
           font-size: 40px;
@@ -126,7 +126,7 @@ export default function MhjBrandReveal() {
           opacity: 1;
         }
         .mhj-ap {
-          font-family: 'Playfair Display', serif;
+          font-family: 'Playfair Display', 'Noto Sans KR', serif;
           font-weight: 400;
           font-style: italic;
           font-size: 48px;
@@ -181,7 +181,7 @@ export default function MhjBrandReveal() {
         .mhj-sub-b {
           position: absolute;
           inset: 0;
-          font-family: 'Playfair Display', serif;
+          font-family: 'Playfair Display', 'Noto Sans KR', serif;
           font-weight: 300;
           font-style: italic;
           font-size: 22px;
@@ -232,7 +232,7 @@ export default function MhjBrandReveal() {
           transform: translateY(0);
         }
         .mhj-story-em {
-          font-family: 'Playfair Display', serif;
+          font-family: 'Playfair Display', 'Noto Sans KR', serif;
           font-weight: 400;
           font-style: italic;
           color: #334155;

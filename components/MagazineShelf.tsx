@@ -153,7 +153,7 @@ const SHELF_CSS = `
   margin-bottom: clamp(32px, 4vw, 48px);
 }
 .ms-heading {
-  font-family: "Playfair Display", serif;
+  font-family: "Playfair Display", "Noto Sans KR", serif;
   font-weight: 900;
   font-size: clamp(28px, 4.5vw, 40px);
   color: #1A1A1A;
@@ -266,7 +266,7 @@ const SHELF_CSS = `
   opacity: 0;
 }
 .shelf-book-spine-top {
-  font-family: "Playfair Display", serif;
+  font-family: "Playfair Display", "Noto Sans KR", serif;
   font-weight: 900;
   font-size: 13px;
   letter-spacing: 0.04em;
@@ -276,7 +276,7 @@ const SHELF_CSS = `
 .shelf-book-spine-text {
   writing-mode: vertical-rl;
   /* ISO 6357 / BS 6738: top-to-bottom (제목 첫 글자가 책등 상단에) */
-  font-family: "Playfair Display", serif;
+  font-family: "Playfair Display", "Noto Sans KR", serif;
   font-weight: 700;
   font-size: 17px;
   letter-spacing: 0.04em;
@@ -412,7 +412,7 @@ const SHELF_CSS = `
   text-align: center;
 }
 .ms-placeholder-mhj {
-  font-family: "Playfair Display", serif;
+  font-family: "Playfair Display", "Noto Sans KR", serif;
   font-size: clamp(28px, 5vw, 44px);
   font-weight: 900;
   letter-spacing: -0.02em;
@@ -429,7 +429,7 @@ const SHELF_CSS = `
 
 .ms-meta { padding: 14px 4px 0; }
 .ms-card-title {
-  font-family: "Playfair Display", serif;
+  font-family: "Playfair Display", "Noto Sans KR", serif;
   font-weight: 700;
   font-size: 16px;
   color: #1A1A1A;
@@ -489,7 +489,7 @@ html.dark .ms-empty-desc { color: rgba(253,252,250,0.55); }
   margin-bottom: 12px;
 }
 .ms-empty-title {
-  font-family: "Playfair Display", serif;
+  font-family: "Playfair Display", "Noto Sans KR", serif;
   font-weight: 900;
   font-style: italic;
   font-size: clamp(28px, 4vw, 40px);

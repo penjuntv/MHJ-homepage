@@ -92,7 +92,7 @@ export default function AiInsight({ title, content, blogId }: Props) {
               fontWeight: 900,
               color: 'rgba(79,70,229,0.12)',
               lineHeight: 1,
-              fontFamily: "'Playfair Display', Georgia, serif",
+              fontFamily: "'Playfair Display', 'Noto Sans KR', Georgia, serif",
               userSelect: 'none',
               pointerEvents: 'none',
             }}

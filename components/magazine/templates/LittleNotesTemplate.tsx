@@ -37,7 +37,7 @@ export default function LittleNotesTemplate({
       <div style={{ flexShrink: 0, textAlign: 'left', paddingBottom: '0.9em', borderBottom: '1px solid var(--mag-title-divider)' }}>
         <h1
           style={{
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontWeight: 900,
             fontSize: 'var(--mag-font-title)',
@@ -67,7 +67,7 @@ export default function LittleNotesTemplate({
             border: `1px dashed ${accentColor}44`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: `${accentColor}88`,
-            fontFamily: '"Playfair Display", serif', fontStyle: 'italic',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif', fontStyle: 'italic',
             fontSize: 'var(--mag-font-meta)',
           }}>
             image
@@ -82,7 +82,7 @@ export default function LittleNotesTemplate({
         <span
           aria-hidden
           style={{
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontSize: 'clamp(44px, 13cqw, 110px)',
             lineHeight: 0.6,
@@ -97,7 +97,7 @@ export default function LittleNotesTemplate({
         {/* gap 3(암묵적): 따옴표 marginBottom = GAP */}
         <p
           style={{
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontSize: 'var(--mag-font-quote)',
             lineHeight: 1.45,
@@ -126,7 +126,7 @@ export default function LittleNotesTemplate({
       {/* 하단 구분선 — marginTop: auto로 페이지 바닥에 고정 */}
       <div style={{ flexShrink: 0, marginTop: 'auto', paddingTop: '0.9em', borderTop: '1px solid var(--mag-title-divider)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <span style={{
-          fontFamily: '"Playfair Display", serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontStyle: 'italic',
           fontSize: 'var(--mag-font-meta)',
           color: accentColor,

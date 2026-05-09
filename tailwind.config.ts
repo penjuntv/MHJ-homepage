@@ -11,7 +11,7 @@ const config: Config = {
     extend: {
       /* ─── 폰트 ─── */
       fontFamily: {
-        display: ['"Playfair Display"', "serif"],
+        display: ['"Playfair Display"', '"Noto Sans KR"', "serif"],
         body: ['"Noto Sans KR"', "sans-serif"],
       },
 

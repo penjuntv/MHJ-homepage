@@ -50,7 +50,7 @@ export default function ColumnLayoutTemplate({
               alignItems: 'center',
               justifyContent: 'center',
               color: `${accentColor}88`,
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontStyle: 'italic',
               fontSize: 'var(--mag-font-meta)',
             }}
@@ -104,7 +104,7 @@ export default function ColumnLayoutTemplate({
         ${article.style_overrides?.dropCap ? `
         .col-body-${uid} p:first-of-type::first-letter {
           float: left;
-          font-family: "Playfair Display", serif;
+          font-family: "Playfair Display", "Noto Sans KR", serif;
           font-weight: 900;
           font-size: clamp(40px, 11cqw, 88px);
           line-height: 0.85;
@@ -133,7 +133,7 @@ export default function ColumnLayoutTemplate({
         >
           <h1
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontStyle: 'italic',
               fontWeight: 900,
               fontSize: 'var(--mag-font-title)',
@@ -200,7 +200,7 @@ export default function ColumnLayoutTemplate({
         </span>
         <span
           style={{
-            fontFamily: '"Playfair Display", serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontSize: 'var(--mag-font-meta)',
             color: accentColor,

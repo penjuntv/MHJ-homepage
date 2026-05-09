@@ -21,7 +21,7 @@ export function CtaSlide(input: CarouselInput) {
       {/* Logo */}
       <span
         style={{
-          fontFamily: 'Playfair Display, serif',
+          fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 400,
           fontSize: 56,
           color: '#C9A96E',
@@ -124,7 +124,7 @@ export function CtaSlide(input: CarouselInput) {
       >
         <span
           style={{
-            fontFamily: 'Playfair Display, serif',
+            fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontWeight: 700,
             color: 'rgba(255,255,255,0.3)',
             letterSpacing: 2,

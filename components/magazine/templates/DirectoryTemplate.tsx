@@ -40,7 +40,7 @@ export default function DirectoryTemplate({
           </div>
           <div
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
               fontSize: 'clamp(22px, 3vw, 32px)',
               lineHeight: 1.1,
@@ -109,7 +109,7 @@ export default function DirectoryTemplate({
                 >
                   <div
                     style={{
-                      fontFamily: '"Playfair Display", serif',
+                      fontFamily: '"Playfair Display", "Noto Sans KR", serif',
                       fontStyle: 'italic',
                       fontWeight: 400,
                       fontSize: 'clamp(18px, 2.4vw, 28px)',

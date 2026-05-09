@@ -76,7 +76,7 @@ const TEXTURES: { id: 'none' | 'noise' | 'paper'; name: string }[] = [
 ];
 
 const FONT_THEMES: { id: string; name: string; font: string }[] = [
-  { id: 'editorial', name: 'Editorial', font: "'Playfair Display', serif" },
+  { id: 'editorial', name: 'Editorial', font: "'Playfair Display', 'Noto Sans KR', serif" },
   { id: 'modern', name: 'Modern', font: "'Inter', sans-serif" },
   { id: 'tech', name: 'Tech', font: 'monospace' },
 ];
