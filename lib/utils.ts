@@ -25,3 +25,21 @@ export function formatDate(dateString: string): string {
 export function staggerIndex(i: number): number {
   return Math.min(i + 1, 4);
 }
+
+// HTML 태그 + 흔한 entity 제거 → SEO/스크린리더용 plain text.
+// 입력은 TipTap/내부 콘텐츠라 sanitize 목적은 아님.
+export function stripHtml(html: string | null | undefined): string {
+  if (!html) return '';
+  return html
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/(p|h[1-6]|li|div)>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
