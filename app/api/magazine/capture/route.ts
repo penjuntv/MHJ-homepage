@@ -68,14 +68,24 @@ async function runCapture(params: {
     return NextResponse.json({ error: 'CAPTURE_SECRET not configured' }, { status: 500 });
   }
 
-  // ── /internal/render/{path}/{id} HTML fetch ──
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3003';
+  // baseUrl 우선순위 — immutable URL은 SSO bypass 시 redirect 루프를 유발해서 후순위.
+  // 1) NEXT_PUBLIC_SITE_URL (production alias, e.g. https://www.mhj.nz)
+  // 2) VERCEL_PROJECT_PRODUCTION_URL (Vercel 자동 주입 production alias)
+  // 3) https://{VERCEL_URL} (preview/immutable fallback)
+  // 4) localhost:3003 (로컬 개발)
+  const isProduction = process.env.VERCEL_ENV === 'production';
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3003');
   const renderUrl = `${baseUrl}/internal/render/${config.renderPath}/${encodeURIComponent(String(id))}?token=${encodeURIComponent(captureSecret)}`;
 
+  // production에는 SSO가 없어 bypass 헤더 불필요. 보내면 redirect 루프 위험 (확인된 원인).
   const fetchHeaders: Record<string, string> = {};
-  if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+  if (!isProduction && process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
     fetchHeaders['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
     fetchHeaders['x-vercel-set-bypass-cookie'] = 'true';
   }
@@ -83,6 +93,9 @@ async function runCapture(params: {
   // TEMPORARY: production self-fetch 진단 — 검증 후 제거
   const diag = {
     renderUrl,
+    baseUrl,
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? null,
+    projectProductionUrl: process.env.VERCEL_PROJECT_PRODUCTION_URL ?? null,
     vercelUrl: process.env.VERCEL_URL ?? null,
     captureSecretLength: process.env.CAPTURE_SECRET?.length ?? 0,
     bypassSecretLength: process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.length ?? 0,
