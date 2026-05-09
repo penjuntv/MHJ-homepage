@@ -23,13 +23,14 @@ import DownloadBtn from '@/components/DownloadBtn';
 import type { ArticlePreviewData, StyleOverrides } from '@/components/magazine/templates/shared';
 import { TEMPLATE_PHOTO_COUNT } from '@/components/magazine/templates/shared';
 import StyleOverridePanel from '@/components/admin/StyleOverridePanel';
+import PngSection from './png-section';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
 /* ─── 타입 ─── */
 type ArticleType = 'cover' | 'contents' | 'article';
 type ArticleStatus = 'draft' | 'complete' | 'published';
-type TabKey = 'cover' | 'articles' | 'spread';
+type TabKey = 'cover' | 'articles' | 'spread' | 'images';
 
 type ArticleInput = {
   magazine_id: string;
@@ -643,6 +644,7 @@ export default function MagazineDetailPage() {
             { key: 'cover', label: '📋 표지 & 설정' },
             { key: 'articles', label: '✍️ 기사 편집' },
             { key: 'spread', label: '🔍 전체 미리보기' },
+            { key: 'images', label: '🖼 이미지' },
           ] as { key: TabKey; label: string }[]).map(t => (
             <button key={t.key} onClick={() => setTab(t.key)} style={{
               padding: '12px 20px', fontSize: '12px', fontWeight: 900, letterSpacing: '1px',
@@ -1144,6 +1146,18 @@ export default function MagazineDetailPage() {
           </div>
         );
       })()}
+
+      {/* ══════════════════════════════════════════
+          탭 4: 이미지 (PNG 캡처)
+          ══════════════════════════════════════════ */}
+      {tab === 'images' && (
+        <PngSection
+          magazineId={id}
+          initialMagazine={magazine}
+          initialArticles={articles}
+          onToast={showToast}
+        />
+      )}
 
       {/* ─── 스프레드 풀스크린 모달 ─── */}
       {spreadModal && (

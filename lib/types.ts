@@ -18,6 +18,8 @@ export interface Magazine {
   issue_number?: string | null;     // 이슈 번호 ('01', '02', ...)
   bg_color?: string | null;         // 배경색 (hex)
   published?: boolean;              // 서가 노출 여부 (false면 숨김)
+  cover_png_url?: string | null;
+  cover_png_generated_at?: string | null;
   created_at?: string;
 }
 
@@ -49,6 +51,8 @@ export interface Article {
   directory_items?: DirectoryItem[] | null; // Directory 항목 배열
   quote_text?: string | null;          // PullQuote 인용 본문
   quote_attribution?: string | null;   // PullQuote 인용 출처
+  png_url?: string | null;
+  png_generated_at?: string | null;
   created_at?: string;
 }
 
@@ -170,6 +174,8 @@ export interface ArticlePage {
   image_positions?: string[] | null;
   caption?: string | null;
   captions?: string[] | null;   // 사진별 캡션 (images[i] ↔ captions[i])
+  png_url?: string | null;
+  png_generated_at?: string | null;
 }
 
 export interface GalleryItem {
