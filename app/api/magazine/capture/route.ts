@@ -80,21 +80,54 @@ async function runCapture(params: {
     fetchHeaders['x-vercel-set-bypass-cookie'] = 'true';
   }
 
+  // TEMPORARY: production self-fetch 진단 — 검증 후 제거
+  const diag = {
+    renderUrl,
+    vercelUrl: process.env.VERCEL_URL ?? null,
+    captureSecretLength: process.env.CAPTURE_SECRET?.length ?? 0,
+    bypassSecretLength: process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.length ?? 0,
+    headerKeys: Object.keys(fetchHeaders),
+    vercelEnv: process.env.VERCEL_ENV ?? null,
+    vercelTargetEnv: process.env.VERCEL_TARGET_ENV ?? null,
+    nodeVersion: process.version,
+  };
+
   let html: string;
   try {
     const res = await fetch(renderUrl, { cache: 'no-store', headers: fetchHeaders });
     if (!res.ok) {
       return NextResponse.json(
-        { error: `Render fetch failed: ${res.status} ${res.statusText}` },
+        {
+          error: `Render fetch failed: ${res.status} ${res.statusText}`,
+          diag,
+          response: {
+            status: res.status,
+            statusText: res.statusText,
+            location: res.headers.get('location'),
+            contentType: res.headers.get('content-type'),
+          },
+        },
         { status: 500 },
       );
     }
     html = await res.text();
   } catch (e) {
-    return NextResponse.json(
-      { error: `Render fetch error: ${e instanceof Error ? e.message : String(e)}` },
-      { status: 500 },
-    );
+    const errorInfo =
+      e instanceof Error
+        ? {
+            name: e.name,
+            message: e.message,
+            cause:
+              (e as { cause?: unknown }).cause instanceof Error
+                ? {
+                    name: ((e as { cause: Error }).cause).name,
+                    message: ((e as { cause: Error }).cause).message,
+                    code: ((e as { cause: Error & { code?: string } }).cause).code ?? null,
+                  }
+                : (e as { cause?: unknown }).cause ?? null,
+          }
+        : { message: String(e) };
+    return NextResponse.json({ error: 'Render fetch error', diag, errorInfo }, { status: 500 });
   }
   if (!html || html.length < 1000) {
     return NextResponse.json(
