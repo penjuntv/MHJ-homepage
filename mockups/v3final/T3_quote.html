@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="UTF-8" />
+<title>T3 quote</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800;900&family=Inter:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_tokens.css">
+<style>
+.label-box-wrap { margin-bottom: 60px; }
+
+/* English quote — scales */
+body.format-4x5 .eng-phrase { font-size: 156px; }
+body.format-9x16 .eng-phrase { font-size: 184px; }
+
+.eng-phrase {
+  font-family: var(--font-en);
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  word-break: keep-all;
+  margin-bottom: 60px;
+}
+.eng-phrase .quote-mark { color: var(--accent-primary); display: inline; }
+.eng-phrase .underline {
+  background: linear-gradient(transparent 70%, var(--accent-highlight) 70%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.body-box { margin-top: auto; }
+
+/* In 9:16, body box gets bigger text */
+body.format-9x16 .body-box .text { font-size: 44px; }
+</style>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const aspect = params.get('aspect') || '4x5';
+  document.body.className = `format-${aspect}`;
+});
+</script>
+</head>
+<body class="format-4x5">
+<div class="card">
+  <div class="zone-top">
+    <div class="handle"><span class="at">@</span>MHJ_NZ</div>
+    <div class="page-indicator">04<span class="total"> / 08</span></div>
+  </div>
+
+  <div class="zone-main">
+    <div class="label-box-wrap">
+      <div class="label-box"><div class="text">JIN의 첫 영어 표현</div></div>
+    </div>
+
+    <h1 class="eng-phrase">
+      <span class="quote-mark">"</span>I&nbsp;need<br>
+      <span class="underline">my&nbsp;space.</span><span class="quote-mark">"</span>
+    </h1>
+
+    <div class="body-box">
+      <div class="label">When to use</div>
+      <div class="text">매트 타임에 <strong>친구가 너무 가까이 앉을 때</strong> 쓸 한 마디</div>
+    </div>
+  </div>
+
+  <div class="zone-bottom">
+    <div class="brand-name">@mhj_nz · Term 2 · Week 1</div>
+    <div class="swipe-cta">SWIPE</div>
+  </div>
+</div>
+</body></html>

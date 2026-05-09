@@ -1,0 +1,252 @@
+/* ================================================================
+ * MHJ CAROUSEL V3 — DESIGN TOKENS (SINGLE SOURCE OF TRUTH)
+ * Verified against: CarouselMaker, SocialRails, FlowShorts (YT Shorts), 
+ * PostNitro, 슬로워크, 한국 카드뉴스 명가 패턴
+ * Last verified: 2026-05-08
+ * ================================================================ */
+
+:root {
+  /* === COLOR (Editorial Tone, 1순위) === */
+  --bg: #FAF8F5;
+  --bg-tinted: #F2EDE3;
+  --ink: #1A2C42;
+  --ink-soft: rgba(26, 44, 66, 0.72);
+  --ink-faded: rgba(26, 44, 66, 0.45);
+  --accent-primary: #FF6B6B;
+  --accent-highlight: #FFE5A0;
+  --on-dark: #FAF8F5;
+  
+  /* === FONT SCALE (모바일 검증 통과) === */
+  --fs-micro: 18px;       /* legal text, footnote */
+  --fs-small: 22px;       /* page indicator, brand handle */
+  --fs-base: 26px;        /* meta info */
+  --fs-body-sm: 30px;     /* body small */
+  --fs-body: 36px;        /* body default */
+  --fs-body-lg: 44px;     /* body emphasis */
+  --fs-h3: 56px;          /* sub-heading */
+  --fs-h2: 72px;          /* section heading */
+  --fs-h1: 96px;          /* card headline */
+  --fs-display: 130px;    /* large english quote */
+  --fs-mega: 168px;       /* huge english impact */
+  --fs-mega-xl: 280px;    /* stat number / mega type */
+  
+  /* === LINE HEIGHT === */
+  --lh-tight: 0.95;
+  --lh-snug: 1.18;
+  --lh-normal: 1.45;
+  --lh-loose: 1.55;
+  
+  /* === LETTER SPACING === */
+  --ls-tight: -0.045em;
+  --ls-snug: -0.025em;
+  --ls-normal: -0.015em;
+  --ls-wide: 0.04em;
+  --ls-extra-wide: 0.18em;
+  
+  /* === FONT FAMILIES === */
+  --font-en: 'Inter', sans-serif;
+  --font-kr: 'Noto Sans KR', sans-serif;
+  --font-display: 'Playfair Display', serif;
+  
+  /* === SPACING === */
+  --pad-side: 80px;
+  --pad-stack: 60px;
+}
+
+/* ================================================================
+ * RESET + BASE
+ * ================================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  font-family: var(--font-kr);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  color: var(--ink);
+}
+
+/* ================================================================
+ * 4:5 CANVAS (1080×1350) — Instagram Carousel
+ * ================================================================ */
+body.format-4x5 { width: 1080px; height: 1350px; }
+body.format-4x5 .card { width: 1080px; height: 1350px; position: relative; background: var(--bg); }
+
+/* 4:5 zones */
+body.format-4x5 .zone-top {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 135px; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 60px;
+}
+body.format-4x5 .zone-main {
+  position: absolute;
+  top: 135px; left: 0; right: 0;
+  height: 1080px; z-index: 4;
+  padding: var(--pad-side);
+  display: flex;
+  flex-direction: column;
+}
+body.format-4x5 .zone-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 135px; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 60px;
+}
+
+/* ================================================================
+ * 9:16 CANVAS (1080×1920) — Reels / Shorts / TikTok
+ * Safe area accounts for UI overlays (top status, bottom caption+buttons)
+ * ================================================================ */
+body.format-9x16 { width: 1080px; height: 1920px; }
+body.format-9x16 .card { width: 1080px; height: 1920px; position: relative; background: var(--bg); }
+
+/* 9:16 zones - top 180px UI / bottom 450px UI overlay */
+body.format-9x16 .zone-top {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 180px; z-index: 5;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 var(--pad-side) 30px;
+}
+body.format-9x16 .zone-main {
+  position: absolute;
+  top: 240px; left: 0; right: 0;
+  bottom: 450px;  /* leaves UI overlay space */
+  z-index: 4;
+  padding: var(--pad-stack) var(--pad-side);
+  display: flex;
+  flex-direction: column;
+}
+body.format-9x16 .zone-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 450px; z-index: 5;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 60px var(--pad-side) 0;
+}
+
+/* ================================================================
+ * SHARED ELEMENTS (work in both 4:5 and 9:16)
+ * ================================================================ */
+
+/* Brand handle (top-left) */
+.handle {
+  font-family: var(--font-en);
+  font-size: var(--fs-small);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--ink);
+}
+.handle .at { color: var(--accent-primary); }
+
+/* Page indicator (top-right) */
+.page-indicator {
+  font-family: var(--font-en);
+  font-size: var(--fs-small);
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+.page-indicator .total { color: var(--ink-faded); }
+
+/* Brand name footer */
+.brand-name {
+  font-family: var(--font-en);
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
+
+/* Swipe CTA */
+.swipe-cta {
+  font-family: var(--font-kr);
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 0.08em;
+}
+.swipe-cta::after { content: " →"; color: var(--accent-primary); }
+
+/* Coral label box (neo-brutalist) */
+.label-box {
+  background: var(--accent-primary);
+  padding: 28px 36px;
+  width: fit-content;
+  border-radius: 4px;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.label-box .text {
+  font-family: var(--font-kr);
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--on-dark);
+  letter-spacing: 0.04em;
+}
+
+/* Body box (dark) */
+.body-box {
+  padding: 36px 40px;
+  background: var(--ink);
+  color: var(--on-dark);
+  border-radius: 6px;
+}
+.body-box .label {
+  font-family: var(--font-kr);
+  font-size: var(--fs-base);
+  font-weight: 800;
+  color: var(--accent-highlight);
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+.body-box .text {
+  font-family: var(--font-kr);
+  font-size: var(--fs-body-lg);  /* 44px — 모바일 검증 통과 */
+  font-weight: 700;
+  line-height: var(--lh-normal);
+  color: var(--on-dark);
+  word-break: keep-all;
+  letter-spacing: var(--ls-normal);
+}
+.body-box .text strong {
+  color: var(--accent-highlight);
+  font-weight: 900;
+}
+
+/* Highlight underline */
+.highlight-underline {
+  background: linear-gradient(transparent 70%, var(--accent-highlight) 70%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* Photo placeholder */
+.photo-frame {
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(255, 107, 107, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 70%, rgba(26, 44, 66, 0.55) 0%, transparent 60%),
+    linear-gradient(135deg, #5A7BA0 0%, #1A2C42 50%, #0F1A2A 100%);
+  position: relative;
+  overflow: hidden;
+}
+.photo-frame::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+}
+.photo-frame .placeholder-mark {
+  position: absolute;
+  bottom: 24px;
+  left: 28px;
+  font-family: var(--font-en);
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(250, 248, 245, 0.55);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.photo-frame .placeholder-mark::before {
+  content: "● ";
+  color: var(--accent-primary);
+}

@@ -1,0 +1,178 @@
+<!-- 
+  Usage: 
+  - 4:5 view: ?aspect=4x5
+  - 9:16 view: ?aspect=9x16
+  Default = 4x5
+-->
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="UTF-8" />
+<title>T1 photo-cover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800;900&family=Inter:wght@500;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_tokens.css">
+<style>
+/* ===== Template-specific styles (work in both aspects) ===== */
+
+/* Photo frame fills the upper portion */
+.zone-main .photo-area {
+  flex: 0 0 auto;
+  margin: -80px -80px 40px -80px; /* extend beyond padding */
+  position: relative;
+}
+
+/* In 4:5 — photo height 580px (~54% of main 1080) */
+body.format-4x5 .photo-area .photo-frame {
+  height: 580px;
+}
+
+/* In 9:16 — photo height 720px (more vertical room) */
+body.format-9x16 .photo-area .photo-frame {
+  height: 720px;
+}
+
+/* Floating label on photo */
+.floating-label {
+  position: absolute;
+  top: 50px; left: 60px;
+  z-index: 6;
+  background: var(--accent-primary);
+  padding: 16px 28px;
+  border-radius: 4px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.floating-label .text {
+  font-family: var(--font-kr);
+  font-size: 22px; font-weight: 900;
+  color: var(--on-dark);
+  letter-spacing: 0.06em;
+}
+
+/* Headline area below photo */
+.headline-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.kicker {
+  font-family: var(--font-en);
+  font-size: var(--fs-small);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex; align-items: center; gap: 14px;
+}
+.kicker::before {
+  content: ""; width: 32px; height: 2px;
+  background: var(--accent-primary);
+}
+
+/* Headline scales by aspect */
+body.format-4x5 .headline {
+  font-family: var(--font-kr);
+  font-size: 88px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: var(--ls-tight);
+  color: var(--ink);
+  word-break: keep-all;
+  margin-bottom: 22px;
+}
+body.format-9x16 .headline {
+  font-family: var(--font-kr);
+  font-size: 110px;  /* 9:16은 더 크게 */
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: var(--ls-tight);
+  color: var(--ink);
+  word-break: keep-all;
+  margin-bottom: 28px;
+}
+
+.headline .accent-line {
+  color: var(--ink);
+  position: relative;
+  display: inline-block;
+}
+/* Stronger underline — 4:5 baseline */
+body.format-4x5 .headline .accent-line::after {
+  content: ""; position: absolute;
+  left: -4px; right: -4px; bottom: 4px;
+  height: 22px;
+  background: var(--accent-highlight);
+  z-index: -1;
+  border-radius: 2px;
+}
+/* 9:16 — proportionally bigger underline */
+body.format-9x16 .headline .accent-line::after {
+  content: ""; position: absolute;
+  left: -6px; right: -6px; bottom: 6px;
+  height: 30px;
+  background: var(--accent-highlight);
+  z-index: -1;
+  border-radius: 2px;
+}
+
+.deck {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 28px;
+  font-weight: 600;  /* up from 500 for better mobile contrast */
+  color: var(--ink);  /* solid ink instead of soft */
+  opacity: 0.78;
+  letter-spacing: 0.01em;
+}
+
+/* Get aspect from URL parameter */
+</style>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const aspect = params.get('aspect') || '4x5';
+  document.body.className = `format-${aspect}`;
+  // Adjust deck size for 9:16
+  if (aspect === '9x16') {
+    document.querySelector('.deck').style.fontSize = '32px';
+  }
+});
+</script>
+</head>
+<body class="format-4x5">
+<div class="card">
+  <div class="zone-top">
+    <div class="handle"><span class="at">@</span>MHJ_NZ</div>
+    <div class="page-indicator">01<span class="total"> / 08</span></div>
+  </div>
+
+  <div class="zone-main">
+    <div class="photo-area">
+      <div class="photo-frame">
+        <div class="placeholder-mark">photo · Yussi · school morning</div>
+      </div>
+      <div class="floating-label">
+        <span class="text">Term 2 · Week 1</span>
+      </div>
+    </div>
+
+    <div class="headline-area">
+      <div class="kicker">A New Beginning</div>
+      <h1 class="headline">
+        엄마가 옆에<br>
+        있다고 <span class="accent-line">상상했어</span>
+      </h1>
+      <div class="deck">— Jin, Year 1, 학교 첫 주에 친구의 'No'를 듣고</div>
+    </div>
+  </div>
+
+  <div class="zone-bottom">
+    <div class="brand-name">@mhj_nz · Mairangi Bay · 2026.05</div>
+    <div class="swipe-cta">SWIPE</div>
+  </div>
+</div>
+</body></html>
