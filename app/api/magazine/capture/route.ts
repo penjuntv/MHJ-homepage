@@ -55,13 +55,21 @@ async function isAuthorized(): Promise<boolean> {
   return !!user;
 }
 
+// puppeteer/CDP 통신 재사용 lambda에서 간헐적으로 발생하는 transient 패턴.
+// 재시도(콜드 시작에 가까운 새 인스턴스)로 거의 회복됨.
+function isTransientError(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e);
+  return /Protocol error|Page\.captureScreenshot|Unable to capture|Target closed|Connection closed|Session closed|Browser has been closed/i.test(msg);
+}
+
 async function runCapture(params: {
   type: CaptureType;
   id: string | number;
   magazine_id: string;
+  isRetry?: boolean;
 }): Promise<NextResponse> {
   const start = Date.now();
-  const { type, id, magazine_id } = params;
+  const { type, id, magazine_id, isRetry = false } = params;
   const config = TYPE_CONFIG[type];
   const captureSecret = process.env.CAPTURE_SECRET;
   if (!captureSecret) {
@@ -170,8 +178,13 @@ async function runCapture(params: {
   } catch (e) {
     const durationMs = Date.now() - start;
     const message = e instanceof Error ? e.message : String(e);
+    if (isTransientError(e) && !isRetry) {
+      console.warn('[capture] transient error, auto-retry in 2s:', message);
+      await new Promise(r => setTimeout(r, 2000));
+      return runCapture({ type, id, magazine_id, isRetry: true });
+    }
     console.error('[capture] puppeteer error:', message);
-    return NextResponse.json({ error: message, durationMs }, { status: 500 });
+    return NextResponse.json({ error: message, durationMs, retried: isRetry }, { status: 500 });
   }
 
   // ── Storage 업로드 (옛 timestamp 파일 삭제 후) ──
@@ -232,7 +245,7 @@ async function runCapture(params: {
 
   const durationMs = Date.now() - start;
   const memoryUsageMb = Math.round(process.memoryUsage().rss / 1024 / 1024);
-  console.log(`[capture] ${type}/${id} done in ${durationMs}ms (${memoryUsageMb}MB)`);
+  console.log(`[capture] ${type}/${id} done in ${durationMs}ms (${memoryUsageMb}MB)${isRetry ? ' [retry]' : ''}`);
 
   return NextResponse.json({
     url: publicUrl,
@@ -242,6 +255,7 @@ async function runCapture(params: {
     storagePath,
     durationMs,
     memoryUsageMb,
+    retried: isRetry,
   });
 }
 

@@ -8,6 +8,7 @@ export interface CaptureResult {
   storagePath: string;
   durationMs: number;
   memoryUsageMb: number;
+  retried?: boolean;
 }
 
 const CAPTURE_TIMEOUT_MS = 60_000;

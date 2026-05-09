@@ -35,7 +35,7 @@ export default function PngSection({ magazineId, initialMagazine, initialArticle
   const [pages, setPages] = useState<ArticlePage[]>([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<ItemKey | null>(null);
-  const [lastResult, setLastResult] = useState<Record<string, { durationMs?: number; memoryMb?: number; error?: string }>>({});
+  const [lastResult, setLastResult] = useState<Record<string, { durationMs?: number; memoryMb?: number; retried?: boolean; error?: string }>>({});
   const [bulkProgress, setBulkProgress] = useState<BulkProgress | null>(null);
   const cancelRef = useRef(false);
 
@@ -81,9 +81,9 @@ export default function PngSection({ magazineId, initialMagazine, initialArticle
     setRunning(item);
     try {
       const res = await captureItem({ type: item.type, id: item.id, magazine_id: magazineId });
-      setLastResult(r => ({ ...r, [keyOf(item)]: { durationMs: res.durationMs, memoryMb: res.memoryUsageMb } }));
+      setLastResult(r => ({ ...r, [keyOf(item)]: { durationMs: res.durationMs, memoryMb: res.memoryUsageMb, retried: res.retried } }));
       await refreshOne(item);
-      if (!opts?.silent) onToast(`갱신 완료 (${fmtSec(res.durationMs)}, ${res.memoryUsageMb}MB)`);
+      if (!opts?.silent) onToast(`갱신 완료 (${fmtSec(res.durationMs)}, ${res.memoryUsageMb}MB${res.retried ? ', 재시도됨' : ''})`);
       return { ok: true } as const;
     } catch (e) {
       const msg = trimError(e instanceof Error ? e.message : String(e));
@@ -328,7 +328,7 @@ function ArticleGroup({
   pages: ArticlePage[];
   running: ItemKey | null;
   disabled: boolean;
-  lastResult: Record<string, { durationMs?: number; memoryMb?: number; error?: string }>;
+  lastResult: Record<string, { durationMs?: number; memoryMb?: number; retried?: boolean; error?: string }>;
   onRefreshArticle: () => void;
   onRefreshPage: (pageId: number) => void;
 }) {
@@ -378,7 +378,7 @@ function ItemCard({
   generatedAt?: string | null;
   running: boolean;
   disabled: boolean;
-  lastResult?: { durationMs?: number; memoryMb?: number; error?: string };
+  lastResult?: { durationMs?: number; memoryMb?: number; retried?: boolean; error?: string };
   onRefresh: () => void;
 }) {
   return (
@@ -399,6 +399,7 @@ function ItemCard({
           {lastResult?.durationMs !== undefined && lastResult.error === undefined && (
             <span style={{ marginLeft: 8, color: '#16A34A' }}>
               · {fmtSec(lastResult.durationMs)} / {lastResult.memoryMb ?? '?'}MB
+              {lastResult.retried && <span style={{ color: '#D97706', marginLeft: 6 }}>(재시도됨)</span>}
             </span>
           )}
           {lastResult?.error && (
