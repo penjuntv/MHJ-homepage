@@ -311,7 +311,7 @@ export default function MagazineDetailPage() {
   }, [selectedArtId, inlineIsNew, fetchArticlePages]);
 
   /* ─── 토스트 ─── */
-  function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(''), 3000); }
+  function showToast(msg: string, durationMs: number = 3000) { setToast(msg); setTimeout(() => setToast(''), durationMs); }
 
   /* ─── 이슈 정보 저장 ─── */
   async function saveMagazine() {

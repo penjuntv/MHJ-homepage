@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2, RefreshCw, ImageOff, StopCircle, Image as ImageIcon } from 'lucide-react';
+import { Loader2, RefreshCw, ImageOff, StopCircle, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase-browser';
 import { captureItem, type CaptureType } from '@/lib/capture-magazine';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
@@ -10,13 +10,14 @@ interface Props {
   magazineId: string;
   initialMagazine?: Magazine | null;
   initialArticles?: Article[];
-  onToast: (msg: string) => void;
+  onToast: (msg: string, durationMs?: number) => void;
 }
 
 interface ItemKey { type: CaptureType; id: string | number; }
 interface BulkProgress { done: number; total: number; current?: ItemKey; }
 
 const keyOf = (k: ItemKey) => `${k.type}:${k.id}`;
+const trimError = (msg: string) => (msg.length > 60 ? msg.slice(0, 60) + '…' : msg);
 
 const fmtDate = (iso?: string | null) => {
   if (!iso) return '미생성';
@@ -85,9 +86,9 @@ export default function PngSection({ magazineId, initialMagazine, initialArticle
       if (!opts?.silent) onToast(`갱신 완료 (${fmtSec(res.durationMs)}, ${res.memoryUsageMb}MB)`);
       return { ok: true } as const;
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+      const msg = trimError(e instanceof Error ? e.message : String(e));
       setLastResult(r => ({ ...r, [keyOf(item)]: { error: msg } }));
-      if (!opts?.silent) onToast(`실패: ${msg}`);
+      if (!opts?.silent) onToast(`실패: ${msg}`, 5000);
       return { ok: false, error: msg } as const;
     } finally {
       setRunning(null);
@@ -105,36 +106,82 @@ export default function PngSection({ magazineId, initialMagazine, initialArticle
     return list;
   }, [magazineId, articles, pages]);
 
-  const startBulk = useCallback(async () => {
-    const total = allItems.length;
-    const articleCount = articles.length;
-    const pageCount = pages.length;
-    const estSec = total * 10;
-    const ok = window.confirm(
-      `이 매거진의 표지 + ${articleCount}개 article + ${pageCount}개 page (총 ${total}개) 캡처. 약 ${estSec}초 소요. 진행할까요?`,
-    );
-    if (!ok) return;
+  const labelFor = useCallback((item: ItemKey): string => {
+    if (item.type === 'cover') return '표지';
+    if (item.type === 'article') {
+      const a = articles.find(x => x.id === item.id);
+      return a?.title ?? `기사 ${item.id}`;
+    }
+    const p = pages.find(x => x.id === item.id);
+    if (!p) return `페이지 ${item.id}`;
+    const a = articles.find(x => x.id === p.article_id);
+    return `${a?.title ?? '?'} - p${p.page_number}`;
+  }, [articles, pages]);
+
+  const failedItems: ItemKey[] = useMemo(
+    () => allItems.filter(it => lastResult[keyOf(it)]?.error !== undefined),
+    [allItems, lastResult],
+  );
+
+  const runQueue = useCallback(async (
+    items: ItemKey[],
+    opts: { confirmText?: string; allLabel: string },
+  ) => {
+    if (items.length === 0) return;
+    if (opts.confirmText && !window.confirm(opts.confirmText)) return;
+
+    // 큐에 들어간 항목들의 이전 결과(특히 에러) 초기화
+    setLastResult(r => {
+      const next = { ...r };
+      for (const it of items) delete next[keyOf(it)];
+      return next;
+    });
 
     cancelRef.current = false;
-    setBulkProgress({ done: 0, total });
-    let success = 0;
-    let failure = 0;
+    setBulkProgress({ done: 0, total: items.length });
 
-    for (let i = 0; i < allItems.length; i++) {
+    let success = 0;
+    const failures: ItemKey[] = [];
+
+    for (let i = 0; i < items.length; i++) {
       if (cancelRef.current) break;
-      const item = allItems[i];
-      setBulkProgress({ done: i, total, current: item });
+      const item = items[i];
+      setBulkProgress({ done: i, total: items.length, current: item });
       const r = await captureOne(item, { silent: true });
       if (r.ok) success++;
-      else failure++;
+      else failures.push(item);
     }
 
     const stopped = cancelRef.current;
     setBulkProgress(null);
     cancelRef.current = false;
-    if (stopped) onToast(`중지됨 (성공 ${success}, 실패 ${failure})`);
-    else onToast(`전체 갱신 완료 (성공 ${success}, 실패 ${failure})`);
-  }, [allItems, articles.length, pages.length, captureOne, onToast]);
+
+    if (stopped) {
+      onToast(`중지됨 (성공 ${success}, 실패 ${failures.length})`, 5000);
+      return;
+    }
+    if (failures.length === 0) {
+      onToast(`${success}/${items.length} ${opts.allLabel}`);
+    } else {
+      const titles = failures.slice(0, 3).map(labelFor).join(', ');
+      const more = failures.length > 3 ? ` 외 ${failures.length - 3}개` : '';
+      onToast(`${success}/${items.length} 성공, ${failures.length}개 실패: ${titles}${more}`, 5000);
+    }
+  }, [captureOne, labelFor, onToast]);
+
+  const startBulk = useCallback(() => {
+    const total = allItems.length;
+    const estSec = total * 10;
+    return runQueue(allItems, {
+      confirmText: `이 매거진의 표지 + ${articles.length}개 article + ${pages.length}개 page (총 ${total}개) 캡처. 약 ${estSec}초 소요. 진행할까요?`,
+      allLabel: '갱신 완료',
+    });
+  }, [allItems, articles.length, pages.length, runQueue]);
+
+  const retryFailed = useCallback(() => {
+    if (failedItems.length === 0) return;
+    return runQueue(failedItems, { allLabel: '재시도 성공' });
+  }, [failedItems, runQueue]);
 
   const cancelBulk = useCallback(() => {
     cancelRef.current = true;
@@ -149,6 +196,8 @@ export default function PngSection({ magazineId, initialMagazine, initialArticle
         running={running}
         onStart={startBulk}
         onCancel={cancelBulk}
+        onRetryFailed={retryFailed}
+        failedCount={failedItems.length}
         disabled={loading}
       />
 
@@ -199,54 +248,69 @@ function SectionHeader({
   running,
   onStart,
   onCancel,
+  onRetryFailed,
+  failedCount,
   disabled,
 }: {
   bulk: BulkProgress | null;
   running: ItemKey | null;
   onStart: () => void;
   onCancel: () => void;
+  onRetryFailed: () => void;
+  failedCount: number;
   disabled: boolean;
 }) {
+  const inactive = disabled || running !== null;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 900, letterSpacing: 1, color: 'var(--text)' }}>
-          <ImageIcon size={16} />
-          발행 이미지 (PNG)
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 900, letterSpacing: 1, color: 'var(--text)' }}>
+            <ImageIcon size={16} />
+            발행 이미지 (PNG)
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+            매거진 뷰어에서 사용할 PNG를 캡처/갱신합니다. 단건 ~10초.
+          </div>
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-          매거진 뷰어에서 사용할 PNG를 캡처/갱신합니다. 단건 ~10초.
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {bulk && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+              <Loader2 size={14} className="animate-spin" />
+              {bulk.done} / {bulk.total} 캡처 중{bulk.current ? ` · ${bulk.current.type}/${bulk.current.id}` : ''}
+            </div>
+          )}
+          {bulk ? (
+            <button type="button" onClick={onCancel} style={btnStyle('danger')}>
+              <StopCircle size={14} style={{ marginRight: 6 }} />
+              중지
+            </button>
+          ) : (
+            <button type="button" onClick={onStart} disabled={inactive} style={btnStyle('primary', inactive)}>
+              <RefreshCw size={14} style={{ marginRight: 6 }} />
+              전체 갱신
+            </button>
+          )}
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {bulk && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
-            <Loader2 size={14} className="animate-spin" />
-            {bulk.done} / {bulk.total} 캡처 중{bulk.current ? ` · ${bulk.current.type}/${bulk.current.id}` : ''}
+      {!bulk && failedCount > 0 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+          padding: '10px 14px', background: 'rgba(220,38,38,0.08)',
+          border: '1px solid rgba(220,38,38,0.25)', borderRadius: 12,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#DC2626', fontWeight: 700 }}>
+            <AlertCircle size={14} />
+            실패한 항목 {failedCount}개
           </div>
-        )}
-        {bulk ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            style={btnStyle('danger')}
-          >
-            <StopCircle size={14} style={{ marginRight: 6 }} />
-            중지
+          <button type="button" onClick={onRetryFailed} disabled={inactive} style={btnStyle('danger', inactive)}>
+            <RefreshCw size={13} style={{ marginRight: 6 }} />
+            실패한 항목만 재시도
           </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onStart}
-            disabled={disabled || running !== null}
-            style={btnStyle('primary', disabled || running !== null)}
-          >
-            <RefreshCw size={14} style={{ marginRight: 6 }} />
-            전체 갱신
-          </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -346,7 +410,7 @@ function ItemCard({
         type="button"
         onClick={onRefresh}
         disabled={disabled || running}
-        style={btnStyle('secondary', disabled || running)}
+        style={btnStyle(lastResult?.error ? 'danger' : 'secondary', disabled || running)}
       >
         {running ? (
           <>
@@ -356,7 +420,7 @@ function ItemCard({
         ) : (
           <>
             <RefreshCw size={13} style={{ marginRight: 6 }} />
-            이미지 갱신
+            {lastResult?.error ? '재시도' : '이미지 갱신'}
           </>
         )}
       </button>
