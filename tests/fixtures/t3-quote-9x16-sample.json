@@ -1,0 +1,19 @@
+{
+  "type": "quote",
+  "aspect": "9x16",
+  "tone": "editorial",
+  "data": {
+    "label": "JIN의 첫 영어 표현",
+    "englishLine1": "I need",
+    "englishLine2": "my space.",
+    "highlightWord": "line2",
+    "bodyLabel": "When to use",
+    "bodyText": "매트 타임에 친구가 너무 가까이 앉을 때 쓸 한 마디",
+    "bodyHighlight": "친구가 너무 가까이 앉을 때",
+    "pageNumber": {
+      "current": 4,
+      "total": 8
+    },
+    "brandName": "@mhj_nz · Term 2 · Week 1"
+  }
+}

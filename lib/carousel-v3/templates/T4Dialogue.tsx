@@ -131,14 +131,17 @@ export function T4Dialogue({ data, aspect, tone = 'editorial' }: Props) {
         </div>
       </div>
 
+      {/* 9:16 safe-area gap: zone-main starts at 240px (not 180px) in reference */}
+      {aspect === '9x16' && <div style={{ height: 60 }} />}
+
       {/* ── zone-main ── */}
       <div
         style={{
           flex: 1,
           paddingLeft: PAD.side,
           paddingRight: PAD.side,
-          paddingTop: PAD.side,
-          paddingBottom: PAD.side,
+          paddingTop: aspect === '9x16' ? PAD.stack : PAD.side,
+          paddingBottom: aspect === '9x16' ? PAD.stack : PAD.side,
           display: 'flex',
           flexDirection: 'column',
         }}

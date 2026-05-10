@@ -160,6 +160,9 @@ export function T1Cover({ data, aspect, tone = 'editorial' }: Props) {
         </div>
       </div>
 
+      {/* 9:16 safe-area gap: zone-main starts at 240px (not 180px) in reference */}
+      {aspect === '9x16' && <div style={{ height: 60 }} />}
+
       {/* zone-main: NO padding — photo must bleed to card edges */}
       <div
         style={{
