@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { renderWithSatori } from '@/lib/carousel-v3/render/satori';
+import { renderCard } from '@/lib/carousel-v3/render/engine';
 import type { SlideInput } from '@/lib/carousel-v3/types';
 
 // fs.readFile in fonts.ts requires Node runtime, not Edge.
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    return await renderWithSatori(slide);
+    return (await renderCard(slide)) as unknown as Response;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: 'render failed', detail: message }, { status: 500 });

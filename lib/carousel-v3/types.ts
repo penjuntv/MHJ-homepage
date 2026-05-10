@@ -35,5 +35,100 @@ export interface QuoteSlide {
   data: QuoteData;
 }
 
+// T2 Stat
+export interface StatData {
+  eyebrow: string;
+  number: string;
+  unitLabel: string;
+  unitLabelAccent?: string;
+  bodyLabel: string;
+  bodyText: string;
+  bodyHighlight?: string;
+  pageNumber: { current: number; total: number };
+  brandName: string;
+}
+export interface StatSlide {
+  type: 'stat';
+  aspect: Aspect;
+  tone: Tone;
+  data: StatData;
+}
+
+// T6 Outro
+export interface OutroData {
+  eyebrow: string;
+  thanks: string;
+  thanksHighlight: string;
+  ctaMessage: string;
+  ctaHighlight?: string;
+  actions: Array<{
+    icon: string;
+    text: string;
+    textHighlight?: string;
+  }>;
+  nextUp: string;
+  pageNumber: { current: number; total: number };
+  brandName: string;
+}
+export interface OutroSlide {
+  type: 'outro';
+  aspect: Aspect;
+  tone: Tone;
+  data: OutroData;
+}
+
+// T4 Dialogue
+export interface DialogueData {
+  label: string;
+  q: { speaker: string; text: string };
+  a: { speaker: string; text: string };
+  reveal: string;
+  revealHighlight?: string;
+  pageNumber: { current: number; total: number };
+  brandName: string;
+}
+export interface DialogueSlide {
+  type: 'dialogue';
+  aspect: Aspect;
+  tone: Tone;
+  data: DialogueData;
+}
+
+// T1 Cover
+export interface CoverData {
+  label: string;
+  photoUrl?: string;
+  kicker: string;
+  headline: string;
+  headlineAccent: string;
+  deck: string;
+  pageNumber: { current: number; total: number };
+  brandName: string;
+}
+export interface CoverSlide {
+  type: 'cover';
+  aspect: Aspect;
+  tone: Tone;
+  data: CoverData;
+}
+
+// T5 ImageFeature (stub — Session 2b)
+export interface ImageFeatureData {
+  photoUrl: string;
+  kicker: string;
+  title: string;
+  titleAccent?: string;
+  bodyText: string;
+  bodyHighlight?: string;
+  pageNumber: { current: number; total: number };
+  brandName: string;
+}
+export interface ImageFeatureSlide {
+  type: 'image-feature';
+  aspect: Aspect;
+  tone: Tone;
+  data: ImageFeatureData;
+}
+
 /** Discriminated union — extend as new templates land in Session 2 */
-export type SlideInput = QuoteSlide;
+export type SlideInput = QuoteSlide | StatSlide | OutroSlide | DialogueSlide | CoverSlide | ImageFeatureSlide;
