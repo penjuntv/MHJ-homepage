@@ -132,3 +132,19 @@ export interface ImageFeatureSlide {
 
 /** Discriminated union — extend as new templates land in Session 2 */
 export type SlideInput = QuoteSlide | StatSlide | OutroSlide | DialogueSlide | CoverSlide | ImageFeatureSlide;
+
+// Raw slide for generate endpoint — no aspect (auto-generated 4x5 + 9x16)
+export type RawSlideInput =
+  | { type: 'cover'; data: CoverData }
+  | { type: 'stat'; data: StatData }
+  | { type: 'quote'; data: QuoteData }
+  | { type: 'dialogue'; data: DialogueData }
+  | { type: 'image-feature'; data: ImageFeatureData }
+  | { type: 'outro'; data: OutroData };
+
+export interface CarouselV3Input {
+  title: string;
+  blog_id?: number;
+  tone: Tone;
+  slides: RawSlideInput[];
+}
