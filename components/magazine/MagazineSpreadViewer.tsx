@@ -9,6 +9,8 @@ import MagazinePage from './MagazinePage';
 import type { StyleOverrides } from './templates/shared';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import { isLegacyPngIssue } from '@/lib/magazine-themes';
+import CoverPreview from './CoverPreview';
+import TocPreview from './TocPreview';
 
 interface PageItem {
   type: 'cover' | 'toc' | 'article' | 'extra' | 'legacy-png';
@@ -18,115 +20,70 @@ interface PageItem {
   imageIndex?: number;  // 기사 내 PNG 인덱스 (0-based)
 }
 
-function isLightColor(hex: string): boolean {
-  const c = hex.replace('#', '');
-  if (c.length !== 6) return false;
-  const r = parseInt(c.substring(0, 2), 16);
-  const g = parseInt(c.substring(2, 4), 16);
-  const b = parseInt(c.substring(4, 6), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 > 140;
+/* ── 커버 페이지 ── */
+function CoverPreviewWrapper({ magazine }: { magazine: Magazine }) {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      display: 'flex', alignItems: 'stretch', justifyContent: 'stretch',
+    }}>
+      <style>{`.mv-cover-preview > div { width: 100% !important; height: 100% !important; box-shadow: none !important; border-radius: 0 !important; }`}</style>
+      <div className="mv-cover-preview" style={{ width: '100%', height: '100%' }}>
+        <CoverPreview
+          title={magazine.title}
+          year={magazine.year ?? ''}
+          month_name={magazine.month_name ?? ''}
+          cover_copy={magazine.cover_copy ?? ''}
+          contributors={magazine.contributors ?? []}
+          image_url={magazine.image_url}
+          cover_images={magazine.cover_images ?? []}
+          accent_color={magazine.accent_color ?? '#1A1A1A'}
+          bg_color={magazine.bg_color ?? '#F5F0EA'}
+          cover_filter={magazine.cover_filter ?? 'none'}
+          issue_number={magazine.issue_number ?? ''}
+        />
+      </div>
+    </div>
+  );
 }
 
-/* ── 커버 페이지 ── */
 function CoverPage({ magazine }: { magazine: Magazine }) {
-  const bgColor = magazine.bg_color || '#FAF8F5';
-  const light = isLightColor(bgColor);
-  const textColor = light ? '#3a2000' : '#f0f0f0';
-  const subColor = light ? 'rgba(58,32,0,0.45)' : 'rgba(255,255,255,0.45)';
-
   return (
-    <MagazinePage bgColor={bgColor} showHeader={false} showFooter={false}>
-      <div style={{
-        width: '100%', height: '100%',
-        padding: '48px 40px', boxSizing: 'border-box',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        gap: 8, textAlign: 'center',
-      }}>
-        <span style={{ fontFamily: "'Playfair Display','Noto Sans KR',serif", fontStyle: 'italic', fontSize: 13, letterSpacing: 3, color: subColor }}>the</span>
-        <div style={{ width: 48, height: 1, background: textColor, opacity: 0.2, margin: '4px auto' }} />
-        <span style={{ fontFamily: "'Playfair Display','Noto Sans KR',serif", fontWeight: 900, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: textColor }}>MHJ</span>
-        <span style={{ fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: subColor }}>My Mairangi Journal</span>
-        <div style={{ width: 48, height: 1, background: textColor, opacity: 0.2, margin: '8px auto' }} />
-
-        {magazine.image_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={magazine.image_url}
-            alt={magazine.title}
-            style={{ width: '100%', aspectRatio: '4/5', objectFit: 'cover', borderRadius: 8, margin: '12px 0' }}
-          />
-        )}
-
-        <h2 style={{
-          fontFamily: "'Playfair Display','Noto Sans KR',serif", fontWeight: 900,
-          fontSize: 'clamp(18px,3vw,24px)', letterSpacing: 4,
-          color: textColor, textTransform: 'uppercase', lineHeight: 1.2, margin: '8px 0 0',
-        }}>{magazine.title}</h2>
-        <span style={{ fontSize: 10, letterSpacing: 3, color: subColor, textTransform: 'uppercase' }}>
-          Mairangi Bay · Auckland · {magazine.month_name} {magazine.year}
-        </span>
+    <MagazinePage bgColor={magazine.bg_color || '#FAF8F5'} showHeader={false} showFooter={false}>
+      <div style={{ width: '100%', height: '100%', display: 'flex' }}>
+        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'stretch', justifyContent: 'stretch',
+          }}>
+            <CoverPreviewWrapper magazine={magazine} />
+          </div>
+        </div>
       </div>
     </MagazinePage>
   );
 }
 
 /* ── 목차 페이지 ── */
-function TocPage({ magazine, articles, onGoToArticle }: {
+function TocPage({ magazine, articles }: {
   magazine: Magazine;
   articles: Article[];
-  onGoToArticle: (articleIdx: number) => void;
 }) {
-  const bgColor = magazine.bg_color || '#FAF8F5';
-  const light = isLightColor(bgColor);
-  const textColor = light ? '#3a2000' : '#f0f0f0';
-  const subColor = light ? 'rgba(58,32,0,0.45)' : 'rgba(255,255,255,0.45)';
-
   return (
-    <MagazinePage bgColor={bgColor} showHeader={false} showFooter={false}>
-      <div style={{ width: '100%', height: '100%', padding: '40px 32px', boxSizing: 'border-box', overflow: 'hidden' }}>
-      <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: 4, textTransform: 'uppercase', color: subColor, margin: '0 0 6px' }}>Contents</p>
-      <p style={{
-        fontFamily: "'Playfair Display','Noto Sans KR',serif", fontSize: 'clamp(18px,3vw,24px)',
-        fontWeight: 900, fontStyle: 'italic', color: textColor, lineHeight: 1.1, margin: '0 0 20px',
-      }}>{magazine.title}</p>
-      <div style={{ width: 32, height: 1, background: textColor, opacity: 0.15, marginBottom: 20 }} />
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {articles.map((a, i) => (
-          <button
-            key={a.id}
-            type="button"
-            onClick={() => onGoToArticle(i)}
-            style={{
-              display: 'flex', alignItems: 'baseline', gap: 12,
-              padding: '14px 0',
-              background: 'none', border: 'none',
-              cursor: 'pointer', textAlign: 'left', width: '100%',
-              transition: 'opacity 0.15s',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.7'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
-          >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontFamily: "'Playfair Display','Noto Sans KR',serif",
-                fontSize: 17, fontWeight: 700,
-                color: textColor,
-                lineHeight: 1.25,
-                letterSpacing: '-0.01em',
-                marginBottom: 4,
-              }}>{a.title}</div>
-              <div style={{
-                fontSize: 10, fontWeight: 600,
-                letterSpacing: 2, textTransform: 'uppercase',
-                color: subColor,
-              }}>{a.author}</div>
-            </div>
-          </button>
-        ))}
-      </div>
-      <p style={{ fontSize: 9, color: subColor, letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center', marginTop: 24 }}>
-        The MHJ · {magazine.month_name} {magazine.year}
-      </p>
+    <MagazinePage bgColor={magazine.bg_color || '#FAF8F5'} showHeader={false} showFooter={false}>
+      <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <style>{`.mv-toc-preview > div { width: 100% !important; height: 100% !important; box-shadow: none !important; border-radius: 0 !important; }`}</style>
+        <div className="mv-toc-preview" style={{ width: '100%', height: '100%' }}>
+          <TocPreview
+            title={magazine.title}
+            year={magazine.year ?? ''}
+            month_name={magazine.month_name ?? ''}
+            articles={articles}
+            color_theme={magazine.color_theme ?? 'slate'}
+            accent_color={magazine.accent_color ?? '#1A1A1A'}
+            bg_color={magazine.bg_color ?? '#F5F0EA'}
+          />
+        </div>
       </div>
     </MagazinePage>
   );
@@ -380,23 +337,7 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
     }
 
     if (p.type === 'toc') {
-      return (
-        <TocPage
-          magazine={magazine}
-          articles={sorted}
-          onGoToArticle={(idx) => {
-            const targetId = sorted[idx]?.id;
-            if (targetId == null) return;
-            const articlePageIdx = pages.findIndex(
-              (pg, i) =>
-                i >= 2 &&
-                (pg.type === 'article' || pg.type === 'legacy-png') &&
-                pg.article?.id === targetId
-            );
-            if (articlePageIdx >= 0) goToPage(articlePageIdx);
-          }}
-        />
-      );
+      return <TocPage magazine={magazine} articles={sorted} />;
     }
 
     if (p.type === 'legacy-png' && p.imageUrl) {
@@ -725,13 +666,14 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
       </div>
 
       {/* ── 페이지 캔버스 ── */}
-      <div style={{
+      <div className="mv-canvas" style={{
         flex: 1,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         padding: '72px 4vw 64px',
         boxSizing: 'border-box',
+        overflowY: 'auto',
       }}>
-        <div style={{
+        <div className="mv-page-wrap" style={{
           width: '100%',
           maxWidth: 'min(620px, calc((100vh - 160px) * 42 / 55))',
           position: 'relative',
@@ -882,6 +824,9 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
           @media (max-width: 767px) {
             .mv-nav-side { display: none !important; }
             .mv-mobile-bottom { display: flex !important; }
+            .mv-canvas { padding: 56px 0 80px !important; align-items: stretch !important; }
+            .mv-page-wrap { max-width: 100% !important; }
+            .mv-page-wrap .mag-page-root { aspect-ratio: unset !important; height: auto !important; min-height: calc(100vh - 200px); overflow: visible !important; }
           }
           @media (min-width: 768px) {
             .mv-touch-zone { display: none; }

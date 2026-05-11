@@ -1198,7 +1198,7 @@ export default function MagazineDetailPage() {
             style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 24px' }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ animation: 'fadeInScale 0.2s ease', transform: `scale(${modalZoom / 100})`, transformOrigin: 'top center', transition: 'transform 0.15s ease', flexShrink: 0 }}>
+            <div style={{ animation: 'fadeInScale 0.2s ease', transform: `scale(${modalZoom / 100})`, transformOrigin: 'top center', transition: 'transform 0.15s ease', flexShrink: 0, width: '420px' }}>
               {spreadModal.pages[spreadModal.idx].content}
             </div>
           </div>
