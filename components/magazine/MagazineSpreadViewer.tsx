@@ -18,13 +18,6 @@ interface PageItem {
   imageIndex?: number;  // 기사 내 PNG 인덱스 (0-based)
 }
 
-function resolvePngUrl(p: PageItem, magazine: Magazine): string | null {
-  if (p.type === 'cover') return magazine.cover_png_url ?? null;
-  if (p.type === 'article' && p.article) return p.article.png_url ?? null;
-  if (p.type === 'extra' && p.articlePage) return p.articlePage.png_url ?? null;
-  return null;
-}
-
 function isLightColor(hex: string): boolean {
   const c = hex.replace('#', '');
   if (c.length !== 6) return false;
@@ -382,42 +375,6 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
     const p = pages[currentPage];
     if (!p) return null;
 
-    const pngUrl = resolvePngUrl(p, magazine);
-    if (pngUrl) {
-      // 데스크톱: 캡처된 PNG 한 장. 모바일/PNG 미존재: 기존 HTML 렌더 (CSS로 토글).
-      return (
-        <>
-          <div className="mv-png-frame">
-            <MagazinePage bgColor={bgColor} showHeader={false} showFooter={false}>
-              <div style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: bgColor,
-                overflow: 'hidden',
-              }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={pngUrl}
-                  alt={p.article?.title ?? magazine.title ?? ''}
-                  loading="eager"
-                  decoding="async"
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-                />
-              </div>
-            </MagazinePage>
-          </div>
-          <div className="mv-html-fallback">{renderHtmlContent(p)}</div>
-        </>
-      );
-    }
-
-    return renderHtmlContent(p);
-  }
-
-  function renderHtmlContent(p: PageItem) {
     if (p.type === 'cover') {
       return <CoverPage magazine={magazine} />;
     }
@@ -925,11 +882,9 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
           @media (max-width: 767px) {
             .mv-nav-side { display: none !important; }
             .mv-mobile-bottom { display: flex !important; }
-            .mv-png-frame { display: none; }
           }
           @media (min-width: 768px) {
             .mv-touch-zone { display: none; }
-            .mv-html-fallback { display: none; }
           }
         `}</style>
       </div>
