@@ -9,7 +9,6 @@ import MagazinePage from './MagazinePage';
 import type { StyleOverrides } from './templates/shared';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import { isLegacyPngIssue } from '@/lib/magazine-themes';
-import { stripHtml } from '@/lib/utils';
 
 interface PageItem {
   type: 'cover' | 'toc' | 'article' | 'extra' | 'legacy-png';
@@ -24,31 +23,6 @@ function resolvePngUrl(p: PageItem, magazine: Magazine): string | null {
   if (p.type === 'article' && p.article) return p.article.png_url ?? null;
   if (p.type === 'extra' && p.articlePage) return p.articlePage.png_url ?? null;
   return null;
-}
-
-// PNG는 검색엔진/스크린리더가 텍스트를 못 읽으므로 같은 콘텐츠를 sr-only로 동행.
-// .mv-png-frame 안에 두어 모바일 fallback에서 .mv-png-frame display:none 시 함께 가려져
-// HTML fallback과 중복 노출이 생기지 않음.
-function srTextForPage(p: PageItem, magazine: Magazine): string {
-  if (p.type === 'cover') {
-    return [magazine.title, magazine.cover_subtitle, magazine.cover_copy]
-      .filter((s): s is string => !!s && s.trim().length > 0)
-      .join(' — ');
-  }
-  if (p.type === 'article' && p.article) {
-    const a = p.article;
-    return [a.kicker, a.title, a.subtitle, stripHtml(a.content), a.quote_text, a.quote_attribution]
-      .filter((s): s is string => !!s && s.trim().length > 0)
-      .join(' ');
-  }
-  if (p.type === 'extra' && p.articlePage) {
-    const pg = p.articlePage;
-    const captions = (pg.captions ?? []).filter(Boolean).join(' ');
-    return [stripHtml(pg.content), captions]
-      .filter((s) => s && s.trim().length > 0)
-      .join(' ');
-  }
-  return '';
 }
 
 function isLightColor(hex: string): boolean {
@@ -411,7 +385,6 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
     const pngUrl = resolvePngUrl(p, magazine);
     if (pngUrl) {
       // 데스크톱: 캡처된 PNG 한 장. 모바일/PNG 미존재: 기존 HTML 렌더 (CSS로 토글).
-      const srText = srTextForPage(p, magazine);
       return (
         <>
           <div className="mv-png-frame">
@@ -435,7 +408,6 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
                 />
               </div>
             </MagazinePage>
-            {srText && <div className="sr-only">{srText}</div>}
           </div>
           <div className="mv-html-fallback">{renderHtmlContent(p)}</div>
         </>
