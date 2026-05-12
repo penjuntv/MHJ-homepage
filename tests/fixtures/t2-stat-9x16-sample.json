@@ -1,0 +1,19 @@
+{
+  "type": "stat",
+  "aspect": "9x16",
+  "tone": "editorial",
+  "data": {
+    "eyebrow": "BY THE NUMBERS",
+    "number": "3",
+    "unitLabel": "친구 쌍 — 그리고 혼자 남은 한 아이",
+    "unitLabelAccent": "혼자 남은 한 아이",
+    "bodyLabel": "THE MATH",
+    "bodyText": "새 친구 둘은 옛 친구의 친구. 또 둘은 서로의 친구. 셋 + 하나.",
+    "bodyHighlight": "옛 친구의 친구",
+    "pageNumber": {
+      "current": 3,
+      "total": 8
+    },
+    "brandName": "@mhj_nz · Term 2 · Week 1"
+  }
+}

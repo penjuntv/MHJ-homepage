@@ -1,0 +1,19 @@
+{
+  "type": "outro",
+  "aspect": "4x5",
+  "tone": "editorial",
+  "data": {
+    "eyebrow": "— THANK YOU FOR READING",
+    "thanks": "이 글이\n마음에 들었다면",
+    "thanksHighlight": "마음에 들었다면",
+    "ctaMessage": "저장해두세요 — 다음에도 생각날 거예요.\n그리고 친구에게 보내주세요.",
+    "ctaHighlight": "저장해두세요",
+    "actions": [
+      { "icon": "♡", "text": "좋아요로 응원해주세요", "textHighlight": "좋아요" },
+      { "icon": "↗", "text": "전문은 mhj.nz/journal에서", "textHighlight": "mhj.nz/journal" }
+    ],
+    "nextUp": "다음 편 · ESR Form 읽는 법",
+    "pageNumber": { "current": 8, "total": 8 },
+    "brandName": "@mhj_nz · Mairangi Bay"
+  }
+}

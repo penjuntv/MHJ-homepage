@@ -26,6 +26,7 @@ const NAV: NavEntry[] = [
   { type: 'item', href: '/mhj-desk/gallery', label: '갤러리', icon: Images },
   { type: 'item', href: '/mhj-desk/hero', label: '히어로 슬라이드', icon: Layers },
   { type: 'item', href: '/mhj-desk/carousel', label: '캐러셀', icon: LayoutGrid },
+  { type: 'item', href: '/mhj-desk/carousel-v3', label: '캐러셀 V3', icon: LayoutGrid },
   { type: 'item', href: '/mhj-desk/seo', label: 'SEO', icon: SearchCheck },
 
   { type: 'group', label: '페이지' },

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="UTF-8" />
+<title>T2 stat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800;900&family=Inter:wght@500;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_tokens.css">
+<style>
+.zone-main {
+  align-items: center;
+  text-align: center;
+}
+
+.eyebrow {
+  font-family: var(--font-kr);
+  font-size: var(--fs-small);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  margin-top: 30px;
+  margin-bottom: 50px;
+  display: flex; align-items: center; gap: 16px;
+}
+.eyebrow::before, .eyebrow::after {
+  content: ""; width: 32px; height: 2px;
+  background: var(--accent-primary);
+}
+
+/* Mega number — scales by aspect */
+body.format-4x5 .giant-number { font-size: 380px; }
+body.format-9x16 .giant-number { font-size: 480px; }
+
+.giant-number {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  color: var(--ink);
+  font-style: italic;
+  margin-bottom: 28px;
+}
+
+.number-bar {
+  width: 180px;
+  height: 18px;
+  background: var(--accent-highlight);
+  border-radius: 2px;
+  margin: 0 auto 28px;
+}
+
+.unit-label {
+  font-family: var(--font-kr);
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: var(--ls-snug);
+  word-break: keep-all;
+  margin-bottom: auto;  /* push body-box to bottom */
+}
+body.format-4x5 .unit-label { font-size: 36px; }
+body.format-9x16 .unit-label { font-size: 44px; }
+
+.unit-label .accent { color: var(--accent-primary); }
+
+.body-box {
+  width: 100%;
+  text-align: left;
+  margin-top: 40px;
+}
+</style>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const aspect = params.get('aspect') || '4x5';
+  document.body.className = `format-${aspect}`;
+});
+</script>
+</head>
+<body class="format-4x5">
+<div class="card">
+  <div class="zone-top">
+    <div class="handle"><span class="at">@</span>MHJ_NZ</div>
+    <div class="page-indicator">03<span class="total"> / 08</span></div>
+  </div>
+
+  <div class="zone-main">
+    <div class="eyebrow">By the Numbers</div>
+    <div class="giant-number">3</div>
+    <div class="number-bar"></div>
+    <div class="unit-label">친구 쌍 — 그리고 <span class="accent">혼자 남은 한 아이</span></div>
+
+    <div class="body-box">
+      <div class="label">The Math</div>
+      <div class="text">
+        새 친구 둘은 <strong>옛 친구의 친구</strong>.<br>
+        또 둘은 서로의 친구. 셋 + 하나.
+      </div>
+    </div>
+  </div>
+
+  <div class="zone-bottom">
+    <div class="brand-name">@mhj_nz · Term 2 · Week 1</div>
+    <div class="swipe-cta">SWIPE</div>
+  </div>
+</div>
+</body></html>
