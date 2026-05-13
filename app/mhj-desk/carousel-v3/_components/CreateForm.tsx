@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import sampleJson from '@/tests/fixtures/full-carousel-sample.json';
 
@@ -45,6 +45,76 @@ export function CreateForm() {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerateResult | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function injectPhotoIntoJson(url: string) {
+    if (!text.trim()) return;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed?.slides?.[0]?.type === 'cover' && parsed.slides[0].data) {
+        parsed.slides[0].data.photoUrl = url;
+        const next = JSON.stringify(parsed, null, 2);
+        setText(next);
+        setValidationError(validate(next));
+        setResult(null);
+        setApiError(null);
+      }
+    } catch {
+      // JSON invalid — URL stays visible in upload area for manual paste
+    }
+  }
+
+  async function handlePhotoFile(file: File) {
+    setPhotoError(null);
+    const allowed = new Set(['image/jpeg', 'image/png', 'image/webp']);
+    if (!allowed.has(file.type)) {
+      setPhotoError(`${file.type || 'unknown'} 미지원 — JPG/PNG/WEBP만 가능`);
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setPhotoError(`10MB 한도 초과 (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+      return;
+    }
+
+    setPhotoUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('photo', file);
+      const res = await fetch('/api/carousel-v3/upload-photo', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) {
+        setPhotoError(data.error ?? `업로드 실패 (${res.status})`);
+        return;
+      }
+      setPhotoUrl(data.url as string);
+      injectPhotoIntoJson(data.url as string);
+    } catch {
+      setPhotoError('네트워크 오류 — 서버를 확인하세요');
+    } finally {
+      setPhotoUploading(false);
+    }
+  }
+
+  function handleClearPhoto() {
+    setPhotoUrl(null);
+    setPhotoError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (!text.trim()) return;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed?.slides?.[0]?.type === 'cover' && parsed.slides[0].data) {
+        parsed.slides[0].data.photoUrl = '';
+        const next = JSON.stringify(parsed, null, 2);
+        setText(next);
+        setValidationError(validate(next));
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   function handleChange(val: string) {
     setText(val);
@@ -102,6 +172,120 @@ export function CreateForm() {
       }}>
         Generate
       </span>
+
+      {/* Photo upload (T1 cover only) */}
+      <div style={{ marginBottom: 16 }}>
+        <span style={{
+          display: 'block',
+          fontSize: 9,
+          fontWeight: 800,
+          letterSpacing: 3,
+          textTransform: 'uppercase',
+          color: 'rgba(0,0,0,0.25)',
+          marginBottom: 8,
+        }}>
+          Photo (cover only · optional)
+        </span>
+
+        {photoUrl ? (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: 10,
+            borderRadius: 8,
+            border: '1px solid #f1f5f9',
+            background: '#fafafa',
+          }}>
+            <div style={{
+              width: 64,
+              height: 80,
+              backgroundImage: `url(${photoUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              borderRadius: 4,
+              flexShrink: 0,
+            }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{
+                margin: 0,
+                fontSize: 11,
+                color: '#64748b',
+                fontFamily: "'Courier New', Courier, monospace",
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {photoUrl}
+              </p>
+              <p style={{ margin: '4px 0 0', fontSize: 10, color: '#94A3B8' }}>
+                cover.data.photoUrl 자동 동기화됨
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleClearPhoto}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 999,
+                border: '1px solid #f1f5f9',
+                background: 'white',
+                color: '#64748b',
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <div
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => {
+              e.preventDefault();
+              if (photoUploading) return;
+              const f = e.dataTransfer.files?.[0];
+              if (f) handlePhotoFile(f);
+            }}
+            onClick={() => !photoUploading && fileInputRef.current?.click()}
+            style={{
+              border: `2px dashed ${photoError ? '#FCA5A5' : '#F1F5F9'}`,
+              borderRadius: 12,
+              padding: '20px 16px',
+              textAlign: 'center',
+              cursor: photoUploading ? 'wait' : 'pointer',
+              background: '#fafafa',
+              transition: 'border-color 0.15s',
+            }}
+          >
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#64748b' }}>
+              {photoUploading ? '업로드 중…' : '클릭하거나 사진을 드래그해서 올리세요'}
+            </p>
+            <p style={{ margin: '4px 0 0', fontSize: 10, color: '#94A3B8' }}>
+              JPG · PNG · WEBP — 최대 10MB
+            </p>
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          style={{ display: 'none' }}
+          onChange={e => {
+            const f = e.target.files?.[0];
+            if (f) handlePhotoFile(f);
+          }}
+        />
+
+        {photoError && (
+          <p style={{ fontSize: 11, color: '#EF4444', marginTop: 6, marginBottom: 0 }}>
+            ✕ {photoError}
+          </p>
+        )}
+      </div>
 
       {/* Textarea */}
       <textarea
@@ -198,7 +382,12 @@ export function CreateForm() {
           </button>
           <button
             type="button"
-            onClick={() => handleChange('')}
+            onClick={() => {
+              handleChange('');
+              setPhotoUrl(null);
+              setPhotoError(null);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+            }}
             disabled={text === ''}
             style={{
               padding: '9px 16px',
