@@ -96,7 +96,18 @@ export async function POST(req: NextRequest) {
 
   const db = createAdminClient();
   const mailData = await buildMailrangiData(body.form, db);
-  const html = renderMailrangiNotes(mailData);
+
+  const { data: settingsRows } = await db
+    .from('site_settings')
+    .select('key,value')
+    .in('key', ['lunch_cta_label', 'lunch_cta_url']);
+  const s = Object.fromEntries(
+    ((settingsRows ?? []) as Array<{ key: string; value: string }>).map(r => [r.key, r.value]),
+  );
+  const html = renderMailrangiNotes(mailData, {
+    lunchCtaLabel: s['lunch_cta_label'] || undefined,
+    lunchCtaUrl: s['lunch_cta_url'] || undefined,
+  });
 
   return NextResponse.json({ html });
 }

@@ -252,7 +252,12 @@ export default function NewsletterComposePage() {
   const [jinEnabled, setJinEnabled] = useState(false);
   const [jinExpression, setJinExpression] = useState('');
   const [jinBody, setJinBody] = useState('');
-  const [jinUrl, setJinUrl] = useState('https://storypress.kr');
+  const [jinUrl, setJinUrl] = useState('');
+  const [storypressDefault, setStorypressDefault] = useState('https://app.mhj.nz/');
+
+  /* ── §3 Lunch Box CTA (site_settings 주입) ── */
+  const [lunchCtaLabel, setLunchCtaLabel] = useState<string | undefined>(undefined);
+  const [lunchCtaUrl, setLunchCtaUrl] = useState<string | undefined>(undefined);
 
   /* ── §6 Local Guide ── */
   const [localsEnabled, setLocalsEnabled] = useState(false);
@@ -313,6 +318,21 @@ export default function NewsletterComposePage() {
         }
       });
 
+    supabase
+      .from('site_settings')
+      .select('key,value')
+      .in('key', ['storypress_cta_url', 'lunch_cta_label', 'lunch_cta_url'])
+      .then(({ data }) => {
+        const rows = (data ?? []) as Array<{ key: string; value: string }>;
+        const map = Object.fromEntries(rows.map(r => [r.key, r.value]));
+        const sp = map['storypress_cta_url'];
+        if (sp) setStorypressDefault(sp);
+        const fallback = sp || 'https://app.mhj.nz/';
+        setJinUrl(prev => prev === '' ? fallback : prev);
+        if (map['lunch_cta_label']) setLunchCtaLabel(map['lunch_cta_label']);
+        if (map['lunch_cta_url']) setLunchCtaUrl(map['lunch_cta_url']);
+      });
+
     if (initId) loadDraft(Number(initId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -352,7 +372,7 @@ export default function NewsletterComposePage() {
           setJinEnabled(true);
           setJinExpression(d.jin_expression ?? '');
           setJinBody(d.jin_body ?? '');
-          setJinUrl(d.jin_storypress_url ?? 'https://storypress.kr');
+          setJinUrl(d.jin_storypress_url ?? storypressDefault);
         }
         if (d.locals_json && Array.isArray(d.locals_json) && d.locals_json.length > 0) {
           setLocalsEnabled(true);
@@ -479,7 +499,7 @@ export default function NewsletterComposePage() {
   async function saveDraft() {
     if (!subject.trim()) { setError('이메일 제목을 입력해주세요.'); return; }
     setSaving(true); setError('');
-    const html = renderMailrangiNotes(buildData());
+    const html = renderMailrangiNotes(buildData(), { lunchCtaLabel, lunchCtaUrl });
 
     const record = {
       subject,
@@ -535,7 +555,7 @@ export default function NewsletterComposePage() {
 
   /* ── preview ── */
   function openPreview() {
-    setPreviewHtml(renderMailrangiNotes(buildData()));
+    setPreviewHtml(renderMailrangiNotes(buildData(), { lunchCtaLabel, lunchCtaUrl }));
     setPreview(true);
   }
 
@@ -828,7 +848,7 @@ export default function NewsletterComposePage() {
           </div>
           <div style={{ marginTop: 12 }}>
             <Field label="StoryPress URL">
-              <Input value={jinUrl} onChange={setJinUrl} placeholder="https://storypress.kr/..." />
+              <Input value={jinUrl} onChange={setJinUrl} placeholder="https://app.mhj.nz/..." />
             </Field>
           </div>
         </SectionCard>

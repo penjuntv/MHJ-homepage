@@ -9,6 +9,21 @@ import {
 } from '@/lib/newsletter-template';
 import type { BlogPostInfo, MailrangiNotesData } from '@/lib/newsletter-template';
 
+async function loadNewsletterCtaSettings(
+  db: ReturnType<typeof createAdminClient>,
+): Promise<{ lunchCtaLabel?: string; lunchCtaUrl?: string }> {
+  const { data } = await db
+    .from('site_settings')
+    .select('key,value')
+    .in('key', ['lunch_cta_label', 'lunch_cta_url']);
+  const rows = (data ?? []) as Array<{ key: string; value: string }>;
+  const map = Object.fromEntries(rows.map(r => [r.key, r.value]));
+  return {
+    lunchCtaLabel: map['lunch_cta_label'] || undefined,
+    lunchCtaUrl: map['lunch_cta_url'] || undefined,
+  };
+}
+
 function addUtmToMhjLinks(html: string, issueNumber: number | undefined): string {
   const campaign = `mairangi-notes-${issueNumber ?? 'unknown'}`;
   const utm = `utm_source=newsletter&utm_medium=email&utm_campaign=${campaign}`;
@@ -138,6 +153,7 @@ export async function POST(req: NextRequest) {
   }
 
   const db = createAdminClient();
+  const ctaOpts = await loadNewsletterCtaSettings(db);
 
   /* ── HTML 생성 ── */
   let htmlBody: string;
@@ -158,13 +174,13 @@ export async function POST(req: NextRequest) {
 
     subject = (nl as NewsletterRow).subject;
     baseMailData = await buildFromRow(nl as NewsletterRow, db);
-    htmlBody = renderMailrangiNotes(baseMailData);
+    htmlBody = renderMailrangiNotes(baseMailData, ctaOpts);
 
   } else if (structured_data) {
     /* ② structured_data 직접 전달 경로 (하위 호환) */
     if (!subject) return NextResponse.json({ error: 'subject required' }, { status: 400 });
     baseMailData = structured_data;
-    htmlBody = renderMailrangiNotes(structured_data);
+    htmlBody = renderMailrangiNotes(structured_data, ctaOpts);
 
   } else {
     /* ③ 레거시 content 경로 */
@@ -216,7 +232,7 @@ export async function POST(req: NextRequest) {
       ? renderMailrangiNotes({
           ...baseMailData,
           unsubscribeUrl: `https://www.mhj.nz/unsubscribe?email=${encodeURIComponent(r.email)}`,
-        })
+        }, ctaOpts)
       : htmlBody;
     // UTM 자동 추가 (paths ① and ②만; 레거시 ③은 issueNumber 불명이므로 스킵)
     const html = baseMailData

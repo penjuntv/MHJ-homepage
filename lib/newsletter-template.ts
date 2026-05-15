@@ -257,8 +257,17 @@ export interface MailrangiNotesData {
   unsubscribeUrl: string;
 }
 
-export function renderMailrangiNotes(data: MailrangiNotesData): string {
+export function renderMailrangiNotes(
+  data: MailrangiNotesData,
+  opts?: { lunchCtaLabel?: string; lunchCtaUrl?: string },
+): string {
   const siteUrl = 'https://www.mhj.nz';
+
+  /* §3 Lunch Box CTA — site_settings 주입 (없으면 기본값) + UTM 인라인 부착 */
+  const lunchCtaUrl = opts?.lunchCtaUrl || 'https://www.instagram.com/my.mairangi/';
+  const lunchCtaLabel = opts?.lunchCtaLabel || 'Visit our Instagram →';
+  const lunchUtm = `utm_source=newsletter&utm_medium=email&utm_campaign=mairangi-notes-${data.issueNumber}`;
+  const lunchHref = `${lunchCtaUrl}${lunchCtaUrl.includes('?') ? '&' : '?'}${lunchUtm}`;
 
   /* ── 섹션 헤더 배지 + 라벨 + 요일 태그 ── */
   function sectionHead(num: number, label: string, dayTag?: string): string {
@@ -363,7 +372,7 @@ export function renderMailrangiNotes(data: MailrangiNotesData): string {
             <p style="margin:0 0 14px;font-family:'Noto Sans KR',Arial,sans-serif;font-size:14px;line-height:1.85;color:#475569;">
               ${formatText(data.lunch.body)}
             </p>
-            <a href="${siteUrl}/blog" style="font-family:Arial,sans-serif;font-size:13px;color:#8A6B4F;text-decoration:underline;">Visit mhj.nz &rarr;</a>
+            <a href="${lunchHref}" style="font-family:Arial,sans-serif;font-size:13px;color:#8A6B4F;text-decoration:underline;">${escapeHtml(lunchCtaLabel)}</a>
           </td>
         </tr>
       </table>
