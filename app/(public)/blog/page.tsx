@@ -28,9 +28,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   ].filter(Boolean).join(' — ');
 
   const title = suffix ? `Journal — ${suffix}` : 'Journal';
-  const canonical = new URL(`${SITE_URL}/blog`);
-  if (category) canonical.searchParams.set('category', category);
-  if (page > 1) canonical.searchParams.set('page', String(page));
+
+  // Category filter pages collapse canonical to /blog and are excluded from index
+  // to avoid thin/duplicate content signals (GSC was rejecting filtered URLs).
+  const baseUrl = `${SITE_URL}/blog`;
+  const canonical = new URL(baseUrl);
+  if (!category && page > 1) canonical.searchParams.set('page', String(page));
 
   const description = "Yussi's personal archive: observations from the everyday, perspectives on education, and essays from a life in progress.";
 
@@ -44,6 +47,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       images: [{ url: `${SITE_URL}/og-blog.jpg`, width: 1200, height: 630 }],
     },
     alternates: { canonical: canonical.toString() },
+    ...(category ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
