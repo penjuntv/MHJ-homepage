@@ -348,10 +348,13 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
               {/* 기사 페이지 썸네일 */}
               {mainArticles.map((art, i) => {
                 const pageNum = pageMap[art.id] ?? (3 + i);
+                const href = art.slug
+                  ? `/magazine/${magazine.id}/${art.slug}`
+                  : `/magazine/${magazine.id}?page=${pageNum}`;
                 return (
                   <Link
                     key={art.id}
-                    href={`/magazine/${magazine.id}?page=${pageNum}`}
+                    href={href}
                     className="mid-card"
                   >
                     <div className="mid-thumb">

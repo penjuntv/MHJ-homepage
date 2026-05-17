@@ -30,6 +30,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: m.created_at,
   }));
 
+  // 매거진 기사 (slug 있는 published만)
+  const { data: articleRows } = await supabase
+    .from('articles')
+    .select('magazine_id, slug, created_at')
+    .not('slug', 'is', null);
+
+  const articlePages: MetadataRoute.Sitemap = (articleRows ?? []).map((a) => ({
+    url: `${baseUrl}/magazine/${a.magazine_id}/${a.slug}`,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+    lastModified: a.created_at,
+  }));
+
   const now = new Date().toISOString();
 
   // 동적 블로그 (published만)
@@ -46,5 +59,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: b.created_at,
   }));
 
-  return [...staticPages, ...magazinePages, ...blogPages];
+  return [...staticPages, ...magazinePages, ...articlePages, ...blogPages];
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
 import MagazineViewer from '@/components/MagazineViewer';
@@ -170,6 +170,18 @@ export default async function MagazineIssuePage({ params, searchParams }: Props)
   // (이슈 상세 → SpreadViewer). PDF 접근은 MagazineIssueDetail의 다운로드 링크로 유지.
   const isArticlesMode = (isLegacy || !magazine.pdf_url) && articles.length > 0;
   const hasPageParam = typeof searchParams?.page !== 'undefined';
+
+  // 308 redirect: ?page=N → /magazine/{id}/{slug} (page≥3 + 해당 article에 slug 있을 때만)
+  // page=1(cover), page=2(toc)은 SEO 대상 아니므로 viewer URL 유지.
+  if (hasPageParam && articles.length > 0) {
+    const pageNum = parseInt(searchParams.page ?? '', 10);
+    if (Number.isFinite(pageNum) && pageNum >= 3) {
+      const pageMap = await buildPageMap(articles, { isLegacy });
+      const targetId = Object.entries(pageMap).find(([, p]) => p === pageNum)?.[0];
+      const target = targetId ? articles.find((a) => a.id === Number(targetId)) : null;
+      if (target?.slug) redirect(`/magazine/${params.id}/${target.slug}`);
+    }
+  }
 
   /* 이슈 상세 페이지 (articles 모드 + ?page 없음) */
   if (isArticlesMode && !hasPageParam) {

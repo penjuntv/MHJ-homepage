@@ -53,6 +53,7 @@ export interface Article {
   quote_attribution?: string | null;   // PullQuote 인용 출처
   png_url?: string | null;
   png_generated_at?: string | null;
+  slug?: string | null;             // 정적 라우트 /magazine/[id]/[slug] 용 (published만 채워짐)
   created_at?: string;
 }
 
