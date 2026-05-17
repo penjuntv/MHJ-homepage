@@ -17,6 +17,7 @@ export async function generateStaticParams() {
   const { data } = await supabase
     .from('articles')
     .select('magazine_id, slug')
+    .eq('article_status', 'published')
     .not('slug', 'is', null);
   return (data ?? []).map((a) => ({ id: a.magazine_id, slug: a.slug as string }));
 }
@@ -27,6 +28,7 @@ async function getArticle(magazineId: string, slug: string): Promise<Article | n
     .select('*')
     .eq('magazine_id', magazineId)
     .eq('slug', slug)
+    .eq('article_status', 'published')
     .maybeSingle();
   return data ?? null;
 }
@@ -45,6 +47,7 @@ async function getSiblings(
     .select('slug, title, sort_order')
     .eq('magazine_id', magazineId)
     .eq('article_type', 'article')
+    .eq('article_status', 'published')
     .not('slug', 'is', null)
     .order('sort_order', { ascending: true });
   const list = (data ?? []) as { slug: string; title: string; sort_order: number | null }[];

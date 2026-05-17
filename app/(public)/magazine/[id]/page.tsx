@@ -89,6 +89,7 @@ async function getArticles(magazineId: string): Promise<Article[]> {
     .from('articles')
     .select('*')
     .eq('magazine_id', magazineId)
+    .eq('article_status', 'published')
     .order('sort_order', { ascending: true });
   if (data?.length) return data;
   return magazineId === '2026-03' ? FALLBACK_ARTICLES : [];

@@ -34,11 +34,12 @@ const FALLBACK_MAGAZINES: Magazine[] = [
 ];
 
 async function getMagazines(): Promise<Magazine[]> {
-  // articles 개수도 함께 가져오기 (서가 뱃지용)
+  // articles 개수도 함께 가져오기 (서가 뱃지용, published 아티클만 카운트)
   const { data } = await supabase
     .from('magazines')
     .select('*, articles(count)')
     .eq('published', true)
+    .eq('articles.article_status', 'published')
     .order('id', { ascending: false });
 
   if (!data?.length) return FALLBACK_MAGAZINES;
