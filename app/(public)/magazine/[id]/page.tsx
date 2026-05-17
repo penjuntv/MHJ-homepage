@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
 import MagazineViewer from '@/components/MagazineViewer';
@@ -171,7 +171,7 @@ export default async function MagazineIssuePage({ params, searchParams }: Props)
   const isArticlesMode = (isLegacy || !magazine.pdf_url) && articles.length > 0;
   const hasPageParam = typeof searchParams?.page !== 'undefined';
 
-  // 308 redirect: ?page=N → /magazine/{id}/{slug} (page≥3 + 해당 article에 slug 있을 때만)
+  // 308 permanent redirect: ?page=N → /magazine/{id}/{slug} (page≥3 + 해당 article에 slug 있을 때만)
   // page=1(cover), page=2(toc)은 SEO 대상 아니므로 viewer URL 유지.
   if (hasPageParam && articles.length > 0) {
     const pageNum = parseInt(searchParams.page ?? '', 10);
@@ -179,7 +179,7 @@ export default async function MagazineIssuePage({ params, searchParams }: Props)
       const pageMap = await buildPageMap(articles, { isLegacy });
       const targetId = Object.entries(pageMap).find(([, p]) => p === pageNum)?.[0];
       const target = targetId ? articles.find((a) => a.id === Number(targetId)) : null;
-      if (target?.slug) redirect(`/magazine/${params.id}/${target.slug}`);
+      if (target?.slug) permanentRedirect(`/magazine/${params.id}/${target.slug}`);
     }
   }
 
