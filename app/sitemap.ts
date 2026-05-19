@@ -15,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/storypress`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/gallery`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${baseUrl}/media-kit`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/mairangi-notes`, changeFrequency: 'weekly', priority: 0.8 },
   ];
 
   // 동적 매거진 이슈
@@ -34,6 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { data: articleRows } = await supabase
     .from('articles')
     .select('magazine_id, slug, created_at')
+    .eq('article_status', 'published')
     .not('slug', 'is', null);
 
   const articlePages: MetadataRoute.Sitemap = (articleRows ?? []).map((a) => ({
@@ -59,5 +61,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: b.created_at,
   }));
 
-  return [...staticPages, ...magazinePages, ...articlePages, ...blogPages];
+  // 동적 뉴스레터 이슈 (sent 상태 + issue_number 있는 것만)
+  const { data: newsletterRows } = await supabase
+    .from('newsletters')
+    .select('issue_number, sent_at')
+    .eq('status', 'sent')
+    .not('issue_number', 'is', null);
+
+  const newsletterPages: MetadataRoute.Sitemap = (newsletterRows ?? []).map((n) => ({
+    url: `${baseUrl}/mairangi-notes/${n.issue_number}`,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+    lastModified: n.sent_at,
+  }));
+
+  return [...staticPages, ...magazinePages, ...articlePages, ...blogPages, ...newsletterPages];
 }
