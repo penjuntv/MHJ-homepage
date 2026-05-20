@@ -1,19 +1,17 @@
 import type { Metadata } from 'next';
-import { notFound, permanentRedirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { createPublicAdminClient } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
+import MagazineViewer from '@/components/MagazineViewer';
+import MagazineIssueDetail from '@/components/magazine/MagazineIssueDetail';
+import { isLegacyPngIssue } from '@/lib/magazine-themes';
 
 export const revalidate = 300;
 
 const db = createPublicAdminClient();
-import MagazineViewer from '@/components/MagazineViewer';
-import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
-import MagazineIssueDetail from '@/components/magazine/MagazineIssueDetail';
-import { isLegacyPngIssue } from '@/lib/magazine-themes';
 
 interface Props {
   params: { id: string };
-  searchParams: { page?: string };
 }
 
 async function buildPageMap(
@@ -122,7 +120,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function MagazineIssuePage({ params, searchParams }: Props) {
+export default async function MagazineIssuePage({ params }: Props) {
   const magazine = await getMagazine(params.id);
   if (!magazine) notFound();
 
@@ -171,25 +169,12 @@ export default async function MagazineIssuePage({ params, searchParams }: Props)
   };
 
   const isLegacy = isLegacyPngIssue(magazine.id);
-  // Legacy PNG 이슈는 pdf_url이 있어도 2월/3월호와 동일한 articles 플로우로 취급
-  // (이슈 상세 → SpreadViewer). PDF 접근은 MagazineIssueDetail의 다운로드 링크로 유지.
   const isArticlesMode = (isLegacy || !magazine.pdf_url) && articles.length > 0;
-  const hasPageParam = typeof searchParams?.page !== 'undefined';
 
-  // 308 permanent redirect: ?page=N → /magazine/{id}/{slug} (page≥3 + 해당 article에 slug 있을 때만)
-  // page=1(cover), page=2(toc)은 SEO 대상 아니므로 viewer URL 유지.
-  if (hasPageParam && articles.length > 0) {
-    const pageNum = parseInt(searchParams.page ?? '', 10);
-    if (Number.isFinite(pageNum) && pageNum >= 3) {
-      const pageMap = await buildPageMap(articles, { isLegacy });
-      const targetId = Object.entries(pageMap).find(([, p]) => p === pageNum)?.[0];
-      const target = targetId ? articles.find((a) => a.id === Number(targetId)) : null;
-      if (target?.slug) permanentRedirect(`/magazine/${params.id}/${target.slug}`);
-    }
-  }
+  // ?page=N 리다이렉트는 middleware.ts로 이전 (searchParams 읽기 제거 → ISR 활성화)
 
-  /* 이슈 상세 페이지 (articles 모드 + ?page 없음) */
-  if (isArticlesMode && !hasPageParam) {
+  /* 이슈 상세 페이지 (articles 모드) */
+  if (isArticlesMode) {
     const pageMap = await buildPageMap(articles, { isLegacy });
     return (
       <>
@@ -200,18 +185,7 @@ export default async function MagazineIssuePage({ params, searchParams }: Props)
     );
   }
 
-  /* Legacy PNG + ?page → SpreadViewer 직결 (MagazineViewer의 PDF 모드 우회, 중간 모달 제거) */
-  if (isLegacy && articles.length > 0) {
-    return (
-      <>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-        <MagazineSpreadViewer magazine={magazine} articles={articles} />
-      </>
-    );
-  }
-
-  /* PDF/empty 모드 또는 ?page 있을 때 → 기존 뷰어 경로 */
+  /* PDF/empty 모드 폴백 */
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
