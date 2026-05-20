@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import SafeImage from './SafeImage';
 import { useRouter } from 'next/navigation';
 import type { Blog } from '@/lib/types';
-import { BLOG_CATEGORIES } from '@/lib/constants';
+import { BLOG_CATEGORIES, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
@@ -50,11 +50,15 @@ export default function BlogLibrary({
   }, [currentPage]);
 
   function navigateTo(category: string | null, page: number) {
-    const params = new URLSearchParams();
-    if (category) params.set('category', category);
-    if (page > 1) params.set('page', String(page));
-    const qs = params.toString();
-    router.push(`/blog${qs ? `?${qs}` : ''}`, { scroll: false });
+    const pageQuery = page > 1 ? `?page=${page}` : '';
+    if (category) {
+      const slug = CATEGORY_TO_SLUG[category as BlogCategory];
+      if (slug) {
+        router.push(`/blog/category/${slug}${pageQuery}`, { scroll: false });
+        return;
+      }
+    }
+    router.push(`/blog${pageQuery}`, { scroll: false });
   }
 
   function handleCategoryChange(cat: string) {

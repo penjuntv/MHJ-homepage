@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
+import { CATEGORY_TO_SLUG } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/gallery`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${baseUrl}/media-kit`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/mairangi-notes`, changeFrequency: 'weekly', priority: 0.8 },
+    ...Object.values(CATEGORY_TO_SLUG).map((slug) => ({
+      url: `${baseUrl}/blog/category/${slug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    })),
   ];
 
   // 동적 매거진 이슈

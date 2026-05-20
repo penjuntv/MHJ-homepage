@@ -8,6 +8,7 @@ import { supabase, createAdminClient, createPublicAdminClient } from '@/lib/supa
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
+import { CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
 import { getNZSeasonLabel } from '@/lib/date-helpers';
 import ViewTracker from './ViewTracker';
 import RelatedCard from './RelatedCard';
@@ -384,7 +385,11 @@ export default async function BlogDetailPage({
             </span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
             <Link
-              href={`/blog?category=${blog.category}`}
+              href={
+                CATEGORY_TO_SLUG[blog.category as BlogCategory]
+                  ? `/blog/category/${CATEGORY_TO_SLUG[blog.category as BlogCategory]}`
+                  : `/blog?category=${encodeURIComponent(blog.category)}`
+              }
               style={{
                 fontSize: 11,
                 fontWeight: 900,
