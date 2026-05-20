@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createPublicAdminClient } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
+
+export const revalidate = 300;
+
+const db = createPublicAdminClient();
 import MagazineViewer from '@/components/MagazineViewer';
 import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
 import MagazineIssueDetail from '@/components/magazine/MagazineIssueDetail';
@@ -40,7 +44,7 @@ async function buildPageMap(
 
   // 기본: article_pages 테이블 기반 누적 (2026-02, 2026-03)
   const ids = mainArticles.map((a) => a.id);
-  const { data } = await supabase
+  const { data } = await db
     .from('article_pages')
     .select('article_id')
     .in('article_id', ids);
@@ -76,7 +80,7 @@ const FALLBACK_MAGAZINES: Record<string, Magazine> = {
 };
 
 async function getMagazine(id: string): Promise<Magazine | null> {
-  const { data } = await supabase
+  const { data } = await db
     .from('magazines')
     .select('*')
     .eq('id', id)
@@ -85,7 +89,7 @@ async function getMagazine(id: string): Promise<Magazine | null> {
 }
 
 async function getArticles(magazineId: string): Promise<Article[]> {
-  const { data } = await supabase
+  const { data } = await db
     .from('articles')
     .select('*')
     .eq('magazine_id', magazineId)
