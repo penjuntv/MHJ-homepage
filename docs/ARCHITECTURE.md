@@ -325,7 +325,7 @@ export interface Blog {
   id: number;
   category: 'Daily' | 'School' | 'Kids' | 'Travel' | 'Food';
   title: string;
-  author: string;        // default 'Heejong Jo'
+  author: string;        // default 'Yussi'
   date: string;
   image_url: string;
   content: string;

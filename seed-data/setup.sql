@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS blogs (
   id SERIAL PRIMARY KEY,
   category TEXT NOT NULL CHECK (category IN ('Daily', 'School', 'Kids', 'Travel', 'Food')),
   title TEXT NOT NULL,
-  author TEXT NOT NULL DEFAULT 'Heejong Jo',
+  author TEXT NOT NULL DEFAULT 'Yussi',
   date TEXT NOT NULL,
   image_url TEXT NOT NULL,
   content TEXT NOT NULL,
