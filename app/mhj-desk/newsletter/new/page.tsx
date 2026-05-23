@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
@@ -219,6 +219,7 @@ export default function NewsletterComposePage() {
   const [subject, setSubject] = useState('');
   const [preheader, setPreheader] = useState('');
   const [issueNumber, setIssueNumber] = useState(1);
+  const issueTouchedRef = useRef(false);
   const [issueDate, setIssueDate] = useState(() => {
     const d = new Date();
     return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
@@ -306,17 +307,21 @@ export default function NewsletterComposePage() {
       .eq('active', true)
       .then(({ count }) => setSubCount(count ?? 0));
 
-    supabase
-      .from('newsletters')
-      .select('issue_number')
-      .not('issue_number', 'is', null)
-      .order('issue_number', { ascending: false })
-      .limit(1)
-      .then(({ data }) => {
-        if (data && data[0]?.issue_number) {
-          setIssueNumber((data[0].issue_number as number) + 1);
-        }
-      });
+    if (!initId) {
+      supabase
+        .from('newsletters')
+        .select('issue_number')
+        .not('issue_number', 'is', null)
+        .order('issue_number', { ascending: false })
+        .limit(1)
+        .then(({ data }) => {
+          if (issueTouchedRef.current) return;
+          if (data && data[0]?.issue_number) {
+            const next = (data[0].issue_number as number) + 1;
+            setIssueNumber(Number.isFinite(next) && next > 0 ? next : 1);
+          }
+        });
+    }
 
     supabase
       .from('site_settings')
@@ -496,8 +501,8 @@ export default function NewsletterComposePage() {
   ]);
 
   /* ── save draft ── */
-  async function saveDraft() {
-    if (!subject.trim()) { setError('이메일 제목을 입력해주세요.'); return; }
+  async function saveDraft(): Promise<number | null> {
+    if (!subject.trim()) { setError('이메일 제목을 입력해주세요.'); return null; }
     setSaving(true); setError('');
     const html = renderMailrangiNotes(buildData(), { lunchCtaLabel, lunchCtaUrl });
 
@@ -536,8 +541,10 @@ export default function NewsletterComposePage() {
       archive_excerpt: archiveEnabled ? archiveExcerpt : null,
     };
 
+    let savedId: number | null = null;
     if (editId) {
       await supabase.from('newsletters').update(record).eq('id', editId);
+      savedId = editId;
     } else {
       const { data: nl } = await supabase
         .from('newsletters')
@@ -547,10 +554,12 @@ export default function NewsletterComposePage() {
       if (nl?.id) {
         setEditId(nl.id);
         window.history.replaceState({}, '', `/mhj-desk/newsletter/new?id=${nl.id}`);
+        savedId = nl.id;
       }
     }
     setSaving(false);
     showToast('임시저장 완료');
+    return savedId;
   }
 
   /* ── preview ── */
@@ -563,13 +572,13 @@ export default function NewsletterComposePage() {
   async function handleTestSend() {
     if (!subject.trim()) { setError('이메일 제목을 입력해주세요.'); return; }
     setTesting(true); setError('');
+    const savedId = await saveDraft();
+    if (savedId == null) { setTesting(false); return; }
     const res = await fetch('/api/send-newsletter', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        subject,
-        structured_data: buildData(),
-        newsletter_id: editId,
+        newsletter_id: savedId,
         test_email: 'penjunetv@gmail.com',
       }),
     });
@@ -587,13 +596,13 @@ export default function NewsletterComposePage() {
     }
     if (!confirm(`${subCount}명의 활성 구독자에게 발송하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;
     setSending(true); setError('');
+    const savedId = await saveDraft();
+    if (savedId == null) { setSending(false); return; }
     const res = await fetch('/api/send-newsletter', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        subject,
-        structured_data: buildData(),
-        newsletter_id: editId,
+        newsletter_id: savedId,
       }),
     });
     const json = await res.json();
@@ -643,7 +652,10 @@ export default function NewsletterComposePage() {
               <input
                 type="number"
                 value={issueNumber}
-                onChange={e => setIssueNumber(Number(e.target.value))}
+                onChange={e => {
+                  issueTouchedRef.current = true;
+                  setIssueNumber(Number(e.target.value));
+                }}
                 style={{ ...IS, width: 100 }}
                 min={1}
               />
