@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getSiteSettings } from '@/lib/site-settings';
+import { STORYPRESS_FAQS } from '@/lib/storypress-faqs';
 import StoryPressClient from './StoryPressClient';
 
 export const dynamic = 'force-dynamic';
@@ -49,6 +50,19 @@ export default async function StoryPressPage() {
     inLanguage: ['en', 'ko'],
   };
 
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: STORYPRESS_FAQS.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.a,
+      },
+    })),
+  };
+
   return (
     <>
       <script
@@ -58,6 +72,10 @@ export default async function StoryPressPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <StoryPressClient
         title={s.storypress_title || 'StoryPress'}
