@@ -2,7 +2,23 @@ import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 import { CATEGORY_TO_SLUG } from '@/lib/constants';
 
-export const dynamic = 'force-dynamic';
+/**
+ * MHJ sitemap — 2026-05-30
+ *
+ * Phase A6 of the SEO patch.
+ *
+ * 변경 사항:
+ * - `force-dynamic` 제거 → `revalidate = 3600` 으로 완화
+ *   매 요청마다 Supabase 4개 쿼리 → 1시간 캐시
+ *   발행 시 /api/revalidate 에서 '/sitemap.xml' 도 함께 호출하면 즉시 갱신됨
+ *
+ * - 발행 캘린더가 주 3~5회이므로 1시간 캐시는 충분
+ * - Googlebot이 sitemap을 자주 fetch하므로 DB 부하 절감 효과 큼
+ *
+ * 발행 시 sitemap 강제 갱신을 위해 /mhj-desk 의 발행 핸들러에서
+ * /api/revalidate body 에 '/sitemap.xml' 을 paths 배열에 포함시켜야 함.
+ */
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
