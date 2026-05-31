@@ -44,3 +44,21 @@
 → 코드 전문가가 코드 수정
 → 비주얼 디렉터가 수정 후 스크린샷 비교
 → 리더가 최종 검증
+
+---
+
+## 스킬 목록
+
+`.claude/skills/` 에 등록된 스킬 인벤토리. 추가 시 이 표 갱신.
+
+| 스킬 | 추가 일자 | 용도 |
+|---|---|---|
+| yussi-factory | 2026-03-24 | 유씨팩토리 인포블록 생산 파이프라인 |
+| blog-publish-preflight | 2026-03-24 | 블로그 발행 전 품질 체크 |
+| design-rules-audit | 2026-03-24 | DESIGN_RULES 위반 검출 |
+| cc-prompt-gen | 2026-03-24 | Claude Code 프롬프트 4섹션 자동 생성 |
+| newsletter-composer | 2026-03-24 | Mairangi Notes 7섹션 조립 |
+| frontend-design | 2026-05-03 | 프론트엔드 디자인 가이드 |
+| llms-txt-generator | 2026-05-30 | /llms.txt 동적 라우트 점검·검증 |
+| seo-audit-runner | 2026-05-30 | 발행 콘텐츠 SEO 감사 보고서 자동 생성 |
+| internal-link-suggester | 2026-05-30 | 발행 시 내부 링크 후보 추천 |
