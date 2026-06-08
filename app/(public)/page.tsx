@@ -191,6 +191,21 @@ async function getArchivePosts(excludeIds: number[], limit = 3): Promise<Blog[]>
   return candidates.slice(0, limit);
 }
 
+// 최신 편지 글 1편 (letter_to 가 채워진 글). 없으면 null → 섹션 미노출.
+async function getLatestLetter(): Promise<Blog | null> {
+  const now = new Date().toISOString();
+  const { data } = await supabase
+    .from('blogs')
+    .select('*')
+    .eq('published', true)
+    .not('letter_to', 'is', null)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
+    .order('date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data as Blog) ?? null;
+}
+
 
 /* ─── Page component ─── */
 
@@ -201,11 +216,12 @@ export default async function LandingPage() {
   const latest = await getLatestPosts(heroIds);
   const latestExcludeIds = [...heroIds, ...latest.map(b => b.id)].filter(Boolean);
 
-  const [mostRead, latestMag, categoryPosts, settings] = await Promise.all([
+  const [mostRead, latestMag, categoryPosts, settings, latestLetter] = await Promise.all([
     getMostReadBlogs(latestExcludeIds),
     getLatestMagazine(),
     getCategoryPosts(latestExcludeIds),
     getSiteSettings(),
+    getLatestLetter(),
   ]);
   const ctaCopyA = settings.newsletter_cta_copy_a || 'A quiet letter, a few times a month.';
 
@@ -592,6 +608,11 @@ export default async function LandingPage() {
           <FromTheArchive posts={archivePosts} />
         )}
 
+        {/* ═══════ §3.8 A Letter Home (letter_to 글이 있을 때만) ═══════ */}
+        {latestLetter && (
+          <LetterHome letter={latestLetter} />
+        )}
+
         {/* ═══════ §4. Magazine Feature ═══════ */}
         {latestMag && (
           <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '64px clamp(20px, 4vw, 48px) 0' }}>
@@ -962,6 +983,80 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
         </p>
       </div>
     </Link>
+  );
+}
+
+/* ─── A Letter Home section (편지 글이 있을 때만 노출) ─── */
+const LETTER_NAMES: Record<string, string> = { M: 'Min', H: 'Hyun', J: 'Jin' };
+
+function LetterHome({ letter }: { letter: Blog }) {
+  const toName = letter.letter_to ? (LETTER_NAMES[letter.letter_to] ?? letter.letter_to) : '';
+  const excerpt = (letter.content ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 220);
+
+  return (
+    <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '96px clamp(20px, 4vw, 48px) 0' }}>
+      <Link
+        href={`/blog/${letter.slug}`}
+        className="blog-card-hover"
+        style={{
+          display: 'block',
+          borderRadius: 12,
+          border: '1px solid var(--border)',
+          background: 'var(--bg-warm)',
+          padding: 'clamp(32px, 5vw, 56px)',
+          textDecoration: 'none',
+        }}
+      >
+        <p style={{
+          fontSize: 10, fontWeight: 900, letterSpacing: 5,
+          textTransform: 'uppercase', color: 'var(--text-tertiary)',
+          margin: '0 0 20px',
+        }}>
+          A Letter Home
+        </p>
+
+        <h2 className="font-display" style={{
+          fontSize: 'clamp(28px, 4vw, 40px)',
+          fontWeight: 900, fontStyle: 'italic',
+          color: 'var(--text)', letterSpacing: -0.5, lineHeight: 1.1,
+          margin: '0 0 16px',
+        }}>
+          Dear {toName}.
+        </h2>
+
+        {excerpt && (
+          <p className="font-display" style={{
+            fontSize: 'clamp(16px, 1.6vw, 19px)',
+            fontStyle: 'italic', fontWeight: 300,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.7, maxWidth: 640,
+            margin: '0 0 24px',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical' as const,
+            overflow: 'hidden',
+          }}>
+            {excerpt}…
+          </p>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <span className="font-display" style={{
+            fontSize: 14, fontStyle: 'italic',
+            color: 'var(--text-tertiary)',
+          }}>
+            — Mum, from Mairangi
+          </span>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            fontSize: 13, fontWeight: 900, letterSpacing: 2,
+            textTransform: 'uppercase', color: 'var(--text-secondary)',
+          }}>
+            Read the letter <ArrowRight size={12} />
+          </span>
+        </div>
+      </Link>
+    </section>
   );
 }
 

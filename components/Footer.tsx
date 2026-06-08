@@ -161,6 +161,7 @@ export default function Footer({
               { label: 'About',      href: '/about' },
               { label: 'Journal',    href: '/blog' },
               { label: 'Magazine',   href: '/magazine' },
+              { label: 'Gallery',    href: '/gallery' },
               { label: 'StoryPress', href: '/storypress' },
               { label: 'Privacy',    href: '/privacy' },
             ].map((link) => (
