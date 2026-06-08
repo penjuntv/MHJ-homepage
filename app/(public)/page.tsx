@@ -934,6 +934,22 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
           {blog.title}
         </h3>
 
+        {/* 태그 — 조용한 점 구분, 최대 2개 (카테고리보다 약하게) */}
+        {blog.tags && blog.tags.length > 0 && (
+          <p style={{
+            fontSize: 10,
+            fontWeight: 400,
+            color: 'var(--text-tertiary)',
+            margin: '8px 0 0',
+            lineHeight: 1.5,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}>
+            {blog.tags.slice(0, 2).join(' · ')}
+          </p>
+        )}
+
         {/* Author + Views + Comment count */}
         <p style={{
           fontSize: 11,

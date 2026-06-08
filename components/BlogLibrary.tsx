@@ -575,6 +575,16 @@ function BlogCard({ blog, onClick }: CardProps) {
         }}>
           {blog.title}
         </h3>
+        {/* 태그 — 조용한 점 구분, 최대 2개 (카테고리보다 약하게) */}
+        {blog.tags && blog.tags.length > 0 && (
+          <p style={{
+            fontSize: 10, fontWeight: 400, color: 'var(--text-tertiary)',
+            margin: '8px 0 0', lineHeight: 1.5,
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>
+            {blog.tags.slice(0, 2).join(' · ')}
+          </p>
+        )}
         {(blog.view_count ?? 0) > 0 && (
           <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '6px 0 0' }}>
             {blog.view_count} {blog.view_count === 1 ? 'view' : 'views'}

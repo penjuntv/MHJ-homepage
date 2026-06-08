@@ -17,6 +17,7 @@ import CommentSection from './CommentSection';
 import AiInsight from '@/components/AiInsight';
 import BlogReadTracker from './BlogReadTracker';
 import ScrollDepthTracker from './ScrollDepthTracker';
+import ReadingProgress from './ReadingProgress';
 import { formatDate } from '@/lib/utils';
 
 export const revalidate = 600;
@@ -255,6 +256,7 @@ export default async function BlogDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
+      <ReadingProgress />
       <ViewTracker slug={blog.slug} />
       <BlogReadTracker slug={blog.slug} category={blog.category} author={blog.author} />
       <ScrollDepthTracker slug={blog.slug} />
