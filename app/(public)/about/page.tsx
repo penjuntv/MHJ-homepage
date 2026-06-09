@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 import { supabase } from '@/lib/supabase';
 import type { FamilyMember } from '@/lib/types';
@@ -347,7 +349,17 @@ export default async function AboutPage() {
 
                 {/* 본문 3단락 */}
                 <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 16 }}>
-                  {"I'm Yussi — a mother of three girls, a social work student at Massey University, and a Korean immigrant slowly making Mairangi Bay home."}
+                  {/* 드롭캡 — MHJ 시그니처를 About 소개에 절제된 크기로 확장 */}
+                  <span className="font-display" style={{
+                    float: 'left',
+                    fontSize: '3.1em',
+                    lineHeight: 0.82,
+                    fontWeight: 900,
+                    marginRight: '0.09em',
+                    marginTop: '0.04em',
+                    color: 'var(--text)',
+                  }}>I</span>
+                  {"'m Yussi — a mother of three girls, a social work student at Massey University, and a Korean immigrant slowly making Mairangi Bay home."}
                 </p>
                 <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 16 }}>
                   {"I write because it's what I've done my whole life — the small, ordinary moments and the ones that are anything but. Things I want to remember and things I need to let go of. Writing is my work, and sometimes my way of self-care."}
@@ -395,6 +407,30 @@ export default async function AboutPage() {
                 }}>
                   Mairangi Bay, Auckland / Master of Social Work (in progress) / Mum to Min, Hyun &amp; Jin
                 </div>
+
+                {/* 저널 연결 — About에서 끝나지 않고 실제 글로 이어지게 */}
+                <Link
+                  href="/blog"
+                  className="blog-card-hover"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    alignSelf: 'flex-start',
+                    marginTop: 28,
+                    padding: '12px 24px',
+                    borderRadius: 8,
+                    border: '1px solid var(--border-medium, var(--border))',
+                    color: 'var(--text)',
+                    textDecoration: 'none',
+                    fontSize: 12,
+                    fontWeight: 900,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Read Yussi&rsquo;s writing <ArrowRight size={13} />
+                </Link>
 
               </div>
             </div>
