@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description: 'How MHJ collects, uses, and protects your personal information under the NZ Privacy Act 2020.',
+  robots: { index: false, follow: true },
+  alternates: { canonical: `${SITE_URL}/privacy` },
 };
 
 const sectionStyle: React.CSSProperties = {

@@ -33,8 +33,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/gallery`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${baseUrl}/media-kit`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/mairangi-notes`, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/llms.txt`, changeFrequency: 'weekly' as const, priority: 0.5 },
-    { url: `${baseUrl}/llms-full.txt`, changeFrequency: 'weekly' as const, priority: 0.5 },
     ...Object.values(CATEGORY_TO_SLUG).map((slug) => ({
       url: `${baseUrl}/blog/category/${slug}`,
       changeFrequency: 'weekly' as const,
