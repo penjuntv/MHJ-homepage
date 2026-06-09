@@ -564,6 +564,7 @@ function BlogCard({ blog, onClick }: CardProps) {
           letterSpacing: -0.3,
           lineHeight: 1.4,
           margin: 0,
+          minHeight: '2.8em', /* 2줄 고정 — 1·2줄 제목 혼재 시 하단 태그/조회수 정렬 유지 */
           display: '-webkit-box',
           WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical' as const,
