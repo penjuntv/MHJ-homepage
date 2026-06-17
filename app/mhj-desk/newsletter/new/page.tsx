@@ -254,7 +254,7 @@ export default function NewsletterComposePage() {
   const [jinExpression, setJinExpression] = useState('');
   const [jinBody, setJinBody] = useState('');
   const [jinUrl, setJinUrl] = useState('');
-  const [storypressDefault, setStorypressDefault] = useState('https://app.mhj.nz/');
+  const [storypressDefault, setStorypressDefault] = useState(process.env.NEXT_PUBLIC_STORYPRESS_URL ?? 'https://app.mhz.nz');
 
   /* ── §3 Lunch Box CTA (site_settings 주입) ── */
   const [lunchCtaLabel, setLunchCtaLabel] = useState<string | undefined>(undefined);

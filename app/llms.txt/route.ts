@@ -113,7 +113,7 @@ export async function GET() {
     `- [Magazine](${SITE_URL}/magazine): Quarterly editorial issues with long-form articles, photography, and design templates`
   );
   lines.push(
-    `- [StoryPress](${SITE_URL}/storypress): The family's bilingual storybook app for children aged 3–8 (separate product, hosted at app.mhj.nz)`
+    `- [StoryPress](${SITE_URL}/storypress): The family's bilingual storybook app for children aged 3–8 (separate product, hosted at app.mhz.nz)`
   );
   lines.push(
     `- [Mairangi Notes](${SITE_URL}/mairangi-notes): The weekly Friday newsletter — a seven-section letter from Yussi`
