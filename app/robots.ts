@@ -56,6 +56,8 @@ export default function robots(): MetadataRoute.Robots {
     'Meta-ExternalAgent', // Meta AI
     'cohere-ai',       // Cohere
     'Diffbot',         // 다수 검색·요약 도구
+    'Yeti',            // 네이버 봇 (Naver Search)
+    'bingbot',         // Bing 검색
   ];
 
   // 명시적 disallow (콘텐츠 라이선스·관할 불투명)

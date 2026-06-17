@@ -23,7 +23,11 @@ export const metadata: Metadata = {
     template: '%s — MHJ',
   },
   description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 가족의 이야기. 기자 출신 아빠, 석사 과정 엄마, 세 딸의 라이프 매거진.',
-  keywords: ['뉴질랜드', '오클랜드', '노스쇼어', '마이랑이', 'Mairangi Bay', '가족', '육아', '이민', '뉴질랜드 생활'],
+  keywords: [
+    '뉴질랜드', '오클랜드', '노스쇼어', '마이랑이', 'Mairangi Bay', '가족', '육아', '이민', '뉴질랜드 생활',
+    '뉴질랜드 한인', '오클랜드 한인', '뉴질랜드 육아', '해외이민 생활', '뉴질랜드 가족블로그',
+    'Korean family Auckland', 'Korean New Zealand', 'Auckland family blog', 'NZ immigration life',
+  ],
   authors: [{ name: 'PeNnY' }, { name: 'Yussi' }],
   creator: 'MHJ',
   publisher: 'MHJ',
@@ -47,7 +51,13 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
   },
-  verification: { google: 'kjz6IsQn0jwDusM7kcWrGHT5gO2lc6k7FecrzEuuZBg' },
+  verification: {
+    google: 'kjz6IsQn0jwDusM7kcWrGHT5gO2lc6k7FecrzEuuZBg',
+    other: {
+      'naver-site-verification': process.env.NEXT_PUBLIC_NAVER_VERIFICATION ?? '',
+      'msvalidate.01': process.env.NEXT_PUBLIC_BING_VERIFICATION ?? '',
+    },
+  },
   alternates: { canonical: BASE_URL },
   icons: {
     icon: '/favicon.ico',
@@ -97,7 +107,7 @@ const themeScript = `
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="ko" className={inter.variable} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
         <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />

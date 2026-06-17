@@ -242,7 +242,7 @@ export default async function BlogDetailPage({
       },
     },
     keywords: [blog.category, ...(blog.tags ?? [])].filter(Boolean).join(', '),
-    inLanguage: 'en',
+    inLanguage: 'ko',
   };
 
   return (
