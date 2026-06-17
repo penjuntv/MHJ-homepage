@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     google: 'qC-Rqu96p3i9Vyzi3IUnWpfOIzoQDBVu1fZHX40aAOg',
   },
   other: {
-    'naver-site-verification': '51375014a626d94893a9001c14581940d0188874',
+    'naver-site-verification': '5110def7550b633424a62e87c8bc6c9923b3ff8d',
     'msvalidate.01': 'BCBAF2870768CDEA7EB779C9021D10FC',
   },
 };
