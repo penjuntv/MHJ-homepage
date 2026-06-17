@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   verification: {
     google: 'qC-Rqu96p3i9Vyzi3IUnWpfOIzoQDBVu1fZHX40aAOg',
   },
+  other: {
+    'naver-site-verification': '51375014a626d94893a9001c14581940d0188874',
+    'msvalidate.01': 'BCBAF2870768CDEA7EB779C9021D10FC',
+  },
 };
 
 export const revalidate = 3600;

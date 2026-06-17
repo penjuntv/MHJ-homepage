@@ -51,13 +51,7 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
   },
-  verification: {
-    google: 'kjz6IsQn0jwDusM7kcWrGHT5gO2lc6k7FecrzEuuZBg',
-    other: {
-      'naver-site-verification': process.env.NEXT_PUBLIC_NAVER_VERIFICATION ?? '',
-      'msvalidate.01': process.env.NEXT_PUBLIC_BING_VERIFICATION ?? '',
-    },
-  },
+  verification: { google: 'kjz6IsQn0jwDusM7kcWrGHT5gO2lc6k7FecrzEuuZBg' },
   alternates: { canonical: BASE_URL },
   icons: {
     icon: '/favicon.ico',
