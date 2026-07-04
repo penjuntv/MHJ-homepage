@@ -15,15 +15,15 @@ export const STORYPRESS_FAQS: StoryPressFAQ[] = [
   },
   {
     q: 'Who is it for?',
-    a: "Children aged 3–8 who are growing up with two languages. It works especially well for ESOL families, immigrant families, and children who need a gentle way into English — through stories, not pressure.",
+    a: "For ages 3–8. It's a gentle fit for homes where English isn't the first language, too. Words and stories adapt to your child — no level numbers, no pressure.",
   },
   {
     q: 'How does it work?',
-    a: "Each day takes about 10 minutes. Your child meets 4 new words with pictures and sound → plays short games (spelling, matching, sentences) → then creates a story page using those words. After 10 days, the pages become a finished book. Words come back naturally — each one appears 14+ times — so they stick without drilling.",
+    a: "Each day takes about 10 minutes. Your child meets 4 new words with pictures and sound → plays short games (spelling, matching, sentences) → then creates a story page using those words. After 10 days, the pages become a finished book. Words come back naturally through stories and games — so they stick without drilling.",
   },
   {
     q: 'How much does it cost?',
-    a: 'StoryPress is free to start — your child gets a full 10-day cycle to create their first storybook. No credit card needed. After that, plans start at $5.99/month.',
+    a: 'StoryPress is free to start — your child creates their first full storybook, no credit card needed. After that, paid plans (Starter and Family) unlock unlimited books. Current pricing is always shown inside the app.',
   },
   {
     q: 'How is it different from other apps?',
@@ -35,6 +35,6 @@ export const STORYPRESS_FAQS: StoryPressFAQ[] = [
   },
   {
     q: 'What is the 4-10 Method?',
-    a: "4 words a day × 10 days = 1 storybook. Every day your child meets new words, plays with them, and creates a story page. By Day 10, they've made a complete book — and met over 40 English words along the way.",
+    a: "4 words a day × 10 days = 1 storybook. Every day your child meets new words, plays with them, and creates a story page. By Day 10, they've made a complete book — and made every page along the way.",
   },
 ];

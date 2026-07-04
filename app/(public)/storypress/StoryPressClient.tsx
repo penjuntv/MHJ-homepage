@@ -51,8 +51,8 @@ const FEATURES = [
     bg: '#FDF2F8',
     highlight: null,
     highlightSub: null,
-    title: 'Made for Families Like Ours',
-    desc: "We're an immigrant family in Auckland. We built StoryPress for children growing up between two languages — where English isn't just a subject, it's part of everyday life.",
+    title: 'Built to be made, not watched',
+    desc: "Screens are built to be effortless — endless fun a child just takes in, with nothing left at the end. StoryPress turns the same device the other way: your child meets words, imagines a story, colors it in, and makes a page that's truly theirs.",
   },
 ];
 
@@ -60,21 +60,39 @@ const STEPS = [
   {
     num: '01',
     label: 'Meet & Play',
-    desc: "Every day, your child meets 4 new English words — with pictures and sound. Then they play short games: spelling, matching, filling in sentences. It feels like play, because it is.",
+    desc: "Four new words arrive every day — few enough to truly stick. Jini introduces each like a new friend. Then words turn into puzzles, matches and games — the kind where learning hides inside the fun.",
   },
   {
     num: '02',
     label: 'Create',
-    desc: "Today's 4 words become today's story page. Your child colours the scene and hears the story read aloud. Every page is something they made — not something they watched.",
+    desc: "Today's words become a story page. Pick the path, color the scene. The book grows one page at a time.",
   },
   {
     num: '03',
     label: 'Collect',
-    desc: "A new page every day. A finished book every 10 days. With your child's name on the cover and their choices on every page. It's a real storybook — and they're the author.",
+    desc: "Day 10: the book is complete. Their name on the cover. Print it, share it, read it at bedtime.",
   },
 ];
 
 const LIBRARY_STATS = [
+  {
+    icon: Calendar,
+    color: '#10B981',
+    bg: '#ECFDF5',
+    number: '12',
+    unit: '',
+    label: 'books a year',
+    desc: 'A new finished book every month — twelve of their own by the end of the year.',
+  },
+  {
+    icon: BookMarked,
+    color: '#6D7AFA',
+    bg: '#EEF2FF',
+    number: '1,000+',
+    unit: '',
+    label: 'word encounters',
+    desc: 'Across a year of stories and games, words return again and again — until they stick.',
+  },
   {
     icon: Clock,
     color: '#F59E42',
@@ -84,24 +102,6 @@ const LIBRARY_STATS = [
     label: 'a day',
     desc: 'Short enough for any schedule. Long enough to make real progress.',
   },
-  {
-    icon: BookMarked,
-    color: '#6D7AFA',
-    bg: '#EEF2FF',
-    number: '40+',
-    unit: '',
-    label: 'words per book',
-    desc: 'Each storybook contains 40 carefully chosen, research-backed vocabulary words.',
-  },
-  {
-    icon: Calendar,
-    color: '#10B981',
-    bg: '#ECFDF5',
-    number: '10',
-    unit: 'days',
-    label: 'to a real book',
-    desc: 'Ten daily pages become one finished storybook — with your child\'s name on the cover.',
-  },
 ];
 
 const RESEARCH_CARDS = [
@@ -109,22 +109,22 @@ const RESEARCH_CARDS = [
     icon: Brain,
     color: '#6D7AFA',
     bg: '#EEF2FF',
-    title: 'Words that stick',
-    desc: "Every word in StoryPress is chosen from the same research-backed lists used in classrooms across New Zealand, Australia, the US, and the UK. Your child meets each word 14+ times — through stories, games, and their own creations — so it stays.",
+    title: 'Research-backed words',
+    desc: "Grounded in Dolch, Fry and the Science of Reading — trusted by educators in New Zealand, Australia, the US, and the UK.",
   },
   {
     icon: BookOpen,
     color: '#F59E42',
     bg: '#FFF7ED',
-    title: 'Stories, not drills',
-    desc: "Children remember words far better when they meet them inside stories they care about. That's why every word in StoryPress lives inside a story your child helps create.",
+    title: 'Spaced repetition',
+    desc: "Words return at carefully timed intervals — the same proven memory science behind the world's best learning tools.",
   },
   {
     icon: Pencil,
     color: '#10B981',
     bg: '#ECFDF5',
-    title: 'Made by them, not watched by them',
-    desc: "Your child doesn't just listen or tap. They build a story, colour the scene, and see their work become a real page in a real book. That's active creation — and it's what makes the difference.",
+    title: 'Learning by creating',
+    desc: "Children remember what they make — far better than what they're simply given. Every story page is active creation, not passive consumption.",
   },
 ];
 
@@ -153,22 +153,26 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         {/* 좌: 텍스트 */}
         <div style={{ position: 'relative', zIndex: 1 }}>
           <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#F59E42', marginBottom: 24 }}>
-            From Our Family · ESOL · Ages 3–8
+            Ages 3–8
           </p>
           <h1
             className="font-display"
             style={{ fontSize: 'clamp(56px, 10vw, 120px)', fontWeight: 900, fontStyle: 'italic', letterSpacing: -4, lineHeight: 0.88, color: 'var(--text)', marginBottom: 28, maxWidth: 800 }}
           >
-            {title}
+            {title.split('\n').map((line, i) => (
+              <span key={i} style={{ display: 'block' }}>{line}</span>
+            ))}
           </h1>
-          <p style={{ fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 500, color: '#64748B', lineHeight: 1.65, marginBottom: 40, maxWidth: 480 }}>
+          <p style={{ fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 500, color: '#64748B', lineHeight: 1.65, marginBottom: 24, maxWidth: 480 }}>
             {description || (
               <>
-                Four new words today. A story page tonight.{' '}
-                A real book by the end of the month —{' '}
-                <span style={{ fontWeight: 900, color: '#F59E42' }}>with your child&apos;s name on the cover.</span>
+                Four words a day. Ten days.{' '}
+                <span style={{ fontWeight: 900, color: '#F59E42' }}>One real storybook — created by your child.</span>
               </>
             )}
+          </p>
+          <p style={{ fontSize: 'clamp(14px, 1.6vw, 17px)', fontWeight: 500, color: '#94A3B8', lineHeight: 1.7, marginBottom: 40, maxWidth: 480 }}>
+            Meet new words. Play with them. Color the scenes. And watch a real book take shape — page by page, with their name on the cover.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a
@@ -176,7 +180,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               onClick={() => trackEvent('cta_click', { location: 'hero' })}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', borderRadius: 999, background: '#1A1A1A', color: '#fff', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 16px 32px rgba(0,0,0,0.15)' }}
             >
-              Start Your Free Adventure
+              Let&apos;s Make a Book
             </a>
             <a
               href="#why-storypress"
@@ -429,6 +433,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             marginTop: 56,
             fontFamily: 'var(--font-display, serif)',
           }}>
+            Other apps end with a score. StoryPress ends with a book.
           </p>
         </div>
       </section>
@@ -455,7 +460,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               A growing library of books they made themselves
             </h2>
             <p style={{ fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'var(--text-secondary)', lineHeight: 1.75, maxWidth: 600, margin: '0 auto' }}>
-              Every day, your child creates a new story page. After 10 days, all the pages come together into a finished book — with their name right there on the cover. Then a new story begins.
+              Every month, a new book. Every book, their creation — their name on the cover, their words inside, their colors on every page.
             </p>
           </div>
 
@@ -534,7 +539,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   <Star size={14} color="#F59E42" fill="#F59E42" />
                   <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: '#F59E42' }}>Finished Book</span>
                 </div>
-                <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', marginBottom: 4, letterSpacing: '-0.3px' }}>
+                <p style={{ fontSize: 15, fontWeight: 900, color: '#1A1A1A', marginBottom: 4, letterSpacing: '-0.3px' }}>
                   &ldquo;{book.title}&rdquo;
                 </p>
                 <p style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 1 }}>
@@ -565,10 +570,10 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               letterSpacing: '-2px', lineHeight: 1, fontStyle: 'italic',
               color: 'var(--text)', marginBottom: 20,
             }}>
-              Not a new method. Proven science, wrapped in creativity.
+              We didn&apos;t invent a method. We built on what works.
             </h2>
             <p style={{ fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'var(--text-secondary)', lineHeight: 1.75, maxWidth: 600, margin: '0 auto' }}>
-              We didn&apos;t invent a new way to teach English. We took what decades of research already proved — and wrapped it in something a child would actually want to do: make their own storybook.
+              Decades of vocabulary research, wrapped in something a child actually wants to do.
             </p>
           </div>
 
@@ -628,6 +633,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                 — the same research behind New Zealand&apos;s new classroom literacy programme
               </span>
             </div>
+            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500, lineHeight: 1.7, maxWidth: 640, margin: '20px auto 0' }}>
+              Based on Dolch &amp; Fry word lists · Nation&apos;s vocabulary framework · Biemiller&apos;s developmental sequences · output-hypothesis research.
+            </p>
           </div>
         </div>
       </section>
@@ -649,49 +657,33 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           gap: 'clamp(40px, 6vw, 80px)',
           alignItems: 'center',
         }}>
-          {/* 좌: 가족 일러스트 카드 */}
+          {/* 좌: 창업자 풀쿼트 카드 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* 메인 카드 */}
             <div style={{
               background: 'white',
               borderRadius: 24,
-              padding: 32,
+              padding: 'clamp(36px, 4vw, 52px)',
               boxShadow: '0 20px 60px rgba(245,158,66,0.12), 0 4px 16px rgba(0,0,0,0.06)',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #FF8B5E, #F59E42)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="font-display" style={{
+                fontSize: 72, fontWeight: 900, fontStyle: 'italic',
+                lineHeight: 0.5, color: '#F59E42', opacity: 0.28, marginBottom: 20,
+              }}>
+                &ldquo;
+              </div>
+              <p style={{ fontSize: 'clamp(19px, 2.2vw, 26px)', fontStyle: 'italic', color: '#334155', lineHeight: 1.6, margin: 0, letterSpacing: '-0.3px' }}>
+                We set out to give our daughter a voice in a new language. The app is just how we got there.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 32, paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #FF8B5E, #F59E42)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Heart size={22} color="white" fill="white" />
                 </div>
                 <div>
-                  <p style={{ fontSize: 14, fontWeight: 900, color: '#1A1A1A', margin: 0 }}>Penny &amp; Yussi</p>
+                  <p style={{ fontSize: 14, fontWeight: 900, color: '#1A1A1A', margin: 0 }}>Yussi</p>
                   <p style={{ fontSize: 11, color: '#94A3B8', margin: 0, fontWeight: 600, letterSpacing: 1 }}>AUCKLAND, NEW ZEALAND</p>
                 </div>
               </div>
-              <p style={{ fontSize: 15, fontStyle: 'italic', color: '#64748B', lineHeight: 1.75, margin: 0 }}>
-                &ldquo;We didn&apos;t invent a new teaching method. We took what research already proved — and wrapped it in something a 4-year-old would actually want to do: create her own storybook.&rdquo;
-              </p>
-            </div>
-
-            {/* 보조 카드 */}
-            <div style={{ display: 'flex', gap: 12 }}>
-              {[
-                { emoji: '🇰🇷', label: 'Seoul', sub: 'where we started' },
-                { emoji: '🇳🇿', label: 'Auckland', sub: 'where we live' },
-                { emoji: '📖', label: 'StoryPress', sub: 'what we built' },
-              ].map((item, i) => (
-                <div key={i} style={{
-                  flex: 1,
-                  background: 'white',
-                  borderRadius: 16,
-                  padding: '16px 12px',
-                  textAlign: 'center',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-                }}>
-                  <div style={{ fontSize: 24, marginBottom: 6 }}>{item.emoji}</div>
-                  <p style={{ fontSize: 12, fontWeight: 900, color: '#1A1A1A', margin: 0, letterSpacing: '-0.3px' }}>{item.label}</p>
-                  <p style={{ fontSize: 10, color: '#94A3B8', margin: 0, fontWeight: 600 }}>{item.sub}</p>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -703,18 +695,18 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             <h2 className="font-display font-black" style={{
               fontSize: 'clamp(28px, 4.5vw, 52px)',
               letterSpacing: '-2px', lineHeight: 1.1, fontStyle: 'italic',
-              color: 'var(--text)', marginBottom: 28,
+              color: '#1A1A1A', marginBottom: 28,
             }}>
-              Built by a mom.<br />For her daughter.
+              We built this for our daughter.<br />Then every family needed it.
             </h2>
-            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: 'var(--text-secondary)', lineHeight: 1.85, marginBottom: 20 }}>
-              When Jin moved from Seoul to Auckland at age 4, English was a wall. We tried apps, tutors, YouTube, playgroups. Some helped. Most didn&apos;t stick.
+            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: '#64748B', lineHeight: 1.85, marginBottom: 20 }}>
+              Penny and I spent years in publishing — we made magazines, and we thought about books for a living: why they matter, why they last. Then our daughter moved to a new country at four, and English was a wall.
             </p>
-            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: 'var(--text-secondary)', lineHeight: 1.85, marginBottom: 32 }}>
-              StoryPress was born from that journey — the frustration, the breakthroughs, and the moment Jin said &ldquo;I made a story!&rdquo; for the first time.
+            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: '#64748B', lineHeight: 1.85, marginBottom: 32 }}>
+              We tried everything we knew; nothing reached her. What finally did wasn&apos;t a lesson — it was a story she made herself. So we built that one moment into this.
             </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-              {['Immigrant family', 'ESOL experience', 'Research-based', 'Built with love'].map((tag, i) => (
+              {['Research-based', 'Built with love'].map((tag, i) => (
                 <span key={i} style={{
                   display: 'inline-block',
                   padding: '6px 14px',
@@ -772,7 +764,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               textTransform: 'uppercase', color: 'var(--text-tertiary)',
               fontStyle: 'normal',
             }}>
-              — Auckland ESOL Family
+              — An Auckland family
             </cite>
           </blockquote>
         </div>

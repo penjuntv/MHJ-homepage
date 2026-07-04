@@ -9,10 +9,10 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
   title: 'StoryPress — 4 Words a Day, One Storybook at a Time',
-  description: 'Your child meets 4 new English words a day, creates a story page, and builds a real storybook — with their name on the cover. For ESOL families in Auckland and beyond.',
+  description: 'Four words a day. Ten days. One real storybook — created by your child. Their name on the cover.',
   openGraph: {
     title: 'StoryPress — 4 Words a Day, One Storybook at a Time',
-    description: '4 words a day. A story page tonight. A real book by the end of the month — with your child\'s name on the cover.',
+    description: 'Four words a day. Ten days. One real storybook — created by your child. Their name on the cover.',
     url: `${SITE_URL}/storypress`,
     images: [{ url: `${SITE_URL}/og-storypress.jpg`, width: 1200, height: 630, alt: 'StoryPress' }],
     type: 'website',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'StoryPress — 4 Words a Day, One Storybook at a Time',
-    description: 'Your child meets 4 new English words a day and builds a real storybook.',
+    description: 'Four words a day. Ten days. One real storybook — created by your child.',
   },
   alternates: { canonical: `${SITE_URL}/storypress` },
 };
@@ -46,7 +46,7 @@ export default async function StoryPressPage() {
     description: 'An English storybook app for children aged 3–8. Every day, 4 new words — a story page — a real book by the end of 10 days.',
     url: `${SITE_URL}/storypress`,
     author: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
-    audience: { '@type': 'Audience', audienceType: 'Children aged 3–8, ESOL families, bilingual families' },
+    audience: { '@type': 'Audience', audienceType: 'Children aged 3–8 and their families' },
     inLanguage: ['en', 'ko'],
   };
 
