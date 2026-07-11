@@ -5,7 +5,9 @@ import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 
-export const dynamic = 'force-dynamic';
+// force-dynamic 불필요 — 라우트 파라미터(tag)만 읽으므로 ISR 로 캐시 가능.
+// 첫 요청 시 렌더 후 300초 캐시(on-demand ISR). noindex 페이지라 staleness 무방.
+export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 

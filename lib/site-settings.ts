@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 import { supabase } from './supabase';
 
 export interface SiteSetting {
@@ -27,7 +28,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   contact_email: 'hello@mhj.nz',
   magazine_title: 'Magazine Shelf',
   magazine_hint: 'Scroll to explore',
-  storypress_title: 'StoryPress',
+  storypress_title: 'Every child has a story.\nLet them write it.',
   storypress_description: '',
   storypress_cta_url: '',
   storypress_cta_text: 'Join the Waitlist',
@@ -126,7 +127,7 @@ export const SETTING_DESCRIPTIONS: Record<string, string> = {
   pillar_homelearning_intro: 'Home Learning 기둥 소개',
 };
 
-export async function getSiteSettings(): Promise<Record<string, string>> {
+async function fetchSiteSettings(): Promise<Record<string, string>> {
   try {
     const { data, error } = await supabase
       .from('site_settings')
@@ -141,3 +142,11 @@ export async function getSiteSettings(): Promise<Record<string, string>> {
     return { ...DEFAULT_SETTINGS };
   }
 }
+
+// 사이트 설정은 자주 바뀌지 않고 거의 모든 페이지가 읽으므로 Data Cache로 캐싱.
+// 관리자 저장 시 /api/revalidate 가 revalidateTag('settings') 로 즉시 무효화.
+export const getSiteSettings = unstable_cache(
+  fetchSiteSettings,
+  ['site-settings'],
+  { revalidate: 3600, tags: ['settings'] },
+);

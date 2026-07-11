@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
@@ -135,6 +136,15 @@ async function getPaginatedBlogs(
   return { blogs: data ?? [], totalCount: count ?? 0 };
 }
 
+// Data Cache 래퍼 — searchParams(page) 때문에 동적 렌더링될 때도
+// 읽기 쿼리를 300초당 1회로 제한. 발행 시 revalidateTag('blogs') 로 무효화.
+const CAT_CACHE = { revalidate: 300, tags: ['blogs'] };
+const getFeaturedBlogCached = unstable_cache(getFeaturedBlog, ['cat:featured'], CAT_CACHE);
+const getPaginatedBlogsCached = unstable_cache(getPaginatedBlogs, ['cat:paginated'], CAT_CACHE);
+const getMostReadBlogsCached = unstable_cache(getMostReadBlogs, ['cat:mostread'], CAT_CACHE);
+const getCategoryCountsCached = unstable_cache(getCategoryCounts, ['cat:catcounts'], CAT_CACHE);
+const getRecentBlogsCached = unstable_cache(getRecentBlogs, ['cat:recent'], CAT_CACHE);
+
 export default async function BlogCategoryPage({ params, searchParams }: Props) {
   const category = SLUG_TO_CATEGORY[params.slug];
   if (!category) notFound();
@@ -151,14 +161,14 @@ export default async function BlogCategoryPage({ params, searchParams }: Props) 
   const page = Math.max(1, parseInt(pageRaw, 10) || 1);
 
   const [featured, paginated, mostRead, s, categoryCounts] = await Promise.all([
-    getFeaturedBlog(category),
-    getPaginatedBlogs(page, category),
-    getMostReadBlogs(),
+    getFeaturedBlogCached(category),
+    getPaginatedBlogsCached(page, category),
+    getMostReadBlogsCached(),
     getSiteSettings(),
-    getCategoryCounts(),
+    getCategoryCountsCached(),
   ]);
 
-  const recent = await getRecentBlogs(category, featured?.id ?? null);
+  const recent = await getRecentBlogsCached(category, featured?.id ?? null);
 
   const totalPages = Math.ceil(paginated.totalCount / PAGE_SIZE);
 

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import { BLOG_CATEGORIES } from '@/lib/constants';
@@ -140,20 +141,32 @@ async function getPaginatedBlogs(
   return { blogs: data ?? [], totalCount: count ?? 0 };
 }
 
+// ── Data Cache 래퍼 ──
+// /blog 는 searchParams(page/category) 때문에 동적 렌더링으로 강제되어
+// revalidate=300 이 무시되고 매 요청마다 Supabase 를 라이브 조회한다.
+// 읽기 쿼리를 unstable_cache 로 감싸 DB 조회를 300초당 1회로 줄인다.
+// (인자 page/category 는 캐시 키에 자동 포함됨. 발행 시 revalidateTag('blogs') 로 무효화)
+const BLOG_CACHE = { revalidate: 300, tags: ['blogs'] };
+const getFeaturedBlogCached = unstable_cache(getFeaturedBlog, ['blog:featured'], BLOG_CACHE);
+const getPaginatedBlogsCached = unstable_cache(getPaginatedBlogs, ['blog:paginated'], BLOG_CACHE);
+const getMostReadBlogsCached = unstable_cache(getMostReadBlogs, ['blog:mostread'], BLOG_CACHE);
+const getCategoryCountsCached = unstable_cache(getCategoryCounts, ['blog:catcounts'], BLOG_CACHE);
+const getRecentBlogsCached = unstable_cache(getRecentBlogs, ['blog:recent'], BLOG_CACHE);
+
 export default async function BlogPage({ searchParams }: Props) {
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
   const category = params.category && VALID_CATEGORIES.includes(params.category) ? params.category : null;
 
   const [featured, paginated, mostRead, s, categoryCounts] = await Promise.all([
-    getFeaturedBlog(category),
-    getPaginatedBlogs(page, category),
-    getMostReadBlogs(),
+    getFeaturedBlogCached(category),
+    getPaginatedBlogsCached(page, category),
+    getMostReadBlogsCached(),
     getSiteSettings(),
-    getCategoryCounts(),
+    getCategoryCountsCached(),
   ]);
 
-  const recent = await getRecentBlogs(category, featured?.id ?? null);
+  const recent = await getRecentBlogsCached(category, featured?.id ?? null);
 
   const totalPages = Math.ceil(paginated.totalCount / PAGE_SIZE);
 
