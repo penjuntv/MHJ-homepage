@@ -10,7 +10,7 @@ export const revalidate = 600;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 interface Props {
-  params: { id: string; slug: string };
+  params: Promise<{ id: string; slug: string }>;
 }
 
 export async function generateStaticParams() {
@@ -64,7 +64,8 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const [article, magazine] = await Promise.all([
     getArticle(params.id, params.slug),
     getMagazine(params.id),
@@ -99,7 +100,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function MagazineArticlePage({ params }: Props) {
+export default async function MagazineArticlePage(props: Props) {
+  const params = await props.params;
   const [article, magazine] = await Promise.all([
     getArticle(params.id, params.slug),
     getMagazine(params.id),
