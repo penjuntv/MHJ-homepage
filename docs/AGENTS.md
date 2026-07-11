@@ -14,8 +14,8 @@
 - 읽어야 할 문서: docs/ARCHITECTURE.md, docs/DB_SCHEMA.md
 - 행동 규칙:
   - 새 파일 생성 시 기존 패턴(import 경로, 컴포넌트 구조) 먼저 확인
-  - Supabase fetch에는 반드시 cache: 'no-store'
-  - Admin 기능 추가 시 → public 페이지 연동까지 완료해야 "끝"
+  - 캐싱: 공개 읽기는 ISR 허용(`supabase`/`createPublicAdminClient`) + 발행 시 revalidate. `no-store`는 예약발행·admin·유저별에만 (CLAUDE.md 규칙2 참조 — "모든 fetch no-store"는 폐기)
+  - Admin(`app/mhj-desk/`) 기능 추가 시 → public 페이지 연동까지 완료해야 "끝"
   - npm run build 통과 필수
   - TypeScript strict 모드 준수
 
@@ -49,7 +49,7 @@
 
 ## 스킬 목록
 
-`.claude/skills/` 에 등록된 스킬 인벤토리. 추가 시 이 표 갱신.
+`.claude/skills/` · `.agents/skills/` 에 등록된 스킬 인벤토리. 추가 시 이 표 갱신.
 
 | 스킬 | 추가 일자 | 용도 |
 |---|---|---|
@@ -62,3 +62,4 @@
 | llms-txt-generator | 2026-05-30 | /llms.txt 동적 라우트 점검·검증 |
 | seo-audit-runner | 2026-05-30 | 발행 콘텐츠 SEO 감사 보고서 자동 생성 |
 | internal-link-suggester | 2026-05-30 | 발행 시 내부 링크 후보 추천 |
+| fact-verify | 2026-06-27 | 발행 전 사실 검증 게이트 |
