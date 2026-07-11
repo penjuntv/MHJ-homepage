@@ -273,7 +273,9 @@ function FeedCard({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={mediaUrl}
-          alt="Gallery"
+          alt="MHJ family photo on Instagram"
+          loading="lazy"
+          decoding="async"
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           draggable={false}
         />
