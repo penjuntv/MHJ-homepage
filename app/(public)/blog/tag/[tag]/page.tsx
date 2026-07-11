@@ -11,7 +11,8 @@ export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
-export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ tag: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const tag = decodeURIComponent(params.tag);
   return {
     title: `Posts tagged #${tag}`,
@@ -31,7 +32,8 @@ async function getBlogsByTag(tag: string): Promise<Blog[]> {
   return data ?? [];
 }
 
-export default async function TagPage({ params }: { params: { tag: string } }) {
+export default async function TagPage(props: { params: Promise<{ tag: string }> }) {
+  const params = await props.params;
   const tag = decodeURIComponent(params.tag);
   const blogs = await getBlogsByTag(tag);
 

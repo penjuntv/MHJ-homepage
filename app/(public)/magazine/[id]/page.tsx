@@ -8,8 +8,8 @@ import MagazineIssueDetail from '@/components/magazine/MagazineIssueDetail';
 import { isLegacyPngIssue } from '@/lib/magazine-themes';
 
 interface Props {
-  params: { id: string };
-  searchParams: { page?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
 async function buildPageMap(
@@ -97,7 +97,8 @@ async function getArticles(magazineId: string): Promise<Article[]> {
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const magazine = await getMagazine(params.id);
   if (!magazine) return {};
   const title = `${magazine.title} — ${magazine.year} ${magazine.month_name}`;
@@ -118,7 +119,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function MagazineIssuePage({ params, searchParams }: Props) {
+export default async function MagazineIssuePage(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const magazine = await getMagazine(params.id);
   if (!magazine) notFound();
 

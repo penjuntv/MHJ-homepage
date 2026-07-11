@@ -18,7 +18,8 @@ interface Props {
   searchParams: Promise<{ page?: string; category?: string }>;
 }
 
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const searchParams = await props.searchParams;
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
   const category = params.category && VALID_CATEGORIES.includes(params.category) ? params.category : null;
@@ -153,7 +154,8 @@ const getMostReadBlogsCached = unstable_cache(getMostReadBlogs, ['blog:mostread'
 const getCategoryCountsCached = unstable_cache(getCategoryCounts, ['blog:catcounts'], BLOG_CACHE);
 const getRecentBlogsCached = unstable_cache(getRecentBlogs, ['blog:recent'], BLOG_CACHE);
 
-export default async function BlogPage({ searchParams }: Props) {
+export default async function BlogPage(props: Props) {
+  const searchParams = await props.searchParams;
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
   const category = params.category && VALID_CATEGORIES.includes(params.category) ? params.category : null;

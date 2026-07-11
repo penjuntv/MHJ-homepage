@@ -14,7 +14,7 @@ const PAGE_SIZE = 20;
 const CATEGORY_ORDER = [...BLOG_CATEGORIES];
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
@@ -22,7 +22,9 @@ export function generateStaticParams() {
   return Object.values(CATEGORY_TO_SLUG).map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const category = SLUG_TO_CATEGORY[params.slug];
   if (!category) return { title: 'Not Found' };
 
@@ -145,7 +147,9 @@ const getMostReadBlogsCached = unstable_cache(getMostReadBlogs, ['cat:mostread']
 const getCategoryCountsCached = unstable_cache(getCategoryCounts, ['cat:catcounts'], CAT_CACHE);
 const getRecentBlogsCached = unstable_cache(getRecentBlogs, ['cat:recent'], CAT_CACHE);
 
-export default async function BlogCategoryPage({ params, searchParams }: Props) {
+export default async function BlogCategoryPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const category = SLUG_TO_CATEGORY[params.slug];
   if (!category) notFound();
 

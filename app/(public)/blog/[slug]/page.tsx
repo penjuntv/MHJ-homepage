@@ -111,12 +111,13 @@ async function getBlogForPreview(slug: string): Promise<Blog | null> {
   return data;
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const { isEnabled } = draftMode();
+export async function generateMetadata(
+  props: {
+    params: Promise<{ slug: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
+  const { isEnabled } = await draftMode();
   const blog = isEnabled
     ? await getBlogForPreview(params.slug)
     : await getBlog(params.slug);
@@ -151,12 +152,13 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogDetailPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const { isEnabled: isPreview } = draftMode();
+export default async function BlogDetailPage(
+  props: {
+    params: Promise<{ slug: string }>;
+  }
+) {
+  const params = await props.params;
+  const { isEnabled: isPreview } = await draftMode();
   const blog = isPreview
     ? await getBlogForPreview(params.slug)
     : await getBlog(params.slug);

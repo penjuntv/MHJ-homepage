@@ -22,6 +22,6 @@ export async function GET(request: Request) {
     return new Response('해당 슬러그의 글을 찾을 수 없습니다.', { status: 404 });
   }
 
-  draftMode().enable();
+  (await draftMode()).enable();
   redirect(`/blog/${slug}`);
 }

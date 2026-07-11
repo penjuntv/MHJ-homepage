@@ -64,11 +64,12 @@ export async function generateStaticParams() {
     .map((issue) => ({ issue: String(issue) }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { issue: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ issue: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const nl = await getIssue(params.issue);
   if (!nl) return { title: 'Not Found' };
   return {
@@ -84,11 +85,12 @@ export async function generateMetadata({
   };
 }
 
-export default async function NewsletterIssuePage({
-  params,
-}: {
-  params: { issue: string };
-}) {
+export default async function NewsletterIssuePage(
+  props: {
+    params: Promise<{ issue: string }>;
+  }
+) {
+  const params = await props.params;
   const nl = await getIssue(params.issue);
   if (!nl) notFound();
 
