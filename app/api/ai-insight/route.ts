@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY ?? '');
+const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY ?? '' });
 
 const CACHE_DAYS = 30;
 
@@ -32,18 +32,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Gemini API 호출 (캐시 없거나 만료)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const result = await model.generateContent(
-      `Read the following post and write a poetic, evocative 2-sentence reflection in English. Use an editorial magazine tone that inspires the reader.
+    const result = await genAI.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Read the following post and write a poetic, evocative 2-sentence reflection in English. Use an editorial magazine tone that inspires the reader.
 
 Title: ${title}
 
 Content: ${content.slice(0, 500)}
 
-Write only the reflection, nothing else.`
-    );
+Write only the reflection, nothing else.`,
+    });
 
-    const insight = result.response.text();
+    const insight = result.text ?? '';
 
     // blog_id가 있으면 DB에 캐시 저장
     if (blog_id && insight) {

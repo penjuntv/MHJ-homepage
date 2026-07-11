@@ -1,469 +1,118 @@
 # MHJ HOMEPAGE — ARCHITECTURE
 
-> Next.js 14 App Router 기반 컴포넌트 아키텍처 및 라우팅 설계
+> Next.js 14.2.35 App Router 기반 아키텍처. 마지막 현행화: 2026-07-11.
+> 이 문서는 "디렉토리·패턴의 용도"를 기술한다. 파일별 세부는 실제 코드가 진실.
 
 ---
 
 ## 1. 라우팅 구조
 
-### 파일 기반 라우팅 매핑
-
-| REFERENCE 내 page state | Next.js 경로 | 파일 |
-|--------------------------|-------------|------|
-| `'landing'` | `/` | `app/page.tsx` |
-| `'about'` | `/about` | `app/about/page.tsx` |
-| `'magazine_shelf'` | `/magazine` | `app/magazine/page.tsx` |
-| `'magazine_issue'` + selectedMonth | `/magazine/[id]` | `app/magazine/[id]/page.tsx` |
-| `'blog'` | `/blog` | `app/blog/page.tsx` |
-| 상세 모달 (selectedItem) | URL 변경 없음 — 클라이언트 상태 모달 | `components/DetailModal.tsx` |
-| — | `/admin` | `app/admin/page.tsx` |
-| — | `/admin/login` | `app/admin/login/page.tsx` |
-| — | `/admin/blogs/...` | `app/admin/blogs/` |
-| — | `/admin/magazines/...` | `app/admin/magazines/` |
-
-### 레이아웃 공유 구조
-
+### 1.1 라우트 그룹
 ```
 app/
-├── layout.tsx          ← 루트 레이아웃 (Google Fonts, globals.css, <html lang="ko">)
-├── (public)/           ← 그룹 라우트 (Navigation + Footer 공유)
-│   ├── layout.tsx      ← Navigation + Footer 포함
-│   ├── page.tsx        ← Landing
-│   ├── about/page.tsx
-│   ├── magazine/
-│   │   ├── page.tsx    ← Shelf
-│   │   └── [id]/page.tsx ← Issue
-│   └── blog/
-│       └── page.tsx    ← Library
-├── admin/              ← 별도 레이아웃 (Navigation/Footer 없음)
-│   ├── layout.tsx      ← Admin 전용 레이아웃
-│   ├── page.tsx
-│   ├── login/page.tsx
-│   ├── blogs/
-│   └── magazines/
-├── api/
-│   └── ai-insight/route.ts
-├── sitemap.ts
-└── robots.ts
+├── layout.tsx              ← 루트 레이아웃: <html lang="ko">, 폰트, globals.css, Organization JSON-LD, Analytics
+├── (public)/              ← 공개 그룹 (Navigation + Footer 공유 layout)
+│   ├── layout.tsx
+│   ├── page.tsx           ← Landing (Hero + Intro)
+│   ├── about/             ├ blog/ (page, category/[slug], tag/[tag], [slug])
+│   ├── magazine/ ([id])   ├ gallery/  ├ mairangi-notes/  ├ media-kit/
+│   ├── storypress/        ├ privacy/  └ unsubscribe/
+├── mhj-desk/              ← Admin UI (구 app/admin 아님 — 반드시 mhj-desk)
+├── internal/render/       ← 캡처 전용 렌더 라우트 (CAPTURE_SECRET 토큰 검증, 미들웨어에서 게이트)
+├── api/                   ← 라우트 핸들러 (§4)
+├── go/                    ← 아웃바운드 리디렉션 트래킹
+├── sitemap.ts · robots.ts · manifest.ts · icon.tsx · apple-icon.tsx · feed.xml · llms.txt · llms-full.txt
 ```
+
+### 1.2 Admin (`app/mhj-desk/`)
+대시보드(page) + 로그인/MFA(login, mfa-setup, mfa-verify) + 콘텐츠 관리:
+blogs · magazines([id], articles) · gallery · family · hero · landing-photos · navigation · pages([pageId]) ·
+carousel · carousel-v3 · comments · newsletter · subscribers · affiliates · media · seo · design-kit · settings.
+> Admin 변경 시 대응 public 페이지 연동까지 완료해야 "끝"(CLAUDE.md 규칙9).
 
 ---
 
-## 2. 서버 vs 클라이언트 컴포넌트 판단
+## 2. 서버 vs 클라이언트 컴포넌트
 
-### 서버 컴포넌트 (기본값)
-| 컴포넌트/페이지 | 이유 |
-|----------------|------|
-| `app/(public)/layout.tsx` | 정적 레이아웃 셸 |
-| `app/(public)/page.tsx` | 초기 데이터 fetch (blogs) |
-| `app/(public)/about/page.tsx` | 초기 데이터 fetch (family_members) |
-| `app/(public)/magazine/page.tsx` | 초기 데이터 fetch (magazines) |
-| `app/(public)/magazine/[id]/page.tsx` | 초기 데이터 fetch (magazine + articles) |
-| `app/(public)/blog/page.tsx` | 초기 데이터 fetch (blogs) |
-| `app/api/ai-insight/route.ts` | API Route (서버 전용) |
-
-### 클라이언트 컴포넌트 ('use client')
-| 컴포넌트 | 이유 |
-|---------|------|
-| `Navigation.tsx` | useState (mobileOpen), onClick 핸들러 |
-| `HeroCarousel.tsx` | useState (idx), useEffect (setInterval), onClick |
-| `MagazineShelf.tsx` | useRef (scrollRef), useState (hovered), useEffect (wheel listener), onMouseEnter |
-| `BlogLibrary.tsx` | useState (activeCategory), onClick (필터) |
-| `DetailModal.tsx` | useState (aiInsight, loading), fetch (AI API), onClick |
-| `AiInsight.tsx` | useState, fetch |
-| `ArticleCard.tsx` | onMouseEnter/Leave (hover 효과) |
-| `BlogCard.tsx` | onMouseEnter/Leave (hover 효과) |
-
-### 하이브리드 패턴
-- **페이지 (서버)** → Supabase에서 데이터 fetch → **클라이언트 컴포넌트**에 props로 전달
-- 예: `magazine/page.tsx` (서버)에서 magazines 데이터 fetch → `<MagazineShelf magazines={data} />` (클라이언트)
+- **기본은 서버 컴포넌트.** `app/(public)/**/page.tsx`는 서버에서 Supabase fetch → 클라이언트 컴포넌트에 props 전달(하이브리드).
+- **`'use client'`**는 상호작용 컴포넌트에만: Navigation, HeroCarousel, MagazineShelf, BlogLibrary, DetailModal, AiInsight, ThemeProvider, SearchOverlay, TipTapEditor, 카드류(hover) 등.
+- 하이브리드 예: `magazine/page.tsx`(서버, magazines fetch) → `<MagazineShelf magazines={data} />`(클라이언트).
 
 ---
 
-## 3. 컴포넌트 아키텍처
+## 3. 데이터 계층 & 캐싱 ⭐
 
-### 3.1 Navigation (`components/Navigation.tsx`)
+### 3.1 Supabase 클라이언트 (`lib/supabase.ts`)
+4-way 전략 — 용도별로 골라 쓴다:
 
-```typescript
-'use client';
+| export | 키 | 캐시 | 용도 |
+|--------|----|------|------|
+| `supabase` | anon | **ISR 호환**(기본 fetch) | 공개 페이지 서버 읽기 (기본 선택) |
+| `createPublicAdminClient()` | service_role | **ISR 호환** | 공개 페이지에서 RLS 우회 필요한 읽기만 |
+| `supabaseNoCache` | anon | `no-store` | 항상 최신 필요한 실시간 읽기 |
+| `createAdminClient()` | service_role | `no-store` | Admin UI·API route 쓰기/관리 |
 
-interface NavigationProps {
-  // Next.js에서는 usePathname()으로 현재 경로 감지 — props 불필요
-}
+브라우저(Admin): `lib/supabase-browser.ts`의 `createBrowserClient`(@supabase/ssr) — 쿠키 세션을 미들웨어와 공유.
 
-// 상태: mobileOpen (boolean)
-// 동작: Link 컴포넌트로 라우팅, 모바일 풀스크린 메뉴 토글
-// 반응형: 768px 브레이크포인트 — 데스크톱 메뉴 / 모바일 햄버거
-// 스타일: fixed top, z-100, blur 배경, 1px 하단 보더
-```
+### 3.2 캐싱 규칙 (Next.js Data Cache / ISR)
+- 공개 페이지는 세그먼트에 **`export const revalidate = <초>`**(예: blog 300s) + 쿼리에 **`{ next: { tags: ['blogs'] } }`** 태그.
+- 발행/수정 시 `app/api/revalidate/route.ts` → **`revalidateTag('blogs')` / `revalidatePath`**로 무효화.
+- **예약발행**: 모든 공개 쿼리에 `.or('publish_at.is.null,publish_at.lte.<now>')`.
+- `no-store`는 예약발행 체크·admin·유저별에만. ⚠️ "모든 fetch no-store"는 폐기된 옛 규칙.
 
-**주요 구현 포인트:**
-- `usePathname()`으로 현재 페이지 하이라이트
-- Magazine 경로 (`/magazine`와 `/magazine/[id]` 모두) 하이라이트
-- `next/link`의 `Link` 컴포넌트 사용
-- 모바일 메뉴 열 때 `body overflow: hidden` 처리
-
-### 3.2 Footer (`components/Footer.tsx`)
-
-```typescript
-// 서버 컴포넌트 가능 (onClick은 Link로 대체)
-interface FooterProps {}
-
-// 3컬럼 그리드: 브랜드 + Explore 링크 + Contact
-// 하단: 저작권 + 아카이브 라벨
-// 배경: #000, 텍스트: white 계열 투명도
-```
-
-### 3.3 HeroCarousel (`components/HeroCarousel.tsx`)
-
-```typescript
-'use client';
-
-interface HeroCarouselProps {
-  items: Blog[];  // 최근 블로그 5개
-  onItemClick: (item: Blog) => void;
-}
-
-// 상태: idx (number) — 현재 슬라이드 인덱스
-// useEffect: 6초 자동재생 setInterval
-// 동작: prev/next 버튼, 인디케이터 도트, 아이템 클릭 시 모달
-// 높이: 85vh
-// 전환: opacity 1s ease
-```
-
-**핵심 구현:**
-- `useEffect`로 6초 `setInterval` (cleanup 필수)
-- 이전/다음 버튼: `(idx - 1 + length) % length`, `(idx + 1) % length`
-- 인디케이터: active는 width 48px, inactive는 32px
-- 이미지: `filter: saturate(1.5)`
-
-### 3.4 MagazineShelf (`components/MagazineShelf.tsx`) ⭐ 핵심
-
-```typescript
-'use client';
-
-interface MagazineShelfProps {
-  magazines: Magazine[];
-}
-
-// 상태: hovered (number) — 현재 호버된 아이템 인덱스
-// useRef: scrollRef — 가로 스크롤 컨테이너
-// useEffect: wheel 이벤트 리스너 (deltaY → scrollLeft)
-// 동작: hover 시 width 확장, 클릭 시 /magazine/[id]로 라우팅
-```
-
-**핵심 구현:**
-- `useCallback`으로 wheel 핸들러 메모이제이션
-- `{ passive: false }` 옵션으로 `preventDefault()` 가능하게
-- width 전환: `transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1)`
-- Spine과 Cover 크로스페이드: opacity + transform 전환
-- Cover에 `transition-delay: 0.15s` (나타날 때)
-- `next/navigation`의 `useRouter()`로 클릭 시 라우팅
-- 끝에 `8vw` 빈 공간 (패딩 역할)
-
-### 3.5 BlogLibrary (`components/BlogLibrary.tsx`)
-
-```typescript
-'use client';
-
-interface BlogLibraryProps {
-  blogs: Blog[];
-  onItemClick: (item: Blog) => void;
-}
-
-// 상태: activeCategory (string) — 'All' | 'Daily' | 'School' | 'Kids' | 'Travel' | 'Food'
-// 필터: activeCategory === 'All' ? 전체 : category 일치
-// 그리드: auto-fill, minmax(min(320px, 100%), 1fr)
-```
-
-### 3.6 ArticleGrid (`components/ArticleGrid.tsx`)
-
-```typescript
-'use client';
-
-interface ArticleGridProps {
-  articles: Article[];
-  onItemClick: (item: Article) => void;
-}
-
-// 그리드: auto-fill, minmax(min(300px, 100%), 1fr)
-// 카드: 3:4 이미지 + 날짜/저자 + 제목
-// hover: translateY(-16px) + shadow 강화
-```
-
-### 3.7 DetailModal (`components/DetailModal.tsx`) ⭐
-
-```typescript
-'use client';
-
-interface DetailModalProps {
-  item: Article | Blog | null;
-  onClose: () => void;
-}
-
-// 상태: aiInsight (string), loading (boolean)
-// 동작: AI Insight 버튼 클릭 → /api/ai-insight 호출
-// 레이아웃: 오른쪽 슬라이드인, max-width 900px
-// 애니메이션: 백드롭 fade-in + 패널 slide-right
-```
-
-**핵심 구현:**
-- 백드롭 클릭 시 닫기
-- ESC 키로 닫기 (useEffect + keydown)
-- body scroll 잠금 (모달 열릴 때)
-- AI Insight: `/api/ai-insight` POST → 응답 표시
-- 드롭캡: 첫 글자 분리 렌더링
-- 21:9 하단 이미지
-
-### 3.8 AiInsight (`components/AiInsight.tsx`)
-
-```typescript
-'use client';
-
-interface AiInsightProps {
-  title: string;
-  content: string;
-}
-
-// 상태: insight (string), loading (boolean)
-// 버튼 클릭 → fetch('/api/ai-insight', { method: 'POST', body: { title, content } })
-// 결과: zoom-in 애니메이션으로 표시
-```
-
-### 3.9 BlogCard / ArticleCard
-
-```typescript
-'use client';
-
-interface BlogCardProps {
-  blog: Blog;
-  onClick: () => void;
-  staggerIndex: number;  // 1~4
-}
-
-interface ArticleCardProps {
-  article: Article;
-  onClick: () => void;
-  staggerIndex: number;
-}
-
-// onMouseEnter/Leave로 hover 효과 (translateY, boxShadow)
-// 또는 Tailwind group hover로 처리
-```
+### 3.3 페이지별 주요 소스
+| 페이지 | 테이블 |
+|--------|--------|
+| `/` Landing | blogs(hero/intro), landing_photos, hero_slides |
+| `/about` | family_members |
+| `/magazine`·`/magazine/[id]` | magazines (+ articles) |
+| `/blog`(+category/tag/[slug]) | blogs (published + publish_at 게이트), comments |
+| `/gallery` | gallery |
+| `/mairangi-notes` | 뉴스레터 아카이브 |
 
 ---
 
-## 4. 데이터 흐름
+## 4. API 라우트 (`app/api/`) — 용도별
 
-### Supabase 클라이언트 설정
+- **AI**: `ai-insight`(Gemini 2.5 Flash, `@google/genai` — 블로그 감상평, DB 30일 캐시) · `ai-seo`(Claude Haiku 4.5, `@anthropic-ai/sdk` — 메타 생성) · `carousel/ai-layout`(Gemini — 10슬라이드 레이아웃).
+- **Carousel/Magazine**: `carousel/*`(generate, caption, download, proxy-image, save-content) · `carousel-v3/*` · `magazine/capture`(puppeteer-core + chromium-min) · `og`(@vercel/og).
+- **콘텐츠/캐시**: `revalidate`(태그/경로 무효화) · `preview`·`preview-exit`(Draft Mode) · `view`(조회수) · `search`.
+- **뉴스레터/구독**: `subscribe` · `unsubscribe` · `send-newsletter`·`send-test-newsletter`·`newsletter-preview`(Resend) · `process-welcome-sequence`.
+- **기타**: `comments` · `instagram`.
 
-```typescript
-// lib/supabase.ts
-import { createClient } from '@supabase/supabase-js';
-
-// 서버 컴포넌트용 (SSR)
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-// 관리자용 (서버 사이드, service_role key)
-export const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-```
-
-### 페이지별 데이터 fetch
-
-| 페이지 | 테이블 | 쿼리 |
-|--------|--------|------|
-| Landing `/` | blogs | `SELECT * FROM blogs WHERE published = true ORDER BY created_at DESC LIMIT 5` (히어로) + 전체 (Intro) |
-| About `/about` | family_members | `SELECT * FROM family_members ORDER BY sort_order` |
-| Magazine Shelf `/magazine` | magazines | `SELECT * FROM magazines ORDER BY created_at DESC` |
-| Magazine Issue `/magazine/[id]` | magazines + articles | `SELECT * FROM magazines WHERE id = $1` + `SELECT * FROM articles WHERE magazine_id = $1` |
-| Blog `/blog` | blogs | `SELECT * FROM blogs WHERE published = true ORDER BY created_at DESC` |
-
-### AI Insight API Route
-
-```typescript
-// app/api/ai-insight/route.ts
-// POST { title: string, content: string }
-// → Claude API 호출 (process.env.ANTHROPIC_API_KEY — 서버 전용!)
-// → { insight: string }
-```
+> ⚠️ AI 모델을 바꾸면 이 표와 CLAUDE.md 기술 스택 줄을 함께 갱신.
 
 ---
 
-## 5. 타입 정의
+## 5. 인증 & 미들웨어 (`middleware.ts`)
 
-```typescript
-// lib/types.ts
-
-export interface Magazine {
-  id: string;            // '2026-03'
-  year: string;
-  month_name: string;    // 'Mar'
-  title: string;
-  editor: string;
-  image_url: string;
-  created_at?: string;
-}
-
-export interface Article {
-  id: number;
-  magazine_id: string;   // FK → magazines.id
-  title: string;
-  author: string;
-  date: string;          // '2026.03.02'
-  image_url: string;
-  content: string;
-  created_at?: string;
-}
-
-export interface Blog {
-  id: number;
-  category: 'Daily' | 'School' | 'Kids' | 'Travel' | 'Food';
-  title: string;
-  author: string;        // default 'Yussi'
-  date: string;
-  image_url: string;
-  content: string;
-  slug: string;
-  meta_description?: string;
-  og_image_url?: string;
-  published: boolean;
-  created_at?: string;
-}
-
-export interface FamilyMember {
-  id: number;
-  name: string;
-  role: string;
-  bio: string;
-  image_url: string;
-  sort_order: number;
-}
-
-// 모달용 통합 타입
-export type DetailItem = (Article | Blog) & {
-  category?: string;  // Blog에만 있음
-};
-```
+- `@supabase/ssr` `createServerClient`로 **쿠키 세션 검증** → `/mhj-desk/*` 보호(로그인+MFA). 공개 경로: `/mhj-desk/login`, `/mhj-desk/mfa-setup`, `/mhj-desk/mfa-verify`.
+- `/internal/render/*`는 세션 대신 **`CAPTURE_SECRET` 토큰** 검증(캡처 파이프라인 전용).
+- 로그인 흐름: login → mfa-verify → `/mhj-desk`. 브라우저/서버가 동일 쿠키 세션 공유(supabase-browser ↔ middleware).
 
 ---
 
-## 6. SEO 메타데이터
+## 6. 타입 (`lib/types.ts`)
+Magazine · Article · ArticlePage · DirectoryItem · ArticleReaction · Blog · Comment · FamilyMember · HeroSlide · HeroCarouselItem · CarouselSlide · GalleryItem · LandingPhoto · DetailItem(= Article | Blog 모달 통합).
 
-### 페이지별 메타데이터
+## 7. SEO / 메타데이터
+- 각 page: `metadata` 또는 `generateMetadata`(동적: magazine/[id], blog/[slug]).
+- 루트 `layout.tsx`: `metadataBase`, Organization JSON-LD. 블로그 상세: BlogPosting JSON-LD.
+- `sitemap.ts`(정적+동적 URL) · `robots.ts`(`/mhj-desk` 차단, AI봇 정책) · `feed.xml`(RSS) · `manifest.ts`(PWA) · `llms.txt`/`llms-full.txt`(에이전트 인덱스 — SEO용 아님).
+- IndexNow(`lib/indexnow.ts`)로 발행 시 색인 알림.
 
-```typescript
-// app/(public)/page.tsx
-export const metadata: Metadata = {
-  title: 'MY MAIRANGI — Family Archive',
-  description: '뉴질랜드 오클랜드 노스쇼어에서의 특별한 나날들',
-  openGraph: { ... },
-};
+## 8. lib 유틸
+supabase(.ts/-browser) · site-settings · types · utils · constants · date-helpers · analytics · indexnow · pillars · magazine-themes · newsletter-template · welcome-emails · capture-magazine · storypress-faqs · validate-affiliate-links · carousel-v3/.
 
-// app/(public)/about/page.tsx
-export const metadata: Metadata = {
-  title: 'About — MY MAIRANGI',
-  description: '기자 출신의 아빠와 석사 과정의 엄마, 세 딸의 이야기',
-};
-
-// app/(public)/magazine/page.tsx
-export const metadata: Metadata = {
-  title: 'Magazine — MY MAIRANGI',
-  description: '마이랑이 가족의 월간 매거진 아카이브',
-};
-
-// app/(public)/magazine/[id]/page.tsx
-export async function generateMetadata({ params }): Promise<Metadata> {
-  const magazine = await fetchMagazine(params.id);
-  return {
-    title: `${magazine.title} — MY MAIRANGI Magazine`,
-    description: `${magazine.year} ${magazine.month_name} Edition`,
-  };
-}
-
-// app/(public)/blog/page.tsx
-export const metadata: Metadata = {
-  title: 'Blog Library — MY MAIRANGI',
-  description: '사회복지사 석사 과정과 일상을 기록하는 개인 서재',
-};
+## 9. 환경변수 (`.env.local`, 서버 전용 키 클라이언트 노출 금지)
+```
+NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY        # 서버 전용
+GOOGLE_AI_API_KEY                # Gemini (ai-insight, carousel/ai-layout)
+ANTHROPIC_API_KEY                # Claude (ai-seo)
+RESEND_API_KEY                   # 뉴스레터
+CAPTURE_SECRET                   # /internal/render 캡처 게이트
 ```
 
-### 기타 SEO
-- `app/sitemap.ts`: 정적 페이지 + 동적 매거진/블로그 URL
-- `app/robots.ts`: `/admin` 차단
-- `app/layout.tsx`: `<html lang="ko">`, JSON-LD (WebSite, Organization)
-- 블로그 상세: BlogPosting JSON-LD (향후 `/blog/[slug]` 페이지 추가 시)
-
----
-
-## 7. 환경변수
-
-```env
-# .env.local
-NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...  (서버 전용)
-ANTHROPIC_API_KEY=sk-ant-...      (서버 전용, API Route에서만 사용)
-```
-
-## 8. 포트 설정
-
-개발 서버와 프로덕션 서버 모두 **포트 3003** 고정.
-
-```json
-// package.json scripts
-"dev": "next dev -p 3003",
-"start": "next start -p 3003"
-```
-
-- `npm run dev` → http://localhost:3003
-- `-p 3003` 옵션으로 포트 고정 (기본 3000 대신)
-
----
-
-## 8. 모달 상태 관리 전략
-
-REFERENCE_DESIGN.jsx에서 모달은 `selectedItem` 상태로 관리됨. Next.js에서도 동일하게 **클라이언트 상태**로 처리:
-
-```
-방법 1: 각 페이지 컴포넌트에서 useState로 selectedItem 관리
-방법 2: React Context (ModalProvider)로 전역 관리
-방법 3: URL search params (?detail=123) — SEO에 유리하지만 복잡도 증가
-
-→ 권장: 방법 1 (단순함 우선). 필요 시 방법 2로 전환.
-```
-
-### 모달이 필요한 페이지
-- Landing (히어로 캐러셀 아이템 클릭)
-- Magazine Issue (아티클 카드 클릭)
-- Blog Library (블로그 카드 클릭)
-
-→ 각 페이지의 클라이언트 래퍼에서 `selectedItem` 상태 + `DetailModal` 렌더링
-
----
-
-## 9. 관리자 페이지 구조 (간략)
-
-```
-/admin
-├── layout.tsx        ← Supabase Auth 세션 체크, 리디렉트
-├── page.tsx          ← 대시보드 (통계 카드)
-├── login/page.tsx    ← 이메일/비밀번호 로그인
-├── blogs/
-│   ├── page.tsx      ← 블로그 목록 (검색, 필터, published 토글)
-│   ├── new/page.tsx  ← 블로그 작성 (TipTap 에디터)
-│   └── [id]/edit/page.tsx ← 블로그 수정
-└── magazines/
-    ├── page.tsx      ← 매거진 목록
-    ├── new/page.tsx  ← 매거진 이슈 생성
-    └── [id]/
-        ├── page.tsx  ← 아티클 목록
-        └── articles/
-            ├── new/page.tsx
-            └── [articleId]/edit/page.tsx
-```
+## 10. 포트
+dev/start 모두 **3003 고정**(`next dev -p 3003`). dev 실행 중 `npm run build` 금지(.next 캐시 오염).

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY ?? '');
+const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY ?? '' });
 
 const LAYOUT_TYPES = [
   'cover-arch','cover-full-image','cover-split','cover-minimal','cover-polaroid','cover-magazine','cover-dark',
@@ -50,14 +50,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'GOOGLE_AI_API_KEY not configured' }, { status: 500 });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const result = await genAI.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Content to convert into carousel:\n\n${text.slice(0, 8000)}`,
+      config: { systemInstruction: SYSTEM_PROMPT },
+    });
 
-    const result = await model.generateContent([
-      SYSTEM_PROMPT,
-      `\nContent to convert into carousel:\n\n${text.slice(0, 8000)}`,
-    ]);
-
-    const raw = result.response.text();
+    const raw = result.text ?? '';
     // Strip potential markdown fences
     const cleaned = raw.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
 
