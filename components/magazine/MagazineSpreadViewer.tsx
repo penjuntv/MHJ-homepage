@@ -11,6 +11,7 @@ import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import { isLegacyPngIssue } from '@/lib/magazine-themes';
 import CoverPreview from './CoverPreview';
 import TocPreview from './TocPreview';
+import { MAG_PAGE_W, MAG_PAGE_H } from './canvas-constants';
 
 interface PageItem {
   type: 'cover' | 'toc' | 'article' | 'extra' | 'legacy-png';
@@ -101,9 +102,10 @@ const SWIPE_THRESHOLD = 0.22;   // 페이지 너비의 22% 이상 스와이프 �
 const AUTO_HIDE_MS = 3000;
 
 /* 고정 캔버스: 지면은 항상 620×812(42:55)로 레이아웃하고 scale로만 축소.
-   → 창 크기/줌과 무관하게 지면 내부 레이아웃·분량이 항상 동일. */
-const PAGE_W = 620;
-const PAGE_H = (620 * 55) / 42; // ≈ 811.9
+   → 창 크기/줌과 무관하게 지면 내부 레이아웃·분량이 항상 동일.
+   치수는 canvas-constants 단일 소스에서 파생. */
+const PAGE_W = MAG_PAGE_W;
+const PAGE_H = MAG_PAGE_H;
 
 export default function MagazineSpreadViewer({ magazine, articles }: Props) {
   const router = useRouter();

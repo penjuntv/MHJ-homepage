@@ -1,13 +1,15 @@
 'use client';
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { MAG_PAGE_W, MAG_PAGE_H } from './canvas-constants';
 
 /* ── 매거진 고정 캔버스 ──
    모든 매거진 지면은 620×812(42:55) 고정 크기로 레이아웃하고,
    화면에는 transform: scale()로만 축소해서 보여준다.
-   → 어떤 창 크기/줌에서도 지면 내부 레이아웃·분량이 픽셀 단위로 동일. */
-export const MAG_CANVAS_W = 620;
-export const MAG_CANVAS_H = (620 * 55) / 42; // ≈ 811.9
+   → 어떤 창 크기/줌에서도 지면 내부 레이아웃·분량이 픽셀 단위로 동일.
+   치수는 canvas-constants의 단일 소스에서 파생(하위 호환용 alias 유지). */
+export const MAG_CANVAS_W = MAG_PAGE_W;
+export const MAG_CANVAS_H = MAG_PAGE_H;
 
 interface MagazineCanvasProps {
   children: ReactNode;

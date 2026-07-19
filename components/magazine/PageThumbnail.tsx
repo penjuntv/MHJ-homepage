@@ -7,6 +7,7 @@ import ArticlePageRenderer from './ArticlePageRenderer';
 import type { Magazine, Article } from '@/lib/types';
 import type { StyleOverrides } from './templates/shared';
 import { isLegacyPngIssue } from '@/lib/magazine-themes';
+import { MAG_PAGE_W, MAG_PAGE_H } from './canvas-constants';
 
 export type PageThumbnailType = 'cover' | 'toc' | 'article';
 
@@ -18,14 +19,14 @@ interface PageThumbnailProps {
 }
 
 const NATIVE_W: Record<PageThumbnailType, number> = {
-  cover: 420,        // CoverPreview fixed 420x594
-  toc: 420,          // TocPreview fixed 420x594
-  article: 620,      // MagazinePage / ArticlePageRenderer 기준 (42:55)
+  cover: 420,           // CoverPreview fixed 420x550
+  toc: 420,             // TocPreview fixed 420x550
+  article: MAG_PAGE_W,  // MagazinePage / ArticlePageRenderer 기준 (42:55)
 };
 const NATIVE_H: Record<PageThumbnailType, number> = {
-  cover: 550,                           // 420 × 55/42 = 42:55 정확
+  cover: 550,                        // 420 × 55/42 = 42:55 정확
   toc: 550,
-  article: Math.round(620 * 55 / 42),   // 812
+  article: Math.round(MAG_PAGE_H),   // 812
 };
 
 export default function PageThumbnail({
