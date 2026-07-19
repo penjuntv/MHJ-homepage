@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Heart, Share2, List, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase-browser';
@@ -100,6 +100,11 @@ interface Props {
 const SWIPE_THRESHOLD = 0.22;   // 페이지 너비의 22% 이상 스와이프 시 넘김
 const AUTO_HIDE_MS = 3000;
 
+/* 고정 캔버스: 지면은 항상 620×812(42:55)로 레이아웃하고 scale로만 축소.
+   → 창 크기/줌과 무관하게 지면 내부 레이아웃·분량이 항상 동일. */
+const PAGE_W = 620;
+const PAGE_H = (620 * 55) / 42; // ≈ 811.9
+
 export default function MagazineSpreadViewer({ magazine, articles }: Props) {
   const router = useRouter();
   const sorted = useMemo(
@@ -116,6 +121,8 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
   const [uiVisible, setUiVisible] = useState(true);
 
   const pageBodyRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [pageScale, setPageScale] = useState(1);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartX = useRef<number | null>(null);
   const touchCurrentX = useRef<number | null>(null);
@@ -184,6 +191,24 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
         setPages(flat);
       });
   }, [magazine.id, sorted, isLegacyPng]);
+
+  /* ─── 고정 캔버스 스케일 계산 (가용 영역에 contain) ─── */
+  useLayoutEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const measure = () => {
+      if (stage.clientWidth === 0 || stage.clientHeight === 0) return; // 미장착 시 바닥 고정 방지
+      // 데스크톱 좌우 화살표는 지면 바깥(-52px, 40px 폭)에 있으므로 폭이 제약일 때
+      // 양쪽 여유(≈56px)를 확보해야 화살표가 잘리지 않는다. (모바일은 CSS로 무시됨)
+      const availW = Math.max(1, stage.clientWidth - 112);
+      const s = Math.min(1, availW / PAGE_W, stage.clientHeight / PAGE_H);
+      setPageScale(Math.max(s, 0.1));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(stage);
+    return () => ro.disconnect();
+  }, []);
 
   /* ─── URL ?page 초기화 (pages 로드 후) ─── */
   useEffect(() => {
@@ -437,14 +462,16 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
   const barBg = 'rgba(10,10,10,0.6)';
 
   return (
-    <div style={{
-      minHeight: '100vh',
+    <div className="mv-root" style={{
+      /* 고정 높이 — 스테이지 측정이 콘텐츠 크기에 되먹임되지 않도록 함 (모바일은 CSS로 auto 복원).
+         높이는 .mv-root 규칙(100vh→100dvh 폴백)에서 지정 — 모바일 브라우저 툴바 대응. */
       background: '#0A0A0A',
       display: 'flex', flexDirection: 'column',
       color: barText,
       position: 'relative',
     }}>
       <style>{`
+        .mv-root { height: 100vh; height: 100dvh; }
         @keyframes mvSlideInRight { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes mvSlideInLeft  { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
       `}</style>
@@ -673,9 +700,13 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
         boxSizing: 'border-box',
         overflowY: 'auto',
       }}>
+        {/* 가용 영역 측정용 스테이지 — 지면은 620×812 고정, scale로만 축소 */}
+        <div ref={stageRef} className="mv-stage" style={{
+          flex: 1, minHeight: 0, width: '100%', alignSelf: 'stretch',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
         <div className="mv-page-wrap" style={{
-          width: '100%',
-          maxWidth: 'min(620px, calc((100vh - 160px) * 42 / 55))',
+          width: PAGE_W * pageScale,
           position: 'relative',
         }}>
           {/* 좌 화살표 (데스크톱: 페이지 바깥) */}
@@ -732,15 +763,17 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
             <ChevronRight size={18} />
           </button>
 
-          {/* 페이지 본체 — 터치/스와이프 */}
+          {/* 페이지 본체 — 터치/스와이프. 내부는 620px 고정 레이아웃 + scale */}
           <div
             ref={pageBodyRef}
             key={`page-${currentPage}-${direction}`}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
+            className="mv-page-body"
             style={{
-              width: '100%',
+              width: PAGE_W * pageScale,
+              height: PAGE_H * pageScale,
               boxShadow: '0 8px 32px rgba(0,0,0,0.30), 0 2px 10px rgba(0,0,0,0.2)',
               overflow: 'hidden',
               animation: direction === 'next'
@@ -749,7 +782,16 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
               touchAction: 'pan-y',
             }}
           >
-            {renderContent()}
+            <div
+              className="mv-page-scale"
+              style={{
+                width: PAGE_W,
+                transform: `scale(${pageScale})`,
+                transformOrigin: 'top left',
+              }}
+            >
+              {renderContent()}
+            </div>
           </div>
 
           {/* 모바일 터치 존 (보이지 않음) + 하단 chevron pair */}
@@ -773,6 +815,7 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
               zIndex: 2,
             }}
           />
+        </div>
         </div>
 
         {/* ── 모바일 하단 chevron ── */}
@@ -822,10 +865,15 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
 
         <style>{`
           @media (max-width: 767px) {
+            .mv-root { height: auto !important; min-height: 100vh; min-height: 100dvh; }
             .mv-nav-side { display: none !important; }
             .mv-mobile-bottom { display: flex !important; }
             .mv-canvas { padding: 56px 0 80px !important; align-items: stretch !important; }
-            .mv-page-wrap { max-width: 100% !important; }
+            /* 모바일: 스케일 대신 세로 흐름(리플로우) — 고정 캔버스 해제 */
+            .mv-stage { display: block !important; flex: none !important; min-height: 0 !important; }
+            .mv-page-wrap { width: 100% !important; }
+            .mv-page-body { width: 100% !important; height: auto !important; }
+            .mv-page-scale { width: 100% !important; transform: none !important; }
             .mv-page-wrap .mag-page-root { aspect-ratio: unset !important; height: auto !important; min-height: calc(100vh - 200px); overflow: visible !important; }
           }
           @media (min-width: 768px) {

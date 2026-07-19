@@ -29,7 +29,7 @@ export default function TitleCardTemplate({
           style={{
             fontFamily: '"Inter", sans-serif',
             fontWeight: 600,
-            fontSize: 'clamp(7px, 0.9vw, 10px)',
+            fontSize: 'clamp(7px, 1.61cqw, 10px)',
             letterSpacing: '0.35em',
             textTransform: 'uppercase',
             color: accentColor,
@@ -44,7 +44,7 @@ export default function TitleCardTemplate({
             style={{
               fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
-              fontSize: 'clamp(28px, 4.8vw, 50px)',
+              fontSize: 'clamp(28px, 8.06cqw, 50px)',
               lineHeight: 1.08,
               color: '#1A1A1A',
               margin: 0,
@@ -60,7 +60,7 @@ export default function TitleCardTemplate({
               fontFamily: '"Inter", sans-serif',
               fontWeight: 400,
               fontStyle: 'italic',
-              fontSize: 'clamp(11px, 1.35vw, 15px)',
+              fontSize: 'clamp(11px, 2.42cqw, 15px)',
               lineHeight: 1.55,
               color: '#1A1A1A',
               marginTop: '1.4em',
@@ -89,7 +89,7 @@ export default function TitleCardTemplate({
             style={{
               fontFamily: '"Inter", sans-serif',
               fontWeight: 500,
-              fontSize: 'clamp(7px, 0.9vw, 10px)',
+              fontSize: 'clamp(7px, 1.61cqw, 10px)',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
               color: '#9B9590',

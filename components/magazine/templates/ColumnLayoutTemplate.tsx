@@ -116,7 +116,10 @@ export default function ColumnLayoutTemplate({
           .col-grid-${uid} {
             grid-template-columns: 1fr !important;
           }
-          .col-imgs-${uid} { order: -1 !important; }
+          /* 1컬럼 모드: 세로 스택(flex 1 1 0)은 auto 행에서 높이 0으로
+             붕괴하므로, 1:1 정사각 3장 가로 스트립으로 전환 */
+          .col-imgs-${uid} { order: -1 !important; flex-direction: row !important; }
+          .col-imgs-${uid} > div { aspect-ratio: 1 / 1; }
           .col-text-${uid} { order: 0 !important; }
         }
       `}</style>

@@ -67,22 +67,27 @@ function GalleryStack({
   hideTitle?: boolean;
 }) {
   return (
-    <div style={{ width: '100%', height: '100%', background: bgColor, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3%', padding: '3%' }}>
+    <div style={{ width: '100%', height: '100%', background: bgColor, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '3%', gap: '3%', boxSizing: 'border-box' }}>
+      {/* 이미지들이 가용 세로 공간을 균등 분할 → 지면(812px)을 절대 넘지 않음.
+         각 이미지는 cover-fit(에디토리얼 콘택트시트 방식). */}
+      <div style={{ flex: '1 1 0', minHeight: 0, display: 'flex', flexDirection: 'column', gap: '3%' }}>
         {images.map((src, i) => (
-          <div key={i}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={src}
-              alt=""
-              style={{ width: '100%', height: 'auto', display: 'block' }}
-            />
+          <div key={i} style={{ flex: '1 1 0', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: '1 1 0', minHeight: 0, overflow: 'hidden' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt=""
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            </div>
             {captions[i] && (
               <div
                 style={{
                   marginTop: '0.4em',
+                  flexShrink: 0,
                   fontFamily: '"Inter", sans-serif',
-                  fontSize: 'clamp(7px, 0.85vw, 10px)',
+                  fontSize: 'clamp(7px, 1.61cqw, 10px)',
                   lineHeight: 1.4,
                   color: '#9B9590',
                 }}
@@ -94,13 +99,13 @@ function GalleryStack({
         ))}
       </div>
       {(content || title) && (
-        <div style={{ padding: '3% 5%', flexShrink: 0 }}>
+        <div style={{ flexShrink: 0 }}>
           {!hideTitle && title && (
             <div
               style={{
                 fontFamily: '"Playfair Display", "Noto Sans KR", serif',
                 fontWeight: 900,
-                fontSize: 'clamp(16px, 2vw, 22px)',
+                fontSize: 'clamp(16px, 3.55cqw, 22px)',
                 color: '#1A1A1A',
                 lineHeight: 1.15,
                 marginBottom: '0.5em',
@@ -112,7 +117,7 @@ function GalleryStack({
           <div
             style={{
               fontFamily: '"Inter", sans-serif',
-              fontSize: 'clamp(10px, 1.1vw, 13px)',
+              fontSize: 'clamp(10px, 2.1cqw, 13px)',
               lineHeight: 1.6,
               color: '#1A1A1A',
             }}
@@ -125,7 +130,7 @@ function GalleryStack({
                 paddingTop: '0.6em',
                 borderTop: `1px solid ${accentColor}22`,
                 fontFamily: '"Inter", sans-serif',
-                fontSize: 'clamp(8px, 0.9vw, 10px)',
+                fontSize: 'clamp(8px, 1.61cqw, 10px)',
                 fontWeight: 600,
                 letterSpacing: '0.2em',
                 color: '#9B9590',

@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Article, Magazine } from '@/lib/types';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
+import MagazinePage from '@/components/magazine/MagazinePage';
+import MagazineCanvas from '@/components/magazine/MagazineCanvas';
 
 export const revalidate = 600;
 
@@ -159,34 +161,37 @@ export default async function MagazineArticlePage(props: Props) {
             </Link>
           </nav>
 
-          <article
-            style={{
-              background: bgColor,
-              borderRadius: 12,
-              overflow: 'hidden',
-              aspectRatio: '4 / 5',
-              maxHeight: '85vh',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-            }}
-          >
-            <ArticlePageRenderer
-              template={article.template}
-              title={article.title}
-              author={article.author}
-              content={article.content ?? ''}
-              images={(article.article_images ?? []).filter(Boolean) as string[]}
-              imagePositions={(article.image_positions ?? []) as string[]}
-              captions={(article.image_captions ?? []) as string[]}
-              accentColor={accentColor}
-              bgColor={bgColor}
-              kicker={article.kicker}
-              subtitle={article.subtitle}
-              sidebarTitle={article.sidebar_title}
-              sidebarBody={article.sidebar_body}
-              directoryItems={article.directory_items}
-              quoteText={article.quote_text}
-              quoteAttribution={article.quote_attribution}
-            />
+          <article>
+            <MagazineCanvas viewportHeightFraction={0.85}>
+              <div
+                style={{
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                }}
+              >
+                <MagazinePage bgColor={bgColor}>
+                  <ArticlePageRenderer
+                    template={article.template}
+                    title={article.title}
+                    author={article.author}
+                    content={article.content ?? ''}
+                    images={(article.article_images ?? []).filter(Boolean) as string[]}
+                    imagePositions={(article.image_positions ?? []) as string[]}
+                    captions={(article.image_captions ?? []) as string[]}
+                    accentColor={accentColor}
+                    bgColor={bgColor}
+                    kicker={article.kicker}
+                    subtitle={article.subtitle}
+                    sidebarTitle={article.sidebar_title}
+                    sidebarBody={article.sidebar_body}
+                    directoryItems={article.directory_items}
+                    quoteText={article.quote_text}
+                    quoteAttribution={article.quote_attribution}
+                  />
+                </MagazinePage>
+              </div>
+            </MagazineCanvas>
           </article>
 
           <nav

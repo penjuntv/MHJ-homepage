@@ -26,7 +26,7 @@ export default function PhotoHeroTemplate({
   const so = article.style_overrides ?? {};
   const bg = so.bgColor ?? bgColor;
   const align: 'left' | 'center' = so.textAlign ?? 'left';
-  const titleClamp = overrideTitleClamp(so, 'clamp(22px, 3.4vw, 38px)');
+  const titleClamp = overrideTitleClamp(so, 'clamp(22px, 6.13cqw, 38px)');
 
   const isDark = isDarkBg(bg);
   const ink = isDark ? '#FDFCFA' : '#1A1A1A';
@@ -48,7 +48,7 @@ export default function PhotoHeroTemplate({
       <style>{`
         .hero-body-${uid} p {
           margin: 0;
-          font-size: clamp(11px, 1.3vw, 14px);
+          font-size: clamp(11px, 2.26cqw, 14px);
           font-style: italic;
           line-height: 1.55;
           color: ${isDark ? 'rgba(253,252,250,0.82)' : '#1A1A1A'};
@@ -98,7 +98,7 @@ export default function PhotoHeroTemplate({
               fontFamily: '"Inter", sans-serif',
               background: 'rgba(26,26,26,0.55)',
               color: '#FDFCFA',
-              fontSize: 'clamp(7px, 0.82vw, 9px)',
+              fontSize: 'clamp(7px, 1.45cqw, 9px)',
               lineHeight: 1.4,
               padding: '0.35em 0.8em',
             }}
@@ -123,7 +123,7 @@ export default function PhotoHeroTemplate({
           style={{
             fontFamily: '"Inter", sans-serif',
             fontWeight: 600,
-            fontSize: 'clamp(7px, 0.9vw, 10px)',
+            fontSize: 'clamp(7px, 1.61cqw, 10px)',
             letterSpacing: '0.35em',
             color: accentColor,
             textTransform: 'uppercase',
@@ -161,7 +161,7 @@ export default function PhotoHeroTemplate({
               style={{
                 fontFamily: '"Inter", sans-serif',
                 fontStyle: 'italic',
-                fontSize: 'clamp(10px, 1.25vw, 14px)',
+                fontSize: 'clamp(10px, 2.26cqw, 14px)',
                 lineHeight: 1.55,
                 color: isDark ? 'rgba(253,252,250,0.82)' : '#1A1A1A',
                 display: '-webkit-box',
@@ -179,7 +179,7 @@ export default function PhotoHeroTemplate({
           style={{
             marginTop: '1em',
             fontFamily: '"Inter", sans-serif',
-            fontSize: 'clamp(7px, 0.85vw, 10px)',
+            fontSize: 'clamp(7px, 1.61cqw, 10px)',
             fontWeight: 500,
             letterSpacing: '0.25em',
             color: warm,

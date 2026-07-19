@@ -56,17 +56,16 @@ export function overrideTitleClamp(so: StyleOverrides | null | undefined, fallba
   const t = so?.titleSize;
   if (!t) return fallback;
   const min = Math.round(t * 0.6);
-  const vw = (t / 620 * 100).toFixed(1);
-  return `clamp(${min}px, ${vw}vw, ${t}px)`;
+  const cqw = (t / 620 * 100).toFixed(1);
+  return `clamp(${min}px, ${cqw}cqw, ${t}px)`;
 }
 
 export function overrideBodyClamp(so: StyleOverrides | null | undefined, fallback: string): string {
   const b = so?.bodySize;
   if (!b) return fallback;
   const min = (b * 0.9).toFixed(1);
-  const vw = (b / 620 * 100).toFixed(2);
-  const max = (b * 1.1).toFixed(1);
-  return `clamp(${min}px, ${vw}vw, ${max}px)`;
+  const cqw = (b / 620 * 100).toFixed(2);
+  return `clamp(${min}px, ${cqw}cqw, ${b}px)`;
 }
 
 export function overrideLineHeight(so: StyleOverrides | null | undefined, fallback: number): number {

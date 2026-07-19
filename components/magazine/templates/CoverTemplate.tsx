@@ -13,7 +13,7 @@ export default function CoverTemplate({
 
   const so = article.style_overrides ?? {};
   const bg = so.bgColor ?? bgColor;
-  const titleClamp = overrideTitleClamp(so, 'clamp(28px, 5.4vw, 56px)');
+  const titleClamp = overrideTitleClamp(so, 'clamp(28px, 9.03cqw, 56px)');
 
   return (
     <div
@@ -67,7 +67,7 @@ export default function CoverTemplate({
           color: '#FDFCFA',
           fontFamily: '"Playfair Display", "Noto Sans KR", serif',
           fontWeight: 400,
-          fontSize: 'clamp(22px, 3.2vw, 38px)',
+          fontSize: 'clamp(22px, 6.13cqw, 38px)',
           letterSpacing: '0.08em',
           textShadow: '0 1px 10px rgba(0,0,0,0.35)',
           lineHeight: 1,
@@ -78,7 +78,7 @@ export default function CoverTemplate({
           style={{
             fontFamily: '"Inter", sans-serif',
             fontWeight: 500,
-            fontSize: 'clamp(7px, 0.9vw, 10px)',
+            fontSize: 'clamp(7px, 1.61cqw, 10px)',
             letterSpacing: '0.35em',
             textTransform: 'uppercase',
             marginTop: '0.35em',
@@ -105,7 +105,7 @@ export default function CoverTemplate({
               style={{
                 fontFamily: '"Inter", sans-serif',
                 fontWeight: 600,
-                fontSize: 'clamp(8px, 0.95vw, 11px)',
+                fontSize: 'clamp(8px, 1.77cqw, 11px)',
                 letterSpacing: '0.3em',
                 textTransform: 'uppercase',
                 opacity: 0.82,
@@ -135,7 +135,7 @@ export default function CoverTemplate({
               fontFamily: '"Inter", sans-serif',
               fontWeight: 400,
               fontStyle: 'italic',
-              fontSize: 'clamp(10px, 1.3vw, 14px)',
+              fontSize: 'clamp(10px, 2.26cqw, 14px)',
               lineHeight: 1.5,
               color: 'rgba(253,252,250,0.88)',
               marginTop: '0.9em',
@@ -154,7 +154,7 @@ export default function CoverTemplate({
             style={{
               fontFamily: '"Inter", sans-serif',
               fontWeight: 500,
-              fontSize: 'clamp(7px, 0.9vw, 10px)',
+              fontSize: 'clamp(7px, 1.61cqw, 10px)',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
               color: 'rgba(253,252,250,0.65)',
