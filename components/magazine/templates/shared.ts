@@ -1,3 +1,5 @@
+import { MAG_PAGE_W } from '../canvas-constants';
+
 export interface TemplateTheme {
   primary: string;
   secondary: string;
@@ -56,7 +58,7 @@ export function overrideTitleClamp(so: StyleOverrides | null | undefined, fallba
   const t = so?.titleSize;
   if (!t) return fallback;
   const min = Math.round(t * 0.6);
-  const cqw = (t / 620 * 100).toFixed(1);
+  const cqw = (t / MAG_PAGE_W * 100).toFixed(1);
   return `clamp(${min}px, ${cqw}cqw, ${t}px)`;
 }
 
@@ -64,7 +66,7 @@ export function overrideBodyClamp(so: StyleOverrides | null | undefined, fallbac
   const b = so?.bodySize;
   if (!b) return fallback;
   const min = (b * 0.9).toFixed(1);
-  const cqw = (b / 620 * 100).toFixed(2);
+  const cqw = (b / MAG_PAGE_W * 100).toFixed(2);
   return `clamp(${min}px, ${cqw}cqw, ${b}px)`;
 }
 

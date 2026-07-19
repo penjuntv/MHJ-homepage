@@ -19,6 +19,7 @@ import CoverPreview from '@/components/magazine/CoverPreview';
 import TocPreview from '@/components/magazine/TocPreview';
 import MagazinePage from '@/components/magazine/MagazinePage';
 import MagazineCanvas from '@/components/magazine/MagazineCanvas';
+import { MAG_PAGE_W, MAG_PAGE_H } from '@/components/magazine/canvas-constants';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import DownloadBtn from '@/components/DownloadBtn';
 import type { ArticlePreviewData, StyleOverrides } from '@/components/magazine/templates/shared';
@@ -1014,7 +1015,7 @@ export default function MagazineDetailPage() {
           </div>
 
           {/* ─── 우: 실시간 프리뷰 (스티키, 현재 포커스 페이지만) ─── */}
-          <div className="article-preview-panel" style={{ position: 'sticky', top: '80px', minWidth: 0, width: '100%', maxWidth: 620, minHeight: 0, margin: '0 auto', alignSelf: 'start' }}>
+          <div className="article-preview-panel" style={{ position: 'sticky', top: '80px', minWidth: 0, width: '100%', maxWidth: MAG_PAGE_W, minHeight: 0, margin: '0 auto', alignSelf: 'start' }}>
             {inlineForm ? (() => {
               const totalPageCount = 1 + articlePages.length;
               const focusedExtraPage = focusedPageIdx !== null ? articlePages[focusedPageIdx] : null;
@@ -1381,12 +1382,13 @@ const zoomBtn: React.CSSProperties = {
 };
 
 /* ─── SpreadPage: 스프레드 뷰 아이템 ─── */
-/* 라이브 뷰어와 동일한 620×812(42:55) 고정 캔버스 기준 — WYSIWYG 보장 */
+/* 라이브 뷰어와 동일한 620×812(42:55) 고정 캔버스 기준 — WYSIWYG 보장.
+   치수는 canvas-constants 단일 소스에서 파생. SPREAD_SCALE은 썸네일 표시 배율(별개). */
 const SPREAD_SCALE = 0.474;
-const SPREAD_PAGE_W = 620;
-const SPREAD_PAGE_H = Math.round((SPREAD_PAGE_W * 55) / 42); // 812
+const SPREAD_PAGE_W = MAG_PAGE_W;
+const SPREAD_PAGE_H = Math.round(MAG_PAGE_H); // 812
 const SPREAD_SCALED_W = Math.round(SPREAD_PAGE_W * SPREAD_SCALE);  // 294
-const SPREAD_SCALED_H = Math.round(SPREAD_PAGE_H * SPREAD_SCALE);  // 416
+const SPREAD_SCALED_H = Math.round(SPREAD_PAGE_H * SPREAD_SCALE);  // 385
 
 function SpreadPage({ label, children, filename, onEdit, onPreview }: {
   label: string;

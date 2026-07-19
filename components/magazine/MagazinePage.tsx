@@ -1,7 +1,8 @@
 'use client';
 import type { ReactNode, CSSProperties } from 'react';
+import { MAG_ASPECT } from './canvas-constants';
 
-export const PAGE_ASPECT_RATIO = '42 / 55';
+export const PAGE_ASPECT_RATIO = MAG_ASPECT;
 export const PAGE_BG = '#FDFCFA';
 export const PAGE_INK = '#1A1A1A';
 export const PAGE_WARM_GRAY = '#9B9590';
