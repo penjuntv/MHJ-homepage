@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Heart, Share2, List, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase-browser';
@@ -12,6 +12,7 @@ import { isLegacyPngIssue } from '@/lib/magazine-themes';
 import CoverPreview from './CoverPreview';
 import TocPreview from './TocPreview';
 import { MAG_PAGE_W, MAG_PAGE_H } from './canvas-constants';
+import { useCanvasScale } from './useCanvasScale';
 
 interface PageItem {
   type: 'cover' | 'toc' | 'article' | 'extra' | 'legacy-png';
@@ -124,7 +125,6 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
 
   const pageBodyRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const [pageScale, setPageScale] = useState(1);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartX = useRef<number | null>(null);
   const touchCurrentX = useRef<number | null>(null);
@@ -194,23 +194,12 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
       });
   }, [magazine.id, sorted, isLegacyPng]);
 
-  /* ─── 고정 캔버스 스케일 계산 (가용 영역에 contain) ─── */
-  useLayoutEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-    const measure = () => {
-      if (stage.clientWidth === 0 || stage.clientHeight === 0) return; // 미장착 시 바닥 고정 방지
-      // 데스크톱 좌우 화살표는 지면 바깥(-52px, 40px 폭)에 있으므로 폭이 제약일 때
-      // 양쪽 여유(≈56px)를 확보해야 화살표가 잘리지 않는다. (모바일은 CSS로 무시됨)
-      const availW = Math.max(1, stage.clientWidth - 112);
-      const s = Math.min(1, availW / PAGE_W, stage.clientHeight / PAGE_H);
-      setPageScale(Math.max(s, 0.1));
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(stage);
-    return () => ro.disconnect();
-  }, []);
+  /* ─── 고정 캔버스 스케일 (가용 영역에 contain) ─── 공용 훅.
+     container 모드: min(1, (stageW−112)/620, stageH/812). 112 = 지면 바깥 좌우 화살표 여유. */
+  const pageScale = useCanvasScale(stageRef, {
+    heightMode: { mode: 'container' },
+    horizontalInsetPx: 112,
+  });
 
   /* ─── URL ?page 초기화 (pages 로드 후) ─── */
   useEffect(() => {

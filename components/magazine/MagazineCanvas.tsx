@@ -1,7 +1,8 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { MAG_PAGE_W, MAG_PAGE_H } from './canvas-constants';
+import { useCanvasScale } from './useCanvasScale';
 
 /* ── 매거진 고정 캔버스 ──
    모든 매거진 지면은 620×812(42:55) 고정 크기로 레이아웃하고,
@@ -31,32 +32,12 @@ export default function MagazineCanvas({
   className,
 }: MagazineCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-
-  useLayoutEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-
-    const measure = () => {
-      // 폭 0(display:none 탭·미장착)일 때 측정하면 scale이 바닥(0.1)에 고정된다 → 건너뜀.
-      if (host.clientWidth === 0) return;
-      let s = Math.min(maxScale, host.clientWidth / MAG_CANVAS_W);
-      if (viewportHeightFraction) {
-        const availH = window.innerHeight * viewportHeightFraction - viewportHeightOffsetPx;
-        s = Math.min(s, availH / MAG_CANVAS_H);
-      }
-      setScale(Math.max(s, 0.1));
-    };
-
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(host);
-    window.addEventListener('resize', measure);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', measure);
-    };
-  }, [maxScale, viewportHeightFraction, viewportHeightOffsetPx]);
+  const scale = useCanvasScale(hostRef, {
+    heightMode: viewportHeightFraction
+      ? { mode: 'viewport', fraction: viewportHeightFraction, offsetPx: viewportHeightOffsetPx }
+      : { mode: 'none' },
+    maxScale,
+  });
 
   return (
     <div
