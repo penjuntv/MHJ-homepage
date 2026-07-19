@@ -8,7 +8,7 @@ Live: www.mhj.nz · Repo: penjuntv/MHJ-homepage · Supabase project: vpayqdatpqa
 ## 기술 스택
 Next.js 14.2.35 (App Router) · React 18 · TypeScript 5 · Tailwind CSS 3.4 · Supabase(@supabase/ssr + supabase-js) · TipTap 3.x · Resend · Vercel.
 AI: Gemini 2.5 Flash(`@google/generative-ai` — AI Insight, Carousel ai-layout) + Claude Haiku 4.5(`@anthropic-ai/sdk` — AI SEO).
-개발 서버: `npm run dev` → localhost:3003 (포트 고정, 3000 아님).
+개발 서버: `npm run dev` → localhost:3003 (포트 고정, 3000 아님). **dev는 Turbopack**(`next dev --turbopack`) — webpack dev의 `eval-source-map`가 react-pdf/pdfjs `.mjs` 로드 시 크래시(`Object.defineProperty called on non-object`)를 내서 과월호 PDF 뷰어가 로컬에서 안 뜨던 문제 회피. 프로덕션(`next build`)은 webpack 그대로라 무영향. --turbopack 제거 금지.
 
 ## 명령어
 - `npm run dev` — 개발 서버(3003). dev 실행 중에는 `npm run build` 금지(.next 캐시 오염).
