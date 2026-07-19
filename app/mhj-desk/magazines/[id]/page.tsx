@@ -11,13 +11,14 @@ import type { Magazine, Article, ArticlePage, DirectoryItem } from '@/lib/types'
 import {
   ChevronLeft, Plus, Trash2, X, Upload, Loader2, Check,
   ChevronUp, ChevronDown, ExternalLink, BookOpen, AlertCircle,
-  FileText, Image as ImageIcon, ZoomIn, ZoomOut,
+  FileText, Image as ImageIcon, ZoomIn, ZoomOut, AlertTriangle,
 } from 'lucide-react';
 import { ACCENT_PRESETS, COVER_FILTERS, DEFAULT_CONTRIBUTORS, SEASONAL_ACCENTS } from '@/lib/magazine-themes';
 import ImageCropModal from '@/components/admin/ImageCropModal';
 import CoverPreview from '@/components/magazine/CoverPreview';
 import TocPreview from '@/components/magazine/TocPreview';
 import MagazinePage from '@/components/magazine/MagazinePage';
+import MagazineCanvas from '@/components/magazine/MagazineCanvas';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import DownloadBtn from '@/components/DownloadBtn';
 import type { ArticlePreviewData, StyleOverrides } from '@/components/magazine/templates/shared';
@@ -249,6 +250,42 @@ export default function MagazineDetailPage() {
 
   /* ─── Tab 2 live preview ref ─── */
   const previewDivRef = useRef<HTMLDivElement>(null);
+
+  /* ─── 지면 넘침 감지 ───
+     지면은 620×812 고정 캔버스(overflow:hidden)라, 내부에서 clip되는 요소의
+     scrollHeight-clientHeight를 재면 "몇 px 잘려서 발행되는지"를 결정적으로 알 수 있다.
+     scrollHeight/clientHeight는 CSS transform(scale)의 영향을 받지 않아 항상 620-space px. */
+  const [overflowPx, setOverflowPx] = useState(0);
+  /* 지면 넘침 재측정: 미리보기에 영향 주는 입력이 바뀔 때마다 (rAF로 레이아웃 flush 후).
+     scrollHeight/clientHeight는 transform(scale) 무관 → 항상 620-space px = 라이브 잘림량과 동일.
+     ⚠ 훅 순서 유지 위해 early-return 위에 위치 (rules-of-hooks). */
+  useEffect(() => {
+    if (tab !== 'articles' || !inlineForm) { setOverflowPx(0); return; }
+    let raf = 0;
+    const measure = () => {
+      const el = previewDivRef.current;
+      if (!el) { setOverflowPx(0); return; }
+      let maxClip = 0;
+      el.querySelectorAll('*').forEach((node) => {
+        const cs = getComputedStyle(node);
+        // 의도적 line-clamp(제목/캡션 N줄 자르기)는 지면 넘침이 아니므로 제외.
+        const clamped = cs.webkitLineClamp && cs.webkitLineClamp !== 'none';
+        if (!clamped && (cs.overflowY === 'hidden' || cs.overflow === 'hidden')) {
+          const diff = node.scrollHeight - node.clientHeight;
+          if (diff > maxClip) maxClip = diff;
+        }
+      });
+      setOverflowPx(maxClip > 4 ? Math.round(maxClip) : 0);
+    };
+    raf = requestAnimationFrame(measure);
+    // 웹폰트(Playfair/Noto)가 늦게 로드되면 텍스트 높이가 바뀌므로 로드 후 1회 재측정.
+    let cancelled = false;
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      document.fonts.ready.then(() => { if (!cancelled) requestAnimationFrame(measure); });
+    }
+    return () => { cancelled = true; cancelAnimationFrame(raf); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inlineForm, focusedPageIdx, articlePages, tab]);
 
   /* ─── 스프레드 스크롤 ref (마우스 휠 → 가로 스크롤) ─── */
   const spreadScrollRef = useRef<HTMLDivElement>(null);
@@ -1004,6 +1041,7 @@ export default function MagazineDetailPage() {
 
                   {/* 현재 포커스 페이지 미리보기 (템플릿 기반) */}
                   {focusedPageIdx === null ? (
+                    <MagazineCanvas mobileReflow={false}>
                     <div ref={previewDivRef} style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden' }}>
                       <MagazinePage bgColor={bgCol}>
                         {renderTemplate(inlineForm.template, {
@@ -1025,8 +1063,10 @@ export default function MagazineDetailPage() {
                         } as ArticlePreviewData, accentCol, bgCol)}
                       </MagazinePage>
                     </div>
+                    </MagazineCanvas>
                   ) : focusedExtraPage ? (
-                    <div style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden' }}>
+                    <MagazineCanvas mobileReflow={false}>
+                    <div ref={previewDivRef} style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden' }}>
                       <MagazinePage bgColor={bgCol}>
                         {renderTemplate(focusedExtraPage.template ?? inlineForm.template, {
                           title: inlineForm.title,
@@ -1039,7 +1079,23 @@ export default function MagazineDetailPage() {
                         } as ArticlePreviewData, accentCol, bgCol, true)}
                       </MagazinePage>
                     </div>
+                    </MagazineCanvas>
                   ) : null}
+
+                  {/* 지면 넘침 경고 — 잘려서 발행되기 전에 알림 */}
+                  {overflowPx > 0 && (
+                    <div style={{
+                      marginTop: '10px',
+                      display: 'flex', alignItems: 'center', gap: '8px',
+                      padding: '9px 12px',
+                      background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px',
+                    }}>
+                      <AlertTriangle size={15} color="#DC2626" style={{ flexShrink: 0 }} />
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#B91C1C', lineHeight: 1.4 }}>
+                        본문이 지면을 <strong>약 {overflowPx}px</strong> 넘칩니다 — 이 상태로 발행하면 라이브에서 잘립니다. 본문/이미지를 줄이거나 페이지를 나눠 주세요.
+                      </span>
+                    </div>
+                  )}
 
                   {/* 페이지 전환 버튼 (추가 페이지 있을 때) */}
                   {!inlineIsNew && totalPageCount > 1 && (
@@ -1086,24 +1142,41 @@ export default function MagazineDetailPage() {
         const spreadPages: { label: string; content: React.ReactNode; artId?: number }[] = [
           {
             label: 'Cover',
-            content: <CoverPreview
-              title={magazine.title} year={magazine.year} month_name={magazine.month_name}
-              cover_copy={magazine.cover_copy ?? ''}
-              contributors={magazine.contributors ?? []} image_url={magazine.image_url}
-              cover_images={magazine.cover_images ?? []}
-              accent_color={magazine.accent_color ?? '#1A1A1A'}
-              bg_color={magazine.bg_color ?? '#F5F0EA'}
-              cover_filter={magazine.cover_filter ?? 'none'}
-              issue_number={magazine.issue_number ?? ''}
-            />,
+            /* CoverPreview/TocPreview는 420px 고정 컴포넌트 → 620 지면(MagazinePage)에
+               맞추려면 라이브 뷰어와 동일하게 내부 root를 100%로 stretch. 안 그러면
+               스프레드/모달에서 68% 크기로 좌상단에 쏠려 여백이 생긴다. */
+            content: (
+              <MagazinePage bgColor={bgCol} showHeader={false} showFooter={false}>
+                <div className="admin-cover-fill" style={{ width: '100%', height: '100%' }}>
+                  <style>{`.admin-cover-fill > div { width:100% !important; height:100% !important; box-shadow:none !important; border-radius:0 !important; }`}</style>
+                  <CoverPreview
+                    title={magazine.title} year={magazine.year} month_name={magazine.month_name}
+                    cover_copy={magazine.cover_copy ?? ''}
+                    contributors={magazine.contributors ?? []} image_url={magazine.image_url}
+                    cover_images={magazine.cover_images ?? []}
+                    accent_color={magazine.accent_color ?? '#1A1A1A'}
+                    bg_color={magazine.bg_color ?? '#F5F0EA'}
+                    cover_filter={magazine.cover_filter ?? 'none'}
+                    issue_number={magazine.issue_number ?? ''}
+                  />
+                </div>
+              </MagazinePage>
+            ),
           },
           {
             label: 'Contents',
-            content: <TocPreview
-              title={magazine.title} year={magazine.year} month_name={magazine.month_name}
-              articles={sortedArticles} accent_color={magazine.accent_color ?? '#1A1A1A'}
-              bg_color={magazine.bg_color ?? '#F5F0EA'}
-            />,
+            content: (
+              <MagazinePage bgColor={bgCol} showHeader={false} showFooter={false}>
+                <div className="admin-cover-fill" style={{ width: '100%', height: '100%' }}>
+                  <style>{`.admin-cover-fill > div { width:100% !important; height:100% !important; box-shadow:none !important; border-radius:0 !important; }`}</style>
+                  <TocPreview
+                    title={magazine.title} year={magazine.year} month_name={magazine.month_name}
+                    articles={sortedArticles} accent_color={magazine.accent_color ?? '#1A1A1A'}
+                    bg_color={magazine.bg_color ?? '#F5F0EA'}
+                  />
+                </div>
+              </MagazinePage>
+            ),
           },
           ...sortedArticles.filter(a => a.article_type === 'article' || !a.article_type).map((article, idx) => {
             const tpl = (article as Article & { template?: string }).template ?? 'classic';
@@ -1198,7 +1271,7 @@ export default function MagazineDetailPage() {
             style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 24px' }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ animation: 'fadeInScale 0.2s ease', transform: `scale(${modalZoom / 100})`, transformOrigin: 'top center', transition: 'transform 0.15s ease', flexShrink: 0, width: '420px' }}>
+            <div style={{ animation: 'fadeInScale 0.2s ease', transform: `scale(${modalZoom / 100})`, transformOrigin: 'top center', transition: 'transform 0.15s ease', flexShrink: 0, width: `${SPREAD_PAGE_W}px` }}>
               {spreadModal.pages[spreadModal.idx].content}
             </div>
           </div>
@@ -1308,9 +1381,10 @@ const zoomBtn: React.CSSProperties = {
 };
 
 /* ─── SpreadPage: 스프레드 뷰 아이템 ─── */
-const SPREAD_SCALE = 0.7;
-const SPREAD_PAGE_W = 420;
-const SPREAD_PAGE_H = 594;
+/* 라이브 뷰어와 동일한 620×812(42:55) 고정 캔버스 기준 — WYSIWYG 보장 */
+const SPREAD_SCALE = 0.474;
+const SPREAD_PAGE_W = 620;
+const SPREAD_PAGE_H = Math.round((SPREAD_PAGE_W * 55) / 42); // 812
 const SPREAD_SCALED_W = Math.round(SPREAD_PAGE_W * SPREAD_SCALE);  // 294
 const SPREAD_SCALED_H = Math.round(SPREAD_PAGE_H * SPREAD_SCALE);  // 416
 

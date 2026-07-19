@@ -40,7 +40,7 @@ export default function PullQuoteTemplate({
             fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontWeight: 400,
-            fontSize: 'clamp(60px, 10vw, 120px)',
+            fontSize: 'clamp(60px, 19.35cqw, 120px)',
             color: accentColor,
             opacity: 0.22,
             lineHeight: 1,
@@ -56,7 +56,7 @@ export default function PullQuoteTemplate({
             fontFamily: '"Playfair Display", "Noto Sans KR", serif',
             fontStyle: 'italic',
             fontWeight: 400,
-            fontSize: 'clamp(18px, 2.8vw, 32px)',
+            fontSize: 'clamp(18px, 5.16cqw, 32px)',
             lineHeight: 1.32,
             color: '#1A1A1A',
           }}
@@ -70,7 +70,7 @@ export default function PullQuoteTemplate({
               marginTop: '1.8em',
               fontFamily: '"Inter", sans-serif',
               fontWeight: 500,
-              fontSize: 'clamp(9px, 1.05vw, 12px)',
+              fontSize: 'clamp(9px, 1.94cqw, 12px)',
               letterSpacing: '0.1em',
               color: '#9B9590',
             }}

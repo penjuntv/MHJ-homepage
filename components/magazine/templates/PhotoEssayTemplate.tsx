@@ -55,7 +55,7 @@ function PhotoSlot({
             fontFamily: '"Inter", sans-serif',
             background: 'rgba(26,26,26,0.55)',
             color: '#FDFCFA',
-            fontSize: 'clamp(7px, 0.8vw, 9px)',
+            fontSize: 'clamp(7px, 1.45cqw, 9px)',
             lineHeight: 1.4,
             padding: '0.3em 0.6em',
           }}
@@ -95,7 +95,7 @@ export default function PhotoEssayTemplate({
           style={{
             fontFamily: '"Inter", sans-serif',
             fontWeight: 600,
-            fontSize: 'clamp(7px, 0.9vw, 10px)',
+            fontSize: 'clamp(7px, 1.61cqw, 10px)',
             letterSpacing: '0.35em',
             color: accentColor,
             textTransform: 'uppercase',
@@ -109,7 +109,7 @@ export default function PhotoEssayTemplate({
             style={{
               fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
-              fontSize: 'clamp(20px, 2.6vw, 28px)',
+              fontSize: 'clamp(20px, 4.52cqw, 28px)',
               color: '#1A1A1A',
               lineHeight: 1.1,
               display: '-webkit-box',
@@ -152,7 +152,7 @@ export default function PhotoEssayTemplate({
           paddingTop: '0.7em',
           borderTop: `1px solid ${accentColor}22`,
           fontFamily: '"Inter", sans-serif',
-          fontSize: 'clamp(8px, 0.9vw, 10px)',
+          fontSize: 'clamp(8px, 1.61cqw, 10px)',
           fontWeight: 600,
           letterSpacing: '0.25em',
           color: '#9B9590',

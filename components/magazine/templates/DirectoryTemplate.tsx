@@ -29,7 +29,7 @@ export default function DirectoryTemplate({
             style={{
               fontFamily: '"Inter", sans-serif',
               fontWeight: 600,
-              fontSize: 'clamp(7px, 0.9vw, 10px)',
+              fontSize: 'clamp(7px, 1.61cqw, 10px)',
               letterSpacing: '0.35em',
               textTransform: 'uppercase',
               color: accentColor,
@@ -42,7 +42,7 @@ export default function DirectoryTemplate({
             style={{
               fontFamily: '"Playfair Display", "Noto Sans KR", serif',
               fontWeight: 900,
-              fontSize: 'clamp(22px, 3vw, 32px)',
+              fontSize: 'clamp(22px, 5.16cqw, 32px)',
               lineHeight: 1.1,
               color: '#1A1A1A',
             }}
@@ -76,7 +76,7 @@ export default function DirectoryTemplate({
             style={{
               gridColumn: '1 / -1',
               fontFamily: '"Inter", sans-serif',
-              fontSize: 'clamp(10px, 1.1vw, 13px)',
+              fontSize: 'clamp(10px, 2.1cqw, 13px)',
               fontStyle: 'italic',
               color: '#9B9590',
               alignSelf: 'start',
@@ -112,7 +112,7 @@ export default function DirectoryTemplate({
                       fontFamily: '"Playfair Display", "Noto Sans KR", serif',
                       fontStyle: 'italic',
                       fontWeight: 400,
-                      fontSize: 'clamp(18px, 2.4vw, 28px)',
+                      fontSize: 'clamp(18px, 4.52cqw, 28px)',
                       color: accentColor,
                       opacity: 0.35,
                       lineHeight: 1,
@@ -125,7 +125,7 @@ export default function DirectoryTemplate({
                       style={{
                         fontFamily: '"Inter", sans-serif',
                         fontWeight: 600,
-                        fontSize: 'clamp(8px, 0.9vw, 10px)',
+                        fontSize: 'clamp(8px, 1.61cqw, 10px)',
                         letterSpacing: '0.15em',
                         color: accentColor,
                         opacity: 0.7,
@@ -139,7 +139,7 @@ export default function DirectoryTemplate({
                   style={{
                     fontFamily: '"Inter", sans-serif',
                     fontWeight: 800,
-                    fontSize: 'clamp(9px, 1vw, 12px)',
+                    fontSize: 'clamp(9px, 1.94cqw, 12px)',
                     color: '#1A1A1A',
                     lineHeight: 1.3,
                     display: '-webkit-box',
@@ -155,7 +155,7 @@ export default function DirectoryTemplate({
                     style={{
                       fontFamily: '"Inter", sans-serif',
                       fontWeight: 400,
-                      fontSize: 'clamp(7px, 0.85vw, 10px)',
+                      fontSize: 'clamp(7px, 1.61cqw, 10px)',
                       color: '#9B9590',
                       lineHeight: 1.4,
                       display: '-webkit-box',
@@ -182,7 +182,7 @@ export default function DirectoryTemplate({
             borderTop: `1px solid ${accentColor}22`,
             fontFamily: '"Inter", sans-serif',
             fontWeight: 500,
-            fontSize: 'clamp(7px, 0.85vw, 10px)',
+            fontSize: 'clamp(7px, 1.61cqw, 10px)',
             letterSpacing: '0.25em',
             textTransform: 'uppercase',
             color: '#9B9590',
