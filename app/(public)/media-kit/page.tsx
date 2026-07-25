@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import { Mail } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+// 카운트 통계는 실시간일 필요 없음 → ISR (force-dynamic 제거)
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 

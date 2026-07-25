@@ -3,7 +3,8 @@ import { getSiteSettings } from '@/lib/site-settings';
 import { STORYPRESS_FAQS } from '@/lib/storypress-faqs';
 import StoryPressClient from './StoryPressClient';
 
-export const dynamic = 'force-dynamic';
+// 정적 FAQ + site_settings 만 읽으므로 ISR 로 충분 (force-dynamic 제거 → ISR 복원)
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 

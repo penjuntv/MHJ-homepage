@@ -193,7 +193,7 @@ export default function DetailModal({ item, onClose }: Props) {
             {/* 하단 이미지 21:9 */}
             <div style={{
               aspectRatio: '21/9',
-              borderRadius: 32,
+              borderRadius: 16,
               overflow: 'hidden',
               marginBottom: 80,
               boxShadow: '0 25px 60px rgba(0,0,0,0.12)',

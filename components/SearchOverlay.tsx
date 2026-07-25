@@ -131,7 +131,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
 
         {/* 검색 입력 */}
         <div style={{ maxWidth: '800px', margin: '0 auto 56px' }}>
-          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: '#CBD5E1', marginBottom: '20px' }}>
+          <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '20px' }}>
             SEARCH
           </p>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -179,7 +179,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
           {/* 결과 있음 */}
           {searched && results.length > 0 && (
             <div>
-              <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '4px', color: '#CBD5E1', marginBottom: '24px' }}>
+              <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '4px', color: 'var(--text-tertiary)', marginBottom: '24px' }}>
                 {results.length} results found
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -196,7 +196,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
               <p className="font-display font-black" style={{ fontSize: 'clamp(24px, 4vw, 40px)', letterSpacing: '-1px', marginBottom: '12px', fontStyle: 'italic' }}>
                 No results found
               </p>
-              <p style={{ fontSize: '15px', color: '#94A3B8', marginBottom: '40px' }}>
+              <p style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '40px' }}>
                 No results found for &ldquo;{query}&rdquo;. Try a different keyword.
               </p>
               <QuickLinks onClose={onClose} />
@@ -244,9 +244,8 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
         border: '1px solid',
         borderColor: hovered ? 'var(--border-medium)' : 'var(--border)',
         textDecoration: 'none',
-        transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
         boxShadow: hovered ? '0 12px 32px rgba(0,0,0,0.12)' : 'none',
-        transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
+        transition: 'background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease',
         animation: `slideUp 0.4s ${index * 0.04}s both cubic-bezier(0.16,1,0.3,1)`,
       }}
       onMouseEnter={() => setHovered(true)}
@@ -257,7 +256,7 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
         <div style={{
           width: '56px', height: '56px', borderRadius: '12px',
           overflow: 'hidden', flexShrink: 0,
-          transform: hovered ? 'scale(1.05)' : 'scale(1)',
+          transform: hovered ? 'scale(1.03)' : 'scale(1)',
           transition: 'transform 0.3s ease',
         }}>
           <img
@@ -265,8 +264,6 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
             alt=""
             style={{
               width: '100%', height: '100%', objectFit: 'cover',
-              filter: hovered ? 'saturate(2)' : 'saturate(1)',
-              transition: 'filter 0.4s ease',
             }}
           />
         </div>
@@ -283,12 +280,12 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
             {TYPE_LABEL[item.type]}
           </span>
           {item.category && (
-            <span style={{ fontSize: '10px', color: '#CBD5E1', fontWeight: 700 }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 700 }}>
               {item.category}
             </span>
           )}
           {item.date && (
-            <span style={{ fontSize: '10px', color: '#CBD5E1' }}>{formatDate(item.date)}</span>
+            <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>{formatDate(item.date)}</span>
           )}
         </div>
         <p style={{
@@ -308,7 +305,7 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
 
       <ArrowRight
         size={16}
-        style={{ color: hovered ? color : '#CBD5E1', flexShrink: 0, transition: 'color 0.2s ease' }}
+        style={{ color: hovered ? color : 'var(--text-tertiary)', flexShrink: 0, transition: 'color 0.2s ease' }}
       />
     </Link>
   );
@@ -317,7 +314,7 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
 function QuickLinks({ onClose }: { onClose: () => void }) {
   return (
     <div>
-      <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '4px', color: '#CBD5E1', marginBottom: '16px' }}>
+      <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '4px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
         BROWSE BY CATEGORY
       </p>
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
