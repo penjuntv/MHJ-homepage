@@ -61,6 +61,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             <input
               type="email"
               placeholder="your@email.com"
+              aria-label="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -114,6 +115,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
               <input
                 type="email"
                 placeholder="Email"
+                aria-label="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -264,6 +266,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
               <input
                 type="text"
                 placeholder="Name (optional)"
+                aria-label="Name (optional)"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 style={{
@@ -287,6 +290,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
               <input
                 type="email"
                 placeholder="your@email.com"
+                aria-label="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

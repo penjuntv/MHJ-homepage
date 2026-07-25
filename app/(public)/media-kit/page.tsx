@@ -67,8 +67,51 @@ export default async function MediaKitPage() {
     { number: stats.newsletters, label: 'Newsletters Sent' },
   ];
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Media Kit' },
+    ],
+  };
+
+  const mediaKitLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Media Kit — My Mairangi Journal',
+    url: `${SITE_URL}/media-kit`,
+    description:
+      "Partner with My Mairangi Journal. Reach families on Auckland's North Shore through newsletter sponsorship, sponsored posts, and affiliate partnerships.",
+    inLanguage: 'en',
+    publisher: {
+      '@type': 'Organization',
+      name: 'MHJ',
+      url: SITE_URL,
+      email: 'hello@mhj.nz',
+    },
+    mainEntity: {
+      '@type': 'OfferCatalog',
+      name: 'Partnership Options',
+      itemListElement: PARTNERSHIPS.map((p) => ({
+        '@type': 'Offer',
+        name: p.title,
+        description: p.description,
+        priceSpecification: { '@type': 'PriceSpecification', price: p.price },
+      })),
+    },
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(mediaKitLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       {/* Hero */}
       <section style={{
         padding: 'clamp(64px, 10vw, 128px) clamp(20px, 4vw, 48px)',

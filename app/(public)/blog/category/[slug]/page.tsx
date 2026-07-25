@@ -174,6 +174,17 @@ export default async function BlogCategoryPage(props: Props) {
 
   const recent = await getRecentBlogsCached(category, featured?.id ?? null);
 
+  // 목록 카드는 excerpt(≈100자)만 쓴다 → 전체 content HTML을 클라이언트 페이로드로
+  // 직렬화하지 않도록 plain-text 200자로 축약. (excerpt·JSON-LD 모두 이 범위에서 동작)
+  const trimForList = <T extends { content?: string }>(b: T): T => ({
+    ...b,
+    content: (b.content ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200),
+  });
+  const featuredCard = featured ? trimForList(featured) : null;
+  const recentCards = recent.map(trimForList);
+  const blogCards = paginated.blogs.map(trimForList);
+  const mostReadCards = mostRead.map(trimForList);
+
   const totalPages = Math.ceil(paginated.totalCount / PAGE_SIZE);
 
   const breadcrumbLd = {
@@ -196,7 +207,7 @@ export default async function BlogCategoryPage(props: Props) {
     inLanguage: 'en',
     author: { '@type': 'Person', name: 'Yussi' },
     publisher: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
-    blogPost: paginated.blogs.slice(0, 10).map((b) => ({
+    blogPost: blogCards.slice(0, 10).map((b) => ({
       '@type': 'BlogPosting',
       headline: b.title,
       author: { '@type': 'Person', name: b.author },
@@ -241,14 +252,14 @@ export default async function BlogCategoryPage(props: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <BlogLibrary
-        featuredBlog={featured}
-        recentBlogs={recent}
-        blogs={paginated.blogs}
+        featuredBlog={featuredCard}
+        recentBlogs={recentCards}
+        blogs={blogCards}
         totalCount={paginated.totalCount}
         currentPage={page}
         totalPages={totalPages}
         activeCategory={category}
-        readerFavorites={mostRead}
+        readerFavorites={mostReadCards}
         blogTitle={s.blog_title}
         blogDescription={s.blog_description}
         categoryCounts={categoryCounts}

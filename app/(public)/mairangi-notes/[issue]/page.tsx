@@ -97,8 +97,43 @@ export default async function NewsletterIssuePage(
   const settings = await getSiteSettings();
   const ctaCopyB = settings.newsletter_cta_copy_b || 'Be the first to receive our next letter.';
 
+  const issueUrl = `${SITE_URL}/mairangi-notes/${nl.issue_number ?? nl.id}`;
+  const articleLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: nl.subject,
+    description: nl.preheader || `Mairangi Notes Issue #${nl.issue_number ?? nl.id}`,
+    url: issueUrl,
+    ...(nl.sent_at ? { datePublished: nl.sent_at, dateModified: nl.sent_at } : {}),
+    author: { '@type': 'Person', name: 'Yussi' },
+    publisher: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
+    isPartOf: {
+      '@type': 'PublicationIssue',
+      issueNumber: nl.issue_number ?? String(nl.id),
+      name: 'Mairangi Notes',
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': issueUrl },
+  };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Mairangi Notes', item: `${SITE_URL}/mairangi-notes` },
+      { '@type': 'ListItem', position: 3, name: nl.subject },
+    ],
+  };
+
   return (
     <article className="mn-issue-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <Link href="/mairangi-notes" className="mn-back">
         <ArrowLeft size={12} /> Archive
       </Link>

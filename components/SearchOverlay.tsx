@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { X, Search, ArrowRight } from 'lucide-react';
 import type { SearchResult } from '@/app/api/search/route';
 import { formatDate } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
+import { useFocusTrap } from '@/lib/useFocusTrap';
 
 const TYPE_LABEL: Record<string, string> = {
   blog: 'Journal',
@@ -36,6 +38,8 @@ interface Props {
 
 export default function SearchOverlay({ open, onClose }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(containerRef, open);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -71,8 +75,10 @@ export default function SearchOverlay({ open, onClose }: Props) {
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       const data = await res.json();
-      setResults(data.results ?? []);
+      const found = data.results ?? [];
+      setResults(found);
       setSearched(true);
+      trackEvent('search', { search_term: q, results_count: found.length });
     } catch {
       setResults([]);
     } finally {
@@ -91,6 +97,10 @@ export default function SearchOverlay({ open, onClose }: Props) {
 
   return (
     <div
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Site search"
       style={{
         position: 'fixed', inset: 0, zIndex: 100,
         background: 'var(--overlay-bg)',
@@ -134,6 +144,8 @@ export default function SearchOverlay({ open, onClose }: Props) {
               value={query}
               onChange={handleChange}
               placeholder="Search articles..."
+              aria-label="Search articles"
+              type="search"
               style={{
                 width: '100%',
                 paddingLeft: '48px',

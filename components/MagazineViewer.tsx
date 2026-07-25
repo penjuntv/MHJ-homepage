@@ -452,6 +452,9 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
       {/* ── 이미지 라이트박스 ── */}
       {lightboxIdx !== null && allImages[lightboxIdx] && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="이미지 크게 보기"
           onClick={(e) => { if (e.target === e.currentTarget) setLightboxIdx(null); }}
           style={{
             position: 'fixed', inset: 0, zIndex: 300,
@@ -462,6 +465,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
           {/* 닫기 */}
           <button
             onClick={() => setLightboxIdx(null)}
+            aria-label="닫기"
             style={{
               position: 'absolute', top: 16, right: 16, zIndex: 310,
               width: 40, height: 40, borderRadius: '50%',
@@ -488,6 +492,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
             <button
               onClick={(e) => { e.stopPropagation(); setLightboxIdx(i => i !== null ? Math.max(0, i - 1) : null); }}
               disabled={lightboxIdx === 0}
+              aria-label="이전 이미지"
               style={{
                 position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
                 width: 44, height: 44, borderRadius: '50%',
@@ -507,7 +512,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
           <img
             key={lightboxIdx}
             src={allImages[lightboxIdx]}
-            alt=""
+            alt={`이미지 ${lightboxIdx + 1} / ${allImages.length}`}
             style={{
               maxWidth: 'calc(100vw - 120px)', maxHeight: 'calc(100vh - 80px)',
               objectFit: 'contain', borderRadius: 4,
@@ -520,6 +525,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
             <button
               onClick={(e) => { e.stopPropagation(); setLightboxIdx(i => i !== null ? Math.min(allImages.length - 1, i + 1) : null); }}
               disabled={lightboxIdx === allImages.length - 1}
+              aria-label="다음 이미지"
               style={{
                 position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
                 width: 44, height: 44, borderRadius: '50%',

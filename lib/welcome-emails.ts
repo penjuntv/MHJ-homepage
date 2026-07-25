@@ -124,7 +124,7 @@ export function generateWelcome2(
         A few days ago you joined My Mairangi Journal &mdash; and I wanted to properly introduce myself.
       </p>
       <p class="text-primary" style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#1a1a1a;">
-        I'm Yussi (Heejong), currently studying a Master of Social Welfare here in Auckland while raising three daughters &mdash; Min, Hyun, and Jin. My husband PeNnY runs the tech side of MHJ (he's the one who built this very website).
+        I'm Yussi, currently studying a Master of Social Welfare here in Auckland while raising three daughters &mdash; Min, Hyun, and Jin. My husband PeNnY runs the tech side of MHJ (he's the one who built this very website).
       </p>
       <p class="text-primary" style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#1a1a1a;">
         We moved to New Zealand a few years ago, and this journal is our way of documenting the journey: the challenges of settling in, the beauty of Mairangi Bay, the chaos of three kids, and the small victories that make it all worthwhile.
