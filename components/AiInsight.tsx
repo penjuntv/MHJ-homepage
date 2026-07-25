@@ -69,7 +69,7 @@ export default function AiInsight({ title, content, blogId }: Props) {
           style={{
             position: 'relative',
             background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 60%, #FDF4FF 100%)',
-            borderRadius: 24,
+            borderRadius: 12,
             padding: 'clamp(32px, 4vw, 48px) clamp(32px, 4vw, 56px)',
             overflow: 'hidden',
           }}

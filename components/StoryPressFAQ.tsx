@@ -44,7 +44,7 @@ export default function StoryPressFAQ() {
                 key={idx}
                 className="sp-faq-card"
                 style={{
-                  borderRadius: 24,
+                  borderRadius: 12,
                   border: isOpen ? '1px solid rgba(245,158,66,0.35)' : '1px solid rgba(0,0,0,0.06)',
                   overflow: 'hidden',
                   transition: 'border-color 0.25s',

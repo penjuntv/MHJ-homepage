@@ -69,8 +69,7 @@ export default function GalleryClient({ photos, galleryTitle, galleryDescription
       <div style={{
         marginBottom: 56,
         opacity: loaded ? 1 : 0,
-        transform: loaded ? 'none' : 'translateY(24px)',
-        transition: 'opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)',
+        transition: 'opacity 0.7s cubic-bezier(0.16,1,0.3,1)',
       }}>
         <p className="font-black uppercase" style={{ fontSize: 10, letterSpacing: 6, color: 'var(--text-tertiary)', marginBottom: 16 }}>
           Through the Journal
@@ -246,7 +245,7 @@ function GalleryCard({ photo, onClick }: { photo: GalleryPhoto; onClick: () => v
         opacity: hovered ? 1 : 0, transition: 'opacity 0.4s ease',
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '18px 16px',
       }}>
-        <div style={{ transform: hovered ? 'translateY(0)' : 'translateY(14px)', transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
+        <div>
           <p style={{ fontSize: 8, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', margin: '0 0 5px' }}>
             {photo.category}
           </p>

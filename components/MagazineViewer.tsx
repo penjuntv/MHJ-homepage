@@ -235,7 +235,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
         </>
       )}
 
-      <div style={{ background: 'var(--bg-card)', borderRadius: 20, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+      <div style={{ background: 'var(--bg-card)', borderRadius: 16, width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
 
         {/* 헤더 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `2px solid ${accentColor}20`, flexShrink: 0 }}>
