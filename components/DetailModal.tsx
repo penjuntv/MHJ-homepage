@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import SafeImage from '@/components/SafeImage';
 import { X, Share2 } from 'lucide-react';
 import type { Blog, Article } from '@/lib/types';
 import AiInsight from './AiInsight';
 import { formatDate } from '@/lib/utils';
+import { useFocusTrap } from '@/lib/useFocusTrap';
 
 type DetailItem = Blog | Article;
 
@@ -15,9 +16,13 @@ interface Props {
 }
 
 export default function DetailModal({ item, onClose }: Props) {
-  // ESC 닫기 + body scroll lock
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, true);
+
+  // ESC 닫기 + body scroll lock + 초기 포커스
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+    panelRef.current?.focus();
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
@@ -49,6 +54,11 @@ export default function DetailModal({ item, onClose }: Props) {
 
       {/* 패널 */}
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={item.title}
+        tabIndex={-1}
         className="animate-slide-right"
         style={{
           position: 'relative',
@@ -183,7 +193,7 @@ export default function DetailModal({ item, onClose }: Props) {
             {/* 하단 이미지 21:9 */}
             <div style={{
               aspectRatio: '21/9',
-              borderRadius: 32,
+              borderRadius: 16,
               overflow: 'hidden',
               marginBottom: 80,
               boxShadow: '0 25px 60px rgba(0,0,0,0.12)',

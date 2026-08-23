@@ -91,6 +91,7 @@ export default function InlineSubscribeCTA({ location = 'blog_inline' }: Props) 
           <input
             type="email"
             placeholder="your@email.com"
+            aria-label="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

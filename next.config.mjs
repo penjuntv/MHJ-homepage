@@ -4,6 +4,8 @@ const nextConfig = {
     const staticRedirects = [
       { source: '/journal', destination: '/blog', permanent: true },
       { source: '/journal/:path*', destination: '/blog/:path*', permanent: true },
+      // 삭제된 포스트 — Google이 404로 감지 (2026-06-18)
+      { source: '/blog/education-006', destination: '/blog', permanent: true },
     ];
 
     const map = [

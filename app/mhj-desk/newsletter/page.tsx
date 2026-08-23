@@ -104,6 +104,8 @@ export default function NewsletterPage() {
           {newsletters.map(nl => {
             const st = STATUS_STYLE[nl.status] ?? STATUS_STYLE.draft;
             const isDraft = nl.status === 'draft';
+            // draft + 발송 실패(failed)는 다시 열어 편집·재발송 가능
+            const isEditable = nl.status === 'draft' || nl.status === 'failed';
 
             return (
               <div
@@ -174,8 +176,8 @@ export default function NewsletterPage() {
                     </button>
                   )}
 
-                  {/* Draft 전용: 편집 + 삭제 */}
-                  {isDraft && (
+                  {/* draft + failed: 편집 / 재발송 + 삭제 */}
+                  {isEditable && (
                     <>
                       <Link
                         href={`/mhj-desk/newsletter/new?id=${nl.id}`}
@@ -187,7 +189,7 @@ export default function NewsletterPage() {
                           display: 'inline-flex', alignItems: 'center',
                         }}
                       >
-                        편집
+                        {isDraft ? '편집' : '재발송'}
                       </Link>
                       <button
                         onClick={() => deleteDraft(nl.id)}

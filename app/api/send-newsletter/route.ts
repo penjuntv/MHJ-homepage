@@ -38,6 +38,20 @@ function addUtmToMhjLinks(html: string, issueNumber: number | undefined): string
   );
 }
 
+/**
+ * Resend 배치는 주소 하나라도 무효하면 배치 전체를 422로 거부한다.
+ * (특히 example.com/.org/.net·test.com 등 예약 도메인 → "Please use our testing email address")
+ * 발송 전에 배달 불가 주소를 걸러 배치 전체가 죽는 것을 막는다.
+ */
+const RESERVED_DOMAIN = /@(example\.(com|org|net)|test\.(com|org))$/i;
+function isDeliverableEmail(email: string | undefined | null): boolean {
+  if (!email) return false;
+  const e = email.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return false;
+  if (RESERVED_DOMAIN.test(e)) return false;
+  return true;
+}
+
 /* ── DB row 타입 ── */
 interface NewsletterRow {
   id: number;
@@ -191,6 +205,7 @@ export async function POST(req: NextRequest) {
 
   /* ── 수신자 결정 ── */
   let recipients: Array<{ email: string; name?: string }>;
+  let skippedCount = 0; // 배달 불가로 걸러낸 주소 수
 
   if (test_email) {
     recipients = [{ email: test_email }];
@@ -204,7 +219,12 @@ export async function POST(req: NextRequest) {
     if (!subscribers?.length) {
       return NextResponse.json({ error: '활성 구독자가 없습니다.' }, { status: 400 });
     }
-    recipients = subscribers;
+    // 배달 불가 주소(example.com 등)를 걸러 배치 전체가 422로 죽는 것을 방지
+    recipients = subscribers.filter(s => isDeliverableEmail(s.email));
+    skippedCount = subscribers.length - recipients.length;
+    if (!recipients.length) {
+      return NextResponse.json({ error: '유효한 수신자가 없습니다. (모든 구독자 주소가 배달 불가)' }, { status: 400 });
+    }
   }
 
   /* ── DB 상태 업데이트 (전체 발송 시에만) ── */
@@ -247,9 +267,25 @@ export async function POST(req: NextRequest) {
     };
   });
 
+  // 개별 발송 폴백: 배치가 통째로 실패하면 한 통씩 보내 정상 주소는 살린다.
+  async function sendOne(email: (typeof emails)[number]): Promise<boolean> {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(email),
+    });
+    if (!r.ok) {
+      const t = await r.text().catch(() => '');
+      console.error(`[send-newsletter] single send failed (${email.to}): ${r.status} ${t}`);
+    }
+    return r.ok;
+  }
+
   try {
     const BATCH_SIZE = 100;
     let successCount = 0;
+    const errorSamples: string[] = [];
+
     for (let i = 0; i < emails.length; i += BATCH_SIZE) {
       const batch = emails.slice(i, i + BATCH_SIZE);
       const res = await fetch('https://api.resend.com/emails/batch', {
@@ -260,20 +296,44 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify(batch),
       });
-      if (res.ok) successCount += batch.length;
+
+      if (res.ok) {
+        successCount += batch.length;
+        continue;
+      }
+
+      // 배치 실패 — 에러 본문을 남기고(과거엔 조용히 삼켰음) 개별 발송으로 폴백
+      const errText = await res.text().catch(() => '');
+      console.error(`[send-newsletter] batch ${i / BATCH_SIZE} failed: ${res.status} ${errText}`);
+      if (errorSamples.length < 3) errorSamples.push(`${res.status}: ${errText.slice(0, 200)}`);
+
+      const settled = await Promise.all(batch.map(sendOne));
+      successCount += settled.filter(Boolean).length;
     }
+
+    const total = emails.length;
+    const failedCount = total - successCount;
 
     if (!test_email && dbId) {
       await db.from('newsletters').update({
-        status: 'sent',
+        // 한 명도 못 보냈으면 failed로 명확히 기록 (조용한 '0명 수신' 방지)
+        status: successCount > 0 ? 'sent' : 'failed',
         sent_at: new Date().toISOString(),
         recipient_count: successCount,
       }).eq('id', dbId);
       // 발송 성공 후 Mairangi Notes 아카이브 캐시 갱신 (세션 4)
-      revalidatePath('/mairangi-notes');
+      if (successCount > 0) revalidatePath('/mairangi-notes');
     }
 
-    return NextResponse.json({ ok: true, sent: successCount });
+    // 전원 실패 → 에러로 반환해 admin UI가 실패를 표시하도록 (기존엔 ok:true로 조용히 넘어감)
+    if (successCount === 0) {
+      return NextResponse.json(
+        { error: `발송 실패: 수신자 ${total}명 전원에게 전송하지 못했습니다.`, details: errorSamples, skipped: skippedCount },
+        { status: 502 },
+      );
+    }
+
+    return NextResponse.json({ ok: true, sent: successCount, failed: failedCount, skipped: skippedCount });
   } catch (err) {
     if (!test_email && dbId) {
       await db.from('newsletters').update({ status: 'failed' }).eq('id', dbId);

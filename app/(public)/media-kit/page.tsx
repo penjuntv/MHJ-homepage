@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import { Mail } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+// 카운트 통계는 실시간일 필요 없음 → ISR (force-dynamic 제거)
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
@@ -67,8 +68,51 @@ export default async function MediaKitPage() {
     { number: stats.newsletters, label: 'Newsletters Sent' },
   ];
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Media Kit' },
+    ],
+  };
+
+  const mediaKitLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Media Kit — My Mairangi Journal',
+    url: `${SITE_URL}/media-kit`,
+    description:
+      "Partner with My Mairangi Journal. Reach families on Auckland's North Shore through newsletter sponsorship, sponsored posts, and affiliate partnerships.",
+    inLanguage: 'en',
+    publisher: {
+      '@type': 'Organization',
+      name: 'MHJ',
+      url: SITE_URL,
+      email: 'hello@mhj.nz',
+    },
+    mainEntity: {
+      '@type': 'OfferCatalog',
+      name: 'Partnership Options',
+      itemListElement: PARTNERSHIPS.map((p) => ({
+        '@type': 'Offer',
+        name: p.title,
+        description: p.description,
+        priceSpecification: { '@type': 'PriceSpecification', price: p.price },
+      })),
+    },
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(mediaKitLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       {/* Hero */}
       <section style={{
         padding: 'clamp(64px, 10vw, 128px) clamp(20px, 4vw, 48px)',
@@ -90,7 +134,7 @@ export default async function MediaKitPage() {
           style={{
             fontSize: 'clamp(32px, 5vw, 56px)',
             fontWeight: 900,
-            color: 'var(--text-primary, #1A1A1A)',
+            color: 'var(--text)',
             lineHeight: 1.15,
             marginBottom: 16,
             maxWidth: 720,
@@ -130,7 +174,7 @@ export default async function MediaKitPage() {
                 style={{
                   fontSize: 'clamp(32px, 4vw, 48px)',
                   fontWeight: 900,
-                  color: 'var(--text-primary, #1A1A1A)',
+                  color: 'var(--text)',
                   lineHeight: 1,
                   marginBottom: 8,
                 }}
@@ -200,7 +244,7 @@ export default async function MediaKitPage() {
                 <p style={{
                   fontSize: 16,
                   lineHeight: 1.7,
-                  color: 'var(--text-primary, #1A1A1A)',
+                  color: 'var(--text)',
                   fontWeight: 600,
                 }}>
                   {item.value}
@@ -255,7 +299,7 @@ export default async function MediaKitPage() {
                 style={{
                   fontSize: 24,
                   fontWeight: 900,
-                  color: 'var(--text-primary, #1A1A1A)',
+                  color: 'var(--text)',
                   marginBottom: 16,
                 }}
               >
@@ -284,7 +328,7 @@ export default async function MediaKitPage() {
           style={{
             fontSize: 'clamp(24px, 3vw, 32px)',
             fontWeight: 900,
-            color: 'var(--text-primary, #1A1A1A)',
+            color: 'var(--text)',
             marginBottom: 16,
           }}
         >
@@ -307,8 +351,8 @@ export default async function MediaKitPage() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 8,
-            background: 'var(--text-primary, #1A1A1A)',
-            color: '#FFFFFF',
+            background: 'var(--text)',
+            color: 'var(--bg)',
             padding: '14px 32px',
             borderRadius: 8,
             fontSize: 13,

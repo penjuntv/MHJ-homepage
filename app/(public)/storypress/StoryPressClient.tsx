@@ -200,7 +200,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             <div style={{
               width: '100%', maxWidth: 420,
               aspectRatio: '4/5',
-              borderRadius: 40,
+              borderRadius: 16,
               overflow: 'hidden',
               boxShadow: '0 32px 80px rgba(0,0,0,0.14)',
               position: 'relative',
@@ -213,7 +213,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               />
             </div>
           ) : (
-          <div style={{ width: '100%', maxWidth: 360, background: 'var(--bg-card)', borderRadius: 40, padding: 32, boxShadow: '0 32px 80px rgba(74,55,40,0.12), 0 8px 24px rgba(0,0,0,0.06)', position: 'relative' }}>
+          <div style={{ width: '100%', maxWidth: 360, background: 'var(--bg-card)', borderRadius: 12, padding: 32, boxShadow: '0 32px 80px rgba(74,55,40,0.12), 0 8px 24px rgba(0,0,0,0.06)', position: 'relative' }}>
             {/* 앱 상단 바 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: '#FF8B5E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
