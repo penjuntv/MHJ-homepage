@@ -5,6 +5,7 @@ import InstagramFeed from '@/components/InstagramFeed';
 import { getSiteSettings } from '@/lib/site-settings';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import OutboundLinkTracker from '@/components/OutboundLinkTracker';
+import AnalyticsBeacon from '@/components/AnalyticsBeacon';
 
 export const metadata: Metadata = {
   verification: {
@@ -59,6 +60,7 @@ export default async function PublicLayout({
         socialThreads={s.social_threads}
       />
       <OutboundLinkTracker />
+      <AnalyticsBeacon />
       <GoogleAnalytics gaId="G-326N3JJFGN" />
     </>
   );
