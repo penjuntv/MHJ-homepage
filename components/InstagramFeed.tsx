@@ -262,7 +262,7 @@ function FeedCard({
         style={{
           width: CARD_W,
           aspectRatio: '1 / 1',
-          borderRadius: 16,
+          borderRadius: 12,
           overflow: 'hidden',
           transform: hovered ? 'scale(1.03)' : 'scale(1)',
           transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s',
