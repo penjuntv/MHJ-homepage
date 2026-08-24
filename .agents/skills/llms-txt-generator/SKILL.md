@@ -61,7 +61,7 @@ curl -s https://www.mhj.nz/llms.txt | head -40
 ```bash
 curl -X POST https://www.mhj.nz/api/revalidate \
   -H "Content-Type: application/json" \
-  -d '{"secret":"23f30c498a06a5a31bc3e409bb5b7ee9","paths":["/llms.txt","/llms-full.txt"]}'
+  -d '{"secret":"'"$REVALIDATION_SECRET"'","paths":["/llms.txt","/llms-full.txt"]}'
 ```
 
 ## 컨텐츠 정책 — MHJ 차별점
