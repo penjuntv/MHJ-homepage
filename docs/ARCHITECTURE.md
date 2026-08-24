@@ -60,7 +60,33 @@ carousel · carousel-v3 · comments · newsletter · subscribers · affiliates �
 - **예약발행**: 모든 공개 쿼리에 `.or('publish_at.is.null,publish_at.lte.<now>')`.
 - `no-store`는 예약발행 체크·admin·유저별에만. ⚠️ "모든 fetch no-store"는 폐기된 옛 규칙.
 
-### 3.3 페이지별 주요 소스
+### 3.3 ⚠️ P-27 — `no-store` 하나가 페이지 전체를 dynamic 으로 강등시킨다
+
+2026-05-04 에 홈 TTFB 가 5–7초까지 치솟은 원인. 재발 시 진단이 어려워 증상·판별법을 남긴다.
+
+**증상**
+- 공개 페이지 TTFB 급증(모바일 특히), 응답 헤더가 `cache-control: private, no-cache, no-store, max-age=0`
+- `x-vercel-cache` 가 영원히 `MISS` — HIT 이 한 번도 안 뜸
+- 코드에 `export const revalidate = 300` 이 있어도 무시됨
+
+**원인**
+`createAdminClient()` 는 `global.fetch` 에 `cache: 'no-store'` 를 박아둔다. 이 클라이언트가 공개 페이지 트리에서 한 번이라도 호출되면, **Next.js 는 트리에 no-store fetch 가 하나라도 있으면 페이지 전체를 dynamic 으로 강등**시킨다. ISR 캐시가 아예 생성되지 않고 매 요청이 풀 SSR + Sydney Supabase 왕복이 된다.
+
+**판별법 (3단)**
+1. `curl -sI https://www.mhj.nz/<경로> | grep cache` → `private, no-cache, no-store` 면 dynamic
+2. `npm run build` 의 Routes 섹션 기호 → `ƒ` = dynamic, `●` = SSG, `○` = static
+3. `x-vercel-cache` 가 계속 `MISS`
+
+**예방**
+- `app/(public)/**` 에서 `createAdminClient` 호출 = 위험 신호. `createPublicAdminClient` 를 쓸 것.
+- `app/mhj-desk/**`·`app/api/**` 는 `createAdminClient` 그대로 OK.
+- `draftMode().isEnabled` 분기는 예외 — preview 는 항상 최신이어야 하므로 `createAdminClient` 유지.
+- Supabase 뿐 아니라 일반 `fetch()` 도 동일. 공개 페이지에서 `{ cache: 'no-store' }` 나 `{ next: { revalidate: 0 } }` 를 쓰면 같은 강등이 난다.
+
+**비용 영향**: dynamic 강등 시 모든 요청이 Vercel Function 1 invocation. ISR 회복 후에는 revalidate 주기당 1회.
+관련 커밋 `31e3de4` · [Next.js 캐싱 모델](https://nextjs.org/docs/app/building-your-application/caching#opting-out-1)
+
+### 3.4 페이지별 주요 소스
 | 페이지 | 테이블 |
 |--------|--------|
 | `/` Landing | blogs(hero/intro), landing_photos, hero_slides |
