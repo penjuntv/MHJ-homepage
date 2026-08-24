@@ -1,34 +1,26 @@
 # MHJ scope-guard 보호 파일 목록
-# 매 세션 시작 시 필요에 따라 편집
-# 빈 줄과 # 주석은 무시됨
+#
+# 형식: 경로 조각 한 줄에 하나. 빈 줄과 '#' 로 시작하는 줄은 무시된다.
+# 매칭 방식: .claude/hooks/scope-guard.sh 가 Edit/Write 대상 경로에 대해
+#            [[ "$TARGET" == *"$line"* ]] 부분문자열 비교를 한다.
+# ⚠️ 줄 끝에 인라인 주석을 달면 그 주석까지 패턴에 포함되어 절대 매칭되지 않는다.
+#    설명은 반드시 위쪽 '#' 줄에 쓸 것.
 
-# Welcome Sequence (완료)
+# Welcome Sequence — 완료, 발송 중. 수정하려면 이 줄을 주석 처리 후 작업하고 되돌릴 것
 lib/welcome-emails.ts
 app/api/subscribe/route.ts
-app/api/process-welcome-sequence/route.ts  # 완료 2026-04-22 welcome step 0 fallback 추가됨
+app/api/process-welcome-sequence/route.ts
 vercel.json
 
-# 푸터 리디자인 (완료) — 브랜드 적용으로 보호 해제
-# components/Footer.tsx
-
-# Admin 핵심 기능 (완료) — 브랜드 적용으로 보호 해제
-# app/mhj-desk/blogs/
-app/mhj-desk/newsletters/
+# 구독자 관리 — 완료
 app/mhj-desk/subscribers/
 
-## 7. 보호 파일 현황 (.claude/protected-files.txt)
+# 뉴스레터 admin — 원래 'newsletters/'(복수) 로 적혀 있어 실제 디렉터리
+# 'newsletter/'(단수) 와 달라 수개월간 매칭된 적이 없다. 경로는 아래가 맞다.
+# 다만 2026-08 현재 활발히 수정 중인 영역이라 활성화하지 않는다.
+# 보호가 필요해지면 아래 줄의 '# ' 만 지울 것.
+# app/mhj-desk/newsletter/
 
-세션 시작 전 수정 대상 파일이 이 목록에 있는지 확인할 것.
-있으면 Claude Code 프롬프트에 "해제 → 수정 → 재보호" 패턴 명시.
-
-현재 보호 파일 (2026-04-22 기준):
-- lib/welcome-emails.ts (Welcome 템플릿)
-- app/api/subscribe/route.ts (silent catch 버그 보유, 추후 수정 대상)
-- app/api/process-welcome-sequence/route.ts (완료 2026-04-22, step 0 fallback 포함)
-- vercel.json
-- app/mhj-desk/newsletters/
-- app/mhj-desk/subscribers/
-
-해제된 파일 (참고):
-- components/Footer.tsx (브랜드 적용으로 해제)
-- app/mhj-desk/blogs/ (브랜드 적용으로 해제)
+# 해제됨 (브랜드 적용으로 보호 불필요)
+# components/Footer.tsx
+# app/mhj-desk/blogs/

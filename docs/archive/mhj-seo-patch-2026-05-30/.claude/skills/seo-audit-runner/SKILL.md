@@ -142,10 +142,9 @@ ORDER BY date DESC;
 4. Top 10 worst blogs (overall_score 오름차순)
 5. Recommended quick wins (영향 큰 순)
 
-### Step 4. 후속 작업 목록 전달
+### Step 4. todo.md 자동 업데이트
 
-Top 10 worst 블로그를 "Content cleanup" 체크박스 목록으로 만들어 **보고서 말미와
-대화 응답에 그대로 출력**한다. (루트 todo.md 는 2026-08-24 에 삭제됐다 — 파일에 쓰지 말 것.)
+Top 10 worst 블로그를 todo.md 의 "Content cleanup" 섹션에 체크박스로 추가.
 
 ## Gotchas
 

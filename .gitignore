@@ -64,3 +64,9 @@ next-env.d.ts
 # Secrets / ephemeral auth
 magiclink.txt
 *.magiclink
+
+# QA screenshots (jpeg not covered by *.png rule above)
+qa-screenshots/
+
+# Codex local config — contains a personal access token, must never be committed
+.codex/config.toml
