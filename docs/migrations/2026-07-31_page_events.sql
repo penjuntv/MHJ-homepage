@@ -5,6 +5,12 @@
 -- 목적: 유입원(source/medium)·체류시간(engagement_ms)·스크롤깊이 등을
 --       사이트 자체 DB에 수집한다. GA4/Vercel 대시보드 의존 없이 조회 가능.
 --
+-- 상태: 2026-08-24 프로덕션(vpayqdatpqajsmalpfmq) 적용 완료.
+--       마이그레이션 3건으로 반영됨:
+--         1) page_events_analytics       — 테이블·인덱스·RLS·집계 RPC (§1~4)
+--         2) page_events_revoke_anon_rpc — anon 개별 grant 회수 (§4 하단)
+--         3) page_events_admin_guard     — mhj_is_admin() + RPC 4개 재정의 (§5)
+--
 -- 실행 방법: Supabase Dashboard → SQL Editor 에 이 파일 전체를 붙여넣고 Run.
 --           (프로젝트: vpayqdatpqajsmalpfmq)
 --           한 번만 실행하면 됨. 이미 존재하면 IF NOT EXISTS 로 안전하게 skip.
@@ -160,7 +166,147 @@ revoke execute on function public.mhj_daily_pageviews(integer)            from p
 revoke execute on function public.mhj_top_pages(integer, integer)         from public;
 revoke execute on function public.mhj_content_engagement(integer, integer) from public;
 
+-- ⚠️ Supabase 함정: 위의 `revoke ... from public` 만으로는 anon 이 막히지 않는다.
+--    Supabase 프로젝트는 default privileges 로 public 스키마 함수에 anon·authenticated
+--    **각 롤에 직접** execute 를 부여한다. PUBLIC(의사 롤) 회수는 이 개별 grant 를
+--    건드리지 않으므로, 아래 revoke 전까지 anon 키만으로 집계 RPC 가 호출 가능했다.
+--    (2026-08-24 확인 → 마이그레이션 page_events_revoke_anon_rpc 로 수정)
+revoke execute on function public.mhj_traffic_by_source(integer)          from anon;
+revoke execute on function public.mhj_daily_pageviews(integer)            from anon;
+revoke execute on function public.mhj_top_pages(integer, integer)         from anon;
+revoke execute on function public.mhj_content_engagement(integer, integer) from anon;
+
 grant execute on function public.mhj_traffic_by_source(integer)          to authenticated;
 grant execute on function public.mhj_daily_pageviews(integer)            to authenticated;
 grant execute on function public.mhj_top_pages(integer, integer)         to authenticated;
 grant execute on function public.mhj_content_engagement(integer, integer) to authenticated;
+
+-- 5) admin guard (applied 2026-08-24) ----------------------------------------
+-- 배경: 이 Supabase 프로젝트는 YuStudy 와 공유된다. 즉 `authenticated` 는 MHJ
+--       어드민 전용 롤이 아니며, grant 만으로는 리포트를 어드민에 한정할 수 없다.
+--       (게다가 anon key 는 브라우저에 공개되고, middleware 는 /mhj-desk 페이지만
+--        막을 뿐 Supabase REST 엔드포인트는 막지 못한다.)
+-- 결정: 서버 라우트로 옮기지 않고 **함수 내부에서** 차단한다. grant 구조는 유지 —
+--       브라우저 .rpc() 호출부(app/mhj-desk/insights/page.tsx)는 그대로 동작한다.
+-- 동작: 어드민이 아니면 에러가 아니라 **빈 결과셋**을 반환한다.
+
+create or replace function public.mhj_is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(auth.role() = 'service_role', false)
+      or coalesce(lower(auth.jwt() ->> 'email') = 'penjunetv@gmail.com', false);
+$$;
+
+revoke execute on function public.mhj_is_admin() from public;
+revoke execute on function public.mhj_is_admin() from anon;
+grant  execute on function public.mhj_is_admin() to authenticated;
+grant  execute on function public.mhj_is_admin() to service_role;
+
+-- 아래 4개는 시그니처·반환타입 동일, WHERE 최상단에 mhj_is_admin() 술어만 추가.
+-- (create or replace 는 기존 ACL 을 보존하므로 위 3)·4) 의 revoke/grant 재실행 불필요.)
+
+-- 5-1) 유입원별 방문(세션) 수
+create or replace function public.mhj_traffic_by_source(days integer default 30)
+returns table (source text, medium text, sessions bigint, pageviews bigint)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    coalesce(source, 'direct')  as source,
+    coalesce(medium, 'direct')  as medium,
+    count(distinct session_id)  as sessions,
+    count(*)                    as pageviews
+  from public.page_events
+  where public.mhj_is_admin()
+    and event_type = 'pageview'
+    and created_at >= now() - make_interval(days => days)
+  group by 1, 2
+  order by sessions desc;
+$$;
+
+-- 5-2) 일자별 페이지뷰·세션 추이
+create or replace function public.mhj_daily_pageviews(days integer default 30)
+returns table (day date, pageviews bigint, sessions bigint)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    (created_at at time zone 'Pacific/Auckland')::date as day,
+    count(*)                                           as pageviews,
+    count(distinct session_id)                         as sessions
+  from public.page_events
+  where public.mhj_is_admin()
+    and event_type = 'pageview'
+    and created_at >= now() - make_interval(days => days)
+  group by 1
+  order by 1;
+$$;
+
+-- 5-3) 인기 페이지 TOP (평균 체류시간 포함)
+create or replace function public.mhj_top_pages(days integer default 30, lim integer default 20)
+returns table (path text, pageviews bigint, sessions bigint, avg_engagement_ms numeric)
+language sql
+security definer
+set search_path = public
+as $$
+  with pv as (
+    select path, session_id
+    from public.page_events
+    where public.mhj_is_admin()
+      and event_type = 'pageview'
+      and created_at >= now() - make_interval(days => days)
+  ),
+  eng as (
+    select path, avg(engagement_ms)::numeric as avg_ms
+    from public.page_events
+    where public.mhj_is_admin()
+      and event_type = 'engagement'
+      and engagement_ms is not null
+      and created_at >= now() - make_interval(days => days)
+    group by path
+  )
+  select
+    pv.path,
+    count(*)                        as pageviews,
+    count(distinct pv.session_id)   as sessions,
+    round(coalesce(eng.avg_ms, 0))  as avg_engagement_ms
+  from pv
+  left join eng on eng.path = pv.path
+  group by pv.path, eng.avg_ms
+  order by pageviews desc
+  limit lim;
+$$;
+
+-- 5-4) 콘텐츠(블로그) 성과 — pageview·평균 체류시간·완독(scroll 100%)율
+create or replace function public.mhj_content_engagement(days integer default 30, lim integer default 20)
+returns table (
+  blog_slug text,
+  pageviews bigint,
+  avg_engagement_ms numeric,
+  read_complete bigint,
+  scroll100 bigint
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    e.blog_slug,
+    count(*) filter (where e.event_type = 'pageview')                                   as pageviews,
+    round(avg(e.engagement_ms) filter (where e.event_type = 'engagement'))              as avg_engagement_ms,
+    count(*) filter (where e.event_type = 'read_complete')                              as read_complete,
+    count(*) filter (where e.event_type = 'scroll' and e.scroll_pct >= 100)             as scroll100
+  from public.page_events e
+  where public.mhj_is_admin()
+    and e.blog_slug is not null
+    and e.created_at >= now() - make_interval(days => days)
+  group by e.blog_slug
+  order by pageviews desc
+  limit lim;
+$$;
