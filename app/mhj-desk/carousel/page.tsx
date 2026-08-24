@@ -2,7 +2,8 @@
 
 // MHJ Desk → Carousel Generator v2
 // 렌더링: html-to-image (클라이언트) — Satori 서버 렌더링 교체
-// docs/CAROUSEL_V2_MASTER_PLAN.md 세션 1
+// 실제 캡처 구현: components/carousel/v2/ExportEngine.tsx
+// docs/archive/CAROUSEL_V2_MASTER_PLAN.md 세션 1
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Save, Loader2 } from 'lucide-react';
