@@ -1,0 +1,45 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/penny/MHJ_HOMEPAGE/.codex/hooks/safety-gate.sh'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/penny/MHJ_HOMEPAGE/.codex/hooks/scope-guard.sh'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/penny/MHJ_HOMEPAGE/.codex/hooks/ts-check.sh'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/penny/MHJ_HOMEPAGE/.codex/hooks/session-summary.sh'"
+          }
+        ]
+      }
+    ]
+  }
+}
