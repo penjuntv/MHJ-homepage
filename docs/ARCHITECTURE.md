@@ -1,6 +1,6 @@
 # MHJ HOMEPAGE — ARCHITECTURE
 
-> Next.js 14.2.35 App Router 기반 아키텍처. 마지막 현행화: 2026-07-11.
+> Next.js 15.5 App Router 기반 아키텍처. 마지막 현행화: 2026-08-24.
 > 이 문서는 "디렉토리·패턴의 용도"를 기술한다. 파일별 세부는 실제 코드가 진실.
 
 ---
