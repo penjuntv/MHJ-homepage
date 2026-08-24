@@ -62,4 +62,8 @@
 | llms-txt-generator | 2026-05-30 | /llms.txt 동적 라우트 점검·검증 |
 | seo-audit-runner | 2026-05-30 | 발행 콘텐츠 SEO 감사 보고서 자동 생성 |
 | internal-link-suggester | 2026-05-30 | 발행 시 내부 링크 후보 추천 |
-| fact-verify | 2026-06-27 | 발행 전 사실 검증 게이트 |
+| fact-verify | 2026-06-27 | 발행 전 사실 검증 게이트 (원본 `.agents/skills/`, `.claude/skills/` 는 심볼릭 링크) |
+
+### 위치 규칙
+- **원본이 `.agents/skills/` 인 스킬**: frontend-design · fact-verify. `.claude/skills/` 쪽은 심볼릭 링크(git mode 120000)다 — 원본을 지우면 링크가 전부 깨진다.
+- **Codex 변형본**: `.agents/skills/cc-prompt-gen` · `.agents/skills/llms-txt-generator` 는 `.claude/skills/` 의 동명 스킬을 Codex 용으로 문구만 치환("Claude Code"→"Codex")한 별도 사본이다. 내용을 고치면 양쪽 다 갱신할 것.
