@@ -20,15 +20,21 @@
  * 두 높이의 측정값이 다르면 그 불변식이 다시 깨진 것이므로 VIEWPORT-DEPENDENT 로 보고한다.
  * (짧은 창 720 = 노트북, 긴 창 1366 = iPad Pro 세로 — 실사고에서 가장 불리했던 조합)
  *
- * ── 왜 scrollHeight - clientHeight 를 안 쓰는가 ──
- * 그 방식은 오탐이 난다. TipTap 이 본문 끝에 남기는 빈 <p></p> 가 빈 줄 하나(≈28px)를
- * 차지해 "넘침"으로 잡히지만 실제로 사라지는 글자는 없다. 2026-08 실측에서
- * 경고 5건 중 3건이 이 오탐이었고, 그래서 편집자가 빨간 경고를 신뢰하지 않게 됐다.
- * 여기서는 텍스트 노드의 line box 를 직접 재서 "클리핑 박스 아래로 넘어간 글자"만 센다.
+ * ── 측정 정의 ──
+ * lib/magazine-clip.mjs 의 measureMagazineClip 한 곳에만 있다.
+ * 어드민의 빨간 경고(app/mhj-desk/magazines/[id]/page.tsx)도 같은 함수를 쓴다 —
+ * 정의가 갈라지면 편집자가 보는 경고와 실제 라이브가 어긋난다.
+ * (scrollHeight 방식을 쓰지 않는 이유는 그쪽 주석 참고: TipTap 빈 문단 오탐)
+ *
+ * ── 감사 대상 ──
+ * .mag-page-root 로 조판되는 호수만. 과월호 PDF 이슈(react-pdf)는 코드로 조판하지 않아
+ * 대상이 아니며, 그런 호수는 요약에 "감사 대상 아님"으로 반드시 표시한다.
+ * 호수 목록은 sitemap 에서 얻으므로 published=false 인 준비 중 호수는 --issues 로 지정한다.
  */
 import { promises as fs } from 'fs';
 import path from 'path';
 import { chromium } from 'playwright';
+import { measureMagazineClip } from '../lib/magazine-clip.mjs';
 
 const args = Object.fromEntries(
   process.argv.slice(2).map(a => {
@@ -58,72 +64,9 @@ async function discoverIssues() {
   return [...ids].sort();
 }
 
-/**
- * 브라우저 안에서 실행 — 지면에서 "실제로 잘린 글자"를 찾는다.
- * 반환값은 620-space px(= transform: scale 을 되돌린 값)이라 창 크기와 무관하게 비교 가능.
- */
-/* c8 ignore start — 브라우저 컨텍스트에서 실행되는 코드 */
-function measureInPage(epsilon) {
-  const root = document.querySelector('.mag-page-root');
-  if (!root) return null;
-
-  const rect = root.getBoundingClientRect();
-  // 뷰어는 transform: scale() 로 축소한다. 화면 px → 620-space px 환산 계수.
-  const scale = root.clientHeight > 0 ? rect.height / root.clientHeight : 1;
-  const unscale = (v) => (scale > 0 ? v / scale : v);
-
-  /** el 을 실제로 잘라내는 가장 가까운 조상(overflow hidden/clip). 없으면 null. */
-  const clipperOf = (el) => {
-    let n = el;
-    while (n && n !== document.body) {
-      const cs = getComputedStyle(n);
-      // 의도적 line-clamp(제목 N줄 자르기)는 편집 의도이므로 잘림으로 치지 않는다.
-      if (cs.webkitLineClamp && cs.webkitLineClamp !== 'none') return null;
-      // hidden/clip 만 — auto/scroll 은 스크롤로 도달 가능하므로 "사라진 글자"가 아니다.
-      if (['hidden', 'clip'].includes(cs.overflowY) || ['hidden', 'clip'].includes(cs.overflow)) return n;
-      n = n.parentElement;
-    }
-    return null;
-  };
-
-  let worst = 0;
-  let sample = '';
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  while (walker.nextNode()) {
-    const node = walker.currentNode;
-    const text = node.nodeValue;
-    if (!text || !text.trim()) continue;           // 빈 문단/공백은 잘려도 손실이 아니다
-    const parent = node.parentElement;
-    if (!parent) continue;
-    const pcs = getComputedStyle(parent);
-    if (pcs.visibility === 'hidden' || pcs.display === 'none' || Number(pcs.opacity) === 0) continue;
-
-    const box = clipperOf(parent);
-    if (!box) continue;
-    const boxBottom = box.getBoundingClientRect().bottom;
-
-    // line box 단위로 재야 "몇 줄이 사라졌나"를 정확히 안다.
-    const range = document.createRange();
-    range.selectNodeContents(node);
-    for (const r of range.getClientRects()) {
-      if (r.height === 0) continue;
-      const over = unscale(r.bottom - boxBottom);
-      if (over > worst) {
-        worst = over;
-        sample = text.trim().slice(0, 70);
-      }
-    }
-  }
-
-  const header = root.querySelector('div[style*="letter-spacing"]');
-  return {
-    clip: worst > epsilon ? Math.round(worst) : 0,
-    label: (header?.textContent ?? '').trim().slice(0, 44),
-    sample,
-    pageH: root.clientHeight,
-  };
-}
-/* c8 ignore stop */
+/* 측정 정의는 lib/magazine-clip.mjs 한 곳에만 둔다 — Admin 의 빨간 경고와 이 게이트가
+   같은 함수를 써야 편집자가 보는 경고와 실제 라이브가 어긋나지 않는다.
+   page.evaluate 는 함수를 문자열로 직렬화하므로 self-contained 여야 한다(그쪽 주석 참고). */
 
 /** 한 호수를 페이지별로 순회하며 측정. 페이지 전환은 뷰어의 ArrowRight 키를 쓴다. */
 async function auditIssue(browser, issue, height) {
@@ -144,7 +87,7 @@ async function auditIssue(browser, issue, height) {
 
     let prevSample = null;
     for (let i = 1; i <= MAX_PAGES; i++) {
-      const r = await page.evaluate(measureInPage, CLIP_EPSILON);
+      const r = await page.evaluate(measureMagazineClip, { epsilon: CLIP_EPSILON });
       if (!r) break;
       const sig = `${r.label}|${r.sample}`;
       if (i > 1 && sig === prevSample) break; // 마지막 지면에서 더 안 넘어감 → 종료

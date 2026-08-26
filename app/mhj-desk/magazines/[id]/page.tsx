@@ -25,6 +25,7 @@ import DownloadBtn from '@/components/DownloadBtn';
 import type { ArticlePreviewData, StyleOverrides } from '@/components/magazine/templates/shared';
 import { TEMPLATE_PHOTO_COUNT } from '@/components/magazine/templates/shared';
 import StyleOverridePanel from '@/components/admin/StyleOverridePanel';
+import { measureMagazineClip, stripTrailingEmptyBlocks } from '@/lib/magazine-clip.mjs';
 import PngSection from './png-section';
 
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
@@ -253,30 +254,30 @@ export default function MagazineDetailPage() {
   const previewDivRef = useRef<HTMLDivElement>(null);
 
   /* ─── 지면 넘침 감지 ───
-     지면은 620×812 고정 캔버스(overflow:hidden)라, 내부에서 clip되는 요소의
-     scrollHeight-clientHeight를 재면 "몇 px 잘려서 발행되는지"를 결정적으로 알 수 있다.
-     scrollHeight/clientHeight는 CSS transform(scale)의 영향을 받지 않아 항상 620-space px. */
+     지면은 620×812 고정 캔버스(overflow:hidden)라, 미리보기를 실제로 재면
+     "이 상태로 발행하면 몇 px 잘리는지"를 결정적으로 알 수 있다.
+
+     측정 정의는 lib/magazine-clip.mjs 에만 둔다 — scripts/magazine-overflow-audit.mjs
+     (라이브 감사 게이트)와 반드시 같은 함수를 써야 편집자가 보는 경고와 실제 라이브가
+     어긋나지 않는다.
+
+     ⚠ 옛 구현은 overflow:hidden 요소의 scrollHeight-clientHeight 를 썼는데 오탐이 났다.
+     TipTap 이 본문 끝에 남기는 빈 <p></p> 가 빈 줄 하나(≈28px)를 차지해 "넘침"으로
+     잡히지만 사라지는 글자는 없다. 2026-08 라이브 실측에서 5건 중 3건이 이 오탐이었고,
+     그래서 빨간 경고가 늑대소년이 됐다. 지금은 텍스트 line box 를 직접 잰다. */
   const [overflowPx, setOverflowPx] = useState(0);
-  /* 지면 넘침 재측정: 미리보기에 영향 주는 입력이 바뀔 때마다 (rAF로 레이아웃 flush 후).
-     scrollHeight/clientHeight는 transform(scale) 무관 → 항상 620-space px = 라이브 잘림량과 동일.
+  const [overflowSample, setOverflowSample] = useState('');
+  /* 미리보기에 영향 주는 입력이 바뀔 때마다 재측정 (rAF로 레이아웃 flush 후).
      ⚠ 훅 순서 유지 위해 early-return 위에 위치 (rules-of-hooks). */
   useEffect(() => {
-    if (tab !== 'articles' || !inlineForm) { setOverflowPx(0); return; }
+    if (tab !== 'articles' || !inlineForm) { setOverflowPx(0); setOverflowSample(''); return; }
     let raf = 0;
     const measure = () => {
-      const el = previewDivRef.current;
-      if (!el) { setOverflowPx(0); return; }
-      let maxClip = 0;
-      el.querySelectorAll('*').forEach((node) => {
-        const cs = getComputedStyle(node);
-        // 의도적 line-clamp(제목/캡션 N줄 자르기)는 지면 넘침이 아니므로 제외.
-        const clamped = cs.webkitLineClamp && cs.webkitLineClamp !== 'none';
-        if (!clamped && (cs.overflowY === 'hidden' || cs.overflow === 'hidden')) {
-          const diff = node.scrollHeight - node.clientHeight;
-          if (diff > maxClip) maxClip = diff;
-        }
-      });
-      setOverflowPx(maxClip > 4 ? Math.round(maxClip) : 0);
+      if (!previewDivRef.current) { setOverflowPx(0); setOverflowSample(''); return; }
+      // 어드민 한 화면에 썸네일 등 .mag-page-root 가 여럿 있으므로 미리보기로 스코프를 좁힌다.
+      const r = measureMagazineClip({ rootSelector: '.mag-overflow-probe .mag-page-root' });
+      setOverflowPx(r?.clip ?? 0);
+      setOverflowSample(r?.sample ?? '');
     };
     raf = requestAnimationFrame(measure);
     // 웹폰트(Playfair/Noto)가 늦게 로드되면 텍스트 높이가 바뀌므로 로드 후 1회 재측정.
@@ -454,11 +455,31 @@ export default function MagazineDetailPage() {
   async function saveArticle() {
     if (!inlineForm) return;
     if (!inlineForm.title) { setFormError('제목은 필수입니다.'); return; }
+
+    /* 지면 넘침 게이트 — 경고를 띄워만 두면 지나쳐서 발행된다(2026-08 사고).
+       측정은 미리보기 실측이므로 "본문이 실제로 잘린다"가 확정된 상태에서만 뜬다. */
+    if (overflowPx > 0) {
+      const where = focusedPageIdx === null ? '이 지면' : `P${focusedPageIdx + 2}`;
+      const ok = window.confirm(
+        `${where}의 본문이 약 ${overflowPx}px 잘립니다.\n` +
+        (overflowSample ? `\n끊기는 부분: "${overflowSample}…"\n` : '') +
+        `\n이대로 저장하면 라이브에서도 잘려 보입니다.\n` +
+        `본문을 줄이거나 "추가 페이지"로 나누는 것을 권합니다.\n\n그래도 저장할까요?`,
+      );
+      if (!ok) return;
+    }
+
     setSavingArticle(true);
     setFormError('');
     // 기사 사진 첫 번째를 대표 image_url로 자동 설정
     const firstImg = (inlineForm.article_images ?? []).filter(Boolean)[0] ?? inlineForm.image_url ?? '';
-    const formToSave = { ...inlineForm, image_url: firstImg };
+    /* TipTap 이 본문 끝에 남기는 빈 <p></p> 를 잘라낸다 — 고정 캔버스에서 이 빈 줄은
+       의미 없이 자리만 차지해 헛경고를 띄우고 진짜 본문을 지면 밖으로 민다. */
+    const formToSave = {
+      ...inlineForm,
+      image_url: firstImg,
+      content: stripTrailingEmptyBlocks(inlineForm.content),
+    };
 
     if (!inlineIsNew && selectedArtId) {
       const { error } = await supabase.from('articles').update(formToSave).eq('id', selectedArtId);
@@ -487,6 +508,18 @@ export default function MagazineDetailPage() {
   /* ─── 추가 페이지 저장 ─── */
   async function saveArticlePages() {
     if (!selectedArtId) return;
+
+    /* 기사 본문과 동일한 넘침 게이트 — 추가 페이지도 같은 고정 캔버스에 얹힌다.
+       현재 미리보기 중인 페이지만 실측 가능하므로, 그 페이지가 넘칠 때 확인을 받는다. */
+    if (overflowPx > 0 && focusedPageIdx !== null) {
+      const ok = window.confirm(
+        `P${focusedPageIdx + 2}의 본문이 약 ${overflowPx}px 잘립니다.\n` +
+        (overflowSample ? `\n끊기는 부분: "${overflowSample}…"\n` : '') +
+        `\n이대로 저장하면 라이브에서도 잘려 보입니다.\n\n그래도 저장할까요?`,
+      );
+      if (!ok) return;
+    }
+
     setSavingPages(true);
     await supabase.from('article_pages').delete().eq('article_id', selectedArtId);
     if (articlePages.length > 0) {
@@ -494,7 +527,8 @@ export default function MagazineDetailPage() {
         article_id: selectedArtId,
         page_number: idx + 1,
         template: p.template,
-        content: p.content,
+        // 기사 본문과 동일하게 트레일링 빈 문단 정규화 (lib/magazine-clip.mjs)
+        content: stripTrailingEmptyBlocks(p.content),
         images: p.images,
         image_positions: p.image_positions ?? [],
         caption: p.caption ?? null,
@@ -1043,7 +1077,7 @@ export default function MagazineDetailPage() {
                   {/* 현재 포커스 페이지 미리보기 (템플릿 기반) */}
                   {focusedPageIdx === null ? (
                     <MagazineCanvas mobileReflow={false}>
-                    <div ref={previewDivRef} style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden' }}>
+                    <div ref={previewDivRef} className="mag-overflow-probe" style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden' }}>
                       <MagazinePage bgColor={bgCol}>
                         {renderTemplate(inlineForm.template, {
                           title: inlineForm.title,
@@ -1067,7 +1101,7 @@ export default function MagazineDetailPage() {
                     </MagazineCanvas>
                   ) : focusedExtraPage ? (
                     <MagazineCanvas mobileReflow={false}>
-                    <div ref={previewDivRef} style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden' }}>
+                    <div ref={previewDivRef} className="mag-overflow-probe" style={{ border: '1px solid #F1F5F9', borderRadius: '12px', overflow: 'hidden' }}>
                       <MagazinePage bgColor={bgCol}>
                         {renderTemplate(focusedExtraPage.template ?? inlineForm.template, {
                           title: inlineForm.title,
@@ -1083,17 +1117,25 @@ export default function MagazineDetailPage() {
                     </MagazineCanvas>
                   ) : null}
 
-                  {/* 지면 넘침 경고 — 잘려서 발행되기 전에 알림 */}
+                  {/* 지면 넘침 경고 — 잘려서 발행되기 전에 알림.
+                      측정은 텍스트 line box 실측이라(lib/magazine-clip.mjs) 이 경고가 뜨면
+                      실제로 글자가 사라진다. 어디서 끊기는지까지 보여줘 확인 비용을 없앤다. */}
                   {overflowPx > 0 && (
                     <div style={{
                       marginTop: '10px',
-                      display: 'flex', alignItems: 'center', gap: '8px',
+                      display: 'flex', alignItems: 'flex-start', gap: '8px',
                       padding: '9px 12px',
                       background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px',
                     }}>
-                      <AlertTriangle size={15} color="#DC2626" style={{ flexShrink: 0 }} />
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#B91C1C', lineHeight: 1.4 }}>
+                      <AlertTriangle size={15} color="#DC2626" style={{ flexShrink: 0, marginTop: '1px' }} />
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#B91C1C', lineHeight: 1.5 }}>
                         본문이 지면을 <strong>약 {overflowPx}px</strong> 넘칩니다 — 이 상태로 발행하면 라이브에서 잘립니다. 본문/이미지를 줄이거나 페이지를 나눠 주세요.
+                        {overflowSample && (
+                          <>
+                            <br />
+                            <span style={{ fontWeight: 500, opacity: 0.85 }}>끊기는 부분: “{overflowSample}…”</span>
+                          </>
+                        )}
                       </span>
                     </div>
                   )}
