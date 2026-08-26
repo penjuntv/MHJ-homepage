@@ -279,13 +279,15 @@ export default function MagazineDetailPage() {
       setOverflowPx(r?.clip ?? 0);
       setOverflowSample(r?.sample ?? '');
     };
-    raf = requestAnimationFrame(measure);
+    // inlineForm 은 타이핑 한 글자마다 바뀐다. 측정은 getClientRects 로 레이아웃을
+    // 강제하므로 타이핑이 멎은 뒤 한 번만 재도록 짧게 debounce 한다.
+    const timer = setTimeout(() => { raf = requestAnimationFrame(measure); }, 120);
     // 웹폰트(Playfair/Noto)가 늦게 로드되면 텍스트 높이가 바뀌므로 로드 후 1회 재측정.
     let cancelled = false;
     if (typeof document !== 'undefined' && 'fonts' in document) {
       document.fonts.ready.then(() => { if (!cancelled) requestAnimationFrame(measure); });
     }
-    return () => { cancelled = true; cancelAnimationFrame(raf); };
+    return () => { cancelled = true; clearTimeout(timer); cancelAnimationFrame(raf); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inlineForm, focusedPageIdx, articlePages, tab]);
 
@@ -451,23 +453,27 @@ export default function MagazineDetailPage() {
     setUploadingSlotIdx(null);
   }
 
+  /* ─── 지면 넘침 게이트 ───
+     경고를 띄워만 두면 지나쳐서 발행된다(2026-08 사고 — saveArticle 은 overflowPx 를
+     참조조차 하지 않았다). 측정은 미리보기 실측이라 이 시점엔 잘림이 확정돼 있다.
+     @returns true = 저장 진행 */
+  function confirmOverflow(pageLabel: string): boolean {
+    return window.confirm(
+      `${pageLabel}의 본문이 약 ${overflowPx}px 잘립니다.\n` +
+      (overflowSample ? `\n끊기는 부분: "${overflowSample}…"\n` : '') +
+      `\n이대로 저장하면 라이브에서도 잘려 보입니다.\n` +
+      `본문을 줄이거나 "추가 페이지"로 나누는 것을 권합니다.\n\n그래도 저장할까요?`,
+    );
+  }
+
   /* ─── 기사 저장 ─── */
   async function saveArticle() {
     if (!inlineForm) return;
     if (!inlineForm.title) { setFormError('제목은 필수입니다.'); return; }
 
-    /* 지면 넘침 게이트 — 경고를 띄워만 두면 지나쳐서 발행된다(2026-08 사고).
-       측정은 미리보기 실측이므로 "본문이 실제로 잘린다"가 확정된 상태에서만 뜬다. */
-    if (overflowPx > 0) {
-      const where = focusedPageIdx === null ? '이 지면' : `P${focusedPageIdx + 2}`;
-      const ok = window.confirm(
-        `${where}의 본문이 약 ${overflowPx}px 잘립니다.\n` +
-        (overflowSample ? `\n끊기는 부분: "${overflowSample}…"\n` : '') +
-        `\n이대로 저장하면 라이브에서도 잘려 보입니다.\n` +
-        `본문을 줄이거나 "추가 페이지"로 나누는 것을 권합니다.\n\n그래도 저장할까요?`,
-      );
-      if (!ok) return;
-    }
+    /* 미리보기가 P1(기사 본문)일 때만 게이트한다 — 추가 페이지를 보고 있으면
+       overflowPx 는 그 페이지 값이라 지금 저장하는 본문과 무관하다. */
+    if (focusedPageIdx === null && overflowPx > 0 && !confirmOverflow('이 지면')) return;
 
     setSavingArticle(true);
     setFormError('');
@@ -510,15 +516,9 @@ export default function MagazineDetailPage() {
     if (!selectedArtId) return;
 
     /* 기사 본문과 동일한 넘침 게이트 — 추가 페이지도 같은 고정 캔버스에 얹힌다.
-       현재 미리보기 중인 페이지만 실측 가능하므로, 그 페이지가 넘칠 때 확인을 받는다. */
-    if (overflowPx > 0 && focusedPageIdx !== null) {
-      const ok = window.confirm(
-        `P${focusedPageIdx + 2}의 본문이 약 ${overflowPx}px 잘립니다.\n` +
-        (overflowSample ? `\n끊기는 부분: "${overflowSample}…"\n` : '') +
-        `\n이대로 저장하면 라이브에서도 잘려 보입니다.\n\n그래도 저장할까요?`,
-      );
-      if (!ok) return;
-    }
+       ⚠ 실측 가능한 건 현재 미리보기 중인 페이지뿐이다. 다른 추가 페이지의 넘침은
+       여기서 못 잡으므로, 발행 전 scripts/magazine-overflow-audit.mjs 로 전수 확인할 것. */
+    if (focusedPageIdx !== null && overflowPx > 0 && !confirmOverflow(`P${focusedPageIdx + 2}`)) return;
 
     setSavingPages(true);
     await supabase.from('article_pages').delete().eq('article_id', selectedArtId);
