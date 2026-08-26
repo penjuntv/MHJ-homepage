@@ -90,7 +90,8 @@ export default function MiddleTemplate({
             style={{
               width: '100%',
               height: 'auto',
-              maxHeight: '38cqh',
+              /* 지면 높이의 38%. cqh 직접 사용 금지 — globals.css 의 --mag-cqh 주석 참고. */
+              maxHeight: 'calc(38 * var(--mag-cqh))',
               objectFit: 'cover',
               objectPosition: slot.pos,
               display: 'block',

@@ -113,6 +113,27 @@
 }
 ```
 
+## ⚠ 지면 안의 세로 비율 — cqh 금지
+
+지면 루트(`.mag-page-root`)는 `container-type: inline-size` 다. **가로(cqw)만** 컨테이너
+기준이 되고, `cqh` 는 매칭될 size 컨테이너가 없어 **브라우저 창 높이(small viewport)로
+폴백**한다. 즉 `38cqh` 가 `38svh` 로 동작한다.
+
+2026-08 리딩뷰 잘림 사고가 이것이었다. 이미지 `max-height` 가 창 높이에 비례하는 바람에
+같은 URL 이 창 크기에 따라 잘리기도 안 잘리기도 했고, "620×812 고정 캔버스 = 어떤
+창에서도 픽셀 단위로 동일"이라는 전제가 깨졌다. 창이 높을수록 나빠져 **iPad 세로가 최악**이었다.
+
+세로 비율이 필요하면 `--mag-cqh` 를 쓴다 (지면 높이 = 폭 × 55/42 환산, `app/globals.css`):
+
+```css
+/* ✗ 창 높이에 끌려간다 */   max-height: 38cqh;
+/* ✓ 지면 높이의 38% 고정 */ max-height: calc(38 * var(--mag-cqh));
+```
+
+- 강제: `.claude/hooks/mag-unit-guard.sh` 가 매거진 코드의 `Ncqh`, 템플릿의 `vh/vw` 계열을 차단
+- 검증: `node scripts/magazine-overflow-audit.mjs` — 창 높이 720/1366 두 조건의 측정값이
+  다르면 `VIEWPORT-DEPENDENT` 로 보고(= 불변식이 다시 깨짐)
+
 ---
 
 # 2. 그리드 시스템

@@ -85,7 +85,12 @@ export default function MumsNoteTemplate({
           <img
             src={ornament}
             alt=""
-            style={{ maxWidth: '30%', maxHeight: '22cqh', width: 'auto', height: 'auto', objectFit: 'contain', display: 'block' }}
+            style={{
+              maxWidth: '30%',
+              /* 지면 높이의 22%. cqh 직접 사용 금지 — globals.css 의 --mag-cqh 주석 참고. */
+              maxHeight: 'calc(22 * var(--mag-cqh))',
+              width: 'auto', height: 'auto', objectFit: 'contain', display: 'block',
+            }}
           />
         ) : (
           <div style={{

@@ -95,7 +95,8 @@ export default function FeatureHalfTemplate({
             style={{
               width: '100%',
               height: 'auto',
-              maxHeight: '40cqh',
+              /* 지면 높이의 40%. cqh 직접 사용 금지 — globals.css 의 --mag-cqh 주석 참고. */
+              maxHeight: 'calc(40 * var(--mag-cqh))',
               objectFit: 'cover',
               objectPosition: slot.pos,
               display: 'block',
