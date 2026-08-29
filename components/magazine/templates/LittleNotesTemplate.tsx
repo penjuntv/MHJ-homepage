@@ -58,7 +58,12 @@ export default function LittleNotesTemplate({
           <img
             src={image}
             alt=""
-            style={{ maxWidth: '58%', maxHeight: '52cqh', width: 'auto', height: 'auto', objectFit: 'contain', display: 'block' }}
+            style={{
+              maxWidth: '58%',
+              /* 지면 높이의 52%. cqh 직접 사용 금지 — globals.css 의 --mag-cqh 주석 참고. */
+              maxHeight: 'calc(52 * var(--mag-cqh))',
+              width: 'auto', height: 'auto', objectFit: 'contain', display: 'block',
+            }}
           />
         ) : (
           <div style={{

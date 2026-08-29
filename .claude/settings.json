@@ -20,6 +20,10 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/name-guard.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/mag-unit-guard.sh"
           }
         ]
       }

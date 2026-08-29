@@ -1677,6 +1677,16 @@ a:hover .magazine-cover-shadow img {
   /* 폰트 스케일 (cqw: container query width 기준)
      매거진 페이지 컨테이너(420px 썸네일 / 620px 뷰어) 내부에서 비율 유지.
      clamp 최솟값 = 모바일 가독성 하한, 최댓값 = 4K/와이드 상한 */
+  /* ⚠ 세로 컨테이너 단위 — cqh 를 직접 쓰지 말 것.
+     .mag-page-root 는 container-type: inline-size 라 cqh 를 해석할 size 컨테이너가 없고,
+     그러면 cqh 는 small viewport 높이로 폴백한다(= 38cqh 가 38svh 로 동작).
+     그 결과 이미지 높이가 브라우저 창 높이에 비례해 지면 분량이 창마다 달라지고
+     "620×812 고정 캔버스" 불변식이 깨진다(2026-08 잘림 사고의 원인).
+     지면 높이 = 폭 × 55/42 이므로 cqw 로 환산해 창 높이와 무관하게 만든다.
+     사용: max-height: calc(38 * var(--mag-cqh))  ← 옛 38cqh 와 동일 의도.
+     비율은 canvas-constants.ts 의 MAG_ASPECT_W/H(42/55)와 반드시 일치시킬 것. */
+  --mag-cqh: calc(1cqw * 55 / 42);
+
   --mag-font-title:    clamp(18px, 6cqw, 56px);
   --mag-font-subtitle: clamp(10px, 1.5cqw, 16px);
   --mag-font-body:     clamp(11px, 2.2cqw, 18px);
