@@ -99,5 +99,5 @@ curl -X POST https://www.mhj.nz/api/revalidate \
 ## 모니터링 (3개월 뒤 점검)
 
 - Vercel runtime log 에서 `GPTBot|ClaudeBot|PerplexityBot` 검색 → /llms.txt fetch 빈도 확인
-- ChatGPT / Claude / Perplexity 에 "What is My Mairangi Journal?" 질의 → 답변에 우리 사이트 인용 여부
+- ChatGPT / Codex / Perplexity 에 "What is My Mairangi Journal?" 질의 → 답변에 우리 사이트 인용 여부
 - 인용 패턴 변화 시 이 스킬 Gotchas 섹션에 추가

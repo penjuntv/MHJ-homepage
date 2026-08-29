@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/safety-gate.sh"
+            "command": "bash '/Users/penny/MHJ_HOMEPAGE/.codex/hooks/safety-gate.sh'"
           }
         ]
       },
@@ -15,11 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/scope-guard.sh"
-          },
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/name-guard.sh"
+            "command": "bash '/Users/penny/MHJ_HOMEPAGE/.codex/hooks/scope-guard.sh'"
           }
         ]
       }
@@ -30,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/ts-check.sh"
+            "command": "bash '/Users/penny/MHJ_HOMEPAGE/.codex/hooks/ts-check.sh'"
           }
         ]
       }
@@ -40,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/session-summary.sh"
+            "command": "bash '/Users/penny/MHJ_HOMEPAGE/.codex/hooks/session-summary.sh'"
           }
         ]
       }

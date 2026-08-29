@@ -41,5 +41,5 @@ compact 시 유지할 것: 현재 브랜치 · 건드린 파일 · 실패 중인
 - 멀티툴 repo: Claude Code(`.claude/`) · Codex(`.codex/`) · Antigravity(루트 `AGENTS.md`, 읽기전용 QA). 설정은 서로 별개.
 - 강제 규칙은 프롬프트가 아니라 hook 로 추가한다: `.claude/hooks/` 의 safety-gate(Bash)·scope-guard(Edit/Write)·ts-check(PostToolUse)·session-summary(Stop).
 - 스킬 `.claude/skills/`·`.agents/skills/`(인벤토리 `docs/AGENTS.md`) · 서브에이전트 `.claude/agents/`.
-- `.claude/skills/frontend-design` 과 `.kiro/skills/frontend-design` 은 `.agents/skills/frontend-design` 을 가리키는 **심볼릭 링크**다. 원본을 지우면 셋 다 깨진다.
+- `.claude/skills/frontend-design`(+`.kiro/skills/frontend-design`)·`.claude/skills/fact-verify` 는 `.agents/skills/` 의 원본을 가리키는 **심볼릭 링크**다. 원본을 지우면 링크가 전부 깨진다.
 - MCP: Supabase 는 DDL=apply_migration / 조회·DML=execute_sql. 불필요한 MCP 는 끄기.
