@@ -16,6 +16,7 @@ description: |
 - [ ] published = true인가
 - [ ] 본문에 빈 이미지 태그가 없는가
 - [ ] info_block_html이 있다면 인라인 스타일이 포함되어 있는가
+- [ ] 링크 체크 — fact-verify §1(Link check) 절차를 content + info_block_html 에 실행했는가. `/go/` 링크는 `lib/validate-affiliate-links.ts` 로 검증. FAIL 이 1건이라도 있으면 발행 중단.
 
 ## Gotchas
 - admin 카테고리 드롭다운이 사이트 필터와 불일치한 적 있음
