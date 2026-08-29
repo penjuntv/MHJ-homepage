@@ -17,6 +17,17 @@ export default function ColumnLayoutTemplate({
   const slots = getImageSlots(article, 3);
   const content = article.content || '<p>본문을 작성해 주세요. 이미지 3장이 측면 컬럼에 세로로 배치됩니다.</p>';
 
+  /* ── 인포블록 슬롯 (사진 컬럼 하단) ──
+     영업시간·준비물 같은 실용 정보는 산문이 아니다. 본문 흐름에 두면 지면 분량만
+     잡아먹고(2026-02 "Up the Coast" 가 이것 때문에 잘렸다) 읽는 리듬도 끊는다.
+     실무 매거진의 service information/fact box 를 사진 컬럼 아래에 둔 것.
+
+     ⚠ getSidebarContent() 를 쓰지 않고 필드를 직접 읽는다 — 그 getter 는 본문의
+     <hr> 분할과 image_captions 폴백을 갖고 있어서, 값을 넣은 적 없는 기존 기사에도
+     인포블록이 갑자기 나타날 수 있다. 여기서는 명시적으로 입력했을 때만 렌더한다. */
+  const infoBody = article.sidebar_body?.trim() ?? '';
+  const infoTitle = article.sidebar_title?.trim() ?? '';
+
   const imageColumn = (
     <div
       className={`col-imgs-${uid}`}
@@ -59,6 +70,41 @@ export default function ColumnLayoutTemplate({
           </div>
         )
       )}
+
+      {/* 인포블록 — 입력했을 때만 렌더. 없으면 기존 지면과 출력이 완전히 동일하다.
+          flexShrink:0 이라 사진(flex:1 1 0)이 그만큼 줄어들고 지면은 넘치지 않는다.
+          시각 언어는 SidebarTemplate 의 인포블록과 통일(accent 틴트 + 4px radius). */}
+      {infoBody && (
+        <div
+          className={`col-info-${uid}`}
+          style={{
+            flexShrink: 0,
+            marginTop: '4px', // 이미지 gap 과 동일한 리듬
+            background: `${accentColor}08`,
+            border: `1px solid ${accentColor}22`,
+            borderRadius: '4px',
+            padding: '0.9em 1em',
+            boxSizing: 'border-box',
+          }}
+        >
+          {infoTitle && (
+            <div
+              style={{
+                fontFamily: '"Inter", sans-serif',
+                fontWeight: 700,
+                fontSize: 'var(--mag-font-meta)',
+                letterSpacing: '0.25em',
+                textTransform: 'uppercase',
+                color: accentColor,
+                marginBottom: '0.6em',
+              }}
+            >
+              {infoTitle}
+            </div>
+          )}
+          <div dangerouslySetInnerHTML={{ __html: infoBody }} />
+        </div>
+      )}
     </div>
   );
 
@@ -92,6 +138,24 @@ export default function ColumnLayoutTemplate({
           color: var(--mag-body-color);
         }
         .col-body-${uid} p:last-child { margin-bottom: 0; }
+        /* 인포블록 타이포 — 본문보다 한 단계 작게(SidebarTemplate 과 동일 비율) */
+        .col-info-${uid} p {
+          margin: 0 0 0.5em;
+          font-size: calc(var(--mag-font-body) * 0.92);
+          line-height: 1.55;
+          color: var(--mag-body-color);
+        }
+        .col-info-${uid} p:last-child { margin-bottom: 0; }
+        .col-info-${uid} ul, .col-info-${uid} ol { margin: 0; padding-left: 1.1em; }
+        .col-info-${uid} li {
+          margin-bottom: 0.3em;
+          font-size: calc(var(--mag-font-body) * 0.92);
+          line-height: 1.55;
+          color: var(--mag-body-color);
+        }
+        .col-info-${uid} li:last-child { margin-bottom: 0; }
+        .col-info-${uid} em { font-style: italic; }
+        .col-info-${uid} strong { font-weight: 700; }
         .col-body-${uid} strong { font-weight: 700; }
         .col-body-${uid} em { font-style: italic; }
         .col-body-${uid} blockquote {

@@ -1949,9 +1949,18 @@ function InlineForm({
         </CollapsibleSection>
       )}
 
-      {form.template === 'sidebar' && (
-        <CollapsibleSection title="인포블록 콘텐츠" defaultOpen>
+      {/* left/right 도 사진 컬럼 하단에 인포블록 슬롯을 갖는다(비우면 렌더되지 않음).
+          영업시간·준비물 같은 실용 정보를 본문에서 빼 지면 넘침을 예방한다. */}
+      {(form.template === 'sidebar' || form.template === 'left' || form.template === 'right') && (
+        <CollapsibleSection title="인포블록 콘텐츠" defaultOpen={form.template === 'sidebar'}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {form.template !== 'sidebar' && (
+              <p style={{ fontSize: '11px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>
+                사진 컬럼 아래에 작은 정보 상자로 들어갑니다. 영업시간·준비물·링크처럼
+                산문이 아닌 실용 정보를 여기 두면 본문 분량을 잡아먹지 않습니다.
+                <strong> 비워 두면 아무것도 표시되지 않습니다.</strong>
+              </p>
+            )}
             <div>
               <label style={labelStyle}>Sidebar Title (소제목, optional)</label>
               <input
