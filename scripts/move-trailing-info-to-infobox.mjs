@@ -105,7 +105,9 @@ let verdict = null;
 try {
   for (const height of [720, 1366]) {
     const page = await browser.newPage({ viewport: { width: 1440, height } });
-    await page.goto(`${BASE}/magazine/${art.magazine_id}`, { waitUntil: 'networkidle', timeout: 60_000 });
+    // ⚠ ?page=1 필수 — 빼면 리딩 뷰어가 아니라 이슈 상세(썸네일 목록)가 열린다.
+    // 거기에도 .mag-page-root 는 있어서 조용히 통과한 뒤 문구를 못 찾고 오판한다.
+    await page.goto(`${BASE}/magazine/${art.magazine_id}?page=1`, { waitUntil: 'networkidle', timeout: 60_000 });
     // 기사 지면까지 넘긴다 (뷰어의 ArrowRight)
     let found = null;
     await page.waitForSelector('.mag-page-root', { timeout: 25_000 });
@@ -118,7 +120,7 @@ try {
       await page.keyboard.press('ArrowRight');
       await page.waitForTimeout(500);
     }
-    if (!found) verdict = `h${height}: 옮긴 문구가 어느 지면에도 보이지 않는다 (코드 미배포 가능성)`;
+    if (!found) verdict = `h${height}: 옮긴 문구가 어느 지면에도 보이지 않는다 (인포블록 슬롯 미배포 / 캐시 미갱신 / 뷰어 경로 확인 필요)`;
     else if (found.clip > 0) verdict = `h${height}: 해당 지면이 여전히 ${found.clip}px 잘린다`;
     else console.log(`  h${height} ✓ 문구 노출 확인 · 잘림 0`);
     await page.close();

@@ -31,7 +31,9 @@ export default function ColumnLayoutTemplate({
   const imageColumn = (
     <div
       className={`col-imgs-${uid}`}
-      style={{ display: 'flex', flexDirection: 'column', gap: '4px', minHeight: 0 }}
+      /* minWidth:0 — grid/flex item 의 기본 min-width:auto 는 내용의 min-content 를
+         하한으로 삼아 트랙을 부풀린다. 지면은 고정 폭이므로 절대 부풀면 안 된다. */
+      style={{ display: 'flex', flexDirection: 'column', gap: '4px', minHeight: 0, minWidth: 0 }}
     >
       {slots.map((slot, i) =>
         slot.src ? (
@@ -111,7 +113,7 @@ export default function ColumnLayoutTemplate({
   const contentColumn = (
     <div
       className={`col-text-${uid}`}
-      style={{ minHeight: 0, overflow: 'hidden' }}
+      style={{ minHeight: 0, minWidth: 0, overflow: 'hidden' }}
     >
       <div className={`col-body-${uid}`} dangerouslySetInnerHTML={{ __html: content }} />
     </div>
@@ -182,8 +184,14 @@ export default function ColumnLayoutTemplate({
           }
           /* 1컬럼 모드: 세로 스택(flex 1 1 0)은 auto 행에서 높이 0으로
              붕괴하므로, 1:1 정사각 3장 가로 스트립으로 전환 */
-          .col-imgs-${uid} { order: -1 !important; flex-direction: row !important; }
-          .col-imgs-${uid} > div { aspect-ratio: 1 / 1; }
+          .col-imgs-${uid} { order: -1 !important; flex-direction: row !important; flex-wrap: wrap !important; }
+          /* ⚠ :not(.col-info) 필수 — 인포블록도 .col-imgs 의 자식 div 라서,
+             제외하지 않으면 사진 슬롯 취급을 받아 1:1 정사각이 되고 가로 스트립에
+             끼어든다. 그러면 flex row 의 min-content 폭이 커져 1fr 트랙이 지면보다
+             넓어지고(실측 286px → 1056px) 본문이 가로로 잘린다. */
+          .col-imgs-${uid} > div:not(.col-info-${uid}) { aspect-ratio: 1 / 1; }
+          /* 인포블록은 사진 스트립 아래 제 줄을 차지한다 */
+          .col-info-${uid} { flex: 1 0 100% !important; margin-top: 8px !important; }
           .col-text-${uid} { order: 0 !important; }
         }
       `}</style>
