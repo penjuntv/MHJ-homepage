@@ -1,5 +1,18 @@
 -- 2026-08-27 · 매거진 본문 끝 빈 문단 제거 (1회 실행)
 --
+-- ⚠️ 실행 완료 — 2026-08-29, 다만 이 SQL 이 아니라 스크립트로 처리했다:
+--      node --env-file=.env.local scripts/strip-trailing-empty-paragraphs.mjs --apply
+--    articles 5행 + article_pages 3행 정리. 재실행 시 0행(멱등).
+--
+--    스크립트를 쓴 이유 — 이 SQL 의 [[:space:]] 는 POSIX 공백 클래스라
+--    전각 공백 U+3000 을 매칭하지 못한다. 실제 데이터에 그게 있었다:
+--      articles#30 "J's Birthday" → <p style="text-align: right;">　　</p>
+--    JS 의 \s 는 U+3000 을 포함하므로 스크립트만 이걸 잡아냈고, 무엇보다
+--    스크립트는 앱이 저장 시점에 쓰는 함수(lib/magazine-clip.mjs 의
+--    stripTrailingEmptyBlocks)를 그대로 써서 결과가 어긋날 수 없다.
+--
+--    아래 SQL 은 참고용으로 남긴다. 다시 쓸 일이 있으면 스크립트를 쓸 것.
+--
 -- 배경:
 --   TipTap 이 본문 끝에 빈 문단을 남긴다 — <p></p>, <p><br></p>, <p>&nbsp;</p>,
 --   <p style="text-align: right;">  </p> 등. 고정 캔버스(620×812) 지면에서 이 빈 줄은
