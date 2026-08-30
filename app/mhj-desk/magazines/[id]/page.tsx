@@ -379,7 +379,6 @@ export default function MagazineDetailPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET,
             paths: ['/magazine', `/magazine/${id}`, '/'],
             indexNowUrls: [`${siteUrl}/magazine/${id}`],
           }),
@@ -503,7 +502,6 @@ export default function MagazineDetailPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET,
           paths: ['/magazine', `/magazine/${id}`, '/'],
         }),
       });

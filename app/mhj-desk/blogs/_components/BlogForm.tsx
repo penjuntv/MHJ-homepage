@@ -360,7 +360,6 @@ export default function BlogForm({ initial }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET,
           paths: [`/blog/${form.slug}`, '/', '/blog'],
           ...(shouldPublish ? { indexNowUrls: [`${siteUrl}/blog/${form.slug}`] } : {}),
         }),

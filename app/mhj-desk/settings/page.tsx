@@ -160,7 +160,7 @@ export default function SettingsPage() {
       fetch('/api/revalidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, all: true }),
+        body: JSON.stringify({ all: true }),
       }).catch(() => {});
     }
     setSaving(false);
@@ -187,7 +187,7 @@ export default function SettingsPage() {
     fetch('/api/revalidate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths }),
+      body: JSON.stringify({ paths }),
     }).catch(() => {});
     setSavingSection(null);
   }
@@ -216,7 +216,7 @@ export default function SettingsPage() {
       fetch('/api/revalidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/about'] }),
+        body: JSON.stringify({ paths: ['/about'] }),
       }).catch(() => {});
     }
   }
