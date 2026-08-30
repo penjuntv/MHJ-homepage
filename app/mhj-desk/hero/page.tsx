@@ -15,7 +15,6 @@ async function revalidateHome() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET || 'mhj-revalidate-2024',
         paths: ['/'],
       }),
     });

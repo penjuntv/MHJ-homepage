@@ -80,7 +80,7 @@ export default function AdminBlogsPage() {
       await fetch('/api/revalidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/'] }),
+        body: JSON.stringify({ paths: ['/'] }),
       });
     } catch {}
   }

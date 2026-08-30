@@ -49,7 +49,7 @@ export default function AdminFamilyPage() {
     fetch('/api/revalidate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/about'] }),
+      body: JSON.stringify({ paths: ['/about'] }),
     }).catch(() => { });
     setUploading(null);
   }
@@ -69,7 +69,7 @@ export default function AdminFamilyPage() {
     fetch('/api/revalidate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_REVALIDATION_SECRET, paths: ['/about'] }),
+      body: JSON.stringify({ paths: ['/about'] }),
     }).catch(() => { });
     setSaved(member.id);
     setTimeout(() => setSaved(null), 2000);
