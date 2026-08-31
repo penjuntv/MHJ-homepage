@@ -9,7 +9,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Settings, Palette,
   LogOut, ExternalLink, Images, MessageCircle, Users,
   SearchCheck, LayoutList, Menu, Layers, BarChart3, Search, Link2,
-  LayoutGrid, Camera,
+  LayoutGrid, Camera, ShieldAlert,
 } from 'lucide-react';
 
 type NavItem = { type: 'item'; href: string; label: string; icon: React.ElementType; exact?: boolean; badge?: 'comments' | 'blogs' };
@@ -58,6 +58,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [ready, setReady] = useState(false);
   const [pendingComments, setPendingComments] = useState(0);
   const [blogCount, setBlogCount] = useState(0);
+  /* MFA 미등록 배너 — 미들웨어에 aal2 강제 로직이 있지만 등록된 factor 가 하나도
+     없으면 그 분기는 영원히 타지 않는다. 실제로 2026-08 점검 때 전 계정이 미등록
+     상태로 방치돼 있었다. 인프라만 있고 아무도 등록을 안 하는 상황을 눈에 띄게 만든다. */
+  const [mfaMissing, setMfaMissing] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
@@ -86,6 +90,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           setPendingComments(pc ?? 0);
           setBlogCount(bc ?? 0);
         });
+        // TOTP factor 가 하나도 없으면 2단계 인증이 사실상 꺼져 있는 상태다.
+        supabase.auth.mfa.listFactors()
+          .then(({ data }) => setMfaMissing(!data?.totp?.length))
+          .catch(() => { /* 조회 실패 시 배너를 띄우지 않는다(오탐 방지) */ });
       }
     }).catch(() => {
       if (!isLogin) router.replace('/mhj-desk/login');
@@ -239,6 +247,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* ─── 메인 ─── */}
       <main style={{ flex: 1, marginLeft: isMobile ? 0 : 220, minHeight: '100vh', background: '#F8FAFC', paddingTop: isMobile ? 64 : 0, minWidth: 0, overflowX: 'hidden' }}>
+        {mfaMissing && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+            padding: '10px 16px',
+            background: '#FEF3C7', borderBottom: '1px solid #FDE68A',
+            fontSize: 12, color: '#92400E', lineHeight: 1.5,
+          }}>
+            <ShieldAlert size={15} style={{ flexShrink: 0 }} />
+            <span>
+              <strong>2단계 인증이 등록되지 않았습니다.</strong> 이 계정은 비밀번호만으로 로그인됩니다 —
+              어드민은 발행·삭제 권한을 갖고 있으니 등록을 권합니다.
+            </span>
+            <Link
+              href="/mhj-desk/mfa-setup"
+              style={{
+                marginLeft: 'auto', flexShrink: 0,
+                padding: '5px 12px', borderRadius: 6,
+                background: '#92400E', color: '#FFFBEB',
+                fontSize: 11, fontWeight: 700, textDecoration: 'none',
+              }}
+            >
+              지금 등록 (2분)
+            </Link>
+          </div>
+        )}
         {children}
       </main>
 
