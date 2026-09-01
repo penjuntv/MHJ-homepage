@@ -20,15 +20,6 @@ export default function MfaSetupPage() {
 
   useEffect(() => {
     async function enroll() {
-      /* 이 경로는 미들웨어 PUBLIC_PATHS 라 세션 검사를 거치지 않는다.
-         로그인 없이 들어오면 enroll 이 실패하며 "오류가 발생했습니다"만 떠서
-         원인을 알 수 없다. 먼저 세션을 확인하고 안내를 분리한다. */
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setError('로그인이 필요합니다. 먼저 로그인한 뒤 다시 시도해 주세요.');
-        setEnrolling(false);
-        return;
-      }
       const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
       if (error || !data) {
         setError('MFA 등록 중 오류가 발생했습니다.');
