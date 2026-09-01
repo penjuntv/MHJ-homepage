@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Instagram } from 'lucide-react';
+import { nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 
 interface GalleryPost {
   id: string;
@@ -270,10 +271,23 @@ function FeedCard({
           cursor: 'pointer',
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {/* 카드는 CARD_W(220px) 정사각인데 원본은 800~1500px PNG 였다. 이 컴포넌트는
+            (public) 레이아웃에 있어 **모든 공개 페이지**에 뜨고, 마퀴 루프 때문에
+            같은 사진이 3벌 렌더된다. 2026-09 실측으로 페이지마다 약 20MB를 이것 하나가
+            차지하고 있었다. 표시 폭에 맞춰 받는다(레티나 고려해 2배까지).
+            eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={mediaUrl}
-          alt="Gallery"
+          src={nextImageUrl(mediaUrl, 256)}
+          srcSet={nextImageSrcSet(mediaUrl, [256, 384, 640]) || undefined}
+          sizes={`${CARD_W}px`}
+          alt="MHJ 가족 인스타그램 사진"
+          loading="lazy"
+          decoding="async"
+          /* 최적화 경로가 실패해도 사진이 사라지지 않도록 원본으로 되돌린다 */
+          onError={(e) => {
+            const img = e.currentTarget;
+            if (img.src !== mediaUrl) { img.srcset = ''; img.src = mediaUrl; }
+          }}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           draggable={false}
         />
