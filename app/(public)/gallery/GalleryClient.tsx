@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { X, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 
 export type GalleryPhoto = {
   src: string;
@@ -152,8 +153,20 @@ export default function GalleryClient({ photos, galleryTitle, galleryDescription
           <button onClick={(e) => { e.stopPropagation(); next(); }} aria-label="Next" style={navBtn('right')}><ChevronRight size={22} /></button>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22, maxWidth: '82vw' }} onClick={(e) => e.stopPropagation()}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={current.src} alt={current.title} style={{ maxWidth: '82vw', maxHeight: '68vh', objectFit: 'contain', borderRadius: 12, display: 'block' }} />
+            {/* 라이트박스는 최대 82vw/68vh — 8~11MB 원본을 그대로 받을 필요가 없다.
+                eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={nextImageUrl(current.src, 1080, 80)}
+              srcSet={nextImageSrcSet(current.src, [1080, 1920], 80) || undefined}
+              sizes="82vw"
+              alt={current.title}
+              decoding="async"
+              onError={(e) => {
+                const img = e.currentTarget;
+                if (img.src !== current.src) { img.srcset = ''; img.src = current.src; }
+              }}
+              style={{ maxWidth: '82vw', maxHeight: '68vh', objectFit: 'contain', borderRadius: 12, display: 'block' }}
+            />
             <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
               <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>
                 {current.source} · {current.category}{current.date ? ` · ${formatDate(current.date)}` : ''}
@@ -215,11 +228,24 @@ function GalleryCard({ photo, onClick }: { photo: GalleryPhoto; onClick: () => v
         transition: 'box-shadow 0.4s cubic-bezier(0.16,1,0.3,1)',
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* 썸네일은 실제 표시 폭이 161~279px(뷰포트 390~1440)이라 원본을 그대로 받을 이유가 없다.
+          2026-09 실측: 이 페이지가 원본을 받느라 첫 로드에 582MB(평균 1.8MB × 332장)를 썼고
+          원본 3020px 이미지를 279px 자리에 그리고 있었다. srcSet 으로 폭을 맞춘다.
+          <img> 를 유지하는 이유는 lib/image-url.ts 주석 참고(마소니 비율 보존).
+          eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={photo.src}
+        src={nextImageUrl(photo.src, 384)}
+        srcSet={nextImageSrcSet(photo.src, [256, 384, 640]) || undefined}
+        /* 열 수: <640px 2단 · <1024px 3단 · 그 이상 4단 (아래 .gallery-masonry 규칙과 일치) */
+        sizes="(min-width: 1024px) 23vw, (min-width: 640px) 31vw, 46vw"
         alt={photo.title}
         loading="lazy"
+        decoding="async"
+        /* 최적화 경로가 실패해도 사진이 사라지지 않도록 원본으로 되돌린다 */
+        onError={(e) => {
+          const img = e.currentTarget;
+          if (img.src !== photo.src) { img.srcset = ''; img.src = photo.src; }
+        }}
         style={{
           width: '100%', display: 'block',
           transform: hovered ? 'scale(1.04)' : 'scale(1)',
