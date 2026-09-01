@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getFilterCss } from '@/lib/magazine-themes';
+import { nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 
 interface CoverPreviewProps {
   title: string;
@@ -119,8 +120,19 @@ export default function CoverPreview({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={i}
-            src={src}
-            alt=""
+            /* 표지는 objectFit:cover 로 고정 박스를 채우므로 원본 해상도가 레이아웃에
+               영향을 주지 않는다. 그런데 서가에서는 63px 로 보이는 자리에 최대 4284px
+               원본이 실려 있었다(2026-09 실측: /magazine 이미지 36MB). 표시 폭에 맞춘다. */
+            src={nextImageUrl(src, 384)}
+            srcSet={nextImageSrcSet(src, [256, 384, 640]) || undefined}
+            sizes="420px"
+            alt={i === 0 ? `${title} 표지` : ''}
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (img.src !== src) { img.srcset = ''; img.src = src; }
+            }}
             style={{
               position: 'absolute',
               inset: 0,
