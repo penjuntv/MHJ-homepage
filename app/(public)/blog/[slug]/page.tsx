@@ -10,6 +10,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
 import { CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
 import { getNZSeasonLabel } from '@/lib/date-helpers';
+import { optimizeContentImages, nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 import ViewTracker from './ViewTracker';
 import RelatedCard from './RelatedCard';
 import ShareButton from '@/components/ShareButton';
@@ -475,7 +476,9 @@ export default async function BlogDetailPage(
               {isHtml ? (
                 <div
                   className="blog-content"
-                  dangerouslySetInnerHTML={{ __html: blog.content }}
+                  /* 본문 <img> 를 렌더 시점에 최적화 경로로 재작성 — DB 원본은 건드리지 않는다.
+                     실측(2026-09): 1200px 원본 3장이 656px 자리에 그대로 나가고 있었다. */
+                  dangerouslySetInnerHTML={{ __html: optimizeContentImages(blog.content) }}
                   suppressHydrationWarning
                 />
               ) : (
@@ -490,7 +493,7 @@ export default async function BlogDetailPage(
               <div
                 className="blog-info-block"
                 style={{ margin: '48px 0', fontSize: 'initial', lineHeight: 'initial' }}
-                dangerouslySetInnerHTML={{ __html: blog.info_block_html }}
+                dangerouslySetInnerHTML={{ __html: optimizeContentImages(blog.info_block_html) }}
               />
             )}
 
@@ -584,7 +587,14 @@ export default async function BlogDetailPage(
                 <Link href={`/blog/${nextStory.slug}`} className="next-story-card">
                   <div className="next-story-image">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={nextStory.image_url} alt={nextStory.title} />
+                    <img
+                      src={nextImageUrl(nextStory.image_url, 640)}
+                      srcSet={nextImageSrcSet(nextStory.image_url, [384, 640]) || undefined}
+                      sizes="(max-width: 768px) 100vw, 680px"
+                      alt={nextStory.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
                   <h3 className="next-story-title">{nextStory.title}</h3>
                   <time className="next-story-date">{formatDate(nextStory.date)}</time>

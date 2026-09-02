@@ -46,3 +46,38 @@ export function nextImageSrcSet(
   if (!isRemote(src)) return '';
   return widths.map((w) => `${nextImageUrl(src, w, quality)} ${w}w`).join(', ');
 }
+
+/**
+ * DB 에 저장된 본문 HTML 안의 <img> 를 최적화 경로로 재작성한다 (렌더 시점, 서버에서 호출).
+ *
+ * 블로그 본문은 TipTap/스크립트가 만든 HTML 이 그대로 저장되고
+ * dangerouslySetInnerHTML 로 뿌려지므로 컴포넌트 레벨에서 손댈 곳이 없다.
+ * DB 를 고쳐 쓰는 방법은 원본 URL 을 잃게 되니 금물 — 렌더 직전에만 바꾼다.
+ *
+ * 재작성 규칙:
+ *   - http(s) 원격 src 만 대상 (data:·상대경로·이미 /_next/image 인 것은 그대로)
+ *   - src → w=1080 최적화 URL, srcset(640/1080) + sizes 추가
+ *   - loading/decoding 속성이 없으면 lazy/async 를 붙인다
+ *   - 그 외 속성(alt·class·기존 스타일)은 전부 보존
+ */
+export function optimizeContentImages(
+  html: string | null | undefined,
+  { sizes = '(max-width: 768px) 100vw, 680px', widths = [640, 1080] as readonly number[], quality = 75 } = {},
+): string {
+  if (!html) return '';
+  return html.replace(/<img\b([^>]*?)\/?>/gi, (tag, attrs: string) => {
+    const srcMatch = attrs.match(/\bsrc\s*=\s*"([^"]+)"/i) ?? attrs.match(/\bsrc\s*=\s*'([^']+)'/i);
+    const src = srcMatch?.[1];
+    if (!src || !/^https?:\/\//.test(src) || src.includes('/_next/image')) return tag;
+
+    let out = attrs
+      .replace(/\bsrc\s*=\s*(?:"[^"]+"|'[^']+')/i, `src="${nextImageUrl(src, 1080, quality)}"`)
+      // 혹시 남아 있던 옛 srcset/sizes 는 원본 기준이므로 걷어내고 다시 단다
+      .replace(/\s+srcset\s*=\s*(?:"[^"]*"|'[^']*')/gi, '')
+      .replace(/\s+sizes\s*=\s*(?:"[^"]*"|'[^']*')/gi, '');
+    out += ` srcset="${nextImageSrcSet(src, widths, quality)}" sizes="${sizes}"`;
+    if (!/\bloading\s*=/i.test(out)) out += ' loading="lazy"';
+    if (!/\bdecoding\s*=/i.test(out)) out += ' decoding="async"';
+    return `<img${out} />`;
+  });
+}

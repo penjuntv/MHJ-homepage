@@ -905,7 +905,10 @@ function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) 
           src={blog.image_url}
           alt={blog.title}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          /* 마지막 항 33vw → 220px (2026-09): 그리드가 max-width 컨테이너 안 3열이라
+             데스크탑 카드 실폭은 ~219px 고정인데 33vw(1440 기준 475px)로 요청해
+             w=640 파일을 받고 있었다. 실측 폭으로 교정. */
+          sizes="(max-width: 639px) 100vw, (max-width: 767px) 50vw, (max-width: 1024px) 33vw, 220px"
           className="object-cover"
           style={{ transition: 'transform 0.5s ease' }}
         />
