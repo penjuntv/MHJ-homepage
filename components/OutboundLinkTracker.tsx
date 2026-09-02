@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { trackEvent } from '@/lib/analytics';
+import { sendEvent } from '@/lib/first-party';
 
 const SITE_HOST = 'mhj.nz';
 
@@ -21,6 +22,10 @@ export default function OutboundLinkTracker() {
         trackEvent('outbound_link', {
           url: href,
           context: inInfoBlock ? 'info_block' : 'body',
+        });
+        sendEvent({
+          type: 'outbound',
+          meta: { url: href, context: inInfoBlock ? 'info_block' : 'body' },
         });
       } catch {
         // invalid URL — ignore

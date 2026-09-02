@@ -18,6 +18,7 @@ type NavEntry = NavItem | NavGroup;
 
 const NAV: NavEntry[] = [
   { type: 'item', href: '/mhj-desk', label: '대시보드', icon: LayoutDashboard, exact: true },
+  { type: 'item', href: '/mhj-desk/insights', label: '트래픽', icon: BarChart3 },
 
   { type: 'group', label: '콘텐츠' },
   { type: 'item', href: '/mhj-desk/blogs', label: '저널', icon: FileText, badge: 'blogs' },

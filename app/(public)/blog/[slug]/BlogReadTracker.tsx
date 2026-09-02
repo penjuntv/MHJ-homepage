@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { trackEvent } from '@/lib/analytics';
+import { sendEvent } from '@/lib/first-party';
 
 interface Props {
   slug: string;
@@ -25,6 +26,7 @@ export default function BlogReadTracker({ slug, category, author }: Props) {
           fired.current = true;
           sessionStorage.setItem(key, '1');
           trackEvent('blog_read_complete', { slug, category, author });
+          sendEvent({ type: 'read_complete', slug, meta: { category, author } });
           observer.disconnect();
         }
       },

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { trackEvent } from '@/lib/analytics';
+import { sendEvent } from '@/lib/first-party';
 
 const DEPTHS = ['25', '50', '75', '100'] as const;
 
@@ -31,6 +32,7 @@ export default function ScrollDepthTracker({ slug }: Props) {
             firedRef.current.add(depth);
             sessionStorage.setItem(sessionKey, Array.from(firedRef.current).join(','));
             trackEvent('scroll_depth', { depth, slug });
+            sendEvent({ type: 'scroll', slug, scrollPct: Number(depth) });
             observer.unobserve(el);
           }
         },
