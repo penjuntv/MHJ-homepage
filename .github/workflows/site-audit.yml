@@ -1,0 +1,106 @@
+# ── 주간 사이트 감사 ──
+# 2026-08~09 사고의 공통 패턴: 도구가 없어서가 아니라 아무도 안 돌려서 곪았다.
+#   · 매거진 지면 잘림(cqh 버그) — 수동 실행으로야 발견
+#   · 갤러리 582MB — 수동 실측으로야 발견
+#   · 깨진 이미지(blog #27) — 수동 감사로야 발견
+# 이 워크플로가 매주 라이브를 실측하고, 실패하면 이슈를 만든다.
+#
+# 수동 실행: Actions 탭 → site-audit → Run workflow
+# 필요한 secrets: SUPABASE_URL · SUPABASE_SERVICE_ROLE_KEY (깨진 이미지 감사용)
+name: site-audit
+
+on:
+  schedule:
+    # 일 18:00 UTC = 월요일 아침 6~7시 NZ — 한 주 시작 전에 결과가 와 있게
+    - cron: '0 18 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 의존성 설치
+        run: npm ci --omit=optional
+
+      - name: Playwright Chromium 설치
+        run: npx playwright install chromium --with-deps
+
+      - name: ① sitemap 전 URL 상태 확인
+        id: sitemap
+        run: |
+          set -uo pipefail
+          curl -sf https://www.mhj.nz/sitemap.xml | grep -oE '<loc>[^<]+' | sed 's/<loc>//' > /tmp/urls.txt
+          total=$(wc -l < /tmp/urls.txt | tr -d ' ')
+          echo "sitemap URL: $total개"
+          : > /tmp/bad.txt
+          while read -r u; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 30 "$u")
+            [ "$code" = "200" ] || echo "$code $u" >> /tmp/bad.txt
+          done < /tmp/urls.txt
+          if [ -s /tmp/bad.txt ]; then
+            echo "::error::200이 아닌 URL $(wc -l < /tmp/bad.txt | tr -d ' ')건"
+            cat /tmp/bad.txt
+            exit 1
+          fi
+          echo "전부 200 ✅"
+
+      - name: ② 깨진 이미지 전수 감사
+        id: images
+        if: ${{ !cancelled() }}
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/audit-broken-images.mjs
+
+      - name: ③ 매거진 지면 잘림 감사 (창 높이 720/1366)
+        id: overflow
+        if: ${{ !cancelled() }}
+        run: node scripts/magazine-overflow-audit.mjs
+
+      - name: 잘림 스크린샷 보관 (실패 시)
+        if: ${{ failure() && steps.overflow.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: overflow-screenshots
+          path: qa-screenshots/
+          if-no-files-found: ignore
+
+      - name: 실패 시 이슈 생성/갱신
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="🔴 주간 사이트 감사 실패 — $(date -u +%Y-%m-%d)"
+          body="자동 감사가 실패했습니다. 실행 로그: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          | 단계 | 결과 |
+          |---|---|
+          | sitemap 상태 | ${{ steps.sitemap.outcome }} |
+          | 깨진 이미지 | ${{ steps.images.outcome }} |
+          | 매거진 지면 잘림 | ${{ steps.overflow.outcome }} |
+
+          로컬 재현:
+          \`\`\`bash
+          node --env-file=.env.local scripts/audit-broken-images.mjs
+          node scripts/magazine-overflow-audit.mjs
+          \`\`\`"
+          # 같은 라벨의 열린 이슈가 있으면 코멘트, 없으면 생성
+          existing=$(gh issue list --label site-audit --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh label create site-audit --description "주간 자동 감사" --color D93F0B 2>/dev/null || true
+            gh issue create --title "$title" --label site-audit --body "$body"
+          fi
