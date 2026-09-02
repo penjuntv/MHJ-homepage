@@ -314,13 +314,15 @@ export default async function AboutPage() {
                 position: 'relative',
                 background: 'linear-gradient(135deg, var(--bg-surface), var(--border))',
               }}>
+                {/* unoptimized 제거(2026-09): 원래 picsum 폴백 전용 우회였는데 통짜로 박혀
+                    800px PNG 원본이 그대로 나갔다. 지금은 picsum 도 remotePatterns 에 있어
+                    우회 사유 자체가 소멸. */}
                 <Image
                   src={YUSSI_IMAGE_URL}
                   alt="Yussi"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover grayscale-hover"
-                  unoptimized
                 />
               </div>
 
@@ -479,13 +481,14 @@ export default async function AboutPage() {
                     boxShadow: '0 16px 40px rgba(0,0,0,0.08)',
                     position: 'relative',
                   }}>
+                    {/* unoptimized={true} 제거(2026-09): picsum 폴백 전용 우회가 통짜로 박혀
+                        4032px 원본이 381px 자리에 그대로 나갔다(실측 About 이미지 4.9MB).
+                        priority 도 제거 — 이 그리드는 화면 아래라 eager preload 는 역효과다. */}
                     <SafeImage
                       src={m.image_url}
                       alt={m.name}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      unoptimized={true}
-                      priority={true}
                       className="object-cover grayscale-hover"
                     />
                   </div>
