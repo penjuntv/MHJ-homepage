@@ -8,7 +8,7 @@ import { supabase, createAdminClient, createPublicAdminClient } from '@/lib/supa
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
-import { BLOG_DETAIL_COLUMNS, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
+import { BLOG_DETAIL_COLUMNS, BLOG_RELATED_COLUMNS, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
 import { getNZSeasonLabel } from '@/lib/date-helpers';
 import { optimizeContentImages, nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 import ViewTracker from './ViewTracker';
@@ -64,41 +64,45 @@ async function getAdjacentBlogs(currentId: number): Promise<{
 
 async function getRelatedBlogs(category: string, currentSlug: string): Promise<Blog[]> {
   const now = new Date().toISOString();
-  const { data: sameCategory } = await supabase
+  const { data: sameCategory, error: sameCategoryError } = await supabase
     .from('blogs')
-    .select('id, title, author, date, image_url, category, slug, view_count')
+    .select(BLOG_RELATED_COLUMNS)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .eq('category', category)
     .neq('slug', currentSlug)
     .order('created_at', { ascending: false })
     .limit(3);
+  if (sameCategoryError) console.error('getRelatedBlogs(sameCategory):', sameCategoryError.message);
 
   if ((sameCategory?.length ?? 0) >= 3) return sameCategory as Blog[];
 
   const needed = 3 - (sameCategory?.length ?? 0);
   const excludeSlugs = [currentSlug, ...(sameCategory?.map((b) => b.slug) ?? [])];
-  const { data: recent } = await supabase
+  const { data: recent, error: recentError } = await supabase
     .from('blogs')
-    .select('id, title, author, date, image_url, category, slug, view_count')
+    .select(BLOG_RELATED_COLUMNS)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .not('slug', 'in', `(${excludeSlugs.map((s) => `"${s}"`).join(',')})`)
     .order('created_at', { ascending: false })
     .limit(needed);
+  if (recentError) console.error('getRelatedBlogs(recent):', recentError.message);
 
   return [...(sameCategory ?? []), ...(recent ?? [])] as Blog[];
 }
 
 async function getBlog(slug: string): Promise<Blog | null> {
   const now = new Date().toISOString();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('blogs')
     .select(BLOG_DETAIL_COLUMNS)
     .eq('slug', slug)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .single();
+  // 미발행 slug 도 single() 은 PGRST116 을 돌려주므로 not-found 는 로깅하지 않는다
+  if (error && error.code !== 'PGRST116') console.error('getBlog:', error.message);
   return data;
 }
 

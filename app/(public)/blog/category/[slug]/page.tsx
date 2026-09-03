@@ -55,7 +55,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 async function getFeaturedBlog(category: string): Promise<Blog | null> {
   const now = new Date().toISOString();
-  const { data: featuredData } = await supabase
+  const { data: featuredData, error: featuredError } = await supabase
     .from('blogs')
     .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
@@ -64,9 +64,10 @@ async function getFeaturedBlog(category: string): Promise<Blog | null> {
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
     .limit(1);
+  if (featuredError) console.error('getFeaturedBlog(featured):', featuredError.message);
   if (featuredData && featuredData.length > 0) return featuredData[0];
 
-  const { data: latestData } = await supabase
+  const { data: latestData, error: latestError } = await supabase
     .from('blogs')
     .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
@@ -74,12 +75,13 @@ async function getFeaturedBlog(category: string): Promise<Blog | null> {
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
     .limit(1);
+  if (latestError) console.error('getFeaturedBlog(latest):', latestError.message);
   return latestData?.[0] ?? null;
 }
 
 async function getRecentBlogs(category: string, excludeId: number | null): Promise<Blog[]> {
   const now = new Date().toISOString();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('blogs')
     .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
@@ -87,13 +89,14 @@ async function getRecentBlogs(category: string, excludeId: number | null): Promi
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
     .limit(excludeId ? 5 : 4);
+  if (error) console.error('getRecentBlogs:', error.message);
   const all = data ?? [];
   return (excludeId ? all.filter((b) => b.id !== excludeId) : all).slice(0, 4);
 }
 
 async function getMostReadBlogs(): Promise<Blog[]> {
   const now = new Date().toISOString();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('blogs')
     .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
@@ -101,6 +104,7 @@ async function getMostReadBlogs(): Promise<Blog[]> {
     .order('view_count', { ascending: false })
     .order('id', { ascending: false })
     .limit(5);
+  if (error) console.error('getMostReadBlogs:', error.message);
   return (data ?? []) as Blog[];
 }
 
@@ -126,7 +130,7 @@ async function getPaginatedBlogs(
   const now = new Date().toISOString();
   const offset = (page - 1) * PAGE_SIZE;
 
-  const { data, count } = await supabase
+  const { data, count, error } = await supabase
     .from('blogs')
     .select(BLOG_CARD_COLUMNS, { count: 'exact' })
     .eq('published', true)
@@ -135,6 +139,7 @@ async function getPaginatedBlogs(
     .order('date', { ascending: false })
     .range(offset, offset + PAGE_SIZE - 1);
 
+  if (error) console.error('getPaginatedBlogs:', error.message);
   return { blogs: data ?? [], totalCount: count ?? 0 };
 }
 

@@ -39,7 +39,7 @@ async function getFeaturedPosts(): Promise<Blog[]> {
   const now = new Date().toISOString();
 
   // 1) featured=true → hero_order 순서 우선, date 보조
-  const { data: featured } = await supabase
+  const { data: featured, error: featuredError } = await supabase
     .from('blogs')
     .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
@@ -49,10 +49,11 @@ async function getFeaturedPosts(): Promise<Blog[]> {
     .order('date', { ascending: false })
     .limit(3);
 
+  if (featuredError) console.error('getFeaturedPosts(featured):', featuredError.message);
   if (featured?.length) return featured as Blog[];
 
   // 2) fallback: 최신 published 3개
-  const { data: latest } = await supabase
+  const { data: latest, error: latestError } = await supabase
     .from('blogs')
     .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
@@ -60,6 +61,7 @@ async function getFeaturedPosts(): Promise<Blog[]> {
     .order('date', { ascending: false })
     .limit(3);
 
+  if (latestError) console.error('getFeaturedPosts(latest):', latestError.message);
   return (latest as Blog[]) ?? FALLBACK_BLOGS;
 }
 

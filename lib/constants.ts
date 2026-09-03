@@ -40,3 +40,7 @@ export const BLOG_CARD_COLUMNS =
 /** 상세 페이지(/blog/[slug]) 전용 — 카드 컬럼 + 본문 렌더링에 추가로 필요한 컬럼 */
 export const BLOG_DETAIL_COLUMNS =
   `${BLOG_CARD_COLUMNS}, created_at, sponsor_name, cover_caption, info_block_html`;
+
+/** 관련 글 카드(getRelatedBlogs) 전용 — 카드 컬럼보다 가벼운 최소 컬럼 */
+export const BLOG_RELATED_COLUMNS =
+  'id, title, author, date, image_url, category, slug, view_count';
