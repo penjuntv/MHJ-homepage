@@ -120,7 +120,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           title="🔴 주간 사이트 감사 실패 — $(date -u +%Y-%m-%d)"
-          body="자동 감사가 실패했습니다. 실행 로그: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          # body 는 quoted heredoc 으로 — 본문에 따옴표·백틱·괄호가 있어도 bash 가 해석하지 않는다.
+          # (첫 실전 실행에서 본문 속 큰따옴표가 body="..." 를 중간에 끊어 exit 2 로 죽었다.
+          #  ${{ }} 는 Actions 템플릿 단계에서 치환되므로 quoted heredoc 안에서도 동작한다.)
+          body=$(cat <<'ISSUE_BODY'
+          자동 감사가 실패했습니다. 실행 로그: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
           | 단계 | 결과 |
           |---|---|
@@ -136,14 +140,16 @@ jobs:
           "스캔 불가(감사 불완전)"이면 인프라 문제다. 로그의 이름은 [라벨]로 치환돼 있다.
 
           로컬 재현:
-          \`\`\`bash
+          ```bash
           node --env-file=.env.local scripts/audit-broken-images.mjs
           node scripts/magazine-overflow-audit.mjs
           node --env-file=.env.local scripts/audit-name-exposure.mjs
           node scripts/audit-endpoints.mjs
           node --env-file=.env.local scripts/audit-seo-regression.mjs
           node --env-file=.env.local scripts/audit-external-links.mjs
-          \`\`\`"
+          ```
+          ISSUE_BODY
+          )
           # 같은 라벨의 열린 이슈가 있으면 코멘트, 없으면 생성
           existing=$(gh issue list --label site-audit --state open --json number --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
