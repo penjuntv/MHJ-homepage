@@ -8,7 +8,7 @@ import { supabase, createAdminClient, createPublicAdminClient } from '@/lib/supa
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
-import { CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
+import { BLOG_DETAIL_COLUMNS, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
 import { getNZSeasonLabel } from '@/lib/date-helpers';
 import { optimizeContentImages, nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 import ViewTracker from './ViewTracker';
@@ -94,7 +94,7 @@ async function getBlog(slug: string): Promise<Blog | null> {
   const now = new Date().toISOString();
   const { data } = await supabase
     .from('blogs')
-    .select('*')
+    .select(BLOG_DETAIL_COLUMNS)
     .eq('slug', slug)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
@@ -106,7 +106,7 @@ async function getBlogForPreview(slug: string): Promise<Blog | null> {
   const adminClient = createAdminClient();
   const { data } = await adminClient
     .from('blogs')
-    .select('*')
+    .select(BLOG_DETAIL_COLUMNS)
     .eq('slug', slug)
     .single();
   return data;

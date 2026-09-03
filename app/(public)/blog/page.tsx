@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import { supabase } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
-import { BLOG_CATEGORIES } from '@/lib/constants';
+import { BLOG_CATEGORIES, BLOG_CARD_COLUMNS } from '@/lib/constants';
 import BlogLibrary from '@/components/BlogLibrary';
 import { getSiteSettings } from '@/lib/site-settings';
 
@@ -58,7 +58,7 @@ async function getFeaturedBlog(category: string | null): Promise<Blog | null> {
   // 1) featured=true인 글 중 최신
   let q = supabase
     .from('blogs')
-    .select('*')
+    .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
     .eq('featured', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
@@ -71,7 +71,7 @@ async function getFeaturedBlog(category: string | null): Promise<Blog | null> {
   // 2) featured 글이 없으면 최신 1개
   let q2 = supabase
     .from('blogs')
-    .select('*')
+    .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
@@ -85,7 +85,7 @@ async function getRecentBlogs(category: string | null, excludeId: number | null)
   const now = new Date().toISOString();
   let q = supabase
     .from('blogs')
-    .select('*')
+    .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
@@ -97,10 +97,12 @@ async function getRecentBlogs(category: string | null, excludeId: number | null)
 }
 
 async function getMostReadBlogs(): Promise<Blog[]> {
+  const now = new Date().toISOString();
   const { data } = await supabase
     .from('blogs')
-    .select('id, title, author, date, image_url, category, slug, view_count, meta_description, content, published, og_image_url')
+    .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('view_count', { ascending: false })
     .order('id', { ascending: false })
     .limit(5);
@@ -131,7 +133,7 @@ async function getPaginatedBlogs(
 
   let q = supabase
     .from('blogs')
-    .select('*', { count: 'exact' })
+    .select(BLOG_CARD_COLUMNS, { count: 'exact' })
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
