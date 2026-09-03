@@ -47,7 +47,7 @@ const PATTERNS = [
   { label: 'child-H', re: K(0xc720, 0xd604) },
   { label: 'child-J', re: K(0xc720, 0xc9c4) },
   { label: 'child-M-rom', re: R('Yu' + '\\s?min') },
-  { label: 'child-H-rom', re: R('Yu' + '\\s?hye?un') },
+  { label: 'child-H-rom', re: R('Yu' + '\\s?hy(eo|eu|u)n') }, // eo/eu/u 세 로마자 표기 전부 — name-guard hook 의 목록과 동일 범위
   { label: 'child-J-rom', re: R('Yu' + '\\s?jin') },
   { label: 'parent-Y', re: K(0xc720, 0xd76c, 0xc885) },
   { label: 'parent-HJ', re: R('Hee' + '\\s?jong') },
@@ -58,6 +58,11 @@ try {
   allowlist = JSON.parse(readFileSync(new URL('./qa/name-exposure-allowlist.json', import.meta.url), 'utf8'));
 } catch { /* 허용목록이 없으면 전부 보고 */ }
 
+/* 출력은 public 리포의 CI 로그에 90일 남는다 — 스니펫 속 실명 자체는 라벨로 치환해서만 내보낸다.
+   (감사 도구가 적발 순간에 그 이름을 공개 로그에 재유출하면 본말전도다.) */
+const redact = (str) =>
+  PATTERNS.reduce((t, p) => t.replace(new RegExp(p.re.source, p.re.flags), `[${p.label}]`), str);
+
 const hits = [];
 function scan(text, where) {
   if (!text) return;
@@ -65,8 +70,9 @@ function scan(text, where) {
   for (const { label, re } of PATTERNS) {
     for (const m of s.matchAll(re)) {
       const ctx = s.slice(Math.max(0, m.index - 40), m.index + m[0].length + 40).replace(/\s+/g, ' ');
+      // 허용목록 대조는 원문 스니펫으로, 저장·출력은 치환본으로.
       const allowed = allowlist.some((a) => a.pattern === label && ctx.includes(a.context));
-      if (!allowed) hits.push({ label, where, ctx });
+      if (!allowed) hits.push({ label, where, ctx: redact(ctx) });
     }
   }
 }
@@ -90,38 +96,66 @@ const db = createClient(url, key, { auth: { persistSession: false } });
 
 const TABLES = ['blogs', 'articles', 'article_pages', 'magazines', 'gallery', 'comments', 'site_settings'];
 for (const table of TABLES) {
-  const { data, error } = await db.from(table).select('*');
-  if (error) throw new Error(`${table} 조회 실패 — ${error.message}`); // 조용한 누락 금지 (audit-broken-images 의 교훈)
-  for (const row of data ?? []) scanValue(row, `db:${table} #${row.id ?? row.slug ?? row.key ?? '?'}`);
+  /* PostgREST 는 기본 max-rows 캡(통상 1000행)을 넘는 행을 에러 없이 잘라서 준다 —
+     comments 가 캡을 넘는 순간 초과분이 소리 없이 스캔에서 빠진다. 페이지네이션으로 전수 보장. */
+  for (let off = 0; ; off += 500) {
+    const { data, error } = await db.from(table).select('*').range(off, off + 499);
+    if (error) throw new Error(`${table} 조회 실패 — ${error.message}`); // 조용한 누락 금지 (audit-broken-images 의 교훈)
+    for (const row of data ?? []) scanValue(row, `db:${table} #${row.id ?? row.slug ?? row.key ?? '?'}`);
+    if (!data || data.length < 500) break;
+  }
 }
 console.log(`DB ${TABLES.length}개 테이블 스캔 완료`);
 
 /* ── ② 라이브 전수 ── */
+const unscanned = []; // fetch 실패는 "노출"이 아니라 "감사 불완전" — hits 와 절대 섞지 않는다
 if (!DB_ONLY) {
-  const sm = await fetch(`${BASE}/sitemap.xml`).then((r) => r.text());
+  const smRes = await fetch(`${BASE}/sitemap.xml`, { signal: AbortSignal.timeout(20000) });
+  if (!smRes.ok) throw new Error(`sitemap.xml HTTP ${smRes.status} — 라이브 스캔 대상 목록을 얻지 못했다`); // fail-open 금지
+  const sm = await smRes.text();
   const urls = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+  if (!urls.length) throw new Error('sitemap.xml 에서 URL 을 하나도 못 읽었다 — 포맷 변경?');
   urls.push(`${BASE}/llms.txt`, `${BASE}/llms-full.txt`, `${BASE}/feed.xml`);
+
+  async function fetchLive(u, attempt = 0) {
+    try {
+      const res = await fetch(u, { redirect: 'follow', signal: AbortSignal.timeout(20000) });
+      if (res.ok) return res.text();
+      throw new Error(`HTTP ${res.status}`);
+    } catch (e) {
+      // 일시적 502/콜드스타트를 P0 경보로 만들면 진짜 경보가 노이즈에 묻힌다 — 두 번 재시도.
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+        return fetchLive(u, attempt + 1);
+      }
+      unscanned.push({ url: u, reason: String(e.message ?? e).slice(0, 60) });
+      return null;
+    }
+  }
+
   const CONC = 10;
   for (let i = 0; i < urls.length; i += CONC) {
     await Promise.all(urls.slice(i, i + CONC).map(async (u) => {
-      try {
-        const res = await fetch(u, { redirect: 'follow' });
-        if (res.ok) scan(await res.text(), `live:${u.replace(BASE, '')}`);
-        else hits.push({ label: 'FETCH', where: `live:${u}`, ctx: `HTTP ${res.status} — 스캔 불가` });
-      } catch (e) {
-        hits.push({ label: 'FETCH', where: `live:${u}`, ctx: `ERR ${e.message.slice(0, 40)} — 스캔 불가` });
-      }
+      const body = await fetchLive(u);
+      if (body) scan(body, `live:${u.replace(BASE, '')}`);
     }));
     process.stdout.write(`\r라이브 ${Math.min(i + CONC, urls.length)}/${urls.length}`);
   }
   console.log('');
 }
 
-if (!hits.length) {
-  console.log('\n✅ 실명 노출 없음');
-  process.exit(0);
+if (unscanned.length) {
+  console.log(`\n⚠️ 스캔 불가 ${unscanned.length}건 — 실명 노출이 아니라 "감사 불완전"이다 (3회 시도 후 실패)`);
+  for (const s of unscanned) console.log(`  ${s.url} — ${s.reason}`);
 }
-console.log(`\n🔴 실명 노출 의심 ${hits.length}건 (허용목록 제외 후)`);
-for (const h of hits) console.log(`  [${h.label}] ${h.where}\n      …${h.ctx}…`);
-console.log('\n오탐이면 scripts/qa/name-exposure-allowlist.json 에 {pattern, context, note} 로 등록.');
-process.exit(1);
+if (hits.length) {
+  console.log(`\n🔴 실명 노출 의심 ${hits.length}건 (허용목록 제외 후 — 스니펫의 이름은 [라벨]로 치환돼 있다)`);
+  for (const h of hits) console.log(`  [${h.label}] ${h.where}\n      …${h.ctx}…`);
+  console.log('\n오탐이면 scripts/qa/name-exposure-allowlist.json 에 {pattern, context, note} 로 등록.');
+  process.exit(1);
+}
+if (unscanned.length) {
+  console.log('\n🔴 노출 0건이지만 일부를 스캔하지 못했다 — 불완전한 통과를 ✅ 로 보고하지 않는다.');
+  process.exit(1);
+}
+console.log('\n✅ 실명 노출 없음');

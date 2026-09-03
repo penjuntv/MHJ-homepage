@@ -45,10 +45,10 @@ let sitemapUrls = [];
   if (r.status !== 200) fail('sitemap.xml', `HTTP ${r.status}`);
   else {
     sitemapUrls = [...r.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    // 2026-09 기준 135개. 갑자기 100 미만이면 generateStaticParams/쿼리 어딘가가 죽은 것.
-    sitemapUrls.length >= 100
+    // 2026-09 기준 135개. 하한을 현재치 근처로 잡아야 부분 붕괴를 잡는다 — 글이 늘면 같이 올릴 것.
+    sitemapUrls.length >= 120
       ? ok('sitemap.xml', `${sitemapUrls.length} URL`)
-      : fail('sitemap.xml', `URL ${sitemapUrls.length}개 — 100 미만으로 급감`);
+      : fail('sitemap.xml', `URL ${sitemapUrls.length}개 — 하한 120 미만으로 급감`);
   }
 }
 
@@ -61,40 +61,48 @@ for (const p of ['/llms.txt', '/llms-full.txt']) {
 }
 
 /* ── 4. feed.xml ── */
-let latestFeedLink = null;
+let feedLinks = [];
 {
   const r = await get('/feed.xml');
   if (r.status !== 200) fail('feed.xml', `HTTP ${r.status}`);
   else {
-    const items = [...r.body.matchAll(/<item>[\s\S]*?<link>([^<]+)<\/link>/g)].map((m) => m[1]);
-    latestFeedLink = items[0] ?? null;
-    items.length >= 10 ? ok('feed.xml', `item ${items.length}개`) : fail('feed.xml', `item ${items.length}개 — 10 미만`);
+    feedLinks = [...r.body.matchAll(/<item>[\s\S]*?<link>([^<]+)<\/link>/g)].map((m) => m[1]);
+    // seo-audit-runner SKILL.md 계약: 최신 20개. 절반으로 줄어도 통과하는 하한은 무의미.
+    feedLinks.length >= 20 ? ok('feed.xml', `item ${feedLinks.length}개`) : fail('feed.xml', `item ${feedLinks.length}개 — 20 미만`);
   }
 }
 
-/* ── 5. feed 최신 글 ↔ sitemap 일관성: 발행 파이프라인 어긋남 감지 ── */
-if (latestFeedLink && sitemapUrls.length) {
+/* ── 5. feed↔sitemap 일관성: 발행 파이프라인 어긋남 감지 ──
+   feed 는 publish_at 필터 없이 created_at 순이라 예약발행 글이 최상단에 올 수 있다(정상).
+   그래서 "sitemap 에도 존재하는 가장 최신 feed 글"을 찾고, 하나도 없을 때만 실패다. */
+let liveFeedLink = null;
+if (feedLinks.length && sitemapUrls.length) {
   const norm = (u) => u.replace(/\/$/, '');
-  sitemapUrls.map(norm).includes(norm(latestFeedLink))
-    ? ok('feed↔sitemap 일관성', latestFeedLink)
-    : fail('feed↔sitemap 일관성', `feed 최신 글이 sitemap 에 없음: ${latestFeedLink}`);
+  const inSitemap = new Set(sitemapUrls.map(norm));
+  liveFeedLink = feedLinks.find((u) => inSitemap.has(norm(u))) ?? null;
+  liveFeedLink
+    ? ok('feed↔sitemap 일관성', liveFeedLink)
+    : fail('feed↔sitemap 일관성', 'feed 의 어떤 글도 sitemap 에 없음 — 파이프라인 어긋남');
 }
 
-/* ── 6. 주요 페이지 200 + JSON-LD 존재 ── */
+/* ── 6. 주요 페이지 200 + 페이지 고유 JSON-LD @type ──
+   루트 레이아웃이 모든 페이지에 organization JSON-LD 를 주입하므로
+   'application/ld+json 존재' 검사는 공허하다 — 페이지 고유 @type 을 단정한다. */
 const PAGES = [
-  ['/', true], ['/about', true], ['/blog', true], ['/magazine', false],
-  ['/gallery', true], ['/storypress', true],
+  ['/', 'WebSite'], ['/about', 'Person'], ['/blog', 'Blog'], ['/magazine', null],
+  ['/gallery', 'BreadcrumbList'], ['/storypress', 'SoftwareApplication'],
 ];
-for (const [p, needsSchema] of PAGES) {
+for (const [p, schemaType] of PAGES) {
   const r = await get(p);
   if (r.status !== 200) { fail(p, `HTTP ${r.status}`); continue; }
-  if (needsSchema && !r.body.includes('application/ld+json')) fail(`${p} schema`, 'JSON-LD 없음');
-  else ok(p, needsSchema ? 'JSON-LD ✓' : '200');
+  if (schemaType && !new RegExp(`"@type"\\s*:\\s*"${schemaType}"`).test(r.body)) {
+    fail(`${p} schema`, `${schemaType} JSON-LD 없음`);
+  } else ok(p, schemaType ? `${schemaType} ✓` : '200');
 }
 
-/* ── 7. 블로그 상세 1건 샘플: BlogPosting schema ── */
-if (latestFeedLink) {
-  const path = latestFeedLink.replace(/^https?:\/\/[^/]+/, '');
+/* ── 7. 블로그 상세 1건 샘플: BlogPosting schema (라이브 확인된 feed 글로) ── */
+if (liveFeedLink) {
+  const path = liveFeedLink.replace(/^https?:\/\/[^/]+/, '');
   const r = await get(path);
   if (r.status !== 200) fail(`샘플 블로그 ${path}`, `HTTP ${r.status}`);
   else r.body.includes('BlogPosting')

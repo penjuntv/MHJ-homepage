@@ -2,12 +2,12 @@
   "generated": "2026-09-03",
   "total": 79,
   "h1_over": 0,
-  "alt_missing": 2,
+  "alt_missing": 3,
   "orphan": 10,
   "meta_missing": 0,
   "thin": 36,
   "no_h2": 6,
-  "no_geo": 4,
+  "no_geo": 22,
   "posts": {
     "goodbye-for-a-while": [],
     "100-days-of-schhol": [
@@ -17,10 +17,12 @@
     ],
     "orewa-surf-sounds-2026-fireworks-at-shore": [],
     "a-quiet-week-before-the-break-ends": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "we-hit-pause": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "between-sunshine-and-gale-force": [],
     "nz-ncea-is-changing-following-the-curriculum-shake-up": [],
@@ -50,31 +52,40 @@
       "THIN"
     ],
     "a-cookie-jar-of-numbers-jin-s-first-1-to-20": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "ncea-is-changing-no-more-levels-no-more-credits": [],
-    "y7-kahu-manu-new-way-of-learning": [],
+    "y7-kahu-manu-new-way-of-learning": [
+      "NO_GEO"
+    ],
     "landing-home": [
       "THIN"
     ],
     "settlement-006": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "girls-002": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "ikea-nz-grown-ups-also-dream-at-ikea": [],
     "word-fun-at-dinner": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
-    "a-slow-long-weekend": [],
+    "a-slow-long-weekend": [
+      "NO_GEO"
+    ],
     "learning-aid-scholastic-book-club": [],
     "ive-world-tour-show-what-i-am": [
       "ORPHAN",
       "NO_H2"
     ],
     "so-we-made-our-own": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "a-short-family-trip-to-rotorua": [
       "ORPHAN",
@@ -87,7 +98,8 @@
       "THIN"
     ],
     "settlement-002": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "back-to-school-what": [],
     "our-library-haul": [
@@ -108,7 +120,8 @@
       "THIN"
     ],
     "y7-kahu-manu-2-life-in-pages": [
-      "NO_H2"
+      "NO_H2",
+      "NO_GEO"
     ],
     "y1-maths-term-1-2": [],
     "what-s-in-the-lunchbox": [],
@@ -124,32 +137,40 @@
     "families-in-parks-summer-fun": [
       "THIN"
     ],
-    "settlement-004": [
+    "i-want-to-go-back": [
       "THIN"
     ],
-    "i-want-to-go-back": [
+    "settlement-004": [
       "THIN"
     ],
     "top-team-competition": [],
     "the-first-play-date": [],
     "fearless-four": [],
     "the-app-we-dreamt-of": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "year-7-science-social-studies-nz": [],
     "how-our-study-plan-fell-apart-again": [
       "THIN"
     ],
-    "being-the-only-one": [],
+    "being-the-only-one": [
+      "NO_GEO"
+    ],
     "year-7-intermediate-school-nz-curriculum": [],
     "girls-004": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "step-up-reading-aloud": [],
-    "when-the-plan-meets-reality": [],
+    "when-the-plan-meets-reality": [
+      "NO_GEO"
+    ],
     "education-001": [],
     "the-word-cards": [
-      "THIN"
+      "ALT_MISSING",
+      "THIN",
+      "NO_GEO"
     ],
     "locals-002": [
       "THIN"
@@ -159,7 +180,8 @@
       "NO_H2"
     ],
     "shes-already-there": [
-      "THIN"
+      "THIN",
+      "NO_GEO"
     ],
     "setting-personal-routines": [],
     "nz-keeping-ourselves-safe": [],
@@ -169,14 +191,16 @@
     "settlement-008": [
       "THIN"
     ],
-    "the-homework-book": [],
+    "the-homework-book": [
+      "NO_GEO"
+    ],
     "settlement-005": [
       "THIN"
     ],
+    "library-tour-albany-village-library": [],
     "settlement-003": [
       "THIN"
     ],
-    "library-tour-albany-village-library": [],
     "a-bead-tree-in-winter": [
       "ORPHAN",
       "THIN",

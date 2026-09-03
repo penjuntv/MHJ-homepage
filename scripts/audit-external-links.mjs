@@ -51,6 +51,9 @@ async function check(u, attempt = 0) {
     const get = await fetch(u, { redirect: 'follow', headers: { 'User-Agent': UA, Range: 'bytes=0-512' }, signal: AbortSignal.timeout(15000) });
     return get.ok ? null : get.status;
   } catch (e) {
+    // 타임아웃은 이미 15초를 기다린 판정이다 — 재시도해 봐야 결과는 같고 (최대 46초/링크로)
+    // 잡 예산만 태운다. 즉시 SKIP 분류로 보낸다.
+    if (e?.name === 'TimeoutError') return 'TIMEOUT';
     if (attempt < 2) {
       await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
       return check(u, attempt + 1);

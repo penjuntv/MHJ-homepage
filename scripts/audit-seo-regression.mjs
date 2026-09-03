@@ -36,7 +36,7 @@ const db = createClient(url, key, { auth: { persistSession: false } });
 
 const { data: blogs, error } = await db
   .from('blogs')
-  .select('slug,title,meta_description,content,tags')
+  .select('slug,title,meta_description,content,info_block_html')
   .eq('published', true)
   .or('publish_at.is.null,publish_at.lte.now');
 if (error) throw new Error(`blogs 조회 실패 — ${error.message}`);
@@ -45,14 +45,18 @@ if (error) throw new Error(`blogs 조회 실패 — ${error.message}`);
 const count = (s, re) => (s.match(re) ?? []).length;
 function flagsOf(b) {
   const c = b.content ?? '';
+  // 인포블록도 라이브 페이지에 렌더링된다 — 링크·이미지 결함 판정은 본문+인포블록 합산으로.
+  // 단어 수·H2 는 SKILL.md 정의(본문 기준)를 따른다.
+  const full = c + '\n' + (b.info_block_html ?? '');
+  const visible = full.replace(/<[^>]*>/g, ' ');           // GEO 는 보이는 텍스트만 — href 의 mhj.nz 오탐 방지
   const words = c.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
   const h2 = count(c, /<h2\b/gi);
   const geo = ['Mairangi', 'Auckland', 'New Zealand', 'North Shore', 'NZ', 'Aotearoa']
-    .some((k) => new RegExp(`\\b${k}\\b`, 'i').test(c));
+    .some((k) => new RegExp(`\\b${k}\\b`, 'i').test(visible));
   const flags = [];
-  if (count(c, /<h1\b/gi) > 0) flags.push('H1_OVER');                       // page.tsx 의 <h1> 과 충돌
-  if (count(c, /<img(?![^>]*\salt=)/gi) > 0) flags.push('ALT_MISSING');
-  if (count(c, /href="(\/[^"]+|https?:\/\/(www\.)?mhj\.nz[^"]*)"/gi) === 0) flags.push('ORPHAN');
+  if (count(full, /<h1\b/gi) > 0) flags.push('H1_OVER');                       // page.tsx 의 <h1> 과 충돌
+  if (count(full, /<img(?![^>]*\salt=)/gi) > 0) flags.push('ALT_MISSING');
+  if (count(full, /href="(\/[^"]+|https?:\/\/(www\.)?mhj\.nz[^"]*)"/gi) === 0) flags.push('ORPHAN');
   if (!b.meta_description) flags.push('META_MISSING');
   if (words < 400) flags.push('THIN');
   if (words >= 400 && h2 < 2) flags.push('NO_H2');
@@ -79,7 +83,20 @@ const current = {
 
 /* ── 기준선 로드/부트스트랩 ── */
 let baseline = null;
-try { baseline = JSON.parse(readFileSync(BASELINE_PATH, 'utf8')); } catch { /* 첫 실행 */ }
+try {
+  baseline = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'));
+} catch (e) {
+  // "파일 없음"만 부트스트랩이다. 파손된 기준선을 첫 실행으로 오인하면
+  // CI 가 매주 새 기준선을 (버려지는 워크스페이스에) 쓰고 exit 0 — 게이트가 영구 무장해제된다.
+  if (e.code !== 'ENOENT') {
+    console.error(`🔴 기준선 파일을 읽을 수 없다 — ${e.message}`);
+    process.exit(2);
+  }
+  if (process.env.CI && !UPDATE) {
+    console.error('🔴 CI 에 scripts/qa/seo-baseline.json 이 없다 — 커밋 누락. 로컬에서 생성해 커밋할 것.');
+    process.exit(2);
+  }
+}
 if (!baseline || UPDATE) {
   writeFileSync(BASELINE_PATH, JSON.stringify(current, null, 2) + '\n');
   console.log(`기준선 ${baseline ? '갱신' : '생성'} — 발행 ${current.total}편`);
@@ -100,12 +117,18 @@ for (const m of [...HARD, ...SOFT]) {
   if (now > was && HARD.includes(m)) failed = true;
 }
 
-/* 새로 플래그가 붙은 글을 슬러그 단위로 — 바로 고칠 수 있게 */
+/* 새로 플래그가 붙은 글을 슬러그 단위로 — 바로 고칠 수 있게.
+   집계 비교만 쓰면 "기존 글 1건 고침 + 새 글 1건 결함"이 상쇄돼 숨는다 —
+   새 HARD 플래그는 슬러그 단위로도 FAIL 을 세운다. */
+const HARD_FLAGS = ['H1_OVER', 'ALT_MISSING', 'ORPHAN', 'META_MISSING'];
 const news = [];
 for (const [slug, flags] of Object.entries(posts)) {
   const old = baseline.posts?.[slug] ?? [];
   const added = flags.filter((f) => !old.includes(f));
-  if (added.length) news.push(`  /blog/${slug} — +${added.join(' +')}`);
+  if (added.length) {
+    news.push(`  /blog/${slug} — +${added.join(' +')}`);
+    if (added.some((f) => HARD_FLAGS.includes(f))) failed = true;
+  }
 }
 if (news.length) console.log(`\n기준선 이후 새 플래그 ${news.length}건:\n${news.join('\n')}`);
 
