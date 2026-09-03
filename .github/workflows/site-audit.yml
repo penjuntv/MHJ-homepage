@@ -5,8 +5,13 @@
 #   · 깨진 이미지(blog #27) — 수동 감사로야 발견
 # 이 워크플로가 매주 라이브를 실측하고, 실패하면 이슈를 만든다.
 #
+# 검사 7종: ①sitemap 상태 ②깨진 이미지 ③매거진 지면 잘림
+#           ④실명 노출(P0) ⑤엔드포인트 건강 ⑥SEO 회귀 ⑦외부 링크 rot
+# 사람 눈 판정(화질·톤·실기기 터치감)은 자동화 대상이 아니다 —
+# 별도 실측 체크리스트(2026-09-03 배포)로 사람이 본다.
+#
 # 수동 실행: Actions 탭 → site-audit → Run workflow
-# 필요한 secrets: SUPABASE_URL · SUPABASE_SERVICE_ROLE_KEY (깨진 이미지 감사용)
+# 필요한 secrets: SUPABASE_URL · SUPABASE_SERVICE_ROLE_KEY (②④⑥⑦용)
 name: site-audit
 
 on:
@@ -39,16 +44,15 @@ jobs:
 
       - name: ① sitemap 전 URL 상태 확인
         id: sitemap
+        timeout-minutes: 8
         run: |
           set -uo pipefail
           curl -sf https://www.mhj.nz/sitemap.xml | grep -oE '<loc>[^<]+' | sed 's/<loc>//' > /tmp/urls.txt
           total=$(wc -l < /tmp/urls.txt | tr -d ' ')
           echo "sitemap URL: $total개"
-          : > /tmp/bad.txt
-          while read -r u; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 30 "$u")
-            [ "$code" = "200" ] || echo "$code $u" >> /tmp/bad.txt
-          done < /tmp/urls.txt
+          # 직렬 curl 은 최악 135×30s=67분 — 잡 타임아웃은 '취소'라 실패 이슈조차 안 남는다. 8병렬로.
+          xargs -P 8 -I{} curl -s -o /dev/null -w '%{http_code} {}\n' -L --max-time 20 {} < /tmp/urls.txt > /tmp/status.txt
+          grep -v '^200 ' /tmp/status.txt > /tmp/bad.txt || true
           if [ -s /tmp/bad.txt ]; then
             echo "::error::200이 아닌 URL $(wc -l < /tmp/bad.txt | tr -d ' ')건"
             cat /tmp/bad.txt
@@ -68,6 +72,39 @@ jobs:
         id: overflow
         if: ${{ !cancelled() }}
         run: node scripts/magazine-overflow-audit.mjs
+
+      - name: ④ 실명 노출 감사 (P0 — DB 전수 + 라이브 전수)
+        id: names
+        if: ${{ !cancelled() }}
+        timeout-minutes: 12
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/audit-name-exposure.mjs
+
+      - name: ⑤ 엔드포인트 건강 (robots·sitemap·llms·feed·schema·og)
+        id: endpoints
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: node scripts/audit-endpoints.mjs
+
+      - name: ⑥ SEO 회귀 (기준선 scripts/qa/seo-baseline.json 대비)
+        id: seo
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/audit-seo-regression.mjs
+
+      - name: ⑦ 외부 링크 rot (404/410 확정만 실패)
+        id: links
+        if: ${{ !cancelled() }}
+        timeout-minutes: 12
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/audit-external-links.mjs
 
       - name: 잘림 스크린샷 보관 (실패 시)
         if: ${{ failure() && steps.overflow.outcome == 'failure' }}
@@ -90,11 +127,22 @@ jobs:
           | sitemap 상태 | ${{ steps.sitemap.outcome }} |
           | 깨진 이미지 | ${{ steps.images.outcome }} |
           | 매거진 지면 잘림 | ${{ steps.overflow.outcome }} |
+          | 실명 노출 (P0) | ${{ steps.names.outcome }} |
+          | 엔드포인트 건강 | ${{ steps.endpoints.outcome }} |
+          | SEO 회귀 | ${{ steps.seo.outcome }} |
+          | 외부 링크 rot | ${{ steps.links.outcome }} |
+
+          ⚠ 실명 노출 단계가 실패면 로그 말미를 먼저 확인 — "실명 노출"이면 P0 즉시 처리,
+          "스캔 불가(감사 불완전)"이면 인프라 문제다. 로그의 이름은 [라벨]로 치환돼 있다.
 
           로컬 재현:
           \`\`\`bash
           node --env-file=.env.local scripts/audit-broken-images.mjs
           node scripts/magazine-overflow-audit.mjs
+          node --env-file=.env.local scripts/audit-name-exposure.mjs
+          node scripts/audit-endpoints.mjs
+          node --env-file=.env.local scripts/audit-seo-regression.mjs
+          node --env-file=.env.local scripts/audit-external-links.mjs
           \`\`\`"
           # 같은 라벨의 열린 이슈가 있으면 코멘트, 없으면 생성
           existing=$(gh issue list --label site-audit --state open --json number --jq '.[0].number // empty')
