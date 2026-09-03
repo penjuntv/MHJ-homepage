@@ -17,15 +17,17 @@
  *       feed.xml(item 수) · 주요 페이지 200 + JSON-LD 존재 · /api/og 이미지 응답 ·
  *       feed 최신 글이 sitemap 에 있는가(파이프라인 일관성)
  */
+import { fetchSitemapUrls } from './lib/audit-shared.mjs';
+
 const BASE = (process.argv.find((a) => a.startsWith('--base=')) ?? '--base=https://www.mhj.nz').slice(7);
 
 const results = [];
 const ok = (name, detail = '') => results.push({ name, pass: true, detail });
 const fail = (name, detail) => results.push({ name, pass: false, detail });
 
-async function get(path, asText = true) {
+async function get(path) {
   const res = await fetch(BASE + path, { redirect: 'follow' });
-  return { status: res.status, type: res.headers.get('content-type') ?? '', body: asText ? await res.text() : null };
+  return { status: res.status, body: await res.text() };
 }
 
 /* ── 1. robots.txt: AI 봇 명시 허용 ── */
@@ -40,16 +42,14 @@ async function get(path, asText = true) {
 
 /* ── 2. sitemap.xml: URL 수가 갑자기 줄면 라우트가 깨진 것 ── */
 let sitemapUrls = [];
-{
-  const r = await get('/sitemap.xml');
-  if (r.status !== 200) fail('sitemap.xml', `HTTP ${r.status}`);
-  else {
-    sitemapUrls = [...r.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    // 2026-09 기준 135개. 하한을 현재치 근처로 잡아야 부분 붕괴를 잡는다 — 글이 늘면 같이 올릴 것.
-    sitemapUrls.length >= 120
-      ? ok('sitemap.xml', `${sitemapUrls.length} URL`)
-      : fail('sitemap.xml', `URL ${sitemapUrls.length}개 — 하한 120 미만으로 급감`);
-  }
+try {
+  sitemapUrls = await fetchSitemapUrls(BASE);
+  // 2026-09 기준 135개. 하한을 현재치 근처로 잡아야 부분 붕괴를 잡는다 — 글이 늘면 같이 올릴 것.
+  sitemapUrls.length >= 120
+    ? ok('sitemap.xml', `${sitemapUrls.length} URL`)
+    : fail('sitemap.xml', `URL ${sitemapUrls.length}개 — 하한 120 미만으로 급감`);
+} catch (e) {
+  fail('sitemap.xml', e.message);
 }
 
 /* ── 3. llms.txt / llms-full.txt ── */

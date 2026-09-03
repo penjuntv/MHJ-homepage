@@ -7,41 +7,47 @@
  *   node --env-file=.env.local scripts/audit-seo-regression.mjs --update-baseline
  *
  * Exit code:
- *   기계적 결함(H1 혼입·alt 누락·내부링크 0·meta 누락) 지표가 기준선보다 나빠지면 1.
- *   THIN·H2 부족·GEO 키워드 부재는 편집 판단 영역이라 WARN 만 찍고 0.
+ *   기계적 결함(hard: H1 혼입·alt 누락·내부링크 0·meta 누락)이 집계로 악화되거나
+ *   슬러그 단위로 새로 발생하면 1. THIN·H2 부족·GEO 부재는 편집 판단 영역이라 WARN 만.
+ *   기준선 파일이 깨졌거나 CI 에 없으면 2 — 게이트를 조용히 무장해제하지 않는다.
  *
- * 기준선: scripts/qa/seo-baseline.json — 없으면 현재 값으로 생성하고 0 으로 종료(부트스트랩).
- *   정비 작업으로 지표가 좋아지면 --update-baseline 으로 낮아진 값을 잠근다.
+ * 기준선: scripts/qa/seo-baseline.json — 로컬에서 없으면 현재 값으로 생성(부트스트랩).
+ *   정비로 지표가 좋아지면 --update-baseline 으로 낮아진 값을 잠근다.
  *
  * 왜 필요한가:
  *   분기별 seo-audit-runner 보고서(docs/seo-audit-*.md)는 사람이 돌려야 나온다.
  *   그 사이 새 글이 ORPHAN/alt 누락으로 발행돼도 다음 분기까지 아무도 모른다.
- *   이 스크립트가 매주 headline 지표만 재서 "새로 나빠진 글"을 즉시 슬러그 단위로 보고한다.
- *   판정 기준은 .claude/skills/seo-audit-runner/SKILL.md 와 동일 — 갈라지면 그쪽이 정본.
+ *   이 스크립트가 매주 headline 지표만 재서 "새로 나빠진 글"을 슬러그 단위로 보고한다.
+ *   판정 기준은 .claude/skills/seo-audit-runner/SKILL.md 기반 — 단, 두 곳을 의도적으로
+ *   개선했다: ①ALT/ORPHAN/H1 은 라이브에 함께 렌더링되는 info_block_html 포함,
+ *   ②GEO 는 보이는 텍스트만(원본 SQL 은 내부링크 URL 의 'nz' 를 지역 신호로 오인).
  */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { createClient } from '@supabase/supabase-js';
+import { requireAdminClient, paged } from './lib/audit-shared.mjs';
 
 const UPDATE = process.argv.includes('--update-baseline');
 const BASELINE_PATH = new URL('./qa/seo-baseline.json', import.meta.url);
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!url || !key) {
-  console.error('NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 가 필요하다.');
-  console.error('실행: node --env-file=.env.local scripts/audit-seo-regression.mjs');
-  process.exit(2);
-}
-const db = createClient(url, key, { auth: { persistSession: false } });
+/* ── 검사 정의는 이 표 한 곳에만 — 플래그·집계 키·hard/soft 를 세 군데서 따로 적으면
+     새 검사를 추가할 때 하나를 빠뜨려도 출력엔 보이는데 게이트만 무장해제된다. ── */
+const CHECKS = [
+  { key: 'h1_over',      flag: 'H1_OVER',      hard: true  },
+  { key: 'alt_missing',  flag: 'ALT_MISSING',  hard: true  },
+  { key: 'orphan',       flag: 'ORPHAN',       hard: true  },
+  { key: 'meta_missing', flag: 'META_MISSING', hard: true  },
+  { key: 'thin',         flag: 'THIN',         hard: false },
+  { key: 'no_h2',        flag: 'NO_H2',        hard: false },
+  { key: 'no_geo',       flag: 'NO_GEO',       hard: false },
+];
+const HARD_FLAGS = CHECKS.filter((c) => c.hard).map((c) => c.flag);
 
-const { data: blogs, error } = await db
-  .from('blogs')
-  .select('slug,title,meta_description,content,info_block_html')
-  .eq('published', true)
-  .or('publish_at.is.null,publish_at.lte.now');
-if (error) throw new Error(`blogs 조회 실패 — ${error.message}`);
+const db = requireAdminClient();
+const blogs = [];
+for await (const b of paged(() =>
+  db.from('blogs').select('slug,title,meta_description,content,info_block_html')
+    .eq('published', true).or('publish_at.is.null,publish_at.lte.now'),
+)) blogs.push(b);
 
-/* ── 글별 플래그 (seo-audit-runner SKILL.md 의 기준을 JS 로 옮긴 것) ── */
 const count = (s, re) => (s.match(re) ?? []).length;
 function flagsOf(b) {
   const c = b.content ?? '';
@@ -71,13 +77,7 @@ const countFlag = (f) => Object.values(posts).filter((fl) => fl.includes(f)).len
 const current = {
   generated: new Date().toISOString().slice(0, 10),
   total: blogs.length,
-  h1_over: countFlag('H1_OVER'),
-  alt_missing: countFlag('ALT_MISSING'),
-  orphan: countFlag('ORPHAN'),
-  meta_missing: countFlag('META_MISSING'),
-  thin: countFlag('THIN'),
-  no_h2: countFlag('NO_H2'),
-  no_geo: countFlag('NO_GEO'),
+  ...Object.fromEntries(CHECKS.map((c) => [c.key, countFlag(c.flag)])),
   posts,
 };
 
@@ -105,22 +105,18 @@ if (!baseline || UPDATE) {
 }
 
 /* ── 비교 ── */
-const HARD = ['h1_over', 'alt_missing', 'orphan', 'meta_missing']; // 기계적 결함 — 악화 시 FAIL
-const SOFT = ['thin', 'no_h2', 'no_geo'];                          // 편집 판단 — WARN 만
-
 console.log(`발행 ${current.total}편 (기준선 ${baseline.generated}: ${baseline.total}편)\n`);
 let failed = false;
-for (const m of [...HARD, ...SOFT]) {
-  const was = baseline[m] ?? 0, now = current[m];
-  const mark = now > was ? (HARD.includes(m) ? '🔴' : '⚠️') : now < was ? '🟢' : '·';
-  console.log(`${mark} ${m}: ${was} → ${now}`);
-  if (now > was && HARD.includes(m)) failed = true;
+for (const { key, hard } of CHECKS) {
+  const was = baseline[key] ?? 0, now = current[key];
+  const mark = now > was ? (hard ? '🔴' : '⚠️') : now < was ? '🟢' : '·';
+  console.log(`${mark} ${key}: ${was} → ${now}`);
+  if (now > was && hard) failed = true;
 }
 
 /* 새로 플래그가 붙은 글을 슬러그 단위로 — 바로 고칠 수 있게.
    집계 비교만 쓰면 "기존 글 1건 고침 + 새 글 1건 결함"이 상쇄돼 숨는다 —
-   새 HARD 플래그는 슬러그 단위로도 FAIL 을 세운다. */
-const HARD_FLAGS = ['H1_OVER', 'ALT_MISSING', 'ORPHAN', 'META_MISSING'];
+   새 hard 플래그는 슬러그 단위로도 FAIL 을 세운다. */
 const news = [];
 for (const [slug, flags] of Object.entries(posts)) {
   const old = baseline.posts?.[slug] ?? [];

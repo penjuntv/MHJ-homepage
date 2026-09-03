@@ -17,17 +17,10 @@
  * 검사 범위: blogs(content·image_url) · articles(content·image_url·article_images)
  *            article_pages(content·images) · magazines(image_url·cover_images) · gallery
  */
-import { createClient } from '@supabase/supabase-js';
+import { requireAdminClient, checkUrl, mapConcurrent } from './lib/audit-shared.mjs';
 
 const JSON_OUT = process.argv.includes('--json');
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!url || !key) {
-  console.error('NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 가 필요하다.');
-  console.error('실행: node --env-file=.env.local scripts/audit-broken-images.mjs');
-  process.exit(2);
-}
-const db = createClient(url, key, { auth: { persistSession: false } });
+const db = requireAdminClient();
 
 const URL_RE = /https?:\/\/[^\s"'<>()\\]+/g;
 const looksLikeImage = (u) =>
@@ -71,33 +64,14 @@ for (const g of gal) collect('gallery', g.id, g.caption ?? '', g.image_url);
 const unique = [...new Set(refs.map((r) => r.url))];
 if (!JSON_OUT) console.log(`이미지 참조 ${refs.length}건 · 고유 URL ${unique.length}건 — 확인 중…`);
 
-/** HEAD 로 확인하고, HEAD 를 막는 서버를 위해 실패 시 GET(Range)로 한 번 더 본다. */
-async function check(u, attempt = 0) {
-  try {
-    const head = await fetch(u, { method: 'HEAD' });
-    if (head.ok) return null;
-    // HEAD 를 막는 서버가 있어 GET(Range)로 한 번 더 본다.
-    const get = await fetch(u, { headers: { Range: 'bytes=0-0' } });
-    return get.ok ? null : get.status;
-  } catch (e) {
-    // 일시적 네트워크 오류를 "깨짐"으로 보고하면 오탐이 된다(실제로 정상인 1.5MB
-    // 표지가 그렇게 잡혔다). 두 번까지 재시도한 뒤에만 실패로 확정한다.
-    if (attempt < 2) {
-      await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
-      return check(u, attempt + 1);
-    }
-    return `ERR ${e.message.slice(0, 30)}`;
-  }
-}
-
+/* HEAD→GET(Range) 폴백·재시도 후 확정 정책은 scripts/lib/audit-shared.mjs 의 checkUrl 한 곳에만 있다.
+   (일시적 네트워크 오류를 "깨짐"으로 보고하면 오탐 — 정상 1.5MB 표지가 실제로 그렇게 잡혔던 교훈도 그쪽 주석에.) */
+const statuses = await mapConcurrent(
+  unique, 12, (u) => checkUrl(u),
+  JSON_OUT ? undefined : (done, total) => process.stdout.write(`\r  ${done}/${total}`),
+);
 const broken = [];
-const CONC = 12;
-for (let i = 0; i < unique.length; i += CONC) {
-  const slice = unique.slice(i, i + CONC);
-  const results = await Promise.all(slice.map(check));
-  slice.forEach((u, k) => { if (results[k] !== null) broken.push({ url: u, status: results[k] }); });
-  if (!JSON_OUT) process.stdout.write(`\r  ${Math.min(i + CONC, unique.length)}/${unique.length}`);
-}
+unique.forEach((u, k) => { if (statuses[k] !== null) broken.push({ url: u, status: statuses[k] }); });
 if (!JSON_OUT) console.log('');
 
 const report = broken.map((b) => ({

@@ -33,7 +33,7 @@
  *   name-guard 가 그 파일 쓰기도 차단한다).
  */
 import { readFileSync } from 'node:fs';
-import { createClient } from '@supabase/supabase-js';
+import { requireAdminClient, paged, mapConcurrent, progressLine, fetchSitemapUrls } from './lib/audit-shared.mjs';
 
 const DB_ONLY = process.argv.includes('--db-only');
 const BASE = 'https://www.mhj.nz';
@@ -85,24 +85,13 @@ function scanValue(v, where) {
 }
 
 /* ── ① DB 전수 ── */
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!url || !key) {
-  console.error('NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 가 필요하다.');
-  console.error('실행: node --env-file=.env.local scripts/audit-name-exposure.mjs');
-  process.exit(2);
-}
-const db = createClient(url, key, { auth: { persistSession: false } });
+const db = requireAdminClient();
 
 const TABLES = ['blogs', 'articles', 'article_pages', 'magazines', 'gallery', 'comments', 'site_settings'];
 for (const table of TABLES) {
-  /* PostgREST 는 기본 max-rows 캡(통상 1000행)을 넘는 행을 에러 없이 잘라서 준다 —
-     comments 가 캡을 넘는 순간 초과분이 소리 없이 스캔에서 빠진다. 페이지네이션으로 전수 보장. */
-  for (let off = 0; ; off += 500) {
-    const { data, error } = await db.from(table).select('*').range(off, off + 499);
-    if (error) throw new Error(`${table} 조회 실패 — ${error.message}`); // 조용한 누락 금지 (audit-broken-images 의 교훈)
-    for (const row of data ?? []) scanValue(row, `db:${table} #${row.id ?? row.slug ?? row.key ?? '?'}`);
-    if (!data || data.length < 500) break;
+  // paged: PostgREST 기본 max-rows 캡의 조용한 절단 방지 + 에러 시 throw (조용한 누락 금지)
+  for await (const row of paged(() => db.from(table).select('*'))) {
+    scanValue(row, `db:${table} #${row.id ?? row.slug ?? row.key ?? '?'}`);
   }
 }
 console.log(`DB ${TABLES.length}개 테이블 스캔 완료`);
@@ -110,11 +99,7 @@ console.log(`DB ${TABLES.length}개 테이블 스캔 완료`);
 /* ── ② 라이브 전수 ── */
 const unscanned = []; // fetch 실패는 "노출"이 아니라 "감사 불완전" — hits 와 절대 섞지 않는다
 if (!DB_ONLY) {
-  const smRes = await fetch(`${BASE}/sitemap.xml`, { signal: AbortSignal.timeout(20000) });
-  if (!smRes.ok) throw new Error(`sitemap.xml HTTP ${smRes.status} — 라이브 스캔 대상 목록을 얻지 못했다`); // fail-open 금지
-  const sm = await smRes.text();
-  const urls = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  if (!urls.length) throw new Error('sitemap.xml 에서 URL 을 하나도 못 읽었다 — 포맷 변경?');
+  const urls = await fetchSitemapUrls(BASE); // 비정상 시 throw — fail-open 금지
   urls.push(`${BASE}/llms.txt`, `${BASE}/llms-full.txt`, `${BASE}/feed.xml`);
 
   async function fetchLive(u, attempt = 0) {
@@ -133,14 +118,10 @@ if (!DB_ONLY) {
     }
   }
 
-  const CONC = 10;
-  for (let i = 0; i < urls.length; i += CONC) {
-    await Promise.all(urls.slice(i, i + CONC).map(async (u) => {
-      const body = await fetchLive(u);
-      if (body) scan(body, `live:${u.replace(BASE, '')}`);
-    }));
-    process.stdout.write(`\r라이브 ${Math.min(i + CONC, urls.length)}/${urls.length}`);
-  }
+  await mapConcurrent(urls, 10, async (u) => {
+    const body = await fetchLive(u);
+    if (body) scan(body, `live:${u.replace(BASE, '')}`);
+  }, progressLine('라이브'));
   console.log('');
 }
 
