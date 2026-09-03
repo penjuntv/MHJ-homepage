@@ -8,7 +8,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import { formatDate } from '@/lib/utils';
 import { getSiteSettings } from '@/lib/site-settings';
 import { PILLARS } from '@/lib/pillars';
-import { CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
+import { BLOG_CARD_COLUMNS, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
 
 export const revalidate = 300;
 
@@ -41,7 +41,7 @@ async function getFeaturedPosts(): Promise<Blog[]> {
   // 1) featured=true → hero_order 순서 우선, date 보조
   const { data: featured } = await supabase
     .from('blogs')
-    .select('*')
+    .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
     .eq('featured', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
@@ -54,7 +54,7 @@ async function getFeaturedPosts(): Promise<Blog[]> {
   // 2) fallback: 최신 published 3개
   const { data: latest } = await supabase
     .from('blogs')
-    .select('*')
+    .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
@@ -65,9 +65,10 @@ async function getFeaturedPosts(): Promise<Blog[]> {
 
 async function getLatestPosts(excludeIds: number[]): Promise<Blog[]> {
   const now = new Date().toISOString();
+  // PostCard 는 본문을 렌더하지 않는다 — content 를 빼 9행 전문 fetch 를 막는다.
   let query = supabase
     .from('blogs')
-    .select('*')
+    .select('id, category, title, author, date, image_url, slug, view_count, tags')
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false })
@@ -82,10 +83,12 @@ async function getLatestPosts(excludeIds: number[]): Promise<Blog[]> {
 }
 
 async function getMostReadBlogs(excludeIds: number[]): Promise<Blog[]> {
+  const now = new Date().toISOString();
   let query = supabase
     .from('blogs')
-    .select('id, title, category, slug, view_count, date, image_url, author, content, published')
+    .select('id, title, category, slug')
     .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('view_count', { ascending: false })
     .order('id', { ascending: false })
     .limit(10);
@@ -137,7 +140,7 @@ async function getCategoryPosts(excludeIds: number[]): Promise<Record<string, Bl
   const now = new Date().toISOString();
   const { data } = await supabase
     .from('blogs')
-    .select('*')
+    .select('id, category, title, date, image_url, slug, view_count')
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('date', { ascending: false });
@@ -173,7 +176,7 @@ async function getArchivePosts(excludeIds: number[], limit = 3): Promise<Blog[]>
   const now = new Date().toISOString();
   const { data } = await supabase
     .from('blogs')
-    .select('*')
+    .select('id, category, title, image_url, slug')
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`);
 
@@ -196,7 +199,7 @@ async function getLatestLetter(): Promise<Blog | null> {
   const now = new Date().toISOString();
   const { data } = await supabase
     .from('blogs')
-    .select('*')
+    .select('id, slug, content, letter_to')
     .eq('published', true)
     .not('letter_to', 'is', null)
     .or(`publish_at.is.null,publish_at.lte.${now}`)

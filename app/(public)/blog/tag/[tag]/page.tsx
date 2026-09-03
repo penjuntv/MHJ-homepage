@@ -23,13 +23,15 @@ export async function generateMetadata(props: { params: Promise<{ tag: string }>
 }
 
 async function getBlogsByTag(tag: string): Promise<Blog[]> {
+  const now = new Date().toISOString();
   const { data } = await supabase
     .from('blogs')
-    .select('*')
+    .select('id, category, title, date, image_url, slug')
     .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
     .contains('tags', [tag])
     .order('created_at', { ascending: false });
-  return data ?? [];
+  return (data ?? []) as Blog[];
 }
 
 export default async function TagPage(props: { params: Promise<{ tag: string }> }) {

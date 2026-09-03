@@ -28,3 +28,15 @@ export const SLUG_TO_CATEGORY: Record<string, BlogCategory> = Object.fromEntries
     ([cat, slug]) => [slug, cat],
   ),
 );
+
+/**
+ * 공개 페이지 blogs 쿼리 컬럼 화이트리스트 — select('*') 금지.
+ * content_backup·insight_kr 등 비공개 컬럼이 RSC 페이로드로 HTML 에 직렬화되는 것을 막는다
+ * (2026-09-04 감사: content_backup 의 아이 실명이 페이지 소스에 노출됐던 P0 사고).
+ */
+export const BLOG_CARD_COLUMNS =
+  'id, category, title, author, date, image_url, content, slug, meta_description, og_image_url, published, view_count, tags, is_sponsored, letter_to';
+
+/** 상세 페이지(/blog/[slug]) 전용 — 카드 컬럼 + 본문 렌더링에 추가로 필요한 컬럼 */
+export const BLOG_DETAIL_COLUMNS =
+  `${BLOG_CARD_COLUMNS}, created_at, sponsor_name, cover_caption, info_block_html`;
