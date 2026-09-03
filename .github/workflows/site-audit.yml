@@ -122,7 +122,8 @@ jobs:
           title="🔴 주간 사이트 감사 실패 — $(date -u +%Y-%m-%d)"
           # body 는 quoted heredoc 으로 — 본문에 따옴표·백틱·괄호가 있어도 bash 가 해석하지 않는다.
           # (첫 실전 실행에서 본문 속 큰따옴표가 body="..." 를 중간에 끊어 exit 2 로 죽었다.
-          #  ${{ }} 는 Actions 템플릿 단계에서 치환되므로 quoted heredoc 안에서도 동작한다.)
+          #  Actions 템플릿 표현식은 bash 이전 단계에서 치환되므로 quoted heredoc 안에서도 동작한다.
+          #  주의: 이 run 블록 안에는 주석에라도 빈 템플릿 표현식을 쓰면 워크플로 파싱이 깨진다.)
           body=$(cat <<'ISSUE_BODY'
           자동 감사가 실패했습니다. 실행 로그: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
