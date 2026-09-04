@@ -17,11 +17,9 @@
 -- 참고: revoke select (컬럼들) 는 테이블 레벨 GRANT 가 남아 있으면 무효다 —
 -- 반드시 테이블 SELECT 회수 후 컬럼 단위 재부여 방식이어야 한다.
 --
--- 범위 밖(2026-09-04 기준 남아 있는 것): anon 의 INSERT·UPDATE·REFERENCES 는
--- 여전히 39컬럼 전부에 테이블 레벨로 남아 있다. 지금은 RLS 가 막는다 —
--- blogs 의 anon 정책은 anon_select_published_blogs(SELECT) 하나뿐이라 쓰기 정책이
--- 없다. 다층 방어를 원하면 `revoke insert, update, references ... from anon;` 검토.
--- 사용자 승인 후 진행할 것 (라이브 권한 변경).
+-- ✅ 후속 완료 — anon 의 쓰기 권한은 2026-09-05 에 회수했다.
+-- 이 파일 작성 시점의 "범위 밖" 서술(INSERT·UPDATE·REFERENCES 잔존)은 더 이상
+-- 유효하지 않다. 회수 내역·롤백은 `docs/sql/anon_blogs_revoke_write.sql` 참고.
 -- 영향 없음: authenticated(mhj-desk, Supabase Auth)·service_role(미리보기·ai-insight·carousel).
 -- 새 공개 컬럼을 추가하면 이 grant 목록에도 추가해야 anon 이 읽는다 (fail-closed).
 --

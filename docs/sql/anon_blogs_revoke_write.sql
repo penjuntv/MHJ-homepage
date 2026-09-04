@@ -1,0 +1,46 @@
+-- ✅ 적용 완료 — 2026-09-05. 다시 실행할 필요 없다.
+--    이 파일은 "무엇을 왜 회수했는지"의 기록이고, 롤백 절차의 참고본이다.
+--
+-- 목적: anon 롤의 blogs 쓰기 권한 회수 (다층 방어).
+-- 짝이 되는 파일: `docs/sql/anon_blogs_column_whitelist_grant.sql` (SELECT 화이트리스트).
+--
+-- 배경 — 회수 전 상태(2026-09-05 실측):
+--   컬럼 레벨: anon SELECT 36 / INSERT 39 / UPDATE 39 / REFERENCES 39
+--   테이블 레벨: anon 에 DELETE · TRUNCATE · TRIGGER 도 남아 있었다.
+--   (핸드오프 §1 은 INSERT·UPDATE·REFERENCES 만 적었지만 실측 범위는 더 넓었다.)
+--   blogs 는 RLS 활성이고 anon 정책이 anon_select_published_blogs(SELECT) 하나뿐이라
+--   INSERT·UPDATE·DELETE 는 "정책 부재"로만 막히는 **RLS 한 겹** 상태였다.
+--   ⚠️ TRUNCATE 는 RLS 가 적용되지 않는 명령이라 그 한 겹조차 없었다.
+--
+-- 영향 없음 (적용 전 검증):
+--   · blogs 쓰기 코드 경로는 전부 app/mhj-desk(authenticated) 와
+--     app/api/ai-insight(service_role). anon 으로 쓰는 경로 0건.
+--   · 쓰기 RPC 2종(increment_blog_view · increment_view_count)은
+--     SECURITY DEFINER · owner=postgres → 호출자 권한과 무관.
+--   · authenticated · service_role 은 39컬럼 전 권한을 그대로 보유.
+--
+-- 실측 대조군 (같은 anon 키 REST 프로브, 적용 전 → 적용 후):
+--   PATCH /rest/v1/blogs?id=eq.-1   204 (권한 통과 후 RLS 로 0행) → 401 42501 permission denied
+--   POST  /rest/v1/blogs            401 "violates row-level security" → 401 permission denied
+--   DELETE /rest/v1/blogs?id=eq.-1  (미측정)                        → 401 permission denied
+--   GET   select=id,title           200 → 200 (불변)
+--   GET   select=*                  401 → 401 (불변)
+--   GET   select=content_backup 등  401 → 401 (불변)
+--   앱 컬럼 화이트리스트 4종(BLOG_CARD/DETAIL/RELATED/CAROUSEL) 전부 200.
+--
+-- 적용: Supabase MCP apply_migration (migration: revoke_anon_write_privileges_on_blogs).
+revoke insert, update, delete, truncate, references, trigger
+  on table public.blogs from anon;
+
+-- ── 롤백 (되돌릴 일이 생기면) ─────────────────────────────────────────────
+-- grant insert, update, delete, truncate, references, trigger
+--   on table public.blogs to anon;
+-- ⚠️ 되돌리면 SELECT 화이트리스트와 무관하게 쓰기 방어가 RLS 한 겹으로 돌아간다.
+--
+-- ── 남은 것 (미적용, 사용자 판단 필요) ────────────────────────────────────
+-- 같은 노출은 blogs 만의 문제가 아니다. 2026-09-05 실측 기준 public 스키마
+-- 63개 테이블 **전부** 가 anon INSERT/UPDATE/REFERENCES 를 갖고 있고 RLS 로만 막힌다.
+-- anon 쓰기 정책이 실제로 있는 건 4개뿐:
+--   comments · subscribers · page_events · article_reactions (이들은 회수하면 깨진다).
+-- 나머지 58개는 blogs 와 같은 처지다. Supabase 기본 posture 라 즉시 위험은 아니지만,
+-- 전면 정리를 원하면 테이블별로 anon 경로 실측 후 같은 방식으로 회수할 것.
