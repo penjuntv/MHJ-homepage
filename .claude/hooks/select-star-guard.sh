@@ -7,8 +7,10 @@
 # 짝: CI 쪽은 scripts/audit-select-star.mjs (source-guard.yml + site-audit.yml ⑧).
 #
 # 설계 (name-guard.sh 의 fail-closed 원칙 + 리뷰 반영 강화):
-#   - 범위: app/ 전체에서 mhj-desk 만 제외. (public)뿐 아니라 feed.xml·llms·sitemap·
-#     api/search 등 blogs 를 익명 응답으로 내보내는 표면 전부가 대상이다.
+#   - 범위: app/·lib/·components/ 에서 mhj-desk 만 제외. (public)뿐 아니라 feed.xml·
+#     llms·sitemap·api/search 등 blogs 를 익명 응답으로 내보내는 표면 전부가 대상이고,
+#     공유 데이터 접근 헬퍼가 lib/ 로 빠져도 뚫리지 않게 lib/·components/ 도 본다.
+#     (CI 짝 scripts/audit-select-star.mjs 의 ROOTS 와 같은 범위를 유지할 것.)
 #   - 경로 판정은 절대경로/워크트리 경로에도 매치되는 substring case — $PWD 스트립
 #     실패가 fail-open 이 되지 않게 한다.
 #   - MultiEdit 의 edits[].new_string 도 검사한다 (new_string/content 만 보면 no-op).
@@ -30,8 +32,10 @@ fi
 
 # 경로 게이트 — 저장소 상대/절대/워크트리 어디서든 substring 으로 판정 (fail-closed)
 case "$FILE" in
-  *app/mhj-desk/*) exit 0 ;;              # admin: Supabase Auth 뒤, 대상 아님
+  *app/mhj-desk/*) exit 0 ;;               # admin: Supabase Auth 뒤, 대상 아님
   app/*|*/app/*) ;;                        # 공개 표면 후보 → 검사
+  lib/*|*/lib/*) ;;                        # 공유 데이터 접근 헬퍼
+  components/*|*/components/*) ;;          # 공개 페이지가 렌더하는 컴포넌트
   *) exit 0 ;;
 esac
 
