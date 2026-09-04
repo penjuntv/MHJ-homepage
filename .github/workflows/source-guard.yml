@@ -1,0 +1,25 @@
+# ── 소스 가드 (PR/push 즉시) ──
+# 주간 site-audit ⑧과 같은 스크립트를 커밋 시점에 돌린다.
+# 이유: select('*') 유출은 주간 주기로는 최대 7일 노출 — P0 는 PR 에서 막아야 한다.
+# 네트워크·secrets 불필요, ~10초.
+name: source-guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  select-star:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: blogs select('*') 소스 가드
+        run: node scripts/audit-select-star.mjs

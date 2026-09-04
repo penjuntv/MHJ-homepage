@@ -30,12 +30,15 @@ export async function GET(req: NextRequest) {
   }
 
   const pattern = `%${q}%`;
+  const now = new Date().toISOString();
 
   const [blogsRes, articlesRes, magazinesRes] = await Promise.all([
     supabase
       .from('blogs')
       .select('id, title, content, date, category, image_url, slug')
       .eq('published', true)
+      // .or 2회 체이닝은 AND 로 결합된다 — 검색어 매치 AND 예약발행 가드
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
       .or(`title.ilike.${pattern},content.ilike.${pattern}`)
       .order('created_at', { ascending: false })
       .limit(6),

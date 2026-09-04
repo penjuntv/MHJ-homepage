@@ -76,10 +76,16 @@
 | hero_order | integer | YES | 0 | |
 | is_hero | boolean | YES | false | |
 | featured | boolean | YES | false | |
-| content_backup | text | YES | — | |
+| content_backup | text | YES | — | 🔒 비공개 — anon SELECT revoke 대상 |
 | info_block_html | text | YES | — | 인포블록 HTML |
-| insight_kr | text | YES | — | AI 감상평 캐시 |
-| insight_cached_at | timestamptz | YES | — | 캐시 생성 시각 |
+| insight_kr | text | YES | — | AI 감상평 캐시 · 🔒 비공개 (ai-insight 는 service_role) |
+| insight_cached_at | timestamptz | YES | — | 캐시 생성 시각 · 🔒 비공개 |
+
+🔒 비공개 컬럼 3종은 anon 롤에서 컬럼 단위 grant 로 차단한다 —
+`docs/sql/anon_blogs_column_whitelist_grant.sql` (⚠️ 화이트리스트 코드 배포 **후** 적용).
+새 공개 컬럼 추가 시 그 grant 목록에도 추가해야 anon(공개 페이지)이 읽는다.
+앱 쪽 화이트리스트는 `lib/constants.ts` 의 `BLOG_*_COLUMNS`, 재발 가드는
+`.claude/hooks/select-star-guard.sh` + `scripts/audit-select-star.mjs`.
 
 ---
 
