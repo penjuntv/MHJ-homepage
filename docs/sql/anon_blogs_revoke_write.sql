@@ -38,9 +38,17 @@ revoke insert, update, delete, truncate, references, trigger
 -- ⚠️ 되돌리면 SELECT 화이트리스트와 무관하게 쓰기 방어가 RLS 한 겹으로 돌아간다.
 --
 -- ── 남은 것 (미적용, 사용자 판단 필요) ────────────────────────────────────
--- 같은 노출은 blogs 만의 문제가 아니다. 2026-09-05 실측 기준 public 스키마
--- 63개 테이블 **전부** 가 anon INSERT/UPDATE/REFERENCES 를 갖고 있고 RLS 로만 막힌다.
--- anon 쓰기 정책이 실제로 있는 건 4개뿐:
---   comments · subscribers · page_events · article_reactions (이들은 회수하면 깨진다).
--- 나머지 58개는 blogs 와 같은 처지다. Supabase 기본 posture 라 즉시 위험은 아니지만,
--- 전면 정리를 원하면 테이블별로 anon 경로 실측 후 같은 방식으로 회수할 것.
+-- 같은 노출은 blogs 만의 문제가 아니다. **위 revoke 적용 전** public 스키마
+-- 63개 테이블 전부가 anon INSERT/UPDATE/REFERENCES 를 갖고 RLS 로만 막혔다.
+-- blogs 를 회수한 **지금은 62개**다(적용 후 재실측으로 blogs 가 목록에서 빠진 것을 확인).
+-- 그중 anon 쓰기 정책이 실제로 있는 건 4개뿐:
+--   comments · subscribers · page_events · article_reactions
+--   (정책이 있다 = anon 쓰기를 의도한 것으로 보이므로 회수하면 깨진다. 실측은 아님.)
+-- 남는 58개가 회수 전 blogs 와 같은 처지다.
+--
+-- ⚠️ base table 만 세면 누락된다 — 뷰 2개에도 anon 쓰기 grant 가 있다:
+--   math_curriculum_coverage · math_curriculum_mapping_audit
+--   (실측: base table 63 / anon 쓰기 grant 보유 64 = 테이블 62 + 뷰 2.)
+--
+-- Supabase 기본 posture 라 즉시 위험은 아니지만, 전면 정리를 원하면
+-- 대상별로 anon 경로 실측 후 같은 방식으로 회수할 것.
