@@ -37,8 +37,9 @@ export default async function MairangiNotesPage() {
       .eq('status', 'sent')
       .order('sent_at', { ascending: false }),
     db
+      // 카운트만 필요 — service_role 이라 head 가 빠지는 순간 이메일 전 행 유출, 'id' 로 고정
       .from('subscribers')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('active', true),
     getSiteSettings(),
   ]);

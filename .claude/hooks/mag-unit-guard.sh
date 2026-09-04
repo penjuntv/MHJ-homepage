@@ -23,8 +23,8 @@ if ! FILE=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // ""' 2>&1); th
   echo "mag-unit-guard: stdin JSON 파싱 실패 — fail closed. jq: $FILE" >&2
   exit 2
 fi
-# Edit 은 new_string, Write 는 content 를 쓴다. 둘 다 검사.
-if ! TEXT=$(printf '%s' "$INPUT" | jq -r '(.tool_input.new_string // "") + "\n" + (.tool_input.content // "")' 2>&1); then
+# Edit=new_string, Write=content, MultiEdit=edits[].new_string — 셋 다 검사.
+if ! TEXT=$(printf '%s' "$INPUT" | jq -r '(.tool_input.new_string // "") + "\n" + (.tool_input.content // "") + "\n" + ([.tool_input.edits[]?.new_string // ""] | join("\n"))' 2>&1); then
   echo "mag-unit-guard: stdin JSON 파싱 실패 — fail closed. jq: $TEXT" >&2
   exit 2
 fi

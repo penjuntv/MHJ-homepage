@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import JSZip from 'jszip';
 import { createAdminClient } from '@/lib/supabase';
+import { CAROUSEL_BLOG_COLUMNS } from '@/lib/constants';
 import {
   loadCarouselFonts,
   buildCarouselInputFromBlog,
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from('blogs')
-      .select('*')
+      .select(CAROUSEL_BLOG_COLUMNS)
       .eq('id', blogId)
       .single();
     if (error || !data) {

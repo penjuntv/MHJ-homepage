@@ -65,7 +65,8 @@ async function getFeaturedBlog(category: string | null): Promise<Blog | null> {
     .order('date', { ascending: false })
     .limit(1);
   if (category) q = q.eq('category', category);
-  const { data: featuredData } = await q;
+  const { data: featuredData, error: featuredError } = await q;
+  if (featuredError) console.error('getFeaturedBlog(featured):', featuredError.message);
   if (featuredData && featuredData.length > 0) return featuredData[0];
 
   // 2) featured 글이 없으면 최신 1개
@@ -77,7 +78,8 @@ async function getFeaturedBlog(category: string | null): Promise<Blog | null> {
     .order('date', { ascending: false })
     .limit(1);
   if (category) q2 = q2.eq('category', category);
-  const { data: latestData } = await q2;
+  const { data: latestData, error: latestError } = await q2;
+  if (latestError) console.error('getFeaturedBlog(latest):', latestError.message);
   return latestData?.[0] ?? null;
 }
 
@@ -91,14 +93,15 @@ async function getRecentBlogs(category: string | null, excludeId: number | null)
     .order('date', { ascending: false })
     .limit(excludeId ? 5 : 4);
   if (category) q = q.eq('category', category);
-  const { data } = await q;
+  const { data, error } = await q;
+  if (error) console.error('getRecentBlogs:', error.message);
   const all = data ?? [];
   return (excludeId ? all.filter(b => b.id !== excludeId) : all).slice(0, 4);
 }
 
 async function getMostReadBlogs(): Promise<Blog[]> {
   const now = new Date().toISOString();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('blogs')
     .select(BLOG_CARD_COLUMNS)
     .eq('published', true)
@@ -106,6 +109,7 @@ async function getMostReadBlogs(): Promise<Blog[]> {
     .order('view_count', { ascending: false })
     .order('id', { ascending: false })
     .limit(5);
+  if (error) console.error('getMostReadBlogs:', error.message);
   return (data ?? []) as Blog[];
 }
 
@@ -140,7 +144,8 @@ async function getPaginatedBlogs(
     .range(offset, offset + PAGE_SIZE - 1);
 
   if (category) q = q.eq('category', category);
-  const { data, count } = await q;
+  const { data, count, error } = await q;
+  if (error) console.error('getPaginatedBlogs:', error.message);
   return { blogs: data ?? [], totalCount: count ?? 0 };
 }
 

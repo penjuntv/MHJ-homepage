@@ -12,10 +12,12 @@ function escapeXml(str: string): string {
 }
 
 export async function GET() {
+  const now = new Date().toISOString();
   const { data: blogs } = await supabase
     .from('blogs')
     .select('id, title, author, date, image_url, category, slug, meta_description, content, created_at')
     .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
     .order('created_at', { ascending: false })
     .limit(20);
 

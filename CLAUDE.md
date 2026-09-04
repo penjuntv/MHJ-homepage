@@ -39,7 +39,8 @@ compact 시 유지할 것: 현재 브랜치 · 건드린 파일 · 실패 중인
 
 ## Claude Code 운영 메모
 - 멀티툴 repo: Claude Code(`.claude/`) · Codex(`.codex/`) · Antigravity(루트 `AGENTS.md`, 읽기전용 QA). 설정은 서로 별개.
-- 강제 규칙은 프롬프트가 아니라 hook 로 추가한다: `.claude/hooks/` 의 safety-gate(Bash)·scope-guard(Edit/Write)·ts-check(PostToolUse)·session-summary(Stop).
+- 강제 규칙은 프롬프트가 아니라 hook 로 추가한다: `.claude/hooks/` 의 safety-gate(Bash)·scope-guard/name-guard/mag-unit-guard/select-star-guard(Edit/Write/MultiEdit)·ts-check(PostToolUse)·session-summary(Stop).
+- select-star-guard 는 공개 표면(`app/`, mhj-desk 제외)의 `blogs` `select('*')` 를 차단한다(2026-09-04 P0 재발 방지). 짝이 되는 CI 는 `scripts/audit-select-star.mjs`(source-guard.yml + 주간 site-audit ⑧), 훅 자체의 회귀 테스트는 `scripts/qa/test-select-star-guard.sh`. 공개 blogs 쿼리는 `lib/constants.ts` 의 `BLOG_*_COLUMNS` 를 쓸 것.
 - 스킬 `.claude/skills/`·`.agents/skills/`(인벤토리 `docs/AGENTS.md`) · 서브에이전트 `.claude/agents/`.
 - `.claude/skills/frontend-design`(+`.kiro/skills/frontend-design`)·`.claude/skills/fact-verify` 는 `.agents/skills/` 의 원본을 가리키는 **심볼릭 링크**다. 원본을 지우면 링크가 전부 깨진다.
 - MCP: Supabase 는 DDL=apply_migration / 조회·DML=execute_sql. 불필요한 MCP 는 끄기.

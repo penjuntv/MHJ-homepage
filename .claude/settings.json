@@ -24,6 +24,10 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/mag-unit-guard.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/select-star-guard.sh"
           }
         ]
       }
