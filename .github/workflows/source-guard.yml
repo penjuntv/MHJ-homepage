@@ -23,3 +23,9 @@ jobs:
           node-version: 22
       - name: blogs select('*') 소스 가드
         run: node scripts/audit-select-star.mjs
+
+      # 훅은 조용히 fail-open 되기 쉽다(경로 판정·jq 필드·정규식 중 하나만 어긋나도 exit 0).
+      # "돌긴 도는데 아무것도 못 막는" 상태를 여기서 잡는다. jq 는 러너에 기본 설치돼 있다.
+      - name: select-star-guard 훅 회귀 테스트
+        if: ${{ !cancelled() }}
+        run: bash scripts/qa/test-select-star-guard.sh

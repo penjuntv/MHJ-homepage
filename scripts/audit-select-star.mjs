@@ -25,7 +25,9 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const ROOT = 'app';
+// app/ 뿐 아니라 lib/·components/ 도 스캔한다 — 공유 데이터 접근 헬퍼가
+// lib/ 로 빠지는 순간 app/ 만 보는 가드는 그대로 뚫린다 (fail-closed).
+const ROOTS = ['app', 'lib', 'components'];
 const EXCLUDE = /(^|\/)app\/mhj-desk(\/|$)/;
 
 // from('blogs') 뒤, 다른 .from( 을 넘지 않는 500자 안의 select('*')
@@ -42,7 +44,7 @@ function* walk(dir) {
 
 const violations = [];
 let scanned = 0;
-for (const file of walk(ROOT)) {
+for (const root of ROOTS) for (const file of walk(root)) {
   if (EXCLUDE.test(file)) continue;
   scanned++;
   const src = readFileSync(file, 'utf8');
@@ -54,7 +56,9 @@ for (const file of walk(ROOT)) {
   }
 }
 
-console.log(`blogs select('*') 소스 가드 — ${ROOT}/ (mhj-desk 제외) 파일 ${scanned}개 스캔`);
+console.log(
+  `blogs select('*') 소스 가드 — ${ROOTS.map((r) => `${r}/`).join(' ')} (mhj-desk 제외) 파일 ${scanned}개 스캔`
+);
 if (violations.length) {
   console.error(`::error::공개 표면 blogs select('*') ${violations.length}건 — RSC/JSON 유출 위험 (P0 재발)`);
   for (const v of violations) console.error(`  🔴 ${v}`);
