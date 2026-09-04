@@ -40,3 +40,11 @@ export const BLOG_CARD_COLUMNS =
 /** 상세 페이지(/blog/[slug]) 전용 — 카드 컬럼 + 본문 렌더링에 추가로 필요한 컬럼 */
 export const BLOG_DETAIL_COLUMNS =
   `${BLOG_CARD_COLUMNS}, created_at, sponsor_name, cover_caption, info_block_html`;
+
+/** 관련 글 카드(getRelatedBlogs) 전용 — 카드 컬럼보다 가벼운 최소 컬럼 */
+export const BLOG_RELATED_COLUMNS =
+  'id, title, author, date, image_url, category, slug, view_count';
+
+/** 캐러셀 API(app/api/carousel/*) 전용 — CarouselBlogRow 인터페이스와 1:1 */
+export const CAROUSEL_BLOG_COLUMNS =
+  'id, title, category, slug, meta_description, image_url, carousel_enabled, carousel_title, carousel_subtitle, carousel_points, carousel_summary, carousel_summary_kr, carousel_yussi_take, carousel_yussi_take_kr, carousel_style';

@@ -19,11 +19,17 @@ export const metadata: Metadata = {
 };
 
 async function getStats() {
+  const now = new Date().toISOString();
+  // 카운트만 필요 — 와일드카드 select 는 head 옵션이 빠지는 순간 전 컬럼 유출이라 'id' 로 고정
   const [subscribers, blogs, magazines, newsletters] = await Promise.all([
-    supabase.from('subscribers').select('*', { count: 'exact', head: true }).eq('active', true),
-    supabase.from('blogs').select('*', { count: 'exact', head: true }).eq('published', true),
-    supabase.from('magazines').select('*', { count: 'exact', head: true }),
-    supabase.from('newsletters').select('*', { count: 'exact', head: true }).eq('status', 'sent'),
+    supabase.from('subscribers').select('id', { count: 'exact', head: true }).eq('active', true),
+    supabase
+      .from('blogs')
+      .select('id', { count: 'exact', head: true })
+      .eq('published', true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`),
+    supabase.from('magazines').select('id', { count: 'exact', head: true }),
+    supabase.from('newsletters').select('id', { count: 'exact', head: true }).eq('status', 'sent'),
   ]);
   return {
     subscribers: subscribers.count ?? 0,

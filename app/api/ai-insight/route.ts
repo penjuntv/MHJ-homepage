@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createAdminClient } from '@/lib/supabase';
 import { GoogleGenAI } from '@google/genai';
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY ?? '' });
@@ -13,6 +13,10 @@ export async function POST(req: NextRequest) {
     if (!title || !content) {
       return NextResponse.json({ error: 'title and content are required' }, { status: 400 });
     }
+
+    // insight_kr·insight_cached_at 은 anon SELECT 가 revoke 된 비공개 컬럼 —
+    // 서버 전용 라우트이므로 service_role 로 읽고 쓴다 (anon 으로는 UPDATE 도 막힌다).
+    const supabase = createAdminClient();
 
     // blog_id가 있으면 DB 캐시 확인
     if (blog_id) {
