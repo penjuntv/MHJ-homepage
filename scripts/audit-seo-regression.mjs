@@ -18,9 +18,15 @@
  *   분기별 seo-audit-runner 보고서(docs/seo-audit-*.md)는 사람이 돌려야 나온다.
  *   그 사이 새 글이 ORPHAN/alt 누락으로 발행돼도 다음 분기까지 아무도 모른다.
  *   이 스크립트가 매주 headline 지표만 재서 "새로 나빠진 글"을 슬러그 단위로 보고한다.
- *   판정 기준은 .claude/skills/seo-audit-runner/SKILL.md 기반 — 단, 두 곳을 의도적으로
- *   개선했다: ①ALT/ORPHAN/H1 은 라이브에 함께 렌더링되는 info_block_html 포함,
- *   ②GEO 는 보이는 텍스트만(원본 SQL 은 내부링크 URL 의 'nz' 를 지역 신호로 오인).
+ *
+ * ⚠️ 판정 기준은 .claude/skills/seo-audit-runner/SKILL.md 의 SQL 과 **한 쌍**이다.
+ *   여기를 고치면 그쪽 SQL 도 같이 고칠 것(반대도 마찬가지) — 2026-09-04 에 동기화했다.
+ *   합의된 대상 구분: ①단어 수·H2 는 본문(content)만, ②ALT/ORPHAN/H1 은 라이브에 함께
+ *   렌더링되는 info_block_html 포함, ③GEO 는 태그를 벗긴 보이는 텍스트만
+ *   (옛 SQL 은 내부링크 URL 의 'mhj.nz' 를 지역 신호로 오인해 22편을 4편으로 봤다).
+ *   SKILL.md 쪽에서 주의할 점: Postgres 는 단어 경계가 `\y` 다(`\b` 는 백스페이스) —
+ *   JS 의 이 파일에서는 `\b` 가 맞다. 옛 SQL 의 `<h2\b` 는 항상 0을 돌려줬다.
+ *   대조 실측(2026-09-04, 79편): thin 36 / orphan 10 / no_geo 22 / alt 3 / no_h2 6 / h1 0.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { requireAdminClient, paged } from './lib/audit-shared.mjs';
