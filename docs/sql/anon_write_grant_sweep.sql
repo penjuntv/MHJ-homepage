@@ -185,4 +185,6 @@ commit;
 -- ── 새 테이블을 만들 때 ─────────────────────────────────────────────────
 -- Supabase 는 새 테이블에 anon 쓰기 grant 를 기본으로 붙인다. 즉 이 정리는
 -- 한 번 하고 끝나지 않는다. 새 테이블마다 같은 판단(anon 쓰기가 필요한가?)을
--- 하고, 필요 없으면 위와 같이 회수할 것. 주간 감사에 편입하는 것도 방법이다.
+-- 하고, 필요 없으면 위와 같이 회수할 것.
+-- ✅ 2026-09-06 주간 감사 편입 완료 — site-audit ⑨ (scripts/audit-anon-write-grants.mjs +
+--    RPC public.mhj_audit_anon_write_grants(), 허용 목록 scripts/qa/anon-write-allowlist.json).
