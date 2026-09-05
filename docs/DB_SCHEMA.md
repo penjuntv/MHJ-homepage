@@ -267,14 +267,16 @@ DB 가 아니라 repo `scripts/qa/anon-write-allowlist.json` 이 **(테이블, �
   적용되지 않으므로 "RLS 가 막아준다"는 한 겹 방어로 보지 않는다.
   이 두 테이블도 anon 은 **INSERT 만** 보유한다 (2026-09-06 나머지 5종 회수,
   `docs/sql/anon_comments_reactions_insert_only.sql`). 허용 목록도 `["INSERT"]`.
-- **Supabase 는 새 테이블마다 anon 쓰기 grant 를 기본으로 붙인다.** 테이블을 만들면 바로
-  `revoke insert, update, delete, truncate, references, trigger on table public.<t> from anon;` 을 같은 마이그레이션에 넣을 것.
-  빠뜨리면 주간 site-audit ⑨ 가 다음 일요일에 잡는다(최대 7일 노출 — 아래 근본 원인 참조).
-- **근본 원인은 default privileges 다** (`alter default privileges for role postgres in schema public grant ... to anon`).
-  `alter default privileges for role postgres in schema public revoke insert, update, delete, truncate, references, trigger
-  on tables from anon;` 을 걸면 새 테이블이 처음부터 안전하게 태어나 ⑨ 는 두 번째 방어선이 된다.
-  **아직 적용하지 않았다** — 이 프로젝트는 YuStudy 와 공유돼 YuStudy 의 새 테이블에도 적용되기 때문(방향은
-  fail-closed: 조용한 노출이 아니라 개발 시점 42501 로 드러난다). 두 앱 소유자가 함께 결정할 사항 — §2 승인 대기 항목.
+- ~~Supabase 는 새 테이블마다 anon 쓰기 grant 를 기본으로 붙인다~~ → 2026-09-06 이후 postgres 가 만드는 새 테이블에는
+  anon 쓰기 grant 가 **붙지 않는다**(아래 근본 원인 참조). 그래도 새 테이블 마이그레이션에는 `enable row level security` 와
+  필요한 정책을 반드시 넣을 것. anon 쓰기 grant 가 어떤 경로로든 생기면 주간 site-audit ⑨ 가 다음 일요일에 잡는다.
+- **근본 원인(default privileges)은 2026-09-06 에 끊었다** — `alter default privileges for role postgres in schema public
+  revoke insert, update, delete, truncate, references, trigger on tables from anon;` 적용
+  (`docs/sql/anon_default_privileges_revoke.sql`). 실증: 새 테이블에 anon 은 **SELECT 만** 붙는다(적용 전 7권한).
+  authenticated·service_role·기존 테이블 불변. YuStudy 의 새 테이블에도 적용된다 — anon 쓰기가 필요하면 명시 grant
+  + 허용 목록(방향은 fail-closed: 개발 시점 42501 로 드러난다). ⑨ 는 두 번째 방어선.
+  잔여: `supabase_admin` grantor 의 기본 grant 는 postgres 권한으로 못 바꾼다(통상 public 에 테이블을 만들지 않음,
+  생기면 ⑨ 가 잡는다). **새 테이블의 RLS 는 여전히 기본 꺼짐 + anon SELECT 기본 grant** → `enable row level security` 는 계속 필수.
 - **⑨ 가 보지 않는 것** (후속 과제, `docs/handoff-2026-09-04.md` §3): ① 새 테이블의 anon **SELECT** + RLS 미활성
   (plain `create table` 은 RLS 가 꺼져 있고 anon SELECT 가 기본 grant 다 — 쓰기보다 더 넓은 유출면),
   ② 함수 EXECUTE 기본 grant(2026-08-24 실사고 패턴), ③ 시퀀스 USAGE.

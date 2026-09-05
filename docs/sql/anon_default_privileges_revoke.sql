@@ -1,0 +1,54 @@
+-- ✅ 적용 완료 — 2026-09-06 (사용자 승인 후, Supabase MCP apply_migration:
+--    revoke_anon_default_write_privileges_public_tables). 다시 실행할 필요 없다.
+--
+-- 목적: "Supabase 는 새 테이블마다 anon 쓰기 grant 를 기본으로 붙인다"의 **근본 원인** 처리.
+--       그 기본값은 Postgres DEFAULT PRIVILEGES 다 — postgres 롤이 public 스키마에 만드는
+--       테이블에 anon=arwdDxtm 이 자동 부여되도록 pg_default_acl 에 등록돼 있었다.
+--       이 항목에서 anon 의 쓰기 6종(INSERT·UPDATE·DELETE·TRUNCATE·REFERENCES·TRIGGER)을 뺀다.
+--       SELECT 는 유지(공개 읽기 모델 불변) · authenticated · service_role 불변 · 기존 테이블 무영향
+--       (default privileges 는 앞으로 만들 객체에만 적용된다).
+--       주간 site-audit ⑨ (scripts/audit-anon-write-grants.mjs)는 두 번째 방어선으로 유지.
+--
+-- ═══ 적용 전 실측 (2026-09-06) ═══════════════════════════════════════════
+--   pg_default_acl (schema public, tables) — grantor 2개:
+--     postgres        : postgres=arwdDxtm | anon=arwdDxtm | authenticated=arwdDxtm | service_role=arwdDxtm
+--     supabase_admin  : (동일 — anon=arwdDxtm)
+--   실행 롤: postgres (rolsuper=false, supabase_admin 멤버 아님)
+--   양성 대조군 — `create table public._mhj_defpriv_probe_before(id int)` 직후:
+--     anon          = DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE   ← 7종 전부
+--     authenticated = (동일 7종)   rls_enabled = false
+--   (프로브 테이블은 같은 문장에서 drop)
+--
+-- ═══ 적용 ═══════════════════════════════════════════════════════════════
+alter default privileges for role postgres in schema public
+  revoke insert, update, delete, truncate, references, trigger on tables from anon;
+
+-- supabase_admin grantor 분도 시도했으나 불가 — postgres 는 supabase_admin 멤버가 아니다:
+--   alter default privileges for role supabase_admin in schema public revoke ... from anon;
+--   → ERROR 42501: permission denied to change default privileges
+--   supabase_admin 이 public 에 테이블을 만드는 경로는 통상 없다(마이그레이션·SQL Editor·CLI 는
+--   전부 postgres). 그래도 생기면 anon 쓰기 grant 가 붙는다 → 주간 ⑨ 가 잡는다(잔여 위험).
+--
+-- ═══ 적용 후 실측 (2026-09-06, 전부 통과) ═══════════════════════════════
+--   pg_default_acl postgres/public/tables: anon=rm  (r=SELECT, m=MAINTAIN)   ← 쓰기 6종 제거 ✅
+--   실증 — `create table public._mhj_defpriv_probe_after(id int)` 직후:
+--     anon          = SELECT                                          ← 7종 → 1종 ✅
+--     authenticated = DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE (불변) ✅
+--     service_role  = (동일 7종, 불변) ✅
+--     rls_enabled   = false  (변경 대상 아님 — 아래 잔여 참조)
+--     mhj_audit_anon_write_grants() 가 프로브를 위반으로 보지 않음 (anon 쓰기 없음) ✅
+--   기존 테이블 무영향: audit-anon-write-grants.mjs exit 0 (보유 2 / 허용 2) ✅
+--   라이브 / /magazine /blog /feed.xml 200 ✅ · 프로브 테이블 2개 REST 404 (drop 확인) ✅
+--
+-- ═══ 이 변경이 다루지 않는 것 (잔여, docs/handoff-2026-09-04.md §3) ══════
+--   · anon SELECT 기본 grant + 새 테이블 RLS 미활성 → 새 테이블은 여전히 anon 이 읽을 수 있다.
+--     `create table` 뒤 `enable row level security` 는 계속 필수. ⑨ 확장(SELECT+RLS 검출) 예정.
+--   · anon 의 MAINTAIN(m, PG17) 기본 grant — 쓰기 권한이 아니라 승인 범위 밖. PostgREST 로는
+--     노출되지 않는 명령(VACUUM/ANALYZE/LOCK 등)이라 위험도 낮음. 기록만.
+--   · 시퀀스(anon=rwU)·함수(anon=X) 기본 grant — 별건.
+--   · supabase_admin grantor 분 (위 참조).
+--
+-- ── 롤백 ────────────────────────────────────────────────────────────────
+-- alter default privileges for role postgres in schema public
+--   grant insert, update, delete, truncate, references, trigger on tables to anon;
+-- (기존 테이블 권한은 이 변경과 무관하므로 롤백해도 그대로다.)
