@@ -1,4 +1,8 @@
--- ⛔ 미적용 — 실행하려면 사용자 승인이 필요하다. (작성: 2026-09-05)
+-- ✅ 적용 완료 — 2026-09-05 (사용자 승인 후). 다시 실행할 필요 없다.
+--    migration: revoke_anon_write_grants_schema_sweep
+--    아래 revoke 62건 + "유물 정책 정리"(파일 끝)까지 함께 적용했다.
+--    적용 후 실측: anon 쓰기 grant 보유 대상이 comments · article_reactions **2개만** 남음.
+--    이 파일은 이제 "무엇을 왜 회수했는지"의 기록이고, 롤백 절차의 참고본이다.
 --
 -- 목적: `blogs` 에 이어(→ `anon_blogs_revoke_write.sql`) 나머지 공개 스키마 전체에서
 --       anon 롤의 쓰기 권한을 회수한다. **SELECT 는 아무것도 건드리지 않는다.**
@@ -40,21 +44,32 @@
 -- subscribers 는 `app/api/{subscribe,unsubscribe,send-newsletter,
 -- process-welcome-sequence}/route.ts` 가 모두 `createAdminClient()`. 공개 페이지는
 -- 읽기만 한다. 그래서 회수 대상에 넣었다 — 정책은 **유물(vestigial)** 이다.
---   ⚠️ 회수 후 두 테이블은 "정책은 허용하는데 권한이 없는" 상태가 된다. 동작은
---      fail-closed 로 안전하지만 다음 사람이 헷갈린다. 회수한다면 유물 정책
---      (`page_events` · `subscribers` 의 anon INSERT 정책)도 함께 정리하는 편이 낫다.
---      단, 그건 별도 판단이라 이 파일에는 넣지 않았다.
---   ⚠️ 반대로 나중에 "구독 폼을 서버 라우트 없이 브라우저에서 직접 insert" 하도록
---      바꾸면 이 회수 때문에 조용히 깨진다. 그때는 grant 를 되돌릴 것.
+--   ✅ 유물 정책도 함께 정리했다 (파일 끝 참조).
+--   ⚠️ 나중에 "구독 폼을 서버 라우트 없이 브라우저에서 직접 insert" 하도록 바꾸면
+--      이 회수 때문에 조용히 깨진다. 그때는 grant 와 정책을 되돌릴 것.
 --
--- ═══ 적용 후 검증 (반드시) ═════════════════════════════════════════════
---   1) 재실측: 아래 "검증 쿼리" 로 anon 쓰기 grant 보유 대상이 comments ·
---      article_reactions **2개만** 남는지 확인.
---   2) 대조군: anon 키로 `PATCH /rest/v1/<대상>?id=eq.-1` → 204 에서
---      401 permission denied 로 바뀌는지 확인(권한이 실제로 문다는 증거).
---   3) 무영향: 라이브 `/` `/blog` `/magazine` `/gallery` `/feed.xml` 200 +
---      매거진 리액션 누르기(article_reactions) + 댓글 작성(comments) 실동작.
---   4) `node scripts/audit-endpoints.mjs` · `audit-name-exposure.mjs`.
+-- ═══ 적용 후 검증 결과 (2026-09-05, 전부 통과) ═════════════════════════
+--   1) 재실측 — anon 쓰기 grant 보유: `comments` · `article_reactions` **2개만** ✅
+--   2) 대조군 — anon 키 `PATCH ?<pk>=is.null` 에 **실제 컬럼**을 담아 요청:
+--        gallery · magazines · site_settings · family_members · hero_slides ·
+--        page_events · subscribers → **401 42501 permission denied** ✅
+--        comments · article_reactions → **204** (양성 대조군: 같은 프로브·같은 시각에
+--        grant 가 남은 대상은 204 → 401 이 회수 때문임이 확정된다) ✅
+--      ⚠️ 이 프로브의 함정: payload 를 `{}` 로 보내면 PostgREST 가 갱신할 컬럼이 없어
+--         **DB 를 치지 않고 204** 를 돌려준다. 실제로 처음에 이 위음성에 걸려
+--         "회수했는데 204" 로 보였다. 반드시 **실존 컬럼을 담아** 보낼 것.
+--      ⚠️ `site_settings` 의 PK 는 `id` 가 아니라 `key` 다 — 필터를 틀리면
+--         42703(column does not exist)가 나와 권한 판정이 안 된다.
+--   3) 회수 제외 2종의 쓰기 경로가 살아 있는지 (비파괴 — FK 위반 보증):
+--        `POST /rest/v1/article_reactions` {article_id:-987654321} → **409 23503 FK 위반**
+--        `POST /rest/v1/comments` {blog_id:-987654321, name, email, content} → **409 23503**
+--        → 권한·RLS 를 통과하고 FK 에서만 막혔다 = anon insert 경로 정상 ✅
+--   4) 무영향 — 라이브 `/` `/about` `/magazine` `/gallery` 를 `/api/revalidate` 로
+--      강제 갱신 후 재요청: 전부 200 · `x-vercel-cache: REVALIDATED`(= 회수 이후의
+--      새 렌더). 갤러리 이미지 334 · 매거진 9호 · 홈 이미지 26 · about 3자매 표기 정상.
+--      `/blog` `/feed.xml` `/sitemap.xml` `/llms.txt` `/api/search` 200 ✅
+--      (`/welcome` 은 404 지만 커밋 7e8f295 에서 삭제된 페이지로, 이 변경과 무관하다.)
+--   5) `audit-endpoints.mjs` ✅ · `audit-name-exposure.mjs`(DB 7테이블 + 라이브 140 URL) ✅ 0건
 --
 -- 적용: Supabase MCP apply_migration 또는 SQL Editor.
 begin;
@@ -134,8 +149,25 @@ commit;
 --    and privilege_type in ('INSERT','UPDATE','DELETE')
 --  order by table_name;
 
+-- ── 유물 정책 정리 (함께 적용됨) ────────────────────────────────────────
+-- 권한을 회수했으므로 "정책은 허용하는데 권한이 없는" 혼란을 남기지 않는다.
+--
+-- ⚠️ page_events 의 정책은 `{anon,authenticated}` **양쪽**에 걸려 있었다 —
+--    통째로 drop 하면 authenticated 경로까지 사라진다. 그래서 drop 대신
+--    anon 만 떼어냈다. (정책 이름에 공백이 있어 큰따옴표 필수.)
+alter policy "page_events insert (public)" on public.page_events to authenticated;
+
+-- subscribers 의 것은 anon 전용이라 drop 이 정확하다
+-- (authenticated 는 `authenticated_all_subscribers` 가 별도로 커버한다).
+drop policy "anon_insert_subscribers" on public.subscribers;
+
 -- ── 롤백 ────────────────────────────────────────────────────────────────
--- 위 목록의 `revoke` 를 `grant` 로, `from anon` 을 `to anon` 으로 바꿔 실행.
+-- ① 권한: 위 목록의 `revoke` 를 `grant` 로, `from anon` 을 `to anon` 으로.
+-- ② 정책:
+--    alter policy "page_events insert (public)" on public.page_events
+--      to anon, authenticated;
+--    create policy "anon_insert_subscribers" on public.subscribers
+--      for insert to anon with check (true);
 -- ⚠️ 되돌리면 스키마 전체가 다시 RLS 한 겹 의존으로 돌아간다.
 --
 -- ── 새 테이블을 만들 때 ─────────────────────────────────────────────────
