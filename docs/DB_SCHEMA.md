@@ -249,6 +249,26 @@
 > 공유 프로젝트라 `authenticated` 에는 YuStudy 사용자도 포함된다 → 리포트 RPC 는
 > grant 가 아니라 **함수 내부에서**(`mhj_is_admin()`) 가린다.
 
+### 감사 RPC (`security definer`, **service_role 만** execute)
+| 함수 | 인자 | 반환 | 용도 |
+|------|------|------|------|
+| `mhj_audit_anon_write_grants` | — | table_name, relkind, privilege_type — anon 이 보유한 쓰기 권한 6종 전부 | 주간 site-audit ⑨ (`scripts/audit-anon-write-grants.mjs`). 정의 `docs/migrations/2026-09-06_mhj_audit_anon_write_grants.sql` |
+
+anon·authenticated 는 execute 없음(2026-09-06 REST 프로브: anon 키 401 42501). 판정(허용 목록)은
+DB 가 아니라 repo `scripts/qa/anon-write-allowlist.json` 이 한다.
+
+---
+
+## anon 롤 권한 원칙 (2026-09-05 확립)
+
+- **쓰기 grant 는 화이트리스트** — `comments`·`article_reactions` 만 anon 쓰기(실제 anon 클라이언트 insert 경로 있음).
+  나머지 public 스키마 전부 회수 완료(`docs/sql/anon_write_grant_sweep.sql`). RLS 는 TRUNCATE 에 적용되지
+  않으므로 "RLS 가 막아준다"는 한 겹 방어로 보지 않는다.
+- **Supabase 는 새 테이블마다 anon 쓰기 grant 를 기본으로 붙인다.** 테이블을 만들면 바로
+  `revoke insert, update, delete, truncate, references, trigger on table public.<t> from anon;` 을 같은 마이그레이션에 넣을 것.
+  빠뜨리면 주간 site-audit ⑨ 가 다음 일요일에 잡는다.
+- `blogs` 의 anon SELECT 는 컬럼 화이트리스트(36컬럼, `docs/sql/anon_blogs_column_whitelist_grant.sql`) — 새 공개 컬럼은 grant 도 추가.
+
 ---
 
 ## 비고

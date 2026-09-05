@@ -1,0 +1,18 @@
+{
+  "_comment": [
+    "anon 롤의 쓰기 권한(INSERT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER)을 의도적으로 남긴 테이블.",
+    "여기 없는 테이블에 anon 쓰기 grant 가 생기면 scripts/audit-anon-write-grants.mjs 가 실패한다.",
+    "추가할 때는 '실제로 anon 클라이언트가 쓰는 코드 경로'를 reason 에 적을 것 — 근거 없는 추가 금지.",
+    "권한 회수 기록·판정 근거: docs/sql/anon_write_grant_sweep.sql"
+  ],
+  "tables": {
+    "comments": {
+      "reason": "app/api/comments/route.ts 가 anon 클라이언트(lib/supabase.ts 의 supabase)로 insert. RLS anon INSERT 정책이 의도된 것.",
+      "since": "2026-09-05"
+    },
+    "article_reactions": {
+      "reason": "components/MagazineViewer.tsx 가 브라우저(anon 키, lib/supabase-browser.ts)에서 insert. 공개 매거진 페이지에 실림.",
+      "since": "2026-09-05"
+    }
+  }
+}
