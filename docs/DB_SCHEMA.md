@@ -221,7 +221,8 @@
 
 인덱스: `created_at desc` · `source` · `blog_slug` · `(event_type, created_at desc)`
 
-**RLS**: 활성화. insert 는 anon·authenticated 허용(공개 페이지 수집), **select 정책 없음** →
+**RLS**: 활성화. insert 정책은 **authenticated 만**(2026-09-05 anon 회수 — 실제 수집은 `app/api/track` 이
+service_role 로 쓴다, `docs/sql/anon_write_grant_sweep.sql`), **select 정책 없음** →
 원본 행은 service_role 로만 조회 가능. 리포트는 아래 집계 RPC 를 경유한다.
 
 ### 집계 RPC (모두 `security definer`, `authenticated` 만 execute)
@@ -252,21 +253,34 @@
 ### 감사 RPC (`security definer`, **service_role 만** execute)
 | 함수 | 인자 | 반환 | 용도 |
 |------|------|------|------|
-| `mhj_audit_anon_write_grants` | — | table_name, relkind, privilege_type — anon 이 보유한 쓰기 권한 6종 전부 | 주간 site-audit ⑨ (`scripts/audit-anon-write-grants.mjs`). 정의 `docs/migrations/2026-09-06_mhj_audit_anon_write_grants.sql` |
+| `mhj_audit_anon_write_grants` | — | table_name, relkind, privileges text[] — anon 이 쓰기 권한(6종 중)을 하나라도 가진 테이블당 1행 | 주간 site-audit ⑨ (`scripts/audit-anon-write-grants.mjs`). 정의 `docs/migrations/2026-09-06_mhj_audit_anon_write_grants.sql` · 마이그레이션 `mhj_audit_anon_write_grants_rpc`(v1) → `mhj_audit_anon_write_grants_rpc_v2`(현재) |
 
 anon·authenticated 는 execute 없음(2026-09-06 REST 프로브: anon 키 401 42501). 판정(허용 목록)은
-DB 가 아니라 repo `scripts/qa/anon-write-allowlist.json` 이 한다.
+DB 가 아니라 repo `scripts/qa/anon-write-allowlist.json` 이 **(테이블, 권한) 단위**로 한다.
 
 ---
 
 ## anon 롤 권한 원칙 (2026-09-05 확립)
 
-- **쓰기 grant 는 화이트리스트** — `comments`·`article_reactions` 만 anon 쓰기(실제 anon 클라이언트 insert 경로 있음).
-  나머지 public 스키마 전부 회수 완료(`docs/sql/anon_write_grant_sweep.sql`). RLS 는 TRUNCATE 에 적용되지
-  않으므로 "RLS 가 막아준다"는 한 겹 방어로 보지 않는다.
+- **쓰기 grant 는 (테이블, 권한) 화이트리스트** — `comments`·`article_reactions` 만 anon 쓰기(실제 anon 클라이언트
+  insert 경로 있음). 나머지 public 스키마 전부 회수 완료(`docs/sql/anon_write_grant_sweep.sql`). RLS 는 TRUNCATE 에
+  적용되지 않으므로 "RLS 가 막아준다"는 한 겹 방어로 보지 않는다.
+  ⚠️ 이 두 테이블은 코드가 INSERT 만 쓰는데 anon 에 6권한이 다 남아 있다 — 5종 축소는 **사용자 승인 대기**
+  (`docs/handoff-2026-09-04.md` §2). 승인되면 `revoke update, delete, truncate, references, trigger on table
+  public.comments, public.article_reactions from anon;` 후 허용 목록을 `["INSERT"]` 로.
 - **Supabase 는 새 테이블마다 anon 쓰기 grant 를 기본으로 붙인다.** 테이블을 만들면 바로
   `revoke insert, update, delete, truncate, references, trigger on table public.<t> from anon;` 을 같은 마이그레이션에 넣을 것.
-  빠뜨리면 주간 site-audit ⑨ 가 다음 일요일에 잡는다.
+  빠뜨리면 주간 site-audit ⑨ 가 다음 일요일에 잡는다(최대 7일 노출 — 아래 근본 원인 참조).
+- **근본 원인은 default privileges 다** (`alter default privileges for role postgres in schema public grant ... to anon`).
+  `alter default privileges for role postgres in schema public revoke insert, update, delete, truncate, references, trigger
+  on tables from anon;` 을 걸면 새 테이블이 처음부터 안전하게 태어나 ⑨ 는 두 번째 방어선이 된다.
+  **아직 적용하지 않았다** — 이 프로젝트는 YuStudy 와 공유돼 YuStudy 의 새 테이블에도 적용되기 때문(방향은
+  fail-closed: 조용한 노출이 아니라 개발 시점 42501 로 드러난다). 두 앱 소유자가 함께 결정할 사항 — §2 승인 대기 항목.
+- **⑨ 가 보지 않는 것** (후속 과제, `docs/handoff-2026-09-04.md` §3): ① 새 테이블의 anon **SELECT** + RLS 미활성
+  (plain `create table` 은 RLS 가 꺼져 있고 anon SELECT 가 기본 grant 다 — 쓰기보다 더 넓은 유출면),
+  ② 함수 EXECUTE 기본 grant(2026-08-24 실사고 패턴), ③ 시퀀스 USAGE.
+- **공유 프로젝트 경계**: ⑨ 가 잡은 테이블이 YuStudy 것이면 MHJ 쪽에서 임의로 회수하거나 허용하지 말고
+  소유자에게 확인 후 처리. 허용 목록 근거(코드 경로)는 MHJ repo 안에서 검증 가능한 것만 적는다.
 - `blogs` 의 anon SELECT 는 컬럼 화이트리스트(36컬럼, `docs/sql/anon_blogs_column_whitelist_grant.sql`) — 새 공개 컬럼은 grant 도 추가.
 
 ---
