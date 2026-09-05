@@ -265,9 +265,8 @@ DB 가 아니라 repo `scripts/qa/anon-write-allowlist.json` 이 **(테이블, �
 - **쓰기 grant 는 (테이블, 권한) 화이트리스트** — `comments`·`article_reactions` 만 anon 쓰기(실제 anon 클라이언트
   insert 경로 있음). 나머지 public 스키마 전부 회수 완료(`docs/sql/anon_write_grant_sweep.sql`). RLS 는 TRUNCATE 에
   적용되지 않으므로 "RLS 가 막아준다"는 한 겹 방어로 보지 않는다.
-  ⚠️ 이 두 테이블은 코드가 INSERT 만 쓰는데 anon 에 6권한이 다 남아 있다 — 5종 축소는 **사용자 승인 대기**
-  (`docs/handoff-2026-09-04.md` §2). 승인되면 `revoke update, delete, truncate, references, trigger on table
-  public.comments, public.article_reactions from anon;` 후 허용 목록을 `["INSERT"]` 로.
+  이 두 테이블도 anon 은 **INSERT 만** 보유한다 (2026-09-06 나머지 5종 회수,
+  `docs/sql/anon_comments_reactions_insert_only.sql`). 허용 목록도 `["INSERT"]`.
 - **Supabase 는 새 테이블마다 anon 쓰기 grant 를 기본으로 붙인다.** 테이블을 만들면 바로
   `revoke insert, update, delete, truncate, references, trigger on table public.<t> from anon;` 을 같은 마이그레이션에 넣을 것.
   빠뜨리면 주간 site-audit ⑨ 가 다음 일요일에 잡는다(최대 7일 노출 — 아래 근본 원인 참조).

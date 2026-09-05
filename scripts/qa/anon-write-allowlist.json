@@ -6,19 +6,17 @@
     "절차: (1) 새 테이블에 anon 쓰기가 필요 없으면 → revoke insert, update, delete, truncate, references, trigger on table public.<t> from anon;",
     "      (2) 실제 anon 클라이언트(lib/supabase.ts 의 supabase · lib/supabase-browser.ts)가 쓰는 코드 경로가 있으면 → 그 경로와 필요한 권한만 여기 추가.",
     "      근거 없는 추가 금지. 이 Supabase 프로젝트는 YuStudy 와 공유된다 — YuStudy 테이블이 잡히면 소유자에게 확인 후 (1) 또는 (2).",
-    "허용 가능한 권한: INSERT UPDATE DELETE TRUNCATE REFERENCES TRIGGER. 회수 기록: docs/sql/anon_write_grant_sweep.sql"
+    "허용 가능한 권한: INSERT UPDATE DELETE TRUNCATE REFERENCES TRIGGER. 회수 기록: docs/sql/anon_write_grant_sweep.sql · docs/sql/anon_comments_reactions_insert_only.sql"
   ],
   "tables": {
     "comments": {
-      "privileges": ["DELETE", "INSERT", "REFERENCES", "TRIGGER", "TRUNCATE", "UPDATE"],
-      "reason": "app/api/comments/route.ts:82 가 anon 클라이언트(lib/supabase.ts 의 supabase)로 insert. RLS anon INSERT 정책이 의도된 것.",
-      "pending": "코드가 쓰는 권한은 INSERT 만이다. 나머지 5종(특히 RLS 미적용 TRUNCATE)은 회수 대상 — 라이브 권한 변경이라 사용자 승인 대기 (docs/handoff-2026-09-04.md §2). 승인 후 이 배열을 [\"INSERT\"] 로 줄일 것.",
+      "privileges": ["INSERT"],
+      "reason": "app/api/comments/route.ts:82 가 anon 클라이언트(lib/supabase.ts 의 supabase)로 insert. RLS anon INSERT 정책(anon_insert_comments)이 의도된 것. 나머지 5종은 2026-09-06 회수.",
       "since": "2026-09-05"
     },
     "article_reactions": {
-      "privileges": ["DELETE", "INSERT", "REFERENCES", "TRIGGER", "TRUNCATE", "UPDATE"],
-      "reason": "components/MagazineViewer.tsx:127,613 이 브라우저(anon 키, lib/supabase-browser.ts)에서 insert. 공개 매거진 페이지에 실림.",
-      "pending": "코드가 쓰는 권한은 INSERT 만이다. 나머지 5종 회수는 사용자 승인 대기 — 위와 동일. 승인 후 [\"INSERT\"] 로 줄일 것.",
+      "privileges": ["INSERT"],
+      "reason": "components/MagazineViewer.tsx:127,613 이 브라우저(anon 키, lib/supabase-browser.ts)에서 insert. 공개 매거진 페이지에 실림. RLS anon INSERT 정책(anon_insert_reactions). 나머지 5종은 2026-09-06 회수.",
       "since": "2026-09-05"
     }
   }
