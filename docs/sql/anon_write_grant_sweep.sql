@@ -1,6 +1,8 @@
 -- ✅ 적용 완료 — 2026-09-05 (사용자 승인 후). 다시 실행할 필요 없다.
 --    migration: revoke_anon_write_grants_schema_sweep
---    아래 revoke 62건 + "유물 정책 정리"(파일 끝)까지 함께 적용했다.
+--    revoke 62건 + 유물 정책 정리 2건을 **하나의 트랜잭션**(begin~commit)으로 적용했다.
+--    ⚠️ 재현할 때 begin~commit 을 통째로 실행할 것 — 정책 정리는 revoke 목록 뒤,
+--       commit 앞에 있다. revoke 만 떼어 실행하면 최종 상태가 달라진다.
 --    적용 후 실측: anon 쓰기 grant 보유 대상이 comments · article_reactions **2개만** 남음.
 --    이 파일은 이제 "무엇을 왜 회수했는지"의 기록이고, 롤백 절차의 참고본이다.
 --
@@ -140,26 +142,36 @@ revoke insert, update, delete, truncate, references, trigger on table public.wor
 revoke insert, update, delete, truncate, references, trigger on table public.math_curriculum_coverage from anon;
 revoke insert, update, delete, truncate, references, trigger on table public.math_curriculum_mapping_audit from anon;
 
-commit;
-
--- ── 검증 쿼리 (적용 후 실행 — comments · article_reactions 2행만 나와야 한다) ──
--- select distinct table_name
---   from information_schema.table_privileges
---  where table_schema='public' and grantee='anon'
---    and privilege_type in ('INSERT','UPDATE','DELETE')
---  order by table_name;
-
--- ── 유물 정책 정리 (함께 적용됨) ────────────────────────────────────────
+-- ── 유물 정책 정리 (같은 트랜잭션 안에서 함께 적용됨) ───────────────────
 -- 권한을 회수했으므로 "정책은 허용하는데 권한이 없는" 혼란을 남기지 않는다.
 --
 -- ⚠️ page_events 의 정책은 `{anon,authenticated}` **양쪽**에 걸려 있었다 —
 --    통째로 drop 하면 authenticated 경로까지 사라진다. 그래서 drop 대신
 --    anon 만 떼어냈다. (정책 이름에 공백이 있어 큰따옴표 필수.)
+--    `alter policy ... to <roles>` 는 롤 목록만 바꾸고 WITH CHECK 는 보존한다 —
+--    적용 후 실측으로 `check_expr = true` 가 그대로임을 확인했다.
 alter policy "page_events insert (public)" on public.page_events to authenticated;
 
 -- subscribers 의 것은 anon 전용이라 drop 이 정확하다
 -- (authenticated 는 `authenticated_all_subscribers` 가 별도로 커버한다).
 drop policy "anon_insert_subscribers" on public.subscribers;
+
+commit;
+
+-- ── 검증 쿼리 (적용 후 실행 — comments · article_reactions 2행만 나와야 한다) ──
+-- ⚠️ 권한 6종을 **전부** 봐야 한다. INSERT/UPDATE/DELETE 만 세면 TRUNCATE 가
+--    빠지는데, TRUNCATE 야말로 RLS 가 적용되지 않아 이 작업의 핵심이었다.
+-- select distinct table_name
+--   from information_schema.table_privileges
+--  where table_schema='public' and grantee='anon'
+--    and privilege_type in ('INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER')
+--    and table_name not in ('comments','article_reactions')
+--  order by table_name;   -- 0행이면 정상
+--
+-- 정책 쪽 검증 (page_events 는 {authenticated} 만, subscribers 는 anon 정책 없음):
+-- select tablename, policyname, cmd, roles::text, with_check
+--   from pg_policies
+--  where schemaname='public' and tablename in ('page_events','subscribers');
 
 -- ── 롤백 ────────────────────────────────────────────────────────────────
 -- ① 권한: 위 목록의 `revoke` 를 `grant` 로, `from anon` 을 `to anon` 으로.
