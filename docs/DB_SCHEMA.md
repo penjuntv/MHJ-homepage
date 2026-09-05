@@ -254,6 +254,7 @@ service_role 로 쓴다, `docs/sql/anon_write_grant_sweep.sql`), **select 정책
 | 함수 | 인자 | 반환 | 용도 |
 |------|------|------|------|
 | `mhj_audit_anon_write_grants` | — | table_name, relkind, privileges text[] — anon 이 쓰기 권한(6종 중)을 하나라도 가진 테이블당 1행 | 주간 site-audit ⑨ (`scripts/audit-anon-write-grants.mjs`). 정의 `docs/migrations/2026-09-06_mhj_audit_anon_write_grants.sql` · 마이그레이션 `mhj_audit_anon_write_grants_rpc`(v1) → `mhj_audit_anon_write_grants_rpc_v2`(현재) |
+| `mhj_audit_anon_read_exposure` | — | table_name, relkind, reason(`rls_disabled` \| `view_without_security_invoker`) — anon SELECT 가 있는데 행 단위 보호가 없는 릴레이션 | 주간 site-audit ⑩ (`scripts/audit-anon-read-exposure.mjs`). 정의 `docs/migrations/2026-09-06_mhj_audit_anon_read_exposure.sql` · 마이그레이션 `mhj_audit_anon_read_exposure_rpc`. 허용 목록 `scripts/qa/anon-read-exposure-allowlist.json` |
 
 anon·authenticated 는 execute 없음(2026-09-06 REST 프로브: anon 키 401 42501). 판정(허용 목록)은
 DB 가 아니라 repo `scripts/qa/anon-write-allowlist.json` 이 **(테이블, 권한) 단위**로 한다.
@@ -277,9 +278,11 @@ DB 가 아니라 repo `scripts/qa/anon-write-allowlist.json` 이 **(테이블, �
   + 허용 목록(방향은 fail-closed: 개발 시점 42501 로 드러난다). ⑨ 는 두 번째 방어선.
   잔여: `supabase_admin` grantor 의 기본 grant 는 postgres 권한으로 못 바꾼다(통상 public 에 테이블을 만들지 않음,
   생기면 ⑨ 가 잡는다). **새 테이블의 RLS 는 여전히 기본 꺼짐 + anon SELECT 기본 grant** → `enable row level security` 는 계속 필수.
-- **⑨ 가 보지 않는 것** (후속 과제, `docs/handoff-2026-09-04.md` §3): ① 새 테이블의 anon **SELECT** + RLS 미활성
-  (plain `create table` 은 RLS 가 꺼져 있고 anon SELECT 가 기본 grant 다 — 쓰기보다 더 넓은 유출면),
-  ② 함수 EXECUTE 기본 grant(2026-08-24 실사고 패턴), ③ 시퀀스 USAGE.
+- **⑩ anon 읽기 노출** (2026-09-06 추가): 새 테이블의 anon **SELECT** + RLS 미활성(plain `create table` 은 RLS 가
+  꺼져 있고 anon SELECT 가 기본 grant 다 — 쓰기보다 더 넓은 유출면)과 `security_invoker` 없는 뷰를 매주 검출한다.
+  2026-09-06 기준선은 테이블 63개 전부 RLS 켜짐. **새 테이블 마이그레이션에는 `enable row level security` 필수.**
+  RLS 가 켜진 테이블의 `using (true)` 공개 읽기 정책은 의도된 것으로 보고 대상에서 뺀다.
+- **⑨·⑩ 이 보지 않는 것** (후속, `docs/handoff-2026-09-04.md` §3): 함수 EXECUTE 기본 grant(2026-08-24 실사고 패턴), 시퀀스 USAGE.
 - **공유 프로젝트 경계**: ⑨ 가 잡은 테이블이 YuStudy 것이면 MHJ 쪽에서 임의로 회수하거나 허용하지 말고
   소유자에게 확인 후 처리. 허용 목록 근거(코드 경로)는 MHJ repo 안에서 검증 가능한 것만 적는다.
 - `blogs` 의 anon SELECT 는 컬럼 화이트리스트(36컬럼, `docs/sql/anon_blogs_column_whitelist_grant.sql`) — 새 공개 컬럼은 grant 도 추가.
