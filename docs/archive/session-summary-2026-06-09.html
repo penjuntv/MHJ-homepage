@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MHJ 작업 요약 — 2026.06.09</title>
+<style>
+  :root{
+    --brown:#8A6B4F; --ink:#1a1a1a; --sub:#5b5650; --tertiary:#9b948b;
+    --line:#e7e2da; --warm:#f5f1ea; --bg:#fbfaf8; --green:#3f9d6d; --amber:#c98a2b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:64px 24px 120px;}
+  .serif{font-family:"Playfair Display",Georgia,serif;}
+  .kicker{font-size:11px; font-weight:900; letter-spacing:4px; text-transform:uppercase; color:var(--tertiary);}
+
+  header.hero{margin-bottom:64px; border-bottom:2px solid var(--ink); padding-bottom:40px;}
+  header.hero .logo{font-family:Georgia,serif; font-size:34px; letter-spacing:2px; color:var(--brown); font-weight:700;}
+  header.hero .logo small{display:block; font-size:10px; letter-spacing:5px; text-transform:uppercase; color:var(--tertiary); margin-top:2px;}
+  header.hero h1{font-family:Georgia,serif; font-style:italic; font-size:clamp(30px,5vw,46px); line-height:1.1; margin:28px 0 12px; letter-spacing:-1px;}
+  header.hero p{color:var(--sub); font-size:16px; max-width:560px;}
+  .date-badge{display:inline-block; margin-top:18px; font-size:12px; font-weight:700; letter-spacing:1px; color:var(--brown); background:var(--warm); padding:6px 14px; border-radius:999px;}
+
+  h2.section{font-size:13px; font-weight:900; letter-spacing:3px; text-transform:uppercase; color:var(--brown); margin:72px 0 28px; padding-bottom:10px; border-bottom:1px solid var(--line);}
+
+  .card{border:1px solid var(--line); border-radius:14px; background:#fff; padding:28px 28px 26px; margin-bottom:20px;}
+  .card .tag-line{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .pill{font-size:10px; font-weight:900; letter-spacing:2px; text-transform:uppercase; padding:4px 11px; border-radius:999px;}
+  .pill.done{background:#e7f3ec; color:var(--green);}
+  .pill.live{background:#eef6ff; color:#2d7dd2;}
+  .pill.wait{background:#fdf3e3; color:var(--amber);}
+  .card h3{font-size:20px; letter-spacing:-0.3px; margin-bottom:8px;}
+  .card .what{color:var(--sub); font-size:15px; margin-bottom:18px;}
+  .card .before-after{display:grid; grid-template-columns:1fr; gap:14px;}
+
+  /* 미니 목업 공통 */
+  .mock{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff;}
+  .mock-label{font-size:10px; font-weight:900; letter-spacing:2px; text-transform:uppercase; color:var(--tertiary); padding:10px 14px 0;}
+
+  /* 읽기 진행 바 목업 */
+  .progress-demo{position:relative; height:120px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff;}
+  .progress-demo .bar{position:absolute; top:0; left:0; height:3px; width:42%; background:var(--brown);}
+  .progress-demo .lines{padding:24px 22px;}
+  .progress-demo .lines i{display:block; height:9px; border-radius:3px; background:#ece8e1; margin-bottom:10px;}
+  .progress-demo .lines i:nth-child(1){width:90%;} .progress-demo .lines i:nth-child(2){width:96%;}
+  .progress-demo .lines i:nth-child(3){width:70%;} .progress-demo .lines i:nth-child(4){width:84%;}
+  .arrow-note{font-size:12px; color:var(--brown); margin-top:8px; font-weight:600;}
+
+  /* 블로그 카드 목업 (전/후) */
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr;}}
+  .bcard{border:1px solid var(--line); border-radius:12px; padding:12px;}
+  .bcard .thumb{aspect-ratio:16/10; border-radius:6px; background:linear-gradient(135deg,#d8cfc2,#efe9e0);}
+  .bcard .meta{display:flex; justify-content:space-between; align-items:center; margin:12px 0 8px;}
+  .bcard .cat{font-size:9px; font-weight:900; letter-spacing:2px; text-transform:uppercase; color:var(--sub);}
+  .bcard .dt{font-size:10px; color:var(--sub);}
+  .bcard .title{font-size:15px; font-weight:700; line-height:1.4;}
+  .bcard .tags{font-size:10px; color:var(--tertiary); margin-top:8px;}
+  .bcard .views{font-size:10px; color:var(--tertiary); margin-top:6px;}
+  .col-cap{font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--tertiary); margin-bottom:8px;}
+
+  /* 편지 섹션 목업 */
+  .letter{background:var(--warm); border:1px solid var(--line); border-radius:12px; padding:34px 32px;}
+  .letter .lk{font-size:10px; font-weight:900; letter-spacing:5px; text-transform:uppercase; color:var(--tertiary); margin-bottom:16px;}
+  .letter h4{font-family:Georgia,serif; font-style:italic; font-size:30px; letter-spacing:-0.5px; margin-bottom:14px;}
+  .letter .body{font-family:Georgia,serif; font-style:italic; color:var(--sub); font-size:16px; line-height:1.7; max-width:520px; margin-bottom:20px;}
+  .letter .foot{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;}
+  .letter .sig{font-family:Georgia,serif; font-style:italic; color:var(--tertiary); font-size:13px;}
+  .letter .read{font-size:12px; font-weight:900; letter-spacing:2px; text-transform:uppercase; color:var(--sub);}
+
+  /* 후속 액션 */
+  .action{border:1px solid var(--line); border-left:4px solid var(--amber); border-radius:10px; background:#fffdf8; padding:24px 26px; margin-bottom:18px;}
+  .action h3{font-size:18px; margin-bottom:6px; display:flex; align-items:center; gap:10px;}
+  .action .who{font-size:11px; font-weight:800; letter-spacing:1px; color:var(--amber); background:#fdf3e3; padding:3px 10px; border-radius:999px;}
+  .action ol{margin:14px 0 6px 0; padding-left:20px;}
+  .action ol li{margin-bottom:8px; color:var(--sub); font-size:15px;}
+  .action ol li b{color:var(--ink);}
+  .action .why{font-size:13px; color:var(--tertiary); margin-top:10px; font-style:italic;}
+
+  /* 로드맵 */
+  .road{display:flex; flex-direction:column; gap:0;}
+  .road .step{display:flex; gap:18px; padding:18px 0; border-bottom:1px solid var(--line);}
+  .road .step .num{flex-shrink:0; width:34px; height:34px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;}
+  .road .step.next .num{background:var(--brown);}
+  .road .step .txt h4{font-size:16px; margin-bottom:3px;}
+  .road .step .txt p{font-size:14px; color:var(--sub);}
+  .road .step .badge{margin-left:auto; align-self:center; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--brown);}
+
+  .legend{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:24px; font-size:12px; color:var(--sub);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .dot{width:9px; height:9px; border-radius:50%;}
+
+  footer{margin-top:80px; padding-top:30px; border-top:2px solid var(--ink); font-size:13px; color:var(--tertiary);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="logo">MHJ<small>my mairangi journal</small></div>
+    <h1>이번 작업이 홈페이지에<br>가져온 변화</h1>
+    <p>404 오류 수정부터 새 기능 3가지까지 — 무엇이 바뀌었고, 두 분이 무엇을 하시면 되는지 한눈에 정리했습니다.</p>
+    <span class="date-badge">2026년 6월 9일 기준 · 전부 라이브 반영 완료</span>
+  </header>
+
+  <!-- ========== 완료 작업 ========== -->
+  <h2 class="section">① 이번 세션에 끝낸 일</h2>
+
+  <div class="legend">
+    <span><span class="dot" style="background:var(--green)"></span> 완료 · 바로 보임</span>
+    <span><span class="dot" style="background:#2d7dd2"></span> 완료 · 라이브</span>
+    <span><span class="dot" style="background:var(--amber)"></span> 코드 완료 · 콘텐츠 입력 대기</span>
+  </div>
+
+  <!-- 404 -->
+  <div class="card">
+    <div class="tag-line"><span class="pill done">해결됨</span><span class="kicker">버그 수정</span></div>
+    <h3>"More from Little 15 Mins →" 404 오류</h3>
+    <p class="what">글 안의 버튼이 없는 주소(/journal)를 가리켜 엑박이 떴습니다. 잘못된 링크를 바른 주소로 고치고, 혹시 또 다른 /journal 링크가 있어도 자동으로 올바른 페이지로 보내도록 안전장치까지 넣었습니다.</p>
+    <div class="mock" style="padding:16px 18px;">
+      <div style="font-size:14px;"><span style="color:#c0392b; text-decoration:line-through;">www.mhj.nz/journal → 404 엑박</span></div>
+      <div style="font-size:14px; margin-top:8px;"><span style="color:var(--green); font-weight:700;">www.mhj.nz/blog/category/little-15-mins → 정상 ✓</span></div>
+    </div>
+  </div>
+
+  <!-- A1 진행바 -->
+  <div class="card">
+    <div class="tag-line"><span class="pill live">A · 라이브</span><span class="kicker">읽기 경험</span></div>
+    <h3>읽기 진행 바</h3>
+    <p class="what">블로그 글을 읽을 때 화면 맨 위에 가는 선이 생기고, 아래로 스크롤할수록 갈색으로 채워집니다. "내가 이 글의 어디쯤 왔는지" 한눈에 보여줘 끝까지 읽게 도와줍니다.</p>
+    <div class="progress-demo">
+      <div class="bar"></div>
+      <div class="lines"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <p class="arrow-note">↑ 맨 위 갈색 선이 스크롤만큼 채워집니다 (지금 약 42%)</p>
+  </div>
+
+  <!-- A2 카드 태그 -->
+  <div class="card">
+    <div class="tag-line"><span class="pill live">A · 라이브</span><span class="kicker">목록 UX</span></div>
+    <h3>블로그 카드에 태그 표시</h3>
+    <p class="what">글 목록 카드에 그 글의 핵심 키워드를 조용히 한 줄 더해, 클릭 전에 무슨 내용인지 미리 가늠하게 했습니다. 기존 디자인을 해치지 않도록 카테고리보다 약하게 처리했습니다.</p>
+    <div class="grid2">
+      <div>
+        <div class="col-cap">전 (Before)</div>
+        <div class="bcard">
+          <div class="thumb"></div>
+          <div class="meta"><span class="cat">Little 15 Mins</span><span class="dt">27 May 2026</span></div>
+          <div class="title">[Y1] Maths, Term 1 &amp; 2</div>
+          <div class="views">5 views</div>
+        </div>
+      </div>
+      <div>
+        <div class="col-cap" style="color:var(--brown)">후 (After)</div>
+        <div class="bcard">
+          <div class="thumb"></div>
+          <div class="meta"><span class="cat">Little 15 Mins</span><span class="dt">27 May 2026</span></div>
+          <div class="title">[Y1] Maths, Term 1 &amp; 2</div>
+          <div class="tags">nzprimary · y1maths</div>
+          <div class="views">5 views</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B 갤러리 -->
+  <div class="card">
+    <div class="tag-line"><span class="pill wait">B · 입력 대기</span><span class="kicker">갤러리</span></div>
+    <h3>갤러리 — 푸터 노출 + 사진작가 필터</h3>
+    <p class="what">사진작가별로 사진을 골라보는 필터는 <b>이미 완성되어 작동 중</b>이었지만, 정작 갤러리 페이지로 가는 링크가 어디에도 없어 아무도 못 찾는 상태였습니다. 푸터(맨 아래 메뉴)에 <b>Gallery</b>를 추가해 들어갈 수 있게 했습니다.</p>
+    <div class="mock" style="padding:14px 18px;">
+      <div class="mock-label" style="padding:0 0 8px;">갤러리 상단 필터 (작동 중)</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="pill" style="background:var(--ink); color:#fff;">ALL</span>
+        <span class="pill" style="background:#FB923C; color:#fff;">● MIN</span>
+        <span class="pill" style="border:1px solid var(--line); color:var(--sub);">● HYUN</span>
+        <span class="pill" style="border:1px solid var(--line); color:var(--sub);">● JIN</span>
+        <span class="pill" style="border:1px solid var(--line); color:var(--sub);">● PENNY</span>
+        <span class="pill" style="border:1px solid var(--line); color:var(--sub);">● YUSSI</span>
+      </div>
+      <div style="margin-top:14px; padding:14px; background:#faf7f2; border-radius:8px; font-size:13px; color:var(--amber);">
+        ⚠️ 지금은 어떤 작가를 눌러도 <b>"NO PHOTOS"</b> — 올린 사진 7장에 촬영자가 지정돼 있지 않아서입니다. (아래 후속 액션 참고)
+      </div>
+    </div>
+  </div>
+
+  <!-- C 편지 -->
+  <div class="card">
+    <div class="tag-line"><span class="pill wait">C · 콘텐츠 대기</span><span class="kicker">홈 새 섹션</span></div>
+    <h3>"A Letter Home" — 이번 주의 편지</h3>
+    <p class="what">엄마가 세 딸(민·현·진)에게 쓰는 편지 글을 홈 화면에 따뜻하게 보여주는 섹션입니다. 편지 글을 발행하면 <b>자동으로</b> 이 모습이 홈에 나타납니다. (아래는 실제 렌더링 모습)</p>
+    <div class="letter">
+      <div class="lk">A Letter Home</div>
+      <h4>Dear Hyun.</h4>
+      <div class="body">My darling, it rained the whole way home from school today and you did not complain once. You held the umbrella for your little sister the entire walk…</div>
+      <div class="foot">
+        <span class="sig">— Mum, from Mairangi</span>
+        <span class="read">Read the letter →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 후속 액션 ========== -->
+  <h2 class="section">② 두 분이 하실 일 (후속 액션)</h2>
+  <p style="color:var(--sub); margin-bottom:24px; font-size:15px;">코드는 다 끝났습니다. 아래 두 가지는 <b>"내용 채우기"</b>라 제가 대신 할 수 없는, PeNnY·Yussi 손이 필요한 일입니다.</p>
+
+  <div class="action">
+    <h3><span class="who">PeNnY 또는 Yussi</span> 갤러리 사진에 "누가 찍었는지" 지정</h3>
+    <ol>
+      <li>관리자 페이지 접속 → <b>www.mhj.nz/mhj-desk</b> → 왼쪽 메뉴 <b>Gallery</b></li>
+      <li>올라온 사진 7장을 하나씩 열어, <b>촬영자(Photographer)</b>를 Min / Hyun / Jin / PeNnY / Yussi 중에서 고르기</li>
+      <li>저장하면 끝 — 그 즉시 갤러리 필터가 살아납니다</li>
+    </ol>
+    <p class="why">왜? 사진에 촬영자 정보가 비어 있어 지금은 필터를 눌러도 빈 화면이 뜹니다. 누가 찍었는지는 두 분만 아시니까요.</p>
+  </div>
+
+  <div class="action">
+    <h3><span class="who">Yussi (엄마)</span> 딸에게 보내는 편지 1편 발행</h3>
+    <ol>
+      <li>관리자 → <b>블로그 새 글 작성</b></li>
+      <li>편지 옵션에서 <b>받는 사람(M=민 / H=현 / J=진)</b> 지정하고 글쓰기</li>
+      <li>발행하면 → 홈 화면 매거진 위에 <b>"A Letter Home"</b> 섹션이 자동으로 나타납니다</li>
+    </ol>
+    <p class="why">왜? 섹션 기능은 완성됐지만 아직 편지 글이 0개라 숨어 있습니다. 첫 편지를 쓰는 순간 켜집니다.</p>
+  </div>
+
+  <!-- ========== 로드맵 ========== -->
+  <h2 class="section">③ 앞으로의 로드맵 (다음 작업 후보)</h2>
+  <div class="road">
+    <div class="step next">
+      <div class="num">D</div>
+      <div class="txt"><h4>가족 구성원별 글 모아보기</h4><p>"민이 쓴 글", "Yussi가 쓴 글"처럼 사람별로 글을 모아보는 페이지. About에서 바로 연결.</p></div>
+      <span class="badge">다음</span>
+    </div>
+    <div class="step">
+      <div class="num">E</div>
+      <div class="txt"><h4>About 페이지 리디자인</h4><p>가족 스토리 허브로 확장 — 가족 사진, 각자 소개, 이민 타임라인, 우리 동네 소개.</p></div>
+    </div>
+    <div class="step">
+      <div class="num">F</div>
+      <div class="txt"><h4>/places — 마이랑이 로컬 가이드</h4><p>한국인 가족이 직접 고른 동네 맛집·카페·해변. 구글 검색 유입에 가장 직접적.</p></div>
+    </div>
+  </div>
+
+  <footer>
+    MHJ HOMEPAGE · 작업 요약 리포트 · 2026.06.09<br>
+    이번 세션: 404 수정 + 읽기 진행 바 + 카드 태그 + 갤러리 노출 + 편지 섹션 — 모두 배포 완료.
+  </footer>
+
+</div>
+</body>
+</html>
