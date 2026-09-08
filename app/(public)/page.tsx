@@ -383,7 +383,8 @@ export default async function LandingPage() {
           <div className="pillar-grid">
             {pillarPosts.map(({ pillar, latest }) => {
               const subtitle = settings[pillar.subtitleKey] || '';
-              const href = latest ? `/blog/${latest.slug}` : '/blog';
+              // 셀이 보여주는 최신 글의 카테고리 허브로 — 제목과 목적지가 일치한다. 글이 없으면 기둥 기본 허브.
+              const href = latest ? categoryHref(latest.category) : `/blog/category/${pillar.hubSlug}`;
               return (
                 <Link key={pillar.id} href={href} className="pillar-cell">
                   <h3 className="pillar-name">{pillar.name}</h3>
@@ -392,7 +393,7 @@ export default async function LandingPage() {
                     <>
                       <p className="pillar-latest-title">{latest.title}</p>
                       <time className="pillar-latest-date">{formatDate(latest.date)}</time>
-                      <span className="pillar-read-arrow">READ →</span>
+                      <span className="pillar-read-arrow">EXPLORE →</span>
                     </>
                   ) : (
                     <p className="pillar-empty">Coming soon</p>

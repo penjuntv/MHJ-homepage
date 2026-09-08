@@ -26,6 +26,10 @@ interface Props {
   blogTitle?: string;
   blogDescription?: string;
   categoryCounts?: Record<string, number>;
+  /** 카테고리 허브 소개문 (lib/category-intros) — 전체 목록이면 null */
+  categoryIntro?: string | null;
+  /** 허브 첫 진입 글 (제목만) */
+  startHere?: { slug: string; title: string }[];
 }
 
 export default function BlogLibrary({
@@ -41,6 +45,8 @@ export default function BlogLibrary({
   blogTitle,
   blogDescription,
   categoryCounts = {},
+  categoryIntro = null,
+  startHere = [],
 }: Props) {
   const router = useRouter();
 
@@ -76,10 +82,10 @@ export default function BlogLibrary({
         padding: 'clamp(96px, 10vw, 128px) clamp(20px, 4vw, 48px)',
       }}
     >
-      {/* ═══════ 헤더 — 타이틀 + 설명만 ═══════ */}
+      {/* ═══════ 헤더 — 전체 목록: 타이틀 + 설명 / 카테고리 허브: 카테고리명 + 소개문 + Start here (W2-C) ═══════ */}
       <header style={{ marginBottom: 96 }}>
         <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 16 }}>
-          Journal
+          {activeCategory ? `Journal · ${activeCategory}` : 'Journal'}
         </p>
         <h1
           className="font-display font-black type-display"
@@ -90,11 +96,30 @@ export default function BlogLibrary({
             marginBottom: 24,
           }}
         >
-          {blogTitle || 'The Journal'}
+          {activeCategory ?? (blogTitle || 'The Journal')}
         </h1>
-        <p className="type-body" style={{ color: 'var(--text-secondary)', maxWidth: 480 }}>
-          {blogDescription || 'Stories from our life in Mairangi Bay — family, learning, and everything in between.'}
+        <p className="type-body" style={{ color: 'var(--text-secondary)', maxWidth: categoryIntro ? 640 : 480 }}>
+          {categoryIntro ?? (blogDescription || 'Stories from our life in Mairangi Bay — family, learning, and everything in between.')}
         </p>
+        {startHere.length > 0 && (
+          <nav aria-label="Start here" style={{ marginTop: 32, maxWidth: 640 }}>
+            <h2 style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
+              Start here
+            </h2>
+            <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {startHere.map((b, i) => (
+                <li key={b.slug} style={{ display: 'flex', gap: 16, alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color: 'var(--text-tertiary)', flexShrink: 0 }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <Link href={`/blog/${b.slug}`} style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)', textDecoration: 'none' }}>
+                    {b.title}
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
       </header>
 
       {/* ═══════ Featured + Recent Stories ═══════ */}
