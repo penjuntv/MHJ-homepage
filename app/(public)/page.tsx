@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG, SITE_DESCRIPTION } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, SITE_DESCRIPTION, WEBSITE_ID, orgRef, yussiNode } from '@/lib/seo';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
@@ -275,16 +275,13 @@ export default async function LandingPage() {
   const websiteLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': WEBSITE_ID,
     name: 'My Mairangi Journal',
     alternateName: 'MHJ',
     url: SITE_URL,
-    description: 'A family archive from Mairangi Bay, Auckland. Stories, images, and small records of a Korean family building a life in New Zealand.',
+    description: SITE_DESCRIPTION,
     inLanguage: SITE_LANG,
-    publisher: {
-      '@type': 'Organization',
-      name: 'My Mairangi Journal',
-      url: SITE_URL,
-    },
+    publisher: orgRef(),
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -295,59 +292,14 @@ export default async function LandingPage() {
     },
   };
 
-  const organizationLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'My Mairangi Journal',
-    alternateName: 'MHJ',
-    url: SITE_URL,
-    logo: {
-      '@type': 'ImageObject',
-      url: `${SITE_URL}/icon-192.png`,
-      width: 192,
-      height: 192,
-    },
-    description: 'A family archive from Mairangi Bay, Auckland — stories, images, and small records of a Korean family building a life in New Zealand.',
-    foundingLocation: {
-      '@type': 'Place',
-      name: 'Mairangi Bay, Auckland, New Zealand',
-    },
-    sameAs: [
-      `${SITE_URL}/about`,
-      `${SITE_URL}/magazine`,
-      `${SITE_URL}/blog`,
-    ],
-  };
-
-  const personLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: 'Yussi',
-    jobTitle: 'Writer, MSW Student',
-    url: `${SITE_URL}/about`,
-    worksFor: {
-      '@type': 'Organization',
-      name: 'My Mairangi Journal',
-      url: SITE_URL,
-    },
-    description: 'A mother of three, social work student at Massey University, and writer of My Mairangi Journal — a family archive from Mairangi Bay, Auckland.',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'Mairangi Bay',
-      addressRegion: 'Auckland',
-      addressCountry: 'NZ',
-    },
-  };
+  // Organization 전체 노드는 루트 layout 이 전 페이지에 낸다 — 여기서 중복 선언하지 않는다 (W2-B).
+  const personLd = yussiNode();
 
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
       />
       <script
         type="application/ld+json"

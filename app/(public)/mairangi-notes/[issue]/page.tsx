@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, personRef, orgRef } from '@/lib/seo';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -108,8 +108,8 @@ export default async function NewsletterIssuePage(
     description: nl.preheader || `Mairangi Notes Issue #${nl.issue_number ?? nl.id}`,
     url: issueUrl,
     ...(nl.sent_at ? { datePublished: nl.sent_at, dateModified: nl.sent_at } : {}),
-    author: { '@type': 'Person', name: 'Yussi' },
-    publisher: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
+    author: personRef('Yussi'),
+    publisher: orgRef(),
     isPartOf: {
       '@type': 'PublicationIssue',
       issueNumber: nl.issue_number ?? String(nl.id),

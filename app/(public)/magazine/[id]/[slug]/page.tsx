@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, personRef, orgRef } from '@/lib/seo';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -119,7 +119,7 @@ export default async function MagazineArticlePage(props: Props) {
     '@type': 'Article',
     inLanguage: SITE_LANG,
     headline: article.title,
-    author: { '@type': 'Person', name: article.author },
+    author: personRef(article.author),
     datePublished: article.date,
     image: article.png_url || article.image_url || magazine.image_url,
     mainEntityOfPage: `${SITE_URL}/magazine/${params.id}/${params.slug}`,
@@ -129,12 +129,7 @@ export default async function MagazineArticlePage(props: Props) {
       issueNumber: `${magazine.year}-${magazine.month_name}`,
       url: `${SITE_URL}/magazine/${params.id}`,
     },
-    publisher: {
-      '@type': 'Organization',
-      name: 'My Mairangi Journal',
-      url: SITE_URL,
-      logo: { '@type': 'ImageObject', url: `${SITE_URL}/icon-192.png`, width: 192, height: 192 },
-    },
+    publisher: orgRef(),
   };
 
   const breadcrumbLd = {

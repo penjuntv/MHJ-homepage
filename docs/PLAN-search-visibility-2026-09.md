@@ -157,9 +157,9 @@ M   ●          ●                ● +4w                          ● +8w
 - 홈 `<h1>` 을 정체성 문장으로 고정(시각적으로는 작게), 캐러셀 글 제목은 `<h2>` → `heading-order` 위반 해소
 - Done: 라이브 137 URL `lang` 전부 `en-NZ` · JSON-LD `inLanguage` 단일 · 홈 H1 고정 · LH `heading-order` 통과
 
-**☐ W2-B · 저자 박스 + 엔티티 그래프** — F-D-07 · F-B-04(1,2) · F-B-05 · H12 · 노력 S~M · 1 PR
-- `components/AuthorBox.tsx`: 사진 + "Yussi · Master of Social Work (Massey University) · Mother of three in Mairangi Bay" 2줄 + `/about` 링크. 글 본문 직후(인포블록 앞)
-- JSON-LD 정규화(`lib/seo.ts`): `Organization @id ${SITE}/#org` name `My Mairangi Journal` alternateName `MHJ` · `WebSite @id ${SITE}/#website` · `Person @id ${SITE}/about#yussi`(jobTitle·alumniOf·knowsAbout·sameAs) · `Person @id ${SITE}/about#penny`(Editor, former journalist) · BlogPosting.author/publisher 는 `@id` 참조 · Article(매거진) 도 동일
+**◐ W2-B · 저자 박스 + 엔티티 그래프** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w2b-author-entity`) — F-D-07 · F-B-04(1,2) · F-B-05 · H12 · 노력 S~M · 1 PR
+- `components/AuthorBox.tsx`: 사진 + "Yussi · Writer · Social work student, Massey University"(재학생 — 석사 취득 표기 금지) + 소개 1~2문장 + `/about` 링크. 글 본문 직후(인포블록 앞)
+- JSON-LD 정규화(`lib/seo.ts`): `Organization @id ${SITE}/#organization` name `My Mairangi Journal` alternateName `MHJ` · `WebSite @id ${SITE}/#website` · `Person @id ${SITE}/about#yussi`(jobTitle·alumniOf·knowsAbout; sameAs 는 URL 확보 시) · `Person @id ${SITE}/about#penny`(Editor, former journalist) · BlogPosting.author/publisher 는 `@id` 참조 · Article(매거진) 도 동일
 - `sameAs` 용 외부 프로필 URL 은 사용자에게 받는다(인스타·유튜브·링크드인 등). 없으면 Organization sameAs 만
 - **실명 P0**: 사이트 표기(PeNnY/Yussi/Min·Hyun·Jin)만. name-guard 훅이 막으면 우회 금지
 - Done: 80편 저자 박스 · `raw/jsonld` 재추출 시 `@id` 참조 80/80 · Rich Results Test 통과 스크린샷 · 3화면
