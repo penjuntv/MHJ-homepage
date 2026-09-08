@@ -128,7 +128,7 @@ M   ●          ●                ● +4w                          ● +8w
 - Done: build+tsc ✅ · 로컬 prod 서버에서 11개 라우트 og:image 전부 200 ✅ · `/code-review high` 10건 전부 수정 ✅ · 배포 후 `audit-endpoints` · 라이브 `robots.txt` `Allow: /api/og` · 글 3편 `og:site_name`·`article:published_time` 재확인
 - 후속(W1-B 에 편입): 주간 감사에 "각 페이지가 광고하는 og:image URL 이 200 인지" 검사 추가 — 이번 404 6건이 CI 를 통과해 온 이유.
 
-**◐ W1-B · 감사 위음성·검색 버그·주간 감사 ⑪** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w1b-audit-search`) — F-A-03 · F-E-03(1,4) · F-E-04(2) · 노력 S · 1 PR
+**☑ W1-B · 감사 위음성·검색 버그·주간 감사 ⑪** (2026-09-08 PR #53 머지) — F-A-03 · F-E-03(1,4) · F-E-04(2) · 노력 S · 1 PR
 - OG 폴백 정의('' 또는 `/api/og`, 59편)를 SKILL.md SQL·회귀 스크립트(`isOgApi`)·`mhj-desk/seo` **세 곳에 동일하게** 적용(기준선 59). 감사 ⑪ 은 `scripts/audit-live-pages.mjs` 로 no-store 와 **og:image 응답**을 함께 잰다(허용 목록 `scripts/qa/no-store-allowlist.json` = 매거진 9, 단위 테스트 11케이스, 음성 대조군 exit 1·2 실증).
 - OG 폴백 판정을 `nullif(btrim(og_image_url),'') IS NULL` 로 — **세 곳 동시**: `.claude/skills/seo-audit-runner/SKILL.md` SQL · `app/mhj-desk/seo/page.tsx:27` · `scripts/audit-seo-regression.mjs` → 수치 0→59 가 되므로 `--update-baseline` 으로 기준선 재잠금(핸드오프 §5-5 규율)
 - `components/SearchOverlay.tsx:23-32` QUICK_LINKS 를 `lib/constants.ts` 의 현행 7카테고리 slug 로 (죽은 링크 5개 제거)
@@ -137,8 +137,9 @@ M   ●          ●                ● +4w                          ● +8w
 - **신규 주간 감사 ⑪** `scripts/audit-cache-headers.mjs`: sitemap 전 URL 의 `cache-control` 에 `no-store` 가 허용 목록(`scripts/qa/no-store-allowlist.json`, 근거 경로 필수) 밖에서 나오면 exit 1 — P-27 세 번째 재발 방지. 양성 대조군(허용 목록 비우고 exit 1) 실증 후 `site-audit.yml` 편입
 - Done: `audit-seo-regression.mjs` 가 OG 폴백 59 보고 · 검색 오버레이 QuickLink 7개 전부 카테고리 페이지 도착 · 새 감사 exit 코드 3종 실증
 
-**☐ W1-C · 홈 LCP** — F-C-02 · F-E-02(heading) · 노력 S · 1 PR
-- `SafeImage` 는 `priority` 를 `...props` 로 넘긴다(확인됨) → 원인은 `HeroCarousel` 쪽. 클라이언트 상태로 슬라이드 순서가 바뀌거나 첫 슬라이드가 이미지가 아닌 슬롯일 가능성. **원인 특정 후** 첫 시각 슬라이드에 `priority` + `fetchPriority="high"` 보장
+**◐ W1-C · 홈 LCP** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w1c-home-lcp`) — F-C-02 · 노력 S · 1 PR
+- **원인 확정**: 홈은 `HeroCarousel` 을 쓰지 않는다(import 0건, 죽은 컴포넌트). 실제 LCP 요소는 `app/(public)/page.tsx` `EditorialHero` 의 메인 `SafeImage` 이고 `priority` 가 없어 lazy 였다. `priority` + `fetchPriority="high"` 추가 → 로컬 prod 에서 `<link rel=preload as=image>` 생성, `loading` 속성 제거, 첫 이미지 요청이 내비게이션 +22ms. `heading-order`(홈 H1 = 히어로 글 제목)는 W2-A 에서.
+- 정리 후보(별건): `components/HeroCarousel.tsx` 는 어디서도 import 되지 않는다 — `lib/types.ts` 의 캐러셀 타입과 함께 삭제 검토.
 - Done: 라이브 홈 HTML 의 첫 캐러셀 `<img>` 에 `loading="eager"` `fetchpriority="high"` + `<link rel=preload>` · LH-desktop 홈 LCP < 800ms
 
 **☐ W1-S · API 보안 하드닝 (범위 밖 발견, 권고)** — `06-frontend-backend.md` F5 · 노력 S~M · 1 PR
