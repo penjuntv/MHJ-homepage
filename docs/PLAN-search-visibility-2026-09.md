@@ -142,10 +142,11 @@ M   ●          ●                ● +4w                          ● +8w
 - 정리 후보(별건): `components/HeroCarousel.tsx` 는 어디서도 import 되지 않는다 — `lib/types.ts` 의 캐러셀 타입과 함께 삭제 검토.
 - Done: 라이브 홈 HTML 의 `EditorialHero` 메인 `<img>` 에 `loading` 속성 없음(eager) + `fetchpriority="high"` + `<link rel=preload as=image>` · 글·소개 페이지 히어로도 `fetchPriority="high"` · LH-desktop 홈 LCP < 800ms 는 배포 후 재측정
 
-**☐ W1-S · API 보안 하드닝 (범위 밖 발견, 권고)** — `06-frontend-backend.md` F5 · 노력 S~M · 1 PR
+**◐ W1-S · API 보안 하드닝** (2026-09-08 구현 완료, PR 대기 — 브랜치 `security/w1s-api-hardening`) — `06-frontend-backend.md` F5 · 노력 S~M · 1 PR
 - `/api/ai-seo`·`/api/ai-insight`(`blog_id` 없는 자유 호출 경로 제거)·`/api/carousel*` 8개: `hasAdminSession(request)`(revalidate 라우트에 이미 있음) 재사용
 - `/api/preview`: `CAPTURE_SECRET` 급 시크릿 요구 · `/api/carousel/proxy-image`: 호스트 allowlist(Supabase Storage·Unsplash) · `/api/view`: IP+slug 60초 쿨다운(comments 패턴 재사용)
-- Done: 무인증 curl 이 401 · 관리자 화면 기능 회귀 없음 · `audit-endpoints` ✅
+- 구현: 미들웨어 matcher 로 관리자 전용 API 8경로 게이트(JSON 401/403, `getUser`; 내비게이션은 리다이렉트; 갱신 쿠키 보존) — send-newsletter·send-test·magazine/capture 의 인라인 검사 3곳 제거 · 공개 `ai-insight` 에 발행 가드(draftMode 예외) · subscribe·track 에도 rate-limit · `/api/ai-insight` `blog_id` 필수 + IP 쿨다운(`lib/rate-limit.ts`) · `proxy-image` Storage 공개 경로 allowlist(`lib/image-proxy-allow.mjs`) · `/api/view` 삭제(호출처 0) · 공개 라우트 8개 `PUBLIC_ROUTE_OK` · source-guard `scripts/audit-api-auth.mjs`. 정리 후보: 호출처 0 인 `carousel/caption`·`carousel/generate`·`carousel-v3/preview`·`newsletter-preview`. 후속: anon RPC `increment_view_count` EXECUTE(핸드오프 §3 ①).
+- Done: 무인증 curl 이 401 · 관리자 화면 기능 회귀 없음(배포 후 사용자가 AI 메타·미리보기 버튼 확인) · `audit-endpoints` ✅
 
 ### W2. 언어·정체성·엔티티 (2주차) ⛔ D1
 

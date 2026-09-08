@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
 import { createAdminClient } from '@/lib/supabase';
 
 const CHROMIUM_X64_URL =
@@ -39,21 +37,7 @@ const TYPE_CONFIG: Record<CaptureType, {
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-async function isAuthorized(): Promise<boolean> {
-  const cookieStore = await cookies();
-  const authClient = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll(); },
-        setAll() {},
-      },
-    },
-  );
-  const { data: { user } } = await authClient.auth.getUser();
-  return !!user;
-}
+// 관리자 세션 검사는 middleware.ts matcher 가 맡는다(2026-09-08 W1-S) — 아래 CAPTURE_SECRET 검사는 별도 축(캡처 파이프라인)으로 유지.
 
 // puppeteer/CDP 통신 재사용 lambda에서 간헐적으로 발생하는 transient 패턴.
 // 재시도(콜드 시작에 가까운 새 인스턴스)로 거의 회복됨.
@@ -291,10 +275,6 @@ function validateInput(
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAuthorized())) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   let body: { type?: string; id?: string | number; magazine_id?: string };
   try {
     body = await req.json();

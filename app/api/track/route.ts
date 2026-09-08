@@ -1,4 +1,6 @@
+// PUBLIC_ROUTE_OK: 1st-party 분석 비콘(공개). 봇 필터 + 이벤트 화이트리스트 + 2KB 상한.
 import { NextRequest, NextResponse } from 'next/server';
+import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { createAdminClient } from '@/lib/supabase';
 import { deriveSource, isBot, parseDevice, type Medium } from '@/lib/traffic-source';
 
@@ -37,6 +39,9 @@ export async function POST(request: NextRequest) {
   // 봇 필터 (UA 기준). 실패해도 항상 204.
   const ua = request.headers.get('user-agent');
   if (isBot(ua)) return NO_CONTENT;
+  // UA 는 위조되므로 IP 당 분당 120건(한 페이지가 pageview·engagement·scroll·read_complete 4~5건) 넘으면 조용히 버린다 —
+  // page_events 는 SEO 정비 우선순위의 근거라 오염을 늦춰야 한다(인스턴스별 완화책).
+  if (!rateLimit.take(`track:${clientIp(request)}`, 120, 60_000)) return NO_CONTENT;
 
   let body: Record<string, unknown>;
   try {

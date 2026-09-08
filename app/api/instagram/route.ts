@@ -1,3 +1,4 @@
+// PUBLIC_ROUTE_OK: 홈 인스타 피드(공개 컴포넌트). 토큰은 서버에만 있고 응답은 공개 미디어 6개뿐.
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 

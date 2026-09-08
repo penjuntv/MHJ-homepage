@@ -1,8 +1,8 @@
+// PUBLIC_ROUTE_OK: 공개 댓글 읽기/작성. 쓰기는 anon RLS(insert only) + IP 쿨다운(lib/rate-limit, 인스턴스별 완화책).
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { clientIp, rateLimit } from '@/lib/rate-limit';
 
-// 간단한 IP 기반 스팸 방지 (in-memory, 서버리스 인스턴스별)
-const recentPosts = new Map<string, number>();
 
 // GET: 승인된 댓글만 공개 조회 — anon key + RLS "Public read approved" 정책으로 처리
 export async function GET(req: NextRequest) {
@@ -56,12 +56,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Content must be 1-500 characters.' }, { status: 400 });
   }
 
-  // IP 기반 60초 쿨다운
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || req.headers.get('x-real-ip')
-    || 'unknown';
-  const lastPost = recentPosts.get(ip);
-  if (lastPost && Date.now() - lastPost < 60_000) {
+  // IP 기반 60초 쿨다운 (lib/rate-limit — ai-insight 와 같은 정책)
+  const ip = clientIp(req);
+  if (!rateLimit.take(`comments:${ip}`, 1, 60_000)) {
     return NextResponse.json(
       { error: 'Please wait a moment before posting again.' },
       { status: 429 },
@@ -83,14 +80,6 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  recentPosts.set(ip, Date.now());
-  // 오래된 엔트리 정리 (메모리 누수 방지)
-  if (recentPosts.size > 1000) {
-    const cutoff = Date.now() - 120_000;
-    recentPosts.forEach((v, k) => {
-      if (v < cutoff) recentPosts.delete(k);
-    });
-  }
 
   return NextResponse.json(
     { message: 'Comment submitted for review' },

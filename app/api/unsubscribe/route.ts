@@ -1,3 +1,4 @@
+// PUBLIC_ROUTE_OK: 메일 링크의 구독 해지(공개). 이메일 주소 외 권한 없음.
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
 

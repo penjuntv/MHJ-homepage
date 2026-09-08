@@ -1,3 +1,4 @@
+// PUBLIC_ROUTE_OK: 공개 검색. anon 키 + 발행 가드(published / article_status) + ILIKE 이스케이프.
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 

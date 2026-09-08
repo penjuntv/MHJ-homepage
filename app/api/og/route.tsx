@@ -1,3 +1,4 @@
+// PUBLIC_ROUTE_OK: OG 이미지 — 크롤러·SNS 가 익명으로 가져가야 한다. 엣지 캐시 1년.
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
