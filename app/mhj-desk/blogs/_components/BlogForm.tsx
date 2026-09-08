@@ -319,6 +319,8 @@ export default function BlogForm({ initial }: Props) {
       publish_at: publishAt,
       published: shouldPublish,
       cover_caption: coverCaption.trim() || null,
+      // '' 는 NULL 로 — "없음" 의 표현을 하나로 (2026-09-08 정리 전 56행이 '' 였다)
+      og_image_url: form.og_image_url?.trim() || null,
     };
 
     let blogId: number | undefined;

@@ -8,6 +8,9 @@
 --    "후에" 적용할 것. 배포 전에 적용하면 구코드의 anon select('*') 가 전부
 --    42501 로 떨어져 블로그 상세=404, 목록=fallback 이 된다
 --    (2026-09-04 실측 — 3분간 적용했다 원복한 이력).
+--    ↔ 반대로 "새 공개 컬럼 추가" 는 추가형 grant 라 코드 배포 "전" 에 적용한다
+--    (2026-09-08 W4-A, docs/migrations/2026-09-08_anon_blogs_grant_seo_columns.sql).
+--    회수형 = 배포 후, 추가형 = 배포 전.
 --
 -- 목적: anon 롤의 blogs 비공개 컬럼(content_backup·insight_kr·insight_cached_at)
 -- SELECT 차단. 앱 화이트리스트(lib/constants.ts BLOG_*_COLUMNS)는 opt-in 이라
@@ -32,7 +35,8 @@ grant select (id, category, title, author, date, image_url, content, slug,
   info_block_html, carousel_enabled, carousel_title, carousel_subtitle,
   carousel_points, carousel_summary, carousel_summary_kr, carousel_yussi_take,
   carousel_yussi_take_kr, carousel_cta, carousel_style, carousel_generated_at,
-  carousel_series_name, carousel_series_number, cover_caption, letter_to)
+  carousel_series_name, carousel_series_number, cover_caption, letter_to,
+  updated_at, seo_title, summary_ko, faq_json, related_slugs, og_image_alt)
   on table public.blogs to anon;
 commit;
 

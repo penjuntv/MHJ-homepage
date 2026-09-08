@@ -97,6 +97,22 @@ export interface Blog {
   info_block_html?: string | null;
   cover_caption?: string | null;
   letter_to?: 'M' | 'H' | 'J' | null;
+  /** 편집 컬럼이 실제로 바뀔 때만 DB 트리거가 갱신 — dateModified/lastmod 원천 (W4-A) */
+  updated_at?: string;
+  /** <title>/og:title 전용 제목. 없으면 title (D2, W4-B 렌더링) */
+  seo_title?: string | null;
+  /** 한국어 요약 블록 — <section lang="ko"> (D1, W4-B 렌더링) */
+  summary_ko?: string | null;
+  /** FAQPage JSON-LD + 본문 FAQ. DB CHECK 로 배열만 허용 */
+  faq_json?: BlogFaqItem[] | null;
+  /** 편집자가 고른 관련 글 slug — 존재 검증은 W4-C preflight */
+  related_slugs?: string[] | null;
+  og_image_alt?: string | null;
+}
+
+export interface BlogFaqItem {
+  q: string;
+  a: string;
 }
 
 export interface Comment {

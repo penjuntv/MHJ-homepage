@@ -80,10 +80,26 @@
 | info_block_html | text | YES | — | 인포블록 HTML |
 | insight_kr | text | YES | — | AI 감상평 캐시 · 🔒 비공개 (ai-insight 는 service_role) |
 | insight_cached_at | timestamptz | YES | — | 캐시 생성 시각 · 🔒 비공개 |
+| cover_caption | text | YES | — | 표지 캡션 |
+| letter_to | text | YES | — | 'M' / 'H' / 'J' — 편지 형식 글의 수신자 라벨 |
+| updated_at | timestamptz | NO | now() | 편집 컬럼 실제 변경 시 트리거 갱신 — dateModified/lastmod 원천 (W4-A 2026-09-08) |
+| seo_title | text | YES | — | `<title>`/og:title 전용 제목, 없으면 title (D2) |
+| summary_ko | text | YES | — | 한국어 요약 블록 `<section lang="ko">` (D1) |
+| faq_json | jsonb | YES | — | `[{"q","a"}]` · CHECK 배열만 · FAQPage JSON-LD |
+| related_slugs | text[] | YES | — | 편집자가 고른 관련 글 slug (존재 검증은 W4-C preflight) |
+| og_image_alt | text | YES | — | og:image alt |
+
+트리거 2개: `trg_sync_created_at` (INSERT · UPDATE OF date → `created_at` = 발행일 자정 NZ),
+`trg_blogs_set_updated_at` (`set_blogs_updated_at()`: title·content·meta_description·info_block_html·cover_caption·
+tags·category·image_url·author·date·letter_to·SEO 5컬럼이 **실제로 바뀔 때만** `updated_at = now()`.
+view_count·published·featured·is_hero·hero_order·publish_at·carousel_*·insight_*·og_image_url 은 제외.
+명시적으로 `updated_at` 을 SET 한 UPDATE 는 그 값을 존중한다).
+`og_image_url` 은 '' 를 쓰지 않는다 — 2026-09-08 56행을 NULL 로 정리했고 BlogForm 이 저장 시 `trim() || null`.
 
 🔒 비공개 컬럼 3종은 anon 롤에서 컬럼 단위 grant 로 차단한다 —
-`docs/sql/anon_blogs_column_whitelist_grant.sql` (⚠️ 화이트리스트 코드 배포 **후** 적용).
-새 공개 컬럼 추가 시 그 grant 목록에도 추가해야 anon(공개 페이지)이 읽는다.
+`docs/sql/anon_blogs_column_whitelist_grant.sql` (⚠️ 회수형 화이트리스트는 코드 배포 **후** 적용).
+새 공개 컬럼 추가 시 그 grant 목록에도 추가해야 anon(공개 페이지)이 읽는다 — 추가형 grant 는 코드 배포 **전**
+(예: `docs/migrations/2026-09-08_anon_blogs_grant_seo_columns.sql`). 회수형 = 배포 후, 추가형 = 배포 전.
 앱 쪽 화이트리스트는 `lib/constants.ts` 의 `BLOG_*_COLUMNS`, 재발 가드는
 `.claude/hooks/select-star-guard.sh` + `scripts/audit-select-star.mjs`.
 

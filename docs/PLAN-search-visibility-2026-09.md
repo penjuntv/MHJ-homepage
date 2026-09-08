@@ -192,8 +192,11 @@ M   ●          ●                ● +4w                          ● +8w
 
 ### W4. SEO 운영 컬럼과 구조 (3~5주차) ⛔ D2 D3
 
-**☐ W4-A · 마이그레이션 "SEO 운영 컬럼"** — F-A-04 · F-D-01 · F-D-02 · F3 · 노력 M · 위험 중간 · Plan Mode 필수
-- 컬럼: `updated_at timestamptz default now()` + 갱신 트리거 · `seo_title text` · `summary_ko text`(D1) · `faq_json jsonb` · `related_slugs text[]` · `og_image_alt text`
+**☑ W4-A · 마이그레이션 "SEO 운영 컬럼"** — F-A-04 · F-D-01 · F-D-02 · F3 · 노력 M · 위험 중간 · Plan Mode 필수 — **2026-09-08 완료** (PR `seo/w4a-seo-columns`)
+- 결과: 컬럼 6개 라이브(`docs/migrations/2026-09-08_seo_operating_columns.sql`) · anon 컬럼 grant 42개(`…_anon_blogs_grant_seo_columns.sql`, 추가형이라 배포 **전** 적용) · `og_image_url ''` 56행 → NULL(백업 `qa-reports/og-image-url-backup-2026-09-08T09-07-22-621Z.json`) · `BLOG_CARD_COLUMNS` +`updated_at`, `BLOG_DETAIL_COLUMNS` +SEO 5컬럼 · BlogForm 저장 시 `og_image_url` `trim() || null`
+- `updated_at` 트리거(`set_blogs_updated_at`)는 **편집 컬럼이 실제로 바뀔 때만** 갱신 — view_count·published/featured/hero 토글·carousel_*·insight_*·og_image_url 제외, 명시 SET 존중. 백필 = `created_at`(발행일). 실증: DO 블록 4케이스 통과 후 롤백
+- `authenticated`·`service_role` 은 테이블 단위 권한이라 새 컬럼 자동 커버 — grant 는 anon 만. 회수형 grant = 배포 후, 추가형 = 배포 전(DB_SCHEMA 에 기록)
+- 컬럼: `updated_at timestamptz default now()` + 갱신 트리거 · `seo_title text` · `summary_ko text`(D1) · `faq_json jsonb`(CHECK 배열) · `related_slugs text[]` · `og_image_alt text`
 - 데이터 정리: `og_image_url ''` → NULL (dry-run + `qa-reports/` 백업 + 적용 후 검증, 3원칙)
 - **순서 엄수**: ① `apply_migration` ② `docs/sql/anon_blogs_column_whitelist_grant.sql` 패턴으로 새 공개 컬럼 anon SELECT grant(fail-closed — 빠뜨리면 공개 페이지 42501) ③ `lib/constants.ts` `BLOG_*_COLUMNS` 갱신 ④ 코드 배포. 없는 컬럼 select 는 쿼리 전체가 조용히 null 이다(핸드오프 §5-3)
 - `docs/DB_SCHEMA.md` 갱신 · 주간 감사 ⑨⑩ 통과 확인
@@ -283,7 +286,7 @@ M   ●          ●                ● +4w                          ● +8w
 | 8 | W3-A | `… §4 W3-A 착수. Plan Mode. 매거진 ?page 는 범위 밖` | — |
 | 9 | W3-B/C | `… §4 W3-B, W3-C 착수(별도 대화 2개)` | — |
 | 10 | W4-A | `… §4 W4-A 착수. Plan Mode. 마이그레이션→grant→constants→배포 순서, og_image_url '' 정리는 dry-run 먼저` | D2 D3 |
-| 11 | W4-B | `… §4 W4-B 착수` | W4-A |
+| 11 | W4-B | `… §4 W4-B 착수. updated_at 은 편집 변경만 갱신하므로 dateModified·sitemap lastmod 에 바로 사용. seo_title 등은 BLOG_DETAIL_COLUMNS 에 이미 포함` | W4-A ☑ |
 | 12 | W4-C | `… §4 W4-C 착수. preflight 는 경고 모드` | W4-A |
 | 13 | W4-D/E | 별도 2대화 | W4-A |
 | 14 | W5 | `… §4 W5 정비 큐 1번부터. 처방 목록만 만들고 본문은 수정하지 않는다` | D4 |
