@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE } from '@/lib/seo';
 import { supabase } from '@/lib/supabase';
 import type { Magazine } from '@/lib/types';
 import MagazineShelf from '@/components/MagazineShelf';
@@ -12,10 +13,10 @@ export const metadata: Metadata = {
   title: 'Magazine',
   description: 'MHJ Magazine — quarterly issues from a family in Mairangi Bay, Auckland. Stories, photos, and essays on life in Aotearoa.',
   openGraph: {
+    ...OG_BASE,
     title: 'Magazine',
     description: 'MHJ Magazine — quarterly issues from a family in Mairangi Bay, Auckland. Stories, photos, and essays on life in Aotearoa.',
     url: `${SITE_URL}/magazine`,
-    images: [{ url: `${SITE_URL}/og-magazine.jpg`, width: 1200, height: 630 }],
   },
   alternates: { canonical: `${SITE_URL}/magazine` },
 };

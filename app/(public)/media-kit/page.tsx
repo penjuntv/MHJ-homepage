@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE } from '@/lib/seo';
 import { supabase } from '@/lib/supabase';
 import { Mail } from 'lucide-react';
 
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   title: 'Media Kit',
   description: 'Partner with My Mairangi Journal. Reach families on Auckland\'s North Shore through newsletter sponsorship, sponsored posts, and affiliate partnerships.',
   openGraph: {
+    ...OG_BASE,
     title: 'Media Kit',
     description: 'Partner with My Mairangi Journal. Reach families on Auckland\'s North Shore.',
     url: `${SITE_URL}/media-kit`,

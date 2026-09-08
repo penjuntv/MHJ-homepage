@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE, ogImageFor } from '@/lib/seo';
 import { getSiteSettings } from '@/lib/site-settings';
 import { STORYPRESS_FAQS } from '@/lib/storypress-faqs';
 import StoryPressClient from './StoryPressClient';
@@ -12,10 +13,11 @@ export const metadata: Metadata = {
   title: 'StoryPress — 4 Words a Day, One Storybook at a Time',
   description: 'Four words a day. Ten days. One real storybook — created by your child. Their name on the cover.',
   openGraph: {
+    ...OG_BASE,
     title: 'StoryPress — 4 Words a Day, One Storybook at a Time',
     description: 'Four words a day. Ten days. One real storybook — created by your child. Their name on the cover.',
     url: `${SITE_URL}/storypress`,
-    images: [{ url: `${SITE_URL}/og-storypress.jpg`, width: 1200, height: 630, alt: 'StoryPress' }],
+    images: [{ url: ogImageFor('StoryPress — 4 Words a Day, One Storybook at a Time', 'StoryPress'), width: 1200, height: 630, alt: 'StoryPress' }],
     type: 'website',
   },
   twitter: {

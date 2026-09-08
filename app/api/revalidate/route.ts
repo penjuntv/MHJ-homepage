@@ -49,20 +49,40 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const ALL_PUBLIC_PATHS = ['/', '/about', '/blog', '/magazine', '/storypress'];
+  const ALL_PUBLIC_PATHS = ['/', '/about', '/blog', '/magazine', '/storypress', '/gallery', '/mairangi-notes', '/media-kit'];
+
+  // 발행물을 나열하는 파생 엔드포인트 — 발행/삭제/발송이 있으면 콘텐츠 종류와 무관하게 낡는다.
+  // 호출자가 이 목록을 알 필요 없이 `derived: true` 만 보내면 서버가 붙인다 (2026-09-08 W1-A).
+  // 이 목록에 없으면 ISR 주기(1시간)까지 새 글이 검색엔진·RSS 에 안 보인다.
+  const DERIVED_PATHS = ['/sitemap.xml', '/feed.xml', '/llms.txt', '/llms-full.txt', '/gallery'];
+  // 동적 세그먼트는 'page' 타입으로 통째 갱신 — 카테고리 허브 7개·페이지네이션·호 상세.
+  const DERIVED_SEGMENTS = [
+    '/blog/category/[slug]', '/blog/category/[slug]/page/[n]', '/blog/page/[n]', '/mairangi-notes/[issue]',
+  ];
+
+  const requested = Array.isArray(paths)
+    ? (paths as unknown[]).filter((p): p is string => typeof p === 'string' && p.startsWith('/'))
+    : [];
+  const derived = all || body.derived === true;
 
   try {
-    const targetPaths = all ? ALL_PUBLIC_PATHS : (paths as string[]);
+    const targetPaths = Array.from(new Set([
+      ...(all ? ALL_PUBLIC_PATHS : requested),
+      ...(derived ? DERIVED_PATHS : []),
+    ]));
     for (const path of targetPaths) {
       revalidatePath(path);
     }
+    if (derived) {
+      for (const seg of DERIVED_SEGMENTS) revalidatePath(seg, 'page');
+    }
 
-    // Data Cache(unstable_cache) 태그 무효화 — 동적 페이지(/blog 등)가
-    // 캐싱한 읽기 쿼리도 발행 즉시 반영되도록 한다. 관리자 저장은 빈도가 낮아
-    // 세 태그를 항상 flush 해도 비용이 거의 없다.
+    // Data Cache(unstable_cache) 태그 무효화 — 목록 쿼리(blogs)와 사이트 설정(settings).
+    // 관리자 저장은 빈도가 낮아 항상 flush 해도 비용이 거의 없다.
+    // 'magazines' 태그는 등록하는 unstable_cache 가 코드베이스에 없어(2026-09-08 전수 grep)
+    // 제거했다. 매거진 페이지는 revalidatePath 와 시간 기반 ISR 로 갱신된다.
     revalidateTag('blogs');
     revalidateTag('settings');
-    revalidateTag('magazines');
 
     if (Array.isArray(indexNowUrls) && indexNowUrls.length > 0) {
       await submitToIndexNow(indexNowUrls);

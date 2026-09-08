@@ -31,7 +31,7 @@ export default function AdminMagazinesPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          paths: ['/magazine', `/magazine/${id}`, '/'],
+          paths: ['/magazine', `/magazine/${id}`, '/'], derived: true,
           // current=true이면 숨기기(→unpublish), current=false이면 공개(→publish)
           ...(!current ? { indexNowUrls: [`${siteUrl}/magazine/${id}`] } : {}),
         }),

@@ -6,6 +6,7 @@
  * 이 본문을 각각 복제해 갖고 있었다.
  */
 import { notFound } from 'next/navigation';
+import { OG_BASE, ogImageFor } from '@/lib/seo';
 import type { Metadata } from 'next';
 import BlogLibrary from '@/components/BlogLibrary';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -34,10 +35,11 @@ export function buildBlogListMetadata(categorySlug: string | null, page: number)
     title,
     description: LIST_DESCRIPTION,
     openGraph: {
+      ...OG_BASE,
       title,
       description: LIST_DESCRIPTION,
       url: canonical,
-      images: [{ url: `${SITE_URL}/og-blog.jpg`, width: 1200, height: 630 }],
+      images: [{ url: ogImageFor(title, 'Journal'), width: 1200, height: 630, alt: title }],
     },
     alternates: { canonical },
     robots: { index: true, follow: true },

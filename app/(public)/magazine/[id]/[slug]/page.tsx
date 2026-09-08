@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE } from '@/lib/seo';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -86,11 +87,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     title,
     description,
     openGraph: {
+      ...OG_BASE,
       title,
       description,
       url,
       type: 'article',
-      images: ogImage ? [{ url: ogImage, width: 1200, height: 1500, alt: article.title }] : undefined,
+      ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 1500, alt: article.title }] } : {}),
     },
     twitter: {
       card: 'summary_large_image',

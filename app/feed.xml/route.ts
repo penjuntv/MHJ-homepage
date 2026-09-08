@@ -2,6 +2,11 @@ import { supabase } from '@/lib/supabase';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
+// Full Route Cache 에 넣어 /api/revalidate 의 revalidatePath('/feed.xml') 이 실효하게 한다.
+// 수동 Cache-Control 은 두지 않는다 — max-age 는 리더·프록시가 1시간을 자체 보유해 purge 가
+// 닿지 않고, s-maxage 는 Next 가 revalidate 값으로 직접 내보낸다 (2026-09-08 W1-A).
+export const revalidate = 3600;
+
 function escapeXml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -53,7 +58,7 @@ export async function GET() {
     <language>ko</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <image>
-      <url>${BASE_URL}/og-default.jpg</url>
+      <url>${BASE_URL}/og-default.png</url>
       <title>MHJ</title>
       <link>${BASE_URL}</link>
     </image>
@@ -64,7 +69,6 @@ export async function GET() {
   return new Response(rss, {
     headers: {
       'Content-Type': 'application/rss+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
     },
   });
 }

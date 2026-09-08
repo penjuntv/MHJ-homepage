@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase-browser';
 import type { Blog } from '@/lib/types';
-import { BLOG_CATEGORIES } from '@/lib/constants';
+import { BLOG_CATEGORIES, CATEGORY_TO_SLUG } from '@/lib/constants';
 import { Upload, Loader2, Sparkles, Eye } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
 import ImageCropModal from '@/components/admin/ImageCropModal';
@@ -356,11 +356,25 @@ export default function BlogForm({ initial }: Props) {
     // On-demand revalidation + IndexNow (published일 때만)
     try {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+      const toHub = (c: string) => CATEGORY_TO_SLUG[c as keyof typeof CATEGORY_TO_SLUG];
+      const categorySlug = toHub(form.category);
+      // 편집으로 카테고리·슬러그가 바뀌면 이전 허브·이전 URL 도 낡는다.
+      const prevCategorySlug = initial && initial.category !== form.category ? toHub(initial.category) : undefined;
+      const prevSlug = initial && initial.slug !== form.slug ? initial.slug : undefined;
+      // 공개 상태가 관여하는 저장(발행·예약·기발행 글 수정·발행 취소)만 파생 엔드포인트
+      // (sitemap·feed·llms — 서버가 목록을 소유)까지 갱신한다. 초안 저장은 공개 표면이 안 변한다.
+      const touchesPublic = shouldPublish || !!initial?.published;
       await fetch('/api/revalidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          paths: [`/blog/${form.slug}`, '/', '/blog'],
+          paths: [
+            `/blog/${form.slug}`, '/', '/blog',
+            ...(categorySlug ? [`/blog/category/${categorySlug}`] : []),
+            ...(prevCategorySlug ? [`/blog/category/${prevCategorySlug}`] : []),
+            ...(prevSlug ? [`/blog/${prevSlug}`] : []),
+          ],
+          derived: touchesPublic,
           ...(shouldPublish ? { indexNowUrls: [`${siteUrl}/blog/${form.slug}`] } : {}),
         }),
       });
