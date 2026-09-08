@@ -24,7 +24,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { fetchSitemapUrls, fetchText, checkUrl, mapConcurrent, progressLine, baseArg, isOgApi } from './lib/audit-shared.mjs';
+import { fetchSitemapUrls, fetchText, checkUrl, mapConcurrent, progressLine, baseArg, isOgApi } from './lib/http-audit.mjs';
 
 export const DEFAULT_ALLOWLIST = new URL('./qa/no-store-allowlist.json', import.meta.url);
 

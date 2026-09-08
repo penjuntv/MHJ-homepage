@@ -13,7 +13,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { judgePage, patternToRegex, extractMeta, loadAllowlist, rehost } from '../audit-live-pages.mjs';
-import { isOgApi } from '../lib/audit-shared.mjs';
+import { isOgApi } from '../lib/http-audit.mjs';
 
 const SCRIPT = fileURLToPath(new URL('../audit-live-pages.mjs', import.meta.url));
 let failed = 0;
