@@ -1,6 +1,8 @@
+// PUBLIC_ROUTE_OK: 뉴스레터 구독 폼(공개). 서버가 이메일 검증·중복 처리.
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
 import { generateWelcome1 } from '@/lib/welcome-emails';
+import { clientIp, rateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
@@ -8,6 +10,11 @@ export async function POST(req: NextRequest) {
 
   if (!email || !email.includes('@')) {
     return NextResponse.json({ error: 'Valid email required' }, { status: 400 });
+  }
+  // 요청마다 service_role INSERT + 환영 메일(Resend, from hello@mhj.nz)이 나간다 — IP 당 10분에 5회.
+  // 임의 주소로 대량 가입시켜 남에게 메일을 보내는(이메일 폭탄·발신 평판 훼손) 것을 늦춘다(인스턴스별 완화책).
+  if (!rateLimit.take(`subscribe:${clientIp(req)}`, 5, 10 * 60_000)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
   const supabase = createAdminClient();

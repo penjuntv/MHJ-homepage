@@ -102,7 +102,7 @@ carousel · carousel-v3 · comments · newsletter · subscribers · affiliates �
 
 - **AI**: `ai-insight`(Gemini 2.5 Flash, `@google/genai` — 블로그 감상평, DB 30일 캐시) · `ai-seo`(Claude Haiku 4.5, `@anthropic-ai/sdk` — 메타 생성) · `carousel/ai-layout`(Gemini — 10슬라이드 레이아웃).
 - **Carousel/Magazine**: `carousel/*`(generate, caption, download, proxy-image, save-content) · `carousel-v3/*` · `magazine/capture`(puppeteer-core + chromium-min) · `og`(@vercel/og).
-- **콘텐츠/캐시**: `revalidate`(태그/경로 무효화) · `preview`·`preview-exit`(Draft Mode) · `view`(조회수) · `search`.
+- **콘텐츠/캐시**: `revalidate`(태그/경로 무효화) · `preview`·`preview-exit`(Draft Mode) · `search`. (`view` 는 2026-09-08 삭제 — 호출처 0. 조회수는 `ViewTracker.tsx` 가 anon RPC `increment_view_count` 를 직접 호출)
 - **뉴스레터/구독**: `subscribe` · `unsubscribe` · `send-newsletter`·`send-test-newsletter`·`newsletter-preview`(Resend) · `process-welcome-sequence`.
 - **기타**: `comments` · `instagram`.
 
@@ -115,6 +115,7 @@ carousel · carousel-v3 · comments · newsletter · subscribers · affiliates �
 - `@supabase/ssr` `createServerClient`로 **쿠키 세션 검증** → `/mhj-desk/*` 보호(로그인+MFA). 공개 경로: `/mhj-desk/login`, `/mhj-desk/mfa-setup`, `/mhj-desk/mfa-verify`.
 - `/internal/render/*`는 세션 대신 **`CAPTURE_SECRET` 토큰** 검증(캡처 파이프라인 전용).
 - 로그인 흐름: login → mfa-verify → `/mhj-desk`. 브라우저/서버가 동일 쿠키 세션 공유(supabase-browser ↔ middleware).
+- **API 인증 규칙 (2026-09-08 W1-S)**: 관리자 전용 API 는 `middleware.ts` `config.matcher` 에 열거한다(미들웨어가 `getUser()` + MFA aal2 로 검사, 실패 시 JSON 401/403). 공개 API 는 파일 상단에 `// PUBLIC_ROUTE_OK: <이유>` 를 적는다. 자체 인증(`getUser(`·`REVALIDATION_SECRET`·`CAPTURE_SECRET`·`CRON_SECRET`)도 인정. 셋 다 없으면 `scripts/audit-api-auth.mjs`(source-guard)가 PR 을 막는다. 인메모리 요청 제한은 `lib/rate-limit.ts`(인스턴스별 완화책).
 
 ---
 

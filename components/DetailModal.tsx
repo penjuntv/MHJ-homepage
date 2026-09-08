@@ -118,7 +118,7 @@ export default function DetailModal({ item, onClose }: Props) {
                 }}>
                   {category ? `${category} / ` : ''}{formatDate(item.date)}
                 </span>
-                <AiInsight title={item.title} content={item.content} />
+                <AiInsight title={item.title} content={item.content} blogId={'magazine_id' in item ? undefined : item.id} />
               </div>
 
               {/* 대형 제목 */}

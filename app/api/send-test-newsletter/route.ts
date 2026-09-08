@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase';
 import { renderMailrangiNotes } from '@/lib/newsletter-template';
 import type { MailrangiNotesData } from '@/lib/newsletter-template';
@@ -90,22 +88,7 @@ async function buildMailrangiData(
  * newsletters DB에 저장하지 않음 — 단순 미리 보내기용
  */
 export async function POST(req: NextRequest) {
-  /* ── 인증 체크 ── */
-  const cookieStore = await cookies();
-  const authClient = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll(); },
-        setAll() {},
-      },
-    }
-  );
-  const { data: { user } } = await authClient.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // 인증은 middleware.ts matcher(관리자 세션 + MFA)가 맡는다 — 2026-09-08 W1-S 에서 인라인 검사를 옮겼다.
 
   const body = await req.json() as {
     form: NewsletterFormData;

@@ -9,9 +9,13 @@ interface Props {
   blogId?: number;
 }
 
-export default function AiInsight({ title, content, blogId }: Props) {
+export default function AiInsight({ blogId }: Props) {
   const [insight, setInsight] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  // 서버는 blog_id 로 DB 행을 읽어 요약한다(요청 본문의 제목·본문은 쓰지 않는다). 행이 없는 항목(매거진 기사 모달 등)은
+  // 성공할 수 없는 호출이므로 버튼을 아예 그리지 않는다. title/content props 는 호출처 호환용으로 타입에만 남긴다.
+  if (!blogId) return null;
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -19,9 +23,13 @@ export default function AiInsight({ title, content, blogId }: Props) {
       const res = await fetch('/api/ai-insight', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, blog_id: blogId }),
+        body: JSON.stringify({ blog_id: blogId }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.insight) {
+        setInsight(res.status === 429 ? 'Too many requests — please try again in a minute.' : 'Failed to load AI insight.');
+        return;
+      }
       setInsight(data.insight);
     } catch {
       setInsight('Failed to load AI insight.');
