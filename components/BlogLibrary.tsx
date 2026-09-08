@@ -133,15 +133,9 @@ export default function BlogLibrary({
           borderTop: '1px solid var(--border)',
           borderBottom: '1px solid var(--border)',
         }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)',
-              gap: 40,
-              alignItems: 'stretch',
-            }}
-            className="featured-grid"
-          >
+          {/* 그리드 규칙은 globals.css(.featured-grid). 인라인 2열 + <style jsx> 모바일 1열 조합은 App Router 에서
+              styled-jsx 가 서버 HTML 에 안 실려 하이드레이션 뒤에야 1열이 되며 CLS 0.19 를 냈다 (2026-09-08 W3-B). */}
+          <div className="featured-grid">
             {/* Featured Story */}
             <FeaturedCard
               blog={featuredBlog}
@@ -250,14 +244,6 @@ export default function BlogLibrary({
         />
       )}
 
-      {/* 반응형 스타일 */}
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .featured-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }
@@ -386,7 +372,7 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
           src={blog.image_url}
           alt={blog.title}
           fill
-          sizes="(max-width: 1024px) 100vw, 66vw"
+          sizes="(max-width: 767px) 100vw, 66vw"
           className="object-cover"
           priority
           style={{
