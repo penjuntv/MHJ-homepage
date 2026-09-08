@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE } from '@/lib/seo';
 import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -140,12 +141,17 @@ export async function generateMetadata(
     title: blog.title,
     description,
     openGraph: {
+      ...OG_BASE,
       title: blog.title,
       description,
       url: `${baseUrl}/blog/${blog.slug}`,
       images: [{ url: ogImage, width: 1200, height: 630, alt: blog.title }],
       type: 'article',
       authors: [blog.author],
+      // updated_at 컬럼이 생기기 전(W4)까지 modifiedTime 은 발행일과 같다.
+      publishedTime: blog.created_at ?? undefined,
+      modifiedTime: blog.created_at ?? undefined,
+      tags: blog.tags ?? undefined,
     },
     twitter: {
       card: 'summary_large_image',
@@ -223,11 +229,11 @@ export default async function BlogDetailPage(
     },
     headline: blog.title,
     description: blog.meta_description || plainText.slice(0, 160),
+    // width/height 를 신고하지 않는다 — 원본이 1000×625~5628×3167 로 제각각이라
+    // 1200×630 하드코딩은 사실과 달랐다(자체진단 F-A-09).
     image: {
       '@type': 'ImageObject',
       url: blog.og_image_url || blog.image_url,
-      width: 1200,
-      height: 630,
     },
     datePublished: blog.created_at ?? blog.date,
     dateModified: blog.created_at ?? blog.date,

@@ -28,7 +28,9 @@ import { MetadataRoute } from 'next';
  * - /admin, /mhj-desk: 관리자 UI (Google OAuth + MFA)
  * - /go: 어필리에이트 리다이렉트 (rel=sponsored, 인덱싱 무의미)
  * - /blog/tag/: thin/duplicate 신호 (메모리상 noindex 처리 완료)
- * - /api: 내부 API 엔드포인트
+ * - /api: 내부 API 엔드포인트 — 단 /api/og 는 Allow (2026-09-08 W1-A).
+ *   글 59편의 og:image 가 /api/og 폴백인데 /api/ 차단에 걸려 구글 이미지·네이버·카카오
+ *   스크래퍼가 미리보기 이미지를 못 받던 것을 해소. 최장 일치 규칙이라 다른 /api/* 는 계속 차단.
  * - /unsubscribe: 개인화 URL
  */
 export default function robots(): MetadataRoute.Robots {
@@ -65,7 +67,7 @@ export default function robots(): MetadataRoute.Robots {
 
   const allowAiBots = FRIENDLY_AI_BOTS.map((userAgent) => ({
     userAgent,
-    allow: '/',
+    allow: ['/', '/api/og'],
     disallow: PRIVATE_PATHS,
   }));
 
@@ -79,7 +81,7 @@ export default function robots(): MetadataRoute.Robots {
       // 1. 기본 — 모든 봇 (Googlebot, Bingbot 등 포함)
       {
         userAgent: '*',
-        allow: '/',
+        allow: ['/', '/api/og'],
         disallow: PRIVATE_PATHS,
       },
       // 2. AI 봇 — 명시적 allow (Cloudflare 등 미들웨어의 기본 차단 회피)

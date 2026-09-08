@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE } from '@/lib/seo';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -76,6 +77,7 @@ export async function generateMetadata(
     title: `${nl.subject} — Mairangi Notes`,
     description: nl.preheader || `Mairangi Notes Issue #${nl.issue_number}`,
     openGraph: {
+      ...OG_BASE,
       title: `${nl.subject} — Mairangi Notes`,
       description: nl.preheader || '',
       url: `${SITE_URL}/mairangi-notes/${nl.issue_number ?? nl.id}`,

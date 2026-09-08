@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from 'sonner';
+import { SITE_NAME, OG_LOCALE } from '@/lib/seo';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -33,19 +34,17 @@ export const metadata: Metadata = {
   publisher: 'MHJ',
   openGraph: {
     type: 'website',
-    locale: 'ko_KR',
+    locale: OG_LOCALE,
     url: BASE_URL,
-    siteName: 'MHJ',
+    siteName: SITE_NAME,
     title: 'MHJ — my mairangi',
     description: 'A family archive from Mairangi Bay, Auckland.',
     images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'MHJ — A family archive from Mairangi Bay, Auckland' }],
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'MHJ — my mairangi',
-    description: 'A family archive from Mairangi Bay, Auckland.',
-    images: [OG_IMAGE],
-  },
+  // 카드 타입만 선언한다. 제목·설명·이미지를 여기 두면 자체 twitter 블록이 없는 하위
+  // 페이지가 이 generic 값을 통째로 물려받는다(병합이 최상위 키 단위). 비워 두면
+  // X·카카오가 페이지별 og:* 로 폴백한다. (2026-09-08 W1-A)
+  twitter: { card: 'summary_large_image' },
   robots: {
     index: true,
     follow: true,

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE } from '@/lib/seo';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -16,10 +17,10 @@ export const metadata: Metadata = {
   description: 'Meet Yussi — a social work student, mother of three, and the writer behind MHJ. Stories from a Korean family in Mairangi Bay, Auckland.',
   authors: [{ name: 'Yussi' }],
   openGraph: {
+    ...OG_BASE,
     title: 'About',
     description: 'Meet Yussi — a social work student, mother of three, and the writer behind MHJ.',
     url: `${SITE_URL}/about`,
-    images: [{ url: `${SITE_URL}/og-about.jpg`, width: 1200, height: 630 }],
   },
   alternates: { canonical: `${SITE_URL}/about` },
 };

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE } from '@/lib/seo';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
@@ -18,10 +19,10 @@ export const metadata: Metadata = {
   title: { absolute: 'MHJ — my mairangi' },
   description: 'A family archive from Mairangi Bay, Auckland. Stories, images, and small records of a Korean family building a life in New Zealand.',
   openGraph: {
+    ...OG_BASE,
     title: 'MHJ — my mairangi',
     description: 'A family archive from Mairangi Bay, Auckland.',
     url: SITE_URL,
-    images: [{ url: `${SITE_URL}/og-default.jpg`, width: 1200, height: 630, alt: 'MHJ — A family archive from Mairangi Bay, Auckland' }],
   },
   alternates: { canonical: SITE_URL },
 };

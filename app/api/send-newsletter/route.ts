@@ -321,8 +321,13 @@ export async function POST(req: NextRequest) {
         sent_at: new Date().toISOString(),
         recipient_count: successCount,
       }).eq('id', dbId);
-      // 발송 성공 후 Mairangi Notes 아카이브 캐시 갱신 (세션 4)
-      if (successCount > 0) revalidatePath('/mairangi-notes');
+      // 발송 성공 후 Mairangi Notes 아카이브 캐시 갱신 (세션 4) + 호 상세 세그먼트 전체 (2026-09-08 W1-A).
+      // 개별 경로를 만들지 않는다 — buildFromRow 가 issue_number NULL 을 1 로 채우므로
+      // 호 번호로 경로를 조립하면 엉뚱한 1호가 갱신된다. 호는 20여 개라 세그먼트 전체 갱신이 싸다.
+      if (successCount > 0) {
+        revalidatePath('/mairangi-notes');
+        revalidatePath('/mairangi-notes/[issue]', 'page');
+      }
     }
 
     // 전원 실패 → 에러로 반환해 admin UI가 실패를 표시하도록 (기존엔 ok:true로 조용히 넘어감)

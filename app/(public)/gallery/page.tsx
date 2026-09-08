@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE } from '@/lib/seo';
 import { supabase } from '@/lib/supabase';
 import { getSiteSettings } from '@/lib/site-settings';
 import GalleryClient, { type GalleryPhoto } from './GalleryClient';
@@ -11,10 +12,10 @@ export const metadata: Metadata = {
   title: 'Photo Gallery',
   description: 'Photographs from the journal and magazine — every image links back to the story it belongs to. A visual index of My Mairangi Journal.',
   openGraph: {
+    ...OG_BASE,
     title: 'Photo Gallery',
     description: 'Photographs from the journal and magazine — a visual index of My Mairangi Journal.',
     url: `${SITE_URL}/gallery`,
-    images: [{ url: `${SITE_URL}/og-gallery.jpg`, width: 1200, height: 630 }],
   },
   alternates: { canonical: `${SITE_URL}/gallery` },
 };

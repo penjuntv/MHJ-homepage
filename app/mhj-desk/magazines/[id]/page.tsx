@@ -379,7 +379,7 @@ export default function MagazineDetailPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            paths: ['/magazine', `/magazine/${id}`, '/'],
+            paths: ['/magazine', `/magazine/${id}`, '/'], derived: true,
             indexNowUrls: [`${siteUrl}/magazine/${id}`],
           }),
         });
@@ -502,7 +502,7 @@ export default function MagazineDetailPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          paths: ['/magazine', `/magazine/${id}`, '/'],
+          paths: ['/magazine', `/magazine/${id}`, '/'], derived: true,
         }),
       });
     } catch { /* revalidation 실패해도 저장은 성공 */ }

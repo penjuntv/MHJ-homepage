@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_BASE } from '@/lib/seo';
 import Link from 'next/link';
 import { createPublicAdminClient } from '@/lib/supabase';
 import NewsletterCTA from '@/components/NewsletterCTA';
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
   title: 'Mairangi Notes — MHJ',
   description: 'A weekly letter from our family in Mairangi Bay, Auckland.',
   openGraph: {
+    ...OG_BASE,
     title: 'Mairangi Notes — MHJ',
     description: 'A weekly letter from our family in Mairangi Bay, Auckland.',
     url: `${SITE_URL}/mairangi-notes`,
