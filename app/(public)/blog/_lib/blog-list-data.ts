@@ -108,8 +108,27 @@ async function getPaginatedBlogs(
   return { blogs: data ?? [], totalCount: count ?? 0 };
 }
 
+/** 허브 "Start here" — lib/category-intros 의 slug 목록을 발행 게이트를 거쳐 제목만 가져온다. 순서는 목록 순서 유지. */
+export type StartHereItem = { slug: string; title: string; category: string };
+async function getStartHere(slugs: string[], category: string): Promise<StartHereItem[]> {
+  if (!slugs.length) return [];
+  // 허브 카테고리로도 좁힌다 — lib/category-intros 의 slug 가 다른 카테고리로 옮겨가도 남의 글이 허브에 걸리지 않게.
+  const { data, error } = await supabase
+    .from('blogs')
+    .select('slug, title, category')
+    .in('slug', slugs)
+    .eq('category', category)
+    .eq('published', true)
+    .is('letter_to', null)
+    .or(publishGate());
+  if (error) console.error('getStartHere:', error.message);
+  const byslug = new Map((data ?? []).map((b) => [b.slug, b as StartHereItem]));
+  return slugs.map((s) => byslug.get(s)).filter((b): b is StartHereItem => !!b);
+}
+
 /** 발행 시 revalidateTag('blogs') 로 무효화된다 (app/api/revalidate/route.ts) */
 const LIST_CACHE = { revalidate: 300, tags: ['blogs'] };
+export const getStartHereCached = unstable_cache(getStartHere, ['bloglist:starthere'], LIST_CACHE);
 
 export const getFeaturedBlogCached = unstable_cache(getFeaturedBlog, ['bloglist:featured'], LIST_CACHE);
 export const getRecentBlogsCached = unstable_cache(getRecentBlogs, ['bloglist:recent'], LIST_CACHE);

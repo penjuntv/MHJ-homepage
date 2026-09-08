@@ -164,8 +164,8 @@ M   ●          ●                ● +4w                          ● +8w
 - **실명 P0**: 사이트 표기(PeNnY/Yussi/Min·Hyun·Jin)만. name-guard 훅이 막으면 우회 금지
 - Done: 80편 저자 박스 · `raw/jsonld` 재추출 시 `@id` 참조 80/80 · Rich Results Test 통과 스크린샷 · 3화면
 
-**☐ W2-C · 카테고리 허브 + 기둥 정렬** — F-A-06 · F-D-04 · F-E-05 · 노력 M · 1 PR
-- `site_settings` 에 `category_intro_{slug}`(영문 200~300자, 초안은 내가 쓰고 사용자 승인) · `category_start_here_{slug}`(slug 3개)
+**◐ W2-C · 카테고리 허브 + 기둥 정렬** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w2c-category-hubs`) — F-A-06 · F-D-04 · F-E-05 · 노력 M · 1 PR
+- 구현(2026-09-08): 소개문·description·Start here 는 `lib/category-intros.ts` 코드 상수, `site_settings.category_intro_{slug}` 는 소개문 덮어쓰기 전용(관리자 CATEGORY INTROS 섹션). Start here 는 코드에서만 관리. 한글 병기는 D1(영어 정본)에 따라 보류
 - 카테고리 페이지 상단: 소개문 + "Start here" 3편 + 고유 description
 - 홈 기둥 셀 → `/blog/category/{slug}` · Local Guide 를 기둥에 편입(또는 4기둥을 7카테고리 축으로 재정의 — 사용자 선택) · 카테고리 라벨 한글 병기(D1 이 한국어 독자를 포함할 때)
 - Done: 8개 허브 description 전부 고유 · 기둥 셀이 허브로 도착 · 3화면

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { CATEGORY_TO_SLUG } from '@/lib/constants';
 import { supabase } from '@/lib/supabase-browser';
 import { DEFAULT_SETTINGS, SETTING_DESCRIPTIONS } from '@/lib/site-settings';
 import { Loader2, Save, RotateCcw, Instagram, Facebook, Youtube, Upload, Image as ImageIcon, X } from 'lucide-react';
@@ -55,7 +56,7 @@ const SOCIAL_META: Record<string, { label: string; icon: React.ReactNode; placeh
 
 // 에디토리얼 섹션 (세션 1 추가) — 섹션별 개별 저장
 type EditorialSection = {
-  id: 'editor_note' | 'children' | 'pillar' | 'newsletter_cta';
+  id: 'editor_note' | 'children' | 'pillar' | 'newsletter_cta' | 'category_intro';
   title: string;
   hint: string;
   revalidatePaths: string[];
@@ -97,9 +98,24 @@ const EDITORIAL_SECTIONS: EditorialSection[] = [
     revalidatePaths: ['/'],
     fields: [
       { key: 'pillar_storypress_intro',   label: 'StoryPress (Little 15 Mins)',              type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
-      { key: 'pillar_aotearoa_intro',     label: 'Aotearoa (Travelers + Life in Aotearoa)',  type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
+      { key: 'pillar_aotearoa_intro',     label: 'Aotearoa (Travelers + Life in Aotearoa + Local Guide)',  type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
       { key: 'pillar_homelearning_intro', label: 'Home Learning',                             type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
       { key: 'pillar_whanau_intro',       label: 'Whānau (Whānau + Settlement)',              type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
+    ],
+  },
+  {
+    id: 'category_intro',
+    title: 'CATEGORY INTROS',
+    hint: '카테고리 허브 상단 소개문(영문 200~300자). 비워 두면 lib/category-intros.ts 의 기본 문장이 나갑니다. meta description 은 코드에서 관리.',
+    revalidatePaths: ['/blog', ...Object.values(CATEGORY_TO_SLUG).map((slug) => `/blog/category/${slug}`)],
+    fields: [
+      { key: 'category_intro_home-learning',    label: 'Home Learning',    type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
+      { key: 'category_intro_little-15-mins',   label: 'Little 15 Mins',   type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
+      { key: 'category_intro_settlement',       label: 'Settlement',       type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
+      { key: 'category_intro_life-in-aotearoa', label: 'Life in Aotearoa', type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
+      { key: 'category_intro_local-guide',      label: 'Local Guide',      type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
+      { key: 'category_intro_whanau',           label: 'Whānau',           type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
+      { key: 'category_intro_travelers',        label: 'Travelers',        type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
     ],
   },
   {

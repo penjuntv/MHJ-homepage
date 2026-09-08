@@ -123,7 +123,7 @@ export const SETTING_DESCRIPTIONS: Record<string, string> = {
   pillar_whanau_intro: 'Whānau 기둥 소개 (Whānau + Settlement)',
   pillar_localguide_intro: 'Local Guide 카테고리 페이지 상단 인트로 (DEPRECATED — 세션 5 이후 미사용)',
   pillar_storypress_intro: 'StoryPress 기둥 소개 (Little 15 Mins)',
-  pillar_aotearoa_intro: 'Aotearoa 기둥 소개 (Travelers + Life in Aotearoa)',
+  pillar_aotearoa_intro: 'Aotearoa 기둥 소개 (Travelers + Life in Aotearoa + Local Guide)',
   pillar_homelearning_intro: 'Home Learning 기둥 소개',
 };
 
