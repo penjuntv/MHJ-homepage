@@ -13,6 +13,8 @@
  * 언어 신고는 SITE_LANG·OG_LOCALE 한 곳에서 — 2026-09-08 W2-A 에서 'ko' → 'en-NZ' 로 정정했다(본문이 영어인 사이트가
  * 한국어라고 신고하고 있었다. 한국어 요약 블록은 W4 에서 `<section lang="ko">` 로 블록 단위 신고).
  */
+import type { BlogFaqItem } from './types';
+
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 export const SITE_NAME = 'My Mairangi Journal';
 export const SITE_LANG = 'en-NZ';
@@ -98,6 +100,22 @@ export function orgRef() {
 export function personRef(name: string) {
   const id = Object.hasOwn(PERSON_IDS, name) ? PERSON_IDS[name] : undefined;
   return id ? { '@type': 'Person', '@id': id, name, url: `${SITE_URL}/about` } : { '@type': 'Person', name };
+}
+
+/**
+ * FAQPage 노드 — storypress 랜딩과 블로그 상세가 공유한다(타입도 BlogFaqItem 하나).
+ * ⚠️ 화면에 같은 Q&A 가 보일 때만 낼 것: 보이지 않는 FAQ 마크업은 구글 정책 위반이다.
+ */
+export function faqPageNode(items: BlogFaqItem[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
+    })),
+  };
 }
 
 export function organizationNode() {

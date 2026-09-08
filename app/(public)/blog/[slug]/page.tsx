@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import AuthorBox from '@/components/AuthorBox';
-import { OG_BASE, SITE_LANG, personRef, orgRef } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, personRef, orgRef, faqPageNode } from '@/lib/seo';
 import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
 import { draftMode } from 'next/headers';
 import { supabase, createAdminClient, createPublicAdminClient } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
@@ -22,6 +21,9 @@ import BlogReadTracker from './BlogReadTracker';
 import ScrollDepthTracker from './ScrollDepthTracker';
 import ReadingProgress from './ReadingProgress';
 import { formatDate } from '@/lib/utils';
+import {
+  stripHtml, readingMinutes, addHeadingIds, wrapKeyTakeaways, sanitizeFaq, toParagraphs,
+} from '@/lib/content-html.mjs';
 
 export const revalidate = 600;
 
@@ -64,23 +66,47 @@ async function getAdjacentBlogs(current: { id: number; date: string }): Promise<
   };
 }
 
-async function getRelatedBlogs(category: string, currentSlug: string): Promise<Blog[]> {
+/**
+ * 관련 글 3편. 편집자가 고른 `related_slugs` 가 1순위(그 순서를 그대로 지킨다),
+ * 부족분은 같은 카테고리 최신순 → 전체 최신순으로 채운다. 모든 단계에 발행·예약 게이트를 건다.
+ */
+async function getRelatedBlogs(category: string, currentSlug: string, relatedSlugs?: string[] | null): Promise<Blog[]> {
   const now = new Date().toISOString();
+
+  // ① 편집자 지정 — 존재하지 않거나 미발행인 slug 는 조용히 빠진다(W4-C preflight 가 경고할 몫).
+  let picked: Blog[] = [];
+  const wanted = (relatedSlugs ?? []).filter((sl) => typeof sl === 'string' && sl && sl !== currentSlug).slice(0, 3);
+  if (wanted.length) {
+    const { data, error } = await supabase
+      .from('blogs')
+      .select(BLOG_RELATED_COLUMNS)
+      .eq('published', true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .in('slug', wanted);
+    if (error) console.error('getRelatedBlogs(related_slugs):', error.message);
+    // DB 는 순서를 보장하지 않는다 — 편집자가 적은 순서로 되돌린다.
+    picked = wanted
+      .map((sl) => (data ?? []).find((b) => b.slug === sl))
+      .filter((b): b is NonNullable<typeof b> => Boolean(b)) as Blog[];
+    if (picked.length >= 3) return picked.slice(0, 3);
+  }
+
   const { data: sameCategory, error: sameCategoryError } = await supabase
     .from('blogs')
     .select(BLOG_RELATED_COLUMNS)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .eq('category', category)
-    .neq('slug', currentSlug)
+    .not('slug', 'in', `(${[currentSlug, ...picked.map((b) => b.slug)].map((sl) => `"${sl}"`).join(',')})`)
     .order('created_at', { ascending: false })
     .limit(3);
   if (sameCategoryError) console.error('getRelatedBlogs(sameCategory):', sameCategoryError.message);
 
-  if ((sameCategory?.length ?? 0) >= 3) return sameCategory as Blog[];
+  const byCategory = [...picked, ...((sameCategory ?? []) as Blog[])].slice(0, 3);
+  if (byCategory.length >= 3) return byCategory;
 
-  const needed = 3 - (sameCategory?.length ?? 0);
-  const excludeSlugs = [currentSlug, ...(sameCategory?.map((b) => b.slug) ?? [])];
+  const needed = 3 - byCategory.length;
+  const excludeSlugs = [currentSlug, ...byCategory.map((b) => b.slug)];
   const { data: recent, error: recentError } = await supabase
     .from('blogs')
     .select(BLOG_RELATED_COLUMNS)
@@ -91,7 +117,7 @@ async function getRelatedBlogs(category: string, currentSlug: string): Promise<B
     .limit(needed);
   if (recentError) console.error('getRelatedBlogs(recent):', recentError.message);
 
-  return [...(sameCategory ?? []), ...(recent ?? [])] as Blog[];
+  return [...byCategory, ...((recent ?? []) as Blog[])];
 }
 
 async function getBlog(slug: string): Promise<Blog | null> {
@@ -130,8 +156,9 @@ export async function generateMetadata(
     : await getBlog(params.slug);
   if (!blog) return { title: 'Not Found' };
 
-  const plainText = blog.content.replace(/<[^>]*>/g, '');
-  const description = blog.meta_description || plainText.slice(0, 160);
+  const description = blog.meta_description || stripHtml(blog.content).slice(0, 160);
+  // 검색·공유용 제목만 seo_title 로 갈아끼운다 — 지면의 <h1> 은 blog.title 그대로다(D2).
+  const metaTitle = blog.seo_title || blog.title;
 
   const baseUrl = SITE_URL;
   const ogImage = blog.og_image_url
@@ -139,24 +166,24 @@ export async function generateMetadata(
     : `${baseUrl}/api/og?title=${encodeURIComponent(blog.title)}&category=${encodeURIComponent(blog.category)}&date=${encodeURIComponent(blog.date)}`;
 
   return {
-    title: blog.title,
+    title: metaTitle,
     description,
     openGraph: {
       ...OG_BASE,
-      title: blog.title,
+      title: metaTitle,
       description,
       url: `${baseUrl}/blog/${blog.slug}`,
-      images: [{ url: ogImage, width: 1200, height: 630, alt: blog.title }],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: blog.og_image_alt || blog.title }],
       type: 'article',
       authors: [blog.author],
-      // updated_at 컬럼이 생기기 전(W4)까지 modifiedTime 은 발행일과 같다.
       publishedTime: blog.created_at ?? undefined,
-      modifiedTime: blog.created_at ?? undefined,
+      // article:modified_time — 편집 컬럼이 실제로 바뀔 때만 오르는 값(W4-A 트리거).
+      modifiedTime: blog.updated_at ?? blog.created_at ?? undefined,
       tags: blog.tags ?? undefined,
     },
     twitter: {
       card: 'summary_large_image',
-      title: blog.title,
+      title: metaTitle,
       description,
       images: [ogImage],
     },
@@ -179,7 +206,7 @@ export default async function BlogDetailPage(
   const isLetter = Boolean(blog.letter_to);
   const adminDb = createPublicAdminClient();
   const [relatedBlogs, adjacent, latestNewsletterRes, settings, nextStoryRes] = await Promise.all([
-    getRelatedBlogs(blog.category, blog.slug),
+    getRelatedBlogs(blog.category, blog.slug, blog.related_slugs),
     getAdjacentBlogs(blog),
     adminDb
       .from('newsletters')
@@ -209,7 +236,23 @@ export default async function BlogDetailPage(
   const ctaCopyB = settings.newsletter_cta_copy_b || 'Be the first to receive our next letter.';
 
   const isHtml = blog.content.includes('<') && blog.content.includes('>');
-  const plainText = blog.content.replace(/<[^>]*>/g, '');
+  const plainText = stripHtml(blog.content);
+
+  // 본문 변환은 렌더 직전에만: 이미지 최적화 → H2 앵커 id(+목차 목록) → Key takeaways 박스.
+  // 목차와 앵커가 같은 통과에서 나오므로 서로 어긋날 수 없다.
+  const { html: contentWithIds, headings } = addHeadingIds(optimizeContentImages(blog.content));
+  const articleHtml = wrapKeyTakeaways(contentWithIds);
+  // H2 가 3개 미만이면 목차가 본문보다 길어 보인다(실측: 84편 중 3개+ 는 31편).
+  const toc = headings.length >= 3 ? headings : [];
+  const minutes = readingMinutes(blog.content);
+  const faq = sanitizeFaq(blog.faq_json);
+  const summaryParagraphs = toParagraphs(blog.summary_ko);
+  // 갱신일은 발행 다음 날 이후로 벌어졌을 때만 보여준다 — 같은 날 오타 수정까지 알릴 일은 아니다.
+  const updatedAt =
+    blog.updated_at && blog.created_at &&
+    new Date(blog.updated_at).getTime() - new Date(blog.created_at).getTime() > 24 * 60 * 60 * 1000
+      ? blog.updated_at
+      : null;
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -217,7 +260,9 @@ export default async function BlogDetailPage(
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE_URL}/blog` },
-      { '@type': 'ListItem', position: 3, name: blog.title },
+      // 화면의 빵부스러기(Home · Journal · 카테고리)와 같은 경로를 신고한다.
+      { '@type': 'ListItem', position: 3, name: blog.category, item: `${SITE_URL}${categoryHref(blog.category)}` },
+      { '@type': 'ListItem', position: 4, name: blog.title },
     ],
   };
 
@@ -237,7 +282,7 @@ export default async function BlogDetailPage(
       url: blog.og_image_url || blog.image_url,
     },
     datePublished: blog.created_at ?? blog.date,
-    dateModified: blog.created_at ?? blog.date,
+    dateModified: blog.updated_at ?? blog.created_at ?? blog.date,
     url: `${SITE_URL}/blog/${blog.slug}`,
     author: personRef(blog.author || 'Yussi'),
     publisher: orgRef(),
@@ -255,6 +300,13 @@ export default async function BlogDetailPage(
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
+      {/* FAQPage 는 화면에 같은 Q&A 가 보일 때만 낸다 — 구글 요건이자, 안 보이는 마크업은 위반이다. */}
+      {faq.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageNode(faq)) }}
+        />
+      )}
 
       <ReadingProgress />
       <ViewTracker slug={blog.slug} />
@@ -298,29 +350,18 @@ export default async function BlogDetailPage(
           margin: '0 auto',
           padding: 'clamp(64px, 8vw, 96px) clamp(20px, 4vw, 32px) 0',
         }}>
-          {/* Back to Library */}
-          <Link
-            href="/blog"
-            className="blog-back-link"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '12px 20px',
-              borderRadius: 999,
-              fontWeight: 900,
-              fontSize: 11,
-              letterSpacing: 3,
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              color: 'var(--text-secondary)',
-              marginBottom: 48,
-              border: '1px solid var(--border)',
-              transition: 'all 0.2s',
-            }}
-          >
-            <ArrowLeft size={14} /> Back to Library
-          </Link>
+          {/* 빵부스러기 — 이전의 'Back to Library' 알약을 대체한다.
+              Journal 링크가 되돌아가기를 겸하고, Home·카테고리까지 한 줄로 보여준다.
+              같은 경로를 BreadcrumbList JSON-LD 로도 신고한다(위). */}
+          <nav aria-label="Breadcrumb" className="blog-breadcrumb" style={{ marginBottom: 48 }}>
+            <ol>
+              <li><Link href="/">Home</Link></li>
+              <li aria-hidden="true" className="blog-breadcrumb-sep" />
+              <li><Link href="/blog">Journal</Link></li>
+              <li aria-hidden="true" className="blog-breadcrumb-sep" />
+              <li><Link href={categoryHref(blog.category)}>{blog.category}</Link></li>
+            </ol>
+          </nav>
 
           {/* 스폰서 */}
           {blog.is_sponsored && (
@@ -385,6 +426,18 @@ export default async function BlogDetailPage(
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
               {formatDate(blog.date)}
             </span>
+            <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
+              {minutes} min read
+            </span>
+            {updatedAt && (
+              <>
+                <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
+                  Updated {formatDate(updatedAt)}
+                </span>
+              </>
+            )}
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
             <Link
               href={categoryHref(blog.category)}
@@ -459,6 +512,18 @@ export default async function BlogDetailPage(
             marginBottom: 32,
           } : undefined}>
 
+            {/* 목차 — H2 3개 이상일 때만. 앵커 id 는 addHeadingIds 가 같은 통과에서 붙였다. */}
+            {toc.length > 0 && (
+              <nav className="blog-toc" aria-label="On this page">
+                <p className="blog-toc-label">On this page</p>
+                <ol>
+                  {toc.map((h) => (
+                    <li key={h.id}><a href={`#${h.id}`}>{h.text}</a></li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+
             {/* 3) 본문 */}
             <div style={{ position: 'relative' }}>
               {/* Scroll depth sentinels */}
@@ -470,9 +535,9 @@ export default async function BlogDetailPage(
               {isHtml ? (
                 <div
                   className="blog-content"
-                  /* 본문 <img> 를 렌더 시점에 최적화 경로로 재작성 — DB 원본은 건드리지 않는다.
-                     실측(2026-09): 1200px 원본 3장이 656px 자리에 그대로 나가고 있었다. */
-                  dangerouslySetInnerHTML={{ __html: optimizeContentImages(blog.content) }}
+                  /* 렌더 시점 변환만: <img> 최적화 경로 재작성(실측 2026-09: 1200px 원본이 656px 자리에 그대로
+                     나갔다) + H2 앵커 id + Key takeaways 박스. DB 원본은 건드리지 않는다. */
+                  dangerouslySetInnerHTML={{ __html: articleHtml }}
                   suppressHydrationWarning
                 />
               ) : (
@@ -482,7 +547,18 @@ export default async function BlogDetailPage(
               )}
             </div>
 
-            {/* ── 저자 박스 (사진·자격·소개) — 본문 직후, 인포블록 앞 ── */}
+            {/* ── 한국어 요약 (D1: 영어 정본 + 한국어 요약 블록) ──
+                평문이라 dangerouslySetInnerHTML 을 쓰지 않는다. lang 을 바꿔 크롤러에 언어를 알린다. */}
+            {summaryParagraphs.length > 0 && (
+              <section lang="ko" className="blog-summary-ko" aria-labelledby="summary-ko-heading">
+                <h2 id="summary-ko-heading">한국어 요약</h2>
+                {summaryParagraphs.map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
+              </section>
+            )}
+
+            {/* ── 저자 박스 (사진·자격·소개) — 한국어 요약 뒤, 인포블록 앞 ── */}
             <AuthorBox author={blog.author || 'Yussi'} />
 
             {/* ── 인포블록 ── */}
@@ -492,6 +568,22 @@ export default async function BlogDetailPage(
                 style={{ margin: '48px 0', fontSize: 'initial', lineHeight: 'initial' }}
                 dangerouslySetInnerHTML={{ __html: optimizeContentImages(blog.info_block_html) }}
               />
+            )}
+
+            {/* ── FAQ — 항상 펼쳐진 가시 Q&A. 접지 않는 이유: 같은 마크업이 FAQPage 리치 결과와
+                AI 답변 엔진 양쪽의 인용 대상이고, 접기는 얻는 것 없이 위험만 는다. ── */}
+            {faq.length > 0 && (
+              <section className="blog-faq" aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Frequently asked questions</h2>
+                <dl>
+                  {faq.map((item, i) => (
+                    <div key={i}>
+                      <dt>{item.q}</dt>
+                      <dd>{item.a}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
             )}
 
             {/* 읽기 완료 감지 sentinel — BlogReadTracker가 observe */}

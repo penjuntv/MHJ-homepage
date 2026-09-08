@@ -887,7 +887,9 @@
 .blog-content blockquote p { margin: 0; }
 .blog-content strong { font-weight: 700; color: var(--text); }
 .blog-content em { font-style: italic; }
-.blog-content ul, .blog-content ol { padding-left: 24px; margin: 0 0 24px; }
+/* Tailwind preflight 가 list-style 을 지우므로 본문에서는 되살린다 — 마커 없는 목록은 문단과 구분되지 않는다. */
+.blog-content ul { list-style: disc; padding-left: 24px; margin: 0 0 24px; }
+.blog-content ol { list-style: decimal; padding-left: 24px; margin: 0 0 24px; }
 .blog-content li { margin: 0.5em 0; line-height: 1.7; }
 .blog-content a { color: #4F46E5; text-decoration: underline; text-underline-offset: 4px; }
 .blog-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 24px 0; display: block; }
@@ -990,6 +992,166 @@
 .blog-content .blog-youtube iframe,
 .blog-content [data-youtube-video] iframe,
 .blog-content .blog-video iframe { width: 100%; height: 100%; border: none; display: block; }
+
+/* ─────────────────────────────────────────────────────────────
+   W4-B 글 페이지 블록 — 빵부스러기·목차·Key takeaways·한국어 요약·FAQ
+   규칙: 색은 토큰만(DESIGN_RULES §6.2), 간격은 8의 배수(§7), radius ≤ 12px(§8),
+   호버는 opacity 만(§9.1). 저자 박스(components/AuthorBox.tsx)의 "헤어라인 구분선 +
+   상자 없음" 언어를 따르고, 색 있는 콜아웃은 쓰지 않는다(§6.3 무채색 원칙).
+   ───────────────────────────────────────────────────────────── */
+
+/* 빵부스러기 — 이전 'Back to Library' 알약과 같은 타이포 스케일 */
+.blog-breadcrumb ol {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.blog-breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: opacity 0.2s ease;
+}
+.blog-breadcrumb a:hover { opacity: 0.7; }
+.blog-breadcrumb-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+/* 목차 — H2 3개 이상일 때만 렌더된다(page.tsx) */
+.blog-toc {
+  margin: 0 0 40px;
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.blog-toc-label {
+  margin: 0 0 16px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.blog-toc ol {
+  margin: 0;
+  padding: 0 0 0 24px;
+  list-style: decimal;
+}
+.blog-toc li { margin: 8px 0; color: var(--text-secondary); }
+.blog-toc a {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+.blog-toc a:hover { opacity: 0.7; text-decoration: underline; text-underline-offset: 4px; }
+/* 앵커로 뛰었을 때 제목이 화면 맨 위에 딱 붙지 않게 */
+.blog-content h2 { scroll-margin-top: 96px; }
+
+/* Key takeaways — 본문 안의 <h2|h3>Key takeaways</h2> + <ul> 을 서버가 감싼 결과
+   (lib/content-html.mjs wrapKeyTakeaways). 본문 타이포를 그대로 상속받는다. */
+.blog-takeaways {
+  display: block;
+  margin: 32px 0;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-surface);
+}
+/* 박스 안에서는 본문 h2 스케일(clamp 24~36px)이 과하다 — 라벨 크기로 낮춘다. */
+.blog-takeaways h2,
+.blog-takeaways h3 {
+  margin: 0 0 16px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.blog-takeaways ul { list-style: disc; margin: 0; padding-left: 24px; }
+.blog-takeaways li { margin: 8px 0; line-height: 1.7; }
+.blog-takeaways li:first-child { margin-top: 0; }
+.blog-takeaways li:last-child { margin-bottom: 0; }
+
+/* 한국어 요약 (D1) — 영어 정본 뒤에 붙는 블록, lang="ko" 는 마크업에서 신고 */
+.blog-summary-ko {
+  margin: 48px 0 0;
+  padding: 32px 0 0;
+  border-top: 1px solid var(--border);
+}
+.blog-summary-ko h2 {
+  margin: 0 0 16px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.blog-summary-ko p {
+  margin: 0 0 16px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.blog-summary-ko p:last-child { margin-bottom: 0; }
+
+/* FAQ — 항상 펼쳐진 Q&A. FAQPage JSON-LD 와 같은 내용이 화면에 보여야 한다. */
+.blog-faq {
+  margin: 48px 0 0;
+  padding: 32px 0 0;
+  border-top: 1px solid var(--border);
+}
+.blog-faq h2 {
+  margin: 0 0 24px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.blog-faq dl { margin: 0; }
+.blog-faq dl > div { margin: 0 0 24px; }
+.blog-faq dl > div:last-child { margin-bottom: 0; }
+.blog-faq dt {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--text);
+}
+.blog-faq dd {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* 인포블록 내부 타이포 복구 — .blog-info-block 이 font-size/line-height 를 initial 로
+   끊어(위 '인포블록 CSS 격리') 목록·표가 본문 값을 못 받고 있었다(플랜 W4-B). */
+.blog-info-block ul { list-style: disc; padding-left: 24px; margin: 0 0 24px; }
+.blog-info-block ol { list-style: decimal; padding-left: 24px; margin: 0 0 24px; }
+.blog-info-block li { margin: 0.5em 0; line-height: 1.7; }
+/* 표는 타이포만 복구한다 — 기존 7편의 표는 table·td·th 에 인라인 스타일로 자기 디자인을 갖고 있어
+   여기서 테두리를 주면 그 디자인에 없던 격자가 생긴다. 인라인이 없는 표만 이 값을 받는다. */
+.blog-info-block table { width: 100%; border-collapse: collapse; margin: 0 0 24px; font-size: 15px; }
+.blog-info-block th,
+.blog-info-block td { padding: 8px 16px; text-align: left; line-height: 1.6; }
+.blog-info-block th { font-weight: 700; }
 @media (max-width: 640px) {
   .blog-content img { float: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
   .blog-content .grid-2, .blog-content .grid-3, .blog-content .grid-1-2 { grid-template-columns: 1fr !important; }

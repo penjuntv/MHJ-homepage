@@ -72,7 +72,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 동적 블로그 (published만)
   const { data: blogs } = await supabase
     .from('blogs')
-    .select('slug, created_at')
+    .select('slug, created_at, updated_at')
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`);
 
@@ -80,7 +80,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/blog/${b.slug}`,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
-    lastModified: b.created_at,
+    // updated_at 은 편집 컬럼이 실제로 바뀔 때만 오른다(W4-A 트리거) — 조회수·발행 토글로는 움직이지
+    // 않으므로 lastmod 로 신고해도 거짓 신호가 되지 않는다.
+    lastModified: b.updated_at ?? b.created_at,
   }));
 
   // 동적 뉴스레터 이슈 (sent 상태 + issue_number 있는 것만)
