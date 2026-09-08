@@ -180,6 +180,7 @@ export default async function AboutPage() {
                   unoptimized={whoImage.includes('picsum.photos')}
                   className="object-cover"
                   priority
+                  fetchPriority="high"
                 />
               ) : (
                 <div style={{

@@ -765,7 +765,7 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                 fill
                 priority
                 fetchPriority="high"
-                sizes="(max-width: 1024px) 100vw, 66vw"
+                sizes="(max-width: 1024px) calc(100vw - 40px), 66vw"
                 className="object-cover"
               />
             </div>
