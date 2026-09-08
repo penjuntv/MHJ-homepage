@@ -182,10 +182,11 @@ M   ●          ●                ● +4w                          ● +8w
 - 모바일 375px Playwright `PerformanceObserver('layout-shift')` 로 요소 특정 → 카드 이미지 `aspect-ratio` 고정 또는 필터 바 높이 예약
 - Done: LH-mobile `/blog`·카테고리 CLS < 0.1
 
-**☐ W3-C · 매거진 썸네일 최적화 + 폰트 웨이트 정리** — F-C-05(2) · F-C-04(2) · 노력 S
+**☑ W3-C · 매거진 썸네일 최적화 + 폰트 웨이트 정리** — F-C-05(2) · F-C-04(2) · 노력 S
 - `PageThumbnail`·`MagazineViewer` 표지 그리드만 `nextImageUrl` 경유(지면 렌더 무영향). 뷰어 본체 20파일은 보류
 - 실제 사용 웨이트 감사 후 `globals.css:8` 요청을 Playfair 6→2~3, Noto 4→2 로 축소. `next/font` 이전(L)은 보류
 - Done: `/magazine` 이미지 전송량 −50% · 폰트 CSS 92KB 감소 · 매거진 지면 픽셀 디프 0.00%
+- **실측 후 축소(2026-09-08, PR `perf/w3c-fonts-trim`)**: `/magazine`·`/magazine/[id]`(뷰어 `?page` 포함) 이미지 응답 **전부 `/_next/image`, RAW 0**(553KB·78KB) — 보고서의 "미최적화 20파일"은 이미지 파일형 기사(`article.pdf_url`)가 있을 때만 렌더되는 경로로 현재 발행 호에 없음 → 조건부 후속: 이미지형 기사를 발행하면 `MagazineViewer.tsx` `<img src={article.pdf_url}>` 2곳을 `nextImageUrl` 로. 폰트는 `document.fonts` 실측에서 Noto 4웨이트·Playfair 5페이스 **전부 사용 중**이라 줄일 수 없고, **Caveat 만 미사용 → 제거**. 진짜 지렛대(`@import` 체인 → `next/font` 셀프호스팅, 잔여 CLS 0.01 의 `adjustFontFallback`)는 리터럴 50곳+·캡처 파이프라인 때문에 L 급 별건으로 W6 뒤에.
 
 **☐ W3-D · 함수 리전** — U-4 결과에 따름. 가능하면 코드 0. 불가하면 기록만.
 
