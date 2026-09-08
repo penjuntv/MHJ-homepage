@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE } from '@/lib/seo';
+import { OG_BASE, SITE_LANG } from '@/lib/seo';
 import { supabase } from '@/lib/supabase';
 import { Mail } from 'lucide-react';
 
@@ -92,7 +92,7 @@ export default async function MediaKitPage() {
     url: `${SITE_URL}/media-kit`,
     description:
       "Partner with My Mairangi Journal. Reach families on Auckland's North Shore through newsletter sponsorship, sponsored posts, and affiliate partnerships.",
-    inLanguage: 'en',
+    inLanguage: SITE_LANG,
     publisher: {
       '@type': 'Organization',
       name: 'MHJ',

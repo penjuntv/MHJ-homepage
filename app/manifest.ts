@@ -1,10 +1,12 @@
 import type { MetadataRoute } from 'next';
+import { SITE_NAME, SITE_LANG, SITE_DESCRIPTION } from '@/lib/seo';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'MHJ — my mairangi',
+    name: SITE_NAME,
     short_name: 'MHJ',
-    description: 'A family life magazine from Mairangi Bay, Auckland',
+    description: SITE_DESCRIPTION,
+    lang: SITE_LANG,
     start_url: '/',
     display: 'standalone',
     background_color: '#FFFFFF',

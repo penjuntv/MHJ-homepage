@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE } from '@/lib/seo';
+import { OG_BASE, SITE_LANG } from '@/lib/seo';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -117,6 +117,7 @@ export default async function MagazineArticlePage(props: Props) {
   const articleLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
+    inLanguage: SITE_LANG,
     headline: article.title,
     author: { '@type': 'Person', name: article.author },
     datePublished: article.date,

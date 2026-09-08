@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE } from '@/lib/seo';
+import { OG_BASE, SITE_LANG } from '@/lib/seo';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
@@ -163,7 +163,7 @@ export default async function MagazineIssuePage(props: Props) {
       height: 1000,
     },
     url: `${SITE_URL}/magazine/${params.id}`,
-    inLanguage: 'en',
+    inLanguage: SITE_LANG,
     hasPart: articles.map((a) => ({
       '@type': 'Article',
       name: a.title,

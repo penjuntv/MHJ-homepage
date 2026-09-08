@@ -150,7 +150,7 @@ M   ●          ●                ● +4w                          ● +8w
 
 ### W2. 언어·정체성·엔티티 (2주차) ⛔ D1
 
-**☐ W2-A · 언어 신고 정합 + 홈 정체성** — F-A-01 · H17 · F-E-02(2) · 노력 S · 1 PR
+**◐ W2-A · 언어 신고 정합 + 홈 정체성** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w2a-language-identity`) — F-A-01 · H17 · F-E-02(2) · 노력 S · 1 PR
 - `app/layout.tsx:104` `lang="en-NZ"` · `:36` `locale:'en_NZ'` · `blog/[slug]/page.tsx:252` `inLanguage:'en-NZ'` · 홈/storypress `['en','ko']` → `'en-NZ'`
 - 루트 `metadata` 의 한국어 `description`·`keywords`(라이브 미노출 죽은 코드) → 영어 description 으로 정리, `keywords` 삭제
 - 홈 `<title>`: `My Mairangi Journal — A Korean Family's School & Life Notes from Auckland's North Shore` (60자 내 조정) · description 동일 축

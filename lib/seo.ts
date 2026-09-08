@@ -10,11 +10,15 @@
  * ⚠ 스프레드 뒤에 `images: undefined` / `type: undefined` 를 쓰면 기본값이 지워진다.
  *   선택적 이미지는 `...(img ? { images: [...] } : {})` 형태로 쓸 것.
  *
- * OG_LOCALE 은 W2-A(언어 신고 정합)에서 'en_NZ' 로 바뀔 자리다 — 여기 한 줄만 고친다.
+ * 언어 신고는 SITE_LANG·OG_LOCALE 한 곳에서 — 2026-09-08 W2-A 에서 'ko' → 'en-NZ' 로 정정했다(본문이 영어인 사이트가
+ * 한국어라고 신고하고 있었다. 한국어 요약 블록은 W4 에서 `<section lang="ko">` 로 블록 단위 신고).
  */
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 export const SITE_NAME = 'My Mairangi Journal';
-export const OG_LOCALE = 'ko_KR';
+export const SITE_LANG = 'en-NZ';
+/** 사이트 설명 한 줄 — 루트 meta·홈·RSS·manifest 가 같은 문장을 쓴다. 문구를 바꾸면 여기 한 곳만. */
+export const SITE_DESCRIPTION = 'Stories from a Korean family in Mairangi Bay, Auckland: starting school in New Zealand, home learning, settling in, and everyday life on the North Shore.';
+export const OG_LOCALE = 'en_NZ';
 
 /**
  * 기본 OG 이미지 — public/og-default.png (브랜드 킷 1200×630, 2026-09-08 추가).

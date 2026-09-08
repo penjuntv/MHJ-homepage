@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE } from '@/lib/seo';
+import { OG_BASE, SITE_LANG } from '@/lib/seo';
 import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -255,7 +255,7 @@ export default async function BlogDetailPage(
       },
     },
     keywords: [blog.category, ...(blog.tags ?? [])].filter(Boolean).join(', '),
-    inLanguage: 'ko',
+    inLanguage: SITE_LANG,
   };
 
   return (
