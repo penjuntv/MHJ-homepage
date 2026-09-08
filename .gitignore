@@ -72,3 +72,6 @@ qa-screenshots/
 
 # Codex local config — contains a personal access token, must never be committed
 .codex/config.toml
+
+# 2026-09-08 W1-A: 사이트 기본 OG 이미지는 배포 자산이다 (위 png 규칙의 예외)
+!public/og-default.png
