@@ -5,11 +5,12 @@
 #   · 깨진 이미지(blog #27) — 수동 감사로야 발견
 # 이 워크플로가 매주 라이브를 실측하고, 실패하면 이슈를 만든다.
 #
-# 검사 10종: ①sitemap 상태 ②깨진 이미지 ③매거진 지면 잘림
+# 검사 11종: ①sitemap 상태 ②깨진 이미지 ③매거진 지면 잘림
 #           ④실명 노출(P0) ⑤엔드포인트 건강 ⑥SEO 회귀 ⑦외부 링크 rot
 #           ⑧blogs select('*') 소스 가드 (RSC 유출 재발 방지)
 #           ⑨anon 쓰기 grant 재발 검출 (허용 목록 밖 (테이블, 권한) 조합)
 #           ⑩anon 읽기 노출 검출 (anon SELECT + RLS 꺼진 테이블 / security_invoker 없는 뷰)
+#           ⑪공개 페이지 실측 (no-store 강등 = P-27 재발 · og:image 응답 · og:site_name — 허용 목록 밖이면 실패)
 # 사람 눈 판정(화질·톤·실기기 터치감)은 자동화 대상이 아니다 —
 # 별도 실측 체크리스트(2026-09-03 배포)로 사람이 본다.
 #
@@ -133,6 +134,12 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/audit-anon-read-exposure.mjs
 
+      - name: ⑪ 공개 페이지 실측 (no-store·og:image 응답, 허용 목록 scripts/qa/no-store-allowlist.json)
+        id: livepages
+        if: ${{ !cancelled() }}
+        timeout-minutes: 10
+        run: node scripts/audit-live-pages.mjs
+
       - name: 잘림 스크린샷 보관 (실패 시)
         if: ${{ failure() && steps.overflow.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
@@ -166,6 +173,7 @@ jobs:
           | blogs select('*') 소스 가드 | ${{ steps.selectstar.outcome }} |
           | anon 쓰기 grant 재발 검출 | ${{ steps.anongrants.outcome }} |
           | anon 읽기 노출 (RLS 꺼짐·뷰) | ${{ steps.anonread.outcome }} |
+          | 공개 페이지 실측 (no-store·og:image) | ${{ steps.livepages.outcome }} |
 
           ⚠ 실명 노출 단계가 실패면 로그 말미를 먼저 확인 — "실명 노출"이면 P0 즉시 처리,
           "스캔 불가(감사 불완전)"이면 인프라 문제다. 로그의 이름은 [라벨]로 치환돼 있다.
@@ -177,6 +185,11 @@ jobs:
           ⚠ anon 읽기 노출 단계가 실패면 새 테이블에 enable row level security 가 빠졌거나 뷰가
           security_invoker 없이 만들어진 것이다 — anon 키로 전행이 읽히는 상태이므로 P0 급으로 즉시 처리.
           절차는 scripts/qa/anon-read-exposure-allowlist.json 의 _comment.
+          ⚠ 공개 페이지 실측 단계가 실패면 (a) 공개 URL 이 no-store 로 나간다 = searchParams/cookies 로 동적
+          강등된 P-27 재발 (docs/ARCHITECTURE.md §3.3) — 코드에서 원인을 제거, 의도된 동적 페이지만
+          scripts/qa/no-store-allowlist.json 에 근거와 함께 추가. (b) 페이지가 광고하는 og:image 가 404 —
+          자산이 public/ 에 실제로 있는지(.gitignore 의 *.png 규칙 주의) 확인. exit 2 = 네트워크·sitemap·허용 목록
+          문제로 감사 불완전(P-27 아님) — 재실행부터.
 
           로컬 재현:
           ```bash
@@ -188,6 +201,7 @@ jobs:
           node --env-file=.env.local scripts/audit-external-links.mjs
           node scripts/audit-select-star.mjs
           node --env-file=.env.local scripts/audit-anon-write-grants.mjs
+          node scripts/audit-live-pages.mjs
           node --env-file=.env.local scripts/audit-anon-read-exposure.mjs
           ```
           ISSUE_BODY

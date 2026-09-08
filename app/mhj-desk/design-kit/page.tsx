@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import SafeImage from '@/components/SafeImage';
 import { Check, Copy, Play, Sparkles, X } from 'lucide-react';
+import { BLOG_CATEGORIES } from '@/lib/constants';
 
 /* ─────────────────── helpers ─────────────────── */
 function CopyHex({ hex }: { hex: string }) {
@@ -422,7 +423,7 @@ function ArticleCardDemo() {
 
 function FilterBarDemo() {
   const [active, setActive] = useState('All');
-  const cats = ['All', 'Education', 'Settlement', 'Girls', 'Locals', 'Life', 'Travel'];
+  const cats = ['All', ...BLOG_CATEGORIES]; // 폐기된 카테고리명이 남아 있던 데모 (2026-09-08)
   return (
     <div style={{
       display: 'flex', flexWrap: 'wrap', gap: 8, padding: 6,

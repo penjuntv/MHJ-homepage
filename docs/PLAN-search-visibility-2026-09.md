@@ -116,7 +116,7 @@ M   ●          ●                ● +4w                          ● +8w
 
 ### W1. 기술SEO 즉시패치 (1주차, 게이트 없음)
 
-**◐ W1-A · 크롤·색인 신호 패치** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w1a-crawl-signals`) — F-A-02 · F-A-04(2) · F-A-07 · F-A-08 · F-A-09 · F-B-05(og) · F-F-02 · 노력 S · 1 PR
+**☑ W1-A · 크롤·색인 신호 패치** (2026-09-08 PR #52 머지·라이브 확인: robots `Allow: /api/og` 15건, og:image 137/137 응답) — F-A-02 · F-A-04(2) · F-A-07 · F-A-08 · F-A-09 · F-B-05(og) · F-F-02 · 노력 S · 1 PR
 - `app/robots.ts`: `PRIVATE_PATHS` 앞에 `allow: ['/', '/api/og']` — `/api/og` 만 예외, 나머지 `/api/*` 는 계속 차단
 - `app/llms.txt/route.ts:116` `app.mhz.nz` → `app.mhj.nz`
 - 공용 `lib/seo.ts` 에 `baseOpenGraph()` 헬퍼: `siteName: 'My Mairangi Journal'`, `locale`(D1 전엔 현행 유지) — 하위 페이지 openGraph 가 루트를 덮어써 `og:site_name`·`og:locale` 이 137 페이지에서 사라지는 문제 해소
@@ -128,7 +128,8 @@ M   ●          ●                ● +4w                          ● +8w
 - Done: build+tsc ✅ · 로컬 prod 서버에서 11개 라우트 og:image 전부 200 ✅ · `/code-review high` 10건 전부 수정 ✅ · 배포 후 `audit-endpoints` · 라이브 `robots.txt` `Allow: /api/og` · 글 3편 `og:site_name`·`article:published_time` 재확인
 - 후속(W1-B 에 편입): 주간 감사에 "각 페이지가 광고하는 og:image URL 이 200 인지" 검사 추가 — 이번 404 6건이 CI 를 통과해 온 이유.
 
-**☐ W1-B · 감사 위음성·검색 버그** — F-A-03 · F-E-03(1,4) · F-E-04(2) · 노력 S · 1 PR
+**◐ W1-B · 감사 위음성·검색 버그·주간 감사 ⑪** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w1b-audit-search`) — F-A-03 · F-E-03(1,4) · F-E-04(2) · 노력 S · 1 PR
+- OG 폴백 정의('' 또는 `/api/og`, 59편)를 SKILL.md SQL·회귀 스크립트(`isOgApi`)·`mhj-desk/seo` **세 곳에 동일하게** 적용(기준선 59). 감사 ⑪ 은 `scripts/audit-live-pages.mjs` 로 no-store 와 **og:image 응답**을 함께 잰다(허용 목록 `scripts/qa/no-store-allowlist.json` = 매거진 9, 단위 테스트 11케이스, 음성 대조군 exit 1·2 실증).
 - OG 폴백 판정을 `nullif(btrim(og_image_url),'') IS NULL` 로 — **세 곳 동시**: `.claude/skills/seo-audit-runner/SKILL.md` SQL · `app/mhj-desk/seo/page.tsx:27` · `scripts/audit-seo-regression.mjs` → 수치 0→59 가 되므로 `--update-baseline` 으로 기준선 재잠금(핸드오프 §5-5 규율)
 - `components/SearchOverlay.tsx:23-32` QUICK_LINKS 를 `lib/constants.ts` 의 현행 7카테고리 slug 로 (죽은 링크 5개 제거)
 - `app/api/search/route.ts:46-51` `articles` 에 발행 가드(`article_status='published'`) + ILIKE 입력 이스케이프

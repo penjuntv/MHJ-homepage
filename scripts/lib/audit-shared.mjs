@@ -80,8 +80,47 @@ export async function mapConcurrent(items, limit, fn, onProgress) {
   return results;
 }
 
-/** 진행 표시 한 줄용 — mapConcurrent 의 onProgress 로 넘긴다. */
-export const progressLine = (label) => (done, total) => process.stdout.write(`\r${label} ${done}/${total}`);
+/** 진행 표시 한 줄용 — mapConcurrent 의 onProgress 로 넘긴다. 비-TTY(CI 로그)에서는 \r 이 줄을 못 지우고
+ *  항목마다 한 줄씩 쌓이므로 25개 단위·마지막에만 찍는다. */
+export const progressLine = (label) => (done, total) => {
+  if (process.stdout.isTTY) process.stdout.write(`\r${label} ${done}/${total}`);
+  else if (done === total || done % 25 === 0) process.stdout.write(`${label} ${done}/${total}\n`);
+};
+
+/** `--base=https://…` 인자. 감사 스크립트 공통 — 기본은 프로덕션. 끝 슬래시는 제거한다. */
+export function baseArg(argv = process.argv, fallback = 'https://www.mhj.nz') {
+  const v = argv.find((a) => a.startsWith('--base='))?.slice('--base='.length) ?? fallback;
+  return v.replace(/\/+$/, '');
+}
+
+/** 자동 생성 OG 이미지(/api/og) 판정 — audit-seo-regression 의 OG_FALLBACK 과 audit-live-pages 의
+ *  "생존 검사 생략" 이 같은 규칙을 쓴다. SKILL.md 의 SQL `og_image_url ~ '/api/og(\?|$)'` 와 한 쌍. */
+export const isOgApi = (url) => /\/api\/og(\?|$)/.test(url ?? '');
+
+/**
+ * HTML/텍스트 GET — 재시도 정책은 checkUrl 과 같다(네트워크 오류·5xx 는 retries 회 뒤에만 확정,
+ * 타임아웃은 재시도 안 함). 콜드스타트 502 한 번이 주간 이슈가 되지 않게 한다.
+ * 반환: { status:number, headers, body } 또는 { status:'TIMEOUT'|'ERR …', headers:null, body:'' }
+ */
+export async function fetchText(u, { retries = 2, backoffMs = 400, timeoutMs = 20000, headers = {} } = {}) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const res = await fetch(u, { redirect: 'follow', headers, signal: AbortSignal.timeout(timeoutMs) });
+      if (res.status >= 500 && attempt < retries) {
+        await new Promise((r) => setTimeout(r, backoffMs * (attempt + 1)));
+        continue;
+      }
+      return { status: res.status, headers: res.headers, body: res.ok ? await res.text() : '' };
+    } catch (e) {
+      if (e?.name === 'TimeoutError') return { status: 'TIMEOUT', headers: null, body: '' };
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, backoffMs * (attempt + 1)));
+        continue;
+      }
+      return { status: `ERR ${String(e.message ?? e).slice(0, 30)}`, headers: null, body: '' };
+    }
+  }
+}
 
 /** sitemap 의 <loc> 전수. 비정상 응답·빈 목록은 throw — "0건 스캔 후 ✅" 를 막는다. */
 export async function fetchSitemapUrls(base, { timeoutMs = 20000 } = {}) {

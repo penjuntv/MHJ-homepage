@@ -1,0 +1,15 @@
+{
+  "_comment": [
+    "cache-control 에 no-store 가 나가도 되는 공개 URL 패턴. 여기 없는 URL 이 no-store 면",
+    "scripts/audit-live-pages.mjs (주간 site-audit ⑪) 가 실패한다 — P-27(searchParams/cookies 로 인한 동적 강등) 재발 검출.",
+    "패턴은 Next 라우트 표기: [세그먼트] 는 슬래시 없는 임의 문자열 1개. 그 외는 경로 전체 일치.",
+    "절차: (1) 동적 강등이 의도가 아니면 → 코드에서 searchParams/cookies/draftMode 사용을 제거 (ARCHITECTURE §3.3).",
+    "      (2) 정말 요청마다 렌더해야 하면 → 근거(파일·이유)와 함께 여기 추가. 근거 없는 추가 금지."
+  ],
+  "patterns": {
+    "/magazine/[id]": {
+      "reason": "리딩 뷰어의 현재 페이지가 ?page=N 쿼리로 살아 있는 상태다(components/magazine/MagazineIssueDetail.tsx, MagazineSpreadViewer.tsx). PR #51 이 목록·카테고리 8개만 정적화하고 매거진 9개는 별건으로 남겼다 — docs/handoff-2026-09-04.md §5-4, docs/PLAN-search-visibility-2026-09.md W3-A.",
+      "since": "2026-09-08"
+    }
+  }
+}

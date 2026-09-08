@@ -29,7 +29,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json<SearchResponse>({ results: [], total: 0, query: q });
   }
 
-  const pattern = `%${q}%`;
+  // ILIKE 메타문자(% _ * — PostgREST 는 * 를 % 로 바꾼다)는 이스케이프해 검색어 그대로 찾는다.
+  // .or() 필터 문자열 안에서는 값을 큰따옴표로 인용해 , ( ) 가 문법으로 읽히지 않게 한다
+  // (이전엔 "a,b" 가 500, ,() 를 지우면 "Rotorua, a short…" 가 0건이 됐다 — 2026-09-08 W1-B).
+  // 인용 안에서는 \ 와 " 를 한 번 더 이스케이프한다. .ilike() 빌더는 인용이 없으니 raw 패턴을 쓴다.
+  const pattern = `%${q.replace(/[%_*\\]/g, (m) => '\\' + m)}%`;
+  const quoted = `"${pattern.replace(/[\\"]/g, (m) => '\\' + m)}"`;
   const now = new Date().toISOString();
 
   const [blogsRes, articlesRes, magazinesRes] = await Promise.all([
@@ -39,14 +44,16 @@ export async function GET(req: NextRequest) {
       .eq('published', true)
       // .or 2회 체이닝은 AND 로 결합된다 — 검색어 매치 AND 예약발행 가드
       .or(`publish_at.is.null,publish_at.lte.${now}`)
-      .or(`title.ilike.${pattern},content.ilike.${pattern}`)
+      .or(`title.ilike.${quoted},content.ilike.${quoted}`)
       .order('created_at', { ascending: false })
       .limit(6),
 
     supabase
       .from('articles')
       .select('id, title, content, date, image_url, magazine_id')
-      .or(`title.ilike.${pattern},content.ilike.${pattern}`)
+      // 공개 페이지 5곳과 같은 발행 가드 — 없으면 초안 기사 제목·본문 100자가 검색으로 샌다
+      .eq('article_status', 'published')
+      .or(`title.ilike.${quoted},content.ilike.${quoted}`)
       .order('created_at', { ascending: false })
       .limit(4),
 

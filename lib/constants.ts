@@ -22,6 +22,15 @@ export const CATEGORY_TO_SLUG: Record<BlogCategory, string> = {
   'Local Guide': 'local-guide',
 };
 
+/**
+ * 카테고리 → 허브 링크. 매핑에 없는(폐기된) 카테고리는 /blog 로 — `/blog?category=…` 는 목록 라우트가
+ * searchParams 를 읽지 않아(P-27 회피) 아무 필터도 안 걸리는 죽은 링크였다 (2026-09-08 W1-B).
+ */
+export function categoryHref(category: string): string {
+  const slug = CATEGORY_TO_SLUG[category as BlogCategory];
+  return slug ? `/blog/category/${slug}` : '/blog';
+}
+
 /** URL slug → 카테고리 (역방향) */
 export const SLUG_TO_CATEGORY: Record<string, BlogCategory> = Object.fromEntries(
   (Object.entries(CATEGORY_TO_SLUG) as Array<[BlogCategory, string]>).map(

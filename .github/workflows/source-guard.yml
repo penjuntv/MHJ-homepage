@@ -29,3 +29,8 @@ jobs:
       - name: select-star-guard 훅 회귀 테스트
         if: ${{ !cancelled() }}
         run: bash scripts/qa/test-select-star-guard.sh
+
+      # 주간 site-audit ⑪(공개 페이지 실측)의 판정·exit 코드를 로컬 HTTP 서버로 실증한다 — 네트워크 불필요.
+      - name: audit-live-pages 판정·exit 코드 테스트
+        if: ${{ !cancelled() }}
+        run: node scripts/qa/test-audit-live-pages.mjs

@@ -1,63 +1,94 @@
 {
-  "generated": "2026-09-03",
-  "total": 79,
+  "generated": "2026-09-08",
+  "total": 80,
   "h1_over": 0,
   "alt_missing": 3,
   "orphan": 10,
   "meta_missing": 0,
   "thin": 36,
   "no_h2": 6,
-  "no_geo": 22,
+  "no_geo": 23,
+  "og_fallback": 59,
   "posts": {
-    "goodbye-for-a-while": [],
+    "nz-ncea-is-changing-following-the-curriculum-shake-up": [
+      "OG_FALLBACK"
+    ],
+    "goodbye-for-a-while": [
+      "OG_FALLBACK"
+    ],
     "100-days-of-schhol": [
       "ORPHAN",
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
-    "orewa-surf-sounds-2026-fireworks-at-shore": [],
+    "a-short-family-trip-to-rotorua": [
+      "ORPHAN",
+      "THIN",
+      "OG_FALLBACK"
+    ],
     "a-quiet-week-before-the-break-ends": [
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
+    "how-to-pack-a-lunch": [
+      "OG_FALLBACK"
     ],
     "we-hit-pause": [
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
-    "between-sunshine-and-gale-force": [],
-    "nz-ncea-is-changing-following-the-curriculum-shake-up": [],
-    "how-to-pack-a-lunch": [],
+    "orewa-surf-sounds-2026-fireworks-at-shore": [
+      "OG_FALLBACK"
+    ],
+    "between-sunshine-and-gale-force": [
+      "OG_FALLBACK"
+    ],
     "jins-first-term-report-year-1-nz": [
-      "THIN"
+      "THIN",
+      "OG_FALLBACK"
     ],
     "how-to-read-a-mid-year-report": [
       "ALT_MISSING",
       "ORPHAN",
-      "NO_H2"
+      "NO_H2",
+      "OG_FALLBACK"
     ],
-    "oh-just-you-today": [],
+    "ncea-is-changing-no-more-levels-no-more-credits": [
+      "OG_FALLBACK"
+    ],
+    "library-tour-glenfield-library": [
+      "THIN",
+      "OG_FALLBACK"
+    ],
     "girls-003": [
       "THIN"
     ],
     "holiday-home-learning-the-reading-bingo": [
       "ORPHAN",
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
-    "library-tour-glenfield-library": [
-      "THIN"
+    "anzac-home-learning-the-red-poppy": [
+      "OG_FALLBACK"
     ],
-    "anzac-home-learning-the-red-poppy": [],
     "girls-001": [
       "THIN"
     ],
     "a-cookie-jar-of-numbers-jin-s-first-1-to-20": [
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
-    "ncea-is-changing-no-more-levels-no-more-credits": [],
+    "oh-just-you-today": [
+      "OG_FALLBACK"
+    ],
     "y7-kahu-manu-new-way-of-learning": [
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
     "landing-home": [
       "THIN"
@@ -70,99 +101,138 @@
       "THIN",
       "NO_GEO"
     ],
-    "ikea-nz-grown-ups-also-dream-at-ikea": [],
+    "ikea-nz-grown-ups-also-dream-at-ikea": [
+      "OG_FALLBACK"
+    ],
     "word-fun-at-dinner": [
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
     "a-slow-long-weekend": [
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
-    "learning-aid-scholastic-book-club": [],
-    "ive-world-tour-show-what-i-am": [
-      "ORPHAN",
-      "NO_H2"
+    "learning-aid-scholastic-book-club": [
+      "OG_FALLBACK"
     ],
     "so-we-made-our-own": [
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
-    "a-short-family-trip-to-rotorua": [
+    "ive-world-tour-show-what-i-am": [
       "ORPHAN",
-      "THIN"
+      "NO_H2",
+      "OG_FALLBACK"
     ],
-    "starting-school-in-new-zealand": [],
-    "term-2-a-new-beginning": [],
-    "love-you-too-mummy-monster": [],
+    "love-you-too-mummy-monster": [
+      "OG_FALLBACK"
+    ],
+    "term-2-a-new-beginning": [
+      "OG_FALLBACK"
+    ],
     "night-market-tuesdays": [
-      "THIN"
+      "THIN",
+      "OG_FALLBACK"
+    ],
+    "starting-school-in-new-zealand": [
+      "OG_FALLBACK"
     ],
     "settlement-002": [
       "THIN",
       "NO_GEO"
     ],
     "back-to-school-what": [],
+    "y7-kahu-manu-2-life-in-pages": [
+      "NO_H2",
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
+    "intermediate-guide-specialist-subjects": [
+      "THIN",
+      "OG_FALLBACK"
+    ],
     "our-library-haul": [
       "ALT_MISSING",
       "ORPHAN",
       "NO_H2",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
     "blessings-for-the-lost": [
       "ORPHAN",
-      "NO_H2"
+      "NO_H2",
+      "OG_FALLBACK"
     ],
     "locals-001": [
       "THIN"
     ],
-    "tricky-egg-hunt-for-easter": [],
-    "intermediate-guide-specialist-subjects": [
-      "THIN"
+    "tricky-egg-hunt-for-easter": [
+      "OG_FALLBACK"
     ],
-    "y7-kahu-manu-2-life-in-pages": [
-      "NO_H2",
-      "NO_GEO"
+    "y1-maths-term-1-2": [
+      "OG_FALLBACK"
     ],
-    "y1-maths-term-1-2": [],
-    "what-s-in-the-lunchbox": [],
-    "every-day-is-mother-s-day": [],
+    "what-s-in-the-lunchbox": [
+      "OG_FALLBACK"
+    ],
+    "every-day-is-mother-s-day": [
+      "OG_FALLBACK"
+    ],
     "popcorn-blankets-and-movie-marathons": [
       "ORPHAN",
-      "THIN"
+      "THIN",
+      "OG_FALLBACK"
     ],
     "why-we-learn-at-home": [
       "THIN"
     ],
-    "season-of-cross-country": [],
+    "season-of-cross-country": [
+      "OG_FALLBACK"
+    ],
     "families-in-parks-summer-fun": [
-      "THIN"
+      "THIN",
+      "OG_FALLBACK"
     ],
     "i-want-to-go-back": [
-      "THIN"
+      "THIN",
+      "OG_FALLBACK"
     ],
     "settlement-004": [
       "THIN"
     ],
-    "top-team-competition": [],
-    "the-first-play-date": [],
-    "fearless-four": [],
+    "top-team-competition": [
+      "OG_FALLBACK"
+    ],
+    "the-first-play-date": [
+      "OG_FALLBACK"
+    ],
+    "fearless-four": [
+      "OG_FALLBACK"
+    ],
     "the-app-we-dreamt-of": [
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
     "year-7-science-social-studies-nz": [],
     "how-our-study-plan-fell-apart-again": [
-      "THIN"
+      "THIN",
+      "OG_FALLBACK"
     ],
     "being-the-only-one": [
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
     "year-7-intermediate-school-nz-curriculum": [],
     "girls-004": [
       "THIN",
       "NO_GEO"
     ],
-    "step-up-reading-aloud": [],
+    "step-up-reading-aloud": [
+      "OG_FALLBACK"
+    ],
     "when-the-plan-meets-reality": [
       "NO_GEO"
     ],
@@ -170,47 +240,67 @@
     "the-word-cards": [
       "ALT_MISSING",
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
     "locals-002": [
       "THIN"
     ],
     "honestly-i-got-lost.": [
       "ORPHAN",
-      "NO_H2"
+      "NO_H2",
+      "OG_FALLBACK"
+    ],
+    "library-tour-birkenhead-library": [
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
     "shes-already-there": [
       "THIN",
-      "NO_GEO"
-    ],
-    "setting-personal-routines": [],
-    "nz-keeping-ourselves-safe": [],
-    "the-fox-the-storm-and-the-bread-bowl": [],
-    "growing-without-a-score": [],
-    "what-we-tried-nothing-quite-fit": [],
-    "settlement-008": [
-      "THIN"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
     "the-homework-book": [
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
+    "what-we-tried-nothing-quite-fit": [
+      "OG_FALLBACK"
+    ],
+    "setting-personal-routines": [],
+    "the-fox-the-storm-and-the-bread-bowl": [
+      "OG_FALLBACK"
+    ],
+    "growing-without-a-score": [
+      "OG_FALLBACK"
+    ],
+    "nz-keeping-ourselves-safe": [
+      "OG_FALLBACK"
+    ],
+    "settlement-008": [
+      "THIN"
     ],
     "settlement-005": [
       "THIN"
     ],
-    "library-tour-albany-village-library": [],
+    "library-tour-albany-village-library": [
+      "OG_FALLBACK"
+    ],
     "settlement-003": [
+      "THIN"
+    ],
+    "year-7-english-mathematics-nz": [
       "THIN"
     ],
     "a-bead-tree-in-winter": [
       "ORPHAN",
       "THIN",
-      "NO_GEO"
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
     "matariki-in-the-house": [
-      "THIN"
-    ],
-    "year-7-english-mathematics-nz": [
-      "THIN"
+      "THIN",
+      "OG_FALLBACK"
     ]
   }
 }
