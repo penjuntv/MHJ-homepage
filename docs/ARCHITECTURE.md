@@ -10,7 +10,7 @@
 ### 1.1 라우트 그룹
 ```
 app/
-├── layout.tsx              ← 루트 레이아웃: <html lang="ko">, 폰트, globals.css, Organization JSON-LD, Analytics
+├── layout.tsx              ← 루트 레이아웃: <html lang="en-NZ">(lib/seo SITE_LANG), 폰트, globals.css, Organization JSON-LD, Analytics
 ├── (public)/              ← 공개 그룹 (Navigation + Footer 공유 layout)
 │   ├── layout.tsx
 │   ├── page.tsx           ← Landing (Hero + Intro)

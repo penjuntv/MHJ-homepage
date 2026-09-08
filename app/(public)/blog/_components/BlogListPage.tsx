@@ -6,7 +6,7 @@
  * 이 본문을 각각 복제해 갖고 있었다.
  */
 import { notFound } from 'next/navigation';
-import { OG_BASE, ogImageFor } from '@/lib/seo';
+import { OG_BASE, ogImageFor, SITE_LANG } from '@/lib/seo';
 import type { Metadata } from 'next';
 import BlogLibrary from '@/components/BlogLibrary';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -99,7 +99,7 @@ export default async function BlogListPage({ categorySlug, page }: Props) {
     name: category ? `MHJ Blog Library — ${category}` : 'MHJ Blog Library',
     url: listPageUrl(categorySlug, page),
     description: LIST_DESCRIPTION,
-    inLanguage: 'en',
+    inLanguage: SITE_LANG,
     author: { '@type': 'Person', name: 'Yussi' },
     publisher: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
     blogPost: blogCards.slice(0, 10).map((b) => ({

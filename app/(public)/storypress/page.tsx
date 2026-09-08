@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, ogImageFor } from '@/lib/seo';
+import { OG_BASE, ogImageFor, SITE_LANG } from '@/lib/seo';
 import { getSiteSettings } from '@/lib/site-settings';
 import { STORYPRESS_FAQS } from '@/lib/storypress-faqs';
 import StoryPressClient from './StoryPressClient';
@@ -50,7 +50,7 @@ export default async function StoryPressPage() {
     url: `${SITE_URL}/storypress`,
     author: { '@type': 'Organization', name: 'MHJ', url: SITE_URL },
     audience: { '@type': 'Audience', audienceType: 'Children aged 3–8 and their families' },
-    inLanguage: ['en', 'ko'],
+    inLanguage: SITE_LANG,
   };
 
   const faqJsonLd = {

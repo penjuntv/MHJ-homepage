@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
@@ -51,15 +52,15 @@ export async function GET() {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>MHJ — my mairangi</title>
+    <title>${SITE_NAME}</title>
     <link>${BASE_URL}</link>
     <atom:link href="${BASE_URL}/feed.xml" rel="self" type="application/rss+xml" />
-    <description>뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 한국인 가족의 라이프 매거진.</description>
-    <language>ko</language>
+    <description>${SITE_DESCRIPTION}</description>
+    <language>en-nz</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <image>
       <url>${BASE_URL}/og-default.png</url>
-      <title>MHJ</title>
+      <title>${SITE_NAME}</title>
       <link>${BASE_URL}</link>
     </image>
     ${items}

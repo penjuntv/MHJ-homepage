@@ -9,7 +9,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html lang="ko">
+    <html lang="en-NZ">
       <body
         style={{
           margin: 0,

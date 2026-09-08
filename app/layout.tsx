@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from 'sonner';
-import { SITE_NAME, OG_LOCALE } from '@/lib/seo';
+import { SITE_NAME, OG_LOCALE, SITE_LANG, SITE_DESCRIPTION } from '@/lib/seo';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,15 +20,11 @@ const OG_IMAGE = `${BASE_URL}/api/og?title=MHJ&category=my%20mairangi`;
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'MHJ — my mairangi',
+    default: SITE_NAME,
     template: '%s — MHJ',
   },
-  description: '뉴질랜드 오클랜드 노스쇼어 마이랑이 베이에서 기록하는 가족의 이야기. 기자 출신 아빠, 석사 과정 엄마, 세 딸의 라이프 매거진.',
-  keywords: [
-    '뉴질랜드', '오클랜드', '노스쇼어', '마이랑이', 'Mairangi Bay', '가족', '육아', '이민', '뉴질랜드 생활',
-    '뉴질랜드 한인', '오클랜드 한인', '뉴질랜드 육아', '해외이민 생활', '뉴질랜드 가족블로그',
-    'Korean family Auckland', 'Korean New Zealand', 'Auckland family blog', 'NZ immigration life',
-  ],
+  // 한국어 description·keywords 는 하위 페이지가 덮어써 라이브에 나온 적이 없는 죽은 코드였다 — 영어 한 줄로 (2026-09-08 W2-A).
+  description: SITE_DESCRIPTION,
   authors: [{ name: 'PeNnY' }, { name: 'Yussi' }],
   creator: 'MHJ',
   publisher: 'MHJ',
@@ -37,8 +33,8 @@ export const metadata: Metadata = {
     locale: OG_LOCALE,
     url: BASE_URL,
     siteName: SITE_NAME,
-    title: 'MHJ — my mairangi',
-    description: 'A family archive from Mairangi Bay, Auckland.',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
     images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'MHJ — A family archive from Mairangi Bay, Auckland' }],
   },
   // 카드 타입만 선언한다. 제목·설명·이미지를 여기 두면 자체 twitter 블록이 없는 하위
@@ -100,7 +96,7 @@ const themeScript = `
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={inter.variable} suppressHydrationWarning>
+    <html lang={SITE_LANG} className={inter.variable} suppressHydrationWarning>
       <head>
         {/* 폰트 연결 워밍업 — globals.css의 @import(fonts.googleapis→gstatic) 지연 단축 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

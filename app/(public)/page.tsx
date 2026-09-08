@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, SITE_DESCRIPTION } from '@/lib/seo';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
@@ -15,13 +15,16 @@ export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
+const HOME_TITLE = "My Mairangi Journal — A Korean Family's NZ School & Life Notes";
+
 export const metadata: Metadata = {
-  title: { absolute: 'MHJ — my mairangi' },
-  description: 'A family archive from Mairangi Bay, Auckland. Stories, images, and small records of a Korean family building a life in New Zealand.',
+  // 브랜드명만 있던 제목("MHJ — my mairangi")은 어떤 검색 의도와도 맞지 않았다(자체진단 H17). 주제를 담는다.
+  title: { absolute: HOME_TITLE },
+  description: SITE_DESCRIPTION,
   openGraph: {
     ...OG_BASE,
-    title: 'MHJ — my mairangi',
-    description: 'A family archive from Mairangi Bay, Auckland.',
+    title: HOME_TITLE,
+    description: SITE_DESCRIPTION,
     url: SITE_URL,
   },
   alternates: { canonical: SITE_URL },
@@ -276,7 +279,7 @@ export default async function LandingPage() {
     alternateName: 'MHJ',
     url: SITE_URL,
     description: 'A family archive from Mairangi Bay, Auckland. Stories, images, and small records of a Korean family building a life in New Zealand.',
-    inLanguage: ['en', 'ko'],
+    inLanguage: SITE_LANG,
     publisher: {
       '@type': 'Organization',
       name: 'My Mairangi Journal',
@@ -351,6 +354,30 @@ export default async function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }}
       />
       <div className="animate-fade-in">
+
+        {/* ═══════ §0. 사이트 정체성 문장 = 페이지의 유일한 H1 ═══════
+            히어로 글 제목이 H1 이면 홈의 주제가 매주 바뀐다(자체진단 H17·heading-order). 히어로가 비어도 남도록
+            조건 밖에 둔다. 스타일은 홈 라벨 관례(12px·900·자간 2·대문자·text-secondary). */}
+        <div style={{ background: 'var(--bg-surface)' }}>
+          <div style={{
+            maxWidth: 1320,
+            width: '100%',
+            boxSizing: 'border-box' as const,
+            margin: '0 auto',
+            padding: '32px clamp(20px, 4vw, 48px) 0',
+          }}>
+            <h1 style={{
+              fontSize: 12,
+              fontWeight: 900,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+              color: 'var(--text-secondary)',
+              margin: 0,
+            }}>
+              A Korean family&rsquo;s school &amp; life notes from Mairangi Bay, Auckland
+            </h1>
+          </div>
+        </div>
 
         {/* ═══════ §1. Editorial Hero (full-bleed surface bg) ═══════ */}
         {heroBlogs.length > 0 && (
@@ -782,7 +809,7 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                 {main.date && ` · ${formatDate(main.date)}`}
               </span>
 
-              <h1
+              <h2
                 className="font-display"
                 style={{
                   fontSize: 'clamp(26px, 4vw, 32px)',
@@ -795,7 +822,7 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
                 }}
               >
                 {main.title}
-              </h1>
+              </h2>
 
               {mainExcerpt && (
                 <p style={{

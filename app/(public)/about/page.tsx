@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE } from '@/lib/seo';
+import { OG_BASE, SITE_LANG } from '@/lib/seo';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -95,7 +95,7 @@ export default async function AboutPage() {
     name: 'About — My Mairangi Journal',
     url: `${SITE_URL}/about`,
     description: 'Meet Yussi — a social work student, mother of three, and the writer behind My Mairangi Journal. Stories from a Korean family in Mairangi Bay, Auckland.',
-    inLanguage: 'en',
+    inLanguage: SITE_LANG,
     publisher: {
       '@type': 'Organization',
       name: 'My Mairangi Journal',
