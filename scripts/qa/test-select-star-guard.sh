@@ -41,8 +41,12 @@ run "5 절대경로+멀티라인 체인 차단" 2 \
   "{\"tool_input\":{\"file_path\":\"$PWD/app/feed.xml/route.ts\",\"content\":\"await supabase\n  .from('blogs')\n  .select(\n    '*'\n  )\"}}"
 run "6 MultiEdit edits[] 차단" 2 \
   "{\"tool_input\":{\"file_path\":\"app/api/search/route.ts\",\"edits\":[{\"new_string\":\"const x = 1\"},{\"new_string\":\"supabase.from('blogs').select('*')\"}]}}"
+# 이 케이스는 훅이 **파일 내용**을 읽어 blogs 참조 여부를 판정하는 경로를 검증한다.
+# 따라서 픽스처는 실제로 from('blogs') 를 담고 있는 파일이어야 한다.
+# 2026-09-08: blog 목록 리팩터로 blogs 쿼리가 page.tsx → _lib/blog-list-data.ts 로
+# 옮겨가면서 page.tsx 가 더 이상 blogs 파일이 아니게 됐다(훅은 정상, 픽스처가 stale).
 run "7 체인없는 bare select(*) — blogs 파일이면 차단" 2 \
-  "{\"tool_input\":{\"file_path\":\"app/(public)/blog/page.tsx\",\"new_string\":\"    .select('*')\"}}"
+  "{\"tool_input\":{\"file_path\":\"app/(public)/blog/_lib/blog-list-data.ts\",\"new_string\":\"    .select('*')\"}}"
 run "8 워크트리 절대경로 차단" 2 \
   "{\"tool_input\":{\"file_path\":\"$PWD/.claude/worktrees/x/app/(public)/blog/page.tsx\",\"new_string\":\"supabase.from('blogs').select('*')\"}}"
 # 백틱은 bash 홑따옴표 안에서 리터럴 — JS 작은따옴표가 없는 케이스라 이 형태가 안전

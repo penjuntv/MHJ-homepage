@@ -1,0 +1,10 @@
+# 자체진단 원자료 — 결론과 수치는 *.md 와 06-measurements.json 에 다 들어 있다.
+# 아래 셋은 그것들을 만든 원본이고 합쳐서 35MB 라 커밋하지 않는다(레포 영구 증가).
+# 재생성 방법은 00-summary.md "산출물" 표와 06-frontend-backend.md §G3 참조.
+#
+# psi/     Lighthouse 12개 리포트 (11MB) — 요약본은 06-measurements.json 의 psi.rows
+# screens/ 스크린샷 42장 (15MB)
+# raw/     봇 프로브 HTML · 라우트별 JSON-LD · 메타 전수 · 빌드 로그 (8.9MB)
+psi/
+screens/
+raw/

@@ -7,6 +7,8 @@ import type { Blog } from '@/lib/types';
 import { BLOG_CATEGORIES, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import Link from 'next/link';
+import { listPagePath } from '@/app/(public)/blog/_lib/blog-list-urls';
 
 const ALL_CATEGORIES = [...BLOG_CATEGORIES];
 
@@ -18,6 +20,8 @@ interface Props {
   currentPage: number;
   totalPages: number;
   activeCategory: string | null;
+  /** 페이지네이션 링크 생성용. null 이면 /blog 축 */
+  activeCategorySlug: string | null;
   readerFavorites?: Blog[];
   blogTitle?: string;
   blogDescription?: string;
@@ -32,33 +36,28 @@ export default function BlogLibrary({
   currentPage,
   totalPages,
   activeCategory,
+  activeCategorySlug,
   readerFavorites,
   blogTitle,
   blogDescription,
   categoryCounts = {},
 }: Props) {
   const router = useRouter();
-  const allStoriesRef = useRef<HTMLDivElement>(null);
-  const prevPageRef = useRef(currentPage);
 
-  // 페이지 변경 시 All Stories 섹션으로 스크롤
-  useEffect(() => {
-    if (prevPageRef.current !== currentPage) {
-      prevPageRef.current = currentPage;
-      allStoriesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [currentPage]);
+  // 2026-09-08 P0-3-1: 페이지네이션이 ?page=N 쿼리에서 경로 세그먼트로 옮겨가면서
+  // /blog 와 /blog/page/2 가 서로 다른 라우트 세그먼트가 됐다. 예전의
+  // prevPageRef + scrollIntoView useEffect 는 서브트리가 리마운트되며
+  // ref 가 새 currentPage 로 초기화돼 절대 발화하지 않는다(에러도 안 난다).
+  // #all-stories 해시 앵커로 대체한다 — JS 없이 동작하고, 해시는 서버로
+  // 전송되지 않아 CDN 캐시 키에도 영향이 없다.
+
+  function pageHref(category: string | null, page: number) {
+    const slug = category ? (CATEGORY_TO_SLUG[category as BlogCategory] ?? null) : null;
+    return `${listPagePath(slug, page)}#all-stories`;
+  }
 
   function navigateTo(category: string | null, page: number) {
-    const pageQuery = page > 1 ? `?page=${page}` : '';
-    if (category) {
-      const slug = CATEGORY_TO_SLUG[category as BlogCategory];
-      if (slug) {
-        router.push(`/blog/category/${slug}${pageQuery}`, { scroll: false });
-        return;
-      }
-    }
-    router.push(`/blog${pageQuery}`, { scroll: false });
+    router.push(pageHref(category, page));
   }
 
   function handleCategoryChange(cat: string) {
@@ -152,7 +151,7 @@ export default function BlogLibrary({
       )}
 
       {/* ═══════ ALL STORIES + 카테고리 필터 ═══════ */}
-      <div ref={allStoriesRef} style={{
+      <div id="all-stories" style={{
         borderTop: '1px solid var(--border-medium)',
         paddingTop: 40,
         marginBottom: 40,
@@ -214,7 +213,7 @@ export default function BlogLibrary({
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={(p) => navigateTo(activeCategory, p)}
+          hrefFor={(p) => `${listPagePath(activeCategorySlug, p)}#all-stories`}
         />
       )}
 
@@ -810,10 +809,22 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
 /* ════════════════════════════════════════════
    Pagination
    ════════════════════════════════════════════ */
-function Pagination({ currentPage, totalPages, onPageChange }: {
+/** 페이지네이션 셀 공통 박스. <a> 는 <button> 과 기본 display·밑줄이 달라 명시한다. */
+const NAV_BOX = {
+  width: 40, height: 40,
+  borderRadius: 8,
+  border: '1px solid var(--border)',
+  background: 'transparent',
+  transition: 'all 0.2s',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  textDecoration: 'none',
+} as const;
+
+function Pagination({ currentPage, totalPages, hrefFor }: {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  /** 실제 <a href> 를 만든다 — 크롤러가 페이지 2 이상을 따라갈 수 있게 (2026-09-08 P0-3-1) */
+  hrefFor: (page: number) => string;
 }) {
   function getPageNumbers(): (number | '...')[] {
     if (totalPages <= 7) {
@@ -841,22 +852,19 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
       gap: 8,
       marginTop: 80,
     }}>
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        style={{
-          width: 40, height: 40,
-          borderRadius: 8,
-          border: '1px solid var(--border)',
-          background: 'transparent',
-          color: currentPage === 1 ? 'var(--text-tertiary)' : 'var(--text)',
-          cursor: currentPage === 1 ? 'default' : 'pointer',
-          transition: 'all 0.2s',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-      >
-        <ChevronLeft size={16} />
-      </button>
+      {currentPage === 1 ? (
+        <span aria-disabled="true" style={{ ...NAV_BOX, color: 'var(--text-tertiary)', cursor: 'default' }}>
+          <ChevronLeft size={16} />
+        </span>
+      ) : (
+        <Link
+          href={hrefFor(currentPage - 1)}
+          aria-label="Previous page"
+          style={{ ...NAV_BOX, color: 'var(--text)' }}
+        >
+          <ChevronLeft size={16} />
+        </Link>
+      )}
 
       {pages.map((p, i) =>
         p === '...' ? (
@@ -868,42 +876,42 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
             ...
           </span>
         ) : (
-          <button
+          <Link
             key={p}
-            onClick={() => onPageChange(p)}
+            href={hrefFor(p)}
+            // 숫자 링크는 최대 7개가 한 번에 뷰포트에 들어온다. 기본 prefetch 를
+            // 켜두면 목록 RSC 페이로드를 7개 동시에 당긴다. 실제로 누를 확률이
+            // 높은 prev/next 에만 기본 prefetch 를 남긴다.
+            prefetch={false}
+            aria-label={`Page ${p}`}
+            aria-current={p === currentPage ? 'page' : undefined}
             style={{
-              width: 40, height: 40,
-              borderRadius: 8,
+              ...NAV_BOX,
               border: p === currentPage ? 'none' : '1px solid var(--border)',
               background: p === currentPage ? 'var(--text)' : 'transparent',
               color: p === currentPage ? 'var(--bg)' : 'var(--text-secondary)',
-              cursor: 'pointer',
               fontSize: 12,
               fontWeight: 900,
-              transition: 'all 0.2s',
             }}
           >
             {p}
-          </button>
+          </Link>
         )
       )}
 
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        style={{
-          width: 40, height: 40,
-          borderRadius: 8,
-          border: '1px solid var(--border)',
-          background: 'transparent',
-          color: currentPage === totalPages ? 'var(--text-tertiary)' : 'var(--text)',
-          cursor: currentPage === totalPages ? 'default' : 'pointer',
-          transition: 'all 0.2s',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-      >
-        <ChevronRight size={16} />
-      </button>
+      {currentPage === totalPages ? (
+        <span aria-disabled="true" style={{ ...NAV_BOX, color: 'var(--text-tertiary)', cursor: 'default' }}>
+          <ChevronRight size={16} />
+        </span>
+      ) : (
+        <Link
+          href={hrefFor(currentPage + 1)}
+          aria-label="Next page"
+          style={{ ...NAV_BOX, color: 'var(--text)' }}
+        >
+          <ChevronRight size={16} />
+        </Link>
+      )}
     </div>
   );
 }
