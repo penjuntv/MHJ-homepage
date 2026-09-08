@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG } from '@/lib/seo';
+import AuthorBox from '@/components/AuthorBox';
+import { OG_BASE, SITE_LANG, personRef, orgRef } from '@/lib/seo';
 import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -238,22 +239,8 @@ export default async function BlogDetailPage(
     datePublished: blog.created_at ?? blog.date,
     dateModified: blog.created_at ?? blog.date,
     url: `${SITE_URL}/blog/${blog.slug}`,
-    author: {
-      '@type': 'Person',
-      name: blog.author || 'Yussi',
-      url: `${SITE_URL}/about`,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'My Mairangi Journal',
-      url: SITE_URL,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${SITE_URL}/icon-192.png`,
-        width: 192,
-        height: 192,
-      },
-    },
+    author: personRef(blog.author || 'Yussi'),
+    publisher: orgRef(),
     keywords: [blog.category, ...(blog.tags ?? [])].filter(Boolean).join(', '),
     inLanguage: SITE_LANG,
   };
@@ -494,6 +481,9 @@ export default async function BlogDetailPage(
                 </div>
               )}
             </div>
+
+            {/* ── 저자 박스 (사진·자격·소개) — 본문 직후, 인포블록 앞 ── */}
+            <AuthorBox author={blog.author || 'Yussi'} />
 
             {/* ── 인포블록 ── */}
             {blog.info_block_html && (

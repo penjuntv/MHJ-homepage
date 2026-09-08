@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, orgRef } from '@/lib/seo';
 import { supabase } from '@/lib/supabase';
 import { Mail } from 'lucide-react';
 
@@ -93,12 +93,7 @@ export default async function MediaKitPage() {
     description:
       "Partner with My Mairangi Journal. Reach families on Auckland's North Shore through newsletter sponsorship, sponsored posts, and affiliate partnerships.",
     inLanguage: SITE_LANG,
-    publisher: {
-      '@type': 'Organization',
-      name: 'MHJ',
-      url: SITE_URL,
-      email: 'hello@mhj.nz',
-    },
+    publisher: orgRef(),   // 연락 이메일은 organizationNode() 가 전 페이지에 낸다
     mainEntity: {
       '@type': 'OfferCatalog',
       name: 'Partnership Options',

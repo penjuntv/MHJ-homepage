@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, orgRef } from '@/lib/seo';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
@@ -145,17 +145,7 @@ export default async function MagazineIssuePage(props: Props) {
     name: magazine.title,
     issueNumber: `${magazine.year}-${magazine.month_name}`,
     datePublished: magazine.created_at ?? `${magazine.year}`,
-    publisher: {
-      '@type': 'Organization',
-      name: 'My Mairangi Journal',
-      url: SITE_URL,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${SITE_URL}/icon-192.png`,
-        width: 192,
-        height: 192,
-      },
-    },
+    publisher: orgRef(),
     image: {
       '@type': 'ImageObject',
       url: magazine.image_url,

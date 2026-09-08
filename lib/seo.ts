@@ -44,3 +44,110 @@ export const OG_BASE = {
   type: 'website' as const,
   images: [OG_DEFAULT_IMAGE],
 };
+
+/* ── 엔티티 그래프 (2026-09-08 W2-B) ──
+ * Organization·Person 을 페이지마다 새로 선언하지 않고 `@id` 로 같은 노드를 가리킨다.
+ * 전체 노드는 루트 layout(Organization)과 /about(Person 2명)에만, 나머지 페이지는 orgRef()/personRef() 참조.
+ * 실명 P0(CLAUDE.md 10): 사이트 표기(Yussi·PeNnY·Min/Hyun/Jin)만 쓴다 — DB family_members.name 을 여기 넣지 말 것.
+ */
+export const ORG_ID = `${SITE_URL}/#organization`;
+export const WEBSITE_ID = `${SITE_URL}/#website`;
+/** 조직 공식 프로필. 개인 프로필 URL 을 받으면 AUTHORS[..].sameAs 에 넣는다 — Person 노드가 그대로 읽는다. */
+export const ORG_SAME_AS = [
+  'https://www.instagram.com/mhj_nz/',
+  'https://www.facebook.com/minhyunjin.nz/',
+  'https://www.youtube.com/@mhj_nz',
+];
+export const ORG_LOGO = { '@type': 'ImageObject', url: `${SITE_URL}/icon-192.png`, width: 192, height: 192 };
+const ORG_ADDRESS = { '@type': 'PostalAddress', addressLocality: 'Mairangi Bay', addressRegion: 'Auckland', addressCountry: 'NZ' };
+export const YUSSI_IMAGE_URL = 'https://vpayqdatpqajsmalpfmq.supabase.co/storage/v1/object/public/images/family/yussi_profile.png';
+
+/**
+ * 저자 레지스트리 — 저자 박스(components/AuthorBox.tsx)와 Person 노드·@id 가 전부 여기서 나온다.
+ * 한 곳이라 "스키마엔 @id 가 있는데 화면엔 박스가 없는" 불일치가 생길 수 없다. /about 의 서술과 일치시킬 것.
+ * 자격은 사실대로(Yussi 는 재학생이지 석사 취득자가 아니다 — E-E-A-T 블록의 허위 자격은 역효과).
+ */
+export interface AuthorProfile { name: string; title: string; bio: string; image?: string; href: string; sameAs?: string[] }
+export const AUTHORS: Record<string, AuthorProfile> = {
+  Yussi: {
+    name: 'Yussi',
+    title: 'Writer · Social work student, Massey University',
+    bio: "A mother of three girls and a Korean immigrant making Mairangi Bay home — writing about starting school, home learning and everyday life on Auckland's North Shore.",
+    image: YUSSI_IMAGE_URL,
+    href: '/about',
+  },
+  PeNnY: {
+    name: 'PeNnY',
+    title: 'Editor & Publisher · Former journalist',
+    bio: 'Father of three and former journalist — editor of My Mairangi Journal and the magazine.',
+    href: '/about',
+  },
+};
+export const getAuthor = (name: string): AuthorProfile | undefined =>
+  Object.hasOwn(AUTHORS, name) ? AUTHORS[name] : undefined;
+export const PERSON_IDS: Record<string, string> = Object.fromEntries(
+  Object.keys(AUTHORS).map((n) => [n, `${SITE_URL}/about#${n.toLowerCase()}`]),
+);
+
+/** publisher/worksFor 용 참조. 구글 Article 리치결과가 publisher.logo 를 요구하므로 logo 는 포함한다. */
+export function orgRef() {
+  return { '@type': 'Organization', '@id': ORG_ID, name: SITE_NAME, url: SITE_URL, logo: ORG_LOGO };
+}
+
+/** author 용. 등록된 저자(Yussi·PeNnY)만 @id 를 받고, 그 외(매거진 기사의 Min/Hyun/Jin 등)는 이름만. */
+export function personRef(name: string) {
+  const id = Object.hasOwn(PERSON_IDS, name) ? PERSON_IDS[name] : undefined;
+  return id ? { '@type': 'Person', '@id': id, name, url: `${SITE_URL}/about` } : { '@type': 'Person', name };
+}
+
+export function organizationNode() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': ORG_ID,
+    name: SITE_NAME,
+    alternateName: 'MHJ',
+    url: SITE_URL,
+    logo: ORG_LOGO,
+    description: SITE_DESCRIPTION,
+    address: ORG_ADDRESS,
+    email: 'hello@mhj.nz',
+    foundingLocation: { '@type': 'Place', name: 'Mairangi Bay, Auckland, New Zealand' },
+    founder: [personRef('PeNnY'), personRef('Yussi')],
+    sameAs: ORG_SAME_AS,
+  };
+}
+
+export function yussiNode() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': PERSON_IDS.Yussi,
+    name: 'Yussi',
+    jobTitle: 'Writer & Social Work Student',
+    url: `${SITE_URL}/about`,
+    image: { '@type': 'ImageObject', url: YUSSI_IMAGE_URL },
+    description: AUTHORS.Yussi.bio,
+    worksFor: orgRef(),
+    address: ORG_ADDRESS,
+    nationality: { '@type': 'Country', name: 'South Korea' },
+    alumniOf: { '@type': 'EducationalOrganization', name: 'Massey University' },
+    knowsAbout: ['Starting school in New Zealand', 'Home learning', 'Korean immigrant family life in Auckland', 'Social work'],
+    ...(AUTHORS.Yussi.sameAs ? { sameAs: AUTHORS.Yussi.sameAs } : {}),
+  };
+}
+
+export function pennyNode() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': PERSON_IDS.PeNnY,
+    name: 'PeNnY',
+    jobTitle: 'Editor & Publisher (former journalist)',
+    description: AUTHORS.PeNnY.bio,
+    url: `${SITE_URL}/about`,
+    worksFor: orgRef(),
+    address: ORG_ADDRESS,
+    ...(AUTHORS.PeNnY.sameAs ? { sameAs: AUTHORS.PeNnY.sameAs } : {}),
+  };
+}

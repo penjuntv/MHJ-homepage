@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, orgRef, PERSON_IDS, yussiNode, pennyNode, YUSSI_IMAGE_URL } from '@/lib/seo';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -70,8 +70,6 @@ const container: React.CSSProperties = {
 /* ─ 섹션 vertical padding (§7: 96px/128px) ─ */
 const sectionPad = 'clamp(96px, 10vw, 128px) 0';
 
-const YUSSI_IMAGE_URL = 'https://vpayqdatpqajsmalpfmq.supabase.co/storage/v1/object/public/images/family/yussi_profile.png';
-
 export default async function AboutPage() {
   const [allMembers, s] = await Promise.all([getFamilyMembers(), getSiteSettings()]);
 
@@ -96,45 +94,14 @@ export default async function AboutPage() {
     url: `${SITE_URL}/about`,
     description: 'Meet Yussi — a social work student, mother of three, and the writer behind My Mairangi Journal. Stories from a Korean family in Mairangi Bay, Auckland.',
     inLanguage: SITE_LANG,
-    publisher: {
-      '@type': 'Organization',
-      name: 'My Mairangi Journal',
-      url: SITE_URL,
-    },
+    publisher: orgRef(),
+    mainEntity: { '@id': PERSON_IDS.Yussi },
     breadcrumb: breadcrumbLd,
   };
 
-  const personLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: 'Yussi',
-    jobTitle: 'Writer & Social Work Student',
-    url: `${SITE_URL}/about`,
-    image: {
-      '@type': 'ImageObject',
-      url: YUSSI_IMAGE_URL,
-    },
-    worksFor: {
-      '@type': 'Organization',
-      name: 'My Mairangi Journal',
-      url: SITE_URL,
-    },
-    description: "A mother of three girls, a social work student at Massey University, and a Korean immigrant making Mairangi Bay home. Writer and creator of My Mairangi Journal.",
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'Mairangi Bay',
-      addressRegion: 'Auckland',
-      addressCountry: 'NZ',
-    },
-    nationality: {
-      '@type': 'Country',
-      name: 'South Korea',
-    },
-    alumniOf: {
-      '@type': 'EducationalOrganization',
-      name: 'Massey University',
-    },
-  };
+  // Person 전체 노드는 여기서만 — 글·목록·홈은 personRef() 로 @id 참조 (W2-B)
+  const personLd = yussiNode();
+  const pennyLd = pennyNode();
 
   return (
     <>
@@ -149,6 +116,10 @@ export default async function AboutPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pennyLd) }}
       />
       <div className="animate-fade-in">
 
