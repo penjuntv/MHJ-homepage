@@ -34,6 +34,9 @@ carousel · carousel-v3 · comments · newsletter · subscribers · affiliates �
 
 ## 2. 서버 vs 클라이언트 컴포넌트
 
+> ⚠️ `<style jsx>` 는 App Router 에 styled-jsx 레지스트리가 없어 **서버 HTML 에 실리지 않는다** — 하이드레이션 뒤에야 적용된다.
+> 레이아웃·반응형 규칙은 `globals.css` 에 둔다. (인라인 2열 + `<style jsx>` 모바일 1열 조합이 목록 페이지 모바일 CLS 0.19 를 냈다 — 2026-09-08 W3-B.)
+
 - **기본은 서버 컴포넌트.** `app/(public)/**/page.tsx`는 서버에서 Supabase fetch → 클라이언트 컴포넌트에 props 전달(하이브리드).
 - **`'use client'`**는 상호작용 컴포넌트에만: Navigation, HeroCarousel, MagazineShelf, BlogLibrary, DetailModal, AiInsight, ThemeProvider, SearchOverlay, TipTapEditor, 카드류(hover) 등.
 - 하이브리드 예: `magazine/page.tsx`(서버, magazines fetch) → `<MagazineShelf magazines={data} />`(클라이언트).

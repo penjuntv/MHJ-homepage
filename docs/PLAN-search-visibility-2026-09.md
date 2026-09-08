@@ -178,7 +178,7 @@ M   ●          ●                ● +4w                          ● +8w
 - Done: `raw/meta-by-url.json` 재실행에서 `no-store` 17 → 9 · 8개 URL `x-vercel-cache` PRERENDER/HIT · TTFB 중앙값 < 400ms · 빌드표 `ƒ`→`○` · 주간 감사 ⑪ 허용 목록에 매거진 9개만 남김
 - 잔여(라이브 재측정): 배포 후 `no-store` 9 확인은 W1-B 의 감사 ⑪ 편입 시 함께.
 
-**☐ W3-B · 목록 CLS 0.19** — F-C-03 · 노력 S(원인 특정 후)
+**◐ W3-B · 목록 CLS 0.19** (2026-09-08 구현 완료, PR 대기 — 브랜치 `perf/w3b-list-cls`; 원인 = `<style jsx>` 모바일 규칙이 SSR 에 안 실림, 실측 0.188 → 0.0001) — F-C-03 · 노력 S(원인 특정 후)
 - 모바일 375px Playwright `PerformanceObserver('layout-shift')` 로 요소 특정 → 카드 이미지 `aspect-ratio` 고정 또는 필터 바 높이 예약
 - Done: LH-mobile `/blog`·카테고리 CLS < 0.1
 

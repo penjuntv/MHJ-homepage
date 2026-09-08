@@ -446,6 +446,7 @@ transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 - [ ] border-radius가 12px 이하인가?
 - [ ] 간격이 8px 배수인가?
 - [ ] 카드에 불필요한 텍스트가 없는가?
+- [ ] 반응형·레이아웃 규칙이 `globals.css` 에 있는가? (`<style jsx>` 는 서버 HTML 에 안 실려 첫 페인트 뒤에 접힌다 — CLS)
 - [ ] 이미지 위에 텍스트를 올리고 있지 않은가? (히어로 제외)
 - [ ] 제목 크기가 72px을 초과하지 않는가?
 - [ ] npm run build 성공하는가?

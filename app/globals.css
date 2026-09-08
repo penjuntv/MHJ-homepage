@@ -1383,6 +1383,20 @@
   min-width: 0;
 }
 
+/* 블로그 목록 Featured + Recent Stories 그리드 — 규칙이 초기 CSS 에 있어야 모바일 첫 페인트부터 1열이다.
+   (예전엔 인라인 2열 + <style jsx> 모바일 규칙이라 하이드레이션 후 접히며 CLS 0.19 — 2026-09-08 W3-B) */
+.featured-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: stretch;
+}
+@media (max-width: 767px) {
+  .featured-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .hero-sub-cards {
   display: flex;
   flex-direction: column;
