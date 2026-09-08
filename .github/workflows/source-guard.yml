@@ -45,6 +45,14 @@ jobs:
         if: ${{ !cancelled() }}
         run: node scripts/audit-api-auth.mjs --self-test
 
+      - name: anon 컬럼 grant 가드 (BLOG_*_COLUMNS ⊆ grant 참고본)
+        if: ${{ !cancelled() }}
+        run: node scripts/audit-anon-column-grant.mjs
+
+      - name: anon 컬럼 grant 가드 self-test (임시 파일에 위반 주입 → exit 0/1/2 실증)
+        if: ${{ !cancelled() }}
+        run: node scripts/audit-anon-column-grant.mjs --self-test
+
       - name: proxy-image URL allowlist 테스트 (SSRF 차단)
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-image-proxy-allow.mjs

@@ -27,7 +27,8 @@
  *   SKILL.md 쪽에서 주의할 점: Postgres 는 단어 경계가 `\y` 다(`\b` 는 백스페이스) —
  *   JS 의 이 파일에서는 `\b` 가 맞다. 옛 SQL 의 `<h2\b` 는 항상 0을 돌려줬다.
  *   대조 실측(2026-09-04, 79편): thin 36 / orphan 10 / no_geo 22 / alt 3 / no_h2 6 / h1 0.
- *   og_fallback(2026-09-07, 80편): 59 — og_image_url 이 NULL 이 아니라 빈 문자열이라 IS NULL 로 세면 0 이 나온다.
+ *   og_fallback(2026-09-07, 80편): 59 — 당시 og_image_url 이 빈 문자열이라 IS NULL 로 세면 0 이 나왔다.
+ *   2026-09-08 부터 '' 는 NULL 로 정규화(트리거)됐지만 /api/og 리터럴도 폴백이라 `?? ''`+isOgApi 판정은 그대로다(실측 62/84).
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { requireAdminClient, paged, isOgApi } from './lib/audit-shared.mjs';

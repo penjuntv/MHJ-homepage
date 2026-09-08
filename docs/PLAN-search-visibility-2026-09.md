@@ -192,12 +192,11 @@ M   ●          ●                ● +4w                          ● +8w
 
 ### W4. SEO 운영 컬럼과 구조 (3~5주차) ⛔ D2 D3
 
-**☐ W4-A · 마이그레이션 "SEO 운영 컬럼"** — F-A-04 · F-D-01 · F-D-02 · F3 · 노력 M · 위험 중간 · Plan Mode 필수
-- 컬럼: `updated_at timestamptz default now()` + 갱신 트리거 · `seo_title text` · `summary_ko text`(D1) · `faq_json jsonb` · `related_slugs text[]` · `og_image_alt text`
-- 데이터 정리: `og_image_url ''` → NULL (dry-run + `qa-reports/` 백업 + 적용 후 검증, 3원칙)
-- **순서 엄수**: ① `apply_migration` ② `docs/sql/anon_blogs_column_whitelist_grant.sql` 패턴으로 새 공개 컬럼 anon SELECT grant(fail-closed — 빠뜨리면 공개 페이지 42501) ③ `lib/constants.ts` `BLOG_*_COLUMNS` 갱신 ④ 코드 배포. 없는 컬럼 select 는 쿼리 전체가 조용히 null 이다(핸드오프 §5-3)
-- `docs/DB_SCHEMA.md` 갱신 · 주간 감사 ⑨⑩ 통과 확인
-- Done: 컬럼 6개 존재 · anon 프로브 `select=seo_title` 200 · 공개 페이지 회귀 0
+**☑ W4-A · 마이그레이션 "SEO 운영 컬럼"** — F-A-04 · F-D-01 · F-D-02 · F3 · 노력 M · 위험 중간 — **2026-09-08 완료** (PR `seo/w4a-seo-columns`)
+- 결과: `updated_at`·`seo_title`·`summary_ko`(D1)·`faq_json`·`related_slugs`·`og_image_alt` 라이브(`docs/migrations/2026-09-08_seo_operating_columns.sql` + `…_set_blogs_updated_at_v2.sql`) · anon 컬럼 grant 42개(추가형, 배포 전 적용) · `BLOG_CARD_COLUMNS` +`updated_at`, `BLOG_DETAIL_COLUMNS` +SEO 5컬럼 · 선택 텍스트 `''` 111건/75행 → NULL(`scripts/normalize-empty-strings.mjs`, 3원칙)
+- `updated_at` 트리거는 코드리뷰(8각도·확정 10건) 후 v2: 제외 목록 방식(새 컬럼은 기본 편집 컬럼) · 8컬럼 `''`→NULL 정규화를 모든 writer 에 적용 · `updated_at ≥ created_at`(예약발행 안전) · faq_json 원소 형태 CHECK. 실증 DO 블록 6케이스 통과 후 롤백. 규칙 정본은 `docs/DB_SCHEMA.md` §blogs
+- 새 가드 `scripts/audit-anon-column-grant.mjs`(source-guard): `BLOG_*_COLUMNS` ⊆ grant 참고본 — "grant 빠뜨린 배포 → 42501 → 공개 페이지 500" 을 PR 에서 차단
+- 남긴 것(W4-B 에서): 상세 `modifiedTime`/`dateModified` 를 `updated_at` 으로 교체(현재 created_at), FAQPage 빌더는 storypress 페이지 것을 `lib/seo.ts` 로 올려 공유(`StoryPressFAQ = BlogFaqItem`)
 
 **☐ W4-B · 렌더링** — 노력 M · 1~2 PR
 - `<title>`/OG title = `seo_title || title`, `<h1>` 은 `title` 불변
@@ -283,7 +282,7 @@ M   ●          ●                ● +4w                          ● +8w
 | 8 | W3-A | `… §4 W3-A 착수. Plan Mode. 매거진 ?page 는 범위 밖` | — |
 | 9 | W3-B/C | `… §4 W3-B, W3-C 착수(별도 대화 2개)` | — |
 | 10 | W4-A | `… §4 W4-A 착수. Plan Mode. 마이그레이션→grant→constants→배포 순서, og_image_url '' 정리는 dry-run 먼저` | D2 D3 |
-| 11 | W4-B | `… §4 W4-B 착수` | W4-A |
+| 11 | W4-B | `… §4 W4-B 착수. updated_at 은 편집 변경만 갱신하므로 dateModified·sitemap lastmod 에 바로 사용. seo_title 등은 BLOG_DETAIL_COLUMNS 에 이미 포함` | W4-A ☑ |
 | 12 | W4-C | `… §4 W4-C 착수. preflight 는 경고 모드` | W4-A |
 | 13 | W4-D/E | 별도 2대화 | W4-A |
 | 14 | W5 | `… §4 W5 정비 큐 1번부터. 처방 목록만 만들고 본문은 수정하지 않는다` | D4 |

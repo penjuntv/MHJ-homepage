@@ -44,11 +44,16 @@ export const SLUG_TO_CATEGORY: Record<string, BlogCategory> = Object.fromEntries
  * (2026-09-04 감사: content_backup 의 아이 실명이 페이지 소스에 노출됐던 P0 사고).
  */
 export const BLOG_CARD_COLUMNS =
-  'id, category, title, author, date, image_url, content, slug, meta_description, og_image_url, published, view_count, tags, is_sponsored, letter_to';
+  'id, category, title, author, date, image_url, content, slug, meta_description, og_image_url, published, view_count, tags, is_sponsored, letter_to, updated_at';
 
-/** 상세 페이지(/blog/[slug]) 전용 — 카드 컬럼 + 본문 렌더링에 추가로 필요한 컬럼 */
+/**
+ * 상세 페이지(/blog/[slug]) 전용 — 카드 컬럼 + 본문 렌더링에 추가로 필요한 컬럼.
+ * seo_title·summary_ko·faq_json·related_slugs·og_image_alt 는 W4-A(2026-09-08)에서 컬럼·anon grant 까지
+ * 마련한 SEO 운영 컬럼 — 렌더링은 W4-B. 새 공개 컬럼 추가 절차는 docs/DB_SCHEMA.md §blogs 가 정본
+ * (grant 가 코드보다 먼저 — 없으면 anon select 가 42501 로 전면 실패. scripts/audit-anon-column-grant.mjs 가 PR 에서 확인).
+ */
 export const BLOG_DETAIL_COLUMNS =
-  `${BLOG_CARD_COLUMNS}, created_at, sponsor_name, cover_caption, info_block_html`;
+  `${BLOG_CARD_COLUMNS}, created_at, sponsor_name, cover_caption, info_block_html, seo_title, summary_ko, faq_json, related_slugs, og_image_alt`;
 
 /** 관련 글 카드(getRelatedBlogs) 전용 — 카드 컬럼보다 가벼운 최소 컬럼 */
 export const BLOG_RELATED_COLUMNS =
