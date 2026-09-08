@@ -49,8 +49,8 @@ export const BLOG_CARD_COLUMNS =
 /**
  * 상세 페이지(/blog/[slug]) 전용 — 카드 컬럼 + 본문 렌더링에 추가로 필요한 컬럼.
  * seo_title·summary_ko·faq_json·related_slugs·og_image_alt 는 W4-A(2026-09-08)에서 컬럼·anon grant 까지
- * 마련한 SEO 운영 컬럼 — 렌더링은 W4-B. 새 공개 컬럼은 반드시 anon 컬럼 grant 를 "먼저" 적용할 것
- * (docs/migrations/2026-09-08_anon_blogs_grant_seo_columns.sql — 없으면 anon select 가 42501 로 전면 실패).
+ * 마련한 SEO 운영 컬럼 — 렌더링은 W4-B. 새 공개 컬럼 추가 절차는 docs/DB_SCHEMA.md §blogs 가 정본
+ * (grant 가 코드보다 먼저 — 없으면 anon select 가 42501 로 전면 실패. scripts/audit-anon-column-grant.mjs 가 PR 에서 확인).
  */
 export const BLOG_DETAIL_COLUMNS =
   `${BLOG_CARD_COLUMNS}, created_at, sponsor_name, cover_caption, info_block_html, seo_title, summary_ko, faq_json, related_slugs, og_image_alt`;

@@ -15,6 +15,9 @@ import { slugify as romanizeSlugify } from 'transliteration';
 const TipTapEditor = lazy(() => import('@/components/TipTapEditor'));
 
 type BlogInput = Omit<Blog, 'id' | 'created_at'>;
+
+/** 선택 텍스트 컬럼: 공백뿐이면 NULL ('' 는 저장하지 않는다) */
+const blankToNull = (v?: string | null) => v?.trim() || null;
 type ScheduleMode = 'now' | 'schedule';
 
 interface Props {
@@ -318,9 +321,12 @@ export default function BlogForm({ initial }: Props) {
       tags,
       publish_at: publishAt,
       published: shouldPublish,
-      cover_caption: coverCaption.trim() || null,
-      // '' 는 NULL 로 — "없음" 의 표현을 하나로 (2026-09-08 정리 전 56행이 '' 였다)
-      og_image_url: form.og_image_url?.trim() || null,
+      // 선택 텍스트는 '' 대신 NULL — DB 트리거(set_blogs_updated_at)도 같은 정규화를 하지만 클라이언트가 먼저 맞춘다
+      cover_caption: blankToNull(coverCaption),
+      og_image_url: blankToNull(form.og_image_url),
+      meta_description: blankToNull(form.meta_description),
+      sponsor_name: blankToNull(form.sponsor_name),
+      info_block_html: blankToNull(form.info_block_html),
     };
 
     let blogId: number | undefined;

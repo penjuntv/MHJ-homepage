@@ -1,12 +1,11 @@
+import type { BlogFaqItem } from './types';
 // lib/storypress-faqs.ts
 // StoryPress FAQ 단일 진실 소스.
 // components/StoryPressFAQ.tsx (UI) 와 app/(public)/storypress/page.tsx (FAQPage schema) 가
 // 같은 데이터를 사용하도록 분리.
 
-export interface StoryPressFAQ {
-  q: string;
-  a: string;
-}
+/** blogs.faq_json 의 원소와 같은 모양(BlogFaqItem) — FAQPage JSON-LD 빌더를 공유한다 */
+export type StoryPressFAQ = BlogFaqItem;
 
 export const STORYPRESS_FAQS: StoryPressFAQ[] = [
   {

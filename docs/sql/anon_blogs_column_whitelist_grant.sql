@@ -1,16 +1,15 @@
 -- ✅ 적용 완료 — 2026-09-04 실측으로 확인. 다시 실행할 필요 없다.
---    anon SELECT = 36컬럼(비공개 3종 제외), anon 키 REST 프로브에서
+--    anon SELECT = 42컬럼(비공개 3종 제외; 2026-09-08 SEO 6컬럼 추가), anon 키 REST 프로브에서
 --    content_backup·insight_kr·insight_cached_at·select=* 전부 42501 차단,
 --    공개 컬럼은 200. 이 파일은 이제 "무엇이 왜 이렇게 돼 있는지"의 기록이고,
 --    새 공개 컬럼을 추가할 때 grant 목록을 갱신하는 참고본이다.
 --
--- ⚠️ 만약 어떤 이유로 되돌렸다가 다시 적용한다면: 코드 배포가 라이브에 반영된
---    "후에" 적용할 것. 배포 전에 적용하면 구코드의 anon select('*') 가 전부
---    42501 로 떨어져 블로그 상세=404, 목록=fallback 이 된다
---    (2026-09-04 실측 — 3분간 적용했다 원복한 이력).
---    ↔ 반대로 "새 공개 컬럼 추가" 는 추가형 grant 라 코드 배포 "전" 에 적용한다
---    (2026-09-08 W4-A, docs/migrations/2026-09-08_anon_blogs_grant_seo_columns.sql).
---    회수형 = 배포 후, 추가형 = 배포 전.
+-- ⚠️ 적용 순서 — 정본은 docs/DB_SCHEMA.md §blogs "공개 컬럼 추가 절차":
+--    · 새 공개 컬럼의 추가형 grant 는 코드 배포 "전" (예: 2026-09-08_anon_blogs_grant_seo_columns.sql).
+--    · 이 파일처럼 revoke 를 동반한 회수형 재적용은 코드 배포 "후" — 배포 전에 적용하면 구코드의
+--      anon select('*') 가 전부 42501 로 떨어져 블로그 상세=404, 목록=fallback
+--      (2026-09-04 실측 — 3분간 적용했다 원복한 이력).
+--    · scripts/audit-anon-column-grant.mjs 가 lib/constants.ts 의 BLOG_*_COLUMNS ⊆ 이 파일의 목록을 PR 마다 확인한다.
 --
 -- 목적: anon 롤의 blogs 비공개 컬럼(content_backup·insight_kr·insight_cached_at)
 -- SELECT 차단. 앱 화이트리스트(lib/constants.ts BLOG_*_COLUMNS)는 opt-in 이라

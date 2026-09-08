@@ -83,7 +83,7 @@ node --env-file=.env.local scripts/audit-seo-regression.mjs   # 같은 수치가
 
 | 항목 | SQL | 권고 |
 |---|---|---|
-| `og_image_url` 폴백 | `NULLIF(BTRIM(og_image_url), '') IS NULL OR og_image_url ~ '/api/og(\?|$)'` — **`IS NULL` 만 쓰면 0 이 나온다**(데이터가 빈 문자열) | 자동 `/api/og` 폴백되므로 경고 수준 |
+| `og_image_url` 폴백 | `NULLIF(BTRIM(og_image_url), '') IS NULL OR og_image_url ~ '/api/og(\?|$)'` — 2026-09-08 부터 저장은 트리거가 NULL 로 정규화하지만 `/api/og` 리터럴도 폴백이므로 이 식을 유지 | 자동 `/api/og` 폴백되므로 경고 수준 |
 | `cover_caption` 누락 | `cover_caption IS NULL` | hero 비주얼 캡션 없음 — Yussi 톤 보존 차원에서 권장 |
 | `info_block_html` 누락 | `info_block_html IS NULL` | Yussi Factory 미경유 신호 |
 | `slug` 한글 잔존 | `slug ~ '[^a-z0-9-]'` | URL 안전성 |
@@ -166,7 +166,7 @@ SELECT
     (CASE WHEN visible ~* '\m(NZ|Aotearoa)\M' THEN 1 ELSE 0 END)
   ) AS keyword_score,
   array_length(tags, 1) AS tags_count,
-  (NULLIF(BTRIM(og_image_url), '') IS NULL OR og_image_url ~ '/api/og(\?|$)') AS og_fallback,   -- '' 55 + /api/og 리터럴 4 = 59. JS isOgApi(audit-shared.mjs)·mhj-desk/seo 와 같은 정규식
+  (NULLIF(BTRIM(og_image_url), '') IS NULL OR og_image_url ~ '/api/og(\?|$)') AS og_fallback,   -- NULL(2026-09-08 정규화 후) + /api/og 리터럴: 2026-09-08 실측 56 + 6 = 62/84. JS isOgApi(audit-shared.mjs)·mhj-desk/seo 와 같은 정규식
   cover_caption IS NULL AS caption_missing,
   info_block_html IS NULL AS infoblock_missing
 FROM j
@@ -266,10 +266,12 @@ Top 10 worst 블로그를 "Content cleanup" 체크박스 목록으로 만들어 
 - **schema 검증 한계**: JSON-LD 문법 체크만 가능. Google Rich Results Test API 호출은 별도 (수동).
 - **H1 = 0 이 정답**: blog/[slug]/page.tsx 의 `<h1>` 이 별도로 렌더링. content 내부엔 H2 부터 시작해야 함. content 에 H1 있으면 SEO 충돌.
 
-### 위음성 4호 — `og_image_url` 은 NULL 이 아니라 빈 문자열이다 (2026-09-07)
+### 위음성 4호 — `og_image_url` 의 "없음" 은 `NULLIF` 로 센다 (2026-09-07, 2026-09-08 갱신)
 
-`og_image_url IS NULL` 은 **0** 을 돌려주지만 실제 폴백은 **59편**(`''` 55 + `/api/og` 리터럴 4)이다.
-페이지 코드는 `blog.og_image_url ? … : fallback` 이라 빈 문자열을 falsy 로 본다. 판정식은 반드시
+2026-09-07 조사 시점엔 데이터가 `''` 라 `og_image_url IS NULL` 이 **0** 을 돌려줬다(실제 폴백 59편 = `''` 55 + `/api/og` 4).
+2026-09-08 W4-A 가 `''` 를 NULL 로 정리했고 DB 트리거(`set_blogs_updated_at` v2)가 저장 시 정규화하므로 이제 `''` 는 0행이다
+(같은 정규화가 meta_description·sponsor_name·info_block_html 등 8컬럼에 적용 — `info_block_html IS NULL` 도 이제 정확하다).
+그래도 페이지 코드는 `blog.og_image_url ? … : fallback` 이라 빈 문자열을 falsy 로 보고, `/api/og` 리터럴도 폴백이다. 판정식은 반드시
 `NULLIF(BTRIM(og_image_url), '') IS NULL OR og_image_url ~ '/api/og(\?|$)'`. 같은 정의를 쓰는 곳이 **셋**이다 —
 이 SQL · `scripts/audit-seo-regression.mjs`(`isOgApi`, soft 지표 `og_fallback`) · `app/mhj-desk/seo/page.tsx`(`auditBlog`).
 하나를 바꾸면 셋 다 바꾼다. (soft 인 이유: 노출을 막지는 않고 CTR 문제)

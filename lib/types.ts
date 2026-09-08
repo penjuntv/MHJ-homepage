@@ -82,8 +82,9 @@ export interface Blog {
   image_url: string;
   content: string;
   slug: string;
-  meta_description?: string;
-  og_image_url?: string;
+  /** 선택 텍스트 컬럼은 '' 를 쓰지 않는다 — DB 트리거가 NULL 로 정규화 (2026-09-08) */
+  meta_description?: string | null;
+  og_image_url?: string | null;
   published: boolean;
   view_count?: number;
   tags?: string[];

@@ -22,7 +22,7 @@ function auditBlog(b: Blog): Issue[] {
     issues.push({ level: 'warn', message: `meta_description ${b.meta_description.length}자 (160자 초과)` });
   }
 
-  // og_image_url 폴백 — 빈 값 또는 /api/og 자동 생성. 정의는 SKILL.md SQL·audit-seo-regression.mjs 와 한 쌍(59편).
+  // og_image_url 폴백 — 빈 값 또는 /api/og 자동 생성. 정의는 SKILL.md SQL·audit-seo-regression.mjs 와 한 쌍(2026-09-08 실측 62/84).
   const og = (b.og_image_url ?? '').trim();
   if (!og || /\/api\/og(\?|$)/.test(og)) {
     issues.push({ level: 'warn', message: og ? 'OG 이미지 자동 생성(/api/og) — 대표 사진 지정 권장' : 'OG 이미지 미지정 (자동 생성 폴백)' });

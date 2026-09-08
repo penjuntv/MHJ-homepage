@@ -85,23 +85,30 @@
 | updated_at | timestamptz | NO | now() | 편집 컬럼 실제 변경 시 트리거 갱신 — dateModified/lastmod 원천 (W4-A 2026-09-08) |
 | seo_title | text | YES | — | `<title>`/og:title 전용 제목, 없으면 title (D2) |
 | summary_ko | text | YES | — | 한국어 요약 블록 `<section lang="ko">` (D1) |
-| faq_json | jsonb | YES | — | `[{"q","a"}]` · CHECK 배열만 · FAQPage JSON-LD |
+| faq_json | jsonb | YES | — | `[{"q","a"}]` · CHECK `blogs_faq_json_shape`(배열 + 원소마다 q·a 문자열) · FAQPage JSON-LD |
 | related_slugs | text[] | YES | — | 편집자가 고른 관련 글 slug (존재 검증은 W4-C preflight) |
 | og_image_alt | text | YES | — | og:image alt |
 
-트리거 2개: `trg_sync_created_at` (INSERT · UPDATE OF date → `created_at` = 발행일 자정 NZ),
-`trg_blogs_set_updated_at` (`set_blogs_updated_at()`: title·content·meta_description·info_block_html·cover_caption·
-tags·category·image_url·author·date·letter_to·SEO 5컬럼이 **실제로 바뀔 때만** `updated_at = now()`.
-view_count·published·featured·is_hero·hero_order·publish_at·carousel_*·insight_*·og_image_url 은 제외.
-명시적으로 `updated_at` 을 SET 한 UPDATE 는 그 값을 존중한다).
-`og_image_url` 은 '' 를 쓰지 않는다 — 2026-09-08 56행을 NULL 로 정리했고 BlogForm 이 저장 시 `trim() || null`.
+트리거 2개(BEFORE, 이름순으로 실행):
+- `trg_sync_created_at` — INSERT · UPDATE OF date → `created_at` = 발행일 자정 NZ.
+- `trg_sync_updated_at` (`set_blogs_updated_at()`, `docs/migrations/2026-09-08_set_blogs_updated_at_v2.sql`) —
+  ① 선택 텍스트 8컬럼(og_image_url·meta_description·sponsor_name·info_block_html·cover_caption·seo_title·summary_ko·og_image_alt)의
+  `''`/공백을 NULL 로 정규화한다(모든 writer 공통 — **"없음" 은 NULL 하나**, 2026-09-08 기존 `''` 111건/75행 정리).
+  ② 독자에게 보이는 컬럼이 **실제로 바뀔 때만** `updated_at = now()` — 판정은 **제외 목록**(id·created_at·updated_at·view_count·
+  published·featured·is_hero·hero_order·publish_at·content_backup·insight_*·og_image_url·carousel_*)을 뺀 `to_jsonb` 비교라
+  새 컬럼은 기본이 편집 컬럼이다(제외하려면 함수의 `excluded` 배열에 추가). 명시적으로 `updated_at` 을 SET 한 UPDATE 는 존중.
+  ③ 항상 `updated_at ≥ created_at` — 예약발행(미래 date)도 dateModified ≥ datePublished. 정확한 목록은 함수 본문이 정본.
 
-🔒 비공개 컬럼 3종은 anon 롤에서 컬럼 단위 grant 로 차단한다 —
-`docs/sql/anon_blogs_column_whitelist_grant.sql` (⚠️ 회수형 화이트리스트는 코드 배포 **후** 적용).
-새 공개 컬럼 추가 시 그 grant 목록에도 추가해야 anon(공개 페이지)이 읽는다 — 추가형 grant 는 코드 배포 **전**
-(예: `docs/migrations/2026-09-08_anon_blogs_grant_seo_columns.sql`). 회수형 = 배포 후, 추가형 = 배포 전.
-앱 쪽 화이트리스트는 `lib/constants.ts` 의 `BLOG_*_COLUMNS`, 재발 가드는
-`.claude/hooks/select-star-guard.sh` + `scripts/audit-select-star.mjs`.
+🔒 비공개 컬럼 3종은 anon 롤에서 컬럼 단위 grant 로 차단한다(anon 은 테이블 SELECT 없음 — 새 컬럼은 grant 전엔 42501, fail-closed).
+참고본 `docs/sql/anon_blogs_column_whitelist_grant.sql`(42컬럼). 앱 쪽 화이트리스트는 `lib/constants.ts` 의 `BLOG_*_COLUMNS`,
+가드는 `.claude/hooks/select-star-guard.sh` + `scripts/audit-select-star.mjs` + `scripts/audit-anon-column-grant.mjs`(상수 ⊆ 참고본, source-guard).
+
+**blogs 공개 컬럼 추가 절차 (정본 — 다른 문서는 여기를 가리킨다)**
+1. `apply_migration` 으로 컬럼 추가(+ 필요하면 트리거 `excluded` 배열·정규화 목록 갱신).
+2. **추가형 grant 를 코드 배포 "전" 에** 적용(`grant select (새컬럼) on public.blogs to anon`) + 참고본 sql 의 목록 갱신.
+   반대로 코드가 먼저 나가면 `select=새컬럼` 이 42501 → 공개 페이지 전부 500.
+3. `lib/constants.ts` `BLOG_*_COLUMNS` + `lib/types.ts` → 배포. (`audit-anon-column-grant` 가 2↔3 의 어긋남을 PR 에서 막는다.)
+4. **회수형**(revoke 를 동반한 화이트리스트 재적용)만 코드 배포 **후** — 배포 전에 하면 구코드의 select 가 깨진다(2026-09-04 3분 장애).
 
 ---
 
@@ -301,7 +308,7 @@ DB 가 아니라 repo `scripts/qa/anon-write-allowlist.json` 이 **(테이블, �
 - **⑨·⑩ 이 보지 않는 것** (후속, `docs/handoff-2026-09-04.md` §3): 함수 EXECUTE 기본 grant(2026-08-24 실사고 패턴), 시퀀스 USAGE.
 - **공유 프로젝트 경계**: ⑨ 가 잡은 테이블이 YuStudy 것이면 MHJ 쪽에서 임의로 회수하거나 허용하지 말고
   소유자에게 확인 후 처리. 허용 목록 근거(코드 경로)는 MHJ repo 안에서 검증 가능한 것만 적는다.
-- `blogs` 의 anon SELECT 는 컬럼 화이트리스트(36컬럼, `docs/sql/anon_blogs_column_whitelist_grant.sql`) — 새 공개 컬럼은 grant 도 추가.
+- `blogs` 의 anon SELECT 는 컬럼 화이트리스트(42컬럼, `docs/sql/anon_blogs_column_whitelist_grant.sql`) — 새 공개 컬럼은 §blogs "공개 컬럼 추가 절차" 대로.
 
 ---
 

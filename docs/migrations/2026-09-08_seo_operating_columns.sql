@@ -79,3 +79,6 @@ comment on column public.blogs.og_image_alt is 'og:image alt 텍스트';
 -- 적용 후 실측(2026-09-08): updated_at null 0행 · updated_at = created_at 84행 ·
 --   트리거 실증(DO 블록, 롤백): view_count+1 → 불변 / title 변경 → now() / 명시 SET → 존중.
 --   anon REST select=seo_title → 42501 (grant 전 fail-closed 확인).
+--
+-- ⚠️ 같은 날 코드리뷰로 트리거·CHECK 는 v2 로 교체됐다 — 현재 정의는
+--   2026-09-08_set_blogs_updated_at_v2.sql (정규화·제외 목록·발행일 하한·faq 형태 CHECK). 이 파일의 함수 본문은 기록용.
