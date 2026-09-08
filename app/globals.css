@@ -5,7 +5,9 @@
 
 /* ─── Google Fonts ─── */
 /* preconnect(fonts.googleapis/gstatic)는 app/layout.tsx <head>에서 연결을 미리 워밍업. */
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap');
+/* Caveat 는 2026-09-08 W3-C 실측(document.fonts)에서 어떤 페이지에서도 로드되지 않아 제거. 나머지 웨이트는 전부 실제 사용 중 —
+   Noto 400/500/700/900 매 페이지, Playfair 400·400i·700·700i·900. 줄이려면 디자인 변경이 필요하다(next/font 이전은 별건). */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap');
 
 /* ─── Tailwind 베이스 ─── */
 @tailwind base;
