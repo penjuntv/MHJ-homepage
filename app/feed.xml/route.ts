@@ -1,3 +1,4 @@
+import { stripHtml } from '@/lib/content-html.mjs';
 import { supabase } from '@/lib/supabase';
 import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo';
 
@@ -29,7 +30,7 @@ export async function GET() {
 
   const items = (blogs ?? [])
     .map((blog) => {
-      const plainText = blog.content?.replace(/<[^>]*>/g, '') ?? '';
+      const plainText = stripHtml(blog.content);
       const description = blog.meta_description || plainText.slice(0, 200);
       const pubDate = blog.created_at
         ? new Date(blog.created_at).toUTCString()

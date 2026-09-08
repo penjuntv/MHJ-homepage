@@ -8,7 +8,7 @@
 import assert from 'node:assert/strict';
 import {
   stripHtml, readingMinutes, slugifyHeading, addHeadingIds,
-  wrapKeyTakeaways, sanitizeFaq, toParagraphs,
+  wrapKeyTakeaways, sanitizeFaq, toParagraphs, isTakeawaysHeading,
 } from '../../lib/content-html.mjs';
 
 let failed = 0;
@@ -54,6 +54,25 @@ check('빈 h2 는 앵커도 목차도 만들지 않는다', addHeadingIds('<h2><
 check('h2 없는 본문', addHeadingIds('<p>plain</p>').headings, []);
 check('addHeadingIds 는 나머지 마크업을 보존', addHeadingIds('<p>a</p><img src="x" />').html, '<p>a</p><img src="x" />');
 
+// 2026-09-09 코드리뷰에서 실증된 경우들
+check('data-id 를 id 로 오인하지 않는다',
+  (() => { const r = addHeadingIds('<h2 data-id="node7">Real Title</h2>'); return [r.headings[0].id, r.html.includes('id="real-title"')]; })(),
+  ['real-title', true]);
+check('작은따옴표 id 도 보존하고 중복 id 를 만들지 않는다',
+  (() => { const r = addHeadingIds("<h2 id='kept'>Title</h2>"); return [r.headings[0].id, (r.html.match(/id=/g) || []).length]; })(),
+  ['kept', 1]);
+check('뒤에 나올 저자 id 를 자동 id 가 선점하지 않는다',
+  addHeadingIds('<h2>Guide</h2><p>x</p><h2 id="guide">Guide</h2>').headings.map((h) => h.id),
+  ['guide-2', 'guide']);
+check('저자 id 선점 방지 후에도 HTML 에 같은 id 가 두 번 나오지 않는다',
+  (() => { const h = addHeadingIds('<h2>Guide</h2><h2 id="guide">Guide</h2>').html; return (h.match(/id="guide"/g) || []).length; })(), 1);
+check('takeaways 제목은 목차에 넣지 않는다',
+  addHeadingIds('<h2>Key takeaways</h2><h2>Real section</h2>').headings.map((h) => h.text),
+  ['Real section']);
+check('isTakeawaysHeading — 마침표·콜론·한국어',
+  ['Key takeaways', 'Key Takeaways:', 'Takeaways.', '핵심 요약', 'Shopping list'].map(isTakeawaysHeading),
+  [true, true, true, true, false]);
+
 /* ── wrapKeyTakeaways ── */
 {
   const out = wrapKeyTakeaways('<h2>Key takeaways</h2><ul><li>a</li><li>b</li></ul><p>body</p>');
@@ -67,6 +86,11 @@ check('다른 제목은 건드리지 않는다',
   wrapKeyTakeaways('<h2>Shopping list</h2><ul><li>a</li></ul>'), '<h2>Shopping list</h2><ul><li>a</li></ul>');
 check('제목 뒤 ul 이 없으면 그대로',
   wrapKeyTakeaways('<h2>Key takeaways</h2><p>a</p>'), '<h2>Key takeaways</h2><p>a</p>');
+check('중첩 목록이면 감싸지 않는다 — 태그가 어긋나느니 박스를 포기한다',
+  wrapKeyTakeaways('<h2>Key takeaways</h2><ul><li>a<ul><li>b</li></ul></li><li>c</li></ul>'),
+  '<h2>Key takeaways</h2><ul><li>a<ul><li>b</li></ul></li><li>c</li></ul>');
+check('중첩이 없으면 그대로 감싼다(위 케이스의 대조군)',
+  wrapKeyTakeaways('<h2>Key takeaways</h2><ul><li>a</li><li>c</li></ul>').startsWith('<aside'), true);
 check('ul 이 없는 기존 84편 패턴은 무변화',
   wrapKeyTakeaways('<p>hello</p><h2>Section</h2><p>text</p>'), '<p>hello</p><h2>Section</h2><p>text</p>');
 

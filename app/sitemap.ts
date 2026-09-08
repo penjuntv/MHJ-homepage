@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
-import { CATEGORY_TO_SLUG } from '@/lib/constants';
+import { CATEGORY_TO_SLUG, BLOG_SITEMAP_COLUMNS } from '@/lib/constants';
 
 /**
  * MHJ sitemap — 2026-05-30
@@ -70,11 +70,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date().toISOString();
 
   // 동적 블로그 (published만)
-  const { data: blogs } = await supabase
+  const { data: blogs, error: blogsError } = await supabase
     .from('blogs')
-    .select('slug, created_at, updated_at')
+    .select(BLOG_SITEMAP_COLUMNS)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`);
+
+  // 조용히 빈 sitemap 을 내보내지 않는다 — anon 컬럼 grant 누락이 이 경로로 숨는다.
+  if (blogsError) console.error('sitemap(blogs):', blogsError.message);
 
   const blogPages: MetadataRoute.Sitemap = (blogs ?? []).map((b) => ({
     url: `${baseUrl}/blog/${b.slug}`,

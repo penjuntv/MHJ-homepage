@@ -1,3 +1,4 @@
+import { stripHtml } from '@/lib/content-html.mjs';
 import type { Metadata } from 'next';
 import { OG_BASE, SITE_LANG, SITE_DESCRIPTION, WEBSITE_ID, orgRef, yussiNode } from '@/lib/seo';
 import Link from 'next/link';
@@ -713,7 +714,7 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
 
   function getExcerpt(blog: Blog): string {
     if (blog.meta_description) return blog.meta_description;
-    return blog.content?.replace(/<[^>]*>/g, '').slice(0, 160).trim() ?? '';
+    return stripHtml(blog.content).slice(0, 160);
   }
 
   const mainExcerpt = getExcerpt(main);

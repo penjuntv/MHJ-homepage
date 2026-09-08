@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, ogImageFor, SITE_LANG, orgRef, faqPageNode } from '@/lib/seo';
+import { OG_BASE, ogImageFor, SITE_LANG, orgRef, faqPageNode, jsonLdScript } from '@/lib/seo';
 import { getSiteSettings } from '@/lib/site-settings';
 import { STORYPRESS_FAQS } from '@/lib/storypress-faqs';
 import StoryPressClient from './StoryPressClient';
@@ -67,7 +67,7 @@ export default async function StoryPressPage() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
       <StoryPressClient
         title={s.storypress_title || 'StoryPress'}

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import AuthorBox from '@/components/AuthorBox';
-import { OG_BASE, SITE_LANG, personRef, orgRef, faqPageNode } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, personRef, orgRef, faqPageNode, jsonLdScript } from '@/lib/seo';
 import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -20,7 +20,7 @@ import AiInsight from '@/components/AiInsight';
 import BlogReadTracker from './BlogReadTracker';
 import ScrollDepthTracker from './ScrollDepthTracker';
 import ReadingProgress from './ReadingProgress';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatNZDate } from '@/lib/utils';
 import {
   stripHtml, readingMinutes, addHeadingIds, wrapKeyTakeaways, sanitizeFaq, toParagraphs,
 } from '@/lib/content-html.mjs';
@@ -75,7 +75,8 @@ async function getRelatedBlogs(category: string, currentSlug: string, relatedSlu
 
   // ① 편집자 지정 — 존재하지 않거나 미발행인 slug 는 조용히 빠진다(W4-C preflight 가 경고할 몫).
   let picked: Blog[] = [];
-  const wanted = (relatedSlugs ?? []).filter((sl) => typeof sl === 'string' && sl && sl !== currentSlug).slice(0, 3);
+  // 중복 slug 는 같은 글을 두 번 렌더하고 React key 도 겹친다 — 먼저 유일하게 만든 뒤 자른다.
+  const wanted = [...new Set((relatedSlugs ?? []).filter((sl) => typeof sl === 'string' && sl && sl !== currentSlug))].slice(0, 3);
   if (wanted.length) {
     const { data, error } = await supabase
       .from('blogs')
@@ -97,27 +98,31 @@ async function getRelatedBlogs(category: string, currentSlug: string, relatedSlu
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .eq('category', category)
-    .not('slug', 'in', `(${[currentSlug, ...picked.map((b) => b.slug)].map((sl) => `"${sl}"`).join(',')})`)
+    // 제외는 클라이언트에서 한다 — PostgREST `in` 목록은 값을 직접 따옴표로 감싸야 해서
+    // slug 에 " 나 , 가 섞이면 400 이 되고 관련글이 통째로 사라진다(라이브에 `honestly-i-got-lost.` 처럼
+    // 구두점이 들어간 slug 가 이미 있다). 여유분만 더 받아 온다.
     .order('created_at', { ascending: false })
-    .limit(3);
+    .limit(3 + picked.length + 1);
   if (sameCategoryError) console.error('getRelatedBlogs(sameCategory):', sameCategoryError.message);
 
-  const byCategory = [...picked, ...((sameCategory ?? []) as Blog[])].slice(0, 3);
+  const taken = new Set([currentSlug, ...picked.map((b) => b.slug)]);
+  const sameCategoryRest = ((sameCategory ?? []) as Blog[]).filter((b) => !taken.has(b.slug));
+  const byCategory = [...picked, ...sameCategoryRest].slice(0, 3);
   if (byCategory.length >= 3) return byCategory;
 
   const needed = 3 - byCategory.length;
-  const excludeSlugs = [currentSlug, ...byCategory.map((b) => b.slug)];
+  const exclude = new Set([currentSlug, ...byCategory.map((b) => b.slug)]);
   const { data: recent, error: recentError } = await supabase
     .from('blogs')
     .select(BLOG_RELATED_COLUMNS)
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .not('slug', 'in', `(${excludeSlugs.map((s) => `"${s}"`).join(',')})`)
     .order('created_at', { ascending: false })
-    .limit(needed);
+    .limit(needed + exclude.size);
   if (recentError) console.error('getRelatedBlogs(recent):', recentError.message);
 
-  return [...byCategory, ...((recent ?? []) as Blog[])];
+  const fill = ((recent ?? []) as Blog[]).filter((b) => !exclude.has(b.slug)).slice(0, needed);
+  return [...byCategory, ...fill];
 }
 
 async function getBlog(slug: string): Promise<Blog | null> {
@@ -166,7 +171,9 @@ export async function generateMetadata(
     : `${baseUrl}/api/og?title=${encodeURIComponent(blog.title)}&category=${encodeURIComponent(blog.category)}&date=${encodeURIComponent(blog.date)}`;
 
   return {
-    title: metaTitle,
+    // seo_title 은 편집자가 SERP 길이에 맞춰 쓴 완성 제목이다 — 루트의 '%s — MHJ' 템플릿을 덧붙이면
+    // 그 예산을 넘겨 잘린다. seo_title 이 없을 때만 템플릿을 태운다(기존 동작 유지).
+    title: blog.seo_title ? { absolute: metaTitle } : metaTitle,
     description,
     openGraph: {
       ...OG_BASE,
@@ -247,12 +254,15 @@ export default async function BlogDetailPage(
   const minutes = readingMinutes(blog.content);
   const faq = sanitizeFaq(blog.faq_json);
   const summaryParagraphs = toParagraphs(blog.summary_ko);
-  // 갱신일은 발행 다음 날 이후로 벌어졌을 때만 보여준다 — 같은 날 오타 수정까지 알릴 일은 아니다.
-  const updatedAt =
-    blog.updated_at && blog.created_at &&
-    new Date(blog.updated_at).getTime() - new Date(blog.created_at).getTime() > 24 * 60 * 60 * 1000
-      ? blog.updated_at
-      : null;
+  // 갱신일은 발행일과 **다른 날**일 때만 보여준다. 비교는 화면에 실제로 찍히는 문자열끼리 한다 —
+  // created_at 과의 시간 차(24h)로 재면 UTC/NZ 경계 때문에 "9 Sep · Updated 9 Sep" 같은 중복이 샌다.
+  const publishedLabel = formatDate(blog.date);
+  const updatedLabel = blog.updated_at ? formatNZDate(blog.updated_at) : null;
+  const updatedAt = updatedLabel && updatedLabel !== publishedLabel ? updatedLabel : null;
+
+  // 카테고리 허브가 실제로 있는 경우에만 빵부스러기 3단계를 만든다.
+  const categoryPath = categoryHref(blog.category);
+  const categoryUrl = categoryPath !== '/blog' ? `${SITE_URL}${categoryPath}` : null;
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -261,8 +271,10 @@ export default async function BlogDetailPage(
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE_URL}/blog` },
       // 화면의 빵부스러기(Home · Journal · 카테고리)와 같은 경로를 신고한다.
-      { '@type': 'ListItem', position: 3, name: blog.category, item: `${SITE_URL}${categoryHref(blog.category)}` },
-      { '@type': 'ListItem', position: 4, name: blog.title },
+      // categoryHref 는 미매핑 카테고리(폐기 예정)에 /blog 를 돌려주므로 그때는 단계를 넣지 않는다 —
+      // 2·3단계가 같은 URL 인 빵부스러기는 잘못된 신고다.
+      ...(categoryUrl ? [{ '@type': 'ListItem', position: 3, name: blog.category, item: categoryUrl }] : []),
+      { '@type': 'ListItem', position: categoryUrl ? 4 : 3, name: blog.title },
     ],
   };
 
@@ -294,17 +306,17 @@ export default async function BlogDetailPage(
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbLd) }}
       />
       {/* FAQPage 는 화면에 같은 Q&A 가 보일 때만 낸다 — 구글 요건이자, 안 보이는 마크업은 위반이다. */}
       {faq.length > 0 && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageNode(faq)) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(faqPageNode(faq)) }}
         />
       )}
 
@@ -358,8 +370,12 @@ export default async function BlogDetailPage(
               <li><Link href="/">Home</Link></li>
               <li aria-hidden="true" className="blog-breadcrumb-sep" />
               <li><Link href="/blog">Journal</Link></li>
-              <li aria-hidden="true" className="blog-breadcrumb-sep" />
-              <li><Link href={categoryHref(blog.category)}>{blog.category}</Link></li>
+              {categoryUrl && (
+                <>
+                  <li aria-hidden="true" className="blog-breadcrumb-sep" />
+                  <li><Link href={categoryPath}>{blog.category}</Link></li>
+                </>
+              )}
             </ol>
           </nav>
 
@@ -424,7 +440,7 @@ export default async function BlogDetailPage(
             </span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
-              {formatDate(blog.date)}
+              {publishedLabel}
             </span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
@@ -434,7 +450,7 @@ export default async function BlogDetailPage(
               <>
                 <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
                 <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
-                  Updated {formatDate(updatedAt)}
+                  Updated {updatedAt}
                 </span>
               </>
             )}
@@ -514,8 +530,8 @@ export default async function BlogDetailPage(
 
             {/* 목차 — H2 3개 이상일 때만. 앵커 id 는 addHeadingIds 가 같은 통과에서 붙였다. */}
             {toc.length > 0 && (
-              <nav className="blog-toc" aria-label="On this page">
-                <p className="blog-toc-label">On this page</p>
+              <nav className="blog-toc" aria-labelledby="toc-label">
+                <p className="blog-toc-label" id="toc-label">On this page</p>
                 <ol>
                   {toc.map((h) => (
                     <li key={h.id}><a href={`#${h.id}`}>{h.text}</a></li>
