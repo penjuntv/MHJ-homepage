@@ -757,11 +757,15 @@ function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts:
               borderRadius: 12,
               overflow: 'hidden',
             }}>
+              {/* 홈의 LCP 요소. priority 가 없으면 next/image 기본값 loading="lazy" 로 나가 첫 화면 이미지가
+                  하이드레이션 뒤에야 요청된다 — 자체진단 F-C-02 (LH-mobile LCP 9.8s). preload + fetchpriority=high. */}
               <SafeImage
                 src={main.og_image_url || main.image_url}
                 alt={main.title}
                 fill
-                sizes="(max-width: 1024px) 100vw, 66vw"
+                priority
+                fetchPriority="high"
+                sizes="(max-width: 1024px) calc(100vw - 40px), 66vw"
                 className="object-cover"
               />
             </div>
