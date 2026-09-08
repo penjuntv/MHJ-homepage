@@ -35,59 +35,6 @@ export async function* paged(mkQuery, pageSize = 500) {
   }
 }
 
-/**
- * URL 생존 확인: HEAD → (HEAD 막는 서버 대비) GET(Range) 폴백.
- * 살아 있으면 null, 죽었으면 HTTP status, 타임아웃은 'TIMEOUT'(재시도 안 함 —
- * 이미 timeoutMs 를 기다린 판정이라 반복해 봐야 잡 예산만 태운다),
- * 그 외 네트워크 오류는 retries 회 재시도 뒤에만 'ERR …' 로 확정.
- */
-export async function checkUrl(u, { retries = 2, backoffMs = 400, timeoutMs = 0, headers = {} } = {}) {
-  const sig = () => (timeoutMs ? AbortSignal.timeout(timeoutMs) : undefined);
-  for (let attempt = 0; ; attempt++) {
-    try {
-      const head = await fetch(u, { method: 'HEAD', redirect: 'follow', headers, signal: sig() });
-      if (head.ok) return null;
-      const get = await fetch(u, { redirect: 'follow', headers: { ...headers, Range: 'bytes=0-0' }, signal: sig() });
-      return get.ok ? null : get.status;
-    } catch (e) {
-      if (e?.name === 'TimeoutError') return 'TIMEOUT';
-      if (attempt < retries) {
-        await new Promise((r) => setTimeout(r, backoffMs * (attempt + 1)));
-        continue;
-      }
-      return `ERR ${String(e.message ?? e).slice(0, 30)}`;
-    }
-  }
-}
-
-/**
- * 워커풀 동시 실행. 배치 단위 Promise.all 과 달리 느린 항목 하나가
- * 슬롯 하나만 차지한다(배치 barrier 는 그 항목이 배치 전체를 세운다).
- */
-export async function mapConcurrent(items, limit, fn, onProgress) {
-  const results = new Array(items.length);
-  let next = 0;
-  let done = 0;
-  await Promise.all(
-    Array.from({ length: Math.min(limit, items.length) }, async () => {
-      while (next < items.length) {
-        const i = next++;
-        results[i] = await fn(items[i], i);
-        onProgress?.(++done, items.length);
-      }
-    }),
-  );
-  return results;
-}
-
-/** 진행 표시 한 줄용 — mapConcurrent 의 onProgress 로 넘긴다. */
-export const progressLine = (label) => (done, total) => process.stdout.write(`\r${label} ${done}/${total}`);
-
-/** sitemap 의 <loc> 전수. 비정상 응답·빈 목록은 throw — "0건 스캔 후 ✅" 를 막는다. */
-export async function fetchSitemapUrls(base, { timeoutMs = 20000 } = {}) {
-  const res = await fetch(`${base}/sitemap.xml`, { signal: AbortSignal.timeout(timeoutMs) });
-  if (!res.ok) throw new Error(`sitemap.xml HTTP ${res.status}`);
-  const urls = [...(await res.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  if (!urls.length) throw new Error('sitemap.xml 에서 URL 을 하나도 못 읽었다 — 포맷 변경?');
-  return urls;
-}
+// 네트워크 헬퍼(checkUrl·mapConcurrent·progressLine·fetchSitemapUrls·baseArg·isOgApi·fetchText)는
+// Supabase 의존성이 없는 ./http-audit.mjs 에 있다 — 여기서 재export 해 기존 import 경로를 유지한다.
+export * from './http-audit.mjs';

@@ -27,9 +27,10 @@
  *   SKILL.md 쪽에서 주의할 점: Postgres 는 단어 경계가 `\y` 다(`\b` 는 백스페이스) —
  *   JS 의 이 파일에서는 `\b` 가 맞다. 옛 SQL 의 `<h2\b` 는 항상 0을 돌려줬다.
  *   대조 실측(2026-09-04, 79편): thin 36 / orphan 10 / no_geo 22 / alt 3 / no_h2 6 / h1 0.
+ *   og_fallback(2026-09-07, 80편): 59 — og_image_url 이 NULL 이 아니라 빈 문자열이라 IS NULL 로 세면 0 이 나온다.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { requireAdminClient, paged } from './lib/audit-shared.mjs';
+import { requireAdminClient, paged, isOgApi } from './lib/audit-shared.mjs';
 
 const UPDATE = process.argv.includes('--update-baseline');
 const BASELINE_PATH = new URL('./qa/seo-baseline.json', import.meta.url);
@@ -44,13 +45,14 @@ const CHECKS = [
   { key: 'thin',         flag: 'THIN',         hard: false },
   { key: 'no_h2',        flag: 'NO_H2',        hard: false },
   { key: 'no_geo',       flag: 'NO_GEO',       hard: false },
+  { key: 'og_fallback',  flag: 'OG_FALLBACK',  hard: false },  // '' 또는 NULL → /api/og 자동 이미지. CTR 문제라 soft
 ];
 const HARD_FLAGS = CHECKS.filter((c) => c.hard).map((c) => c.flag);
 
 const db = requireAdminClient();
 const blogs = [];
 for await (const b of paged(() =>
-  db.from('blogs').select('slug,title,meta_description,content,info_block_html')
+  db.from('blogs').select('slug,title,meta_description,content,info_block_html,og_image_url')
     .eq('published', true).or('publish_at.is.null,publish_at.lte.now'),
 )) blogs.push(b);
 
@@ -73,6 +75,8 @@ function flagsOf(b) {
   if (words < 400) flags.push('THIN');
   if (words >= 400 && h2 < 2) flags.push('NO_H2');
   if (!geo) flags.push('NO_GEO');
+  const og = (b.og_image_url ?? '').trim();
+  if (!og || isOgApi(og)) flags.push('OG_FALLBACK');  // SKILL.md SQL 과 한 쌍: NULLIF(BTRIM(..),'') IS NULL OR ~ '/api/og(\?|$)'. mhj-desk/seo 도 같은 정의
   return flags;
 }
 

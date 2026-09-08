@@ -9,7 +9,7 @@ import { supabase, createAdminClient, createPublicAdminClient } from '@/lib/supa
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { getSiteSettings } from '@/lib/site-settings';
-import { BLOG_DETAIL_COLUMNS, BLOG_RELATED_COLUMNS, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
+import { BLOG_DETAIL_COLUMNS, BLOG_RELATED_COLUMNS, categoryHref } from '@/lib/constants';
 import { getNZSeasonLabel } from '@/lib/date-helpers';
 import { optimizeContentImages, nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 import ViewTracker from './ViewTracker';
@@ -34,32 +34,32 @@ export async function generateStaticParams() {
   return (data ?? []).map((b) => ({ slug: b.slug }));
 }
 
-async function getAdjacentBlogs(currentId: number): Promise<{
+async function getAdjacentBlogs(current: { id: number; date: string }): Promise<{
   prev: { id: number; title: string; slug: string } | null;
   next: { id: number; title: string; slug: string } | null;
 }> {
   const now = new Date().toISOString();
-  const [{ data: prevData }, { data: nextData }] = await Promise.all([
-    supabase
+  // 독자가 보는 순서(목록·Next Story 모두 `date` 내림차순)와 같은 키로 이웃을 고른다. id 순은 입력 순서라
+  // 소급 등록·수정된 글에서 목록과 어긋났다. 같은 날짜는 id 로 tie-break. (.or 2회 체이닝 = AND)
+  const neighbour = (dir: 'prev' | 'next') => {
+    const op = dir === 'prev' ? 'lt' : 'gt';
+    const ascending = dir === 'next';
+    return supabase
       .from('blogs')
       .select('id, title, slug')
       .eq('published', true)
       .or(`publish_at.is.null,publish_at.lte.${now}`)
-      .lt('id', currentId)
-      .order('id', { ascending: false })
-      .limit(1),
-    supabase
-      .from('blogs')
-      .select('id, title, slug')
-      .eq('published', true)
-      .or(`publish_at.is.null,publish_at.lte.${now}`)
-      .gt('id', currentId)
-      .order('id', { ascending: true })
-      .limit(1),
-  ]);
+      .or(`date.${op}."${current.date}",and(date.eq."${current.date}",id.${op}.${current.id})`)
+      .order('date', { ascending })
+      .order('id', { ascending })
+      .limit(1);
+  };
+  const [prevRes, nextRes] = await Promise.all([neighbour('prev'), neighbour('next')]);
+  if (prevRes.error) console.error('getAdjacentBlogs prev:', prevRes.error.message);
+  if (nextRes.error) console.error('getAdjacentBlogs next:', nextRes.error.message);
   return {
-    prev: prevData?.[0] ?? null,
-    next: nextData?.[0] ?? null,
+    prev: prevRes.data?.[0] ?? null,
+    next: nextRes.data?.[0] ?? null,
   };
 }
 
@@ -179,7 +179,7 @@ export default async function BlogDetailPage(
   const adminDb = createPublicAdminClient();
   const [relatedBlogs, adjacent, latestNewsletterRes, settings, nextStoryRes] = await Promise.all([
     getRelatedBlogs(blog.category, blog.slug),
-    getAdjacentBlogs(blog.id),
+    getAdjacentBlogs(blog),
     adminDb
       .from('newsletters')
       .select('subject, issue_number')
@@ -400,11 +400,7 @@ export default async function BlogDetailPage(
             </span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
             <Link
-              href={
-                CATEGORY_TO_SLUG[blog.category as BlogCategory]
-                  ? `/blog/category/${CATEGORY_TO_SLUG[blog.category as BlogCategory]}`
-                  : `/blog?category=${encodeURIComponent(blog.category)}`
-              }
+              href={categoryHref(blog.category)}
               style={{
                 fontSize: 11,
                 fontWeight: 900,

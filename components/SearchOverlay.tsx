@@ -7,6 +7,7 @@ import type { SearchResult } from '@/app/api/search/route';
 import { formatDate } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 import { useFocusTrap } from '@/lib/useFocusTrap';
+import { BLOG_CATEGORIES, categoryHref } from '@/lib/constants';
 
 const TYPE_LABEL: Record<string, string> = {
   blog: 'Journal',
@@ -20,13 +21,10 @@ const TYPE_COLOR: Record<string, string> = {
   article: '#10B981',
 };
 
+// 카테고리 목록은 lib/constants 에서 파생 — 하드코딩하면 개편 때 죽은 링크가 남는다
+// (2026-09-08 전까지 폐기된 카테고리 5개가 /blog?category=… 로 조용히 전체 목록으로 떨어졌다).
 const QUICK_LINKS = [
-  { label: 'Education', href: '/blog?category=Education' },
-  { label: 'Settlement', href: '/blog?category=Settlement' },
-  { label: 'Girls', href: '/blog?category=Girls' },
-  { label: 'Locals', href: '/blog?category=Locals' },
-  { label: 'Life', href: '/blog?category=Life' },
-  { label: 'Travel', href: '/blog?category=Travel' },
+  ...BLOG_CATEGORIES.map((label) => ({ label, href: categoryHref(label) })),
   { label: 'Magazine', href: '/magazine' },
   { label: 'Gallery', href: '/gallery' },
 ];

@@ -9,7 +9,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import { formatDate } from '@/lib/utils';
 import { getSiteSettings } from '@/lib/site-settings';
 import { PILLARS } from '@/lib/pillars';
-import { BLOG_CARD_COLUMNS, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
+import { BLOG_CARD_COLUMNS, categoryHref } from '@/lib/constants';
 
 export const revalidate = 300;
 
@@ -1117,11 +1117,7 @@ function ExploreByTopic({ categoryPosts }: { categoryPosts: Record<string, Blog[
                 {category}
               </h3>
               <Link
-                href={
-                  CATEGORY_TO_SLUG[category as BlogCategory]
-                    ? `/blog/category/${CATEGORY_TO_SLUG[category as BlogCategory]}`
-                    : `/blog?category=${encodeURIComponent(category)}`
-                }
+                href={categoryHref(category)}
                 style={{
                   fontSize: 11,
                   fontWeight: 900,
