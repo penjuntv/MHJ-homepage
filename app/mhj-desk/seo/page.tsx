@@ -1,169 +1,206 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+/**
+ * 관리자 SEO 감사 화면 (W4-D).
+ *
+ * 판정은 `lib/seo-defects.mjs` 한 곳에서 온다 — 주간 회귀 감사(`scripts/audit-seo-regression.mjs`)와
+ * **같은 함수**다. 예전에는 이 파일이 검사 규칙을 따로 갖고 있어 화면 수치와 주간 수치가 갈렸다.
+ * 기준선 플래그(8종)의 개수는 `scripts/qa/seo-baseline.json` 과 일치해야 한다.
+ *
+ * 운영 지표(seo_title 없음·요약 없음·FAQ 없음·90일 미갱신 등)는 기준선 밖이다 — 회귀 게이트가 아니라
+ * W5 정비 큐를 고르는 눈이다.
+ */
+
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
-import type { Blog } from '@/lib/types';
 import { AlertCircle, AlertTriangle, CheckCircle2, Info, Loader2, Search } from 'lucide-react';
+import {
+  CHECKS, FLAG_META, FLAG_INPUT_FIELDS, flagsOf, severityOf, baselineStatusOf, isLive,
+} from '@/lib/seo-defects.mjs';
 
-/* ── SEO 점검 결과 ── */
-type IssueLevel = 'error' | 'warn' | 'info';
-type Issue = { level: IssueLevel; message: string };
+/**
+ * 감사에 필요한 컬럼만. `select('*')` 는 비공개 컬럼(content_backup·insight_*)까지 브라우저로 끌어온다.
+ * 판정이 읽는 필드는 lib/seo-defects.mjs 가 선언한다 — 여기서 손으로 적으면 하나 빠져도
+ * 빌드는 통과하고 그 검사만 조용히 0 이 된다.
+ */
+const DISPLAY_FIELDS = ['id', 'date', 'category', 'published', 'publish_at'];
+const AUDIT_COLUMNS = [...new Set([...DISPLAY_FIELDS, ...FLAG_INPUT_FIELDS])].join(', ');
 
-type BlogWithIssues = Blog & { issues: Issue[] };
+const PAGE_SIZE = 200;   // 서버에서 끊어 받는 단위 — 한 번에 전량을 받지 않는다
+const ROWS_PER_PAGE = 25; // 화면에 그리는 단위
 
-function auditBlog(b: Blog): Issue[] {
-  const issues: Issue[] = [];
-
-  // meta_description 누락
-  if (!b.meta_description || b.meta_description.trim() === '') {
-    issues.push({ level: 'error', message: 'meta_description 누락' });
-  } else if (b.meta_description.length > 160) {
-    issues.push({ level: 'warn', message: `meta_description ${b.meta_description.length}자 (160자 초과)` });
-  }
-
-  // og_image_url 폴백 — 빈 값 또는 /api/og 자동 생성. 정의는 SKILL.md SQL·audit-seo-regression.mjs 와 한 쌍(2026-09-08 실측 62/84).
-  const og = (b.og_image_url ?? '').trim();
-  if (!og || /\/api\/og(\?|$)/.test(og)) {
-    issues.push({ level: 'warn', message: og ? 'OG 이미지 자동 생성(/api/og) — 대표 사진 지정 권장' : 'OG 이미지 미지정 (자동 생성 폴백)' });
-  }
-
-  // 제목 길이
-  if (b.title.length > 60) {
-    issues.push({ level: 'warn', message: `제목 ${b.title.length}자 (60자 초과)` });
-  }
-
-  // 슬러그에 한국어
-  if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(b.slug)) {
-    issues.push({ level: 'warn', message: '슬러그에 한국어 포함' });
-  }
-
-  // 태그 없음
-  if (!b.tags || b.tags.length === 0) {
-    issues.push({ level: 'info', message: '태그 없음' });
-  }
-
-  // Unsplash 이미지
-  if (b.image_url?.includes('unsplash.com') || b.image_url?.includes('picsum.photos')) {
-    issues.push({ level: 'info', message: '대표 이미지 교체 권장 (Unsplash/Picsum)' });
-  }
-
-  return issues;
+/** 조회 결과 행 — 컬럼 목록이 상수라 supabase-js 가 타입을 못 추론한다(BLOG_*_COLUMNS 호출부와 같은 사정). */
+interface AuditSource {
+  id: number; title: string; slug: string; date: string; category: string; published: boolean;
+  content: string | null; info_block_html: string | null; meta_description: string | null;
+  og_image_url: string | null; seo_title: string | null; summary_ko: string | null; publish_at: string | null;
+  faq_json: unknown; tags: string[] | null; image_url: string | null;
+  updated_at: string | null; created_at: string | null;
 }
 
-function statusOf(issues: Issue[]): 'good' | 'warn' | 'error' {
-  if (issues.some(i => i.level === 'error')) return 'error';
-  if (issues.some(i => i.level === 'warn')) return 'warn';
-  return 'good';
+interface AuditRow {
+  id: number;
+  title: string;
+  slug: string;
+  date: string;
+  category: string;
+  published: boolean;
+  /** 지금 공개돼 있는가 — 주간 감사와 같은 조건(발행 + 예약 시각 통과) */
+  live: boolean;
+  flags: string[];
 }
 
-type Filter = 'all' | 'issues' | 'good';
-
-/* ── 배지 색상 ── */
-const LEVEL_COLOR: Record<IssueLevel, { bg: string; text: string; border: string }> = {
+const LEVEL_COLOR = {
   error: { bg: '#FEF2F2', text: '#DC2626', border: '#FECACA' },
-  warn:  { bg: '#FFFBEB', text: '#D97706', border: '#FDE68A' },
-  info:  { bg: '#F8FAFC', text: '#64748B', border: '#E2E8F0' },
+  warn: { bg: '#FFFBEB', text: '#D97706', border: '#FDE68A' },
+  info: { bg: '#F8FAFC', text: '#64748B', border: '#E2E8F0' },
+} as const;
+
+const levelOfFlag = (flag: string): keyof typeof LEVEL_COLOR => {
+  const m = FLAG_META[flag];
+  return m?.hard ? 'error' : m?.baseline ? 'warn' : 'info';
 };
 
 export default function AdminSeoPage() {
-  const [blogs, setBlogs] = useState<BlogWithIssues[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<Filter>('all');
+  const [rows, setRows] = useState<AuditRow[] | null>(null);
+  const [loaded, setLoaded] = useState(0);
+  const [error, setError] = useState('');
+  /** 중간에 끊긴 로드 — 부분 집계를 "주간과 일치" 라고 말하면 안 된다. */
+  const [partial, setPartial] = useState(false);
+  const [flagFilter, setFlagFilter] = useState<string | 'all' | 'good' | 'clean'>('all');
+  /** 기본은 주간 감사와 **같은 모집단**(공개된 글) — 그래야 여기 수치를 그대로 인용할 수 있다.
+   *  초안까지 보려면 켠다(발행 전에 결함을 보는 용도). */
+  const [includeDrafts, setIncludeDrafts] = useState(false);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
-    supabase
-      .from('blogs')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        const audited = (data ?? []).map(b => ({ ...b, issues: auditBlog(b) }));
-        setBlogs(audited);
-        setLoading(false);
-      });
+    let cancelled = false;
+    (async () => {
+      const acc: AuditRow[] = [];
+      const now = Date.now();
+      // 서버에서 끊어 받는다 — 84편이 200편이 돼도 한 응답에 전부 담기지 않는다.
+      // 합계는 전 코퍼스를 봐야 나오므로 "끊어 받기"이지 "일부만 보기"는 아니다.
+      for (let from = 0; ;) {
+        const { data, error: e } = await supabase
+          .from('blogs')
+          .select(AUDIT_COLUMNS)
+          // created_at 동률이 라이브에 실제로 있다(2건) — tie-break 이 없으면 페이지 경계에서
+          // 같은 행이 두 번 오거나 빠진다.
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+        if (cancelled) return;
+        if (e) { setError(e.message); setPartial(true); break; }
+        const batch = (data ?? []) as unknown as AuditSource[];
+        if (batch.length === 0) break;
+        for (const b of batch) {
+          acc.push({
+            id: b.id, title: b.title, slug: b.slug, date: b.date,
+            category: b.category, published: b.published,
+            // 판정은 lib/seo-defects.mjs 가 소유한다 — 주간 감사와 같은 조건이어야 한다.
+            live: isLive(b, now),
+            flags: flagsOf(b),
+          });
+        }
+        setLoaded(acc.length);
+        // 실제로 받은 만큼만 전진하고 빈 배치로 끝낸다. `batch.length < PAGE_SIZE` 로 끊으면
+        // 서버의 max-rows 가 PAGE_SIZE 보다 작을 때 첫 페이지에서 조용히 멈춘다(수치가 틀린 채로).
+        from += batch.length;
+      }
+      if (!cancelled) setRows(acc);
+    })();
+    return () => { cancelled = true; };
   }, []);
 
-  /* ── 통계 ── */
-  const total = blogs.length;
-  const withIssues = blogs.filter(b => statusOf(b.issues) !== 'good').length;
-  const allGood = total - withIssues;
+  /** 집계 대상. 기본(공개된 글)에서는 기준선 8종이 주간 감사 수치와 정확히 같다. */
+  const scoped = useMemo(
+    () => (rows ?? []).filter((r) => includeDrafts || r.live),
+    [rows, includeDrafts],
+  );
 
-  /* ── 필터링 ── */
-  const filtered = blogs.filter(b => {
-    if (filter === 'issues') return statusOf(b.issues) !== 'good';
-    if (filter === 'good') return statusOf(b.issues) === 'good';
-    return true;
-  });
+  /** 플래그별 개수 */
+  const counts = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const r of scoped) for (const f of r.flags) m[f] = (m[f] ?? 0) + 1;
+    return m;
+  }, [scoped]);
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+  const filtered = useMemo(() => {
+    const list = scoped;
+    const picked = flagFilter === 'all' ? list
+      : flagFilter === 'good' ? list.filter((r) => r.flags.length === 0)
+      : flagFilter === 'clean' ? list.filter((r) => baselineStatusOf(r.flags) === 'good')
+      : list.filter((r) => r.flags.includes(flagFilter));
+    // 심각한 것부터 — 같은 심각도면 결함이 많은 순
+    return [...picked].sort((a, b) => {
+      const sa = Math.max(0, ...a.flags.map(severityOf));
+      const sb = Math.max(0, ...b.flags.map(severityOf));
+      return sb - sa || b.flags.length - a.flags.length;
+    });
+  }, [scoped, flagFilter]);
+
+  useEffect(() => { setPage(0); }, [flagFilter, includeDrafts]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
+  const visible = filtered.slice(page * ROWS_PER_PAGE, (page + 1) * ROWS_PER_PAGE);
+
+  const total = scoped.length;
+  // 상태는 **기준선 플래그로만** 낸다. 운영 지표(seo_title 없음 등)는 지금 전 편에 붙어 있어
+  // 그걸 상태에 넣으면 "정상 0" 이 영구 고정되고 카드가 신호를 잃는다.
+  const hardCount = scoped.filter((r) => baselineStatusOf(r.flags) === 'error').length;
+  const warnCount = scoped.filter((r) => baselineStatusOf(r.flags) === 'warn').length;
+  const cleanCount = scoped.filter((r) => baselineStatusOf(r.flags) === 'good').length;
+  const opsOnly = scoped.filter((r) => baselineStatusOf(r.flags) === 'good' && r.flags.length > 0).length;
+  const draftCount = (rows ?? []).filter((r) => !r.live).length;
+
+  if (rows === null) return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
       <Loader2 size={28} style={{ animation: 'spin 1s linear infinite', color: '#CBD5E1' }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <p style={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>{loaded}편 불러오는 중...</p>
+      <style>{'@keyframes spin { to { transform: rotate(360deg); } }'}</style>
     </div>
   );
 
   return (
     <div style={{ padding: '48px', maxWidth: 1300, margin: '0 auto' }}>
-
-      {/* ─── 헤더 ─── */}
       <div style={{ marginBottom: 40 }}>
         <h1 className="font-display font-black uppercase" style={{ fontSize: 48, letterSpacing: '-2px', lineHeight: 1 }}>
           SEO Check
         </h1>
         <p style={{ fontSize: 13, color: '#94A3B8', marginTop: 8, fontWeight: 500 }}>
-          저널 글의 SEO 상태를 점검합니다. 문제를 클릭하면 바로 수정할 수 있습니다.
+          판정은 주간 회귀 감사(<code style={{ fontFamily: 'monospace' }}>audit-seo-regression</code>)와 같은 규칙입니다.
+          {partial
+            ? ' ⚠️ 목록을 끝까지 읽지 못했습니다 — 아래 수치는 일부만 센 값입니다.'
+            : includeDrafts
+              ? ' 초안·예약 글을 포함해 세는 중이라 주간 리포트 수치와 다릅니다.'
+              : ' 공개된 글만 세므로 기준선 항목의 개수는 주간 리포트와 일치합니다.'}
         </p>
+        {draftCount > 0 && (
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 12, fontWeight: 700, color: '#64748B', cursor: 'pointer' }}>
+            <input type="checkbox" checked={includeDrafts} onChange={(e) => setIncludeDrafts(e.target.checked)} />
+            초안·예약 {draftCount}편도 포함
+          </label>
+        )}
+        {error && (
+          <p style={{ fontSize: 12, color: '#DC2626', marginTop: 8, fontWeight: 700 }}>조회 오류: {error}</p>
+        )}
       </div>
 
-      {/* ─── 요약 카드 3개 ─── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: 16,
-        marginBottom: 40,
-      }}>
+      {/* 요약 카드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 32 }}>
         {[
-          {
-            label: 'Total Posts',
-            value: total,
-            icon: <Search size={20} />,
-            color: '#4F46E5',
-            bg: '#EEF2FF',
-            cls: 'animate-slide-up stagger-1',
-          },
-          {
-            label: 'Issues Found',
-            value: withIssues,
-            icon: <AlertCircle size={20} />,
-            color: withIssues > 0 ? '#DC2626' : '#94A3B8',
-            bg: withIssues > 0 ? '#FEF2F2' : '#F8FAFC',
-            cls: 'animate-slide-up stagger-2',
-          },
-          {
-            label: 'All Good',
-            value: allGood,
-            icon: <CheckCircle2 size={20} />,
-            color: allGood === total && total > 0 ? '#16A34A' : '#94A3B8',
-            bg: allGood === total && total > 0 ? '#F0FDF4' : '#F8FAFC',
-            cls: 'animate-slide-up stagger-3',
-          },
-        ].map(({ label, value, icon, color, bg, cls }) => (
-          <div key={label} className={cls} style={{
-            background: 'white',
-            borderRadius: 20,
-            padding: '24px 28px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-            border: '1px solid #F1F5F9',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16,
+          { label: 'Total Posts', value: total, icon: <Search size={20} />, color: '#4F46E5', bg: '#EEF2FF' },
+          { label: '필수 결함', value: hardCount, icon: <AlertCircle size={20} />, color: hardCount > 0 ? '#DC2626' : '#94A3B8', bg: hardCount > 0 ? '#FEF2F2' : '#F8FAFC' },
+          { label: '기준선 경고', value: warnCount, icon: <AlertTriangle size={20} />, color: warnCount > 0 ? '#D97706' : '#94A3B8', bg: warnCount > 0 ? '#FFFBEB' : '#F8FAFC' },
+          { label: '기준선 통과', value: cleanCount, icon: <CheckCircle2 size={20} />, color: '#16A34A', bg: '#F0FDF4' },
+        ].map(({ label, value, icon, color, bg }) => (
+          <div key={label} style={{
+            background: 'white', borderRadius: 20, padding: '24px 28px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: '1px solid #F1F5F9',
+            display: 'flex', alignItems: 'center', gap: 16,
           }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 12,
-              background: bg, color, display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-            }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {icon}
             </div>
             <div>
@@ -174,202 +211,187 @@ export default function AdminSeoPage() {
         ))}
       </div>
 
-      {/* ─── 필터 탭 ─── */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
-        {([
-          { key: 'all', label: `전체 (${total})` },
-          { key: 'issues', label: `문제 있음 (${withIssues})` },
-          { key: 'good', label: `정상 (${allGood})` },
-        ] as { key: Filter; label: string }[]).map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            style={{
-              padding: '9px 18px', borderRadius: 12, border: 'none', cursor: 'pointer',
-              background: filter === key ? '#1A1A1A' : '#F1F5F9',
-              color: filter === key ? 'white' : '#64748B',
-              fontWeight: 700, fontSize: 12, transition: 'all 0.15s',
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {/* ─── 테이블 ─── */}
-      {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: '#CBD5E1' }}>
-          <CheckCircle2 size={32} style={{ margin: '0 auto 16px', color: '#86EFAC' }} />
-          <p style={{ fontSize: 14, fontWeight: 700 }}>
-            {filter === 'good' ? '전체 글이 최적화되어 있습니다.' : '해당 항목이 없습니다.'}
-          </p>
-        </div>
-      ) : (
-        <div style={{ background: 'white', borderRadius: 20, border: '1px solid #F1F5F9', overflow: 'hidden' }}>
-
-          {/* 테이블 헤더 */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr 80px 80px 80px 80px',
-            padding: '13px 24px',
-            borderBottom: '1px solid #F1F5F9',
-            fontSize: 10, fontWeight: 900, color: '#CBD5E1',
-            letterSpacing: 2, textTransform: 'uppercase',
-          }}>
-            <span>제목</span>
-            <span>슬러그</span>
-            <span style={{ textAlign: 'center' }}>Meta</span>
-            <span style={{ textAlign: 'center' }}>OG</span>
-            <span style={{ textAlign: 'center' }}>Tags</span>
-            <span style={{ textAlign: 'center' }}>상태</span>
-          </div>
-
-          {/* 테이블 행 */}
-          {filtered.map((b, i) => {
-            const status = statusOf(b.issues);
-            const errors = b.issues.filter(x => x.level === 'error');
-            const warns  = b.issues.filter(x => x.level === 'warn');
-            const infos  = b.issues.filter(x => x.level === 'info');
-
-            const metaIssue  = b.issues.find(x => x.message.includes('meta'));
-            const ogIssue    = b.issues.find(x => x.message.includes('OG'));
-            const tagIssue   = b.issues.find(x => x.message.includes('태그'));
-
+      {/* 운영 지표 진행률 — seo_title·요약·FAQ 는 지금 0/80 이다. 행마다 칩으로 뿌리면
+          진짜 결함(alt 3편·orphan 10편)이 묻힌다. 여기서 한 번만 보여주고 행에서는 접는다. */}
+      <div style={{ background: 'white', borderRadius: 20, border: '1px solid #F1F5F9', padding: '18px 24px', marginBottom: 16 }}>
+        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 12px' }}>
+          운영 지표 진행률 (W5 정비 대상)
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+          {CHECKS.filter((c) => !c.baseline).map((c) => {
+            const bad = counts[c.flag] ?? 0;
+            const done = total - bad;
+            const pct = total ? Math.round((done / total) * 100) : 0;
             return (
-              <div
-                key={b.id}
+              <button key={c.flag} type="button" onClick={() => setFlagFilter(c.flag)}
+                title={c.hint} disabled={bad === 0}
                 style={{
-                  borderBottom: i < filtered.length - 1 ? '1px solid #F8FAFC' : 'none',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#FAFBFF')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-              >
-                {/* 메인 행 */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '2fr 1fr 80px 80px 80px 80px',
-                  padding: '14px 24px',
-                  alignItems: 'center',
+                  textAlign: 'left', border: 'none', background: 'none', padding: 0,
+                  cursor: bad === 0 ? 'default' : 'pointer',
                 }}>
-                  {/* 제목 */}
-                  <div style={{ paddingRight: 16 }}>
-                    <Link
-                      href={`/mhj-desk/blogs/${b.id}/edit`}
-                      style={{
-                        fontSize: 14, fontWeight: 700, color: '#1A1A1A',
-                        textDecoration: 'none', display: 'block',
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}
-                      title={b.title}
-                    >
-                      {b.title}
-                    </Link>
-                    <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 2, fontWeight: 500 }}>
-                      {b.date} · {b.category}
-                      {!b.published && (
-                        <span style={{ marginLeft: 8, background: '#F1F5F9', padding: '1px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700, color: '#94A3B8' }}>
-                          미발행
-                        </span>
-                      )}
-                    </p>
-                  </div>
-
-                  {/* 슬러그 */}
-                  <div style={{ paddingRight: 12, overflow: 'hidden' }}>
-                    <span style={{
-                      fontSize: 11, fontFamily: 'monospace', color: '#64748B',
-                      display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      /{b.slug}
-                    </span>
-                  </div>
-
-                  {/* Meta 상태 */}
-                  <CellIcon issue={metaIssue} ok={!metaIssue} />
-
-                  {/* OG 상태 */}
-                  <CellIcon issue={ogIssue} ok={!ogIssue} />
-
-                  {/* Tags 상태 */}
-                  <CellIcon issue={tagIssue} ok={!tagIssue} />
-
-                  {/* 전체 상태 배지 */}
-                  <div style={{ textAlign: 'center' }}>
-                    {status === 'error' && (
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', background: '#FEF2F2', padding: '4px 10px', borderRadius: 999 }}>
-                        ❌ 필수
-                      </span>
-                    )}
-                    {status === 'warn' && (
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#D97706', background: '#FFFBEB', padding: '4px 10px', borderRadius: 999 }}>
-                        ⚠️ 경고
-                      </span>
-                    )}
-                    {status === 'good' && (
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#16A34A', background: '#F0FDF4', padding: '4px 10px', borderRadius: 999 }}>
-                        ✅ 정상
-                      </span>
-                    )}
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: bad === 0 ? '#16A34A' : '#64748B' }}>{c.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: bad === 0 ? '#16A34A' : '#94A3B8' }}>{done}/{total}</span>
                 </div>
-
-                {/* 이슈 상세 (이슈가 있을 때만) */}
-                {b.issues.length > 0 && (
-                  <div style={{ padding: '0 24px 14px', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {[...errors, ...warns, ...infos].map((issue, j) => {
-                      const col = LEVEL_COLOR[issue.level];
-                      return (
-                        <span key={j} style={{
-                          fontSize: 10, fontWeight: 700, padding: '3px 10px',
-                          borderRadius: 999, border: `1px solid ${col.border}`,
-                          background: col.bg, color: col.text,
-                          display: 'inline-flex', alignItems: 'center', gap: 4,
-                        }}>
-                          {issue.level === 'error' && <AlertCircle size={9} />}
-                          {issue.level === 'warn'  && <AlertTriangle size={9} />}
-                          {issue.level === 'info'  && <Info size={9} />}
-                          {issue.message}
-                        </span>
-                      );
-                    })}
-                    <Link
-                      href={`/mhj-desk/blogs/${b.id}/edit`}
-                      style={{
-                        fontSize: 10, fontWeight: 700, padding: '3px 12px',
-                        borderRadius: 999, background: '#4F46E5', color: 'white',
-                        textDecoration: 'none',
-                      }}
-                    >
-                      수정하기 →
-                    </Link>
-                  </div>
-                )}
-              </div>
+                <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: bad === 0 ? '#16A34A' : '#CBD5E1', borderRadius: 2 }} />
+                </div>
+              </button>
             );
           })}
         </div>
+      </div>
+
+      {/* 항목별 개수 — 클릭하면 그 항목만 본다 */}
+      <div style={{ background: 'white', borderRadius: 20, border: '1px solid #F1F5F9', padding: '18px 24px', marginBottom: 24 }}>
+        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 12px' }}>
+          항목별 (클릭해서 거르기)
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <FilterChip active={flagFilter === 'all'} onClick={() => setFlagFilter('all')} label={`전체 ${total}`} level="info" />
+          <FilterChip active={flagFilter === 'clean'} onClick={() => setFlagFilter('clean')} label={`기준선 통과 ${cleanCount}`} level="info"
+            title="필수·기준선 결함이 없는 글. 운영 지표(seo_title 없음 등)는 남아 있을 수 있다" />
+          <FilterChip active={flagFilter === 'good'} onClick={() => setFlagFilter('good')} label={`완전 무결점 ${total - opsOnly - hardCount - warnCount}`} level="info"
+            title="운영 지표까지 모두 채워진 글" />
+          {CHECKS.filter((c) => c.baseline).map((c) => (
+            <FilterChip
+              key={c.flag}
+              active={flagFilter === c.flag}
+              onClick={() => setFlagFilter(c.flag)}
+              label={`${c.label} ${counts[c.flag] ?? 0}`}
+              level={c.hard ? 'error' : 'warn'}
+              dim={(counts[c.flag] ?? 0) === 0}
+              title={[c.hint, '주간 기준선 항목'].filter(Boolean).join(' · ')}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 목록 */}
+      {filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '80px 0', color: '#CBD5E1' }}>
+          <CheckCircle2 size={32} style={{ margin: '0 auto 16px', color: '#86EFAC' }} />
+          <p style={{ fontSize: 14, fontWeight: 700 }}>해당 항목이 없습니다.</p>
+        </div>
+      ) : (
+        <div style={{ background: 'white', borderRadius: 20, border: '1px solid #F1F5F9', overflow: 'hidden' }}>
+          {visible.map((b, i) => (
+            <div key={b.id} style={{ borderBottom: i < visible.length - 1 ? '1px solid #F8FAFC' : 'none', padding: '14px 24px' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+                <Link
+                  href={`/mhj-desk/blogs/${b.id}/edit`}
+                  style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', textDecoration: 'none' }}
+                  title={b.title}
+                >
+                  {b.title}
+                </Link>
+                <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#94A3B8' }}>/{b.slug}</span>
+                <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 500 }}>{b.date} · {b.category}</span>
+                {!b.published && (
+                  <span style={{ background: '#F1F5F9', padding: '1px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700, color: '#94A3B8' }}>
+                    미발행
+                  </span>
+                )}
+                {(() => {
+                  const baseCount = b.flags.filter((f) => FLAG_META[f]?.baseline).length;
+                  return (
+                    <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: baseCount ? '#D97706' : '#16A34A' }}>
+                      {baseCount ? `결함 ${baseCount}건` : '기준선 통과'}
+                    </span>
+                  );
+                })()}
+              </div>
+              {(b.flags.length > 0) && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                  {[...b.flags].filter((f) => FLAG_META[f]?.baseline)
+                    .sort((x, y) => severityOf(y) - severityOf(x)).map((f) => {
+                    const level = levelOfFlag(f);
+                    const col = LEVEL_COLOR[level];
+                    return (
+                      <span key={f} title={FLAG_META[f]?.hint} style={{
+                        fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+                        border: `1px solid ${col.border}`, background: col.bg, color: col.text,
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                      }}>
+                        {level === 'error' && <AlertCircle size={9} />}
+                        {level === 'warn' && <AlertTriangle size={9} />}
+                        {level === 'info' && <Info size={9} />}
+                        {FLAG_META[f]?.label ?? f}
+                      </span>
+                    );
+                  })}
+                  {(() => {
+                    // 운영 지표는 지금 거의 모든 글에 붙는다 — 칩으로 나열하면 진짜 결함을 가린다.
+                    const ops = b.flags.filter((f) => !FLAG_META[f]?.baseline);
+                    if (!ops.length) return null;
+                    return (
+                      <span
+                        title={ops.map((f) => FLAG_META[f]?.label ?? f).join(' · ')}
+                        style={{
+                          fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+                          border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#94A3B8',
+                        }}
+                      >
+                        운영 지표 {ops.length}
+                      </span>
+                    );
+                  })()}
+                  <Link href={`/mhj-desk/blogs/${b.id}/edit`} style={{
+                    fontSize: 10, fontWeight: 700, padding: '3px 12px', borderRadius: 999,
+                    background: '#4F46E5', color: 'white', textDecoration: 'none',
+                  }}>
+                    수정하기 →
+                  </Link>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
+      {/* 페이지 이동 */}
+      {pageCount > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 20 }}>
+          <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
+            style={pagerStyle(page === 0)}>이전</button>
+          <span style={{ fontSize: 12, color: '#64748B', fontWeight: 700 }}>
+            {page + 1} / {pageCount} · {filtered.length}편
+          </span>
+          <button type="button" onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={page >= pageCount - 1}
+            style={pagerStyle(page >= pageCount - 1)}>다음</button>
+        </div>
+      )}
+
+      <style>{'@keyframes spin { to { transform: rotate(360deg); } }'}</style>
     </div>
   );
 }
 
-/* ── 셀 아이콘 서브컴포넌트 ── */
-function CellIcon({ issue, ok }: { issue: Issue | undefined; ok: boolean }) {
-  if (ok) return (
-    <div style={{ textAlign: 'center' }}>
-      <CheckCircle2 size={16} style={{ color: '#86EFAC', margin: '0 auto' }} />
-    </div>
-  );
+const pagerStyle = (disabled: boolean): React.CSSProperties => ({
+  padding: '8px 16px', borderRadius: 12, border: '1px solid #E2E8F0',
+  background: disabled ? '#F8FAFC' : 'white', color: disabled ? '#CBD5E1' : '#1A1A1A',
+  fontSize: 12, fontWeight: 700, cursor: disabled ? 'not-allowed' : 'pointer',
+});
+
+function FilterChip({ active, onClick, label, level, dim, title }: {
+  active: boolean; onClick: () => void; label: string;
+  level: 'error' | 'warn' | 'info'; dim?: boolean; title?: string;
+}) {
+  const col = LEVEL_COLOR[level];
   return (
-    <div style={{ textAlign: 'center' }}>
-      {issue?.level === 'error' && <AlertCircle size={16} style={{ color: '#DC2626', margin: '0 auto' }} />}
-      {issue?.level === 'warn'  && <AlertTriangle size={16} style={{ color: '#D97706', margin: '0 auto' }} />}
-      {issue?.level === 'info'  && <Info size={16} style={{ color: '#94A3B8', margin: '0 auto' }} />}
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      style={{
+        fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 999, cursor: 'pointer',
+        border: `1px solid ${active ? '#1A1A1A' : col.border}`,
+        background: active ? '#1A1A1A' : dim ? '#FFFFFF' : col.bg,
+        color: active ? 'white' : dim ? '#CBD5E1' : col.text,
+        transition: 'all 0.15s',
+      }}
+    >
+      {label}
+    </button>
   );
 }

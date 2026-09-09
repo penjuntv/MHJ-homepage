@@ -34,24 +34,13 @@
  *   2026-09-08 부터 '' 는 NULL 로 정규화(트리거)됐지만 /api/og 리터럴도 폴백이라 `?? ''`+isOgApi 판정은 그대로다(실측 62/84).
  */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { requireAdminClient, paged, isOgApi } from './lib/audit-shared.mjs';
+import { requireAdminClient, paged } from './lib/audit-shared.mjs';
+// 판정은 lib/seo-defects.mjs 한 곳에 있다 — 관리자 감사 페이지(app/mhj-desk/seo)가 같은 함수를 쓴다.
+// 여기서 다시 정의하면 화면과 주간 수치가 갈린다(2026-09-10 W4-D 에서 통합).
+import { BASELINE_CHECKS, HARD_FLAGS, baselineFlagsOf } from '../lib/seo-defects.mjs';
 
 const UPDATE = process.argv.includes('--update-baseline');
 const BASELINE_PATH = new URL('./qa/seo-baseline.json', import.meta.url);
-
-/* ── 검사 정의는 이 표 한 곳에만 — 플래그·집계 키·hard/soft 를 세 군데서 따로 적으면
-     새 검사를 추가할 때 하나를 빠뜨려도 출력엔 보이는데 게이트만 무장해제된다. ── */
-const CHECKS = [
-  { key: 'h1_over',      flag: 'H1_OVER',      hard: true  },
-  { key: 'alt_missing',  flag: 'ALT_MISSING',  hard: true  },
-  { key: 'orphan',       flag: 'ORPHAN',       hard: true  },
-  { key: 'meta_missing', flag: 'META_MISSING', hard: true  },
-  { key: 'thin',         flag: 'THIN',         hard: false },
-  { key: 'no_h2',        flag: 'NO_H2',        hard: false },
-  { key: 'no_geo',       flag: 'NO_GEO',       hard: false },
-  { key: 'og_fallback',  flag: 'OG_FALLBACK',  hard: false },  // '' 또는 NULL → /api/og 자동 이미지. CTR 문제라 soft
-];
-const HARD_FLAGS = CHECKS.filter((c) => c.hard).map((c) => c.flag);
 
 const db = requireAdminClient();
 const blogs = [];
@@ -60,38 +49,15 @@ for await (const b of paged(() =>
     .eq('published', true).or('publish_at.is.null,publish_at.lte.now'),
 )) blogs.push(b);
 
-const count = (s, re) => (s.match(re) ?? []).length;
-function flagsOf(b) {
-  const c = b.content ?? '';
-  // 인포블록도 라이브 페이지에 렌더링된다 — 링크·이미지 결함 판정은 본문+인포블록 합산으로.
-  // 단어 수·H2 는 SKILL.md 정의(본문 기준)를 따른다.
-  const full = c + '\n' + (b.info_block_html ?? '');
-  const visible = full.replace(/<[^>]*>/g, ' ');           // GEO 는 보이는 텍스트만 — href 의 mhj.nz 오탐 방지
-  const words = c.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
-  const h2 = count(c, /<h2\b/gi);
-  const geo = ['Mairangi', 'Auckland', 'New Zealand', 'North Shore', 'NZ', 'Aotearoa']
-    .some((k) => new RegExp(`\\b${k}\\b`, 'i').test(visible));
-  const flags = [];
-  if (count(full, /<h1\b/gi) > 0) flags.push('H1_OVER');                       // page.tsx 의 <h1> 과 충돌
-  if (count(full, /<img(?![^>]*\salt=)/gi) > 0) flags.push('ALT_MISSING');
-  if (count(full, /href="(\/[^"]+|https?:\/\/(www\.)?mhj\.nz[^"]*)"/gi) === 0) flags.push('ORPHAN');
-  if (!b.meta_description) flags.push('META_MISSING');
-  if (words < 400) flags.push('THIN');
-  if (words >= 400 && h2 < 2) flags.push('NO_H2');
-  if (!geo) flags.push('NO_GEO');
-  const og = (b.og_image_url ?? '').trim();
-  if (!og || isOgApi(og)) flags.push('OG_FALLBACK');  // SKILL.md SQL 과 한 쌍: NULLIF(BTRIM(..),'') IS NULL OR ~ '/api/og(\?|$)'. mhj-desk/seo 도 같은 정의
-  return flags;
-}
-
 const posts = {};
-for (const b of blogs) posts[b.slug] = flagsOf(b);
+// 기준선에는 결함 플래그만 담는다 — 운영 지표(seo_title 없음 등)는 관리자 화면 전용이다.
+for (const b of blogs) posts[b.slug] = baselineFlagsOf(b);
 
 const countFlag = (f) => Object.values(posts).filter((fl) => fl.includes(f)).length;
 const current = {
   generated: new Date().toISOString().slice(0, 10),
   total: blogs.length,
-  ...Object.fromEntries(CHECKS.map((c) => [c.key, countFlag(c.flag)])),
+  ...Object.fromEntries(BASELINE_CHECKS.map((c) => [c.key, countFlag(c.flag)])),
   posts,
 };
 
@@ -121,7 +87,7 @@ if (!baseline || UPDATE) {
 /* ── 비교 ── */
 console.log(`발행 ${current.total}편 (기준선 ${baseline.generated}: ${baseline.total}편)\n`);
 let failed = false;
-for (const { key, hard } of CHECKS) {
+for (const { key, hard } of BASELINE_CHECKS) {
   const was = baseline[key] ?? 0, now = current[key];
   const mark = now > was ? (hard ? '🔴' : '⚠️') : now < was ? '🟢' : '·';
   console.log(`${mark} ${key}: ${was} → ${now}`);

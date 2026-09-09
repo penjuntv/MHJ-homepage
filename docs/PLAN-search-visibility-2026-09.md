@@ -208,17 +208,19 @@ M   ●          ●                ● +4w                          ● +8w
 **☑ W4-C · BlogForm 확장** — 노력 M — **2026-09-10 완료** (PR `seo/w4c-blogform`)
 - 필드: `seo_title`(30~60 카운터·AI 초안) · `summary_ko`(AI 초안 → 편집 → 저장) · FAQ 0~4행 · `og_image_alt` · 관련 글 선택기. `/api/ai-seo` 는 `mode`(description|seo_title|summary_ko) 3모드 + 분당 10회 제한(모드 미지정은 예전 동작 유지)
 - 관련 글·내부 링크는 **한 패널**(`RelatedSuggestions.tsx`): 스킬 v1 가중치를 `lib/link-suggest.mjs` 로 옮겨 점수순 후보 8개를 보여주고, 행마다 "관련글 추가"(related_slugs 순서 유지)와 "링크 복사"(본문 붙여넣기용). 본문은 대신 고치지 않는다
-- preflight 는 기존 체크리스트를 확장 — 판정은 `lib/blog-preflight.mjs` 한 곳(W4-D 의 감사 페이지도 이걸 쓴다). 16행 = 필수 4 + 조건부 1(캡션) + 권장 12. 필수만 저장을 막고 나머지는 경고(D3)
+- preflight 는 기존 체크리스트를 확장 — 판정은 `lib/blog-preflight.mjs` 한 곳. (감사 쪽은 W4-D 에서 `lib/seo-defects.mjs` 로 따로 갔다 — 잣대가 다르다.) 16행 = 필수 4 + 조건부 1(캡션) + 권장 12. 필수만 저장을 막고 나머지는 경고(D3)
 - **커버 캡션은 글이 처음 공개될 때 필수** — "신규 글"(첫 저장) 기준으로 재면 초안으로 저장했다 나중에 발행하는 흐름이 규칙을 그냥 지나친다. 초안 저장은 막지 않는다(저장 버튼이 하나뿐이라 막으면 글을 나눠 쓸 수 없다)
 - 임계값은 `scripts/audit-seo-regression.mjs` 와 **일부러 다르다** — 폼은 발행 템플릿 목표치(내부링크 2개·H2 3개·서술형 alt), 감사는 결함 기준선(내부링크 0=ORPHAN 등, `seo-baseline.json` 에 동결). 실측 80편 중 63편이 내부링크 판정이 갈리므로 수치를 인용할 때 어느 쪽인지 밝힐 것
 - AI 생성물은 훅을 거치지 않으므로 라우트가 `lib/name-guard.mjs` 로 실명 패턴을 검사해 걸리면 422 로 폐기한다(P0, CLAUDE.md 10)
 - 자동 임시저장이 그동안 `coverCaption` 을 빠뜨리고 있었다 — 새 상태 3종과 함께 편입
 - 기존 발행 글은 권장 항목이 **7~11개(중앙값 9)** 미충족으로 뜬다(실측 80편: 내부링크 2개+ 7편, takeaways·seo_title·summary_ko·FAQ·관련글은 0편). 그게 W5 정비 큐의 작업 목록이다. 그래서 **저장 시 토스트는 처음 공개되는 글에서만** 띄우고, 이미 공개된 글은 '이번 편집으로 새로 깨진 항목'만 짚는다(매거진 넘침 경고가 벽지가 된 전례)
 
-**☐ W4-D · mhj-desk/seo 감사 페이지** — F4 · 노력 S~M
-- 검사 추가: ORPHAN · H2 · THIN · OG 빈 문자열 · seo_title 없음 · FAQ 없음 · summary_ko 없음 · 갱신 90일 경과
-- 서버 페이지네이션(`select('*')` 전량 로드 제거)
-- Done: 감사 수치가 `audit-seo-regression.mjs` 와 일치
+**☑ W4-D · mhj-desk/seo 감사 페이지** — F4 · 노력 S~M — **2026-09-10 완료** (PR `seo/w4d-audit-page`)
+- 판정을 `lib/seo-defects.mjs` 로 통합 — 주간 회귀 감사와 관리자 화면이 **같은 함수**를 쓴다. 예전엔 화면이 자기 규칙을 따로 갖고 있어 수치가 갈렸다. 실측 대조: 기준선 8종(h1_over 0·alt 3·orphan 10·meta 0·thin 36·no_h2 6·no_geo 23·og_fallback 59) 전부 `seo-baseline.json` 과 일치
+- 검사 추가(기준선 **밖**, 운영 지표): seo_title 없음 80 · summary_ko 없음 80 · FAQ 없음 80 · 90일 미갱신 67 · 태그 없음 3. 회귀 게이트로 삼지 않는다 — 전 편 미입력이라 게이트가 의미 없고, 채우는 일은 W5 몫
+- 화면: `select('*')` 제거(감사에 필요한 17컬럼만 — 비공개 컬럼이 브라우저로 안 온다) · `.range()` 로 끊어 받기 · 항목별 칩으로 거르기 · 25편씩 페이지 · 심각도순 정렬
+- 회귀 테스트 `scripts/qa/test-seo-defects.mjs`(source-guard 편입) — 임계값을 바꾸려면 테스트를 먼저 고쳐야 한다
+- 합계는 전 코퍼스를 읽어야 나오므로 "끊어 받기"이지 "일부만 보기"가 아니다
 
 **☐ W4-E · 피드·에이전트 인덱스** — F7 · B4 · 노력 S
 - `feed.xml`: `content:encoded` 전문 + 네임스페이스 · `enclosure` 실제 length/type · `pubDate = publish_at ?? created_at`
@@ -286,7 +288,7 @@ M   ●          ●                ● +4w                          ● +8w
 | 10 | W4-A | `… §4 W4-A 착수. Plan Mode. 마이그레이션→grant→constants→배포 순서, og_image_url '' 정리는 dry-run 먼저` | D2 D3 |
 | 11 | W4-B | `… §4 W4-B 착수. updated_at 은 편집 변경만 갱신하므로 dateModified·sitemap lastmod 에 바로 사용. seo_title 등은 BLOG_DETAIL_COLUMNS 에 이미 포함` | W4-A ☑ |
 | 12 | W4-C | `… §4 W4-C 착수. preflight 는 경고 모드` | W4-A ☑ W4-B ☑ — takeaways 는 본문 `<h2>Key takeaways</h2> + <ul>` 관례(감지 규칙 `lib/content-html.mjs`), 폼 필드는 seo_title·summary_ko·FAQ·related_slugs·og_image_alt |
-| 13 | W4-D/E | 별도 2대화 | W4-A ☑ W4-C ☑ — W4-D 는 `auditBlog()` 를 `lib/blog-preflight.mjs` 로 갈아끼우는 것부터 |
+| 13 | W4-E | `… §4 W4-E 착수` | W4-D ☑ — feed `content:encoded`·`llms-full` 전문 |
 | 14 | W5 | `… §4 W5 정비 큐 1번부터. 처방 목록만 만들고 본문은 수정하지 않는다` | D4 |
 | 15 | W6-A~D | 별도 4대화. W6-A 는 DESIGN_RULES 개정 포함 | D5 |
 
