@@ -208,7 +208,7 @@ M   ●          ●                ● +4w                          ● +8w
 **☑ W4-C · BlogForm 확장** — 노력 M — **2026-09-10 완료** (PR `seo/w4c-blogform`)
 - 필드: `seo_title`(30~60 카운터·AI 초안) · `summary_ko`(AI 초안 → 편집 → 저장) · FAQ 0~4행 · `og_image_alt` · 관련 글 선택기. `/api/ai-seo` 는 `mode`(description|seo_title|summary_ko) 3모드 + 분당 10회 제한(모드 미지정은 예전 동작 유지)
 - 관련 글·내부 링크는 **한 패널**(`RelatedSuggestions.tsx`): 스킬 v1 가중치를 `lib/link-suggest.mjs` 로 옮겨 점수순 후보 8개를 보여주고, 행마다 "관련글 추가"(related_slugs 순서 유지)와 "링크 복사"(본문 붙여넣기용). 본문은 대신 고치지 않는다
-- preflight 는 기존 체크리스트를 확장 — 판정은 `lib/blog-preflight.mjs` 한 곳(W4-D 의 감사 페이지도 이걸 쓴다). 16행 = 필수 4 + 조건부 1(캡션) + 권장 12. 필수만 저장을 막고 나머지는 경고(D3)
+- preflight 는 기존 체크리스트를 확장 — 판정은 `lib/blog-preflight.mjs` 한 곳. (감사 쪽은 W4-D 에서 `lib/seo-defects.mjs` 로 따로 갔다 — 잣대가 다르다.) 16행 = 필수 4 + 조건부 1(캡션) + 권장 12. 필수만 저장을 막고 나머지는 경고(D3)
 - **커버 캡션은 글이 처음 공개될 때 필수** — "신규 글"(첫 저장) 기준으로 재면 초안으로 저장했다 나중에 발행하는 흐름이 규칙을 그냥 지나친다. 초안 저장은 막지 않는다(저장 버튼이 하나뿐이라 막으면 글을 나눠 쓸 수 없다)
 - 임계값은 `scripts/audit-seo-regression.mjs` 와 **일부러 다르다** — 폼은 발행 템플릿 목표치(내부링크 2개·H2 3개·서술형 alt), 감사는 결함 기준선(내부링크 0=ORPHAN 등, `seo-baseline.json` 에 동결). 실측 80편 중 63편이 내부링크 판정이 갈리므로 수치를 인용할 때 어느 쪽인지 밝힐 것
 - AI 생성물은 훅을 거치지 않으므로 라우트가 `lib/name-guard.mjs` 로 실명 패턴을 검사해 걸리면 422 로 폐기한다(P0, CLAUDE.md 10)

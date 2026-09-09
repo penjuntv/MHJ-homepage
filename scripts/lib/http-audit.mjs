@@ -67,7 +67,8 @@ export function baseArg(argv = process.argv, fallback = 'https://www.mhj.nz') {
 
 /** 자동 생성 OG 이미지(/api/og) 판정 — audit-seo-regression 의 OG_FALLBACK 과 audit-live-pages 의
  *  "생존 검사 생략" 이 같은 규칙을 쓴다. SKILL.md 의 SQL `og_image_url ~ '/api/og(\?|$)'` 와 한 쌍. */
-export const isOgApi = (url) => /\/api\/og(\?|$)/.test(url ?? '');
+// 정본은 lib/seo-defects.mjs — 주간 감사·관리자 화면·라이브 페이지 감사가 같은 판정을 써야 한다.
+export { isOgApi } from '../../lib/seo-defects.mjs';
 
 /**
  * HTML/텍스트 GET — 재시도 정책은 checkUrl 과 같다(네트워크 오류·5xx 는 retries 회 뒤에만 확정,

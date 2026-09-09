@@ -33,23 +33,20 @@ description: |
 아래 SQL 은 2026-09-04 에 `.mjs` 기준으로 동기화됐다. 한쪽을 고치면 **반드시 다른 쪽도**
 고치고, 아래 대조표의 실측치로 두 경로가 같은 답을 내는지 확인할 것.
 
-### 실측 대조표 (2026-09-04, 발행 79편)
+### 수치 대조는 스크립트로
 
-| 지표 | 값 | 비고 |
-|---|---|---|
-| THIN (본문 400단어 미만) | 36 | |
-| ORPHAN (내부링크 0) | 10 | 본문만 세도 10 — 인포블록 영향 없음 |
-| NO_GEO | **22** | 아래 SQL(보이는 텍스트) 기준. 옛 SQL 은 4로 나왔다 |
-| ALT 누락 | **3** | 인포블록 포함. 본문만 세면 2 |
-| NO_H2 (400단어+ 인데 H2 2개 미만) | 6 | H2 가 아예 0인 글은 별도로 11편 |
-| H1 혼입 | 0 | |
-| meta_description 누락 | 0 | |
-
-검증 명령:
+8종 전부를 동결된 기준선과 비교해 출력한다. 손으로 SQL 을 돌려 맞춰 보지 말 것 —
+아래 per-post SQL 은 `no_h2`·`og_fallback` 을 세지 않아 6종만 맞춰 보고 "일치" 로 오인하기 쉽다.
 
 ```bash
-node --env-file=.env.local scripts/audit-seo-regression.mjs   # 같은 수치가 나와야 한다
+node --env-file=.env.local scripts/audit-seo-regression.mjs
 ```
+
+기준선은 `scripts/qa/seo-baseline.json`(2026-09-08, 발행 80편):
+`h1_over 0 · alt_missing 3 · orphan 10 · meta_missing 0 · thin 36 · no_h2 6 · no_geo 23 · og_fallback 59`.
+같은 판정을 관리자 화면(`/mhj-desk/seo`)도 쓰므로 화면 수치도 이와 같아야 한다(공개 글 기준).
+
+아래 SQL 은 **per-post 표**(제목 길이·키워드·외부 링크·캡션 등 코드가 안 내는 항목)를 만들 때 쓴다.
 
 ## 언제 트리거되나
 
@@ -172,7 +169,7 @@ SELECT
     (CASE WHEN visible ~* '\m(NZ|Aotearoa)\M' THEN 1 ELSE 0 END)
   ) AS keyword_score,
   array_length(tags, 1) AS tags_count,
-  (NULLIF(BTRIM(og_image_url), '') IS NULL OR og_image_url ~ '/api/og(\?|$)') AS og_fallback,   -- NULL(2026-09-08 정규화 후) + /api/og 리터럴: 2026-09-08 실측 56 + 6 = 62/84. JS isOgApi(audit-shared.mjs)·mhj-desk/seo 와 같은 정규식
+  (NULLIF(BTRIM(og_image_url), '') IS NULL OR og_image_url ~ '/api/og(\?|$)') AS og_fallback,   -- 정본은 lib/seo-defects.mjs 의 isOgApi(주간 감사·관리자 화면·라이브 페이지 감사가 재수출로 공유). 발행 80편 기준 59
   cover_caption IS NULL AS caption_missing,
   info_block_html IS NULL AS infoblock_missing
 FROM j

@@ -11,7 +11,7 @@
 import assert from 'node:assert/strict';
 import {
   flagsOf, baselineFlagsOf, CHECKS, BASELINE_CHECKS, HARD_FLAGS, FLAG_META, severityOf, isOgApi, STALE_DAYS,
-  baselineStatusOf, FLAG_INPUT_FIELDS, BASELINE_INPUT_FIELDS,
+  baselineStatusOf, FLAG_INPUT_FIELDS, BASELINE_INPUT_FIELDS, isLive,
 } from '../../lib/seo-defects.mjs';
 import { readFileSync } from 'node:fs';
 
@@ -69,6 +69,10 @@ check('NO_SEO_TITLE', flags({ seo_title: '' }).includes('NO_SEO_TITLE'), true);
 check('NO_SUMMARY_KO', flags({ summary_ko: null }).includes('NO_SUMMARY_KO'), true);
 check('NO_FAQ — 빈 배열도 없음으로', [flags({ faq_json: [] }), flags({ faq_json: null })].map((f) => f.includes('NO_FAQ')), [true, true]);
 check('STALE — 90일 경과', flags({ updated_at: '2026-01-01T00:00:00Z' }).includes('STALE'), true);
+check('staleDays 를 바꾸면 판정도 바뀐다',
+  [flagsOf({ ...clean, updated_at: '2026-08-01T00:00:00Z' }, { now: NOW, staleDays: 30 }).includes('STALE'),
+   flagsOf({ ...clean, updated_at: '2026-08-01T00:00:00Z' }, { now: NOW, staleDays: 90 }).includes('STALE')],
+  [true, false]);
 check('STALE — 경계 직전은 아니다',
   flags({ updated_at: new Date(NOW - (STALE_DAYS - 1) * 86400000).toISOString() }).includes('STALE'), false);
 check('STALE — updated_at 이 없으면 created_at 으로',
@@ -113,24 +117,34 @@ check('플래그 없으면 good', baselineStatusOf([]), 'good');
   const read = [...body.matchAll(/\bb\.([a-z_]+)/g)].map((m) => m[1]);
   const missing = [...new Set(read)].filter((f) => !FLAG_INPUT_FIELDS.includes(f));
   check(`flagsOf 가 읽는 필드가 전부 FLAG_INPUT_FIELDS 에 선언돼 있다 (읽는 필드 ${new Set(read).size}종)`, missing, []);
-  check('기준선 최소 필드는 주간 스크립트 select 에 다 있다',
-    BASELINE_INPUT_FIELDS.filter((f) => !readFileSync(new URL('../audit-seo-regression.mjs', import.meta.url), 'utf8').includes(f)), []);
+  // 파일 전체를 훑으면 주석에 이름만 있어도 통과한다 — 실제 select 인자를 파싱한다.
+  const script = readFileSync(new URL('../audit-seo-regression.mjs', import.meta.url), 'utf8');
+  const selectArg = script.match(/\.select\(\s*'([^']+)'/)?.[1] ?? '';
+  const selected = selectArg.split(',').map((c) => c.trim());
+  check(`기준선 최소 필드가 주간 스크립트 select 에 다 있다 (select ${selected.length}컬럼)`,
+    BASELINE_INPUT_FIELDS.filter((f) => !selected.includes(f)), []);
 }
 
 /* ── 모집단 계약 ──
    관리자 화면은 기본적으로 "공개된 글"만 센다. 주간 감사도 같은 조건이라 수치가 일치한다.
    이 식이 어긋나면 화면과 리포트가 다른 말을 하므로 여기서 못 박는다. */
 {
-  const nowIso = '2026-09-10T00:00:00Z';
-  const isLive = (b) => b.published && (!b.publish_at || b.publish_at <= nowIso);
+  // 화면이 쓰는 **바로 그 함수**를 검사한다. 테스트가 자기 사본을 들고 있으면
+  // 화면이 바뀌어도 초록이라 아무것도 지키지 못한다(2026-09-10 리뷰에서 실제로 그랬다).
+  const now = Date.parse('2026-09-10T00:00:00Z');
   check('공개 판정 — 발행 + 예약 시각 통과',
     [
-      isLive({ published: true, publish_at: null }),
-      isLive({ published: true, publish_at: '2026-01-01T00:00:00Z' }),
-      isLive({ published: true, publish_at: '2027-01-01T00:00:00Z' }),
-      isLive({ published: false, publish_at: null }),
+      isLive({ published: true, publish_at: null }, now),
+      isLive({ published: true, publish_at: '2026-01-01T00:00:00Z' }, now),
+      isLive({ published: true, publish_at: '2027-01-01T00:00:00Z' }, now),
+      isLive({ published: false, publish_at: null }, now),
+      isLive(null, now),
     ],
-    [true, true, false, false]);
+    [true, true, false, false, false]);
+  check('예약 시각은 문자열이 아니라 시각으로 비교한다(타임존 표기가 달라도)',
+    [isLive({ published: true, publish_at: '2026-09-09T23:00:00+00:00' }, now),
+     isLive({ published: true, publish_at: '2026-09-10T13:00:00+13:00' }, now)],
+    [true, true]);
 }
 
 /* ── 빈 입력 ── */

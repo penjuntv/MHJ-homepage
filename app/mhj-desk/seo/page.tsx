@@ -15,7 +15,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
 import { AlertCircle, AlertTriangle, CheckCircle2, Info, Loader2, Search } from 'lucide-react';
-import { CHECKS, FLAG_META, FLAG_INPUT_FIELDS, flagsOf, severityOf, baselineStatusOf } from '@/lib/seo-defects.mjs';
+import {
+  CHECKS, FLAG_META, FLAG_INPUT_FIELDS, flagsOf, severityOf, baselineStatusOf, isLive,
+} from '@/lib/seo-defects.mjs';
 
 /**
  * 감사에 필요한 컬럼만. `select('*')` 는 비공개 컬럼(content_backup·insight_*)까지 브라우저로 끌어온다.
@@ -79,7 +81,7 @@ export default function AdminSeoPage() {
       const now = Date.now();
       // 서버에서 끊어 받는다 — 84편이 200편이 돼도 한 응답에 전부 담기지 않는다.
       // 합계는 전 코퍼스를 봐야 나오므로 "끊어 받기"이지 "일부만 보기"는 아니다.
-      for (let from = 0; ; from += PAGE_SIZE) {
+      for (let from = 0; ;) {
         const { data, error: e } = await supabase
           .from('blogs')
           .select(AUDIT_COLUMNS)
@@ -91,17 +93,20 @@ export default function AdminSeoPage() {
         if (cancelled) return;
         if (e) { setError(e.message); setPartial(true); break; }
         const batch = (data ?? []) as unknown as AuditSource[];
+        if (batch.length === 0) break;
         for (const b of batch) {
           acc.push({
             id: b.id, title: b.title, slug: b.slug, date: b.date,
             category: b.category, published: b.published,
-            // 문자열 비교는 DB 의 타임존 표기가 바뀌면 어긋난다 — 시각으로 비교한다.
-            live: b.published && (!b.publish_at || Date.parse(b.publish_at) <= now),
+            // 판정은 lib/seo-defects.mjs 가 소유한다 — 주간 감사와 같은 조건이어야 한다.
+            live: isLive(b, now),
             flags: flagsOf(b),
           });
         }
         setLoaded(acc.length);
-        if (batch.length < PAGE_SIZE) break;
+        // 실제로 받은 만큼만 전진하고 빈 배치로 끝낸다. `batch.length < PAGE_SIZE` 로 끊으면
+        // 서버의 max-rows 가 PAGE_SIZE 보다 작을 때 첫 페이지에서 조용히 멈춘다(수치가 틀린 채로).
+        from += batch.length;
       }
       if (!cancelled) setRows(acc);
     })();
@@ -206,6 +211,37 @@ export default function AdminSeoPage() {
         ))}
       </div>
 
+      {/* 운영 지표 진행률 — seo_title·요약·FAQ 는 지금 0/80 이다. 행마다 칩으로 뿌리면
+          진짜 결함(alt 3편·orphan 10편)이 묻힌다. 여기서 한 번만 보여주고 행에서는 접는다. */}
+      <div style={{ background: 'white', borderRadius: 20, border: '1px solid #F1F5F9', padding: '18px 24px', marginBottom: 16 }}>
+        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 12px' }}>
+          운영 지표 진행률 (W5 정비 대상)
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+          {CHECKS.filter((c) => !c.baseline).map((c) => {
+            const bad = counts[c.flag] ?? 0;
+            const done = total - bad;
+            const pct = total ? Math.round((done / total) * 100) : 0;
+            return (
+              <button key={c.flag} type="button" onClick={() => setFlagFilter(c.flag)}
+                title={c.hint} disabled={bad === 0}
+                style={{
+                  textAlign: 'left', border: 'none', background: 'none', padding: 0,
+                  cursor: bad === 0 ? 'default' : 'pointer',
+                }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: bad === 0 ? '#16A34A' : '#64748B' }}>{c.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: bad === 0 ? '#16A34A' : '#94A3B8' }}>{done}/{total}</span>
+                </div>
+                <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: bad === 0 ? '#16A34A' : '#CBD5E1', borderRadius: 2 }} />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* 항목별 개수 — 클릭하면 그 항목만 본다 */}
       <div style={{ background: 'white', borderRadius: 20, border: '1px solid #F1F5F9', padding: '18px 24px', marginBottom: 24 }}>
         <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase', margin: '0 0 12px' }}>
@@ -217,15 +253,15 @@ export default function AdminSeoPage() {
             title="필수·기준선 결함이 없는 글. 운영 지표(seo_title 없음 등)는 남아 있을 수 있다" />
           <FilterChip active={flagFilter === 'good'} onClick={() => setFlagFilter('good')} label={`완전 무결점 ${total - opsOnly - hardCount - warnCount}`} level="info"
             title="운영 지표까지 모두 채워진 글" />
-          {CHECKS.map((c) => (
+          {CHECKS.filter((c) => c.baseline).map((c) => (
             <FilterChip
               key={c.flag}
               active={flagFilter === c.flag}
               onClick={() => setFlagFilter(c.flag)}
               label={`${c.label} ${counts[c.flag] ?? 0}`}
-              level={c.hard ? 'error' : c.baseline ? 'warn' : 'info'}
+              level={c.hard ? 'error' : 'warn'}
               dim={(counts[c.flag] ?? 0) === 0}
-              title={[c.hint, c.baseline ? '주간 기준선 항목' : '운영 지표(기준선 밖)'].filter(Boolean).join(' · ')}
+              title={[c.hint, '주간 기준선 항목'].filter(Boolean).join(' · ')}
             />
           ))}
         </div>
@@ -256,13 +292,19 @@ export default function AdminSeoPage() {
                     미발행
                   </span>
                 )}
-                <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: b.flags.length ? '#D97706' : '#16A34A' }}>
-                  {b.flags.length ? `${b.flags.length}건` : '정상'}
-                </span>
+                {(() => {
+                  const baseCount = b.flags.filter((f) => FLAG_META[f]?.baseline).length;
+                  return (
+                    <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: baseCount ? '#D97706' : '#16A34A' }}>
+                      {baseCount ? `결함 ${baseCount}건` : '기준선 통과'}
+                    </span>
+                  );
+                })()}
               </div>
-              {b.flags.length > 0 && (
+              {(b.flags.length > 0) && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-                  {[...b.flags].sort((x, y) => severityOf(y) - severityOf(x)).map((f) => {
+                  {[...b.flags].filter((f) => FLAG_META[f]?.baseline)
+                    .sort((x, y) => severityOf(y) - severityOf(x)).map((f) => {
                     const level = levelOfFlag(f);
                     const col = LEVEL_COLOR[level];
                     return (
@@ -278,6 +320,22 @@ export default function AdminSeoPage() {
                       </span>
                     );
                   })}
+                  {(() => {
+                    // 운영 지표는 지금 거의 모든 글에 붙는다 — 칩으로 나열하면 진짜 결함을 가린다.
+                    const ops = b.flags.filter((f) => !FLAG_META[f]?.baseline);
+                    if (!ops.length) return null;
+                    return (
+                      <span
+                        title={ops.map((f) => FLAG_META[f]?.label ?? f).join(' · ')}
+                        style={{
+                          fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+                          border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#94A3B8',
+                        }}
+                      >
+                        운영 지표 {ops.length}
+                      </span>
+                    );
+                  })()}
                   <Link href={`/mhj-desk/blogs/${b.id}/edit`} style={{
                     fontSize: 10, fontWeight: 700, padding: '3px 12px', borderRadius: 999,
                     background: '#4F46E5', color: 'white', textDecoration: 'none',
