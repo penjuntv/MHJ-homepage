@@ -11,7 +11,9 @@
 import assert from 'node:assert/strict';
 import {
   flagsOf, baselineFlagsOf, CHECKS, BASELINE_CHECKS, HARD_FLAGS, FLAG_META, severityOf, isOgApi, STALE_DAYS,
+  baselineStatusOf, FLAG_INPUT_FIELDS, BASELINE_INPUT_FIELDS,
 } from '../../lib/seo-defects.mjs';
+import { readFileSync } from 'node:fs';
 
 let failed = 0;
 const check = (name, got, want) => {
@@ -91,6 +93,29 @@ check('모든 검사에 화면 라벨이 있다', CHECKS.every((c) => typeof c.l
 check('FLAG_META 는 모든 플래그를 덮는다', CHECKS.every((c) => FLAG_META[c.flag] === c), true);
 check('심각도 — hard 2 · 기준선 soft 1 · 운영 지표 0',
   [severityOf('ORPHAN'), severityOf('THIN'), severityOf('NO_FAQ'), severityOf('UNKNOWN')], [2, 1, 0, 0]);
+
+check('META_LONG — 160자 초과', flags({ meta_description: 'a'.repeat(161) }).includes('META_LONG'), true);
+
+/* ── 상태는 기준선 플래그로만 ──
+   운영 지표까지 상태에 넣으면 지금은 전 편에 붙어 있어 "정상 0" 이 영구 고정된다. */
+check('운영 지표만 있는 글은 기준선 통과',
+  baselineStatusOf(flagsOf({ ...clean, seo_title: '', summary_ko: '', faq_json: null, tags: [] }, { now: NOW })), 'good');
+check('기준선 soft 는 warn', baselineStatusOf(['THIN']), 'warn');
+check('hard 는 error', baselineStatusOf(['THIN', 'ORPHAN']), 'error');
+check('플래그 없으면 good', baselineStatusOf([]), 'good');
+
+/* ── 판정 입력 필드 선언이 실제 코드와 맞는가 ──
+   화면·스크립트의 select 목록이 이 선언을 따르므로, 여기가 실제와 어긋나면
+   그 검사만 조용히 통과 처리된다(빌드는 통과한다 — .mjs 는 타입 검사 대상이 아니다). */
+{
+  const src = readFileSync(new URL('../../lib/seo-defects.mjs', import.meta.url), 'utf8');
+  const body = src.slice(src.indexOf('export function flagsOf'));
+  const read = [...body.matchAll(/\bb\.([a-z_]+)/g)].map((m) => m[1]);
+  const missing = [...new Set(read)].filter((f) => !FLAG_INPUT_FIELDS.includes(f));
+  check(`flagsOf 가 읽는 필드가 전부 FLAG_INPUT_FIELDS 에 선언돼 있다 (읽는 필드 ${new Set(read).size}종)`, missing, []);
+  check('기준선 최소 필드는 주간 스크립트 select 에 다 있다',
+    BASELINE_INPUT_FIELDS.filter((f) => !readFileSync(new URL('../audit-seo-regression.mjs', import.meta.url), 'utf8').includes(f)), []);
+}
 
 /* ── 모집단 계약 ──
    관리자 화면은 기본적으로 "공개된 글"만 센다. 주간 감사도 같은 조건이라 수치가 일치한다.
