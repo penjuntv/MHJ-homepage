@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { htmlToMarkdown } from '@/lib/content-html.mjs';
 
 /**
  * MHJ llms-full.txt — 2026-05-30
@@ -11,8 +12,12 @@ import { NextResponse } from 'next/server';
  *   llms-full.txt 는 전체 콘텐츠를 페이지별로 paginate 된 인덱스
  * - AI 답변 엔진이 "deeper query" 시점에 enumerate 용도로 사용
  *
+ * 2026-09-10 (W4-E): 이름값을 하도록 **전문을 싣는다**. 목록만 있는 인덱스는 sitemap 과 다를 게 없고
+ * AI 답변 엔진이 인용할 문장이 없다. 조회수 상위 20편은 마크다운 전문, 나머지는 한 줄 요약.
+ * 전체 상한 300KB — 넘으면 전문을 싣지 않고 그 사실을 문서에 적는다(조용히 자르지 않는다).
+ *
  * 구성:
- * - 발행된 블로그 전부 (slug, title, meta_description, category, last modified)
+ * - 발행된 블로그 전부 (slug, title, meta_description, category, last modified) + 상위 20편 전문
  * - 발행된 매거진 이슈 전부
  * - 발행된 매거진 아티클 전부 (slug 있는 것만)
  * - 발송된 뉴스레터 이슈 전부
@@ -44,7 +49,7 @@ export async function GET() {
   const [blogsRes, magazinesRes, articlesRes, newslettersRes] = await Promise.all([
     supabase
       .from('blogs')
-      .select('slug, title, meta_description, category, date, created_at')
+      .select('slug, title, meta_description, category, date, created_at, updated_at, content, view_count, summary_ko')
       .eq('published', true)
       .or(`publish_at.is.null,publish_at.lte.${now}`)
       .order('date', { ascending: false }),
@@ -164,6 +169,53 @@ export async function GET() {
       );
     }
     lines.push('');
+  }
+
+  /* ── 전문 ──
+     조회수 상위 20편을 마크다운으로 싣는다. AI 답변 엔진이 실제로 인용할 문장이 여기 있다.
+     300KB 상한을 넘기면 그 지점에서 멈추고 몇 편을 실었는지 밝힌다 — 조용히 자르지 않는다. */
+  const FULL_TEXT_LIMIT = 20;
+  const SIZE_LIMIT = 300 * 1024;
+  const topPosts = [...blogs]
+    .sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0))
+    .slice(0, FULL_TEXT_LIMIT);
+
+  if (topPosts.length > 0) {
+    const fullLines: string[] = [];
+    fullLines.push(`## Full text — most-read ${topPosts.length} entries`);
+    fullLines.push('');
+    fullLines.push('> Complete articles below. Everything else in this file is a one-line summary; follow the link for the full text.');
+    fullLines.push('');
+
+    let bytes = Buffer.byteLength(lines.join('\n'), 'utf8');
+    let included = 0;
+    for (const b of topPosts) {
+      const body = htmlToMarkdown(b.content, SITE_URL);
+      if (!body) continue;
+      const block = [
+        `### ${b.title}`,
+        '',
+        `Source: ${SITE_URL}/blog/${b.slug} · ${b.category} · ${formatDate(b.updated_at ?? b.created_at)}`,
+        '',
+        ...(b.summary_ko ? ['**한국어 요약**', '', escapeMd(b.summary_ko), ''] : []),
+        body,
+        '',
+        '---',
+        '',
+      ].join('\n');
+      const size = Buffer.byteLength(block, 'utf8');
+      if (bytes + size > SIZE_LIMIT) break;
+      fullLines.push(block);
+      bytes += size;
+      included += 1;
+    }
+    if (included > 0) {
+      fullLines[0] = `## Full text — most-read ${included} entries`;
+      if (included < topPosts.length) {
+        fullLines.splice(3, 0, `(${topPosts.length - included} more were omitted to keep this file under 300 KB.)`, '');
+      }
+      lines.push(...fullLines);
+    }
   }
 
   // 정적 페이지

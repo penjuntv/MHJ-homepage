@@ -222,10 +222,12 @@ M   ●          ●                ● +4w                          ● +8w
 - 회귀 테스트 `scripts/qa/test-seo-defects.mjs`(source-guard 편입) — 임계값을 바꾸려면 테스트를 먼저 고쳐야 한다
 - 합계는 전 코퍼스를 읽어야 나오므로 "끊어 받기"이지 "일부만 보기"가 아니다
 
-**☐ W4-E · 피드·에이전트 인덱스** — F7 · B4 · 노력 S
-- `feed.xml`: `content:encoded` 전문 + 네임스페이스 · `enclosure` 실제 length/type · `pubDate = publish_at ?? created_at`
-- `llms-full.txt`: 이름에 맞게 **전문 포함**(상위 20편 전문 + 나머지 요약, 300KB 상한) 또는 이름을 지키지 않기로 문서에 명시 — 전문 포함 권고
-- Done: 네이버 RSS 재제출 · Perplexity 로 `/llms-full.txt` fetch 확인
+**☑ W4-E · 피드·에이전트 인덱스** — F7 · B4 · 노력 S — **2026-09-10 완료** (PR `seo/w4e-feed-llms`)
+- `feed.xml`: `content:encoded` 전문 20편 + `xmlns:content` 네임스페이스(CDATA, `]]>` 이스케이프) · `pubDate = publish_at ?? created_at` · `atom:updated = updated_at` · 본문의 상대 링크를 절대 URL 로(리더 안에서 리더 도메인으로 풀려 깨진다)
+- `enclosure` 는 HEAD 로 실제 `length`·`type` 을 확인한다. 지금까지 전부 `length="0" type="image/jpeg"` 였는데 실측 80편 중 25편이 jpeg 가 아니다. 못 얻으면 **거짓 값 대신 생략**(전체 예산 3초, 느린 CDN 이 피드를 막지 않게)
+- `llms-full.txt`: 이름값대로 **전문 포함** — 조회수 상위 20편을 마크다운(제목·목록·링크 보존)으로, 나머지는 기존 한 줄 요약. 300KB 상한을 넘으면 멈추고 몇 편을 뺐는지 밝힌다. 실측 85KB/20편. `summary_ko` 가 있으면 한국어 요약도 함께 싣는다
+- 새 순수 함수 `absolutizeUrls`·`imageMimeOf`·`htmlToMarkdown`(`lib/content-html.mjs`, 테스트 9건 추가)
+- Done 의 남은 절반은 사용자 몫: **네이버 RSS 재제출** · Perplexity 로 `/llms-full.txt` fetch 확인
 
 ### W5. 콘텐츠 정비·허브·신규 (3주차부터 지속) ⛔ D4
 
@@ -288,7 +290,7 @@ M   ●          ●                ● +4w                          ● +8w
 | 10 | W4-A | `… §4 W4-A 착수. Plan Mode. 마이그레이션→grant→constants→배포 순서, og_image_url '' 정리는 dry-run 먼저` | D2 D3 |
 | 11 | W4-B | `… §4 W4-B 착수. updated_at 은 편집 변경만 갱신하므로 dateModified·sitemap lastmod 에 바로 사용. seo_title 등은 BLOG_DETAIL_COLUMNS 에 이미 포함` | W4-A ☑ |
 | 12 | W4-C | `… §4 W4-C 착수. preflight 는 경고 모드` | W4-A ☑ W4-B ☑ — takeaways 는 본문 `<h2>Key takeaways</h2> + <ul>` 관례(감지 규칙 `lib/content-html.mjs`), 폼 필드는 seo_title·summary_ko·FAQ·related_slugs·og_image_alt |
-| 13 | W4-E | `… §4 W4-E 착수` | W4-D ☑ — feed `content:encoded`·`llms-full` 전문 |
+| 13 | W5 | `… §4 W5 정비 큐 1번부터. 처방 목록만 만들고 본문은 수정하지 않는다` | W4 전체 ☑ |
 | 14 | W5 | `… §4 W5 정비 큐 1번부터. 처방 목록만 만들고 본문은 수정하지 않는다` | D4 |
 | 15 | W6-A~D | 별도 4대화. W6-A 는 DESIGN_RULES 개정 포함 | D5 |
 
