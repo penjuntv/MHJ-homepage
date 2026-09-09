@@ -21,6 +21,13 @@ description: |
 - 블로그 발행 전 (`blog-publish-preflight` 와 짝꿍)
 - Yussi Factory 산출물에 링크 누락 발견 시
 
+## ⚙️ 코드 구현 (2026-09-10, W4-C)
+
+이 점수표는 **`lib/link-suggest.mjs` 에 그대로 구현돼 있다**. 관리자 글 편집 화면의
+"관련 글 · 내부 링크" 패널(`app/mhj-desk/blogs/_components/RelatedSuggestions.tsx`)이 그 함수를 쓴다.
+가중치를 바꾸려면 코드와 이 표를 **함께** 고칠 것 — 갈라지면 폼과 대화형 추천이 서로 다른 답을 낸다.
+회귀 테스트는 `scripts/qa/test-blog-preflight.mjs`.
+
 ## 매칭 알고리즘 — 단순 버전 (v1)
 
 임베딩 없이 키워드/메타데이터 기반.

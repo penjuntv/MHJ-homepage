@@ -7,6 +7,13 @@ description: |
 
 # Blog Publish Preflight
 
+## ⚙️ 폼 안 자동 점검 (2026-09-10, W4-C)
+
+기계로 잴 수 있는 항목은 **글 편집 화면의 "발행 전 체크리스트" 가 자동으로 본다**
+(`lib/blog-preflight.mjs` — 필수 항목은 저장을 막고, 권장 항목은 경고만 한다).
+이 스킬은 그 위에서 사람이 봐야 하는 것 — 링크 실검증(fact-verify), 사진 속 실명, 인포블록 디자인 — 을 맡는다.
+아래 목록 중 slug·og_image_url·meta_description·본문 이미지 항목은 폼이 이미 점검하므로 눈으로 다시 세지 않아도 된다.
+
 ## 필수 체크리스트
 - [ ] slug가 영문 kebab-case인가
 - [ ] og_image_url이 채워져 있는가
