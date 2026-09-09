@@ -92,6 +92,22 @@ check('FLAG_META 는 모든 플래그를 덮는다', CHECKS.every((c) => FLAG_ME
 check('심각도 — hard 2 · 기준선 soft 1 · 운영 지표 0',
   [severityOf('ORPHAN'), severityOf('THIN'), severityOf('NO_FAQ'), severityOf('UNKNOWN')], [2, 1, 0, 0]);
 
+/* ── 모집단 계약 ──
+   관리자 화면은 기본적으로 "공개된 글"만 센다. 주간 감사도 같은 조건이라 수치가 일치한다.
+   이 식이 어긋나면 화면과 리포트가 다른 말을 하므로 여기서 못 박는다. */
+{
+  const nowIso = '2026-09-10T00:00:00Z';
+  const isLive = (b) => b.published && (!b.publish_at || b.publish_at <= nowIso);
+  check('공개 판정 — 발행 + 예약 시각 통과',
+    [
+      isLive({ published: true, publish_at: null }),
+      isLive({ published: true, publish_at: '2026-01-01T00:00:00Z' }),
+      isLive({ published: true, publish_at: '2027-01-01T00:00:00Z' }),
+      isLive({ published: false, publish_at: null }),
+    ],
+    [true, true, false, false]);
+}
+
 /* ── 빈 입력 ── */
 check('빈 객체도 던지지 않는다', Array.isArray(flagsOf({})), true);
 

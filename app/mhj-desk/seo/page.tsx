@@ -20,7 +20,7 @@ import { CHECKS, FLAG_META, flagsOf, severityOf } from '@/lib/seo-defects.mjs';
 /** 감사에 필요한 컬럼만. `select('*')` 는 비공개 컬럼(content_backup·insight_*)까지 브라우저로 끌어온다. */
 const AUDIT_COLUMNS =
   'id, title, slug, date, category, published, content, info_block_html, meta_description, ' +
-  'og_image_url, seo_title, summary_ko, faq_json, tags, image_url, updated_at, created_at';
+  'og_image_url, seo_title, summary_ko, faq_json, tags, image_url, updated_at, created_at, publish_at';
 
 const PAGE_SIZE = 200;   // 서버에서 끊어 받는 단위 — 한 번에 전량을 받지 않는다
 const ROWS_PER_PAGE = 25; // 화면에 그리는 단위
@@ -29,7 +29,7 @@ const ROWS_PER_PAGE = 25; // 화면에 그리는 단위
 interface AuditSource {
   id: number; title: string; slug: string; date: string; category: string; published: boolean;
   content: string | null; info_block_html: string | null; meta_description: string | null;
-  og_image_url: string | null; seo_title: string | null; summary_ko: string | null;
+  og_image_url: string | null; seo_title: string | null; summary_ko: string | null; publish_at: string | null;
   faq_json: unknown; tags: string[] | null; image_url: string | null;
   updated_at: string | null; created_at: string | null;
 }
@@ -41,6 +41,8 @@ interface AuditRow {
   date: string;
   category: string;
   published: boolean;
+  /** 지금 공개돼 있는가 — 주간 감사와 같은 조건(발행 + 예약 시각 통과) */
+  live: boolean;
   flags: string[];
 }
 
@@ -67,12 +69,16 @@ export default function AdminSeoPage() {
   const [loaded, setLoaded] = useState(0);
   const [error, setError] = useState('');
   const [flagFilter, setFlagFilter] = useState<string | 'all' | 'good'>('all');
+  /** 기본은 주간 감사와 **같은 모집단**(공개된 글) — 그래야 여기 수치를 그대로 인용할 수 있다.
+   *  초안까지 보려면 켠다(발행 전에 결함을 보는 용도). */
+  const [includeDrafts, setIncludeDrafts] = useState(false);
   const [page, setPage] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const acc: AuditRow[] = [];
+      const nowIso = new Date().toISOString();
       // 서버에서 끊어 받는다 — 84편이 200편이 돼도 한 응답에 전부 담기지 않는다.
       // 합계는 전 코퍼스를 봐야 나오므로 "끊어 받기"이지 "일부만 보기"는 아니다.
       for (let from = 0; ; from += PAGE_SIZE) {
@@ -88,6 +94,7 @@ export default function AdminSeoPage() {
           acc.push({
             id: b.id, title: b.title, slug: b.slug, date: b.date,
             category: b.category, published: b.published,
+            live: b.published && (!b.publish_at || b.publish_at <= nowIso),
             flags: flagsOf(b),
           });
         }
@@ -99,15 +106,21 @@ export default function AdminSeoPage() {
     return () => { cancelled = true; };
   }, []);
 
-  /** 플래그별 개수 — 기준선 8종은 주간 감사 수치와 같아야 한다. */
+  /** 집계 대상. 기본(공개된 글)에서는 기준선 8종이 주간 감사 수치와 정확히 같다. */
+  const scoped = useMemo(
+    () => (rows ?? []).filter((r) => includeDrafts || r.live),
+    [rows, includeDrafts],
+  );
+
+  /** 플래그별 개수 */
   const counts = useMemo(() => {
     const m: Record<string, number> = {};
-    for (const r of rows ?? []) for (const f of r.flags) m[f] = (m[f] ?? 0) + 1;
+    for (const r of scoped) for (const f of r.flags) m[f] = (m[f] ?? 0) + 1;
     return m;
-  }, [rows]);
+  }, [scoped]);
 
   const filtered = useMemo(() => {
-    const list = rows ?? [];
+    const list = scoped;
     const picked = flagFilter === 'all' ? list
       : flagFilter === 'good' ? list.filter((r) => r.flags.length === 0)
       : list.filter((r) => r.flags.includes(flagFilter));
@@ -117,16 +130,17 @@ export default function AdminSeoPage() {
       const sb = Math.max(0, ...b.flags.map(severityOf));
       return sb - sa || b.flags.length - a.flags.length;
     });
-  }, [rows, flagFilter]);
+  }, [scoped, flagFilter]);
 
-  useEffect(() => { setPage(0); }, [flagFilter]);
+  useEffect(() => { setPage(0); }, [flagFilter, includeDrafts]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
   const visible = filtered.slice(page * ROWS_PER_PAGE, (page + 1) * ROWS_PER_PAGE);
 
-  const total = rows?.length ?? 0;
-  const withIssues = (rows ?? []).filter((r) => statusOf(r.flags) !== 'good').length;
-  const hardCount = (rows ?? []).filter((r) => statusOf(r.flags) === 'error').length;
+  const total = scoped.length;
+  const withIssues = scoped.filter((r) => statusOf(r.flags) !== 'good').length;
+  const hardCount = scoped.filter((r) => statusOf(r.flags) === 'error').length;
+  const draftCount = (rows ?? []).filter((r) => !r.live).length;
 
   if (rows === null) return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
@@ -144,8 +158,16 @@ export default function AdminSeoPage() {
         </h1>
         <p style={{ fontSize: 13, color: '#94A3B8', marginTop: 8, fontWeight: 500 }}>
           판정은 주간 회귀 감사(<code style={{ fontFamily: 'monospace' }}>audit-seo-regression</code>)와 같은 규칙입니다.
-          기준선 항목의 개수는 주간 리포트와 일치합니다.
+          {includeDrafts
+            ? ' 초안·예약 글을 포함해 세는 중이라 주간 리포트 수치와 다릅니다.'
+            : ' 공개된 글만 세므로 기준선 항목의 개수는 주간 리포트와 일치합니다.'}
         </p>
+        {draftCount > 0 && (
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 12, fontWeight: 700, color: '#64748B', cursor: 'pointer' }}>
+            <input type="checkbox" checked={includeDrafts} onChange={(e) => setIncludeDrafts(e.target.checked)} />
+            초안·예약 {draftCount}편도 포함
+          </label>
+        )}
         {error && (
           <p style={{ fontSize: 12, color: '#DC2626', marginTop: 8, fontWeight: 700 }}>조회 오류: {error}</p>
         )}
