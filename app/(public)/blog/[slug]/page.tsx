@@ -73,7 +73,8 @@ async function getAdjacentBlogs(current: { id: number; date: string }): Promise<
 async function getRelatedBlogs(category: string, currentSlug: string, relatedSlugs?: string[] | null): Promise<Blog[]> {
   const now = new Date().toISOString();
 
-  // ① 편집자 지정 — 존재하지 않거나 미발행인 slug 는 조용히 빠진다(W4-C preflight 가 경고할 몫).
+  // ① 편집자 지정 — 존재하지 않거나 미발행인 slug 는 조용히 빠진다.
+  //    관리자 폼(RelatedSuggestions)이 저장 전에 그런 항목을 붉게 표시한다.
   let picked: Blog[] = [];
   // 중복 slug 는 같은 글을 두 번 렌더하고 React key 도 겹친다 — 먼저 유일하게 만든 뒤 자른다.
   const wanted = [...new Set((relatedSlugs ?? []).filter((sl) => typeof sl === 'string' && sl && sl !== currentSlug))].slice(0, 3);

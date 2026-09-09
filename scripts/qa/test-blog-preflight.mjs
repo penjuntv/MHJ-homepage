@@ -13,6 +13,7 @@ import {
   firstParagraphWords, weakAltCount, hasKeyTakeaways,
 } from '../../lib/blog-preflight.mjs';
 import { suggestLinks, scoreCandidate, normalizeTag, keywordsOf, viewCountP75 } from '../../lib/link-suggest.mjs';
+import { containsForbiddenName, FORBIDDEN_SAMPLES } from '../../lib/name-guard.mjs';
 
 let failed = 0;
 const check = (name, got, want) => {
@@ -42,16 +43,18 @@ check('필수 4종을 채우면 차단 없음(초안)', blockingFailures(full), 
 check('제목·본문·커버·슬러그 누락은 전부 차단',
   blockingFailures({ title: '', content: '', image_url: '', slug: '' }).length, 4);
 
-/* ── 커버 캡션: 신규 글을 발행할 때만 필수 ── */
-check('신규 + 발행 → 캡션 필수',
-  blockingFailures({ ...full, isNew: true, willPublish: true }), ['커버 캡션 (신규 발행 필수)']);
-check('신규 + 초안 저장 → 차단 없음(경고만)',
-  blockingFailures({ ...full, isNew: true, willPublish: false }), []);
-check('기존 글 발행 → 차단 없음', blockingFailures({ ...full, isNew: false, willPublish: true }), []);
-check('캡션이 있으면 신규 발행도 통과',
-  blockingFailures({ ...full, isNew: true, willPublish: true, cover_caption: 'Photograph by Yussi' }), []);
+/* ── 커버 캡션: **처음 공개될 때** 필수 (첫 저장 여부가 아니라) ── */
+check('첫 발행 → 캡션 필수',
+  blockingFailures({ ...full, willPublish: true, alreadyPublished: false }), ['커버 캡션 (첫 발행 필수)']);
+check('초안 저장 → 차단 없음(경고만)',
+  blockingFailures({ ...full, willPublish: false, alreadyPublished: false }), []);
+check('초안으로 저장했다가 나중에 발행해도 규칙이 살아 있다',
+  blockingFailures({ ...full, willPublish: true, alreadyPublished: false }).length, 1);
+check('이미 공개된 글 수정 → 차단 없음', blockingFailures({ ...full, willPublish: true, alreadyPublished: true }), []);
+check('캡션이 있으면 첫 발행도 통과',
+  blockingFailures({ ...full, willPublish: true, alreadyPublished: false, cover_caption: 'Photograph by Yussi' }), []);
 check('캡션 항목은 초안일 때 required=false 지만 목록에는 남는다',
-  (() => { const c = idOf({ ...full, isNew: true, willPublish: false }, 'cover_caption'); return [c.required, c.ok]; })(),
+  (() => { const c = idOf({ ...full, willPublish: false }, 'cover_caption'); return [c.required, c.ok]; })(),
   [false, false]);
 
 /* ── 권장 항목 ── */
@@ -59,6 +62,13 @@ check('seo_title 30~60자',
   [30, 61, 10].map((n) => idOf({ ...full, seo_title: 'a'.repeat(n) }, 'seo_title').ok), [true, false, false]);
 check('meta_description 120~160자',
   [120, 161].map((n) => idOf({ ...full, meta_description: 'a'.repeat(n) }, 'meta_description').ok), [true, false]);
+check('faq_json 키(DB 행)로 넘겨도 같은 수가 나온다 — 감사 페이지가 행을 그대로 넘긴다',
+  idOf({ ...full, faq_json: [{ q: 'a', a: 'b' }, { q: 'c', a: 'd' }] }, 'faq').hint, '현재 2개');
+check('본문 이미지 없음을 알린다',
+  [idOf(full, 'body_image').ok, idOf(full, 'alt').hint],
+  [false, '본문 이미지 없음']);
+check('이미지가 있으면 body_image 통과',
+  idOf({ ...full, content: full.content + '<img src="a" alt="A school bag on the table">' }, 'body_image').ok, true);
 check('FAQ 는 정상 항목만 센다',
   idOf({ ...full, faq: [{ q: 'a', a: 'b' }, { q: '', a: 'x' }, 'junk'] }, 'faq').hint, '현재 1개');
 check('H2 는 takeaways 라벨을 빼고 센다',
@@ -98,6 +108,17 @@ check('후보가 없으면 경계는 null', viewCountP75([]), null);
 check('limit 을 지킨다',
   suggestLinks({ slug: 'me', category: 'A', tags: [] },
     Array.from({ length: 20 }, (_, i) => ({ slug: `s${i}`, category: 'A' })), 3).length, 3);
+
+/* ── 실명 차단(P0) — AI 생성물은 훅을 거치지 않으므로 라우트가 이 함수로 막는다 ──
+   샘플은 모듈에서 조립해 가져온다(테스트 파일에 실명을 적지 않기 위해). */
+check('금칙 패턴 8종을 전부 잡는다',
+  FORBIDDEN_SAMPLES.every((n) => containsForbiddenName(`요약 문장에 ${n} 이 섞였다`)), true);
+check('대소문자를 가리지 않는다',
+  FORBIDDEN_SAMPLES.every((n) => containsForbiddenName(n.toUpperCase())), true);
+check('사이트 표기는 통과',
+  ['Min', 'Hyun', 'Jin', 'PeNnY', 'Yussi', '민준', '유쾌한 하루'].map(containsForbiddenName),
+  [false, false, false, false, false, false, false]);
+check('빈 값', [containsForbiddenName(''), containsForbiddenName(null), containsForbiddenName(undefined)], [false, false, false]);
 
 console.log(failed ? `\n🔴 ${failed} 실패` : '\n✅ 전부 통과');
 process.exit(failed ? 1 : 0);

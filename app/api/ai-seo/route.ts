@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
+import { containsForbiddenName, FORBIDDEN_NAME_MESSAGE } from '@/lib/name-guard.mjs';
 
 /**
  * 관리자 AI 초안 — 메타 설명 · 검색 제목(seo_title) · 한국어 요약(summary_ko).
@@ -53,7 +54,8 @@ const MODES = {
 본문 요약: ${content.slice(0, 600)}`,
   },
   summary_ko: {
-    maxTokens: 1000,
+    // 라이브 최장 본문이 약 6,000자라 4,000자에서 자르면 5편이 뒷부분을 잃는다 — 넉넉히 잡는다.
+    maxTokens: 1500,
     legacyKey: null,
     prompt: (title: string, content: string) =>
       `다음 영어 글을 읽는 한국인 독자를 위한 **한국어 요약**을 작성해줘.
@@ -62,12 +64,13 @@ const MODES = {
 - 2~3문단, 각 문단 2~3문장. 문단 사이는 빈 줄로 구분
 - 원문에 있는 내용만. 없는 사실·숫자·날짜를 지어내지 마
 - 번역투 대신 자연스러운 한국어. 존댓말 대신 담백한 서술체
-- 아이 이름이 나오면 원문 표기(Min/Hyun/Jin)를 그대로 쓰고 다른 이름으로 바꾸지 마
+- 아이는 **Min / Hyun / Jin 으로만** 부른다. 본문에 다른 표기(한국식 실명·로마자 실명)가 있어도 그 표기를 절대 쓰지 말고 Min/Hyun/Jin 으로 옮겨라
+- 어른은 Yussi / PeNnY 로만 부른다
 - 요약 본문만 출력하고 "요약:" 같은 머리말은 붙이지 마
 
 제목: ${title}
 
-본문: ${content.slice(0, 4000)}`,
+본문: ${content.slice(0, 8000)}`,
   },
 };
 
@@ -103,7 +106,20 @@ export async function POST(req: NextRequest) {
     if (!text) {
       return NextResponse.json({ error: '빈 응답' }, { status: 502 });
     }
-    return NextResponse.json({ text, ...(spec.legacyKey ? { [spec.legacyKey]: text } : {}) });
+
+    // P0(CLAUDE.md 10): 생성물은 훅을 거치지 않는다. 실명이 섞이면 폼에 넣지 않고 폐기한다 —
+    // 요약은 공개 페이지의 <section lang="ko"> 로 그대로 나간다.
+    if (containsForbiddenName(text)) {
+      console.error('AI SEO: 금칙 이름이 포함된 생성물을 폐기했다 (mode:', key, ')');
+      return NextResponse.json({ error: FORBIDDEN_NAME_MESSAGE }, { status: 422 });
+    }
+
+    return NextResponse.json({
+      text,
+      // 모델이 토큰 한도에서 멈췄으면 문장이 끊겨 있다 — 편집자가 알아야 한다.
+      truncated: message.stop_reason === 'max_tokens',
+      ...(spec.legacyKey ? { [spec.legacyKey]: text } : {}),
+    });
   } catch (error) {
     console.error('AI SEO error:', error);
     return NextResponse.json({ error: 'Failed to generate SEO text' }, { status: 500 });

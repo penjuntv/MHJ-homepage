@@ -29,7 +29,7 @@ interface Candidate {
 }
 
 interface Props {
-  current: { slug: string; title: string; meta_description: string; category: string; tags: string[] };
+  current: { slug: string; title: string; meta_description: string; category: string; tags: string[]; carousel_series_name: string | null };
   selected: string[];
   onChange: (slugs: string[]) => void;
 }
@@ -50,6 +50,8 @@ export default function RelatedSuggestions({ current, selected, onChange }: Prop
         .from('blogs')
         .select('slug, title, category, tags, date, view_count, created_at, carousel_series_name')
         .eq('published', true)
+        // 예약발행 글은 아직 공개 페이지에 없다 — 여기서 고르면 상세 페이지가 조용히 빼 버린다(CLAUDE.md 3).
+        .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`)
         .order('created_at', { ascending: false });
       if (cancelled) return;
       if (error) { console.error('RelatedSuggestions:', error.message); setCandidates([]); return; }
@@ -107,13 +109,21 @@ export default function RelatedSuggestions({ current, selected, onChange }: Prop
       {/* 선택된 관련 글 */}
       {selected.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
-          {selected.map((slug, i) => (
+          {selected.map((slug, i) => {
+            // 후보 목록(발행 + 예약 통과)에 없으면 공개 페이지에서도 조용히 빠진다 —
+            // 슬러그가 바뀌었거나 발행이 취소된 경우다. 저장 전에 눈에 띄어야 한다.
+            const missing = candidates !== null && !bySlug.has(slug);
+            return (
             <div key={slug} style={{
               display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
-              background: '#F8FAFC', borderRadius: 12, fontSize: 13,
+              background: missing ? '#FEF2F2' : '#F8FAFC', borderRadius: 12, fontSize: 13,
+              border: missing ? '1px solid #FECACA' : '1px solid transparent',
             }}>
               <span style={{ fontWeight: 900, color: '#94A3B8', fontSize: 11 }}>{i + 1}</span>
-              <span style={{ flex: 1, color: '#1A1A1A' }}>{bySlug.get(slug)?.title ?? slug}</span>
+              <span style={{ flex: 1, color: missing ? '#B91C1C' : '#1A1A1A' }}>
+                {bySlug.get(slug)?.title ?? slug}
+                {missing && <span style={{ fontSize: 11, fontWeight: 700, marginLeft: 6 }}>발행되지 않았거나 슬러그가 바뀜</span>}
+              </span>
               <button type="button" onClick={() => moveUp(i)} disabled={i === 0}
                 title="위로" aria-label={`${slug} 위로`}
                 style={{ background: 'none', border: 'none', cursor: i === 0 ? 'default' : 'pointer', color: i === 0 ? '#E2E8F0' : '#64748B', padding: 2 }}>
@@ -124,7 +134,8 @@ export default function RelatedSuggestions({ current, selected, onChange }: Prop
                 <X size={14} />
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
