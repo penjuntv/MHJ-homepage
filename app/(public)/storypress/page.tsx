@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, ogImageFor, SITE_LANG, orgRef } from '@/lib/seo';
+import { OG_BASE, ogImageFor, SITE_LANG, orgRef, faqPageNode, jsonLdScript } from '@/lib/seo';
 import { getSiteSettings } from '@/lib/site-settings';
 import { STORYPRESS_FAQS } from '@/lib/storypress-faqs';
 import StoryPressClient from './StoryPressClient';
@@ -53,18 +53,7 @@ export default async function StoryPressPage() {
     inLanguage: SITE_LANG,
   };
 
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: STORYPRESS_FAQS.map((faq) => ({
-      '@type': 'Question',
-      name: faq.q,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.a,
-      },
-    })),
-  };
+  const faqJsonLd = faqPageNode(STORYPRESS_FAQS);
 
   return (
     <>
@@ -78,7 +67,7 @@ export default async function StoryPressPage() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
       <StoryPressClient
         title={s.storypress_title || 'StoryPress'}

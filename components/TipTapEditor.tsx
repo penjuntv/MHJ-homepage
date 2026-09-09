@@ -891,7 +891,10 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
         .tiptap-editor .ProseMirror s { text-decoration: line-through; }
         .tiptap-editor .ProseMirror a { color: #4F46E5; text-decoration: underline; text-underline-offset: 3px; }
         .tiptap-editor .ProseMirror hr { border: none; border-top: 2px solid #f1f5f9; margin: 24px 0; }
-        .tiptap-editor .ProseMirror ul, .tiptap-editor .ProseMirror ol { padding-left: 24px; margin: 8px 0; }
+        /* Tailwind preflight 가 마커를 지운다 — 에디터에서도 본문과 같게 보여야 저자가 목록을 신뢰한다
+           (마커 없는 목록을 '깨졌다' 고 보고 <p> 로 다시 쓰면 Key takeaways 박스가 영영 안 생긴다). */
+        .tiptap-editor .ProseMirror ul { list-style: disc; padding-left: 24px; margin: 8px 0; }
+        .tiptap-editor .ProseMirror ol { list-style: decimal; padding-left: 24px; margin: 8px 0; }
         .tiptap-editor .ProseMirror li { margin: 4px 0; }
         .tiptap-editor .ProseMirror [data-type="calloutBlock"],
         .tiptap-editor .ProseMirror div.blog-callout {

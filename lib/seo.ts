@@ -13,6 +13,8 @@
  * 언어 신고는 SITE_LANG·OG_LOCALE 한 곳에서 — 2026-09-08 W2-A 에서 'ko' → 'en-NZ' 로 정정했다(본문이 영어인 사이트가
  * 한국어라고 신고하고 있었다. 한국어 요약 블록은 W4 에서 `<section lang="ko">` 로 블록 단위 신고).
  */
+import type { BlogFaqItem } from './types';
+
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 export const SITE_NAME = 'My Mairangi Journal';
 export const SITE_LANG = 'en-NZ';
@@ -98,6 +100,31 @@ export function orgRef() {
 export function personRef(name: string) {
   const id = Object.hasOwn(PERSON_IDS, name) ? PERSON_IDS[name] : undefined;
   return id ? { '@type': 'Person', '@id': id, name, url: `${SITE_URL}/about` } : { '@type': 'Person', name };
+}
+
+/**
+ * JSON-LD 를 <script> 안에 넣을 문자열로. `<` 를 유니코드 이스케이프해 본문에 섞인 "</script>" 가
+ * 스크립트를 조기 종료시키지 못하게 한다(JSON.stringify 는 `<`·`/` 를 이스케이프하지 않는다).
+ * 편집자 자유 입력(faq_json·meta 폴백)이 구조화 데이터에 들어오면서 실제 위험이 됐다.
+ */
+export function jsonLdScript(node: unknown): string {
+  return JSON.stringify(node).replace(/</g, '\\u003c');
+}
+
+/**
+ * FAQPage 노드 — storypress 랜딩과 블로그 상세가 공유한다(타입도 BlogFaqItem 하나).
+ * ⚠️ 화면에 같은 Q&A 가 보일 때만 낼 것: 보이지 않는 FAQ 마크업은 구글 정책 위반이다.
+ */
+export function faqPageNode(items: BlogFaqItem[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
+    })),
+  };
 }
 
 export function organizationNode() {

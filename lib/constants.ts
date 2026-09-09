@@ -55,6 +55,13 @@ export const BLOG_CARD_COLUMNS =
 export const BLOG_DETAIL_COLUMNS =
   `${BLOG_CARD_COLUMNS}, created_at, sponsor_name, cover_caption, info_block_html, seo_title, summary_ko, faq_json, related_slugs, og_image_alt`;
 
+/**
+ * sitemap 전용 최소 컬럼. 상수로 두는 이유는 `scripts/audit-anon-column-grant.mjs` 가
+ * lib/constants.ts 의 BLOG_*_COLUMNS 만 보기 때문 — 라우트에 인라인으로 적은 select 는
+ * anon grant 가드의 사각지대다(grant 누락 시 sitemap 이 블로그 0건으로 조용히 비어 나간다).
+ */
+export const BLOG_SITEMAP_COLUMNS = 'slug, created_at, updated_at';
+
 /** 관련 글 카드(getRelatedBlogs) 전용 — 카드 컬럼보다 가벼운 최소 컬럼 */
 export const BLOG_RELATED_COLUMNS =
   'id, title, author, date, image_url, category, slug, view_count';

@@ -198,14 +198,12 @@ M   ●          ●                ● +4w                          ● +8w
 - 새 가드 `scripts/audit-anon-column-grant.mjs`(source-guard): `BLOG_*_COLUMNS` ⊆ grant 참고본 — "grant 빠뜨린 배포 → 42501 → 공개 페이지 500" 을 PR 에서 차단
 - 남긴 것(W4-B 에서): 상세 `modifiedTime`/`dateModified` 를 `updated_at` 으로 교체(현재 created_at), FAQPage 빌더는 storypress 페이지 것을 `lib/seo.ts` 로 올려 공유(`StoryPressFAQ = BlogFaqItem`)
 
-**☐ W4-B · 렌더링** — 노력 M · 1~2 PR
-- `<title>`/OG title = `seo_title || title`, `<h1>` 은 `title` 불변
-- `dateModified`·sitemap `lastModified`·`article:modified_time` = `updated_at`
-- 본문 직후 블록 순서: **Key takeaways(`<ul>` 3~5줄, 인포블록 템플릿)** → 저자 박스 → **한국어 요약 `<section lang="ko">`**(있을 때) → 인포블록 → **FAQ(가시 Q&A + FAQPage JSON-LD)** → 태그
-- 관련글: `related_slugs` 우선, 없으면 현행 자동
-- 글 페이지에 갱신일·읽는 시간·H2 기반 목차·가시 빵부스러기(W6 와 겹치면 여기서 한 번에)
-- `globals.css` 인포블록 내부 `ul/ol/table` 스타일(현재 본문 타이포 미상속, `:772-775`)
-- Done: 상위 5편 라이브에서 FAQPage·takeaways·저자 박스·갱신일 확인 · Rich Results Test · 3화면
+**☑ W4-B · 렌더링** — 노력 M — **2026-09-09 완료** (PR `seo/w4b-detail-render`)
+- 메타: `<title>`/OG/Twitter = `seo_title || title`(seo_title 이면 루트 템플릿 `— MHJ` 를 붙이지 않는다) · og:image alt = `og_image_alt || title` · `article:modified_time`·JSON-LD `dateModified`·sitemap `lastmod` = `updated_at`
+- 화면: 가시 빵부스러기(상단 Back 알약 대체) · 읽는 시간 · 갱신일(발행일과 **다른 날**일 때만, NZ 시간대) · H2 3개+ 목차 · Key takeaways 박스(본문 관례 감지) · `<section lang="ko">` 한국어 요약 · 항상 펼친 FAQ `<dl>` + FAQPage JSON-LD · 관련글 `related_slugs` 우선
+- 새 모듈 `lib/content-html.mjs`(순수 함수 + 테스트 45건, source-guard) · `faqPageNode`·`jsonLdScript` 는 `lib/seo.ts` 공용
+- 인포블록 내부 목록/표 타이포는 **인라인 스타일이 없는 것만** 복구(기존 7편의 표는 자기 디자인을 갖고 있다)
+- 남은 것: 값이 채워진 글이 생기면 Rich Results Test(FAQPage·Article) — W4-C/W5 에서
 
 **☐ W4-C · BlogForm 확장** — 노력 M
 - 필드: `seo_title`(30~60자 카운터) · `summary_ko`(AI 초안 버튼 → 편집 → 저장; `/api/ai-seo` 를 title/description/summary_ko 3모드로 확장, 모델 `claude-haiku-4-5-20251001` 유지) · FAQ 2~4 · `related_slugs` 선택기 · `og_image_alt` · `cover_caption` 필수(신규 글)
@@ -283,7 +281,7 @@ M   ●          ●                ● +4w                          ● +8w
 | 9 | W3-B/C | `… §4 W3-B, W3-C 착수(별도 대화 2개)` | — |
 | 10 | W4-A | `… §4 W4-A 착수. Plan Mode. 마이그레이션→grant→constants→배포 순서, og_image_url '' 정리는 dry-run 먼저` | D2 D3 |
 | 11 | W4-B | `… §4 W4-B 착수. updated_at 은 편집 변경만 갱신하므로 dateModified·sitemap lastmod 에 바로 사용. seo_title 등은 BLOG_DETAIL_COLUMNS 에 이미 포함` | W4-A ☑ |
-| 12 | W4-C | `… §4 W4-C 착수. preflight 는 경고 모드` | W4-A |
+| 12 | W4-C | `… §4 W4-C 착수. preflight 는 경고 모드` | W4-A ☑ W4-B ☑ — takeaways 는 본문 `<h2>Key takeaways</h2> + <ul>` 관례(감지 규칙 `lib/content-html.mjs`), 폼 필드는 seo_title·summary_ko·FAQ·related_slugs·og_image_alt |
 | 13 | W4-D/E | 별도 2대화 | W4-A |
 | 14 | W5 | `… §4 W5 정비 큐 1번부터. 처방 목록만 만들고 본문은 수정하지 않는다` | D4 |
 | 15 | W6-A~D | 별도 4대화. W6-A 는 DESIGN_RULES 개정 포함 | D5 |

@@ -252,7 +252,7 @@ Top 10 worst 블로그를 "Content cleanup" 체크박스 목록으로 만들어 
 - **단어 수 근사**: HTML strip 후 공백 split — 100% 정확하지 않지만 LOW/MED/OK 판정엔 충분.
   빈 본문에서 `array_length(regexp_split_to_array(...))` 가 1 을 돌려주는 것을 막으려고
   `NULLIF(trim(...), '')` 를 씌워 뒀다.
-- **`blogs.updated_at` 없음**: 보고서 생성 시점만 기록. 글별 최종 수정일 추적 불가 (한계).
+- **`blogs.updated_at`**: 2026-09-08 W4-A 에서 신설(편집 컬럼이 실제로 바뀔 때만 트리거가 갱신). 글별 최종 수정일로 쓸 수 있고, W4-B 부터 sitemap `lastmod`·`article:modified_time`·JSON-LD `dateModified` 가 이 값이다.
 - **YuStudy 테이블 혼입 금지**: Supabase 프로젝트(`vpayqdatpqajsmalpfmq`)에 YuStudy 29개 테이블 공존. 쿼리는 반드시 MHJ 테이블만.
 - **이전 보고서와 비교**: 새 보고서 생성 시 이전 보고서와 diff 보여줘서 진척도 측정.
   "thin content 30 → 25" 같은 신호.
