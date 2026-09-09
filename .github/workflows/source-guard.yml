@@ -57,6 +57,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-content-html.mjs
 
+      - name: 발행 전 점검·링크 추천 테스트
+        if: ${{ !cancelled() }}
+        run: node scripts/qa/test-blog-preflight.mjs
+
       - name: proxy-image URL allowlist 테스트 (SSRF 차단)
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-image-proxy-allow.mjs

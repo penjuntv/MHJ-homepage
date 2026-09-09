@@ -106,9 +106,12 @@ export interface Blog {
   summary_ko?: string | null;
   /** FAQPage JSON-LD + 본문 FAQ. DB CHECK 로 배열만 허용 */
   faq_json?: BlogFaqItem[] | null;
-  /** 편집자가 고른 관련 글 slug — 존재 검증은 W4-C preflight */
+  /** 편집자가 고른 관련 글 slug. 관리자 폼이 후보 목록에 없는 항목을 붉게 표시한다(RelatedSuggestions);
+   *  그래도 남아 있으면 상세 페이지가 조용히 건너뛴다 */
   related_slugs?: string[] | null;
   og_image_alt?: string | null;
+  /** 캐러셀 시리즈명 — 관련 글 추천의 시리즈 신호(lib/link-suggest.mjs)에 쓰인다 */
+  carousel_series_name?: string | null;
 }
 
 export interface BlogFaqItem {

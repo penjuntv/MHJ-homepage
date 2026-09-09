@@ -205,11 +205,15 @@ M   ●          ●                ● +4w                          ● +8w
 - 인포블록 내부 목록/표 타이포는 **인라인 스타일이 없는 것만** 복구(기존 7편의 표는 자기 디자인을 갖고 있다)
 - 남은 것: 값이 채워진 글이 생기면 Rich Results Test(FAQPage·Article) — W4-C/W5 에서
 
-**☐ W4-C · BlogForm 확장** — 노력 M
-- 필드: `seo_title`(30~60자 카운터) · `summary_ko`(AI 초안 버튼 → 편집 → 저장; `/api/ai-seo` 를 title/description/summary_ko 3모드로 확장, 모델 `claude-haiku-4-5-20251001` 유지) · FAQ 2~4 · `related_slugs` 선택기 · `og_image_alt` · `cover_caption` 필수(신규 글)
-- `internal-link-suggester` 를 폼 안 패널로: 저장 전 후보 3개 표시(ORPHAN 재발 차단)
-- preflight 패널(경고 모드): 답 먼저 문단 / H2 ≥3 / takeaways / 내부링크 ≥2 / seo_title / summary_ko / alt 서술 — 미충족은 **경고만**, 4주 후 D3 에 따라 차단 훅으로 승격
-- Done: 새 글 1편 발행 흐름 전체 통과 · 관리자 변경은 public 연동까지(규칙 9)
+**☑ W4-C · BlogForm 확장** — 노력 M — **2026-09-10 완료** (PR `seo/w4c-blogform`)
+- 필드: `seo_title`(30~60 카운터·AI 초안) · `summary_ko`(AI 초안 → 편집 → 저장) · FAQ 0~4행 · `og_image_alt` · 관련 글 선택기. `/api/ai-seo` 는 `mode`(description|seo_title|summary_ko) 3모드 + 분당 10회 제한(모드 미지정은 예전 동작 유지)
+- 관련 글·내부 링크는 **한 패널**(`RelatedSuggestions.tsx`): 스킬 v1 가중치를 `lib/link-suggest.mjs` 로 옮겨 점수순 후보 8개를 보여주고, 행마다 "관련글 추가"(related_slugs 순서 유지)와 "링크 복사"(본문 붙여넣기용). 본문은 대신 고치지 않는다
+- preflight 는 기존 체크리스트를 확장 — 판정은 `lib/blog-preflight.mjs` 한 곳(W4-D 의 감사 페이지도 이걸 쓴다). 16행 = 필수 4 + 조건부 1(캡션) + 권장 12. 필수만 저장을 막고 나머지는 경고(D3)
+- **커버 캡션은 글이 처음 공개될 때 필수** — "신규 글"(첫 저장) 기준으로 재면 초안으로 저장했다 나중에 발행하는 흐름이 규칙을 그냥 지나친다. 초안 저장은 막지 않는다(저장 버튼이 하나뿐이라 막으면 글을 나눠 쓸 수 없다)
+- 임계값은 `scripts/audit-seo-regression.mjs` 와 **일부러 다르다** — 폼은 발행 템플릿 목표치(내부링크 2개·H2 3개·서술형 alt), 감사는 결함 기준선(내부링크 0=ORPHAN 등, `seo-baseline.json` 에 동결). 실측 80편 중 63편이 내부링크 판정이 갈리므로 수치를 인용할 때 어느 쪽인지 밝힐 것
+- AI 생성물은 훅을 거치지 않으므로 라우트가 `lib/name-guard.mjs` 로 실명 패턴을 검사해 걸리면 422 로 폐기한다(P0, CLAUDE.md 10)
+- 자동 임시저장이 그동안 `coverCaption` 을 빠뜨리고 있었다 — 새 상태 3종과 함께 편입
+- 기존 발행 글은 권장 항목이 **7~11개(중앙값 9)** 미충족으로 뜬다(실측 80편: 내부링크 2개+ 7편, takeaways·seo_title·summary_ko·FAQ·관련글은 0편). 그게 W5 정비 큐의 작업 목록이다. 그래서 **저장 시 토스트는 처음 공개되는 글에서만** 띄우고, 이미 공개된 글은 '이번 편집으로 새로 깨진 항목'만 짚는다(매거진 넘침 경고가 벽지가 된 전례)
 
 **☐ W4-D · mhj-desk/seo 감사 페이지** — F4 · 노력 S~M
 - 검사 추가: ORPHAN · H2 · THIN · OG 빈 문자열 · seo_title 없음 · FAQ 없음 · summary_ko 없음 · 갱신 90일 경과
@@ -282,7 +286,7 @@ M   ●          ●                ● +4w                          ● +8w
 | 10 | W4-A | `… §4 W4-A 착수. Plan Mode. 마이그레이션→grant→constants→배포 순서, og_image_url '' 정리는 dry-run 먼저` | D2 D3 |
 | 11 | W4-B | `… §4 W4-B 착수. updated_at 은 편집 변경만 갱신하므로 dateModified·sitemap lastmod 에 바로 사용. seo_title 등은 BLOG_DETAIL_COLUMNS 에 이미 포함` | W4-A ☑ |
 | 12 | W4-C | `… §4 W4-C 착수. preflight 는 경고 모드` | W4-A ☑ W4-B ☑ — takeaways 는 본문 `<h2>Key takeaways</h2> + <ul>` 관례(감지 규칙 `lib/content-html.mjs`), 폼 필드는 seo_title·summary_ko·FAQ·related_slugs·og_image_alt |
-| 13 | W4-D/E | 별도 2대화 | W4-A |
+| 13 | W4-D/E | 별도 2대화 | W4-A ☑ W4-C ☑ — W4-D 는 `auditBlog()` 를 `lib/blog-preflight.mjs` 로 갈아끼우는 것부터 |
 | 14 | W5 | `… §4 W5 정비 큐 1번부터. 처방 목록만 만들고 본문은 수정하지 않는다` | D4 |
 | 15 | W6-A~D | 별도 4대화. W6-A 는 DESIGN_RULES 개정 포함 | D5 |
 

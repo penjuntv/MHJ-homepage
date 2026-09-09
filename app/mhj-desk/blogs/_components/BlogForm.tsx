@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase-browser';
-import type { Blog } from '@/lib/types';
+import type { Blog, BlogFaqItem } from '@/lib/types';
+import { preflightChecks, blockingFailures } from '@/lib/blog-preflight.mjs';
+import { stripHtml, sanitizeFaq } from '@/lib/content-html.mjs';
+import RelatedSuggestions from './RelatedSuggestions';
 import { BLOG_CATEGORIES, CATEGORY_TO_SLUG } from '@/lib/constants';
-import { Upload, Loader2, Sparkles, Eye } from 'lucide-react';
+import { Upload, Loader2, Sparkles, Eye, Plus, X } from 'lucide-react';
 import ImagePreviewTabs from '@/components/admin/ImagePreviewTabs';
 import ImageCropModal from '@/components/admin/ImageCropModal';
 import AffiliateLinksValidator from '@/components/admin/AffiliateLinksValidator';
@@ -27,18 +30,48 @@ interface Props {
 const CATEGORIES: Blog['category'][] = [...BLOG_CATEGORIES];
 
 /* ── 발행 전 체크리스트 ── */
-function PublishChecklist({ form }: { form: Omit<Blog, 'id' | 'created_at'> }) {
-  const plainText = form.content.replace(/<[^>]*>/g, '').trim();
-  const checks = [
-    { label: '제목 입력', required: true, ok: form.title.trim().length > 0 },
-    { label: '본문 50자 이상', required: true, ok: plainText.length >= 50 },
-    { label: '커버 이미지', required: true, ok: form.image_url.trim().length > 0 },
-    { label: '카테고리 선택', required: true, ok: true },
-    { label: 'SEO 메타 설명', required: false, ok: (form.meta_description ?? '').trim().length > 0 },
-    { label: '본문 이미지 포함', required: false, ok: form.content.includes('<img') },
-  ];
+/** AI 초안 버튼 — 컴포넌트 밖에 둔다. 안에 두면 렌더마다 타입이 바뀌어 리마운트되고,
+ *  생성 중이던 스피너가 처음부터 다시 돌고 포커스가 날아간다. */
+function AiDraftButton({ mode, aiMode, onGenerate }: {
+  mode: 'description' | 'seo_title' | 'summary_ko';
+  aiMode: null | 'description' | 'seo_title' | 'summary_ko';
+  onGenerate: (mode: 'description' | 'seo_title' | 'summary_ko') => void;
+}) {
+  const busy = aiMode === mode;
+  const disabled = aiMode !== null;
+  return (
+    <button
+      type="button"
+      onClick={() => onGenerate(mode)}
+      disabled={disabled}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 5,
+        padding: '6px 12px', borderRadius: 999,
+        background: disabled ? '#F8FAFC' : '#4F46E5',
+        color: disabled ? '#94A3B8' : 'white',
+        border: 'none', fontSize: 10, fontWeight: 900,
+        letterSpacing: 1.5, textTransform: 'uppercase',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'all 0.2s',
+      }}
+    >
+      {busy ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={11} />}
+      {busy ? '생성 중...' : 'AI 초안'}
+    </button>
+  );
+}
+
+function PublishChecklist({ draft, baselineFailures }: {
+  draft: Parameters<typeof preflightChecks>[0];
+  /** 글을 열었을 때 이미 미충족이던 항목 id — 새 글이면 null */
+  baselineFailures: Set<string> | null;
+}) {
+  const checks = preflightChecks(draft);
+  const newlyBroken = checks.filter(c => !c.ok && baselineFailures && !baselineFailures.has(c.id));
   const allRequired = checks.filter(c => c.required).every(c => c.ok);
   const allOk = checks.every(c => c.ok);
+  const recommendedOk = checks.filter(c => !c.required && c.ok).length;
+  const recommendedTotal = checks.filter(c => !c.required).length;
 
   return (
     <div style={{
@@ -46,7 +79,15 @@ function PublishChecklist({ form }: { form: Omit<Blog, 'id' | 'created_at'> }) {
       border: `1.5px solid ${allRequired ? (allOk ? '#D1FAE5' : '#FEF3C7') : '#FEE2E2'}`,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <p style={{ fontSize: 13, fontWeight: 800, color: '#1a1a1a', margin: 0 }}>발행 전 체크리스트</p>
+        <p style={{ fontSize: 13, fontWeight: 800, color: '#1a1a1a', margin: 0 }}>
+          발행 전 체크리스트
+          <span style={{ fontSize: 11, fontWeight: 600, color: '#94A3B8', marginLeft: 8 }}>
+            권장 {recommendedOk}/{recommendedTotal}
+            {newlyBroken.length > 0 && (
+              <span style={{ color: '#B91C1C', fontWeight: 900, marginLeft: 6 }}>· 이번 편집으로 {newlyBroken.length}개</span>
+            )}
+          </span>
+        </p>
         <span style={{
           fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase',
           padding: '4px 10px', borderRadius: 8,
@@ -56,9 +97,11 @@ function PublishChecklist({ form }: { form: Omit<Blog, 'id' | 'created_at'> }) {
           {allOk ? '준비됨' : allRequired ? '권장 항목 미완료' : '필수 항목 미완료'}
         </span>
       </div>
+      {/* 권장 항목은 저장을 막지 않는다(D3: 경고 모드). 기존 글은 대부분 여러 개가 미완료로 뜨는데,
+          그것이 W5 정비 큐에서 무엇을 고칠지의 목록이다. */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {checks.map(c => (
-          <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -70,9 +113,12 @@ function PublishChecklist({ form }: { form: Omit<Blog, 'id' | 'created_at'> }) {
             <span style={{ fontSize: 13, color: c.ok ? '#64748B' : '#1A1A1A', fontWeight: c.ok ? 500 : 700 }}>
               {c.label}
               {!c.required && <span style={{ fontSize: 10, color: '#94A3B8', marginLeft: 6, fontWeight: 500 }}>권장</span>}
+              {!c.ok && baselineFailures && !baselineFailures.has(c.id) && (
+                <span style={{ fontSize: 10, color: '#B91C1C', marginLeft: 6, fontWeight: 900 }}>이번 편집</span>
+              )}
             </span>
-            {!c.ok && !c.required && (
-              <span style={{ fontSize: 10, color: '#F59E0B', fontWeight: 700, marginLeft: 'auto' }}>미완료</span>
+            {!c.ok && c.hint && (
+              <span style={{ fontSize: 11, color: '#94A3B8', marginLeft: 'auto', fontWeight: 500 }}>{c.hint}</span>
             )}
           </div>
         ))}
@@ -109,6 +155,9 @@ export default function BlogForm({ initial }: Props) {
     is_sponsored: initial?.is_sponsored ?? false,
     sponsor_name: initial?.sponsor_name ?? '',
     info_block_html: initial?.info_block_html ?? '',
+    seo_title: initial?.seo_title ?? '',
+    summary_ko: initial?.summary_ko ?? '',
+    og_image_alt: initial?.og_image_alt ?? '',
   });
 
   const [saving, setSaving] = useState(false);
@@ -117,6 +166,9 @@ export default function BlogForm({ initial }: Props) {
   const [error, setError] = useState('');
   const [coverCaption, setCoverCaption] = useState<string>(initial?.cover_caption ?? '');
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
+  // 배열·객체는 set() 의 string|boolean 시그니처를 못 타므로 tags·coverCaption 처럼 따로 둔다.
+  const [faq, setFaq] = useState<BlogFaqItem[]>(initial?.faq_json ?? []);
+  const [relatedSlugs, setRelatedSlugs] = useState<string[]>(initial?.related_slugs ?? []);
   const [tagInput, setTagInput] = useState('');
   const [scheduleMode, setScheduleMode] = useState<ScheduleMode>(
     initial?.publish_at ? 'schedule' : 'now'
@@ -127,8 +179,63 @@ export default function BlogForm({ initial }: Props) {
       : ''
   );
   const [sendAsNewsletter, setSendAsNewsletter] = useState(false);
-  const [aiSeoLoading, setAiSeoLoading] = useState(false);
+  const [aiMode, setAiMode] = useState<null | 'description' | 'seo_title' | 'summary_ko'>(null);
   const [infoBlockPreview, setInfoBlockPreview] = useState(false);
+
+  /** 예약발행을 고르면 저장이 곧 발행이다(handleSubmit 과 같은 규칙) — 캡션 필수 판정에 쓰인다. */
+  const willPublish = form.published || (scheduleMode === 'schedule' && !!scheduleAt);
+  /** 체크리스트·제출 검증·경고 토스트가 모두 이 하나를 본다.
+   *  본문 한 글자마다 전 항목을 다시 재지 않도록 값 단위로 메모한다(TipTap 은 타이핑마다 onChange 한다). */
+  const draftForChecks = useMemo(() => ({
+    title: form.title,
+    content: form.content,
+    info_block_html: form.info_block_html,
+    image_url: form.image_url,
+    slug: form.slug,
+    meta_description: form.meta_description,
+    seo_title: form.seo_title,
+    summary_ko: form.summary_ko,
+    cover_caption: coverCaption,
+    faq,
+    related_slugs: relatedSlugs,
+    alreadyPublished: !!initial?.published,
+    willPublish,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [form.title, form.content, form.info_block_html, form.image_url, form.slug,
+    form.meta_description, form.seo_title, form.summary_ko, coverCaption, faq, relatedSlugs, initial, willPublish]);
+
+  /** 열었을 때의 상태. "이번 편집으로 새로 깨진 항목" 을 가려내는 기준선 —
+   *  기존 글은 권장 항목 대부분이 원래 미충족이라(실측 평균 8.5개) 그걸 다 경고하면 아무도 안 본다. */
+  const baselineFailures = useMemo(() => {
+    if (!initial) return null;
+    const rows = preflightChecks({
+      title: initial.title,
+      content: initial.content,
+      info_block_html: initial.info_block_html,
+      image_url: initial.image_url,
+      slug: initial.slug,
+      meta_description: initial.meta_description,
+      seo_title: initial.seo_title,
+      summary_ko: initial.summary_ko,
+      cover_caption: initial.cover_caption,
+      faq: initial.faq_json,
+      related_slugs: initial.related_slugs,
+      alreadyPublished: !!initial.published,
+      willPublish: !!initial.published,
+    });
+    return new Set(rows.filter((c) => !c.ok).map((c) => c.id));
+  }, [initial]);
+
+  /** 추천 패널 입력 — 객체 리터럴을 그대로 주면 자식의 useMemo 가 매 렌더 무효가 된다.
+   *  carousel_series_name 은 폼이 편집하지 않지만 점수(+5)에 쓰이므로 원본에서 그대로 전달한다. */
+  const suggestCurrent = useMemo(() => ({
+    slug: form.slug,
+    title: form.title,
+    meta_description: form.meta_description ?? '',
+    category: form.category,
+    tags,
+    carousel_series_name: initial?.carousel_series_name ?? null,
+  }), [form.slug, form.title, form.meta_description, form.category, tags, initial]);
 
   /* ── 슬러그 중복 검사 ── */
   const [slugError, setSlugError] = useState('');
@@ -155,10 +262,10 @@ export default function BlogForm({ initial }: Props) {
   const autoSaveLabelTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 최신 상태를 ref로 추적 (interval이 stale closure를 참조하지 않도록)
-  const stateRef = useRef({ form, tags, scheduleMode, scheduleAt });
+  const stateRef = useRef({ form, tags, scheduleMode, scheduleAt, coverCaption, faq, relatedSlugs });
   useEffect(() => {
-    stateRef.current = { form, tags, scheduleMode, scheduleAt };
-  }, [form, tags, scheduleMode, scheduleAt]);
+    stateRef.current = { form, tags, scheduleMode, scheduleAt, coverCaption, faq, relatedSlugs };
+  }, [form, tags, scheduleMode, scheduleAt, coverCaption, faq, relatedSlugs]);
 
   // 마운트 시 임시저장 확인
   useEffect(() => {
@@ -172,14 +279,13 @@ export default function BlogForm({ initial }: Props) {
   useEffect(() => {
     const id = setInterval(() => {
       try {
-        const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa } = stateRef.current;
+        const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa, coverCaption: cc, faq: fq, relatedSlugs: rs } = stateRef.current;
         // content가 매우 클 경우 content_backup을 제외한 슬림 버전으로 저장 시도
-        const payload = { form: f, tags: t, scheduleMode: sm, scheduleAt: sa };
-        let serialized = JSON.stringify(payload);
+        const rest = { tags: t, scheduleMode: sm, scheduleAt: sa, coverCaption: cc, faq: fq, relatedSlugs: rs };
+        let serialized = JSON.stringify({ form: f, ...rest });
         if (serialized.length > 3_000_000) {
           // 3MB 초과 시 content만 제외하고 저장 (Supabase에 직접 저장된 본문은 안전)
-          const slimForm = { ...f, content: '' };
-          serialized = JSON.stringify({ form: slimForm, tags: t, scheduleMode: sm, scheduleAt: sa });
+          serialized = JSON.stringify({ form: { ...f, content: '' }, ...rest });
         }
         sessionStorage.setItem(draftKey, serialized);
         const now = new Date();
@@ -196,11 +302,16 @@ export default function BlogForm({ initial }: Props) {
     try {
       const saved = sessionStorage.getItem(draftKey);
       if (!saved) return;
-      const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa } = JSON.parse(saved);
-      if (f) setForm(f);
+      const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa, coverCaption: cc, faq: fq, relatedSlugs: rs } = JSON.parse(saved);
+      // 통째 교체하면 배포 전에 저장된 옛 초안이 새 컬럼(seo_title 등)을 지운다 — 병합한다.
+      if (f) setForm(prev => ({ ...prev, ...f }));
       if (t) setTags(t);
       if (sm) setScheduleMode(sm);
       if (sa !== undefined) setScheduleAt(sa);
+      if (cc !== undefined) setCoverCaption(cc);
+      // 손상된 초안(형태가 다른 원소)이 그대로 들어오면 저장 시 던진다 — 렌더러와 같은 필터로 거른다.
+      if (Array.isArray(fq)) setFaq(sanitizeFaq(fq));
+      if (Array.isArray(rs)) setRelatedSlugs(rs);
       setShowRestoreBanner(false);
       toast.success('임시저장된 글을 복원했습니다.');
     } catch {
@@ -213,28 +324,35 @@ export default function BlogForm({ initial }: Props) {
     setShowRestoreBanner(false);
   }
 
-  async function generateSeoWithAI() {
+  /** AI 초안 — 결과는 폼에 들어가고 편집자가 고쳐 저장한다(자동 확정 아님). */
+  async function generateWithAI(mode: 'description' | 'seo_title' | 'summary_ko') {
     if (!form.title) { toast.error('AI 생성을 위해 제목을 먼저 입력하세요.'); return; }
-    setAiSeoLoading(true);
+    setAiMode(mode);
     try {
-      const plainText = form.content.replace(/<[^>]*>/g, '').trim();
+      const plainText = stripHtml(form.content);
       const res = await fetch('/api/ai-seo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: form.title, content: plainText }),
+        body: JSON.stringify({ title: form.title, content: plainText, mode }),
       });
       const data = await res.json();
-      if (data.meta_description) {
-        set('meta_description', data.meta_description);
-        toast.success('SEO 설명이 생성되었습니다.');
+      const text: string | undefined = data.text ?? data.meta_description;
+      if (text) {
+        set(mode === 'description' ? 'meta_description' : mode, text);
+        if (data.truncated) {
+          toast.warning('AI 초안이 길이 한도에서 끊겼습니다 — 마지막 문장을 확인하세요.');
+        } else {
+          toast.success('AI 초안이 들어갔습니다 — 확인하고 고쳐 주세요.');
+        }
       } else {
         toast.error('AI 생성 실패: ' + (data.error ?? '알 수 없는 오류'));
       }
     } catch {
       toast.error('AI 생성 요청 실패');
     }
-    setAiSeoLoading(false);
+    setAiMode(null);
   }
+
 
   function set(key: keyof BlogInput, value: string | boolean) {
     setForm(prev => {
@@ -284,12 +402,8 @@ export default function BlogForm({ initial }: Props) {
     e.preventDefault();
 
     // ── 발행 전 체크리스트 유효성 검사 ──
-    const plainText = form.content.replace(/<[^>]*>/g, '').trim();
-    const failedRequired: string[] = [];
-    if (!form.title.trim()) failedRequired.push('제목');
-    if (plainText.length < 50) failedRequired.push('본문 50자 이상');
-    if (!form.image_url.trim()) failedRequired.push('커버 이미지');
-    if (!form.slug.trim()) failedRequired.push('슬러그');
+    // 체크리스트와 같은 판정을 쓴다 — 두 목록이 갈라지면 "체크리스트는 통과인데 저장이 막히는" 일이 생긴다.
+    const failedRequired = blockingFailures(draftForChecks);
 
     if (failedRequired.length > 0) {
       toast.error(`필수 항목 미완료: ${failedRequired.join(', ')}`);
@@ -297,10 +411,17 @@ export default function BlogForm({ initial }: Props) {
       return;
     }
 
-    // 권장 항목 경고 (차단 안 함)
-    if (!(form.meta_description ?? '').trim()) {
-      toast.warning('SEO 메타 설명이 없습니다. 검색 노출에 불리할 수 있습니다.');
+    // 권장 항목은 막지 않고 알린다(D3: 4주간 경고 모드). 다만 **처음 공개될 때만** —
+    // 이미 공개된 옛 글을 고칠 때마다 8~9개를 알리면 경고가 벽지가 된다(매거진 넘침 경고의 전례).
+    // 그 경우엔 이번 편집으로 **새로 깨진** 항목만 짚는다.
+    const weak = preflightChecks(draftForChecks).filter(c => !c.required && !c.ok);
+    const newlyBroken = baselineFailures ? weak.filter(c => !baselineFailures.has(c.id)) : weak;
+    const toWarn = initial?.published ? newlyBroken : weak;
+    if (toWarn.length) {
+      toast.warning(`권장 항목 ${toWarn.length}개 미완료: ${toWarn.slice(0, 3).map(c => c.label).join(', ')}${toWarn.length > 3 ? ' 외' : ''}`);
     }
+
+    const cleanFaq = sanitizeFaq(faq);
 
     setSaving(true);
     setError('');
@@ -324,6 +445,13 @@ export default function BlogForm({ initial }: Props) {
       // 선택 텍스트는 '' 대신 NULL — DB 트리거(set_blogs_updated_at)도 같은 정규화를 하지만 클라이언트가 먼저 맞춘다
       cover_caption: blankToNull(coverCaption),
       og_image_url: blankToNull(form.og_image_url),
+      seo_title: blankToNull(form.seo_title),
+      summary_ko: blankToNull(form.summary_ko),
+      og_image_alt: blankToNull(form.og_image_alt),
+      // 빈 배열 대신 NULL — "없음" 의 표현을 하나로 (W4-A 트리거와 같은 규칙).
+      // 비어 있는 줄은 저장하지 않는다(DB CHECK: 원소마다 q·a 문자열).
+      faq_json: cleanFaq.length ? cleanFaq : null,
+      related_slugs: relatedSlugs.length ? relatedSlugs : null,
       meta_description: blankToNull(form.meta_description),
       sponsor_name: blankToNull(form.sponsor_name),
       info_block_html: blankToNull(form.info_block_html),
@@ -552,7 +680,9 @@ export default function BlogForm({ initial }: Props) {
           <div style={{ marginTop: 12 }}>
             <label style={labelStyle}>
               커버 이미지 캡션{' '}
-              <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(선택)</span>
+              <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                {!initial ? '(신규 글 발행 시 필수)' : '(선택)'}
+              </span>
             </label>
             <input
               type="text"
@@ -564,6 +694,23 @@ export default function BlogForm({ initial }: Props) {
             />
             <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 6 }}>
               상세 페이지 커버 이미지 아래에 이탤릭 한 줄로 표시됩니다. 비워두면 표시되지 않습니다.
+            </p>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <label style={labelStyle}>
+              공유 카드 이미지 설명 (og:image alt){' '}
+              <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(선택)</span>
+            </label>
+            <input
+              type="text"
+              value={form.og_image_alt ?? ''}
+              onChange={(e) => set('og_image_alt', e.target.value)}
+              maxLength={120}
+              placeholder="예: A school bag on the kitchen table the night before term starts"
+              style={inputStyle}
+            />
+            <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 6 }}>
+              장면을 서술하세요 — 제목을 그대로 옮기면 도움이 되지 않습니다. 비우면 글 제목이 쓰입니다.
             </p>
           </div>
         </div>
@@ -588,8 +735,11 @@ export default function BlogForm({ initial }: Props) {
         {/* ── SEO 섹션 ── */}
         {(() => {
           const titleLen = form.title.length;
+          const seoTitleLen = (form.seo_title ?? '').length;
           const metaLen = (form.meta_description ?? '').length;
-          const titleColor = titleLen > 60 ? '#EF4444' : titleLen > 50 ? '#F59E0B' : '#10B981';
+          // 30~60자가 목표라 짧아도 초록이 아니다 — 비었을 때는 중립색.
+          const seoTitleColor = seoTitleLen === 0 ? '#94A3B8'
+            : seoTitleLen > 60 ? '#EF4444' : seoTitleLen < 30 ? '#F59E0B' : '#10B981';
           const metaColor = metaLen > 160 ? '#EF4444' : metaLen > 140 ? '#F59E0B' : '#64748B';
           return (
             <div style={{ background: 'white', borderRadius: 20, padding: '24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -599,21 +749,36 @@ export default function BlogForm({ initial }: Props) {
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <label style={{ ...labelStyle, marginBottom: 0 }}>검색 제목 (글 제목 기준)</label>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: titleColor }}>
-                    {titleLen}<span style={{ color: '#CBD5E1', fontWeight: 500 }}>/60</span>
-                  </span>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>검색 제목 (seo_title)</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: seoTitleColor }}>
+                      {seoTitleLen}<span style={{ color: '#CBD5E1', fontWeight: 500 }}>/60</span>
+                    </span>
+                    <AiDraftButton mode="seo_title" aiMode={aiMode} onGenerate={generateWithAI} />
+                  </div>
                 </div>
                 <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden', marginBottom: 6 }}>
                   <div style={{
                     height: '100%',
-                    width: `${Math.min(titleLen / 60 * 100, 100)}%`,
-                    background: titleColor,
+                    width: `${Math.min(seoTitleLen / 60 * 100, 100)}%`,
+                    background: seoTitleColor,
                     transition: 'width 0.2s, background 0.2s',
                     borderRadius: 2,
                   }} />
                 </div>
-                <p style={{ fontSize: 11, color: '#94A3B8' }}>글 제목이 Google 검색 결과 제목으로 사용됩니다. 60자 이내를 권장합니다.</p>
+                <input
+                  type="text"
+                  value={form.seo_title ?? ''}
+                  onChange={e => set('seo_title', e.target.value)}
+                  placeholder={form.title || '비우면 글 제목이 그대로 쓰입니다'}
+                  style={inputStyle}
+                />
+                <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 6 }}>
+                  검색 결과·공유 카드에만 쓰입니다. 지면의 큰 제목은 바뀌지 않습니다. 30~60자 권장.{' '}
+                  {seoTitleLen === 0 && (
+                    <>비우면 글 제목(<span style={{ fontWeight: 800, color: titleLen > 60 ? '#EF4444' : '#94A3B8' }}>{titleLen}자</span>)이 그대로 검색 제목이 됩니다{titleLen > 60 ? ' — 60자를 넘어 잘립니다.' : '.'}</>
+                  )}
+                </p>
               </div>
 
               <div>
@@ -623,26 +788,7 @@ export default function BlogForm({ initial }: Props) {
                     <span style={{ fontSize: 11, fontWeight: 800, color: metaColor }}>
                       {metaLen}<span style={{ color: '#CBD5E1', fontWeight: 500 }}>/160</span>
                     </span>
-                    <button
-                      type="button"
-                      onClick={generateSeoWithAI}
-                      disabled={aiSeoLoading}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        padding: '6px 12px', borderRadius: 999,
-                        background: aiSeoLoading ? '#F8FAFC' : '#4F46E5',
-                        color: aiSeoLoading ? '#94A3B8' : 'white',
-                        border: 'none', fontSize: 10, fontWeight: 900,
-                        letterSpacing: 1.5, textTransform: 'uppercase',
-                        cursor: aiSeoLoading ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {aiSeoLoading
-                        ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
-                        : <Sparkles size={11} />}
-                      {aiSeoLoading ? '생성 중...' : 'AI로 자동 생성'}
-                    </button>
+                    <AiDraftButton mode="description" aiMode={aiMode} onGenerate={generateWithAI} />
                   </div>
                 </div>
                 <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
@@ -661,6 +807,79 @@ export default function BlogForm({ initial }: Props) {
                   rows={3}
                   style={{ ...inputStyle, resize: 'vertical' }}
                 />
+              </div>
+
+              {/* 한국어 요약 — 영어 정본 뒤에 <section lang="ko"> 로 나간다(D1, W4-B 렌더) */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>한국어 요약 (summary_ko)</label>
+                  <AiDraftButton mode="summary_ko" aiMode={aiMode} onGenerate={generateWithAI} />
+                </div>
+                <textarea
+                  value={form.summary_ko ?? ''}
+                  onChange={e => set('summary_ko', e.target.value)}
+                  placeholder="한국인 독자를 위한 2~3문단 요약. 빈 줄로 문단을 나눕니다."
+                  rows={5}
+                  style={{ ...inputStyle, resize: 'vertical' }}
+                />
+                <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 6 }}>
+                  비워두면 글에 표시되지 않습니다. AI 초안은 확인·수정 후 저장하세요.
+                </p>
+              </div>
+
+              {/* FAQ — 화면의 Q&A 와 FAQPage 구조화 데이터가 같은 내용이어야 한다 */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>FAQ ({faq.length}/4)</label>
+                  <button
+                    type="button"
+                    onClick={() => faq.length < 4 && setFaq([...faq, { q: '', a: '' }])}
+                    disabled={faq.length >= 4}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 999,
+                      background: faq.length >= 4 ? '#F8FAFC' : '#1A1A1A', color: faq.length >= 4 ? '#94A3B8' : 'white',
+                      border: 'none', fontSize: 10, fontWeight: 900, letterSpacing: 1.5,
+                      cursor: faq.length >= 4 ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <Plus size={11} /> 질문 추가
+                  </button>
+                </div>
+                {faq.length === 0 && (
+                  <p style={{ fontSize: 11, color: '#94A3B8', margin: 0 }}>
+                    2~3개를 권장합니다. 입력하면 글 하단에 Q&amp;A 로 표시되고 FAQPage 구조화 데이터로도 나갑니다.
+                  </p>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {faq.map((item, i) => (
+                    <div key={i} style={{ border: '1px solid #F1F5F9', borderRadius: 12, padding: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <input
+                          type="text"
+                          value={item.q}
+                          onChange={e => setFaq(faq.map((f, j) => j === i ? { ...f, q: e.target.value } : f))}
+                          placeholder="질문"
+                          style={{ ...inputStyle, padding: '10px 12px', fontWeight: 700 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFaq(faq.filter((_, j) => j !== i))}
+                          aria-label={`FAQ ${i + 1} 삭제`}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 4, flexShrink: 0 }}
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      <textarea
+                        value={item.a}
+                        onChange={e => setFaq(faq.map((f, j) => j === i ? { ...f, a: e.target.value } : f))}
+                        placeholder="답변"
+                        rows={2}
+                        style={{ ...inputStyle, padding: '10px 12px', resize: 'vertical' }}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -690,7 +909,7 @@ export default function BlogForm({ initial }: Props) {
                     marginBottom: 4, lineHeight: 1.3,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
-                    {form.title || '글 제목'}
+                    {form.seo_title || form.title || '글 제목'}
                   </div>
                   <div style={{
                     fontSize: 13, color: '#4D5156', lineHeight: 1.5,
@@ -742,6 +961,12 @@ export default function BlogForm({ initial }: Props) {
           <AffiliateLinksValidator infoBlockHtml={form.info_block_html ?? ''} />
           <p style={{ fontSize: 11, color: '#94A3B8', margin: 0 }}>본문 아래 별도 영역으로 렌더링됩니다. 비워두면 표시 안 됩니다.</p>
         </div>
+
+        <RelatedSuggestions
+          current={suggestCurrent}
+          selected={relatedSlugs}
+          onChange={setRelatedSlugs}
+        />
 
         {/* 태그 */}
         <div>
@@ -909,7 +1134,7 @@ export default function BlogForm({ initial }: Props) {
         </div>
 
         {/* ── 발행 전 체크리스트 ── */}
-        <PublishChecklist form={form} />
+        <PublishChecklist draft={draftForChecks} baselineFailures={baselineFailures} />
 
         {error && (
           <p style={{ color: '#EF4444', fontSize: '14px', padding: '16px', background: '#FEF2F2', borderRadius: '12px' }}>
