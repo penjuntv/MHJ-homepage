@@ -8,6 +8,12 @@ description: |
 
 # seo-audit-runner — MHJ 콘텐츠 SEO 종합 감사
 
+
+> ⚙️ **판정 정본은 코드다** (2026-09-10, W4-D): `lib/seo-defects.mjs` 의 `flagsOf()` 를
+> 주간 감사(`scripts/audit-seo-regression.mjs`)와 관리자 화면(`app/mhj-desk/seo`)이 **함께** 쓴다.
+> 아래 SQL 은 그 정의의 SQL 판이다 — 한쪽을 고치면 다른 쪽도 고칠 것. 회귀 테스트는 `scripts/qa/test-seo-defects.mjs`.
+> 폼의 발행 전 체크리스트(`lib/blog-preflight.mjs`)는 **다른 잣대**(발행 템플릿 목표치)이므로 수치를 섞지 말 것.
+
 ## 무엇을 하는 스킬인가
 
 `docs/seo-audit-YYYY-MM-DD.md` 보고서를 자동 생성한다.
