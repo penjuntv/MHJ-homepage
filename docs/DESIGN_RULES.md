@@ -157,37 +157,109 @@ MHJ는 **풀-와이드(full-width)**와 **콘텐츠 영역(contained)**을 섹�
 
 ## 6. 색상 팔레트
 
+> **정본은 `app/globals.css` 의 `:root` / `.dark` 블록이다.** 이 절은 그 값을 옮겨 적은 것이고,
+> 값을 바꿀 때는 CSS 를 고친 뒤 여기를 맞춘다. 2026-09-10 W6-A 에서 실측 기준으로 전면 개정했다
+> (그 전 판은 존재하지 않는 `--text-primary` · `--bg-elevated` · `--accent-light` 를 적고 있었다).
+
 ### 6.1 기본 (라이트 모드)
 
 ```css
 :root {
+  /* 배경 */
   --bg: #FFFFFF;
-  --bg-surface: #F9FAFB;       /* gray-50 — 카드 배경, 섹션 구분 */
-  --bg-elevated: #F3F4F6;      /* gray-100 — 호버, 눌린 상태 */
+  --bg-surface: #FAF8F5;       /* 크림 — 섹션 구분, 콜아웃 */
+  --bg-card: #FFFFFF;
+  --bg-featured: #FAFAF8;
+  --bg-warm: #F5F0EB;
 
-  --text-primary: #1A1A1A;      /* 제목, 본문 */
-  --text-secondary: #6B7280;    /* gray-500 — 부제, 설명 */
-  --text-tertiary: #9CA3AF;     /* gray-400 — 라벨, 메타 */
+  /* 글자 — `--text-primary` 는 없다. `--text` 를 쓴다 (CLAUDE.md 5) */
+  --text: #1A1A1A;             /* 제목, 본문 */
+  --text-secondary: #5F6E82;   /* 부제, 설명 */
+  --text-tertiary: #6B7280;    /* 라벨, 메타 — 가장 옅게 쓸 수 있는 한계선 */
 
-  --border: #F3F4F6;            /* gray-100 */
-  --border-strong: #E5E7EB;     /* gray-200 — 구분선 */
+  /* 선 */
+  --border: #F1F5F9;
+  --border-medium: #E2E8F0;
+  --border-strong: #E2E8F0;
+  --border-tertiary: #F1F5F9;
 
-  --accent: #4F46E5;            /* 인디고 — AI Insight, 특수 기능에만 */
-  --accent-light: #EEF2FF;      /* 인디고 배경 */
+  --accent: #4F46E5;           /* 인디고 */
 }
 ```
 
 ### 6.2 다크 모드
 
-모든 컴포넌트는 CSS 변수 사용 필수. 하드코딩 금지.
-darkMode: 'class' (Tailwind 설정)
+`darkMode: 'class'` — `.dark` 가 같은 이름의 변수를 덮어쓴다. 컴포넌트는 변수만 쓰고,
+`.dark .foo { color: #… }` 같은 수동 재정의를 새로 만들지 않는다.
 
-### 6.3 색상 사용 원칙
+```css
+.dark {
+  --bg: #0A0A0A;
+  --bg-surface: #161412;
+  --bg-card: #1E1E1E;
+  --bg-featured: #111111;
+  --bg-warm: #1E1A16;
+
+  --text: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #8B98A9;
+
+  --border: #2E2E2E;
+  --border-medium: #383838;
+  --border-strong: #404040;
+  --border-tertiary: #1F1F1F;
+
+  --accent: #818CF8;           /* 인디고 원색은 어두운 배경에서 3.15:1 — 다크 전용 밝은 짝 */
+}
+```
+
+**테마에 따라 뜻이 뒤집히는 변수** — 값이 아니라 *역할* 로 짝을 맞춘다. 라이트에서 쓰던 글자색을
+다크에 그대로 두면 배경과 같은 색이 되는 자리가 있다.
+
+| 변수 | 라이트 | 다크 | 비고 |
+|---|---|---|---|
+| `--mhj-brown-text` | `#6F5540` | `var(--mhj-brown-dark)` `#C9A882` | 브랜드 갈색의 **작은 글자용** 짝 |
+| `--newsletter-dark-bg` | `#2C2218` (진갈색) | `#FAF8F5` (크림) | 블록 배경이 반전된다 |
+| `--newsletter-soft` / `--newsletter-muted` | `#E0DAD2` / `#BDB2A5` | `#4A3B2C` / `#6B5A48` | 위 배경 위의 글자 — **함께 반전되어야 한다** |
+| `--number-accent` | `#8A6B4F` | `#C9A882` | Most Read 번호 |
+
+### 6.3 대비 (WCAG AA)
+
+**본문 4.5:1 · 큰 글자(24px+, 또는 18.66px+ Bold) 3:1.** 새 색을 넣을 때는 흰색이 아니라
+**그 색이 실제로 놓이는 배경** 위에서 잰다 — `#64748B` 는 흰 배경에서 4.76:1 이지만
+`--bg-surface`(`#FAF8F5`) 위에서는 4.49:1 로 AA 를 놓쳤다(2026-09-10 실측).
+
+현재 토큰의 실측치 (라이트 = `#FFFFFF` / `#FAF8F5`, 다크 = `#0A0A0A` / `#161412` / `#1E1E1E`):
+
+| 토큰 | 라이트 | 다크 |
+|---|---|---|
+| `--text` | 17.40 / 16.42 | 18.07 / 16.77 / 15.22 |
+| `--text-secondary` | 5.20 / 4.90 | 7.72 / 7.17 / 6.50 |
+| `--text-tertiary` | 4.83 / 4.56 | 6.75 / 6.27 / 5.69 |
+| `--accent` | 6.29 / 5.93 | 6.64 / 6.16 / 5.59 |
+| `--mhj-brown` | 4.89 / 4.61 | (라이트 전용) |
+| `--mhj-brown-text` | 6.89 / 6.50 | 8.87 / 8.23 / 7.47 |
+
+`--text-tertiary` 는 라이트에서 4.56:1 로 **한계선에 가장 가깝다**. 이보다 옅은 회색을 새로 만들지 말고
+이 토큰을 쓴다.
+
+**투명도로 옅게 만들 때**: 알파는 대비를 그대로 깎는다. 푸터(`#111111`) 위 흰 글자 기준
+`0.2 → 1.84:1`, `0.3 → 2.67:1`, `0.5 → 5.33:1`, `0.62 → 7.63:1` — **0.5 아래로 내리지 않는다.**
+
+**브랜드 갈색**: `--mhj-brown`(`#8A6B4F`)은 큰 글자·장식용이다. 10px 로고 부제처럼 작은 글자에는
+어두운 짝 `--mhj-brown-text` 를 쓴다. 단 **고정 배경**(푸터 `#111111` 등) 위에서는 테마와 무관하게
+밝은 쪽(`--mhj-brown-dark`)이 필요하다 — 여기서 `--mhj-brown-text` 를 쓰면 라이트 테마에서 2.74:1 이 된다.
+
+**측정 방법**: `node scripts/qa/audit-contrast.mjs` — 로컬 빌드를 띄우고 5화면 × 2테마의 렌더된
+computed style 로 잰다. 판정 기준은 코드가 아니라 실제 픽셀이다.
+
+### 6.4 색상 사용 원칙
 
 - **사진의 색감이 유일한 컬러** — UI는 무채색 기반
-- 인디고 액센트(--accent)는 **AI Insight 버튼, 인터랙티브 요소에만** 사용
+- 인디고 액센트(`--accent`)는 **AI Insight 버튼, 인터랙티브 요소에만** 사용
 - 카테고리 라벨에 컬러 뱃지 사용 금지 → 회색 텍스트로 통일
 - Featured 등 상태 표현은 **텍스트 라벨** 또는 **미세한 보더**로
+- 색상 하드코딩 금지 (CLAUDE.md 5). 예외는 매거진 지면 — `docs/MHJ_MAGAZINE_DESIGN_BIBLE.md`
 
 ---
 

@@ -165,7 +165,7 @@ const SHELF_CSS = `
   font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #9B9590;
+  color: #767069;
   margin: 0;
 }
 
@@ -444,7 +444,7 @@ const SHELF_CSS = `
   font-family: "Inter", sans-serif;
   font-size: 12px;
   font-weight: 400;
-  color: #9B9590;
+  color: #767069;
   margin: 0;
 }
 
@@ -499,7 +499,7 @@ html.dark .ms-empty-desc { color: rgba(253,252,250,0.55); }
 .ms-empty-desc {
   font-family: "Inter", sans-serif;
   font-size: 14px;
-  color: #9B9590;
+  color: #767069;
   margin: 0;
 }
 `;

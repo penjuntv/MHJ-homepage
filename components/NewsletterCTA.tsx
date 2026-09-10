@@ -175,7 +175,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
 
   /* ── Full version ── */
   return (
-    <section style={{
+    <section className={isDarkVariant ? 'newsletter-dark-variant' : undefined} style={{
       padding: isDarkVariant
         ? 'clamp(64px, 8vw, 128px) clamp(24px, 4vw, 40px)'
         : reducedPadding
@@ -192,7 +192,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
           fontWeight: 900,
           letterSpacing: 5,
           textTransform: 'uppercase',
-          color: isDarkVariant ? 'rgba(250,248,245,0.6)' : 'var(--text-tertiary)',
+          color: isDarkVariant ? 'var(--newsletter-muted)' : 'var(--text-tertiary)',
           marginBottom: reducedPadding ? 8 : 16,
         }}>
           Mairangi Notes
@@ -205,7 +205,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             fontStyle: 'italic',
             fontWeight: 300,
             lineHeight: 1.5,
-            color: isDarkVariant ? 'rgba(250,248,245,0.85)' : 'var(--text-secondary)',
+            color: isDarkVariant ? 'var(--newsletter-soft)' : 'var(--text-secondary)',
             marginBottom: reducedPadding ? 16 : 20,
           }}>
             {copy}
@@ -233,14 +233,14 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
         {!reducedPadding && (
           <p style={{
             fontSize: 15,
-            color: isDarkVariant ? 'rgba(250,248,245,0.7)' : 'var(--text-secondary)',
+            color: isDarkVariant ? 'var(--newsletter-soft)' : 'var(--text-secondary)',
             fontWeight: 500,
             lineHeight: 1.7,
             marginBottom: 48,
           }}>
             Weekly stories, school tips, and local guides from Mairangi Bay.
             <br />
-            <span style={{ color: isDarkVariant ? 'rgba(250,248,245,0.4)' : 'var(--text-tertiary)', fontSize: 13 }}>
+            <span style={{ color: isDarkVariant ? 'var(--newsletter-muted)' : 'var(--text-tertiary)', fontSize: 13 }}>
               No spam. Unsubscribe anytime.
             </span>
           </p>
@@ -253,8 +253,8 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             color: isDarkVariant ? 'var(--newsletter-dark-text)' : 'var(--text)',
             padding: '24px 32px',
             borderRadius: 12,
-            background: isDarkVariant ? 'rgba(255,255,255,0.08)' : 'var(--bg)',
-            border: '1px solid var(--border)',
+            background: isDarkVariant ? 'var(--newsletter-field-bg)' : 'var(--bg)',
+            border: `1px solid ${isDarkVariant ? 'var(--newsletter-field-border)' : 'var(--border)'}`,
             display: 'inline-block',
           }}>
             Welcome! Check your inbox 📬
@@ -272,8 +272,8 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
                 style={{
                   padding: '16px 24px',
                   borderRadius: 8,
-                  border: `1px solid ${isDarkVariant ? 'rgba(255,255,255,0.2)' : 'var(--border-medium)'}`,
-                  background: isDarkVariant ? 'rgba(255,255,255,0.08)' : 'var(--bg)',
+                  border: `1px solid ${isDarkVariant ? 'var(--newsletter-field-border)' : 'var(--border-medium)'}`,
+                  background: isDarkVariant ? 'var(--newsletter-field-bg)' : 'var(--bg)',
                   color: isDarkVariant ? 'var(--newsletter-dark-text)' : 'var(--text)',
                   fontSize: 15,
                   fontWeight: 500,
@@ -298,8 +298,8 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
                   flex: 1,
                   padding: '16px 24px',
                   borderRadius: 8,
-                  border: `1px solid ${isDarkVariant ? 'rgba(255,255,255,0.2)' : 'var(--border-medium)'}`,
-                  background: isDarkVariant ? 'rgba(255,255,255,0.08)' : 'var(--bg)',
+                  border: `1px solid ${isDarkVariant ? 'var(--newsletter-field-border)' : 'var(--border-medium)'}`,
+                  background: isDarkVariant ? 'var(--newsletter-field-bg)' : 'var(--bg)',
                   color: isDarkVariant ? 'var(--newsletter-dark-text)' : 'var(--text)',
                   fontSize: 15,
                   fontWeight: 500,
@@ -332,9 +332,9 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             </div>
 
             {/* Privacy 동의 문구 */}
-            <p style={{ fontSize: 11, color: isDarkVariant ? 'rgba(250,248,245,0.4)' : 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
+            <p style={{ fontSize: 11, color: isDarkVariant ? 'var(--newsletter-muted)' : 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
               By subscribing, you agree to our{' '}
-              <Link href="/privacy" style={{ color: isDarkVariant ? 'rgba(250,248,245,0.4)' : 'var(--text-tertiary)', textDecoration: 'underline' }}>
+              <Link href="/privacy" style={{ color: isDarkVariant ? 'var(--newsletter-muted)' : 'var(--text-tertiary)', textDecoration: 'underline' }}>
                 Privacy Policy
               </Link>.
             </p>

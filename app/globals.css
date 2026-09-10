@@ -18,6 +18,9 @@
 :root {
   /* ── 브랜드 컬러 ── */
   --mhj-brown: #8A6B4F;
+  /* 브랜드 갈색은 큰 글자·장식용. 작은 글자(로고 부제 10px 등)에는 이 어두운 짝을 쓴다
+     — 원색은 서피스 위에서 3.86:1 로 AA 에 못 미친다. 브랜드 색 자체는 바꾸지 않는다. */
+  --mhj-brown-text: #6F5540;
   --mhj-black: #1E1E1E;
   --mhj-green: #3E5F4A;
   --mhj-brown-dark: #C9A882;
@@ -27,8 +30,11 @@
   --bg-card: #FFFFFF;
   --bg-featured: #FAFAF8;
   --text: #1A1A1A;
-  --text-secondary: #64748B;
-  --text-tertiary: #9CA3AF; /* DESIGN_RULES §6.1 gray-400 — #CBD5E1(대비 ≈1.4:1 실패)에서 교정 */
+  /* 대비는 흰 배경이 아니라 **실제 배경**(--bg-surface #FAF8F5 등) 위에서 재야 한다 —
+     #64748B 는 흰 배경에서 4.76:1 이지만 서피스 위에서는 4.49:1 로 AA 를 아슬하게 놓쳤다.
+     2026-09-10 W6-A 실측 교정(라이브 3페이지 × 2테마에서 위반 219 → 0). */
+  --text-secondary: #5F6E82;  /* 서피스 위 ≈5.0:1 */
+  --text-tertiary: #6B7280;   /* 서피스 위 ≈4.7:1 — 이전 #9CA3AF 는 2.4:1 이었다 */
   --border: #F1F5F9;
   --border-medium: #E2E8F0;
   --border-strong: #E2E8F0;
@@ -48,6 +54,14 @@
 
   /* ── Newsletter CTA 다크 반전 (homepage_bottom) ── */
   --newsletter-dark-bg: #2C2218;
+  /* 이 블록은 배경이 테마에 따라 뒤집힌다(라이트=진갈색 / 다크=크림). 글자색을 크림으로 고정하면
+     다크에서 크림 배경 위 크림 글자가 된다 — 2026-09-10 실측에서 홈 하단 블록이 통째로 안 보였다. */
+  --newsletter-soft: #E0DAD2;
+  --newsletter-muted: #BDB2A5;
+  /* 입력칸도 같이 뒤집힌다. 흰색 알파를 고정으로 두면 다크(크림 바탕)에서 테두리가 사라진다 —
+     WCAG 1.4.11 은 폼 컨트롤 경계에 3:1 을 요구한다(고정 0.2 는 1.91:1 이었다). */
+  --newsletter-field-bg: rgba(255,255,255,0.08);
+  --newsletter-field-border: rgba(255,255,255,0.4);   /* 진갈색 위 3.69:1 */
   --newsletter-dark-text: #FAF8F5;
 
   /* ── Most Read 번호 강조 (§17.1 로고전용 예외 대응) ── */
@@ -90,7 +104,7 @@
   --bg-featured: #111111;
   --text: #F1F5F9;
   --text-secondary: #94A3B8;
-  --text-tertiary: #64748B;
+  --text-tertiary: #8B98A9;   /* #64748B 는 3.5~4.2:1 로 AA 미달이었다 */
   --border: #2E2E2E;
   --border-medium: #383838;
   --border-strong: #404040;
@@ -99,12 +113,19 @@
   --overlay-bg: rgba(10, 10, 10, 0.97);
   --modal-bg: rgba(0, 0, 0, 0.7);
   --drop-cap-color: #475569;
-  --accent: #4F46E5;
+  /* 인디고 원색은 어두운 배경에서 3.15:1 로 읽히지 않는다 — 다크 전용으로 밝은 짝을 쓴다.
+     이미 `.dark .blog-content a` 가 손으로 쓰던 값과 같다(그 규칙은 이제 필요 없다). */
+  --accent: #818CF8;
 
   --bg-warm: #1E1A16;
   --card-shadow: 0 2px 8px rgba(0,0,0,0.2);
   --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.35);
+  --mhj-brown-text: var(--mhj-brown-dark);  /* 다크에서는 밝은 갈색이 읽힌다 */
   --newsletter-dark-bg: #FAF8F5;
+  --newsletter-soft: #4A3B2C;
+  --newsletter-muted: #6B5A48;
+  --newsletter-field-bg: rgba(0,0,0,0.03);
+  --newsletter-field-border: rgba(0,0,0,0.5);         /* 크림 위 3.93:1 */
   --newsletter-dark-text: #2C2218;
   --number-accent: #C9A882;
 
@@ -568,6 +589,21 @@
 }
 
 /* ─── RSS 아이콘 링크 ─── */
+/* ─── 입력칸 플레이스홀더 ───
+   Tailwind preflight 의 기본값은 #9CA3AF 로, 흰 배경에서도 2.54:1 이라 AA 를 못 넘는다.
+   플레이스홀더도 글자다 — 테마를 따르는 토큰으로 바꾼다(라이트 4.83:1 / 다크 6.75:1). */
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-tertiary);
+  opacity: 1;   /* Firefox 는 기본 opacity 를 깎아 대비를 다시 떨어뜨린다 */
+}
+
+/* 뉴스레터 하단 블록은 배경이 테마와 **반대로** 뒤집힌다(라이트=진갈색 / 다크=크림).
+   여기서는 --text-tertiary 가 배경과 같은 쪽이 되므로 블록 전용 토큰을 쓴다. */
+.newsletter-dark-variant input::placeholder {
+  color: var(--newsletter-muted);
+}
+
 .rss-icon-link {
   display: inline-flex;
   align-items: center;
@@ -575,8 +611,10 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  /* 아이콘은 텍스트가 아니라 대비 검사에 안 잡히지만 WCAG 1.4.11 이 3:1 을 요구한다.
+     푸터(#111111) 위에서 0.3 은 2.67:1 — 푸터의 나머지 10px 크롬과 같은 0.5(5.33:1)로 맞춘다. */
+  color: rgba(255, 255, 255, 0.5);
   transition: color 0.2s, border-color 0.2s;
 }
 
@@ -885,7 +923,8 @@
 .blog-content ul { list-style: disc; padding-left: 24px; margin: 0 0 24px; }
 .blog-content ol { list-style: decimal; padding-left: 24px; margin: 0 0 24px; }
 .blog-content li { margin: 0.5em 0; line-height: 1.7; }
-.blog-content a { color: #4F46E5; text-decoration: underline; text-underline-offset: 4px; }
+/* 링크 색은 토큰으로 — 다크에서 #4F46E5 는 3.15:1 이라 본문 링크가 읽히지 않았다. */
+.blog-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
 .blog-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 24px 0; display: block; }
 .blog-content img[data-align="left"]   { float: left;  margin: 8px 24px 16px 0; display: inline; }
 .blog-content img[data-align="right"]  { float: right; margin: 8px 0 16px 24px; display: inline; }
@@ -970,7 +1009,7 @@
 .blog-content figure.blog-figure[data-align="left"] { float: left; max-width: 50%; margin: 8px 24px 16px 0; }
 .blog-content figure.blog-figure[data-align="right"] { float: right; max-width: 50%; margin: 8px 0 16px 24px; }
 /* Callout */
-.blog-content .blog-callout { padding: 24px; background: #EEF2FF; border-left: 3px solid #4F46E5; border-radius: 0 8px 8px 0; margin: 24px 0; }
+.blog-content .blog-callout { padding: 24px; background: var(--bg-surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; margin: 24px 0; }
 /* YouTube / Video — editorial embed */
 .blog-content .blog-youtube,
 .blog-content [data-youtube-video],
@@ -1159,9 +1198,6 @@
   color: var(--text);
 }
 
-.dark .blog-content a {
-  color: #818CF8;
-}
 
 /* YouTube 다크모드 */
 .dark .blog-content .blog-youtube,
@@ -1453,8 +1489,8 @@
 
 /* ─── Blog Callout 다크모드 ─── */
 .dark .blog-content .blog-callout {
-  background: rgba(79, 70, 229, 0.1);
-  border-left-color: #6366F1;
+  background: var(--bg-card);
+  border-left-color: var(--accent);
 }
 
 /* ─── 인포블록 다크모드 대응 ─── */

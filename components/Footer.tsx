@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Rss } from 'lucide-react';
-import { useTheme } from './ThemeProvider';
 
 /* ── Inline SVG icons (20px, monochrome) ── */
 function InstagramIcon() {
@@ -50,13 +49,13 @@ function SocialLink({ href, label, children }: { href: string; label: string; ch
       rel="noopener noreferrer"
       aria-label={label}
       style={{
-        color: 'rgba(255,255,255,0.4)',
+        color: 'rgba(255,255,255,0.62)',
         transition: 'color 200ms',
         display: 'flex',
         alignItems: 'center',
       }}
       onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.9)'; }}
-      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
+      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.62)'; }}
     >
       {children}
     </a>
@@ -84,9 +83,9 @@ export default function Footer({
   socialYoutube,
   socialThreads,
 }: FooterProps) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
-  const brandColor = isDark ? 'var(--mhj-brown-dark)' : 'var(--mhj-brown)';
+  // 푸터 배경은 테마와 무관하게 #111111 이다 — 브랜드 색을 테마에 따라 바꾸면 라이트에서
+  // 로고(3.86:1)와 부제가 서로 다른 갈색이 되고 대비도 얕아진다. 락업 전체를 밝은 짝으로 고정한다.
+  const brandColor = 'var(--mhj-brown-dark)';  /* #111111 위 8.46:1 */
   const descLines = footerDescription.split('\n');
 
   return (
@@ -132,7 +131,7 @@ export default function Footer({
           <p
             style={{
               fontSize: '14px',
-              color: 'rgba(255,255,255,0.4)',
+              color: 'rgba(255,255,255,0.62)',
               lineHeight: '1.8',
               fontWeight: 500,
             }}
@@ -150,7 +149,7 @@ export default function Footer({
             style={{
               fontSize: '10px',
               letterSpacing: '4px',
-              color: 'rgba(255,255,255,0.3)',
+              color: 'rgba(255,255,255,0.5)',  /* 0.3 은 #111111 위에서 2.67:1 — 10px 라벨은 4.5:1 이 필요하다 */
               marginBottom: '24px',
             }}
           >
@@ -172,7 +171,7 @@ export default function Footer({
                 style={{
                   fontSize: '14px',
                   letterSpacing: '3px',
-                  color: 'rgba(255,255,255,0.4)',
+                  color: 'rgba(255,255,255,0.62)',
                   textDecoration: 'none',
                 }}
               >
@@ -189,22 +188,22 @@ export default function Footer({
             style={{
               fontSize: '10px',
               letterSpacing: '4px',
-              color: 'rgba(255,255,255,0.3)',
+              color: 'rgba(255,255,255,0.5)',  /* 0.3 은 #111111 위에서 2.67:1 — 10px 라벨은 4.5:1 이 필요하다 */
               marginBottom: '24px',
             }}
           >
             Contact
           </div>
           <div className="flex flex-col" style={{ gap: '8px' }}>
-            <p className="font-bold" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
+            <p className="font-bold" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.62)' }}>
               {contactLocation}
             </p>
             <a
               href={`mailto:${contactEmail}`}
               className="font-bold transition-colors duration-200"
-              style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}
+              style={{ fontSize: '14px', color: 'rgba(255,255,255,0.62)', textDecoration: 'none' }}
               onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.9)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.62)'; }}
             >
               {contactEmail}
             </a>
@@ -249,14 +248,14 @@ export default function Footer({
         }}
       >
         <p
-          style={{ fontSize: '10px', color: 'rgba(255,255,255,0.2)', letterSpacing: '2px' }}
+          style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', letterSpacing: '2px' }}
           className="font-black uppercase"
         >
           &copy; 2026 My Mairangi Journal
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <p
-            style={{ fontSize: '10px', color: 'rgba(255,255,255,0.2)', letterSpacing: '2px' }}
+            style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', letterSpacing: '2px' }}
             className="font-black uppercase"
           >
             {siteSubtitle}
