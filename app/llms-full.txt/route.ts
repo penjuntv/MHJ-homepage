@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { htmlToMarkdown } from '@/lib/content-html.mjs';
+import { BLOG_LLMS_COLUMNS } from '@/lib/constants';
 
 /**
  * MHJ llms-full.txt — 2026-05-30
@@ -49,7 +50,7 @@ export async function GET() {
   const [blogsRes, magazinesRes, articlesRes, newslettersRes] = await Promise.all([
     supabase
       .from('blogs')
-      .select('slug, title, meta_description, category, date, created_at, updated_at, content, view_count, summary_ko')
+      .select(BLOG_LLMS_COLUMNS)
       .eq('published', true)
       .or(`publish_at.is.null,publish_at.lte.${now}`)
       .order('date', { ascending: false }),
@@ -176,21 +177,37 @@ export async function GET() {
      300KB 상한을 넘기면 그 지점에서 멈추고 몇 편을 실었는지 밝힌다 — 조용히 자르지 않는다. */
   const FULL_TEXT_LIMIT = 20;
   const SIZE_LIMIT = 300 * 1024;
-  const topPosts = [...blogs]
+  // 전문 뒤에도 섹션이 더 붙는다(Other pages). 그만큼 미리 빼 두지 않으면 상한을 조금 넘긴다.
+  const TAIL_RESERVE = 1024;
+  /* 조회수만으로 고르면 나이 많은 글이 이긴다 — 실측: 상위 20에 최근 20편 중 3편만 들고,
+     가장 새 글은 58위다(조회수는 시간이 쌓아 주는 값이고 봇 조회도 섞인다).
+     최신 절반 + 많이 읽힌 절반을 합쳐, 새 글이 색인에서 한 달을 기다리지 않게 한다. */
+  const half = Math.ceil(FULL_TEXT_LIMIT / 2);
+  const recent = blogs.slice(0, half).map((b) => b.slug);
+  const mostRead = [...blogs]
     .sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0))
-    .slice(0, FULL_TEXT_LIMIT);
+    .map((b) => b.slug);
+  const pickedSlugs = [...new Set([...recent, ...mostRead])].slice(0, FULL_TEXT_LIMIT);
+  const topPosts = pickedSlugs
+    .map((slug) => blogs.find((b) => b.slug === slug))
+    .filter((b): b is typeof blogs[number] => Boolean(b));
 
   if (topPosts.length > 0) {
     const fullLines: string[] = [];
-    fullLines.push(`## Full text — most-read ${topPosts.length} entries`);
+    fullLines.push(`## Full text — ${topPosts.length} entries (newest + most-read)`);
     fullLines.push('');
     fullLines.push('> Complete articles below. Everything else in this file is a one-line summary; follow the link for the full text.');
     fullLines.push('');
 
-    let bytes = Buffer.byteLength(lines.join('\n'), 'utf8');
+    // 지금까지 쓴 분량 + 이 섹션의 머리말 + 뒤에 붙을 꼬리까지 셈에 넣는다.
+    let bytes = Buffer.byteLength(lines.join('\n'), 'utf8')
+      + Buffer.byteLength(fullLines.join('\n'), 'utf8')
+      + TAIL_RESERVE;
     let included = 0;
     for (const b of topPosts) {
-      const body = htmlToMarkdown(b.content, SITE_URL);
+      // 본문 제목을 두 단계 낮춘다 — 본문의 <h2> 가 `##` 로 나오면 이 파일의 구조(## 섹션 /
+      // ### 글 제목)를 밀어내 파서가 글 하나가 어디서 끝나는지 알 수 없다(실측 ## 57줄 중 52줄이 본문).
+      const body = htmlToMarkdown(b.content, SITE_URL, { headingOffset: 2 });
       if (!body) continue;
       const block = [
         `### ${b.title}`,
@@ -210,7 +227,7 @@ export async function GET() {
       included += 1;
     }
     if (included > 0) {
-      fullLines[0] = `## Full text — most-read ${included} entries`;
+      fullLines[0] = `## Full text — ${included} entries (newest + most-read)`;
       if (included < topPosts.length) {
         fullLines.splice(3, 0, `(${topPosts.length - included} more were omitted to keep this file under 300 KB.)`, '');
       }

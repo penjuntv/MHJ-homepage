@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import {
   stripHtml, readingMinutes, slugifyHeading, addHeadingIds,
   wrapKeyTakeaways, sanitizeFaq, toParagraphs, isTakeawaysHeading,
-  absolutizeUrls, imageMimeOf, htmlToMarkdown,
+  absolutizeUrls, imageMimeOf, htmlToMarkdown, stripXmlIllegal,
 } from '../../lib/content-html.mjs';
 
 let failed = 0;
@@ -129,7 +129,25 @@ check('MIME 은 확장자에서 — RSS enclosure 의 type 이 실제와 맞아�
 
 check('마크다운 — 제목·목록·링크·강조를 보존',
   htmlToMarkdown('<p>Intro <strong>b</strong>.</p><h2>Sec</h2><ul><li>one</li><li>two</li></ul><p>See <a href="/blog/x">this</a>.</p>', 'https://www.mhj.nz'),
-  'Intro **b**.\n\n## Sec\n\n- one\n- two\nSee [this](https://www.mhj.nz/blog/x).');
+  'Intro **b**.\n\n## Sec\n\n- one\n- two\n\nSee [this](https://www.mhj.nz/blog/x).');
+// 2026-09-10 리뷰에서 실증된 경우들
+check('제목·목록·인용 안의 링크가 URL 을 잃지 않는다 (라이브 1건이 잃고 있었다)',
+  htmlToMarkdown('<ul><li>See <a href="/blog/x">this guide</a></li></ul><p>after</p>', 'https://m.nz'),
+  '- See [this guide](https://m.nz/blog/x)\n\nafter');
+check('인용 안의 링크도',
+  htmlToMarkdown('<blockquote>From <a href="https://e.govt.nz">the curriculum</a></blockquote>').includes('](https://e.govt.nz)'), true);
+check('번호 목록은 번호로 — 순서가 뜻인 목록이다',
+  htmlToMarkdown('<ol><li>one</li><li>two</li><li>three</li></ol>'), '1. one\n2. two\n3. three');
+check('목록 뒤 문단이 마지막 항목에 붙지 않는다',
+  htmlToMarkdown('<ul><li>a</li></ul><p>next</p>'), '- a\n\nnext');
+check('headingOffset — 바깥 문서 구조를 밀어내지 않게 낮춘다',
+  htmlToMarkdown('<h2>Sec</h2><h3>Sub</h3>', '', { headingOffset: 2 }), '#### Sec\n\n##### Sub');
+check('headingOffset 은 h6 을 넘지 않는다',
+  htmlToMarkdown('<h6>Deep</h6>', '', { headingOffset: 3 }), '###### Deep');
+check('XML 금지 제어문자 제거 — 하나만 있어도 피드 전체가 파싱 실패한다',
+  stripXmlIllegal('a\u000Bb\u000Cc\u0000d\u001Fe'), 'abcde');
+check('허용된 공백은 남긴다', stripXmlIllegal('a\tb\nc\rd'), 'a\tb\nc\rd');
+
 check('마크다운 — 이미지 alt 는 남기고 src 는 버린다(본문 밖 사본이라 무거워진다)',
   htmlToMarkdown('<p>a</p><img src="x.png" alt="A school bag"><p>b</p>'),
   'a\n\n![A school bag]()\n\nb');
