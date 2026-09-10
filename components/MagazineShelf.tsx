@@ -294,7 +294,9 @@ const SHELF_CSS = `
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--spine-ink, #FDFCFA);
-  opacity: 0.55;
+  /* 0.55 는 9px 에서 2.98~3.76:1 이었다(스파인 색이 호마다 달라 최악은 중간톤).
+     --spine-ink 가 이미 배경 밝기에 따라 뒤집히므로, 알파만 올리면 양쪽 다 통과한다 — 0.85 → 6.4:1 이상. */
+  opacity: 0.85;
   writing-mode: vertical-rl;
   /* ISO 6357 / BS 6738: top-to-bottom, 제목과 방향 통일 */
 }

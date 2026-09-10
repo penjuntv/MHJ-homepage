@@ -18,9 +18,6 @@
 :root {
   /* ── 브랜드 컬러 ── */
   --mhj-brown: #8A6B4F;
-  /* 브랜드 갈색은 큰 글자·장식용. 작은 글자(로고 부제 10px 등)에는 이 어두운 짝을 쓴다
-     — 원색은 서피스 위에서 3.86:1 로 AA 에 못 미친다. 브랜드 색 자체는 바꾸지 않는다. */
-  --mhj-brown-text: #6F5540;
   --mhj-black: #1E1E1E;
   --mhj-green: #3E5F4A;
   --mhj-brown-dark: #C9A882;
@@ -30,11 +27,13 @@
   --bg-card: #FFFFFF;
   --bg-featured: #FAFAF8;
   --text: #1A1A1A;
-  /* 대비는 흰 배경이 아니라 **실제 배경**(--bg-surface #FAF8F5 등) 위에서 재야 한다 —
-     #64748B 는 흰 배경에서 4.76:1 이지만 서피스 위에서는 4.49:1 로 AA 를 아슬하게 놓쳤다.
-     2026-09-10 W6-A 실측 교정(라이브 3페이지 × 2테마에서 위반 219 → 0). */
-  --text-secondary: #5F6E82;  /* 서피스 위 ≈5.0:1 */
-  --text-tertiary: #6B7280;   /* 서피스 위 ≈4.7:1 — 이전 #9CA3AF 는 2.4:1 이었다 */
+  /* 대비는 흰 배경이 아니라 **가장 어두운 실제 배경** 위에서 재야 한다. 흰 배경만 보면 통과처럼
+     보이는 값이 서피스에서 떨어진다(#64748B: 흰 4.76:1 → --bg-surface 4.49:1). 이 사이트에서
+     가장 빡빡한 면은 --bg-warm(#F5F0EB) 이다 — 홈 "A Letter Home" 카드처럼 편지 글이 있을 때만
+     뜨는 자리라 실측에 안 잡히니, 토큰 쪽에서 미리 통과시켜 둔다.
+     2026-09-10 W6-A 실측 교정(같은 스크립트로 잰 전/후: 코드 소유 위반 24 → 0). */
+  --text-secondary: #5F6E82;  /* 흰 5.20 / 서피스 4.90 / warm 4.59 */
+  --text-tertiary: #666C77;   /* 흰 5.28 / 서피스 4.98 / warm 4.66 — 이전 #9CA3AF 는 2.4:1 */
   --border: #F1F5F9;
   --border-medium: #E2E8F0;
   --border-strong: #E2E8F0;
@@ -53,15 +52,21 @@
   --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.08);
 
   /* ── Newsletter CTA 다크 반전 (homepage_bottom) ── */
+  /* 콜아웃은 본문과 결이 다른 상자다 — 섹션 배경(`--bg-surface`)을 재사용하면 서피스 색
+     섹션 안에서 배경끼리 겹쳐 상자가 사라진다. 전용 톤을 둔다(액센트의 옅은 짝). */
+  --callout-bg: #EEF2FF;
+
   --newsletter-dark-bg: #2C2218;
   /* 이 블록은 배경이 테마에 따라 뒤집힌다(라이트=진갈색 / 다크=크림). 글자색을 크림으로 고정하면
      다크에서 크림 배경 위 크림 글자가 된다 — 2026-09-10 실측에서 홈 하단 블록이 통째로 안 보였다. */
   --newsletter-soft: #E0DAD2;
   --newsletter-muted: #BDB2A5;
   /* 입력칸도 같이 뒤집힌다. 흰색 알파를 고정으로 두면 다크(크림 바탕)에서 테두리가 사라진다 —
-     WCAG 1.4.11 은 폼 컨트롤 경계에 3:1 을 요구한다(고정 0.2 는 1.91:1 이었다). */
+     WCAG 1.4.11 은 폼 컨트롤 경계에 3:1 을 요구한다(고정 0.2 는 1.91:1 이었다).
+     ⚠️ 기준은 **경계 양쪽 모두**다. 섹션 배경 쪽만 보고 0.4 로 두면 필드 안쪽(0.08 을 얹은 면)
+     대비가 2.90:1 로 미달한다 — 바깥 3.69:1 만 보고 통과로 읽기 쉬운 자리다. */
   --newsletter-field-bg: rgba(255,255,255,0.08);
-  --newsletter-field-border: rgba(255,255,255,0.4);   /* 진갈색 위 3.69:1 */
+  --newsletter-field-border: rgba(255,255,255,0.5);   /* 안쪽 3.89:1 · 바깥 4.95:1 */
   --newsletter-dark-text: #FAF8F5;
 
   /* ── Most Read 번호 강조 (§17.1 로고전용 예외 대응) ── */
@@ -120,12 +125,12 @@
   --bg-warm: #1E1A16;
   --card-shadow: 0 2px 8px rgba(0,0,0,0.2);
   --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.35);
-  --mhj-brown-text: var(--mhj-brown-dark);  /* 다크에서는 밝은 갈색이 읽힌다 */
+  --callout-bg: #1B1B2E;
   --newsletter-dark-bg: #FAF8F5;
   --newsletter-soft: #4A3B2C;
   --newsletter-muted: #6B5A48;
   --newsletter-field-bg: rgba(0,0,0,0.03);
-  --newsletter-field-border: rgba(0,0,0,0.5);         /* 크림 위 3.93:1 */
+  --newsletter-field-border: rgba(0,0,0,0.55);        /* 안쪽 4.39:1 · 바깥 4.69:1 */
   --newsletter-dark-text: #2C2218;
   --number-accent: #C9A882;
 
@@ -588,10 +593,9 @@
   }
 }
 
-/* ─── RSS 아이콘 링크 ─── */
-/* ─── 입력칸 플레이스홀더 ───
-   Tailwind preflight 의 기본값은 #9CA3AF 로, 흰 배경에서도 2.54:1 이라 AA 를 못 넘는다.
-   플레이스홀더도 글자다 — 테마를 따르는 토큰으로 바꾼다(라이트 4.83:1 / 다크 6.75:1). */
+/* ─── 입력칸 플레이스홀더 ─── */
+/* Tailwind preflight 의 기본값은 #9CA3AF 로, 흰 배경에서도 2.54:1 이라 AA 를 못 넘는다.
+   플레이스홀더도 글자다 — 테마를 따르는 토큰으로 바꾼다(라이트 5.28:1 / 다크 6.75:1). */
 input::placeholder,
 textarea::placeholder {
   color: var(--text-tertiary);
@@ -604,6 +608,7 @@ textarea::placeholder {
   color: var(--newsletter-muted);
 }
 
+/* ─── RSS 아이콘 링크 ─── */
 .rss-icon-link {
   display: inline-flex;
   align-items: center;
@@ -611,7 +616,7 @@ textarea::placeholder {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.4);   /* #111111 위 3.69:1 — 0.24 는 2.13:1 이었다 */
   /* 아이콘은 텍스트가 아니라 대비 검사에 안 잡히지만 WCAG 1.4.11 이 3:1 을 요구한다.
      푸터(#111111) 위에서 0.3 은 2.67:1 — 푸터의 나머지 10px 크롬과 같은 0.5(5.33:1)로 맞춘다. */
   color: rgba(255, 255, 255, 0.5);
@@ -1009,7 +1014,7 @@ textarea::placeholder {
 .blog-content figure.blog-figure[data-align="left"] { float: left; max-width: 50%; margin: 8px 24px 16px 0; }
 .blog-content figure.blog-figure[data-align="right"] { float: right; max-width: 50%; margin: 8px 0 16px 24px; }
 /* Callout */
-.blog-content .blog-callout { padding: 24px; background: var(--bg-surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; margin: 24px 0; }
+.blog-content .blog-callout { padding: 24px; background: var(--callout-bg); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; margin: 24px 0; }
 /* YouTube / Video — editorial embed */
 .blog-content .blog-youtube,
 .blog-content [data-youtube-video],
@@ -1185,7 +1190,7 @@ textarea::placeholder {
 /* 라이트(:first-of-type)와 같은 선택자여야 한다 — :first-child 는 본문 첫 요소가
    <aside class="blog-takeaways"> 인 글에서 매치가 끊겨 드롭캡 색이 혼자 달라진다. */
 .dark .blog-content>p:first-of-type::first-letter {
-  color: #818CF8;
+  color: var(--accent);
 }
 
 .dark .blog-content blockquote {
@@ -1485,12 +1490,6 @@ textarea::placeholder {
 .dark .preview-banner p,
 .dark .preview-banner a {
   color: #FCD34D !important;
-}
-
-/* ─── Blog Callout 다크모드 ─── */
-.dark .blog-content .blog-callout {
-  background: var(--bg-card);
-  border-left-color: var(--accent);
 }
 
 /* ─── 인포블록 다크모드 대응 ─── */

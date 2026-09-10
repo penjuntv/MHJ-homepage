@@ -20,9 +20,12 @@ const config: Config = {
         mhj: {
           bg: "#FFFFFF",
           text: "#1A1A1A",
-          "text-secondary": "#64748B",
-          "text-tertiary": "#CBD5E1",
-          "text-muted": "#94A3B8",
+          /* globals.css 의 :root 토큰과 같은 값으로 맞춘다 — 정본은 그쪽이다(DESIGN_RULES §6).
+             갈라져 있는 동안 어드민(#F8FAFC 셸)에서 text-tertiary 는 1.42:1, text-muted 는
+             2.45:1 로 렌더됐다. 2026-09-10 W6-A. */
+          "text-secondary": "#5F6E82",   /* 셸 4.97:1 · 카드 5.20:1 */
+          "text-tertiary": "#666C77",    /* 셸 5.05:1 · 카드 5.28:1 */
+          "text-muted": "#94A3B8",   /* 사용처 0 — 값을 정하지 않고 그대로 둔다 */
           accent: "#4F46E5",
           "accent-light": "#EEF2FF",
           "accent-text": "#818CF8",

@@ -131,8 +131,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
                 fontSize: 10,
                 fontWeight: 400,
                 letterSpacing: '0.28em',
-                // 10px 은 브랜드 원색으로는 대비가 3.86:1 이라 읽히지 않는다 — 텍스트용 짝을 쓴다.
-                color: 'var(--mhj-brown-text)',
+                color: brandColor,
                 textTransform: 'lowercase' as const,
                 lineHeight: 1,
               }}
