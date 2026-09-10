@@ -20,7 +20,7 @@ export default function StoryPressFAQ() {
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
         {/* 헤더 */}
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#F59E42', marginBottom: 16 }}>
+          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: 'var(--sp-accent)', marginBottom: 16 }}>
             FAQ
           </p>
           <h2
@@ -71,7 +71,7 @@ export default function StoryPressFAQ() {
                   <span style={{
                     fontSize: 'clamp(14px, 1.8vw, 16px)',
                     fontWeight: 900,
-                    color: isOpen ? '#F59E42' : 'var(--text)',
+                    color: isOpen ? 'var(--sp-accent)' : 'var(--text)',
                     letterSpacing: '-0.3px',
                     lineHeight: 1.4,
                     transition: 'color 0.25s',
@@ -84,10 +84,10 @@ export default function StoryPressFAQ() {
                       flexShrink: 0,
                       width: 28, height: 28,
                       borderRadius: '50%',
-                      background: isOpen ? '#F59E42' : 'rgba(0,0,0,0.06)',
+                      background: isOpen ? 'var(--sp-accent)' : 'rgba(0,0,0,0.06)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 16, fontWeight: 900,
-                      color: isOpen ? 'white' : '#64748B',
+                      color: isOpen ? 'var(--sp-on-accent)' : 'var(--sp-body)',
                       transition: 'background 0.25s, color 0.25s',
                       lineHeight: 1,
                     }}
@@ -111,7 +111,7 @@ export default function StoryPressFAQ() {
                     <p style={{
                       padding: '0 clamp(20px, 3vw, 28px) clamp(18px, 2.5vw, 24px)',
                       fontSize: 'clamp(13px, 1.6vw, 15px)',
-                      color: '#64748B',
+                      color: 'var(--sp-body)',
                       lineHeight: 1.75,
                       fontWeight: 500,
                       margin: 0,

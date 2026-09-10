@@ -20,8 +20,11 @@ interface Props {
 const FEATURES = [
   {
     icon: Sparkles,
-    color: '#F59E42',
+    color: 'var(--sp-onlight-accent)',
     bg: '#FFF7ED',
+    // 강조 숫자·라벨은 파스텔 타일이 아니라 `--bg-surface` 위에 놓인다 — 테마를 따르는 짝을 쓴다.
+    highlightColor: 'var(--sp-accent-lg)',   // 40~56px → 3:1
+    highlightSubColor: 'var(--sp-accent)',   // 11px → 4.5:1
     highlight: '4',
     highlightSub: 'Words a Day',
     title: 'Just 4 Words a Day',
@@ -29,8 +32,10 @@ const FEATURES = [
   },
   {
     icon: BookOpen,
-    color: '#6D7AFA',
+    color: 'var(--sp-onlight-indigo)',
     bg: '#EEF2FF',
+    highlightColor: null,
+    highlightSubColor: null,
     highlight: null,
     highlightSub: null,
     title: 'Every Word Becomes a Story',
@@ -38,8 +43,10 @@ const FEATURES = [
   },
   {
     icon: RefreshCw,
-    color: '#10B981',
+    color: 'var(--sp-onlight-green)',
     bg: '#ECFDF5',
+    highlightColor: null,
+    highlightSubColor: null,
     highlight: null,
     highlightSub: null,
     title: 'A Book They Made Themselves',
@@ -47,8 +54,10 @@ const FEATURES = [
   },
   {
     icon: Users,
-    color: '#EC4899',
+    color: 'var(--sp-onlight-pink)',
     bg: '#FDF2F8',
+    highlightColor: null,
+    highlightSubColor: null,
     highlight: null,
     highlightSub: null,
     title: 'Built to be made, not watched',
@@ -77,7 +86,9 @@ const STEPS = [
 const LIBRARY_STATS = [
   {
     icon: Calendar,
-    color: '#10B981',
+    color: 'var(--sp-onlight-green)',
+    numberColor: 'var(--sp-green-lg)',   // 큰 숫자는 파스텔 타일이 아니라 `--bg-surface` 위
+    unitColor: null,
     bg: '#ECFDF5',
     number: '12',
     unit: '',
@@ -86,7 +97,9 @@ const LIBRARY_STATS = [
   },
   {
     icon: BookMarked,
-    color: '#6D7AFA',
+    color: 'var(--sp-onlight-indigo)',
+    numberColor: 'var(--sp-indigo-lg)',
+    unitColor: null,
     bg: '#EEF2FF',
     number: '1,000+',
     unit: '',
@@ -95,7 +108,9 @@ const LIBRARY_STATS = [
   },
   {
     icon: Clock,
-    color: '#F59E42',
+    color: 'var(--sp-onlight-accent)',
+    numberColor: 'var(--sp-accent-lg)',
+    unitColor: 'var(--sp-accent)',   // 18px w900 은 18.66px 미만이라 4.5:1 이 필요하다
     bg: '#FFF7ED',
     number: '10',
     unit: 'min',
@@ -107,21 +122,21 @@ const LIBRARY_STATS = [
 const RESEARCH_CARDS = [
   {
     icon: Brain,
-    color: '#6D7AFA',
+    color: 'var(--sp-onlight-indigo)',
     bg: '#EEF2FF',
     title: 'Research-backed words',
     desc: "Grounded in Dolch, Fry and the Science of Reading — trusted by educators in New Zealand, Australia, the US, and the UK.",
   },
   {
     icon: BookOpen,
-    color: '#F59E42',
+    color: 'var(--sp-onlight-accent)',
     bg: '#FFF7ED',
     title: 'Spaced repetition',
     desc: "Words return at carefully timed intervals — the same proven memory science behind the world's best learning tools.",
   },
   {
     icon: Pencil,
-    color: '#10B981',
+    color: 'var(--sp-onlight-green)',
     bg: '#ECFDF5',
     title: 'Learning by creating',
     desc: "Children remember what they make — far better than what they're simply given. Every story page is active creation, not passive consumption.",
@@ -152,7 +167,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
 
         {/* 좌: 텍스트 */}
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: '#F59E42', marginBottom: 24 }}>
+          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: 'var(--sp-accent)', marginBottom: 24 }}>
             Ages 3–8
           </p>
           <h1
@@ -163,15 +178,15 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               <span key={i} style={{ display: 'block' }}>{line}</span>
             ))}
           </h1>
-          <p style={{ fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 500, color: '#64748B', lineHeight: 1.65, marginBottom: 24, maxWidth: 480 }}>
+          <p style={{ fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 500, color: 'var(--sp-body)', lineHeight: 1.65, marginBottom: 24, maxWidth: 480 }}>
             {description || (
               <>
                 Four words a day. Ten days.{' '}
-                <span style={{ fontWeight: 900, color: '#F59E42' }}>One real storybook — created by your child.</span>
+                <span style={{ fontWeight: 900, color: 'var(--sp-accent)' }}>One real storybook — created by your child.</span>
               </>
             )}
           </p>
-          <p style={{ fontSize: 'clamp(14px, 1.6vw, 17px)', fontWeight: 500, color: '#94A3B8', lineHeight: 1.7, marginBottom: 40, maxWidth: 480 }}>
+          <p style={{ fontSize: 'clamp(14px, 1.6vw, 17px)', fontWeight: 500, color: 'var(--sp-body)', lineHeight: 1.7, marginBottom: 40, maxWidth: 480 }}>
             Meet new words. Play with them. Color the scenes. And watch a real book take shape — page by page, with their name on the cover.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -189,7 +204,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               See How It Works <ChevronDown size={14} />
             </a>
           </div>
-          <p style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, marginTop: 16, letterSpacing: 1 }}>
+          <p style={{ fontSize: 11, color: 'var(--sp-body)', fontWeight: 600, marginTop: 16, letterSpacing: 1 }}>
             Free to try · No credit card needed
           </p>
         </div>
@@ -221,7 +236,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               </div>
               <div>
                 <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: -0.5 }}>StoryPress</p>
-                <p style={{ fontSize: 10, color: '#94A3B8', margin: 0, fontWeight: 600, letterSpacing: 1 }}>TODAY&apos;S WORDS</p>
+                <p style={{ fontSize: 10, color: 'var(--sp-body)', margin: 0, fontWeight: 600, letterSpacing: 1 }}>TODAY&apos;S WORDS</p>
               </div>
             </div>
             {/* 단어 카드들 */}
@@ -234,17 +249,17 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               <div key={i} className="sp-word-card" style={{ background: item.color, border: `1px solid ${item.border}`, borderRadius: 16, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', margin: 0, letterSpacing: -0.3 }}>{item.word}</p>
-                  <p style={{ fontSize: 11, color: '#64748B', margin: 0, fontWeight: 500 }}>{item.korean}</p>
+                  <p style={{ fontSize: 11, color: 'var(--sp-body)', margin: 0, fontWeight: 500 }}>{item.korean}</p>
                 </div>
                 <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                  <span style={{ fontSize: 13 }}>▶</span>
+                  <span aria-hidden="true" style={{ fontSize: 13, color: 'var(--sp-onlight-strong)' }}>▶</span>
                 </div>
               </div>
             ))}
             {/* 진행 바 */}
             <div style={{ marginTop: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 900, color: '#FF8B5E', letterSpacing: 1 }}>
+                <span style={{ fontSize: 11, fontWeight: 900, color: 'var(--sp-coral)', letterSpacing: 1 }}>
                   4 words → 1 story page
                 </span>
               </div>
@@ -268,7 +283,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         }}
       >
         <div style={{ marginBottom: 64, textAlign: 'center' }}>
-          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#CBD5E1', textTransform: 'uppercase', marginBottom: 16 }}>
+          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--sp-body)', textTransform: 'uppercase', marginBottom: 16 }}>
             Why StoryPress
           </p>
           <h2 className="font-display font-black" style={{
@@ -308,7 +323,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   background: f.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   marginBottom: 20,
                 }}>
-                  <Icon size={22} color={f.color} />
+                  <Icon size={22} style={{ color: f.color }} />
                 </div>
 
                 {/* 숫자 강조 (첫 번째 카드) */}
@@ -322,7 +337,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                         fontStyle: 'italic',
                         letterSpacing: -3,
                         lineHeight: 1,
-                        color: f.color,
+                        color: f.highlightColor ?? undefined,
                         display: 'inline',
                       }}
                     >
@@ -334,7 +349,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                         fontWeight: 900,
                         letterSpacing: 3,
                         textTransform: 'uppercase',
-                        color: f.color,
+                        color: f.highlightSubColor ?? undefined,
                         marginLeft: 8,
                         verticalAlign: 'middle',
                       }}>
@@ -370,7 +385,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       >
         <div style={{ maxWidth: 1320, margin: '0 auto' }}>
           <div style={{ marginBottom: 64, textAlign: 'center' }}>
-            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#CBD5E1', textTransform: 'uppercase', marginBottom: 16 }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--sp-body)', textTransform: 'uppercase', marginBottom: 16 }}>
               Three steps to a real storybook
             </p>
             <h2 className="font-display font-black" style={{
@@ -404,7 +419,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   fontSize: 'clamp(40px, 5vw, 56px)',
                   fontWeight: 900, fontStyle: 'italic',
                   letterSpacing: -3, lineHeight: 1,
-                  color: '#F59E42',
+                  color: 'var(--sp-accent-lg)',
                   marginBottom: 20,
                 }}>
                   {step.num}
@@ -415,7 +430,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                 }}>
                   {step.label}
                 </h3>
-                <p style={{ fontSize: 15, color: '#64748B', lineHeight: 1.7, margin: 0 }}>
+                <p style={{ fontSize: 15, color: 'var(--sp-body)', lineHeight: 1.7, margin: 0 }}>
                   {step.desc}
                 </p>
               </div>
@@ -449,7 +464,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       >
         <div style={{ maxWidth: 1320, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#CBD5E1', textTransform: 'uppercase', marginBottom: 16 }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--sp-body)', textTransform: 'uppercase', marginBottom: 16 }}>
               A Growing Library
             </p>
             <h2 className="font-display font-black" style={{
@@ -483,19 +498,19 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 20px',
                   }}>
-                    <Icon size={24} color={stat.color} />
+                    <Icon size={24} style={{ color: stat.color }} />
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 4, marginBottom: 4 }}>
                     <span className="font-display" style={{
                       fontSize: 'clamp(40px, 5vw, 64px)',
                       fontWeight: 900, fontStyle: 'italic',
                       letterSpacing: -3, lineHeight: 1,
-                      color: stat.color,
+                      color: stat.numberColor,
                     }}>
                       {stat.number}
                     </span>
                     {stat.unit && (
-                      <span style={{ fontSize: 18, fontWeight: 900, color: stat.color }}>{stat.unit}</span>
+                      <span style={{ fontSize: 18, fontWeight: 900, color: stat.unitColor ?? undefined }}>{stat.unit}</span>
                     )}
                   </div>
                   <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: 12 }}>
@@ -536,13 +551,13 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                 (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(0,0,0,0.10)';
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <Star size={14} color="#F59E42" fill="#F59E42" />
-                  <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: '#F59E42' }}>Finished Book</span>
+                  <Star size={14} fill="currentColor" style={{ color: 'var(--sp-onlight-accent)' }} />
+                  <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--sp-onlight-accent)' }}>Finished Book</span>
                 </div>
-                <p style={{ fontSize: 15, fontWeight: 900, color: '#1A1A1A', marginBottom: 4, letterSpacing: '-0.3px' }}>
+                <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--sp-onlight-strong)', marginBottom: 4, letterSpacing: '-0.3px' }}>
                   &ldquo;{book.title}&rdquo;
                 </p>
-                <p style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 1 }}>
+                <p style={{ fontSize: 11, color: 'var(--sp-onlight-muted)', fontWeight: 600, letterSpacing: 1 }}>
                   {book.pages} pages · {book.month}
                 </p>
               </div>
@@ -562,7 +577,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       >
         <div style={{ maxWidth: 1320, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#CBD5E1', textTransform: 'uppercase', marginBottom: 16 }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--sp-body)', textTransform: 'uppercase', marginBottom: 16 }}>
               Built on Research
             </p>
             <h2 className="font-display font-black" style={{
@@ -603,7 +618,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     marginBottom: 20,
                   }}>
-                    <Icon size={22} color={card.color} />
+                    <Icon size={22} style={{ color: card.color }} />
                   </div>
                   <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', marginBottom: 12, letterSpacing: '-0.5px' }}>
                     {card.title}
@@ -625,11 +640,11 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               background: '#EEF2FF',
               border: '1px solid #C7D2FE',
             }}>
-              <FlaskConical size={16} color="#6D7AFA" />
-              <span style={{ fontSize: 12, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: '#6D7AFA' }}>
+              <FlaskConical size={16} style={{ color: 'var(--sp-onlight-indigo)' }} />
+              <span style={{ fontSize: 12, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--sp-onlight-indigo)' }}>
                 Built on the Science of Reading
               </span>
-              <span style={{ fontSize: 12, color: '#94A3B8', fontWeight: 500 }}>
+              <span style={{ fontSize: 12, color: 'var(--sp-onlight-muted)', fontWeight: 500 }}>
                 — the same research behind New Zealand&apos;s new classroom literacy programme
               </span>
             </div>
@@ -666,9 +681,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               padding: 'clamp(36px, 4vw, 52px)',
               boxShadow: '0 20px 60px rgba(245,158,66,0.12), 0 4px 16px rgba(0,0,0,0.06)',
             }}>
-              <div className="font-display" style={{
+              <div aria-hidden="true" className="font-display" style={{
                 fontSize: 72, fontWeight: 900, fontStyle: 'italic',
-                lineHeight: 0.5, color: '#F59E42', opacity: 0.28, marginBottom: 20,
+                lineHeight: 0.5, color: 'var(--sp-onlight-ornament)', marginBottom: 20,
               }}>
                 &ldquo;
               </div>
@@ -680,8 +695,8 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   <Heart size={22} color="white" fill="white" />
                 </div>
                 <div>
-                  <p style={{ fontSize: 14, fontWeight: 900, color: '#1A1A1A', margin: 0 }}>Yussi</p>
-                  <p style={{ fontSize: 11, color: '#94A3B8', margin: 0, fontWeight: 600, letterSpacing: 1 }}>AUCKLAND, NEW ZEALAND</p>
+                  <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--sp-onlight-strong)', margin: 0 }}>Yussi</p>
+                  <p style={{ fontSize: 11, color: 'var(--sp-onlight-muted)', margin: 0, fontWeight: 600, letterSpacing: 1 }}>AUCKLAND, NEW ZEALAND</p>
                 </div>
               </div>
             </div>
@@ -689,20 +704,20 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
 
           {/* 우: 텍스트 */}
           <div>
-            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: '#F59E42', textTransform: 'uppercase', marginBottom: 20 }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, color: 'var(--sp-onlight-accent)', textTransform: 'uppercase', marginBottom: 20 }}>
               Our Story
             </p>
             <h2 className="font-display font-black" style={{
               fontSize: 'clamp(28px, 4.5vw, 52px)',
               letterSpacing: '-2px', lineHeight: 1.1, fontStyle: 'italic',
-              color: '#1A1A1A', marginBottom: 28,
+              color: 'var(--sp-onlight-strong)', marginBottom: 28,
             }}>
               We built this for our daughter.<br />Then every family needed it.
             </h2>
-            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: '#64748B', lineHeight: 1.85, marginBottom: 20 }}>
+            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: 'var(--sp-onlight-muted)', lineHeight: 1.85, marginBottom: 20 }}>
               Penny and I spent years in publishing — we made magazines, and we thought about books for a living: why they matter, why they last. Then our daughter moved to a new country at four, and English was a wall.
             </p>
-            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: '#64748B', lineHeight: 1.85, marginBottom: 32 }}>
+            <p style={{ fontSize: 'clamp(15px, 1.8vw, 17px)', color: 'var(--sp-onlight-muted)', lineHeight: 1.85, marginBottom: 32 }}>
               We tried everything we knew; nothing reached her. What finally did wasn&apos;t a lesson — it was a story she made herself. So we built that one moment into this.
             </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -712,7 +727,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
                   padding: '6px 14px',
                   borderRadius: 6,
                   background: 'rgba(245,158,66,0.12)',
-                  color: '#B45309',
+                  color: 'var(--sp-onlight-accent)',
                   fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: 0.5,
@@ -735,12 +750,11 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         }}
       >
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
-          <div className="font-display" style={{
+          <div aria-hidden="true" className="font-display" style={{
             fontSize: 'clamp(80px, 14vw, 160px)',
             fontWeight: 900,
             lineHeight: 0.6,
-            color: '#F59E42',
-            opacity: 0.3,
+            color: 'var(--sp-ornament)',
             marginBottom: 16,
             fontStyle: 'italic',
           }}>
@@ -786,7 +800,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
           <p style={{
             fontSize: 10, fontWeight: 900, letterSpacing: 5,
-            textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)',
+            textTransform: 'uppercase', color: 'var(--sp-ondark-muted)',
             marginBottom: 24,
           }}>
             Your Child&apos;s First Book Is Waiting
@@ -801,7 +815,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </h2>
           <p style={{
             fontSize: 'clamp(15px, 1.8vw, 18px)',
-            color: 'rgba(255,255,255,0.45)',
+            color: 'var(--sp-ondark-muted)',
             fontWeight: 500, lineHeight: 1.7, marginBottom: 48,
           }}>
             Start your free 10-day adventure today.<br />
@@ -825,7 +839,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
             Start Free Adventure
           </a>
 
-          <p style={{ marginTop: 32, fontSize: 11, color: 'rgba(255,255,255,0.2)', fontWeight: 600 }}>
+          <p style={{ marginTop: 32, fontSize: 11, color: 'var(--sp-ondark-muted)', fontWeight: 600 }}>
             Free to try · Cancel anytime
           </p>
         </div>
@@ -839,7 +853,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
       }}>
         <Link href="/" style={{
           fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.25)', textDecoration: 'none',
+          color: 'var(--sp-ondark-link)', textDecoration: 'none',
         }}>
           ← Back to MHJ
         </Link>
