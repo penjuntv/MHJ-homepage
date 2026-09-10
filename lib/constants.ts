@@ -62,6 +62,14 @@ export const BLOG_DETAIL_COLUMNS =
  */
 export const BLOG_SITEMAP_COLUMNS = 'slug, created_at, updated_at';
 
+/** RSS 피드 전용(app/feed.xml) — 전문(content)까지 싣는다 */
+export const BLOG_FEED_COLUMNS =
+  'id, title, author, date, image_url, category, slug, meta_description, content, created_at, publish_at, updated_at';
+
+/** AI 인덱스 전용(app/llms-full.txt) — 상위 글의 전문 + 목록용 메타 */
+export const BLOG_LLMS_COLUMNS =
+  'slug, title, meta_description, category, date, created_at, updated_at, content, view_count, summary_ko';
+
 /** 관련 글 카드(getRelatedBlogs) 전용 — 카드 컬럼보다 가벼운 최소 컬럼 */
 export const BLOG_RELATED_COLUMNS =
   'id, title, author, date, image_url, category, slug, view_count';
