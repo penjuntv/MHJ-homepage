@@ -229,9 +229,14 @@ M   ●          ●                ● +4w                          ● +8w
 - 새 순수 함수 `absolutizeUrls`·`imageMimeOf`·`htmlToMarkdown`(`lib/content-html.mjs`, 테스트 9건 추가)
 - Done 의 남은 절반은 사용자 몫: **네이버 RSS 재제출** · Perplexity 로 `/llms-full.txt` fetch 확인
 
-### W5. 콘텐츠 정비·허브·신규 (3주차부터 지속) ⛔ D4
+### W5. 콘텐츠 정비·허브·신규 (3주차부터 지속) ⛔ D4 — **도구·목록 준비 완료(2026-09-10)**, 본문 집필은 두 분
 
-**정비 큐 (조회 × 결함, 처방은 목록까지 — 본문 수정은 두 분)**
+**정비 큐 → `docs/W5-refit-queue.md`** (2026-09-10 생성). 실측으로 다시 뽑는다:
+`node --env-file=.env.local scripts/report-refit-queue.mjs --write`.
+아래 표는 2026-09-03 보고서 기준의 초안이고, 지금 유효한 순서와 처방은 위 문서에 있다
+(판정은 `lib/seo-defects.mjs` — 관리자 화면·주간 감사와 같은 함수).
+
+**정비 큐 초안 (조회 × 결함, 처방은 목록까지 — 본문 수정은 두 분)**
 
 | 순 | slug | 조회 | 처방 |
 |---|---|---|---|
@@ -248,7 +253,9 @@ M   ●          ●                ● +4w                          ● +8w
 
 **신규 글 후보 (주 1편, 클러스터 빈칸 우선)**: "NZ school years explained for Korean families (Year 0–13)" 허브 · "Year 6→7 전환" · "School zones on the North Shore" · "GP 등록·병원" · "Asian lunchbox 확장". 아카이브 `content-proposal-v2` 14편 중 위 5개만 부활, 나머지 폐기.
 
-**발행 템플릿** (`docs/CONTENT_TEMPLATE.md` 로 신설, D3 반영): 답 먼저 문단 40~60단어 → H2 ≥3(1개는 질문형) → Key takeaways 목록 → 본문 → 내부링크 ≥2(허브 1) → 외부 권위 링크 ≥1(정부·학교) → 인포블록 → FAQ 2~3 → cover_caption · alt 는 장면 서술(제목 반복 금지) · seo_title · summary_ko.
+**발행 템플릿 → `docs/CONTENT_TEMPLATE.md`** (2026-09-10 신설, D3 반영). 문서의 모든 항목이
+코드가 실제로 검사·렌더하는 것과 일치함을 확인했다(takeaways 감지 규칙·체크리스트 항목·캡션 필수 시점).
+원안 요약: 답 먼저 문단 40~60단어 → H2 ≥3(1개는 질문형) → Key takeaways 목록 → 본문 → 내부링크 ≥2(허브 1) → 외부 권위 링크 ≥1(정부·학교) → 인포블록 → FAQ 2~3 → cover_caption · alt 는 장면 서술(제목 반복 금지) · seo_title · summary_ko.
 
 **정비 단락마다** `node --env-file=.env.local scripts/audit-seo-regression.mjs --update-baseline`.
 
