@@ -12,9 +12,10 @@ import { getAuthor } from '@/lib/seo';
 export default function AuthorBox({ author }: { author: string }) {
   const a = getAuthor(author);
   if (!a) return null;
+  // 이름이 붙은 <aside> 는 <article> 안에서도 complementary 랜드마크로 남는다 —
+  // 레이아웃의 <main> 안이라 랜드마크가 중첩된다(DESIGN_RULES §15.5).
   return (
-    <aside
-      aria-label="About the author"
+    <div
       style={{ margin: '48px 0 0', borderTop: '1px solid var(--border)', padding: '32px 0 0', display: 'flex', gap: 16, alignItems: 'flex-start' }}
     >
       {a.image && (
@@ -37,6 +38,6 @@ export default function AuthorBox({ author }: { author: string }) {
           More about {a.name} →
         </Link>
       </div>
-    </aside>
+    </div>
   );
 }

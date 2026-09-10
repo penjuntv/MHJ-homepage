@@ -151,9 +151,10 @@ export default async function MagazineArticlePage(props: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      <main style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: '64px' }}>
+      {/* 레이아웃의 <main> 안이라 여기서 또 <main> 을 쓰면 랜드마크가 중첩·중복된다. */}
+      <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: '64px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px clamp(16px, 4vw, 40px)' }}>
-          <nav style={{ marginBottom: 24, fontSize: 13, color: 'var(--text-tertiary)' }}>
+          <nav aria-label="Breadcrumb" style={{ marginBottom: 24, fontSize: 13, color: 'var(--text-tertiary)' }}>
             <Link href={`/magazine/${params.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
               ← Back to {magazine.title}
             </Link>
@@ -193,6 +194,7 @@ export default async function MagazineArticlePage(props: Props) {
           </article>
 
           <nav
+            aria-label="이전 · 다음 기사"
             style={{
               marginTop: 32,
               display: 'grid',
@@ -240,7 +242,7 @@ export default async function MagazineArticlePage(props: Props) {
             ) : <div />}
           </nav>
         </div>
-      </main>
+      </div>
     </>
   );
 }

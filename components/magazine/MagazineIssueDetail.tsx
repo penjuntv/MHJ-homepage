@@ -236,8 +236,9 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const articleCount = mainArticles.length;
 
+  // 레이아웃의 <main> 안이라 여기서 또 <main> 을 쓰면 랜드마크가 중첩·중복된다.
   return (
-    <main
+    <div
       style={{
         background: '#FAF8F5',
         minHeight: '100vh',
@@ -384,6 +385,6 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
           </section>
         )}
       </div>
-    </main>
+    </div>
   );
 }

@@ -37,6 +37,9 @@ export default async function PublicLayout({
 
   return (
     <>
+      {/* 키보드 사용자는 페이지마다 네비 링크 10여 개를 지나야 본문에 닿는다.
+          포커스를 받을 때만 나타난다(WCAG 2.4.1). */}
+      <a href="#main" className="skip-link">본문 바로가기</a>
       <Navigation
         siteName={s.site_name}
         siteSubtitle={s.site_subtitle}
@@ -47,8 +50,14 @@ export default async function PublicLayout({
         contactEmail={s.contact_email}
         navigationItems={navigationItems}
       />
-      <main>{children}</main>
-      <InstagramFeed instagramUrl={s.social_instagram || ''} />
+      {/* 인스타 섹션은 <main> **안**이어야 한다. 밖에 두면 어떤 랜드마크에도 안 들어가
+          스크린리더가 "여기부터 무엇" 인지 말해 줄 수 없다(axe `region`, 전 페이지 16건). */}
+      {/* tabIndex={-1} 이 없으면 Safari 는 프래그먼트 이동에 포커스를 옮기지 않는다 —
+          바로가기를 눌러도 다음 Tab 이 다시 네비 첫 링크로 돌아간다(자동 검사로는 안 잡힌다). */}
+      <main id="main" tabIndex={-1}>
+        {children}
+        <InstagramFeed instagramUrl={s.social_instagram || ''} />
+      </main>
       <Footer
         siteSubtitle={s.site_subtitle}
         footerDescription={s.footer_description}

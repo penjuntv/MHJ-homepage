@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import SafeImage from './SafeImage';
-import { useRouter } from 'next/navigation';
 import type { Blog } from '@/lib/types';
 import { BLOG_CATEGORIES, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -48,7 +47,6 @@ export default function BlogLibrary({
   categoryIntro = null,
   startHere = [],
 }: Props) {
-  const router = useRouter();
 
   // 2026-09-08 P0-3-1: 페이지네이션이 ?page=N 쿼리에서 경로 세그먼트로 옮겨가면서
   // /blog 와 /blog/page/2 가 서로 다른 라우트 세그먼트가 됐다. 예전의
@@ -60,15 +58,6 @@ export default function BlogLibrary({
   function pageHref(category: string | null, page: number) {
     const slug = category ? (CATEGORY_TO_SLUG[category as BlogCategory] ?? null) : null;
     return `${listPagePath(slug, page)}#all-stories`;
-  }
-
-  function navigateTo(category: string | null, page: number) {
-    router.push(pageHref(category, page));
-  }
-
-  function handleCategoryChange(cat: string) {
-    const newCat = cat === 'All' ? null : cat;
-    navigateTo(newCat, 1);
   }
 
   const selectedCat = activeCategory ?? 'All';
@@ -137,10 +126,7 @@ export default function BlogLibrary({
               styled-jsx 가 서버 HTML 에 안 실려 하이드레이션 뒤에야 1열이 되며 CLS 0.19 를 냈다 (2026-09-08 W3-B). */}
           <div className="featured-grid">
             {/* Featured Story */}
-            <FeaturedCard
-              blog={featuredBlog}
-              onClick={() => router.push(`/blog/${featuredBlog.slug}`)}
-            />
+            <FeaturedCard blog={featuredBlog} />
 
             {/* Recent Stories Sidebar */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -157,7 +143,6 @@ export default function BlogLibrary({
                     key={blog.id}
                     blog={blog}
                     isLast={i === recentBlogs.length - 1}
-                    onClick={() => router.push(`/blog/${blog.slug}`)}
                   />
                 ))}
                 {recentBlogs.length === 0 && (
@@ -177,7 +162,7 @@ export default function BlogLibrary({
       }}>
         <CategoryFilter
           selected={selectedCat}
-          onChange={handleCategoryChange}
+          hrefFor={(cat) => pageHref(cat === 'All' ? null : cat, 1)}
           totalCount={totalCount}
           categoryCounts={categoryCounts}
         />
@@ -201,28 +186,20 @@ export default function BlogLibrary({
             </p>
           )}
           {activeCategory && (
-            <button
-              onClick={() => handleCategoryChange('All')}
-              style={{ color: 'var(--accent)', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}
+            <Link
+              href={pageHref(null, 1)}
+              style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}
             >
               ← Browse all categories
-            </button>
+            </Link>
           )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {blogs.map((b) => (
             b.letter_to
-              ? <LetterCard
-                  key={b.id}
-                  blog={b}
-                  onClick={() => router.push(`/blog/${b.slug}`)}
-                />
-              : <BlogCard
-                  key={b.id}
-                  blog={b}
-                  onClick={() => router.push(`/blog/${b.slug}`)}
-                />
+              ? <LetterCard key={b.id} blog={b} />
+              : <BlogCard key={b.id} blog={b} />
           ))}
         </div>
       )}
@@ -240,7 +217,6 @@ export default function BlogLibrary({
       {readerFavorites && readerFavorites.length > 0 && (
         <ReaderFavoritesSection
           blogs={readerFavorites}
-          onBlogClick={(slug) => router.push(`/blog/${slug}`)}
         />
       )}
 
@@ -251,9 +227,9 @@ export default function BlogLibrary({
 /* ════════════════════════════════════════════
    카테고리 필터 — Scrollable Pill Chips
    ════════════════════════════════════════════ */
-function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
+function CategoryFilter({ selected, hrefFor, totalCount, categoryCounts }: {
   selected: string;
-  onChange: (cat: string) => void;
+  hrefFor: (cat: string) => string;
   totalCount: number;
   categoryCounts: Record<string, number>;
 }) {
@@ -273,10 +249,11 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
         {(() => {
           const isActive = selected === 'All';
           return (
-            <button
+            <Link
               key="all"
-              onClick={() => onChange('All')}
+              href={hrefFor('All')}
               style={{
+                textDecoration: 'none',
                 padding: '6px 14px',
                 borderRadius: 8,
                 border: `1px solid ${isActive ? 'var(--text)' : 'var(--border-medium)'}`,
@@ -293,7 +270,7 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
               }}
             >
               All Stories ({totalCount})
-            </button>
+            </Link>
           );
         })()}
 
@@ -303,10 +280,11 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
           const count = categoryCounts[cat] ?? 0;
           const isEmpty = count === 0;
           return (
-            <button
+            <Link
               key={cat}
-              onClick={() => onChange(cat)}
+              href={hrefFor(cat)}
               style={{
+                textDecoration: 'none',
                 padding: '6px 14px',
                 borderRadius: 8,
                 border: `1px ${isEmpty ? 'dashed' : 'solid'} ${isActive ? 'var(--text)' : isEmpty ? 'var(--border)' : 'var(--border-medium)'
@@ -324,7 +302,7 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
               }}
             >
               {cat}
-            </button>
+            </Link>
           );
         })}
       </div>
@@ -345,16 +323,23 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
 /* ════════════════════════════════════════════
    Featured Card
    ════════════════════════════════════════════ */
-function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
+/**
+ * `<div onClick={router.push}>` 이었다 — 키보드로 열 수 없고, HTML 에 `<a href>` 가 남지 않아
+ * 크롤러 눈에는 `/blog` 가 **어느 글로도 링크하지 않는 페이지**였다(라이브 실측: 글 링크 0개).
+ * 하는 일이 이동뿐이라 진짜 링크가 맞다.
+ */
+function FeaturedCard({ blog }: { blog: Blog }) {
   const [hovered, setHovered] = useState(false);
   const excerpt = blog.meta_description || blog.content.replace(/<[^>]+>/g, '').slice(0, 100) + '...';
 
   return (
-    <div
-      onClick={onClick}
+    <Link
+      href={`/blog/${blog.slug}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        textDecoration: 'none',
+        color: 'inherit',
         borderRadius: 12,
         overflow: 'hidden',
         cursor: 'pointer',
@@ -436,22 +421,29 @@ function FeaturedCard({ blog, onClick }: { blog: Blog; onClick: () => void }) {
           <ArrowRight size={13} style={{ transition: 'transform 0.3s ease', transform: hovered ? 'translateX(4px)' : 'translateX(0)' }} />
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
 /* ════════════════════════════════════════════
    Recent Story Item — 썸네일 + 텍스트
    ════════════════════════════════════════════ */
-function RecentStoryItem({ blog, isLast, onClick }: { blog: Blog; isLast: boolean; onClick: () => void }) {
+/**
+ * `<div onClick={router.push}>` 이었다 — 키보드로 열 수 없고, HTML 에 `<a href>` 가 남지 않아
+ * 크롤러 눈에는 `/blog` 가 **어느 글로도 링크하지 않는 페이지**였다(라이브 실측: 글 링크 0개).
+ * 하는 일이 이동뿐이라 진짜 링크가 맞다.
+ */
+function RecentStoryItem({ blog, isLast }: { blog: Blog; isLast: boolean }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
-      onClick={onClick}
+    <Link
+      href={`/blog/${blog.slug}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        textDecoration: 'none',
+        color: 'inherit',
         padding: '20px 0',
         borderBottom: isLast ? 'none' : '1px solid var(--border-medium)',
         cursor: 'pointer',
@@ -507,7 +499,7 @@ function RecentStoryItem({ blog, isLast, onClick }: { blog: Blog; isLast: boolea
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -516,18 +508,25 @@ function RecentStoryItem({ blog, isLast, onClick }: { blog: Blog; isLast: boolea
    ════════════════════════════════════════════ */
 interface CardProps {
   blog: Blog;
-  onClick: () => void;
 }
 
-function BlogCard({ blog, onClick }: CardProps) {
+/**
+ * `<div onClick={router.push}>` 이었다 — 키보드로 열 수 없고, HTML 에 `<a href>` 가 남지 않아
+ * 크롤러 눈에는 `/blog` 가 **어느 글로도 링크하지 않는 페이지**였다(라이브 실측: 글 링크 0개).
+ * 하는 일이 이동뿐이라 진짜 링크가 맞다.
+ */
+function BlogCard({ blog }: CardProps) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
-      onClick={onClick}
+    <Link
+      href={`/blog/${blog.slug}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        display: 'block',
+        textDecoration: 'none',
+        color: 'inherit',
         borderRadius: 12,
         background: 'var(--bg-card, var(--bg))',
         border: '1px solid var(--border)',
@@ -602,23 +601,21 @@ function BlogCard({ blog, onClick }: CardProps) {
           </p>
         )}
       </div>
-    </div>
+    </Link>
   );
 }
 
 /* ════════════════════════════════════════════
    Letter Card — 편지 글 (letter_to='M'|'H'|'J') (세션 5)
    ════════════════════════════════════════════ */
-function LetterCard({ blog, onClick }: CardProps) {
+/**
+ * `role="link" tabIndex={0}` + Enter 수동 처리로 흉내 내고 있었다. 진짜 `<a href>` 는
+ * Space·가운데클릭·새 탭·컨텍스트 메뉴·크롤러를 전부 공짜로 준다.
+ */
+function LetterCard({ blog }: CardProps) {
   const excerpt = (blog.content ?? '').replace(/<[^>]+>/g, '').slice(0, 100);
   return (
-    <div
-      onClick={onClick}
-      role="link"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter') onClick(); }}
-      className="letter-card"
-    >
+    <Link href={`/blog/${blog.slug}`} className="letter-card">
       <div className="letter-stamp">
         <div className="letter-stamp-dot" />
       </div>
@@ -630,14 +627,14 @@ function LetterCard({ blog, onClick }: CardProps) {
         <p className="letter-hover-preview-text">{excerpt}</p>
         <p className="letter-hover-sig">&mdash; Mum, from Mairangi</p>
       </div>
-    </div>
+    </Link>
   );
 }
 
 /* ════════════════════════════════════════════
    Reader Favorites — 넷플릭스 스타일 가로 캐러셀
    ════════════════════════════════════════════ */
-function ReaderFavoritesSection({ blogs, onBlogClick }: { blogs: Blog[]; onBlogClick: (slug: string) => void }) {
+function ReaderFavoritesSection({ blogs }: { blogs: Blog[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -711,7 +708,7 @@ function ReaderFavoritesSection({ blogs, onBlogClick }: { blogs: Blog[]; onBlogC
           }}
         >
           {blogs.map((blog, i) => (
-            <ReaderFavCard key={blog.id} blog={blog} rank={i + 1} onClick={() => onBlogClick(blog.slug)} />
+            <ReaderFavCard key={blog.id} blog={blog} rank={i + 1} />
           ))}
         </div>
 
@@ -742,15 +739,22 @@ function ReaderFavoritesSection({ blogs, onBlogClick }: { blogs: Blog[]; onBlogC
   );
 }
 
-function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onClick: () => void }) {
+/**
+ * `<div onClick>` 이었다 — 마우스로만 닿았고, 키보드로는 포커스도 실행도 불가능했다.
+ * 하는 일이 `/blog/{slug}` 이동뿐이라 진짜 링크가 맞다. 덤으로 크롤러에도 보인다
+ * (그 전에는 이 "Reader Favorites" 8편이 내부 링크로 세어지지도 않았다).
+ */
+function ReaderFavCard({ blog, rank }: { blog: Blog; rank: number }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
-      onClick={onClick}
+    <Link
+      href={`/blog/${blog.slug}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        display: 'block',
+        textDecoration: 'none',
         minWidth: 280,
         flexShrink: 0,
         borderRadius: 6,
@@ -813,7 +817,7 @@ function ReaderFavCard({ blog, rank, onClick }: { blog: Blog; rank: number; onCl
           {blog.title}
         </h3>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -856,7 +860,7 @@ function Pagination({ currentPage, totalPages, hrefFor }: {
   const pages = getPageNumbers();
 
   return (
-    <div style={{
+    <nav aria-label="페이지 넘기기" style={{
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -923,6 +927,6 @@ function Pagination({ currentPage, totalPages, hrefFor }: {
           <ChevronRight size={16} />
         </Link>
       )}
-    </div>
+    </nav>
   );
 }

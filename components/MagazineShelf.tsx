@@ -117,7 +117,8 @@ function ShelfCard({ magazine, isLatest }: { magazine: Magazine; isLatest: boole
         <PageThumbnail pageType="cover" magazine={magazine} />
       </div>
       <div className="ms-meta">
-        <h3 className="ms-card-title">{magazine.title || 'Untitled'}</h3>
+        {/* 이 페이지의 h1 은 서가 제목이다 — 카드가 h3 면 h2 를 건너뛴다(axe heading-order). */}
+        <h2 className="ms-card-title">{magazine.title || 'Untitled'}</h2>
         <p className="ms-card-date">
           {magazine.month_name} {magazine.year}
         </p>

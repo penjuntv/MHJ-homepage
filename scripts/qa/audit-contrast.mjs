@@ -142,6 +142,7 @@ const COLLECT = () => {
   return { found, skipped };
 };
 
+let aborted = null;
 const browser = await chromium.launch();
 const report = [];
 try {
@@ -169,6 +170,10 @@ try {
       }
     }
   }
+} catch (err) {
+  // 스택 대신 사유만 — CI 로그에서 읽히는 편이 낫다.
+  aborted = err.message;
+  process.exitCode = 1;
 } finally {
   await browser.close();   // 중간에 던져도 브라우저를 남기지 않는다
 }
@@ -190,6 +195,8 @@ if (AS_JSON) {
   const styled = report.reduce((n, r) => n + r.findings.filter((f) => f.inline).length, 0);
   const owned = total - styled;
   console.log(`\n합계 ${total} — CSS 클래스 ${owned} · style= 속성 ${styled}(본문 HTML 또는 컴포넌트 인라인)`);
+  // 중간에 끊겼으면 이 숫자는 "잰 데까지"다 — 통과로 읽히면 안 된다.
+  if (aborted) console.error(`❌ 측정이 끝까지 가지 못했다: ${aborted}`);
   // CI 가 켜져 있을 때 초록으로 지나가면 감사가 아니라 장식이다. 기준선은 **CSS 클래스가 칠한 것**
   // 하나뿐 — `style=` 쪽은 본문 데이터와 매거진 표지가 섞여 있어 코드로 0 을 만들 수 없다.
   if (owned > 0) {

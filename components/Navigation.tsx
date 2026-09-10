@@ -82,6 +82,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
   return (
     <>
       <nav
+        aria-label="주 메뉴"
         className="fixed top-0 left-0 right-0 z-50 nav-backdrop"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
@@ -189,10 +190,13 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </IconBtn>
 
+            {/* 라벨이 "Open menu" 로 고정이면 메뉴가 열린 뒤에도 "여세요" 라고 읽어 준다. */}
             <button
               onClick={toggleMobile}
               style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '6px', padding: '4px' }}
-              aria-label="Open menu"
+              aria-label={mobileOpen ? '메뉴 닫기' : '메뉴 열기'}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
             >
               <span style={{ display: 'block', width: '24px', height: '2px', background: 'var(--text)', transition: 'all 0.3s', transform: mobileOpen ? 'rotate(45deg) translate(4px, 4px)' : 'none' }} />
               <span style={{ display: 'block', width: '24px', height: '2px', background: 'var(--text)', transition: 'all 0.3s', opacity: mobileOpen ? 0 : 1 }} />
@@ -202,9 +206,14 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
         </div>
       </nav>
 
-      {/* 모바일 풀스크린 메뉴 */}
+      {/* 모바일 풀스크린 메뉴 — <nav> 밖의 형제다. 안으로 넣으면 nav 의 z-50 이 만든
+          쌓임 맥락에 갇혀 이 패널(z-40)이 햄버거 버튼 위를 덮어 닫을 수 없게 된다.
+          그래서 밖에 두되, 이름 있는 랜드마크로 만들어 어디에도 안 속하는 상태를 면한다
+          (axe `region` — 메뉴가 열린 동안에만 나던 위반이라 기본 상태 감사로는 안 잡혔다). */}
       {mobileOpen && (
-        <div
+        <nav
+          id="mobile-menu"
+          aria-label="모바일 메뉴"
           className="fixed inset-0 z-40 flex flex-col items-center justify-center"
           style={{ gap: '24px', background: 'var(--bg)' }}
         >
@@ -225,7 +234,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
               {link.label}
             </Link>
           ))}
-        </div>
+        </nav>
       )}
 
       {/* 검색 오버레이 */}
