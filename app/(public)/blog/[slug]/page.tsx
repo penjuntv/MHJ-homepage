@@ -726,7 +726,7 @@ export default async function BlogDetailPage(
 
             {/* 이전/다음 글 네비게이션 */}
             {(adjacent.prev || adjacent.next) && (
-              <nav style={{
+              <nav aria-label="이전 · 다음 글" style={{
                 borderTop: '1px solid var(--border)',
                 paddingTop: 48,
                 paddingBottom: 80,

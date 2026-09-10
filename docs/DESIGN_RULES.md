@@ -531,6 +531,52 @@ transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 
 ---
 
+## 15.5 접근성 (2026-09-10 W6-B)
+
+### 클릭되는 것은 진짜 요소로 만든다
+
+**`<div onClick>` 을 쓰지 않는다.** 이동하면 `<Link href>`, 동작하면 `<button>`.
+`role="link" tabIndex={0}` + `onKeyDown` 으로 흉내 내는 것도 마찬가지다 — 진짜 `<a href>` 는
+Space·가운데클릭·새 탭·컨텍스트 메뉴·크롤러를 전부 공짜로 준다.
+
+2026-09-10 이전 `/blog` 의 글 카드 다섯 종류가 전부 `<div onClick={router.push}>` 이었다.
+결과는 **키보드로 어떤 글도 열 수 없었고, HTML 에 `<a href="/blog/…">` 가 0개**였다 —
+검색 엔진 눈에 블로그 허브가 어느 글로도 링크하지 않는 페이지였다는 뜻이다.
+`scripts/qa/audit-a11y.mjs` 가 이제 그 링크 수를 세어 회귀를 막는다.
+
+### 랜드마크는 겹치지 않게
+
+- 페이지 안에서 `<main>` 을 새로 열지 않는다 — `app/(public)/layout.tsx` 가 이미 하나 연다.
+- `<main>` 안의 `<aside>` 는 랜드마크가 중첩된다. 사이드바는 `<div>` 로.
+- `<nav>` 가 한 페이지에 둘 이상이면 **각각 `aria-label`** 을 준다(주 메뉴 / Breadcrumb / 이전·다음).
+- 여닫이 패널에 `role="region"` 을 붙이지 않는다 — 문항 수만큼 랜드마크가 생긴다.
+  버튼의 `aria-expanded`·`aria-controls` 로 충분하다.
+- 모든 콘텐츠는 랜드마크 **안**에 있어야 한다. `<main>` 밖에 섹션을 두면 안 된다.
+
+### 상태를 말해 주는 이름
+
+토글 버튼의 `aria-label` 을 고정 문자열로 두지 않는다 — 메뉴가 열린 뒤에도 "메뉴 열기" 라고
+읽어 준다. `aria-expanded` 와 함께 라벨도 상태를 따라가게 한다.
+
+### 숨기기
+
+포커스를 받아야 하는 것을 `display:none` / `visibility:hidden` 으로 숨기면 **포커스 자체를
+못 받아 죽는다**. 본문 바로가기 링크(`.skip-link`)처럼 화면 밖으로 밀었다가 `:focus` 에 끌어온다.
+
+### 측정
+
+```bash
+npm run build && npx next start -p 3003 &
+node scripts/qa/audit-a11y.mjs      # axe-core + "글 링크가 실제로 있는가"
+node scripts/qa/audit-contrast.mjs  # 대비는 이쪽 담당(§6.3)
+```
+
+둘 다 위반이 있으면 종료 코드 1 이고, 주간 `site-audit` ⑫·⑬으로 돈다.
+**axe 는 React 의 `onClick` 을 볼 수 없다** — 위의 `<div onClick>` 문제는 axe 가 아니라
+`<a href>` 를 직접 세어 찾았다. 자동 검사가 0 이어도 그것이 전부는 아니다.
+
+---
+
 ## 16. 체크리스트: 새 컴포넌트/페이지 추가 시
 
 새 컴포넌트나 페이지를 만들 때 반드시 아래를 확인:
@@ -547,7 +593,10 @@ transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 - [ ] 반응형·레이아웃 규칙이 `globals.css` 에 있는가? (`<style jsx>` 는 서버 HTML 에 안 실려 첫 페인트 뒤에 접힌다 — CLS)
 - [ ] 이미지 위에 텍스트를 올리고 있지 않은가? (히어로 제외)
 - [ ] 제목 크기가 72px을 초과하지 않는가?
+- [ ] 클릭되는 것이 `<Link>`/`<button>` 인가? (`<div onClick>` 금지 — §15.5)
+- [ ] `<main>`·`<aside>`·이름 없는 두 번째 `<nav>` 를 새로 만들고 있지 않은가? (§15.5)
 - [ ] npm run build 성공하는가?
+- [ ] `node scripts/qa/audit-a11y.mjs` · `audit-contrast.mjs` 가 0 인가?
 
 ---
 

@@ -303,9 +303,25 @@ M   ●          ●                ● +4w                          ● +8w
   W6-A 브리프(3화면)에도, 내가 넓힌 5화면에도 없던 화면이라 이 PR 에 끌어들이지 않았다. 별건.
   `/gallery`·`/privacy`·`/blog/tag/[tag]` 는 0건.
 
-**☐ W6-B · 접근성 기본** — F-E-02 · 노력 S
-- aria-label 12건 · 스킵 링크 · 본문 내 `<footer>`→`<div>`(`page.tsx:542`) · 햄버거 `aria-expanded`
-- Done: LH `button-name`·`label-content-name-mismatch` 통과
+**☑ W6-B · 접근성 기본** — F-E-02 · 노력 S — 2026-09-10 완료
+- Done: `node scripts/qa/audit-a11y.mjs`(axe-core, 8화면 × 2뷰포트) **8규칙 31건 → 0**.
+  주간 `site-audit` ⑬으로 연결. 계획의 Done 기준이던 `button-name`·`label-content-name-mismatch`
+  는 착수 시점에 **이미 위반 0** 이었다 — "aria-label 12건"도 실측 근거가 없어 폐기한다.
+- **계획서가 틀렸던 것**: 본문 내 `<footer>`(`blog/[slug]/page.tsx:644`)는 `<article>` 안이라
+  랜드마크가 아니다. HTML 사양대로 스코프가 잡혀 있어 고칠 것이 없다 — 그대로 뒀다.
+- **계획에 없던, 훨씬 큰 것**: `/blog` 의 글 카드 다섯 종류가 전부 `<div onClick={router.push}>`
+  였다. 라이브 실측 결과 **글로 가는 `<a href>` 가 0개** — 키보드로 어떤 글도 열 수 없었고,
+  검색 엔진 눈에는 블로그 허브가 어느 글로도 링크하지 않는 페이지였다(이 플랜의 목표에
+  정면으로 반한다). 다섯 개를 전부 `<Link>` 로 바꿔 **0 → 23개**.
+  axe 는 React 의 `onClick` 을 못 보므로, 스크립트가 그 링크 수를 직접 세어 회귀를 막는다.
+- 실측으로 잡은 나머지: `<main>` 중첩 3곳(privacy·매거진 기사·호 상세) · `<main>` 안의 `<aside>` ·
+  이름 없는 `<nav>` 4개 · FAQ 답변의 `role="region"`(문항 수만큼 랜드마크가 생겼다) ·
+  인스타 섹션이 `<main>` 밖이라 어떤 랜드마크에도 안 들어감(전 페이지) · 서가 h1→h3 건너뜀 ·
+  키보드로 못 가는 가로 스크롤 영역.
+- 스킵 링크 신설(`.skip-link`). `display:none` 으로 숨기면 포커스를 못 받아 죽으므로 화면 밖에
+  두었다가 `:focus` 에 끌어온다. 햄버거는 `aria-expanded`·`aria-controls` 를 얻었고,
+  라벨이 "Open menu" 로 고정이라 열린 뒤에도 "여세요" 라고 읽던 것을 상태에 따라 바꿨다.
+- `docs/DESIGN_RULES.md` §15.5 신설 — `<div onClick>` 금지·랜드마크 규칙·체크리스트 2줄.
 
 **☐ W6-C · 글 페이지 전환 장치** — F-E-04 · F-D-08 · 노력 S~M
 - 하단 블록 정리: Next Story + 이전/다음 → 1개, 관련글 유지 · `InlineSubscribeCTA` 본문 50% 부활 · `StoryPressSection` 을 Little 15 Mins·Home Learning 글에 · 트래킹 4종(인스타·기둥 셀·관련글·AI Insight) · `subscribers.source='storypress'` 세팅 · 404 에 검색창+인기글 3

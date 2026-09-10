@@ -161,7 +161,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 20px', flexShrink: 0 }} />
 
         {/* 네비 */}
-        <nav style={{ flex: 1, padding: '8px 10px' }}>
+        <nav aria-label="관리 메뉴" style={{ flex: 1, padding: '8px 10px' }}>
           {NAV.map((entry, idx) => {
             if (entry.type === 'group') {
               return (

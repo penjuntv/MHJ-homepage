@@ -82,6 +82,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
   return (
     <>
       <nav
+        aria-label="주 메뉴"
         className="fixed top-0 left-0 right-0 z-50 nav-backdrop"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
@@ -189,10 +190,13 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </IconBtn>
 
+            {/* 라벨이 "Open menu" 로 고정이면 메뉴가 열린 뒤에도 "여세요" 라고 읽어 준다. */}
             <button
               onClick={toggleMobile}
               style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '6px', padding: '4px' }}
-              aria-label="Open menu"
+              aria-label={mobileOpen ? '메뉴 닫기' : '메뉴 열기'}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
             >
               <span style={{ display: 'block', width: '24px', height: '2px', background: 'var(--text)', transition: 'all 0.3s', transform: mobileOpen ? 'rotate(45deg) translate(4px, 4px)' : 'none' }} />
               <span style={{ display: 'block', width: '24px', height: '2px', background: 'var(--text)', transition: 'all 0.3s', opacity: mobileOpen ? 0 : 1 }} />
@@ -205,6 +209,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
       {/* 모바일 풀스크린 메뉴 */}
       {mobileOpen && (
         <div
+          id="mobile-menu"
           className="fixed inset-0 z-40 flex flex-col items-center justify-center"
           style={{ gap: '24px', background: 'var(--bg)' }}
         >

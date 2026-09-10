@@ -97,10 +97,11 @@ export default function StoryPressFAQ() {
                 </button>
 
                 {/* 답변 */}
+                {/* role="region" 을 붙이면 FAQ 답변 하나하나가 랜드마크가 돼, 이름 조합이 겹치는
+                    랜드마크가 문항 수만큼 생긴다(axe landmark-unique). 여닫이는 버튼의
+                    aria-expanded·aria-controls 로 이미 전달된다 — 랜드마크일 필요가 없다. */}
                 <div
                   id={`faq-answer-${idx}`}
-                  role="region"
-                  aria-labelledby={`faq-question-${idx}`}
                   style={{
                     display: 'grid',
                     gridTemplateRows: isOpen ? '1fr' : '0fr',

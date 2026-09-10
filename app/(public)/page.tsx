@@ -452,8 +452,10 @@ export default async function LandingPage() {
               </div>
             </div>
 
-            {/* Right: Sidebar */}
-            <aside style={{ position: 'sticky', top: 80, alignSelf: 'start' }}>
+            {/* Right: Sidebar — <aside> 는 <main> 안에서 complementary 랜드마크로 잡혀
+                랜드마크가 중첩된다(axe landmark-complementary-is-top-level). 사이드바는
+                본문의 일부지 본문과 나란한 별개 영역이 아니다. */}
+            <div style={{ position: 'sticky', top: 80, alignSelf: 'start' }}>
               {/* About mini-card */}
               <div style={{
                 padding: 24,
@@ -579,7 +581,7 @@ export default async function LandingPage() {
                   ))}
                 </div>
               </div>
-            </aside>
+            </div>
           </div>
         </section>
 

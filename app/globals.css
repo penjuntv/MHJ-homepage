@@ -162,6 +162,29 @@
     overflow-wrap: break-word;
   }
 
+  /* ── 접근성: 본문 바로가기 (WCAG 2.4.1) ──
+     `display:none` 이나 `visibility:hidden` 으로 숨기면 **포커스 자체를 못 받아** 링크가 죽는다.
+     화면 밖으로 밀어 두었다가 포커스에 끌어온다. 네비가 z-50 fixed 라 그보다 위여야 가려지지 않는다. */
+  .skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 100;
+    transform: translateY(-200%);
+    padding: 12px 20px;
+    background: var(--bg-card);
+    color: var(--text);
+    border: 2px solid var(--accent);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 160ms ease;
+  }
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
   /* ── 접근성: 전역 focus-visible 링 (WCAG 2.4.7) ──
      키보드 포커스에만 표시(마우스 클릭엔 미표시).
      input/textarea 는 인라인 outline:none 을 쓰는 곳이 많아 box-shadow 로 보강

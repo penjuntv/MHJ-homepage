@@ -44,8 +44,9 @@ const liStyle: React.CSSProperties = {
 };
 
 export default function PrivacyPage() {
+  // 레이아웃의 <main> 안이라 여기서 또 <main> 을 쓰면 랜드마크가 중첩·중복된다.
   return (
-    <main
+    <div
       style={{
         maxWidth: 720,
         margin: '0 auto',
@@ -270,6 +271,6 @@ export default function PrivacyPage() {
           </a>
         </p>
       </section>
-    </main>
+    </div>
   );
 }
