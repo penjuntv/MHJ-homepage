@@ -537,7 +537,10 @@ transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 
 **`<div onClick>` 을 쓰지 않는다.** 이동하면 `<Link href>`, 동작하면 `<button>`.
 `role="link" tabIndex={0}` + `onKeyDown` 으로 흉내 내는 것도 마찬가지다 — 진짜 `<a href>` 는
-Space·가운데클릭·새 탭·컨텍스트 메뉴·크롤러를 전부 공짜로 준다.
+Enter·가운데클릭·새 탭·컨텍스트 메뉴·크롤러를 전부 공짜로 준다.
+
+⚠️ **`<a>` 는 Space 로 활성화되지 않는다**(Space 는 페이지를 스크롤한다). Space 로 눌려야 하는 것은
+`<button>` 이다. 그래서 "이동이냐 동작이냐"로 갈라야지, 둘을 바꿔 쓰면 키보드 계약이 달라진다.
 
 2026-09-10 이전 `/blog` 의 글 카드 다섯 종류가 전부 `<div onClick={router.push}>` 이었다.
 결과는 **키보드로 어떤 글도 열 수 없었고, HTML 에 `<a href="/blog/…">` 가 0개**였다 —
@@ -566,14 +569,22 @@ Space·가운데클릭·새 탭·컨텍스트 메뉴·크롤러를 전부 공짜
 ### 측정
 
 ```bash
+lsof -ti:3003 | xargs kill             # ⚠️ 3003 은 dev 포트다. dev 가 떠 있으면 먼저 끌 것 —
+                                       #    dev 중 build 는 CLAUDE.md 11 위반이고, dev 를 재게 된다
 npm run build && npx next start -p 3003 &
-node scripts/qa/audit-a11y.mjs      # axe-core + "글 링크가 실제로 있는가"
+node scripts/qa/audit-a11y.mjs      # axe-core + "글·카테고리 링크가 실제로 있는가"
 node scripts/qa/audit-contrast.mjs  # 대비는 이쪽 담당(§6.3)
 ```
 
 둘 다 위반이 있으면 종료 코드 1 이고, 주간 `site-audit` ⑫·⑬으로 돈다.
-**axe 는 React 의 `onClick` 을 볼 수 없다** — 위의 `<div onClick>` 문제는 axe 가 아니라
-`<a href>` 를 직접 세어 찾았다. 자동 검사가 0 이어도 그것이 전부는 아니다.
+
+**"위반 0" 이 "결함이 없다" 는 아니다.** 이 검사가 구조적으로 못 보는 것:
+- **React 의 `onClick`** — `<div onClick>` 문제는 axe 가 아니라 `<a href>` 를 직접 세어 찾았다.
+  `/gallery` 는 감사 대상이면서도 "위반 0" 이었는데, 사진 334장이 키보드로 안 열렸다.
+- **감사 목록에 없는 경로** — `/magazine/[id]`, `/blog/tag/…`, 404·에러 화면.
+- **열어야 보이는 것** — 모달·오버레이. 모바일 메뉴·검색·FAQ 세 가지만 열어 본다.
+- **`aria-*` 가 상태를 따라가는지** — axe 는 `aria-expanded` 가 붙어 있는지만 보지,
+  그 값이 실제 상태와 맞는지는 모른다.
 
 ---
 

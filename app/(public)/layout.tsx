@@ -52,7 +52,9 @@ export default async function PublicLayout({
       />
       {/* 인스타 섹션은 <main> **안**이어야 한다. 밖에 두면 어떤 랜드마크에도 안 들어가
           스크린리더가 "여기부터 무엇" 인지 말해 줄 수 없다(axe `region`, 전 페이지 16건). */}
-      <main id="main">
+      {/* tabIndex={-1} 이 없으면 Safari 는 프래그먼트 이동에 포커스를 옮기지 않는다 —
+          바로가기를 눌러도 다음 Tab 이 다시 네비 첫 링크로 돌아간다(자동 검사로는 안 잡힌다). */}
+      <main id="main" tabIndex={-1}>
         {children}
         <InstagramFeed instagramUrl={s.social_instagram || ''} />
       </main>

@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import SafeImage from './SafeImage';
-import { useRouter } from 'next/navigation';
 import type { Blog } from '@/lib/types';
 import { BLOG_CATEGORIES, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -48,7 +47,6 @@ export default function BlogLibrary({
   categoryIntro = null,
   startHere = [],
 }: Props) {
-  const router = useRouter();
 
   // 2026-09-08 P0-3-1: 페이지네이션이 ?page=N 쿼리에서 경로 세그먼트로 옮겨가면서
   // /blog 와 /blog/page/2 가 서로 다른 라우트 세그먼트가 됐다. 예전의
@@ -60,15 +58,6 @@ export default function BlogLibrary({
   function pageHref(category: string | null, page: number) {
     const slug = category ? (CATEGORY_TO_SLUG[category as BlogCategory] ?? null) : null;
     return `${listPagePath(slug, page)}#all-stories`;
-  }
-
-  function navigateTo(category: string | null, page: number) {
-    router.push(pageHref(category, page));
-  }
-
-  function handleCategoryChange(cat: string) {
-    const newCat = cat === 'All' ? null : cat;
-    navigateTo(newCat, 1);
   }
 
   const selectedCat = activeCategory ?? 'All';
@@ -173,7 +162,7 @@ export default function BlogLibrary({
       }}>
         <CategoryFilter
           selected={selectedCat}
-          onChange={handleCategoryChange}
+          hrefFor={(cat) => pageHref(cat === 'All' ? null : cat, 1)}
           totalCount={totalCount}
           categoryCounts={categoryCounts}
         />
@@ -197,12 +186,12 @@ export default function BlogLibrary({
             </p>
           )}
           {activeCategory && (
-            <button
-              onClick={() => handleCategoryChange('All')}
-              style={{ color: 'var(--accent)', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}
+            <Link
+              href={pageHref(null, 1)}
+              style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}
             >
               ← Browse all categories
-            </button>
+            </Link>
           )}
         </div>
       ) : (
@@ -238,9 +227,9 @@ export default function BlogLibrary({
 /* ════════════════════════════════════════════
    카테고리 필터 — Scrollable Pill Chips
    ════════════════════════════════════════════ */
-function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
+function CategoryFilter({ selected, hrefFor, totalCount, categoryCounts }: {
   selected: string;
-  onChange: (cat: string) => void;
+  hrefFor: (cat: string) => string;
   totalCount: number;
   categoryCounts: Record<string, number>;
 }) {
@@ -260,10 +249,11 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
         {(() => {
           const isActive = selected === 'All';
           return (
-            <button
+            <Link
               key="all"
-              onClick={() => onChange('All')}
+              href={hrefFor('All')}
               style={{
+                textDecoration: 'none',
                 padding: '6px 14px',
                 borderRadius: 8,
                 border: `1px solid ${isActive ? 'var(--text)' : 'var(--border-medium)'}`,
@@ -280,7 +270,7 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
               }}
             >
               All Stories ({totalCount})
-            </button>
+            </Link>
           );
         })()}
 
@@ -290,10 +280,11 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
           const count = categoryCounts[cat] ?? 0;
           const isEmpty = count === 0;
           return (
-            <button
+            <Link
               key={cat}
-              onClick={() => onChange(cat)}
+              href={hrefFor(cat)}
               style={{
+                textDecoration: 'none',
                 padding: '6px 14px',
                 borderRadius: 8,
                 border: `1px ${isEmpty ? 'dashed' : 'solid'} ${isActive ? 'var(--text)' : isEmpty ? 'var(--border)' : 'var(--border-medium)'
@@ -311,7 +302,7 @@ function CategoryFilter({ selected, onChange, totalCount, categoryCounts }: {
               }}
             >
               {cat}
-            </button>
+            </Link>
           );
         })}
       </div>
@@ -869,7 +860,7 @@ function Pagination({ currentPage, totalPages, hrefFor }: {
   const pages = getPageNumbers();
 
   return (
-    <div style={{
+    <nav aria-label="페이지 넘기기" style={{
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -936,6 +927,6 @@ function Pagination({ currentPage, totalPages, hrefFor }: {
           <ChevronRight size={16} />
         </Link>
       )}
-    </div>
+    </nav>
   );
 }

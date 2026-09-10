@@ -213,15 +213,20 @@ function navBtn(pos: 'top' | 'left' | 'right'): React.CSSProperties {
 }
 
 /* ─── 갤러리 카드 ─── */
+/* <div onClick> 이었다 — 키보드로는 어떤 사진도 열 수 없었다(라이트박스가 유일한 동작).
+   axe 는 React 의 onClick 을 못 봐서 /gallery 는 '위반 0' 으로 나왔다. */
 function GalleryCard({ photo, onClick }: { photo: GalleryPhoto; onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
+    <button
+      type="button"
+      aria-label={`${photo.title} 크게 보기`}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        border: 'none', padding: 0, font: 'inherit', textAlign: 'inherit', width: '100%',
         position: 'relative', borderRadius: 12, overflow: 'hidden', cursor: 'pointer',
         background: 'var(--bg-surface)',
         boxShadow: hovered ? '0 20px 44px rgba(0,0,0,0.14)' : '0 4px 16px rgba(0,0,0,0.06)',
@@ -281,6 +286,6 @@ function GalleryCard({ photo, onClick }: { photo: GalleryPhoto; onClick: () => v
           </p>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
