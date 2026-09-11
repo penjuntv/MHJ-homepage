@@ -1,9 +1,10 @@
 // PUBLIC_ROUTE_OK: 공개 검색. anon 키 + 발행 가드(blogs published·publish_at / articles article_status / magazines published) + 요청 제한.
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { tokenize, rankDocs, tokensIn, makeSnippet } from '@/lib/search-rank.mjs';
+import { tokenize, rankDocs, rankBlogHits, tokensIn, makeSnippet } from '@/lib/search-rank.mjs';
 import { BLOG_SEARCH_COLUMNS, BLOG_SEARCH_BODY_COLUMNS } from '@/lib/constants';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
+import type { Blog, Article, Magazine } from '@/lib/types';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://placeholder.supabase.co',
@@ -28,17 +29,29 @@ export interface SearchResponse {
 }
 
 const LIMIT = { blog: 8, article: 4, magazine: 3 } as const;
-
 /**
- * `.or()` 안의 ILIKE 값 — 큰따옴표로 인용해 , ( ) 가 필터 문법으로 읽히지 않게 한다(2026-09-08 W1-B).
- * 토큰은 글자·숫자뿐이라 지금은 메타문자가 없지만, 토큰 규칙이 바뀌어도 새지 않게 이스케이프는 남긴다.
+ * 후보 상한. 순위는 JS 가 매기므로 후보가 잘리면 정답이 통째로 빠진다 — 흔한 단어("school" 80%)는 발행 글 대부분에
+ * 걸린다. 정렬(id 역순)을 붙여 잘릴 때 무엇이 잘리는지 정해 두고, 상한은 발행 편수보다 넉넉히. 이 편수에 가까워지면
+ * 점수를 SQL 로 옮긴다(`lib/search-rank.mjs` 머리말).
  */
-const ilike = (t: string) => `"%${t.replace(/[%_*\\"]/g, (m) => '\\' + m)}%"`;
+const CANDIDATES = 500;
+/** 분당 검색 수(IP·인스턴스별). 모바일은 글자마다, 한글 IME 는 자모마다 요청이 나가 검색어 하나에 15번 남짓이다. */
+const PER_MINUTE = 120;
 
-type BlogRow = {
-  id: number; title: string; slug: string; category: string; tags: string[] | null;
-  meta_description: string | null; date: string; image_url: string | null; view_count: number | null;
-};
+// 토큰은 글자·숫자뿐이다(tokenize 가 보장하고 test-search-rank 가 단언) — 필터 문법 문자가 섞일 수 없어 인용만 한다.
+const ilike = (t: string) => `"%${t}%"`;
+/**
+ * 본문 칸: **태그 밖 글자**에서 **단어 앞머리**로 나올 때만(POSIX 정규식, `\m` = 단어 시작).
+ * 원문 HTML 에 ILIKE 를 걸면 이미지 URL 의 타임스탬프가 "7" 에(47편 → 보이는 글자 17편), class/style 이
+ * "strong"(70 → 5)·"data"(40 → 0)에, 단어 속 "nz"(71 → 11)가 걸려 가짜 결과가 된다.
+ */
+const bodyMatch = (t: string) => `"(^|>)[^<]*\\\\m${t}"`;
+
+type BlogRow = Pick<Blog, 'id' | 'title' | 'slug' | 'category' | 'tags' | 'meta_description' | 'date' | 'image_url' | 'view_count'>;
+type ArticleRow = Pick<Article, 'id' | 'title' | 'content' | 'date' | 'image_url' | 'magazine_id'>;
+type MagazineRow = Pick<Magazine, 'id' | 'title' | 'year' | 'month_name' | 'image_url'>;
+
+const noStore = { 'Cache-Control': 'no-store' };
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q')?.trim() ?? '';
@@ -46,70 +59,70 @@ export async function GET(req: NextRequest) {
   if (q.length < 2 || tokens.length === 0) {
     return NextResponse.json<SearchResponse>({ results: [], total: 0, query: q });
   }
-  // 한 번의 검색이 토큰 × 칸 ILIKE 를 여러 번 돈다(인덱스 없는 순차 스캔). 타이핑은 300ms 디바운스라 사람은 분당
-  // 수십 번이 한계다 — 그 이상은 자동화로 보고 늦춘다(인스턴스별 완화책, lib/rate-limit).
-  if (!rateLimit.take(`search:${clientIp(req)}`, 60, 60_000)) {
-    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  // 인스턴스별 완화책(lib/rate-limit) — 진짜 방어는 아래 CDN 캐시다(같은 검색어는 함수까지 오지 않는다).
+  if (!rateLimit.take(`search:${clientIp(req)}`, PER_MINUTE, 60_000)) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429, headers: { ...noStore, 'Retry-After': '60' } });
   }
-  const now = new Date().toISOString();
+  // 예약발행 가드(CLAUDE.md 3). 아래에서 .or 를 두 번 체이닝하면 AND — 가드 AND 검색어 매치.
+  const scheduled = `publish_at.is.null,publish_at.lte.${new Date().toISOString()}`;
 
-  // ① 토큰마다 "어느 칸에든 걸리는 글" — 어느 토큰이 어느 글에 걸렸는지 알아야 여러 단어를 순위 매길 수 있다.
-  //    본문은 거르기만 하고 싣지 않는다. 태그는 배열이라 ILIKE 가 안 돼 **같은 원소**만(원소 안 부분 매치는 순위에서 본다).
-  const blogQueries = tokens.map((t) =>
-    supabase
-      .from('blogs')
-      .select(BLOG_SEARCH_COLUMNS)
-      .eq('published', true)
-      // .or 2회 체이닝은 AND — 예약발행 가드 AND 검색어 매치
-      .or(`publish_at.is.null,publish_at.lte.${now}`)
-      .or(`title.ilike.${ilike(t)},content.ilike.${ilike(t)},meta_description.ilike.${ilike(t)},category.ilike.${ilike(t)},tags.cs.{"${t}"}`)
-      .limit(100));
+  // ① 글 후보 — 토큰 하나라도 어느 칸에든 걸리는 글을 한 번에(가벼운 칸만). 태그는 배열이라 같은 원소만 거른다
+  //    (하이픈 태그 "year-7" 은 구절 꼴로 따로 넣는다. 원소 안 부분 매치는 순위에서 본다).
+  const tagTerms = [...tokens, ...(tokens.length > 1 ? [tokens.join('-')] : [])];
+  const candidates = supabase.from('blogs').select(BLOG_SEARCH_COLUMNS)
+    .eq('published', true).or(scheduled)
+    .or([
+      ...tokens.flatMap((t) => [`title.ilike.${ilike(t)}`, `meta_description.ilike.${ilike(t)}`, `category.ilike.${ilike(t)}`, `content.imatch.${bodyMatch(t)}`]),
+      `tags.ov.{${tagTerms.map((t) => `"${t}"`).join(',')}}`,
+    ].join(','))
+    .order('id', { ascending: false })
+    .limit(CANDIDATES);
+  // ② 토큰마다 본문에 걸린 글의 id 만 — 여러 단어의 "모두 걸림"을 가리려면 어느 토큰이 본문에 있는지 알아야 한다.
+  const bodyHitQueries = tokens.map((t) =>
+    supabase.from('blogs').select('id')
+      .eq('published', true).or(scheduled)
+      .or(`content.imatch.${bodyMatch(t)}`)
+      .limit(CANDIDATES));
   const articleQuery = supabase
     .from('articles')
     .select('id, title, content, date, image_url, magazine_id')
     // 공개 페이지 5곳과 같은 발행 가드 — 없으면 초안 기사 제목·본문이 검색으로 샌다
     .eq('article_status', 'published')
-    .or(tokens.flatMap((t) => [`title.ilike.${ilike(t)}`, `content.ilike.${ilike(t)}`]).join(','))
-    .limit(30);
+    .or(tokens.flatMap((t) => [`title.ilike.${ilike(t)}`, `content.imatch.${bodyMatch(t)}`]).join(','))
+    .order('id', { ascending: false })
+    .limit(50);
   const magazineQuery = supabase
     .from('magazines')
     .select('id, title, year, month_name, image_url')
     // 공개 서가·홈과 같은 발행 가드 — 검색만 빠져 있어 초안 호의 제목이 샐 자리였다(2026-09-11 W6-D)
     .eq('published', true)
     .or(tokens.map((t) => `title.ilike.${ilike(t)}`).join(','))
+    // 동점(제목에 같은 단어)이면 최신 호가 먼저 — 순위 정렬은 안정 정렬이라 이 순서를 지킨다
+    .order('created_at', { ascending: false })
     .limit(10);
 
-  const [articlesRes, magazinesRes, ...blogRes] = await Promise.all([articleQuery, magazineQuery, ...blogQueries]);
-  const failed = [articlesRes, magazinesRes, ...blogRes].find((r) => r.error);
+  const [blogsRes, articlesRes, magazinesRes, ...bodyRes] = await Promise.all([candidates, articleQuery, magazineQuery, ...bodyHitQueries]);
+  const failed = [blogsRes, articlesRes, magazinesRes, ...bodyRes].find((r) => r.error);
   if (failed?.error) {
     // 예전엔 에러를 삼켜 빈 배열을 돌려줬다 — 사용자에겐 "결과 없음" 과 똑같이 보였다.
     console.error('search:', failed.error.message);
-    return NextResponse.json({ error: 'search_failed' }, { status: 500 });
+    return NextResponse.json({ error: 'search_failed' }, { status: 500, headers: noStore });
   }
 
-  // ② 글 — 토큰별 결과를 합치며 어느 토큰에 걸렸는지 모은다
-  const byId = new Map<number, BlogRow & { matched: Set<string> }>();
-  blogRes.forEach((res, i) => {
-    for (const row of (res.data ?? []) as unknown as BlogRow[]) {
-      const hit = byId.get(row.id) ?? { ...row, matched: new Set<string>() };
-      hit.matched.add(tokens[i]);
-      byId.set(row.id, hit);
-    }
-  });
-  const topBlogs = rankDocs(
-    [...byId.values()].map((b) => ({ ...b, meta: b.meta_description })),
-    tokens,
-  ).slice(0, LIMIT.blog) as (BlogRow & { meta: string | null })[];
+  const bodyHits = bodyRes.map((r) => new Set((r.data ?? []).map((x) => x.id)));
+  const topBlogs = rankBlogHits((blogsRes.data ?? []) as BlogRow[], bodyHits, tokens).slice(0, LIMIT.blog);
 
-  // ③ 스니펫용 본문은 최종 상위 몇 편만
+  // ③ 스니펫용 본문은 최종 상위 몇 편만 — 이 조회도 발행 가드를 건다(CLAUDE.md 3)
   const bodies = new Map<number, string>();
   if (topBlogs.length) {
-    const { data, error } = await supabase.from('blogs').select(BLOG_SEARCH_BODY_COLUMNS).in('id', topBlogs.map((b) => b.id));
+    const { data, error } = await supabase.from('blogs').select(BLOG_SEARCH_BODY_COLUMNS)
+      .eq('published', true).or(scheduled)
+      .in('id', topBlogs.map((b) => b.id));
     if (error) {
       console.error('search(body):', error.message);
-      return NextResponse.json({ error: 'search_failed' }, { status: 500 });
+      return NextResponse.json({ error: 'search_failed' }, { status: 500, headers: noStore });
     }
-    for (const row of (data ?? []) as unknown as { id: number; content: string }[]) bodies.set(row.id, row.content);
+    for (const row of data ?? []) bodies.set(row.id, row.content);
   }
 
   const results: SearchResult[] = topBlogs.map((b) => ({
@@ -123,11 +136,10 @@ export async function GET(req: NextRequest) {
     image_url: b.image_url ?? undefined,
   }));
 
-  type ArticleRow = { id: number; title: string; content: string; date: string; image_url: string | null; magazine_id: string };
   const articles = rankDocs(
     ((articlesRes.data ?? []) as ArticleRow[]).map((a) => ({ ...a, matched: tokensIn([a.content], tokens) })),
     tokens,
-  ).slice(0, LIMIT.article) as ArticleRow[];
+  ).slice(0, LIMIT.article);
   for (const a of articles) {
     results.push({
       id: String(a.id),
@@ -140,8 +152,7 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  type MagazineRow = { id: string; title: string; year: string; month_name: string; image_url: string | null };
-  const magazines = rankDocs((magazinesRes.data ?? []) as MagazineRow[], tokens).slice(0, LIMIT.magazine) as MagazineRow[];
+  const magazines = rankDocs((magazinesRes.data ?? []) as MagazineRow[], tokens).slice(0, LIMIT.magazine);
   for (const m of magazines) {
     results.push({
       id: String(m.id),
@@ -153,5 +164,9 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return NextResponse.json<SearchResponse>({ results, total: results.length, query: q });
+  return NextResponse.json<SearchResponse>({ results, total: results.length, query: q }, {
+    // 같은 검색어는 CDN 이 1분 들고 있다 — 타이핑 중 되돌아온 검색어·여러 사람의 같은 검색이 Supabase 까지 가지 않는다.
+    // 새 글이 검색에 뜨는 데 최대 몇 분 늦는 것은 받아들인다(목록·상세는 revalidate 로 즉시).
+    headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
+  });
 }

@@ -160,6 +160,17 @@ jobs:
         timeout-minutes: 12
         run: node scripts/qa/audit-a11y.mjs --base=https://www.mhj.nz
 
+      # W6-D(2026-09-11). 사람이 정한 정답(제목 패턴)으로 상위 3개를 채점 — 순위 규칙이 퇴행하면 실패.
+      # 쿼리 15개라 검색 요청 제한(분당 120)에 닿지 않는다.
+      - name: ⑭ 검색 관련도 (판정표 15쿼리 — 1위 정답 ≥ 0.9 · rel@3 ≥ 0.9)
+        id: search
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/qa/search-relevance.mjs --base=https://www.mhj.nz
+
       - name: 잘림 스크린샷 보관 (실패 시)
         if: ${{ failure() && steps.overflow.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
