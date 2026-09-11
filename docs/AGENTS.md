@@ -63,6 +63,7 @@
 | seo-audit-runner | 2026-05-30 | 발행 콘텐츠 SEO 감사 보고서 자동 생성 |
 | internal-link-suggester | 2026-05-30 | 발행 시 내부 링크 후보 추천 |
 | fact-verify | 2026-06-27 | 발행 전 사실 검증 게이트 (원본 `.agents/skills/`, `.claude/skills/` 는 심볼릭 링크) |
+| verify | 2026-09-11 | 로컬 실행·실측 레시피 — 워크트리 셋업, 서버 기동 패턴, 매거진 네 갈래·fixture, 하면 안 되는 것(`/verify` 용) |
 
 ### 위치 규칙
 - **원본이 `.agents/skills/` 인 스킬**: frontend-design · fact-verify. `.claude/skills/` 쪽은 심볼릭 링크(git mode 120000)다 — 원본을 지우면 링크가 전부 깨진다.
