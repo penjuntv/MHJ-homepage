@@ -1,5 +1,7 @@
 'use client';
 
+import { trackEvent } from './analytics';
+
 /**
  * MHJ 1st-party 분석 — 클라이언트 전송 헬퍼.
  *
@@ -33,7 +35,8 @@ export type TrackEventType =
   | 'engagement'
   | 'scroll'
   | 'read_complete'
-  | 'outbound';
+  | 'outbound'
+  | 'click';
 
 export interface TrackPayload {
   type: TrackEventType;
@@ -91,5 +94,19 @@ function buildBody(payload: TrackPayload): string {
     path: payload.path ?? window.location.pathname,
     sessionId: getSessionId(),
     referrer: document.referrer || '',
+  });
+}
+
+/**
+ * 클릭 한 번을 GA4 이벤트 + 1st-party `click` 으로 **같은 이름·같은 모양**으로 남긴다.
+ * `OutboundLinkTracker` 의 `data-track` 위임과, 폼 제출처럼 클릭 위임으로 잡히지 않는 곳이 함께 쓴다.
+ * 1st-party 쪽은 `meta.name` 에 이벤트명이 들어간다(`page_events.event_type = 'click'`). 2026-09-11 W6-C.
+ */
+export function trackClick(name: string, params: Record<string, string | number> = {}): void {
+  trackEvent(name, params);
+  sendEvent({
+    type: 'click',
+    path: typeof window !== 'undefined' ? window.location.pathname : undefined,
+    meta: { name, ...params },
   });
 }

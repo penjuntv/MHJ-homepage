@@ -27,14 +27,15 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
     const res = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name: compact ? '' : name }),
+      // 어느 CTA 에서 가입했는지 남긴다 — 이게 없어 구독자 15명 중 12명의 출처가 null 이었다(2026-09-11 W6-C).
+      body: JSON.stringify({ email, name: compact ? '' : name, source: location || 'unknown' }),
     });
 
     if (res.ok) {
       setStatus('success');
       setEmail('');
       setName('');
-      trackEvent('newsletter_subscribe', { source: compact ? 'sidebar' : 'cta' });
+      trackEvent('newsletter_subscribe', { source: location || 'unknown' });
       const utmSource = typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search).get('utm_source') || 'direct'
         : 'direct';

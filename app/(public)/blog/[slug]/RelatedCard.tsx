@@ -5,10 +5,13 @@ import Link from 'next/link';
 import type { Blog } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 
-export default function RelatedCard({ blog }: { blog: Blog }) {
+export default function RelatedCard({ blog, position }: { blog: Blog; position?: number }) {
   return (
     <Link
       href={`/blog/${blog.slug}`}
+      data-track="related_click"
+      data-track-slug={blog.slug}
+      data-track-position={position}
       className="related-card"
       style={{
         display: 'block',

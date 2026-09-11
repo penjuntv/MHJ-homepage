@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
 
   const { error } = await supabase
     .from('subscribers')
-    .insert({ email: email.trim().toLowerCase(), name: name?.trim() || null, source: source?.trim() || null });
+    // source 는 클라이언트가 보내는 위치 라벨(`blog_mid` 등) — 길이만 묶는다(임의 문자열이 컬럼에 쌓이지 않게).
+    .insert({ email: email.trim().toLowerCase(), name: name?.trim() || null, source: source?.trim().slice(0, 64) || null });
 
   if (error) {
     if (error.code === '23505') {

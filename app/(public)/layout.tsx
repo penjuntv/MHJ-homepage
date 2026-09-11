@@ -6,6 +6,7 @@ import { getSiteSettings } from '@/lib/site-settings';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import OutboundLinkTracker from '@/components/OutboundLinkTracker';
 import AnalyticsBeacon from '@/components/AnalyticsBeacon';
+import { GA_ID } from '@/lib/analytics';
 
 export const metadata: Metadata = {
   verification: {
@@ -70,7 +71,7 @@ export default async function PublicLayout({
       />
       <OutboundLinkTracker />
       <AnalyticsBeacon />
-      <GoogleAnalytics gaId="G-326N3JJFGN" />
+      <GoogleAnalytics gaId={GA_ID} />
     </>
   );
 }

@@ -32,9 +32,11 @@ const QUICK_LINKS = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** 바깥 폼(404 검색칸 등)에서 검색어를 들고 열 때. 열리자마자 그 검색어로 찾는다. */
+  initialQuery?: string;
 }
 
-export default function SearchOverlay({ open, onClose }: Props) {
+export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   useFocusTrap(containerRef, open);
@@ -83,6 +85,13 @@ export default function SearchOverlay({ open, onClose }: Props) {
       setLoading(false);
     }
   }, []);
+
+  // 404 처럼 바깥 폼에서 검색어를 들고 여는 경우 — 입력칸을 채우고 바로 찾는다(결과 렌더는 이 오버레이 하나뿐).
+  useEffect(() => {
+    if (!open || !initialQuery) return;
+    setQuery(initialQuery);
+    doSearch(initialQuery);
+  }, [open, initialQuery, doSearch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;

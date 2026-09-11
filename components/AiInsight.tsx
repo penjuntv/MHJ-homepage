@@ -44,6 +44,8 @@ export default function AiInsight({ blogId }: Props) {
       {!insight && (
         <button
           onClick={handleGenerate}
+          data-track="ai_insight_click"
+          data-track-blog_id={blogId}
           disabled={loading}
           style={{
             display: 'inline-flex',

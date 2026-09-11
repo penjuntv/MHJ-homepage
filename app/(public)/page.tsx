@@ -10,6 +10,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import { formatDate } from '@/lib/utils';
 import { getSiteSettings } from '@/lib/site-settings';
 import { PILLARS } from '@/lib/pillars';
+import { getPopularPosts } from '@/lib/popular-posts';
 import { BLOG_CARD_COLUMNS, categoryHref } from '@/lib/constants';
 
 export const revalidate = 300;
@@ -90,22 +91,9 @@ async function getLatestPosts(excludeIds: number[]): Promise<Blog[]> {
 }
 
 async function getMostReadBlogs(excludeIds: number[]): Promise<Blog[]> {
-  const now = new Date().toISOString();
-  let query = supabase
-    .from('blogs')
-    .select('id, title, category, slug')
-    .eq('published', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('view_count', { ascending: false })
-    .order('id', { ascending: false })
-    .limit(10);
-
-  if (excludeIds.length) {
-    query = query.not('id', 'in', `(${excludeIds.join(',')})`);
-  }
-
-  const { data } = await query;
-  return ((data ?? FALLBACK_BLOGS) as Blog[]).slice(0, 5);
+  // 조회 기준은 404 와 공유(lib/popular-posts). 실패(null)일 때만 고정 목록으로 떨어진다 — 예전 동작 그대로.
+  const rows = await getPopularPosts({ limit: 10, excludeIds });
+  return ((rows ?? FALLBACK_BLOGS) as Blog[]).slice(0, 5);
 }
 
 async function getCommentCounts(blogIds: number[]): Promise<Record<number, number>> {
@@ -387,7 +375,14 @@ export default async function LandingPage() {
               // 셀이 보여주는 최신 글의 카테고리 허브로 — 제목과 목적지가 일치한다. 글이 없으면 기둥 기본 허브.
               const href = latest ? categoryHref(latest.category) : `/blog/category/${pillar.hubSlug}`;
               return (
-                <Link key={pillar.id} href={href} className="pillar-cell">
+                <Link
+                  key={pillar.id}
+                  href={href}
+                  className="pillar-cell"
+                  data-track="pillar_click"
+                  data-track-pillar={pillar.id}
+                  data-track-destination={href}
+                >
                   <h3 className="pillar-name">{pillar.name}</h3>
                   {subtitle && <p className="pillar-subtitle">{subtitle}</p>}
                   {latest ? (

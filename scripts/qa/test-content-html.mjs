@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import {
   stripHtml, readingMinutes, slugifyHeading, addHeadingIds,
   wrapKeyTakeaways, sanitizeFaq, toParagraphs, isTakeawaysHeading,
-  absolutizeUrls, imageMimeOf, htmlToMarkdown, stripXmlIllegal,
+  absolutizeUrls, imageMimeOf, htmlToMarkdown, stripXmlIllegal, splitForMidInsert,
 } from '../../lib/content-html.mjs';
 
 let failed = 0;
@@ -156,6 +156,52 @@ check('마크다운 — script/style 은 통째로 제거',
 check('마크다운 — 빈 입력', [htmlToMarkdown(''), htmlToMarkdown(null)], ['', '']);
 check('마크다운 — 문단 사이 빈 줄이 3줄 이상 되지 않는다',
   /\n{3,}/.test(htmlToMarkdown('<p>a</p><p></p><p></p><p>b</p>')), false);
+
+
+// ── splitForMidInsert — 본문 중간 구독 CTA 자리. 81편 전부를 지나가므로 경계 규칙을 케이스로 못 박는다.
+const P = (t) => `<p>${t}</p>`;
+const L = (c) => P(`${c} `.repeat(20).trim());   // 39자 문단 — 비율 계산을 예측 가능하게
+{
+  const six = [1, 2, 3, 4, 5, 6].map((n) => P(`${'word '.repeat(10)}${n}`)).join('');
+  const r = splitForMidInsert(six);
+  check('중간 분할 — 이어 붙이면 원문 그대로', r && r.join(''), six);
+  check('중간 분할 — 같은 길이 6문단이면 3/3', r && (r[0].match(/<p>/g) || []).length, 3);
+}
+check('중간 분할 — 문단 4개는 짧은 글(null)', splitForMidInsert([1, 2, 3, 4].map((n) => P(`x ${n}`)).join('')), null);
+check('중간 분할 — 빈 입력', [splitForMidInsert(''), splitForMidInsert(null)], [null, null]);
+{
+  const html = L('a') + L('b') + '<blockquote><p>q1 q1 q1</p><p>q2 q2 q2</p></blockquote>' + L('c') + L('d') + L('e');
+  const r = splitForMidInsert(html);
+  check('인용 **안의** 문단 사이는 경계가 아니다 — 인용 밖에서만 자른다', r && r[1], L('d') + L('e'));
+  check('인용 포함 — 이어 붙이면 원문', r && r.join(''), html);
+}
+check('목록 안의 문단 사이도 경계가 아니다',
+  splitForMidInsert(L('a') + L('b') + '<ul><li><p>l1</p></li><li><p>l2</p></li></ul>' + L('c') + L('d') + L('e'))?.[1],
+  L('d') + L('e'));
+{
+  const html = L('a') + L('b') + L('c') + L('d') + '<h2 id="x">Heading</h2>' + L('e') + L('f') + L('g');
+  const r = splitForMidInsert(html);
+  check('제목과 그 첫 문단 사이는 끊지 않는다 — 양옆이 모두 문단인 곳만', r && r[0].endsWith('</h2>'), false);
+  check('구간 안의 문단 사이에서 자른다', r && r[0], L('a') + L('b') + L('c'));
+}
+check('Key takeaways 박스 직후는 끊지 않는다',
+  splitForMidInsert(L('a') + L('b') + '<aside class="blog-takeaways"><h2>Key takeaways</h2><ul><li>x</li></ul></aside>' + L('c') + L('d') + L('e'))?.[1],
+  L('d') + L('e'));
+check('자리가 한쪽 끝으로 몰리는 글은 null — 끝에 둔다(허용 구간 30~70%)',
+  splitForMidInsert(P('a'.repeat(1000)) + P('b') + P('c') + P('d') + P('e')), null);
+check('짝이 안 맞는 HTML 은 건드리지 않는다(null)',
+  splitForMidInsert(P('a') + P('b') + '<div>' + P('c') + P('d') + P('e') + P('f')), null);
+{
+  // 39자 문단으로 둘러싸 후보가 허용 구간 안에 들게 한다(짧은 문단이면 구간 밖이라 null 이 정답이 된다).
+  const h = L('a') + L('b') + `<p><img alt="1 > 0" src="x.png"> ${'c '.repeat(20).trim()}</p>` + L('d') + L('e') + L('f');
+  const r = splitForMidInsert(h);
+  check('속성 따옴표 안의 > 가 있어도 무손실로, </p> 경계에서 자른다', r && r.join('') === h && r[0].endsWith('</p>'), true);
+}
+check('빈 문단은 세지 않는다(글자 있는 문단 3 → null)',
+  splitForMidInsert(P('a') + '<p></p>' + P('b') + '<p></p>' + P('c') + '<p></p>'), null);
+check('주석은 깊이에 넣지 않는다',
+  splitForMidInsert('<!-- x -->' + [1, 2, 3, 4, 5, 6].map((n) => P(`w ${n}`)).join(''))?.join(''),
+  '<!-- x -->' + [1, 2, 3, 4, 5, 6].map((n) => P(`w ${n}`)).join(''));
 
 console.log(failed ? `\n🔴 ${failed} 실패` : '\n✅ 전부 통과');
 process.exit(failed ? 1 : 0);
