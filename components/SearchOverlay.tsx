@@ -45,6 +45,8 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 검색 요청 순번 — 늦게 도착한 옛 응답이 새 결과를 덮거나, 닫힌 뒤 도착해 다음에 열 때 번쩍이지 않게.
+  const searchSeq = useRef(0);
 
   // ESC 닫기
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
       setTimeout(() => inputRef.current?.focus(), 80);
     } else {
       document.body.style.overflow = '';
+      searchSeq.current += 1;   // 날아가는 중인 응답은 버린다
       setQuery('');
       setResults([]);
       setSearched(false);
@@ -70,19 +73,21 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
   }, [open]);
 
   const doSearch = useCallback(async (q: string) => {
+    const seq = ++searchSeq.current;
     if (q.length < 2) { setResults([]); setSearched(false); return; }
     setLoading(true);
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       const data = await res.json();
+      if (seq !== searchSeq.current) return;
       const found = data.results ?? [];
       setResults(found);
       setSearched(true);
       trackEvent('search', { search_term: q, results_count: found.length });
     } catch {
-      setResults([]);
+      if (seq === searchSeq.current) setResults([]);
     } finally {
-      setLoading(false);
+      if (seq === searchSeq.current) setLoading(false);
     }
   }, []);
 

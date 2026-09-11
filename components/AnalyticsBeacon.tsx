@@ -13,7 +13,10 @@ import { sendEvent, sendBeaconEvent } from '@/lib/first-party';
  *
  * (public)/layout.tsx 에 마운트. 쿠키리스·익명(sessionStorage sid).
  */
-export default function AnalyticsBeacon() {
+export default function AnalyticsBeacon({ pageMeta }: {
+  /** pageview 에 덧붙일 표시 — 루트 404 는 `{ status: 404 }`. 없으면 인기 페이지 집계에 깨진 URL 이 진짜 방문처럼 섞인다. */
+  pageMeta?: Record<string, string | number | boolean>;
+} = {}) {
   const pathname = usePathname();
 
   // 현재 경로의 체류시간 누적 상태
@@ -31,7 +34,7 @@ export default function AnalyticsBeacon() {
     accumMs.current = 0;
     activeStart.current = document.visibilityState === 'visible' ? Date.now() : null;
 
-    sendEvent({ type: 'pageview', path: pathname });
+    sendEvent({ type: 'pageview', path: pathname, meta: pageMeta });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 

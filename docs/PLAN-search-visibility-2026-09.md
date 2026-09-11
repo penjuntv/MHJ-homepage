@@ -341,7 +341,8 @@ M   ●          ●                ● +4w                          ● +8w
 - **추적**: `data-track` 속성 + `OutboundLinkTracker` 전역 위임 한 곳 — 서버 컴포넌트(홈 기둥 셀)에도 붙는다.
   새 이벤트 8종(`instagram_follow_click` · `pillar_click` · `related_click` · `next_read_click` · `ai_insight_click` ·
   `storypress_click` · `not_found_search` · `not_found_popular_click`)이 GA4 와 `page_events(event_type='click')` 에 같은 이름으로.
-  외부 링크 판정이 `*.mhj.nz` 를 전부 내부로 봐서 **app.mhj.nz(StoryPress 앱) 클릭이 어디에도 안 남던 것**도 고쳤다.
+  외부 링크 판정이 `*.mhj.nz` 를 전부 내부로 봐서 **app.mhj.nz(StoryPress 앱) 클릭이 outbound 로는 한 번도 안 남던 것**
+  (/storypress 페이지의 `cta_click` 만 GA 에 있었다)도 고쳤다. `data-track` 외부 링크는 이름 있는 이벤트 하나로만 센다.
 - **Done 검증 방법**: GA 수집 요청을 **가로채 막고**(실제 속성에 테스트 이벤트를 흘리지 않는다) 두 가지로 확인 —
   `window.dataLayer` 에 각 이벤트가 **정확히 한 번** 들어가는지(결정적), GA 가 실제로 보내려던 요청의 `en=` 값.
   GA 는 몇 초 모아 보내므로 3.5초 대기로는 안 보이고 7초에 전부 보였다. **GA4 가 실제로 받았는지는 배포 후
@@ -353,7 +354,18 @@ M   ●          ●                ● +4w                          ● +8w
 - **계획서 문구가 틀렸던 것**: 이전/다음의 `id` 순 정렬은 이미 `date` 순으로 고쳐져 있었다 · StoryPress 는 이메일 폼이 없고
   CTA 가 외부 앱이라 `source='storypress'` 는 생길 수 없다 · `InlineSubscribeCTA` 는 하드코딩 색·`<aside>`·단순 `</p>` 분할이라
   되살릴 수 없는 상태 → 삭제하고 `NewsletterCTA` 로 일원화.
-- 검증: axe·대비 0(홈·목록·글 2종 × 2테마 × 2뷰포트, 404 두 종) · `test-content-html` 신규 17케이스 · 3화면 × 2테마 스크린샷.
+- **코드리뷰 3각도 반영**: 분할기의 태그 정규식이 안 닫힌 `<a ` 입력에서 **제곱 시간**(200KB 에 12초 — ISR 재생성 때
+  이벤트 루프를 막는다) → 앞으로 한 번만 훑는 토크나이저로 교체 · 떠 있는 사진이 CTA 상자로 번짐 → `clear` ·
+  `data-track` 외부 링크가 이벤트 두 개로 **이중 집계** → 이름 있는 이벤트 하나 + `link_url` · 루트 404 는 빌드 때 정적으로
+  굳어 인기글이 배포 전까지 안 바뀜 → `/blog` Most Read 캐시(태그 `blogs`)를 재사용 · 매거진 렌더러(`app/internal`)의
+  notFound() 도 루트 404 로 와 GA·방문 기록이 붙던 것 → 분석 도구를 **공개 경로에서만** 켜는 경로 게이트(`PublicPathGate`).
+  세그먼트 not-found 로 막으려 했지만 `?token=` 인가 요청으로 재현해 보니 `app/internal/`·`app/internal/render/` 어디에 둬도
+  루트 404 가 떴다 — 어느 404 가 뜨든 상관없게 경로로 막았다 · 루트 404 pageview 는
+  `meta.status=404`(앱 안 `notFound()` 404 는 공용 레이아웃 비콘이라 표시 없음 — 한계로 남김) · 404 검색어를 1st-party
+  DB 에 쌓지 않음 · 가입 출처 허용 목록(밖이면 `other`) · `newsletter_subscribe` 의 키를 `location` 으로(utm `source` 와 한
+  칸에 섞이지 않게) · 새 blogs 조회도 컬럼 상수로(anon grant 가드 안) · 쓰지 않던 `StoryPressSection` 삭제 · 분석 도구
+  한 벌 `AnalyticsShell` · 협찬 글엔 StoryPress 카드 안 붙임.
+- 검증: axe·대비 0(홈·목록·글 2종 × 2테마 × 2뷰포트, 404 두 종) · `test-content-html` 분할기 21케이스 · 3화면 × 2테마 스크린샷.
 - **사용자 몫**: GA4 맞춤 측정기준에 새 파라미터 등록 · 관리자 설정 `storypress_cta_text` 가 아직 **"Join the Waitlist"**
   (앱은 이미 열려 있다 — 글 안 카드에 그대로 보인다).
 

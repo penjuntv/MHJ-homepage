@@ -10,7 +10,7 @@ import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import StoryPressPostCard from '@/components/StoryPressPostCard';
 import { getSiteSettings } from '@/lib/site-settings';
-import { BLOG_DETAIL_COLUMNS, BLOG_RELATED_COLUMNS, categoryHref } from '@/lib/constants';
+import { BLOG_DETAIL_COLUMNS, BLOG_RELATED_COLUMNS, categoryHref, BLOG_ADJACENT_COLUMNS, isStoryPressCardCategory } from '@/lib/constants';
 import { getNZSeasonLabel } from '@/lib/date-helpers';
 import { optimizeContentImages, nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 import ViewTracker from './ViewTracker';
@@ -38,9 +38,6 @@ export async function generateStaticParams() {
   return (data ?? []).map((b) => ({ slug: b.slug }));
 }
 
-/** StoryPress 카드를 붙이는 카테고리 — 아이 영어·학습 글(2026-09-11 W6-C). */
-const STORYPRESS_CATEGORIES = new Set(['Little 15 Mins', 'Home Learning']);
-
 type AdjacentPost = { id: number; title: string; slug: string; image_url: string | null; date: string };
 
 async function getAdjacentBlogs(current: { id: number; date: string }): Promise<{
@@ -55,7 +52,7 @@ async function getAdjacentBlogs(current: { id: number; date: string }): Promise<
     const ascending = dir === 'next';
     return supabase
       .from('blogs')
-      .select('id, title, slug, image_url, date')
+      .select(BLOG_ADJACENT_COLUMNS)
       .eq('published', true)
       .or(`publish_at.is.null,publish_at.lte.${now}`)
       .or(`date.${op}."${current.date}",and(date.eq."${current.date}",id.${op}.${current.id})`)
@@ -255,6 +252,8 @@ export default async function BlogDetailPage(
   // 구독 CTA 를 본문 중간으로(2026-09-11 W6-C 결정 ②) — 끝까지 읽는 독자보다 중간에 닿는 독자가 많다.
   // 최상위 문단 사이에서만 자르고, 자를 곳이 없거나 편지·협찬 글이면 null → 예전처럼 끝에 둔다.
   const midSplit = isHtml && !isLetter && !blog.is_sponsored ? splitForMidInsert(articleHtml) : null;
+  // 자르지 않으면 앞 조각이 본문 전체다 — 렌더는 한 갈래로(본문 div 의 속성을 두 번 쓰지 않게).
+  const [bodyHead, bodyTail]: [string, string | null] = midSplit ? [midSplit[0], midSplit[1]] : [articleHtml, null];
   // H2 가 3개 미만이면 목차가 본문보다 길어 보인다(실측: 84편 중 3개+ 는 31편).
   const toc = headings.length >= 3 ? headings : [];
   const minutes = readingMinutes(blog.content);
@@ -554,21 +553,23 @@ export default async function BlogDetailPage(
               <div id="scroll-depth-75" style={{ position: 'absolute', top: '75%', height: 1 }} />
               <div id="scroll-depth-100" style={{ position: 'absolute', bottom: 0, height: 1 }} />
 
-              {isHtml && midSplit ? (
+              {isHtml ? (
                 <>
-                  <div className="blog-content" dangerouslySetInnerHTML={{ __html: midSplit[0] }} suppressHydrationWarning />
-                  <div className="blog-mid-cta">{subscribeBlock('blog_mid')}</div>
-                  {/* 뒤 조각은 `--cont` — 드롭캡(첫 문단 첫 글자)을 또 받지 않게 globals.css 가 제외한다. */}
-                  <div className="blog-content blog-content--cont" dangerouslySetInnerHTML={{ __html: midSplit[1] }} suppressHydrationWarning />
+                  <div
+                    className="blog-content"
+                    /* 렌더 시점 변환만: <img> 최적화 경로 재작성(실측 2026-09: 1200px 원본이 656px 자리에 그대로
+                       나갔다) + H2 앵커 id + Key takeaways 박스. DB 원본은 건드리지 않는다. */
+                    dangerouslySetInnerHTML={{ __html: bodyHead }}
+                    suppressHydrationWarning
+                  />
+                  {bodyTail !== null && (
+                    <>
+                      <div className="blog-mid-cta">{subscribeBlock('blog_mid')}</div>
+                      {/* 뒤 조각은 `--cont` — 리드 글꼴·드롭캡을 또 받지 않게 globals.css 가 제외한다. */}
+                      <div className="blog-content blog-content--cont" dangerouslySetInnerHTML={{ __html: bodyTail }} suppressHydrationWarning />
+                    </>
+                  )}
                 </>
-              ) : isHtml ? (
-                <div
-                  className="blog-content"
-                  /* 렌더 시점 변환만: <img> 최적화 경로 재작성(실측 2026-09: 1200px 원본이 656px 자리에 그대로
-                     나갔다) + H2 앵커 id + Key takeaways 박스. DB 원본은 건드리지 않는다. */
-                  dangerouslySetInnerHTML={{ __html: articleHtml }}
-                  suppressHydrationWarning
-                />
               ) : (
                 <div className="blog-content">
                   <p>{blog.content}</p>
@@ -710,7 +711,8 @@ export default async function BlogDetailPage(
               </nav>
             )}
 
-            {STORYPRESS_CATEGORIES.has(blog.category) && (
+            {/* 협찬 글에는 우리 제품 카드를 붙이지 않는다(중간 CTA 도 협찬 글은 뺀다). */}
+            {!blog.is_sponsored && isStoryPressCardCategory(blog.category) && (
               <StoryPressPostCard
                 title={settings.storypress_title || 'StoryPress'}
                 intro={settings.pillar_storypress_intro || ''}

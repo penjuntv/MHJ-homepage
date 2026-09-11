@@ -187,8 +187,31 @@ check('목록 안의 문단 사이도 경계가 아니다',
 check('Key takeaways 박스 직후는 끊지 않는다',
   splitForMidInsert(L('a') + L('b') + '<aside class="blog-takeaways"><h2>Key takeaways</h2><ul><li>x</li></ul></aside>' + L('c') + L('d') + L('e'))?.[1],
   L('d') + L('e'));
+{
+  // 구간 경계를 못 박는다 — 경계를 한쪽으로 옮기면 실제 글 7~11편의 CTA 위치가 테스트 초록인 채로 바뀐다.
+  // 'x' 반복 한 단어라 stripHtml 길이 = 글자 수. 후보는 2문단 뒤(29%·31%)와 3문단 뒤(71%, 늘 구간 밖)뿐이다.
+  const x = (n) => P('x'.repeat(n));
+  check('구간 경계 — 29% 자리뿐이면 null', splitForMidInsert(x(15) + x(14) + x(42) + x(15) + x(14)), null);
+  check('구간 경계 — 31% 자리는 자른다', splitForMidInsert(x(16) + x(15) + x(40) + x(15) + x(14))?.[0], x(16) + x(15));
+}
 check('자리가 한쪽 끝으로 몰리는 글은 null — 끝에 둔다(허용 구간 30~70%)',
   splitForMidInsert(P('a'.repeat(1000)) + P('b') + P('c') + P('d') + P('e')), null);
+{
+  // 코드리뷰가 찾은 제곱 시간 — 안 닫힌 `<a ` 가 200KB 면 정규식 판은 12초 걸렸다. 선형이면 수 ms.
+  const t0 = performance.now();
+  const r1 = splitForMidInsert('<a '.repeat(70000));
+  const r2 = splitForMidInsert('<p title="'.repeat(20000));
+  const ms = performance.now() - t0;
+  check('망가진 태그 200KB 도 선형 — null 을 즉시 돌려준다', [r1, r2, ms < 300], [null, null, true]);
+}
+check('`<div/>` 는 닫힌 게 아니다(HTML 이 / 를 무시한다) — 짝이 안 맞아 null',
+  splitForMidInsert(L('a') + L('b') + '<div/>' + L('c') + L('d') + L('e') + L('f')), null);
+check('사진만 있는 문단은 글 문단이 아니다 — alt 안의 > 에 속아 세지 않는다(글 문단 4 → null)',
+  splitForMidInsert(L('a') + L('b') + '<p><img alt="sunset > sea" src="x.jpg"></p>' + L('c') + L('d')), null);
+{
+  const h = [1, 2, 3, 4, 5, 6].map((n) => P(`${n} < ${n + 1} is true ${'z '.repeat(10)}`)).join('');
+  check('글 속의 < 는 태그가 아니다 — 무손실로 자른다', splitForMidInsert(h)?.join(''), h);
+}
 check('짝이 안 맞는 HTML 은 건드리지 않는다(null)',
   splitForMidInsert(P('a') + P('b') + '<div>' + P('c') + P('d') + P('e') + P('f')), null);
 {

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getPopularPosts } from '@/lib/popular-posts';
+import { getMostReadBlogsCached } from '@/app/(public)/blog/_lib/blog-list-data';
 import NotFoundSearch from '@/components/NotFoundSearch';
 
 /**
@@ -8,7 +8,9 @@ import NotFoundSearch from '@/components/NotFoundSearch';
  * 링크·검색에 `data-track` 을 달아 깨진 링크로 들어온 사람이 어디로 빠져나가는지 잰다.
  */
 export default async function NotFoundContent() {
-  const popular = (await getPopularPosts({ limit: 3 })) ?? [];
+  // /blog 의 "Most Read" 와 같은 조회·같은 캐시(태그 'blogs', 300초). 루트 404 는 빌드 때 정적으로 굳는다 —
+  // 캐시 태그가 붙어 있어야 발행 시 revalidateTag('blogs') 로 함께 갱신되고, 내려간 글을 계속 권하지 않는다.
+  const popular = (await getMostReadBlogsCached()).slice(0, 3);
 
   return (
     <>
@@ -46,7 +48,7 @@ export default async function NotFoundContent() {
                   data-track="not_found_popular_click"
                   data-track-slug={post.slug}
                   data-track-position={i + 1}
-                  style={{ display: 'block', padding: '12px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text)' }}
+                  style={{ display: 'block', padding: '16px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text)' }}
                 >
                   <span style={{ display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                     {post.category}
@@ -64,7 +66,7 @@ export default async function NotFoundContent() {
         style={{
           marginTop: '8px',
           display: 'inline-block',
-          padding: '12px 28px',
+          padding: '16px 32px',
           borderRadius: '999px',
           background: 'var(--text)',
           color: 'var(--bg)',

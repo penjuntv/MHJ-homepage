@@ -1,12 +1,9 @@
 import type { Metadata } from 'next';
+import AnalyticsShell from '@/components/AnalyticsShell';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import InstagramFeed from '@/components/InstagramFeed';
 import { getSiteSettings } from '@/lib/site-settings';
-import { GoogleAnalytics } from '@next/third-parties/google';
-import OutboundLinkTracker from '@/components/OutboundLinkTracker';
-import AnalyticsBeacon from '@/components/AnalyticsBeacon';
-import { GA_ID } from '@/lib/analytics';
 
 export const metadata: Metadata = {
   verification: {
@@ -69,9 +66,7 @@ export default async function PublicLayout({
         socialYoutube={s.social_youtube}
         socialThreads={s.social_threads}
       />
-      <OutboundLinkTracker />
-      <AnalyticsBeacon />
-      <GoogleAnalytics gaId={GA_ID} />
+      <AnalyticsShell />
     </>
   );
 }

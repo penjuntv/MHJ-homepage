@@ -203,7 +203,7 @@
 | name | text | YES | — | |
 | subscribed_at | timestamptz | YES | now() | |
 | active | boolean | YES | true | |
-| source | text | YES | 'website' | |
+| source | text | YES | 'website' | 가입한 구독 폼의 위치. 2026-09-11 W6-C 부터 앱이 값을 보낸다 — 허용 목록 `SUBSCRIBE_SOURCES`(lib/constants.ts: homepage_bottom · blog_mid · blog_detail · mairangi_notes_index · mairangi_notes_issue · unknown), 밖의 값은 서버가 `other` 로. 그 전 행은 15명 중 12명이 null, 3명 `website` |
 
 ---
 
@@ -240,7 +240,7 @@
 | country | text | YES | — | Vercel geo 헤더 국가코드만 (IP 원문 미저장) |
 | engagement_ms | integer | YES | — | |
 | scroll_pct | integer | YES | — | |
-| meta | jsonb | YES | — | |
+| meta | jsonb | YES | — | `click`: `{ name, …data-track 파라미터, link_url? }` · 루트 404(미매칭 URL)의 `pageview`: `{ status: 404 }`(인기 페이지 집계에서 가를 것). ⚠️ 앱 안의 `notFound()`(없는 글 slug 등)로 난 404 는 공용 레이아웃의 비콘이 보내 **표시가 없다** — 경로가 실제 글 목록에 없는지로 가려야 한다. 2026-09-11 W6-C |
 
 인덱스: `created_at desc` · `source` · `blog_slug` · `(event_type, created_at desc)`
 

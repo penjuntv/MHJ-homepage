@@ -2335,8 +2335,13 @@ a:hover .magazine-cover-shadow img {
 }
 
 /* 본문 중간 구독 CTA 자리 — 앞뒤 본문과 숨 쉴 간격만. CTA 자체 모양은 .newsletter-cta-inline 그대로. */
-.blog-mid-cta { margin: 40px 0; }
+/* clear — 앞 조각의 떠 있는 사진(img[data-align=left|right])이 CTA 상자 옆으로 흘러들지 않게. */
+.blog-mid-cta { margin: 40px 0; clear: both; }
 .blog-mid-cta .latest-newsletter-hint { margin-top: 0; }
+/* CTA 자체의 위 여백(48px)은 글 끝 배치용이다 — 중간에서는 .blog-mid-cta 가 간격을 맡는다.
+   이게 없으면 "지난 편지" 힌트가 없는 글에서 위만 88px(40+48)로 벌어졌다. */
+.blog-mid-cta .newsletter-cta-inline { margin-top: 0; }
+.blog-mid-cta .latest-newsletter-hint + .newsletter-cta-inline { margin-top: 8px; }
 
 /* ─── Journal 그리드 편지 카드 ─── */
 .letter-card {

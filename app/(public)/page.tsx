@@ -10,7 +10,6 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import { formatDate } from '@/lib/utils';
 import { getSiteSettings } from '@/lib/site-settings';
 import { PILLARS } from '@/lib/pillars';
-import { getPopularPosts } from '@/lib/popular-posts';
 import { BLOG_CARD_COLUMNS, categoryHref } from '@/lib/constants';
 
 export const revalidate = 300;
@@ -91,9 +90,22 @@ async function getLatestPosts(excludeIds: number[]): Promise<Blog[]> {
 }
 
 async function getMostReadBlogs(excludeIds: number[]): Promise<Blog[]> {
-  // 조회 기준은 404 와 공유(lib/popular-posts). 실패(null)일 때만 고정 목록으로 떨어진다 — 예전 동작 그대로.
-  const rows = await getPopularPosts({ limit: 10, excludeIds });
-  return ((rows ?? FALLBACK_BLOGS) as Blog[]).slice(0, 5);
+  const now = new Date().toISOString();
+  let query = supabase
+    .from('blogs')
+    .select('id, title, category, slug')
+    .eq('published', true)
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
+    .order('view_count', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(10);
+
+  if (excludeIds.length) {
+    query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+  }
+
+  const { data } = await query;
+  return ((data ?? FALLBACK_BLOGS) as Blog[]).slice(0, 5);
 }
 
 async function getCommentCounts(blogIds: number[]): Promise<Record<number, number>> {

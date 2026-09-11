@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
+import type { SubscribeSource } from '@/lib/constants';
 
 interface Props {
   compact?: boolean;
   reducedPadding?: boolean;
   buttonText?: string;
-  location?: string;
+  /** 가입 출처 라벨 — `subscribers.source` 로 저장된다. 목록은 lib/constants.ts `SUBSCRIBE_SOURCES`. */
+  location?: SubscribeSource;
   variant?: 'hero-dark' | 'inline-thin';
   copy?: string;
 }
@@ -35,7 +37,8 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
       setStatus('success');
       setEmail('');
       setName('');
-      trackEvent('newsletter_subscribe', { source: location || 'unknown' });
+      // 키는 `location` — 아래 subscribe_complete 의 `source`(utm) 와 같은 이름이면 GA 맞춤 측정기준에서 둘이 한 칸에 섞인다.
+      trackEvent('newsletter_subscribe', { location: location || 'unknown' });
       const utmSource = typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search).get('utm_source') || 'direct'
         : 'direct';

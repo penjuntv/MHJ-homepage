@@ -21,7 +21,9 @@ export default function NotFoundSearch() {
           e.preventDefault();
           const q = value.trim();
           if (q.length < 2) return;
-          trackClick('not_found_search', { search_term: q.slice(0, 100) });
+          // 검색어는 싣지 않는다 — 오버레이의 기존 `search` 이벤트가 GA 에만 보낸다. 여기서 실으면 방문자가 친 문장이
+          // 1st-party `page_events.meta` 에도 쌓인다(개인정보가 섞일 수 있는 자유 입력).
+          trackClick('not_found_search');
           setQuery(q);
           setOpen(true);
         }}
@@ -36,7 +38,7 @@ export default function NotFoundSearch() {
           style={{
             flex: 1,
             minWidth: 0,
-            padding: '12px 16px',
+            padding: 16,
             borderRadius: 8,
             // 폼 경계는 3:1(WCAG 1.4.11) — --border-medium 은 흰 배경에서 1.2:1 이라 안 보인다(DESIGN_RULES §6.3).
             border: '1px solid var(--text-tertiary)',
@@ -48,7 +50,7 @@ export default function NotFoundSearch() {
         />
         <button
           type="submit"
-          style={{ padding: '12px 20px', borderRadius: 8, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
+          style={{ padding: '16px 24px', borderRadius: 8, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
         >
           검색
         </button>
