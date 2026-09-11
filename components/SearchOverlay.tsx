@@ -15,11 +15,6 @@ const TYPE_LABEL: Record<string, string> = {
   article: 'Article',
 };
 
-const TYPE_COLOR: Record<string, string> = {
-  blog: '#4F46E5',
-  magazine: '#EC4899',
-  article: '#10B981',
-};
 
 // 카테고리 목록은 lib/constants 에서 파생 — 하드코딩하면 개편 때 죽은 링크가 남는다
 // (2026-09-08 전까지 폐기된 카테고리 5개가 /blog?category=… 로 조용히 전체 목록으로 떨어졌다).
@@ -44,6 +39,8 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  // 실패와 "결과 없음" 을 가른다 — 예전엔 둘 다 빈 배열이라 검색이 고장 나도 "No results" 로 보였다.
+  const [failed, setFailed] = useState<'' | 'error' | 'rate'>('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 검색 요청 순번 — 늦게 도착한 옛 응답이 새 결과를 덮거나, 닫힌 뒤 도착해 다음에 열 때 번쩍이지 않게.
   const searchSeq = useRef(0);
@@ -65,6 +62,7 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
     } else {
       document.body.style.overflow = '';
       searchSeq.current += 1;   // 날아가는 중인 응답은 버린다
+      setFailed('');
       setQuery('');
       setResults([]);
       setSearched(false);
@@ -74,10 +72,18 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
 
   const doSearch = useCallback(async (q: string) => {
     const seq = ++searchSeq.current;
+    setFailed('');
     if (q.length < 2) { setResults([]); setSearched(false); return; }
     setLoading(true);
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      if (seq !== searchSeq.current) return;
+      if (!res.ok) {
+        setResults([]);
+        setSearched(false);
+        setFailed(res.status === 429 ? 'rate' : 'error');
+        return;
+      }
       const data = await res.json();
       if (seq !== searchSeq.current) return;
       const found = data.results ?? [];
@@ -85,7 +91,7 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
       setSearched(true);
       trackEvent('search', { search_term: q, results_count: found.length });
     } catch {
-      if (seq === searchSeq.current) setResults([]);
+      if (seq === searchSeq.current) { setResults([]); setSearched(false); setFailed('error'); }
     } finally {
       if (seq === searchSeq.current) setLoading(false);
     }
@@ -178,8 +184,8 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
               <div style={{
                 position: 'absolute', right: 0,
                 width: '20px', height: '20px',
-                border: '2px solid #F1F5F9',
-                borderTopColor: '#4F46E5',
+                border: '2px solid var(--border)',
+                borderTopColor: 'var(--accent)',
                 borderRadius: '50%',
                 animation: 'spin 0.8s linear infinite',
               }} />
@@ -189,7 +195,29 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
 
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           {/* 결과 있음 */}
-          {searched && results.length > 0 && (
+          {/* 실패 — "결과 없음" 과 다른 말로, 다시 시도할 길을 준다 */}
+          {failed && !loading && (
+            <div role="alert" style={{ animation: 'slideUp 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
+              <p className="font-display font-black" style={{ fontSize: 'clamp(24px, 4vw, 40px)', letterSpacing: '-1px', marginBottom: '16px', fontStyle: 'italic' }}>
+                {failed === 'rate' ? 'Slow down a little' : 'Search is not responding'}
+              </p>
+              <p style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                {failed === 'rate'
+                  ? 'Too many searches in a row. Please try again in a minute.'
+                  : 'Something went wrong on our side — it is not that nothing matched.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => doSearch(query)}
+                style={{ padding: '16px 24px', borderRadius: 8, border: '1px solid var(--text-tertiary)', background: 'transparent', color: 'var(--text)', fontSize: 13, fontWeight: 700, cursor: 'pointer', marginBottom: '40px' }}
+              >
+                Try again
+              </button>
+              <QuickLinks onClose={onClose} />
+            </div>
+          )}
+
+          {!failed && searched && results.length > 0 && (
             <div>
               <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '4px', color: 'var(--text-tertiary)', marginBottom: '24px' }}>
                 {results.length} results found
@@ -203,7 +231,7 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
           )}
 
           {/* 결과 없음 */}
-          {searched && results.length === 0 && !loading && (
+          {!failed && searched && results.length === 0 && !loading && (
             <div style={{ animation: 'slideUp 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
               <p className="font-display font-black" style={{ fontSize: 'clamp(24px, 4vw, 40px)', letterSpacing: '-1px', marginBottom: '12px', fontStyle: 'italic' }}>
                 No results found
@@ -216,7 +244,7 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
           )}
 
           {/* 초기 상태 (검색 전) */}
-          {!searched && (
+          {!failed && !searched && (
             <div style={{ animation: 'slideUp 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
               <QuickLinks onClose={onClose} />
             </div>
@@ -243,7 +271,6 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
 
 function ResultCard({ item, index, onClose }: { item: SearchResult; index: number; onClose: () => void }) {
   const [hovered, setHovered] = useState(false);
-  const color = TYPE_COLOR[item.type] || '#4F46E5';
 
   return (
     <Link
@@ -251,7 +278,7 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
       onClick={onClose}
       style={{
         display: 'flex', alignItems: 'center', gap: '16px',
-        padding: '16px 20px', borderRadius: '20px',
+        padding: '16px 20px', borderRadius: '12px',   // 카드 radius 12px 이하(CLAUDE.md 7) — 20px 이었다
         background: hovered ? 'var(--bg-surface)' : 'var(--bg-card)',
         border: '1px solid',
         borderColor: hovered ? 'var(--border-medium)' : 'var(--border)',
@@ -284,9 +311,11 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
       {/* 텍스트 */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          {/* 종류는 라벨 글자가 말한다 — 색으로 가르지 않는다(DESIGN_RULES §6.4 "컬러 뱃지 금지").
+              하드코딩 인디고·분홍·초록을 9% 배경에 얹어 양 테마 모두 대비 미달이었다(라이트 초록 2.31:1 · 다크 인디고 2.48:1). */}
           <span style={{
             padding: '2px 8px', borderRadius: '999px',
-            background: color + '18', color,
+            background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)',
             fontSize: '9px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase',
           }}>
             {TYPE_LABEL[item.type]}
@@ -317,7 +346,7 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
 
       <ArrowRight
         size={16}
-        style={{ color: hovered ? color : 'var(--text-tertiary)', flexShrink: 0, transition: 'color 0.2s ease' }}
+        style={{ color: hovered ? 'var(--text)' : 'var(--text-tertiary)', flexShrink: 0, transition: 'color 0.2s ease' }}
       />
     </Link>
   );
