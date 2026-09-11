@@ -8,8 +8,9 @@ import { draftMode } from 'next/headers';
 import { supabase, createAdminClient, createPublicAdminClient } from '@/lib/supabase';
 import type { Blog } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import StoryPressPostCard from '@/components/StoryPressPostCard';
 import { getSiteSettings } from '@/lib/site-settings';
-import { BLOG_DETAIL_COLUMNS, BLOG_RELATED_COLUMNS, categoryHref } from '@/lib/constants';
+import { BLOG_DETAIL_COLUMNS, BLOG_RELATED_COLUMNS, categoryHref, BLOG_ADJACENT_COLUMNS, isStoryPressCardCategory } from '@/lib/constants';
 import { getNZSeasonLabel } from '@/lib/date-helpers';
 import { optimizeContentImages, nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 import ViewTracker from './ViewTracker';
@@ -22,7 +23,7 @@ import ScrollDepthTracker from './ScrollDepthTracker';
 import ReadingProgress from './ReadingProgress';
 import { formatDate, formatNZDate } from '@/lib/utils';
 import {
-  stripHtml, readingMinutes, addHeadingIds, wrapKeyTakeaways, sanitizeFaq, toParagraphs,
+  stripHtml, readingMinutes, addHeadingIds, wrapKeyTakeaways, sanitizeFaq, toParagraphs, splitForMidInsert
 } from '@/lib/content-html.mjs';
 
 export const revalidate = 600;
@@ -37,9 +38,11 @@ export async function generateStaticParams() {
   return (data ?? []).map((b) => ({ slug: b.slug }));
 }
 
+type AdjacentPost = { id: number; title: string; slug: string; image_url: string | null; date: string };
+
 async function getAdjacentBlogs(current: { id: number; date: string }): Promise<{
-  prev: { id: number; title: string; slug: string } | null;
-  next: { id: number; title: string; slug: string } | null;
+  prev: AdjacentPost | null;
+  next: AdjacentPost | null;
 }> {
   const now = new Date().toISOString();
   // 독자가 보는 순서(목록·Next Story 모두 `date` 내림차순)와 같은 키로 이웃을 고른다. id 순은 입력 순서라
@@ -49,7 +52,7 @@ async function getAdjacentBlogs(current: { id: number; date: string }): Promise<
     const ascending = dir === 'next';
     return supabase
       .from('blogs')
-      .select('id, title, slug')
+      .select(BLOG_ADJACENT_COLUMNS)
       .eq('published', true)
       .or(`publish_at.is.null,publish_at.lte.${now}`)
       .or(`date.${op}."${current.date}",and(date.eq."${current.date}",id.${op}.${current.id})`)
@@ -213,7 +216,7 @@ export default async function BlogDetailPage(
 
   const isLetter = Boolean(blog.letter_to);
   const adminDb = createPublicAdminClient();
-  const [relatedBlogs, adjacent, latestNewsletterRes, settings, nextStoryRes] = await Promise.all([
+  const [relatedBlogs, adjacent, latestNewsletterRes, settings] = await Promise.all([
     getRelatedBlogs(blog.category, blog.slug, blog.related_slugs),
     getAdjacentBlogs(blog),
     adminDb
@@ -224,24 +227,20 @@ export default async function BlogDetailPage(
       .limit(1)
       .maybeSingle(),
     getSiteSettings(),
-    // 세션 5: 같은 카테고리의 이전(=더 오래된) 글, 편지 글 제외. 편지 글에서는 skip.
-    !isLetter
-      ? adminDb
-          .from('blogs')
-          .select('title, slug, image_url, date')
-          .eq('category', blog.category)
-          .eq('published', true)
-          .is('letter_to', null)
-          .lt('date', blog.date)
-          .neq('slug', blog.slug)
-          .order('date', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
   ]);
   const latestNewsletter = latestNewsletterRes.data as { subject: string; issue_number: string } | null;
-  const nextStory = nextStoryRes.data as { title: string; slug: string; image_url: string; date: string } | null;
   const ctaCopyB = settings.newsletter_cta_copy_b || 'Be the first to receive our next letter.';
+  // 구독 CTA 한 벌 — 본문 중간(midSplit) 또는 글 끝 중 **한 곳에만** 그린다(글당 CTA 1개, cae305f 원칙 유지).
+  const subscribeBlock = (placement: 'blog_mid' | 'blog_detail') => (
+    <>
+      {latestNewsletter?.subject && (
+        <Link href={`/mairangi-notes/${latestNewsletter.issue_number}`} className="latest-newsletter-hint">
+          Last letter: &ldquo;{latestNewsletter.subject}&rdquo;
+        </Link>
+      )}
+      <NewsletterCTA variant="inline-thin" copy={ctaCopyB} location={placement} buttonText="Subscribe →" />
+    </>
+  );
 
   const isHtml = blog.content.includes('<') && blog.content.includes('>');
   const plainText = stripHtml(blog.content);
@@ -250,6 +249,11 @@ export default async function BlogDetailPage(
   // 목차와 앵커가 같은 통과에서 나오므로 서로 어긋날 수 없다.
   const { html: contentWithIds, headings } = addHeadingIds(optimizeContentImages(blog.content));
   const articleHtml = wrapKeyTakeaways(contentWithIds);
+  // 구독 CTA 를 본문 중간으로(2026-09-11 W6-C 결정 ②) — 끝까지 읽는 독자보다 중간에 닿는 독자가 많다.
+  // 최상위 문단 사이에서만 자르고, 자를 곳이 없거나 편지·협찬 글이면 null → 예전처럼 끝에 둔다.
+  const midSplit = isHtml && !isLetter && !blog.is_sponsored ? splitForMidInsert(articleHtml) : null;
+  // 자르지 않으면 앞 조각이 본문 전체다 — 렌더는 한 갈래로(본문 div 의 속성을 두 번 쓰지 않게).
+  const [bodyHead, bodyTail]: [string, string | null] = midSplit ? [midSplit[0], midSplit[1]] : [articleHtml, null];
   // H2 가 3개 미만이면 목차가 본문보다 길어 보인다(실측: 84편 중 3개+ 는 31편).
   const toc = headings.length >= 3 ? headings : [];
   const minutes = readingMinutes(blog.content);
@@ -550,13 +554,22 @@ export default async function BlogDetailPage(
               <div id="scroll-depth-100" style={{ position: 'absolute', bottom: 0, height: 1 }} />
 
               {isHtml ? (
-                <div
-                  className="blog-content"
-                  /* 렌더 시점 변환만: <img> 최적화 경로 재작성(실측 2026-09: 1200px 원본이 656px 자리에 그대로
-                     나갔다) + H2 앵커 id + Key takeaways 박스. DB 원본은 건드리지 않는다. */
-                  dangerouslySetInnerHTML={{ __html: articleHtml }}
-                  suppressHydrationWarning
-                />
+                <>
+                  <div
+                    className="blog-content"
+                    /* 렌더 시점 변환만: <img> 최적화 경로 재작성(실측 2026-09: 1200px 원본이 656px 자리에 그대로
+                       나갔다) + H2 앵커 id + Key takeaways 박스. DB 원본은 건드리지 않는다. */
+                    dangerouslySetInnerHTML={{ __html: bodyHead }}
+                    suppressHydrationWarning
+                  />
+                  {bodyTail !== null && (
+                    <>
+                      <div className="blog-mid-cta">{subscribeBlock('blog_mid')}</div>
+                      {/* 뒤 조각은 `--cont` — 리드 글꼴·드롭캡을 또 받지 않게 globals.css 가 제외한다. */}
+                      <div className="blog-content blog-content--cont" dangerouslySetInnerHTML={{ __html: bodyTail }} suppressHydrationWarning />
+                    </>
+                  )}
+                </>
               ) : (
                 <div className="blog-content">
                   <p>{blog.content}</p>
@@ -686,120 +699,27 @@ export default async function BlogDetailPage(
               <CommentSection blogId={blog.id} />
             </div>
 
-            {/* Next Story (세션 5) — 편지 글에는 노출 안 함 */}
-            {!isLetter && nextStory && (
-              <section className="next-story">
-                <p className="next-story-label">Next Story</p>
-                <Link href={`/blog/${nextStory.slug}`} className="next-story-card">
-                  <div className="next-story-image">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={nextImageUrl(nextStory.image_url, 640)}
-                      srcSet={nextImageSrcSet(nextStory.image_url, [384, 640]) || undefined}
-                      sizes="(max-width: 768px) 100vw, 680px"
-                      alt={nextStory.title}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                  <h3 className="next-story-title">{nextStory.title}</h3>
-                  <time className="next-story-date">{formatDate(nextStory.date)}</time>
-                </Link>
-              </section>
-            )}
+            {/* 구독 CTA — 본문 중간에 넣지 못한 글(짧은 글·편지·협찬·비HTML)만 여기에 */}
+            {!midSplit && subscribeBlock('blog_detail')}
 
-            {/* 지난 편지 hint + inline-thin CTA (세션 4) */}
-            {latestNewsletter?.subject && (
-              <Link
-                href={`/mairangi-notes/${latestNewsletter.issue_number}`}
-                className="latest-newsletter-hint"
-              >
-                Last letter: &ldquo;{latestNewsletter.subject}&rdquo;
-              </Link>
-            )}
-            <NewsletterCTA
-              variant="inline-thin"
-              copy={ctaCopyB}
-              location="blog_detail"
-              buttonText="Subscribe →"
-            />
-
-            {/* 이전/다음 글 네비게이션 */}
+            {/* 이전·다음 — Next Story 카드와 합친 한 블록(2026-09-11 W6-C 결정 ①). 사진은 Next Story 에서,
+                양방향 링크는 이전/다음에서 — 크롤러가 아카이브 전체를 앞뒤로 걸어갈 수 있다. */}
             {(adjacent.prev || adjacent.next) && (
-              <nav aria-label="이전 · 다음 글" style={{
-                borderTop: '1px solid var(--border)',
-                paddingTop: 48,
-                paddingBottom: 80,
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 32,
-              }}>
-                {adjacent.prev ? (
-                  <Link
-                    href={`/blog/${adjacent.prev.slug}`}
-                    style={{ textDecoration: 'none', flex: 1, maxWidth: '45%' }}
-                  >
-                    <span style={{
-                      fontSize: 10,
-                      fontWeight: 900,
-                      letterSpacing: 4,
-                      textTransform: 'uppercase',
-                      color: 'var(--text-tertiary)',
-                      display: 'block',
-                      marginBottom: 10,
-                    }}>
-                      ← Previous
-                    </span>
-                    <p style={{
-                      fontSize: 'clamp(16px, 2vw, 22px)',
-                      fontWeight: 900,
-                      color: 'var(--text)',
-                      letterSpacing: -0.5,
-                      lineHeight: 1.2,
-                      margin: 0,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}>
-                      {adjacent.prev.title}
-                    </p>
-                  </Link>
-                ) : <div />}
-
-                {adjacent.next ? (
-                  <Link
-                    href={`/blog/${adjacent.next.slug}`}
-                    style={{ textDecoration: 'none', flex: 1, maxWidth: '45%', textAlign: 'right' }}
-                  >
-                    <span style={{
-                      fontSize: 10,
-                      fontWeight: 900,
-                      letterSpacing: 4,
-                      textTransform: 'uppercase',
-                      color: 'var(--text-tertiary)',
-                      display: 'block',
-                      marginBottom: 10,
-                    }}>
-                      Next →
-                    </span>
-                    <p style={{
-                      fontSize: 'clamp(16px, 2vw, 22px)',
-                      fontWeight: 900,
-                      color: 'var(--text)',
-                      letterSpacing: -0.5,
-                      lineHeight: 1.2,
-                      margin: 0,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}>
-                      {adjacent.next.title}
-                    </p>
-                  </Link>
-                ) : <div />}
+              <nav aria-label="이전 · 다음 글" className="adjacent-nav">
+                {adjacent.prev ? <AdjacentCard post={adjacent.prev} direction="prev" /> : <div />}
+                {adjacent.next ? <AdjacentCard post={adjacent.next} direction="next" /> : <div />}
               </nav>
+            )}
+
+            {/* 협찬 글에는 우리 제품 카드를 붙이지 않는다(중간 CTA 도 협찬 글은 뺀다). */}
+            {!blog.is_sponsored && isStoryPressCardCategory(blog.category) && (
+              <StoryPressPostCard
+                title={settings.storypress_title || 'StoryPress'}
+                intro={settings.pillar_storypress_intro || ''}
+                ctaUrl={settings.storypress_cta_url || ''}
+                ctaText={settings.storypress_cta_text || ''}
+                category={blog.category}
+              />
             )}
           </article>
         </div>
@@ -836,8 +756,8 @@ export default async function BlogDetailPage(
                 gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
                 gap: 24,
               }}>
-                {relatedBlogs.map((related) => (
-                  <RelatedCard key={related.id} blog={related} />
+                {relatedBlogs.map((related, i) => (
+                  <RelatedCard key={related.id} blog={related} position={i + 1} />
                 ))}
               </div>
             </div>
@@ -845,5 +765,35 @@ export default async function BlogDetailPage(
         )}
       </div>
     </>
+  );
+}
+
+/** 이전·다음 사진 카드. 사진은 장식이라 alt="" — 제목이 링크 이름이다(같은 말을 두 번 읽지 않게). */
+function AdjacentCard({ post, direction }: { post: AdjacentPost; direction: 'prev' | 'next' }) {
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className={`adjacent-card adjacent-card--${direction}`}
+      data-track="next_read_click"
+      data-track-direction={direction}
+      data-track-slug={post.slug}
+    >
+      {post.image_url && (
+        <span className="adjacent-card-image">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={nextImageUrl(post.image_url, 640)}
+            srcSet={nextImageSrcSet(post.image_url, [384, 640]) || undefined}
+            sizes="(max-width: 640px) 100vw, 340px"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </span>
+      )}
+      <span className="adjacent-card-label">{direction === 'prev' ? '← Previous' : 'Next →'}</span>
+      <span className="adjacent-card-title">{post.title}</span>
+      <time className="adjacent-card-date">{formatDate(post.date)}</time>
+    </Link>
   );
 }

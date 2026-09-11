@@ -3,6 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
 import { generateWelcome1 } from '@/lib/welcome-emails';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
+import { SUBSCRIBE_SOURCES } from '@/lib/constants';
+
+/**
+ * 가입 출처는 이 컬럼 하나뿐이다 — 아무 문자열이나 쌓이면 못 쓴다. 허용 목록 밖이면 'other', 안 보냈으면 null
+ * (2026-09-11 W6-C, 목록은 lib/constants.ts).
+ */
+function sourceLabel(source: unknown): string | null {
+  if (typeof source !== 'string' || !source.trim()) return null;
+  return (SUBSCRIBE_SOURCES as readonly string[]).includes(source) ? source : 'other';
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
@@ -21,7 +31,7 @@ export async function POST(req: NextRequest) {
 
   const { error } = await supabase
     .from('subscribers')
-    .insert({ email: email.trim().toLowerCase(), name: name?.trim() || null, source: source?.trim() || null });
+    .insert({ email: email.trim().toLowerCase(), name: name?.trim() || null, source: sourceLabel(source) });
 
   if (error) {
     if (error.code === '23505') {

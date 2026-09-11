@@ -46,6 +46,9 @@ export const SLUG_TO_CATEGORY: Record<string, BlogCategory> = Object.fromEntries
 export const BLOG_CARD_COLUMNS =
   'id, category, title, author, date, image_url, content, slug, meta_description, og_image_url, published, view_count, tags, is_sponsored, letter_to, updated_at';
 
+/** 상세 페이지 이전·다음 사진 카드(2026-09-11 W6-C). 카드 컬럼은 본문(`content`)까지 실어 이웃 두 편에 쓰기엔 무겁다. */
+export const BLOG_ADJACENT_COLUMNS = 'id, title, slug, image_url, date';
+
 /**
  * 상세 페이지(/blog/[slug]) 전용 — 카드 컬럼 + 본문 렌더링에 추가로 필요한 컬럼.
  * seo_title·summary_ko·faq_json·related_slugs·og_image_alt 는 W4-A(2026-09-08)에서 컬럼·anon grant 까지
@@ -82,3 +85,26 @@ export const BLOG_RELATED_COLUMNS =
  */
 export const CAROUSEL_BLOG_COLUMNS =
   'id, title, category, slug, meta_description, image_url, carousel_enabled, carousel_title, carousel_subtitle, carousel_points, carousel_summary, carousel_summary_kr, carousel_yussi_take, carousel_yussi_take_kr, carousel_cta, carousel_style';
+
+/**
+ * 글 끝에 StoryPress 카드를 붙이는 카테고리 — 아이 영어·학습 글(2026-09-11 W6-C).
+ * `BlogCategory` 로 타입을 묶어 두어 카테고리 이름이 바뀌면 tsc 가 잡는다.
+ * (홈 "Four Pillars" 의 StoryPress 기둥은 Little 15 Mins 하나뿐이다 — `lib/pillars.ts`. 카드는 학습 글 전반에 붙인다.)
+ */
+const STORYPRESS_CARD_CATEGORIES: readonly BlogCategory[] = ['Little 15 Mins', 'Home Learning'];
+export const isStoryPressCardCategory = (category: string): boolean =>
+  (STORYPRESS_CARD_CATEGORIES as readonly string[]).includes(category);
+
+/**
+ * 구독 폼의 위치 라벨 = `subscribers.source` 값. 서버(`/api/subscribe`)는 이 목록 밖의 값을 'other' 로 저장한다 —
+ * 가입 출처는 이 컬럼 하나뿐이라 아무 문자열이나 쌓이면 못 쓴다(2026-09-11 W6-C).
+ */
+export const SUBSCRIBE_SOURCES = [
+  'homepage_bottom',
+  'blog_mid',
+  'blog_detail',
+  'mairangi_notes_index',
+  'mairangi_notes_issue',
+  'unknown',
+] as const;
+export type SubscribeSource = (typeof SUBSCRIBE_SOURCES)[number];

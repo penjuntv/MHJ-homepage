@@ -326,9 +326,48 @@ M   ●          ●                ● +4w                          ● +8w
   라벨이 "Open menu" 로 고정이라 열린 뒤에도 "여세요" 라고 읽던 것을 상태에 따라 바꿨다.
 - `docs/DESIGN_RULES.md` §15.5 신설 — `<div onClick>` 금지·랜드마크 규칙·체크리스트 2줄.
 
-**☐ W6-C · 글 페이지 전환 장치** — F-E-04 · F-D-08 · 노력 S~M
-- 하단 블록 정리: Next Story + 이전/다음 → 1개, 관련글 유지 · `InlineSubscribeCTA` 본문 50% 부활 · `StoryPressSection` 을 Little 15 Mins·Home Learning 글에 · 트래킹 4종(인스타·기둥 셀·관련글·AI Insight) · `subscribers.source='storypress'` 세팅 · 404 에 검색창+인기글 3
-- Done: GA4 에 새 이벤트 수신 · 3화면
+**☑ W6-C · 글 페이지 전환 장치** — F-E-04 · F-D-08 · 노력 S~M — 2026-09-11 완료
+- 원래 문구: 하단 블록 정리(Next Story + 이전/다음 → 1개) · `InlineSubscribeCTA` 본문 50% 부활 · `StoryPressSection` 을
+  Little 15 Mins·Home Learning 글에 · 트래킹 4종 · `subscribers.source='storypress'` · 404 에 검색창+인기글 3.
+  Done: GA4 에 새 이벤트 수신 · 3화면
+- **사용자 결정(2026-09-11)** ① 하단 = 이전·다음을 사진 카드 2장으로 합침 ② 구독 CTA 는 끝에서 **본문 중간으로 이동**
+  (글당 1개 — `cae305f` 의 "CTA 7→2" 원칙 유지) ③ `source='storypress'` → **StoryPress 클릭 추적**으로 대체.
+- **선행: 가입 출처가 기록되지 않았다.** `NewsletterCTA` 가 `source` 를 안 보내 구독자 15명 중 12명이 `null` —
+  어느 CTA 가 효과 있는지 원천적으로 몰랐다. 이제 `blog_mid` · `blog_detail` · `homepage_bottom` · … 로 남는다.
+- **본문 중간 CTA**: `splitForMidInsert`(`lib/content-html.mjs`) 가 **최상위 문단 사이에서만** 자른다(인용·목록·표·
+  Key takeaways 안은 안 자름, 제목과 첫 문단 사이도 안 자름). 발행 81편 실측 — **49편 중간(30~70% 구간, 중앙 47%)**,
+  32편은 자를 곳이 없어 끝에. 무손실 49/49. 처음엔 구간이 없어 16%(리드를 끊음)·96%(사실상 끝)에 꽂히는 글이 있었다.
+  뒤 조각은 `--cont` 로 리드 글꼴·드롭캡을 또 받지 않는다(규칙 6개).
+- **추적**: `data-track` 속성 + `OutboundLinkTracker` 전역 위임 한 곳 — 서버 컴포넌트(홈 기둥 셀)에도 붙는다.
+  새 이벤트 8종(`instagram_follow_click` · `pillar_click` · `related_click` · `next_read_click` · `ai_insight_click` ·
+  `storypress_click` · `not_found_search` · `not_found_popular_click`)이 GA4 와 `page_events(event_type='click')` 에 같은 이름으로.
+  외부 링크 판정이 `*.mhj.nz` 를 전부 내부로 봐서 **app.mhj.nz(StoryPress 앱) 클릭이 outbound 로는 한 번도 안 남던 것**
+  (/storypress 페이지의 `cta_click` 만 GA 에 있었다)도 고쳤다. `data-track` 외부 링크는 이름 있는 이벤트 하나로만 센다.
+- **Done 검증 방법**: GA 수집 요청을 **가로채 막고**(실제 속성에 테스트 이벤트를 흘리지 않는다) 두 가지로 확인 —
+  `window.dataLayer` 에 각 이벤트가 **정확히 한 번** 들어가는지(결정적), GA 가 실제로 보내려던 요청의 `en=` 값.
+  GA 는 몇 초 모아 보내므로 3.5초 대기로는 안 보이고 7초에 전부 보였다. **GA4 가 실제로 받았는지는 배포 후
+  실시간/DebugView 에서만** 확인된다(사용자 몫). 구독 제출은 `/api/subscribe` 를 가로채 본문만 봤다(실DB·실메일 방지).
+- **404**: 오타 URL 이 가는 **루트 404 에는 분석 도구가 하나도 없었다**(레이아웃 밖) — 어느 URL 이 깨졌는지조차 안 남았다.
+  이제 pageview·GA·클릭 추적을 직접 마운트하고, 두 404 모두 검색칸(사이트 오버레이 재사용) + 많이 읽힌 글 3편.
+- **Next Story 삭제로 함께 사라진 결함**: 그 쿼리는 service_role 로 **`publish_at` 필터 없이** 돌았다(CLAUDE.md 3 위반 —
+  예약 글이 공개 전에 "Next Story" 로 샐 수 있었다).
+- **계획서 문구가 틀렸던 것**: 이전/다음의 `id` 순 정렬은 이미 `date` 순으로 고쳐져 있었다 · StoryPress 는 이메일 폼이 없고
+  CTA 가 외부 앱이라 `source='storypress'` 는 생길 수 없다 · `InlineSubscribeCTA` 는 하드코딩 색·`<aside>`·단순 `</p>` 분할이라
+  되살릴 수 없는 상태 → 삭제하고 `NewsletterCTA` 로 일원화.
+- **코드리뷰 3각도 반영**: 분할기의 태그 정규식이 안 닫힌 `<a ` 입력에서 **제곱 시간**(200KB 에 12초 — ISR 재생성 때
+  이벤트 루프를 막는다) → 앞으로 한 번만 훑는 토크나이저로 교체 · 떠 있는 사진이 CTA 상자로 번짐 → `clear` ·
+  `data-track` 외부 링크가 이벤트 두 개로 **이중 집계** → 이름 있는 이벤트 하나 + `link_url` · 루트 404 는 빌드 때 정적으로
+  굳어 인기글이 배포 전까지 안 바뀜 → `/blog` Most Read 캐시(태그 `blogs`)를 재사용 · 매거진 렌더러(`app/internal`)의
+  notFound() 도 루트 404 로 와 GA·방문 기록이 붙던 것 → 분석 도구를 **공개 경로에서만** 켜는 경로 게이트(`PublicPathGate`).
+  세그먼트 not-found 로 막으려 했지만 `?token=` 인가 요청으로 재현해 보니 `app/internal/`·`app/internal/render/` 어디에 둬도
+  루트 404 가 떴다 — 어느 404 가 뜨든 상관없게 경로로 막았다 · 루트 404 pageview 는
+  `meta.status=404`(앱 안 `notFound()` 404 는 공용 레이아웃 비콘이라 표시 없음 — 한계로 남김) · 404 검색어를 1st-party
+  DB 에 쌓지 않음 · 가입 출처 허용 목록(밖이면 `other`) · `newsletter_subscribe` 의 키를 `location` 으로(utm `source` 와 한
+  칸에 섞이지 않게) · 새 blogs 조회도 컬럼 상수로(anon grant 가드 안) · 쓰지 않던 `StoryPressSection` 삭제 · 분석 도구
+  한 벌 `AnalyticsShell` · 협찬 글엔 StoryPress 카드 안 붙임.
+- 검증: axe·대비 0(홈·목록·글 2종 × 2테마 × 2뷰포트, 404 두 종) · `test-content-html` 분할기 21케이스 · 3화면 × 2테마 스크린샷.
+- **사용자 몫**: GA4 맞춤 측정기준에 새 파라미터 등록 · 관리자 설정 `storypress_cta_text` 가 아직 **"Join the Waitlist"**
+  (앱은 이미 열려 있다 — 글 안 카드에 그대로 보인다).
 
 **☐ W6-D · 검색 품질** — F-E-03(2,3) · 노력 S → M
 - 1차: 제목 매치 우선 2단 쿼리 + tags/meta_description 포함 + 에러/빈결과 구분 · 2차(선택): `to_tsvector` GIN + `pg_trgm`(DDL)

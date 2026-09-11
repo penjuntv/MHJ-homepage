@@ -19,7 +19,8 @@ const SITE_HOST = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz')
   .replace(/^https?:\/\//, '')
   .replace(/\/.*$/, '');
 
-const VALID_TYPES = new Set(['pageview', 'engagement', 'scroll', 'read_complete', 'outbound']);
+// 'click' = data-track 클릭(meta.name 이 이벤트명). event_type 은 CHECK 없는 text 라 마이그레이션 없이 늘릴 수 있다.
+const VALID_TYPES = new Set(['pageview', 'engagement', 'scroll', 'read_complete', 'outbound', 'click']);
 const NO_CONTENT = new NextResponse(null, { status: 204 });
 
 function clampInt(v: unknown, min: number, max: number): number | null {

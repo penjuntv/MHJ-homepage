@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
+import type { SubscribeSource } from '@/lib/constants';
 
 interface Props {
   compact?: boolean;
   reducedPadding?: boolean;
   buttonText?: string;
-  location?: string;
+  /** 가입 출처 라벨 — `subscribers.source` 로 저장된다. 목록은 lib/constants.ts `SUBSCRIBE_SOURCES`. */
+  location?: SubscribeSource;
   variant?: 'hero-dark' | 'inline-thin';
   copy?: string;
 }
@@ -27,14 +29,16 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
     const res = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name: compact ? '' : name }),
+      // 어느 CTA 에서 가입했는지 남긴다 — 이게 없어 구독자 15명 중 12명의 출처가 null 이었다(2026-09-11 W6-C).
+      body: JSON.stringify({ email, name: compact ? '' : name, source: location || 'unknown' }),
     });
 
     if (res.ok) {
       setStatus('success');
       setEmail('');
       setName('');
-      trackEvent('newsletter_subscribe', { source: compact ? 'sidebar' : 'cta' });
+      // 키는 `location` — 아래 subscribe_complete 의 `source`(utm) 와 같은 이름이면 GA 맞춤 측정기준에서 둘이 한 칸에 섞인다.
+      trackEvent('newsletter_subscribe', { location: location || 'unknown' });
       const utmSource = typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search).get('utm_source') || 'direct'
         : 'direct';

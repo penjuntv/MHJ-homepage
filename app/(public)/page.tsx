@@ -387,7 +387,14 @@ export default async function LandingPage() {
               // 셀이 보여주는 최신 글의 카테고리 허브로 — 제목과 목적지가 일치한다. 글이 없으면 기둥 기본 허브.
               const href = latest ? categoryHref(latest.category) : `/blog/category/${pillar.hubSlug}`;
               return (
-                <Link key={pillar.id} href={href} className="pillar-cell">
+                <Link
+                  key={pillar.id}
+                  href={href}
+                  className="pillar-cell"
+                  data-track="pillar_click"
+                  data-track-pillar={pillar.id}
+                  data-track-destination={href}
+                >
                   <h3 className="pillar-name">{pillar.name}</h3>
                   {subtitle && <p className="pillar-subtitle">{subtitle}</p>}
                   {latest ? (

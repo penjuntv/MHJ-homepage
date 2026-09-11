@@ -566,6 +566,27 @@ Enter·가운데클릭·새 탭·컨텍스트 메뉴·크롤러를 전부 공짜
 포커스를 받아야 하는 것을 `display:none` / `visibility:hidden` 으로 숨기면 **포커스 자체를
 못 받아 죽는다**. 본문 바로가기 링크(`.skip-link`)처럼 화면 밖으로 밀었다가 `:focus` 에 끌어온다.
 
+### 클릭 추적 (2026-09-11 W6-C)
+
+클릭을 재려면 `onClick={() => trackEvent(...)}` 대신 **`data-track` 속성**을 단다:
+
+```tsx
+<Link href={href} data-track="pillar_click" data-track-pillar={id}>…</Link>
+```
+
+- `AnalyticsShell`(안의 `OutboundLinkTracker`) 하나가 전역 위임으로 받아, GA4 이벤트와 1st-party
+  `page_events`(`event_type='click'`, `meta.name` = 이벤트명)에 **같은 이름**으로 남긴다. (public) 레이아웃과
+  루트 404 가 같은 셸을 쓴다 — 새 분석 도구도 **셸에** 넣는다(레이아웃에만 넣으면 루트 404 가 빠진다).
+- 속성만 달면 되므로 **서버 컴포넌트의 `<Link>` 에도 붙는다**(홈 기둥 셀). 클릭을 재려고 `'use client'` 로 바꾸지 않는다.
+- 파라미터는 `data-track-<이름>`. 여러 단어는 **밑줄**(`data-track-blog_id`) — 하이픈은 dataset 이 camelCase 로 바꿔
+  GA 의 snake_case 와 어긋난다.
+- 폼 제출처럼 클릭이 아닌 곳은 `lib/first-party.ts` 의 `trackClick(name, params)` 를 직접 부른다(같은 모양으로 쌓인다).
+- 외부 링크(outbound)는 속성 없이 자동이다. 내부 판정은 "지금 호스트와 같은가(www 무시)" — `app.mhj.nz` 는 외부다.
+  단 **`data-track` 이 달린 외부 링크는 이름 있는 이벤트 하나로만** 남는다(`link_url` 파라미터가 붙는다) —
+  outbound 를 또 보내면 한 번의 클릭이 GA 와 page_events 에 두 번 세어진다.
+- 파라미터 값은 전부 **문자열**로 간다(dataset). 방문자가 친 자유 입력(검색어 등)은 싣지 않는다 —
+  1st-party `page_events.meta` 에 그대로 쌓인다.
+
 ### 측정
 
 ```bash

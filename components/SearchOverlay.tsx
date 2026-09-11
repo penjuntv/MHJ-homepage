@@ -32,9 +32,11 @@ const QUICK_LINKS = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** 바깥 폼(404 검색칸 등)에서 검색어를 들고 열 때. 열리자마자 그 검색어로 찾는다. */
+  initialQuery?: string;
 }
 
-export default function SearchOverlay({ open, onClose }: Props) {
+export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   useFocusTrap(containerRef, open);
@@ -43,6 +45,8 @@ export default function SearchOverlay({ open, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 검색 요청 순번 — 늦게 도착한 옛 응답이 새 결과를 덮거나, 닫힌 뒤 도착해 다음에 열 때 번쩍이지 않게.
+  const searchSeq = useRef(0);
 
   // ESC 닫기
   useEffect(() => {
@@ -60,6 +64,7 @@ export default function SearchOverlay({ open, onClose }: Props) {
       setTimeout(() => inputRef.current?.focus(), 80);
     } else {
       document.body.style.overflow = '';
+      searchSeq.current += 1;   // 날아가는 중인 응답은 버린다
       setQuery('');
       setResults([]);
       setSearched(false);
@@ -68,21 +73,30 @@ export default function SearchOverlay({ open, onClose }: Props) {
   }, [open]);
 
   const doSearch = useCallback(async (q: string) => {
+    const seq = ++searchSeq.current;
     if (q.length < 2) { setResults([]); setSearched(false); return; }
     setLoading(true);
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       const data = await res.json();
+      if (seq !== searchSeq.current) return;
       const found = data.results ?? [];
       setResults(found);
       setSearched(true);
       trackEvent('search', { search_term: q, results_count: found.length });
     } catch {
-      setResults([]);
+      if (seq === searchSeq.current) setResults([]);
     } finally {
-      setLoading(false);
+      if (seq === searchSeq.current) setLoading(false);
     }
   }, []);
+
+  // 404 처럼 바깥 폼에서 검색어를 들고 여는 경우 — 입력칸을 채우고 바로 찾는다(결과 렌더는 이 오버레이 하나뿐).
+  useEffect(() => {
+    if (!open || !initialQuery) return;
+    setQuery(initialQuery);
+    doSearch(initialQuery);
+  }, [open, initialQuery, doSearch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
