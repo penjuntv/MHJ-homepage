@@ -36,7 +36,9 @@ export function useFocusTrap(
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       const activeEl = document.activeElement;
-      if (e.shiftKey && (activeEl === first || !node.contains(activeEl))) {
+      // activeEl === node: 초기 포커스를 컨테이너(tabIndex=-1)에 둔 모달. 여기서 Shift+Tab 을
+      // 그냥 두면 브라우저가 문서 순서상 **컨테이너 앞** — 모달 뒤 페이지 — 로 포커스를 보낸다.
+      if (e.shiftKey && (activeEl === first || activeEl === node || !node.contains(activeEl))) {
         e.preventDefault();
         last.focus();
       } else if (!e.shiftKey && activeEl === last) {

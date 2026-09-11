@@ -154,7 +154,7 @@ jobs:
       # W6-B(2026-09-10). axe 는 React 의 onClick 을 못 본다 — `/blog` 의 글 카드가
       # <div onClick> 이라 글 링크가 0개였던 것은 <a href> 를 직접 세어 찾았고,
       # 그 셈이 스크립트 안에 회귀 검사로 들어가 있다.
-      - name: ⑬ 접근성 실측 (axe-core — 8화면 × 2뷰포트)
+      - name: ⑬ 접근성 실측 (axe-core — 12화면 × 2뷰포트, 매거진 네 갈래 포함)
         id: a11y
         if: ${{ !cancelled() }}
         timeout-minutes: 12

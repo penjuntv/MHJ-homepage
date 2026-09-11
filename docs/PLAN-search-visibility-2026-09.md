@@ -140,6 +140,7 @@ M   ●          ●                ● +4w                          ● +8w
 **◐ W1-C · 홈 LCP** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w1c-home-lcp`) — F-C-02 · 노력 S · 1 PR
 - **원인 확정**: 홈은 `HeroCarousel` 을 쓰지 않는다(import 0건, 죽은 컴포넌트). 실제 LCP 요소는 `app/(public)/page.tsx` `EditorialHero` 의 메인 `SafeImage` 이고 `priority` 가 없어 lazy 였다. `priority` + `fetchPriority="high"` 추가 → 로컬 prod 에서 `<link rel=preload as=image>` 생성, `loading` 속성 제거, 첫 이미지 요청이 내비게이션 +22ms. `heading-order`(홈 H1 = 히어로 글 제목)는 W2-A 에서.
 - 정리 후보(별건): `components/HeroCarousel.tsx` 는 어디서도 import 되지 않는다 — `lib/types.ts` 의 캐러셀 타입과 함께 삭제 검토.
+  → 2026-09-11 W6-C 에서 `HeroCarousel.tsx` 와 그것만 쓰던 `DetailModal.tsx` 를 삭제했다. `lib/types.ts` 의 캐러셀 타입(`HeroCarouselItem`·`HeroSlide`·`DetailItem`)은 남았다 — 별건.
 - Done: 라이브 홈 HTML 의 `EditorialHero` 메인 `<img>` 에 `loading` 속성 없음(eager) + `fetchpriority="high"` + `<link rel=preload as=image>` · 글·소개 페이지 히어로도 `fetchPriority="high"` · LH-desktop 홈 LCP < 800ms 는 배포 후 재측정
 
 **◐ W1-S · API 보안 하드닝** (2026-09-08 구현 완료, PR 대기 — 브랜치 `security/w1s-api-hardening`) — `06-frontend-backend.md` F5 · 노력 S~M · 1 PR

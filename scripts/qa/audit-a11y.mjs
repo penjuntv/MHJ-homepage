@@ -32,7 +32,16 @@ const AXE = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
 const arg = (k, d) => process.argv.find((a) => a.startsWith(`--${k}=`))?.slice(k.length + 3) ?? d;
 const BASE = arg('base', 'http://localhost:3003').replace(/\/+$/, '');
 const AS_JSON = process.argv.includes('--json');
-const PAGES = arg('pages', '/,/blog,/blog/fearless-four,/about,/magazine,/gallery,/storypress,/privacy').split(',');
+// `/magazine/[id]` 는 조건에 따라 **서로 다른 컴포넌트**로 갈린다(app/(public)/magazine/[id]/page.tsx) —
+// 경로 하나만 넣으면 나머지는 감사 밖이다. 그래서 갈래마다 하나씩:
+//   /magazine/2026-03             → MagazineIssueDetail (기사 모드 이슈 상세, 기사 카드 링크)
+//   /magazine/2026-03?page=1      → MagazineSpreadViewer (페이지 넘김 리더)
+//   /magazine/2026-03/lunchboxes  → 기사 단독 페이지
+//   /magazine/2026-01             → MagazineViewer PDF 모드 (legacy PNG 이슈 — 공개 기사 0)
+// MagazineViewer 의 기사 그리드(ArticleGridCard)는 PDF 와 공개 기사를 **둘 다** 가진 비-legacy
+// 이슈에서만 그려진다. 2026-09-11 기준 그런 이슈가 없어 이 감사로는 볼 수 없다(DESIGN_RULES §15.5).
+const MAGAZINE_PAGES = ['/magazine/2026-03', '/magazine/2026-03?page=1', '/magazine/2026-03/lunchboxes', '/magazine/2026-01'];
+const PAGES = arg('pages', ['/', '/blog', '/blog/fearless-four', '/about', '/magazine', ...MAGAZINE_PAGES, '/gallery', '/storypress', '/privacy'].join(',')).split(',');
 const VIEWPORTS = [{ label: 'desktop', width: 1440, height: 900 }, { label: 'mobile', width: 390, height: 844 }];
 
 /** 링크가 실제로 HTML 에 남는지 — axe 가 볼 수 없는 종류의 회귀를 막는다. */
@@ -47,6 +56,11 @@ const ANCHOR_CHECKS = [
   // 카테고리 허브로 가는 길도 링크여야 한다 — 버튼이면 크롤러가 허브를 못 찾는다.
   { path: '/blog', selector: 'a[href^="/blog/category/"]', min: 5,
     why: '카테고리 필터가 <button onClick> 이면 허브 7개가 색인에서 고립된다' },
+  // 이슈 상세의 기사 카드 → 기사 단독 페이지. `?page=N` 링크(리더 진입)는 `/magazine/2026-03?…` 이라
+  // 이 셀렉터에 안 걸린다 — slug 페이지로 가는 링크만 센다. 2026-03 은 공개 기사 5개 전부 slug 가 있다.
+  // 편집으로 이 호의 공개 기사 수가 바뀌면 min 도 같이 바꿀 것.
+  { path: '/magazine/2026-03', selector: 'a[href^="/magazine/2026-03/"]', min: 5,
+    why: '기사 카드가 <div onClick> 이나 ?page= 링크로 되돌아가면 기사 단독 페이지가 색인에서 고립된다' },
 ];
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'];

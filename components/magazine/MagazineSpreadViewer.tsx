@@ -498,14 +498,15 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
 
         {/* 중앙: 매거진 제목 */}
         <div style={{ flex: 1, textAlign: 'center', minWidth: 0 }}>
-          <p style={{
+          {/* 리더 화면의 유일한 제목 — <p> 였을 때 페이지에 <h1> 이 없었다(axe page-has-heading-one). */}
+          <h1 style={{
             fontFamily: '"Inter", sans-serif',
             fontSize: 14, fontWeight: 500, letterSpacing: '0.05em',
             color: barText,
             margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {magazine.title}
-          </p>
+          </h1>
         </div>
 
         {/* 우: 페이지 / TOC / 좋아요 / 공유 / 닫기 */}
@@ -526,6 +527,7 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
               type="button"
               onClick={() => setTocOpen(o => !o)}
               aria-label="Contents"
+              aria-expanded={tocOpen}
               style={{
                 background: tocOpen ? 'rgba(253,252,250,0.18)' : 'transparent',
                 border: '1px solid rgba(253,252,250,0.25)',
