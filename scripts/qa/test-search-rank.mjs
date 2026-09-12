@@ -124,6 +124,17 @@ check('소문자 변환으로 길이가 바뀌는 문자(İ) 뒤에서도 매치
   const c = seq(e400, ok); check('4xx 는 다시 부르지 않는다', [(await retryTransient(c, { delayMs: 0 })).status, c.calls()], [400, 1]);
   const d = seq(ok); check('성공은 한 번만', d.calls() === 0 && (await retryTransient(d, { delayMs: 0 })).status === 200 && d.calls() === 1, true);
   const e = seq(e504, e504, ok); check('두 번째도 실패면 그 실패를 돌려준다(무한 재시도 없음)', [(await retryTransient(e, { delayMs: 0 })).status, e.calls()], [504, 2]);
+  // 게이트웨이의 5초를 기다리지 않는다 — 시도마다 timeoutMs 로 끊고(supabase-js 는 status 0 에러로 돌려준다) 한 번 더
+  let n = 0;
+  const hang = (signal) => (n++ === 0
+    ? new Promise((res) => signal.addEventListener('abort', () => res({ error: { message: 'TimeoutError' }, status: 0, data: null })))
+    : Promise.resolve(ok));
+  const t0 = Date.now();
+  // AbortSignal.timeout 의 타이머는 이벤트 루프를 붙잡지 않는다(실제 라우트에선 fetch 가 붙잡는다) — 테스트에선 따로 붙잡는다
+  const keepAlive = setTimeout(() => {}, 2000);
+  const r = await retryTransient(hang, { delayMs: 0, timeoutMs: 30 });
+  clearTimeout(keepAlive);
+  check('걸린 시도는 timeoutMs 에 끊고 다시 부른다', [r.status, n, Date.now() - t0 < 1000], [200, 2, true]);
 }
 
 console.log(failed ? `\n🔴 ${failed} 실패` : '\n✅ 전부 통과');

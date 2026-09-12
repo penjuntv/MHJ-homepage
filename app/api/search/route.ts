@@ -70,29 +70,32 @@ export async function GET(req: NextRequest) {
   // ① 글 후보 — 토큰 하나라도 어느 칸에든 걸리는 글을 한 번에(가벼운 칸만). 태그는 배열이라 같은 원소만 거른다
   //    (하이픈 태그 "year-7" 은 구절 꼴로 따로 넣는다. 원소 안 부분 매치는 순위에서 본다).
   const tagTerms = [...tokens, ...(tokens.length > 1 ? [tokens.join('-')] : [])];
-  const candidates = () => supabase.from('blogs').select(BLOG_SEARCH_COLUMNS)
+  const candidates = (signal: AbortSignal) => supabase.from('blogs').select(BLOG_SEARCH_COLUMNS)
     .eq('published', true).or(scheduled)
     .or([
       ...tokens.flatMap((t) => [`title.ilike.${ilike(t)}`, `meta_description.ilike.${ilike(t)}`, `category.ilike.${ilike(t)}`, `content.imatch.${bodyMatch(t)}`]),
       `tags.ov.{${tagTerms.map((t) => `"${t}"`).join(',')}}`,
     ].join(','))
     .order('id', { ascending: false })
-    .limit(CANDIDATES);
+    .limit(CANDIDATES)
+    .abortSignal(signal);
   // ② 토큰마다 본문에 걸린 글의 id 만 — 여러 단어의 "모두 걸림"을 가리려면 어느 토큰이 본문에 있는지 알아야 한다.
-  const bodyHitQueries = tokens.map((t) => () =>
+  const bodyHitQueries = tokens.map((t) => (signal: AbortSignal) =>
     supabase.from('blogs').select('id')
       .eq('published', true).or(scheduled)
       .or(`content.imatch.${bodyMatch(t)}`)
-      .limit(CANDIDATES));
-  const articleQuery = () => supabase
+      .limit(CANDIDATES)
+      .abortSignal(signal));
+  const articleQuery = (signal: AbortSignal) => supabase
     .from('articles')
     .select('id, title, content, date, image_url, magazine_id')
     // 공개 페이지 5곳과 같은 발행 가드 — 없으면 초안 기사 제목·본문이 검색으로 샌다
     .eq('article_status', 'published')
     .or(tokens.flatMap((t) => [`title.ilike.${ilike(t)}`, `content.imatch.${bodyMatch(t)}`]).join(','))
     .order('id', { ascending: false })
-    .limit(50);
-  const magazineQuery = () => supabase
+    .limit(50)
+    .abortSignal(signal);
+  const magazineQuery = (signal: AbortSignal) => supabase
     .from('magazines')
     .select('id, title, year, month_name, image_url')
     // 공개 서가·홈과 같은 발행 가드 — 검색만 빠져 있어 초안 호의 제목이 샐 자리였다(2026-09-11 W6-D)
@@ -100,7 +103,8 @@ export async function GET(req: NextRequest) {
     .or(tokens.map((t) => `title.ilike.${ilike(t)}`).join(','))
     // 동점(제목에 같은 단어)이면 최신 호가 먼저 — 순위 정렬은 안정 정렬이라 이 순서를 지킨다
     .order('created_at', { ascending: false })
-    .limit(10);
+    .limit(10)
+    .abortSignal(signal);
 
   const [blogsRes, articlesRes, magazinesRes, ...bodyRes] = await Promise.all([
     retryTransient(candidates), retryTransient(articleQuery), retryTransient(magazineQuery), ...bodyHitQueries.map((q) => retryTransient(q)),
@@ -121,9 +125,10 @@ export async function GET(req: NextRequest) {
   // ③ 스니펫용 본문은 최종 상위 몇 편만 — 이 조회도 발행 가드를 건다(CLAUDE.md 3)
   const bodies = new Map<number, string>();
   if (topBlogs.length) {
-    const { data, error } = await retryTransient(() => supabase.from('blogs').select(BLOG_SEARCH_BODY_COLUMNS)
+    const { data, error } = await retryTransient((signal) => supabase.from('blogs').select(BLOG_SEARCH_BODY_COLUMNS)
       .eq('published', true).or(scheduled)
-      .in('id', topBlogs.map((b) => b.id)));
+      .in('id', topBlogs.map((b) => b.id))
+      .abortSignal(signal));
     // 스니펫만 잃는다 — 설명문으로 대신한다(makeSnippet 의 fallback).
     if (error) { partial = true; console.error('search(partial body):', error.message); }
     for (const row of data ?? []) bodies.set(row.id, row.content);
