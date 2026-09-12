@@ -5,6 +5,7 @@
  */
 import assert from 'node:assert/strict';
 import { tokenize, scoreDoc, rankDocs, rankBlogHits, tokensIn, makeSnippet, MAX_TOKENS } from '../../lib/search-rank.mjs';
+import { retryTransient } from '../../lib/postgrest-retry.mjs';
 
 let failed = 0;
 const check = (name, got, want) => {
@@ -110,6 +111,20 @@ check('단어 앞머리 매치를 먼저(Preschool 이 아니라 school)',
   makeSnippet(`<p>Preschool friends. ${'Filler words go here. '.repeat(6)}Then school started.</p>`, ['school']).includes('school started'), true);
 check('소문자 변환으로 길이가 바뀌는 문자(İ) 뒤에서도 매치를 자르지 않는다',
   makeSnippet(`<p>${'İ'.repeat(50)} then lunch box here</p>`, ['lunch'], { max: 30 }).includes('lunch'), true);
+
+// ── retryTransient: 검색 라우트가 조회마다 쓰는 한 번 더(lib/postgrest-retry.mjs)
+{
+  const seq = (...rs) => { let n = 0; const make = () => Promise.resolve(rs[Math.min(n++, rs.length - 1)]); make.calls = () => n; return make; };
+  const ok = { error: null, status: 200, data: [1] };
+  const e504 = { error: { message: 'Gateway Timeout' }, status: 504, data: null };
+  const e400 = { error: { message: 'bad filter' }, status: 400, data: null };
+  const net = { error: { message: 'fetch failed' }, status: 0, data: null };
+  const a = seq(e504, ok); check('504 → 한 번 더 불러 성공', [(await retryTransient(a, { delayMs: 0 })).status, a.calls()], [200, 2]);
+  const b = seq(net, ok); check('네트워크 실패(status 0) → 한 번 더', [(await retryTransient(b, { delayMs: 0 })).status, b.calls()], [200, 2]);
+  const c = seq(e400, ok); check('4xx 는 다시 부르지 않는다', [(await retryTransient(c, { delayMs: 0 })).status, c.calls()], [400, 1]);
+  const d = seq(ok); check('성공은 한 번만', d.calls() === 0 && (await retryTransient(d, { delayMs: 0 })).status === 200 && d.calls() === 1, true);
+  const e = seq(e504, e504, ok); check('두 번째도 실패면 그 실패를 돌려준다(무한 재시도 없음)', [(await retryTransient(e, { delayMs: 0 })).status, e.calls()], [504, 2]);
+}
 
 console.log(failed ? `\n🔴 ${failed} 실패` : '\n✅ 전부 통과');
 process.exit(failed ? 1 : 0);

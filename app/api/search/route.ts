@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { tokenize, rankDocs, rankBlogHits, tokensIn, makeSnippet } from '@/lib/search-rank.mjs';
 import { BLOG_SEARCH_COLUMNS, BLOG_SEARCH_BODY_COLUMNS } from '@/lib/constants';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
+import { retryTransient } from '@/lib/postgrest-retry.mjs';
 import type { Blog, Article, Magazine } from '@/lib/types';
 
 const supabase = createClient(
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest) {
   // ① 글 후보 — 토큰 하나라도 어느 칸에든 걸리는 글을 한 번에(가벼운 칸만). 태그는 배열이라 같은 원소만 거른다
   //    (하이픈 태그 "year-7" 은 구절 꼴로 따로 넣는다. 원소 안 부분 매치는 순위에서 본다).
   const tagTerms = [...tokens, ...(tokens.length > 1 ? [tokens.join('-')] : [])];
-  const candidates = supabase.from('blogs').select(BLOG_SEARCH_COLUMNS)
+  const candidates = () => supabase.from('blogs').select(BLOG_SEARCH_COLUMNS)
     .eq('published', true).or(scheduled)
     .or([
       ...tokens.flatMap((t) => [`title.ilike.${ilike(t)}`, `meta_description.ilike.${ilike(t)}`, `category.ilike.${ilike(t)}`, `content.imatch.${bodyMatch(t)}`]),
@@ -78,12 +79,12 @@ export async function GET(req: NextRequest) {
     .order('id', { ascending: false })
     .limit(CANDIDATES);
   // ② 토큰마다 본문에 걸린 글의 id 만 — 여러 단어의 "모두 걸림"을 가리려면 어느 토큰이 본문에 있는지 알아야 한다.
-  const bodyHitQueries = tokens.map((t) =>
+  const bodyHitQueries = tokens.map((t) => () =>
     supabase.from('blogs').select('id')
       .eq('published', true).or(scheduled)
       .or(`content.imatch.${bodyMatch(t)}`)
       .limit(CANDIDATES));
-  const articleQuery = supabase
+  const articleQuery = () => supabase
     .from('articles')
     .select('id, title, content, date, image_url, magazine_id')
     // 공개 페이지 5곳과 같은 발행 가드 — 없으면 초안 기사 제목·본문이 검색으로 샌다
@@ -91,7 +92,7 @@ export async function GET(req: NextRequest) {
     .or(tokens.flatMap((t) => [`title.ilike.${ilike(t)}`, `content.imatch.${bodyMatch(t)}`]).join(','))
     .order('id', { ascending: false })
     .limit(50);
-  const magazineQuery = supabase
+  const magazineQuery = () => supabase
     .from('magazines')
     .select('id, title, year, month_name, image_url')
     // 공개 서가·홈과 같은 발행 가드 — 검색만 빠져 있어 초안 호의 제목이 샐 자리였다(2026-09-11 W6-D)
@@ -101,13 +102,18 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(10);
 
-  const [blogsRes, articlesRes, magazinesRes, ...bodyRes] = await Promise.all([candidates, articleQuery, magazineQuery, ...bodyHitQueries]);
-  const failed = [blogsRes, articlesRes, magazinesRes, ...bodyRes].find((r) => r.error);
-  if (failed?.error) {
-    // 예전엔 에러를 삼켜 빈 배열을 돌려줬다 — 사용자에겐 "결과 없음" 과 똑같이 보였다.
-    console.error('search:', failed.error.message);
+  const [blogsRes, articlesRes, magazinesRes, ...bodyRes] = await Promise.all([
+    retryTransient(candidates), retryTransient(articleQuery), retryTransient(magazineQuery), ...bodyHitQueries.map((q) => retryTransient(q)),
+  ]);
+  if (blogsRes.error) {
+    // 글 후보가 없으면 보여 줄 것이 없다 — 실패로 알린다(예전엔 에러를 삼켜 "결과 없음" 과 똑같이 보였다).
+    console.error('search:', blogsRes.error.message);
     return NextResponse.json({ error: 'search_failed' }, { status: 500, headers: noStore });
   }
+  // 나머지는 보조 정보다 — 재시도 뒤에도 실패하면 그 부분만 빼고 돌려준다(본문 매치 없이 순위 · 기사/매거진 없이 글만).
+  // 부분 결과는 CDN 에 캐시하지 않는다 — 일시 실패로 빠진 결과가 몇 분씩 굳지 않게.
+  let partial = false;
+  for (const r of [articlesRes, magazinesRes, ...bodyRes]) if (r.error) { partial = true; console.error('search(partial):', r.error.message); }
 
   const bodyHits = bodyRes.map((r) => new Set((r.data ?? []).map((x) => x.id)));
   const topBlogs = rankBlogHits((blogsRes.data ?? []) as BlogRow[], bodyHits, tokens).slice(0, LIMIT.blog);
@@ -115,13 +121,11 @@ export async function GET(req: NextRequest) {
   // ③ 스니펫용 본문은 최종 상위 몇 편만 — 이 조회도 발행 가드를 건다(CLAUDE.md 3)
   const bodies = new Map<number, string>();
   if (topBlogs.length) {
-    const { data, error } = await supabase.from('blogs').select(BLOG_SEARCH_BODY_COLUMNS)
+    const { data, error } = await retryTransient(() => supabase.from('blogs').select(BLOG_SEARCH_BODY_COLUMNS)
       .eq('published', true).or(scheduled)
-      .in('id', topBlogs.map((b) => b.id));
-    if (error) {
-      console.error('search(body):', error.message);
-      return NextResponse.json({ error: 'search_failed' }, { status: 500, headers: noStore });
-    }
+      .in('id', topBlogs.map((b) => b.id)));
+    // 스니펫만 잃는다 — 설명문으로 대신한다(makeSnippet 의 fallback).
+    if (error) { partial = true; console.error('search(partial body):', error.message); }
     for (const row of data ?? []) bodies.set(row.id, row.content);
   }
 
@@ -167,6 +171,6 @@ export async function GET(req: NextRequest) {
   return NextResponse.json<SearchResponse>({ results, total: results.length, query: q }, {
     // 같은 검색어는 CDN 이 1분 들고 있다 — 타이핑 중 되돌아온 검색어·여러 사람의 같은 검색이 Supabase 까지 가지 않는다.
     // 새 글이 검색에 뜨는 데 최대 몇 분 늦는 것은 받아들인다(목록·상세는 revalidate 로 즉시).
-    headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
+    headers: partial ? noStore : { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
   });
 }
