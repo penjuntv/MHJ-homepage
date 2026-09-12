@@ -25,7 +25,8 @@ export const DEFAULT_CONSTANTS = new URL('../lib/constants.ts', import.meta.url)
 export const DEFAULT_GRANT = new URL('../docs/sql/anon_blogs_column_whitelist_grant.sql', import.meta.url);
 
 const CONST_NAMES = ['BLOG_CARD_COLUMNS', 'BLOG_DETAIL_COLUMNS', 'BLOG_RELATED_COLUMNS', 'BLOG_SITEMAP_COLUMNS',
-  'BLOG_FEED_COLUMNS', 'BLOG_LLMS_COLUMNS', 'BLOG_ADJACENT_COLUMNS'];
+  'BLOG_FEED_COLUMNS', 'BLOG_LLMS_COLUMNS', 'BLOG_ADJACENT_COLUMNS',
+  'BLOG_SEARCH_COLUMNS', 'BLOG_SEARCH_BODY_COLUMNS'];
 
 /** `export const NAME = '...'` / `` `${OTHER}, ...` `` 를 컬럼 집합으로 푼다(템플릿 참조는 1단계만 — 현재 코드가 그렇다). */
 export function parseConstants(src) {
@@ -85,7 +86,7 @@ export function run(constantsPath, grantPath) {
 
 function selfTest() {
   const dir = mkdtempSync(join(tmpdir(), 'anon-grant-'));
-  const consts = (extra = '') => `export const BLOG_CARD_COLUMNS =\n  'id, title, slug${extra}';\nexport const BLOG_DETAIL_COLUMNS =\n  \`\${BLOG_CARD_COLUMNS}, content\`;\nexport const BLOG_RELATED_COLUMNS =\n  'id, title';\nexport const BLOG_SITEMAP_COLUMNS = 'slug';\nexport const BLOG_FEED_COLUMNS = 'slug';\nexport const BLOG_LLMS_COLUMNS = 'slug';\nexport const BLOG_ADJACENT_COLUMNS = 'id, title';\n`;
+  const consts = (extra = '') => `export const BLOG_CARD_COLUMNS =\n  'id, title, slug${extra}';\nexport const BLOG_DETAIL_COLUMNS =\n  \`\${BLOG_CARD_COLUMNS}, content\`;\nexport const BLOG_RELATED_COLUMNS =\n  'id, title';\nexport const BLOG_SITEMAP_COLUMNS = 'slug';\nexport const BLOG_FEED_COLUMNS = 'slug';\nexport const BLOG_LLMS_COLUMNS = 'slug';\nexport const BLOG_ADJACENT_COLUMNS = 'id, title';\nexport const BLOG_SEARCH_COLUMNS = 'id, title';\nexport const BLOG_SEARCH_BODY_COLUMNS = 'id, title';\n`;
   const grant = `begin;\nrevoke select on table public.blogs from anon;\ngrant select (id, title, slug,\n  content -- 코멘트\n  )\n  on table public.blogs to anon;\ncommit;\n`;
   const c = join(dir, 'ok.ts'); writeFileSync(c, consts());
   const cBad = join(dir, 'bad.ts'); writeFileSync(cBad, consts(', seo_title'));

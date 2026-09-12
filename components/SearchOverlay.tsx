@@ -15,11 +15,6 @@ const TYPE_LABEL: Record<string, string> = {
   article: 'Article',
 };
 
-const TYPE_COLOR: Record<string, string> = {
-  blog: '#4F46E5',
-  magazine: '#EC4899',
-  article: '#10B981',
-};
 
 // 카테고리 목록은 lib/constants 에서 파생 — 하드코딩하면 개편 때 죽은 링크가 남는다
 // (2026-09-08 전까지 폐기된 카테고리 5개가 /blog?category=… 로 조용히 전체 목록으로 떨어졌다).
@@ -28,6 +23,17 @@ const QUICK_LINKS = [
   { label: 'Magazine', href: '/magazine' },
   { label: 'Gallery', href: '/gallery' },
 ];
+
+const FAIL_TEXT = {
+  rate: 'Too many searches in a row. Please try again in a minute.',
+  error: 'Something went wrong on our side — it is not that nothing matched.',
+} as const;
+
+function announcement(view: 'idle' | 'done' | 'error' | 'rate', count: number): string {
+  if (view === 'done') return count ? `${count} results found` : 'No results found';
+  if (view === 'idle') return '';
+  return `${view === 'rate' ? 'Slow down a little.' : 'Search is not responding.'} ${FAIL_TEXT[view]}`;
+}
 
 interface Props {
   open: boolean;
@@ -43,7 +49,9 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
+  // 마지막으로 끝난 검색이 무엇을 보여 주는가 — 하나의 상태로 둔다(찾는 중에는 직전 화면을 유지해 번쩍이지 않게).
+  // 실패와 "결과 없음" 을 가른다 — 예전엔 둘 다 빈 배열이라 검색이 고장 나도 "No results" 로 보였다.
+  const [view, setView] = useState<'idle' | 'done' | 'error' | 'rate'>('idle');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 검색 요청 순번 — 늦게 도착한 옛 응답이 새 결과를 덮거나, 닫힌 뒤 도착해 다음에 열 때 번쩍이지 않게.
   const searchSeq = useRef(0);
@@ -67,25 +75,33 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
       searchSeq.current += 1;   // 날아가는 중인 응답은 버린다
       setQuery('');
       setResults([]);
-      setSearched(false);
+      setView('idle');
+      setLoading(false);
     }
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
   const doSearch = useCallback(async (q: string) => {
     const seq = ++searchSeq.current;
-    if (q.length < 2) { setResults([]); setSearched(false); return; }
+    if (q.length < 2) { setResults([]); setView('idle'); setLoading(false); return; }
     setLoading(true);
+    const fail = (reason: 'error' | 'rate') => {
+      setResults([]);
+      setView(reason);
+      trackEvent('search_failed', { search_term: q, reason });
+    };
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      if (seq !== searchSeq.current) return;
+      if (!res.ok) { fail(res.status === 429 ? 'rate' : 'error'); return; }
       const data = await res.json();
       if (seq !== searchSeq.current) return;
       const found = data.results ?? [];
       setResults(found);
-      setSearched(true);
+      setView('done');
       trackEvent('search', { search_term: q, results_count: found.length });
     } catch {
-      if (seq === searchSeq.current) setResults([]);
+      if (seq === searchSeq.current) fail('error');
     } finally {
       if (seq === searchSeq.current) setLoading(false);
     }
@@ -119,7 +135,7 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
         backdropFilter: 'blur(40px)',
         WebkitBackdropFilter: 'blur(40px)',
         display: 'flex', flexDirection: 'column',
-        animation: 'searchFadeIn 0.25s cubic-bezier(0.16,1,0.3,1)',
+        animation: 'searchFadeIn 0.25s ease-out',
       }}
     >
       {/* 닫기 버튼 */}
@@ -178,8 +194,8 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
               <div style={{
                 position: 'absolute', right: 0,
                 width: '20px', height: '20px',
-                border: '2px solid #F1F5F9',
-                borderTopColor: '#4F46E5',
+                border: '2px solid var(--border)',
+                borderTopColor: 'var(--text-secondary)',   // 인디고는 인터랙티브 요소에만(§6.4)
                 borderRadius: '50%',
                 animation: 'spin 0.8s linear infinite',
               }} />
@@ -188,23 +204,48 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
         </div>
 
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          {/* 스크린리더 알림은 늘 있는 이 한 줄만 — 텍스트가 바뀔 때만 읽힌다. 실패 블록 전체를 role="alert" 로 두면
+              다시 시도·타이핑마다 카테고리 링크 목록까지 통째로 다시 읽혔다. */}
+          <p role="status" className="sr-only">{announcement(view, results.length)}</p>
+
+          {/* 실패 — "결과 없음" 과 다른 말로, 다시 시도할 길을 준다 */}
+          {(view === 'error' || view === 'rate') && (
+            <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+              <p className="font-display font-black" style={{ fontSize: 'clamp(24px, 4vw, 40px)', letterSpacing: '-1px', marginBottom: '16px', fontStyle: 'italic' }}>
+                {view === 'rate' ? 'Slow down a little' : 'Search is not responding'}
+              </p>
+              <p style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                {FAIL_TEXT[view]}
+              </p>
+              <button
+                type="button"
+                // 성공하면 이 버튼이 사라진다 — 포커스가 대화상자 밖(<body>)으로 떨어지지 않게 입력칸으로 먼저 옮긴다.
+                onClick={() => { inputRef.current?.focus(); doSearch(query); }}
+                style={{ padding: '16px 24px', borderRadius: 8, border: '1px solid var(--text-tertiary)', background: 'transparent', color: 'var(--text)', fontSize: 13, fontWeight: 700, cursor: 'pointer', marginBottom: '40px' }}
+              >
+                Try again
+              </button>
+              <QuickLinks onClose={onClose} />
+            </div>
+          )}
+
           {/* 결과 있음 */}
-          {searched && results.length > 0 && (
+          {view === 'done' && results.length > 0 && (
             <div>
               <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '4px', color: 'var(--text-tertiary)', marginBottom: '24px' }}>
                 {results.length} results found
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {results.map((item, i) => (
-                  <ResultCard key={`${item.type}-${item.id}`} item={item} index={i} onClose={onClose} />
+                {results.map((item) => (
+                  <ResultCard key={`${item.type}-${item.id}`} item={item} onClose={onClose} />
                 ))}
               </div>
             </div>
           )}
 
           {/* 결과 없음 */}
-          {searched && results.length === 0 && !loading && (
-            <div style={{ animation: 'slideUp 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
+          {view === 'done' && results.length === 0 && !loading && (
+            <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
               <p className="font-display font-black" style={{ fontSize: 'clamp(24px, 4vw, 40px)', letterSpacing: '-1px', marginBottom: '12px', fontStyle: 'italic' }}>
                 No results found
               </p>
@@ -216,8 +257,8 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
           )}
 
           {/* 초기 상태 (검색 전) */}
-          {!searched && (
-            <div style={{ animation: 'slideUp 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
+          {view === 'idle' && (
+            <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
               <QuickLinks onClose={onClose} />
             </div>
           )}
@@ -229,9 +270,9 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
         @keyframes spin {
           to { transform: rotate(360deg); }
@@ -241,9 +282,9 @@ export default function SearchOverlay({ open, onClose, initialQuery }: Props) {
   );
 }
 
-function ResultCard({ item, index, onClose }: { item: SearchResult; index: number; onClose: () => void }) {
+// 호버는 사진 미세 확대 + 화살표만(DESIGN_RULES §9.1 — 배경·보더·그림자 변화 금지). 등장은 페이드만, 순차 지연 없음(§9.3).
+function ResultCard({ item, onClose }: { item: SearchResult; onClose: () => void }) {
   const [hovered, setHovered] = useState(false);
-  const color = TYPE_COLOR[item.type] || '#4F46E5';
 
   return (
     <Link
@@ -251,14 +292,11 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
       onClick={onClose}
       style={{
         display: 'flex', alignItems: 'center', gap: '16px',
-        padding: '16px 20px', borderRadius: '20px',
-        background: hovered ? 'var(--bg-surface)' : 'var(--bg-card)',
-        border: '1px solid',
-        borderColor: hovered ? 'var(--border-medium)' : 'var(--border)',
+        padding: '16px', borderRadius: '12px',   // 카드 radius 12px 이하(CLAUDE.md 7) — 20px 이었다
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
         textDecoration: 'none',
-        boxShadow: hovered ? '0 12px 32px rgba(0,0,0,0.12)' : 'none',
-        transition: 'background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease',
-        animation: `slideUp 0.4s ${index * 0.04}s both cubic-bezier(0.16,1,0.3,1)`,
+        animation: 'fadeIn 0.3s ease-out',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -266,9 +304,9 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
       {/* 썸네일 */}
       {item.image_url && (
         <div style={{
-          width: '56px', height: '56px', borderRadius: '12px',
+          width: '56px', height: '56px', borderRadius: '8px',   // 카드 안 이미지 8px(§8.1)
           overflow: 'hidden', flexShrink: 0,
-          transform: hovered ? 'scale(1.03)' : 'scale(1)',
+          transform: hovered ? 'scale(1.02)' : 'scale(1)',
           transition: 'transform 0.3s ease',
         }}>
           <img
@@ -284,9 +322,11 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
       {/* 텍스트 */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          {/* 종류는 라벨 글자가 말한다 — 색으로 가르지 않는다(DESIGN_RULES §6.4 "컬러 뱃지 금지").
+              하드코딩 인디고·분홍·초록을 9% 배경에 얹어 양 테마 모두 대비 미달이었다(라이트 초록 2.31:1 · 다크 인디고 2.48:1). */}
           <span style={{
-            padding: '2px 8px', borderRadius: '999px',
-            background: color + '18', color,
+            padding: '2px 8px', borderRadius: '4px',   // 뱃지 4px(§8.1)
+            background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)',
             fontSize: '9px', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase',
           }}>
             {TYPE_LABEL[item.type]}
@@ -317,7 +357,7 @@ function ResultCard({ item, index, onClose }: { item: SearchResult; index: numbe
 
       <ArrowRight
         size={16}
-        style={{ color: hovered ? color : 'var(--text-tertiary)', flexShrink: 0, transition: 'color 0.2s ease' }}
+        style={{ color: hovered ? 'var(--text)' : 'var(--text-tertiary)', flexShrink: 0, transition: 'color 0.2s ease' }}
       />
     </Link>
   );

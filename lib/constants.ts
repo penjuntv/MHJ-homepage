@@ -50,6 +50,13 @@ export const BLOG_CARD_COLUMNS =
 export const BLOG_ADJACENT_COLUMNS = 'id, title, slug, image_url, date';
 
 /**
+ * 사이트 검색(2026-09-11 W6-D). 후보는 가벼운 칸만 싣고 본문은 **거르기만** 한다 — 81편 본문을 검색마다 받을 이유가 없다.
+ * 스니펫용 본문은 최종 상위 몇 편만 따로(`BLOG_SEARCH_BODY_COLUMNS`).
+ */
+export const BLOG_SEARCH_COLUMNS = 'id, title, slug, category, tags, meta_description, date, image_url, view_count';
+export const BLOG_SEARCH_BODY_COLUMNS = 'id, content';
+
+/**
  * 상세 페이지(/blog/[slug]) 전용 — 카드 컬럼 + 본문 렌더링에 추가로 필요한 컬럼.
  * seo_title·summary_ko·faq_json·related_slugs·og_image_alt 는 W4-A(2026-09-08)에서 컬럼·anon grant 까지
  * 마련한 SEO 운영 컬럼 — 렌더링은 W4-B. 새 공개 컬럼 추가 절차는 docs/DB_SCHEMA.md §blogs 가 정본

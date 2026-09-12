@@ -65,6 +65,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-seo-defects.mjs
 
+      - name: 사이트 검색 순위·토큰·스니펫 테스트 (W6-D)
+        if: ${{ !cancelled() }}
+        run: node scripts/qa/test-search-rank.mjs
+
       - name: proxy-image URL allowlist 테스트 (SSRF 차단)
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-image-proxy-allow.mjs
