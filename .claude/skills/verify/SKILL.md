@@ -1,6 +1,6 @@
 ---
 name: verify
-description: How to run MHJ locally and drive a change at its real surface (pages in Playwright, the QA CLIs). Recipe learned 2026-09-11 (W6-C); read before /verify or any runtime check.
+description: How to run MHJ locally and drive a change at its real surface (pages in Playwright, the QA CLIs). Recipe learned 2026-09-11 (PR #71 magazine keyboard); read before /verify or any runtime check.
 ---
 
 # Verify recipe — MHJ homepage
