@@ -13,6 +13,7 @@ import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
 import type { StyleOverrides } from '@/components/magazine/templates/shared';
 import { supabase } from '@/lib/supabase-browser';
 import { trackEvent } from '@/lib/analytics';
+import { useFocusTrap } from '@/lib/useFocusTrap';
 
 interface ArticleReaction {
   id: number;
@@ -111,6 +112,13 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
+  // 카드에서 Enter/Space 로 열면 포커스가 뒤쪽 카드에 남아 Tab 이 그리드부터 돈다.
+  // 대화상자로 옮겨 가두고, 닫히면 연 카드로 돌려준다(useFocusTrap cleanup).
+  // 트랩이 먼저 등록돼야 "열기 직전 포커스" 가 카드로 잡힌다 — 두 줄 순서를 바꾸지 말 것.
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, true);
+  useEffect(() => { dialogRef.current?.focus(); }, []);
+
   const loadComments = useCallback(async () => {
     const { data } = await supabase.from('article_reactions').select('*')
       .eq('article_id', article.id).eq('type', 'comment')
@@ -183,7 +191,15 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
   }, [lightboxIdx, allImages.length]);
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={article.title}
+      tabIndex={-1}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, outline: 'none' }}
+    >
       <style>{`
         .apop-nav-side { position: absolute; top: 50%; transform: translateY(-50%); }
         .apop-nav-bottom { display: none; }
@@ -250,8 +266,10 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
                 {currentPage}/{totalPages}
               </span>
             )}
-            {/* 좋아요 버튼 */}
-            <button onClick={onLike} style={{
+            {/* 좋아요 버튼 — 0개일 때는 하트뿐이라 이름이 없었다. 보이는 숫자를 이름에 포함한다(WCAG 2.5.3).
+                좋아요는 취소가 없다(handleLike 가 조기 반환) — aria-pressed 는 "다시 누르면 풀린다" 는 약속이라
+                쓰지 않고, 상태는 이름("Liked")과 aria-disabled 로 말한다. */}
+            <button type="button" onClick={onLike} aria-disabled={liked} aria-label={liked ? `Liked, ${likeCount}` : likeCount > 0 ? `Like, ${likeCount}` : 'Like'} style={{
               display: 'flex', alignItems: 'center', gap: 5,
               padding: '6px 12px', borderRadius: 999,
               border: `1px solid ${liked ? '#FCA5A5' : '#E8DDD4'}`,
@@ -266,9 +284,9 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
             {/* 댓글 수 */}
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#9C8B7A', fontWeight: 600 }}>
               <MessageCircle size={13} />
-              {comments.length > 0 && <span>{comments.length}</span>}
+              {comments.length > 0 && <span>{comments.length}<span className="sr-only"> comments</span></span>}
             </span>
-            <button onClick={onClose} style={{ background: '#F5F0EB', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <button type="button" onClick={onClose} aria-label="닫기" style={{ background: '#F5F0EB', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
               <X size={15} color="#6B5B4E" />
             </button>
           </div>
@@ -349,8 +367,10 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
           {totalPages > 1 && (
             <div className="apop-nav-bottom" style={{ display: 'none', alignItems: 'center', justifyContent: 'center', gap: 16, padding: '12px 20px', borderTop: '1px solid #F1F5F9', background: '#FAF7F4' }}>
               <button
+                type="button"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
+                aria-label="이전 페이지"
                 style={{
                   width: 36, height: 36, borderRadius: '50%',
                   border: '1px solid #E8DDD4', background: 'white',
@@ -365,8 +385,10 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
                 {currentPage} / {totalPages}
               </span>
               <button
+                type="button"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
+                aria-label="다음 페이지"
                 style={{
                   width: 36, height: 36, borderRadius: '50%',
                   border: '1px solid #E8DDD4', background: currentPage === totalPages ? 'white' : '#2C1F14',
@@ -1002,7 +1024,7 @@ function MagazineViewerLegacy({ magazine, articles }: Props) {
                     liked={likedArticles.has(a.id)}
                     likeCount={reactionCounts[a.id]?.likes ?? 0}
                     commentCount={reactionCounts[a.id]?.comments ?? 0}
-                    onLike={e => { e.stopPropagation(); handleLike(a.id); }}
+                    onLike={() => handleLike(a.id)}
                   />
                 ))}
               </div>
@@ -1050,6 +1072,16 @@ function MagazineViewerLegacy({ magazine, articles }: Props) {
           flex: 1 1 0;
           min-width: 0;
         }
+        /* 그리드 카드 — 제목 속 버튼의 ::after 가 카드(.mv-card, position:relative) 전체를 덮는다.
+           포커스 링도 ::after 에 그려야 제목 글자가 아니라 카드 전체에 보인다. */
+        .mv-card-open {
+          background: none; border: 0; padding: 0; margin: 0;
+          font: inherit; color: inherit; letter-spacing: inherit; text-align: left;
+          cursor: pointer;
+        }
+        .mv-card-open::after { content: ''; position: absolute; inset: 0; }
+        .mv-card-open:focus-visible { outline: none; }
+        .mv-card-open:focus-visible::after { outline: 2px solid currentColor; outline-offset: -3px; border-radius: 16px; }
         .dark .mag-sidebar {
           background: var(--bg-card) !important;
           border-left-color: var(--border) !important;
@@ -1090,11 +1122,19 @@ function MagazineViewerLegacy({ magazine, articles }: Props) {
   );
 }
 
-/* ─── Articles 모드 그리드 카드 ─── */
+/* ─── Articles 모드 그리드 카드 ───
+   여는 동작은 <h3> 안의 <button>(.mv-card-open) 하나가 맡고, 그 ::after 가 카드 전체를 덮어 어디를
+   눌러도 열린다(아래 <style>). 카드 통째로 <button> 이면 <h3> 가 버튼 안에서 제목 의미를 잃고
+   좋아요 버튼이 버튼 안에 중첩된다(axe nested-interactive).
+   <Link> 가 아닌 이유: 기사에 slug 가 없으면 갈 주소가 없다 — 같은 그리드에서 어떤 카드는 Space 로
+   열리고 어떤 카드는 안 열리게 된다(DESIGN_RULES §15.5).
+   ⚠️ 이 그리드가 뜨는 호(비-legacy + PDF + 공개 기사)는 page.tsx 가 MagazineIssueDetail 을 거치지 않는다 —
+   그래서 이 화면에는 기사 단독 페이지(/magazine/{id}/{slug})로 가는 내부 링크가 없고, sitemap.ts 만 싣는다.
+   그런 호를 발행하면 slug 있는 기사에 별도 링크를 둘지 검토할 것. */
 function ArticleGridCard({ article, onOpen, magazineLabel, magazineCoverUrl, liked, likeCount, commentCount, onLike }: {
   article: Article; onOpen: () => void; magazineLabel: string; magazineCoverUrl?: string;
   liked: boolean; likeCount: number; commentCount: number;
-  onLike: (e: React.MouseEvent) => void;
+  onLike: () => void;
 }) {
   const isImageFile = !!article.pdf_url && !article.pdf_url.toLowerCase().includes('.pdf');
   const cardRef = useRef<HTMLDivElement>(null);
@@ -1105,9 +1145,8 @@ function ArticleGridCard({ article, onOpen, magazineLabel, magazineCoverUrl, lik
     <div style={{ position: 'relative' }}>
       <div
         ref={cardRef}
-        onClick={onOpen}
         className="mv-card"
-        style={{ borderRadius: 16, overflow: 'hidden', background: '#fff', border: '1px solid #E8DDD4', cursor: 'pointer', transition: 'transform 0.25s ease, box-shadow 0.25s ease', boxShadow: '0 2px 8px rgba(44,31,20,0.06)' }}
+        style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', background: '#fff', border: '1px solid #E8DDD4', cursor: 'pointer', transition: 'transform 0.25s ease, box-shadow 0.25s ease', boxShadow: '0 2px 8px rgba(44,31,20,0.06)' }}
         onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.02)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 16px 40px rgba(44,31,20,0.12)'; }}
         onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(44,31,20,0.06)'; }}
       >
@@ -1131,12 +1170,17 @@ function ArticleGridCard({ article, onOpen, magazineLabel, magazineCoverUrl, lik
             {article.author} · {article.date}
           </p>
           <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 900, lineHeight: 1.3, color: '#2C1F14', letterSpacing: -0.3 }}>
-            {article.title}
+            <button type="button" onClick={onOpen} className="mv-card-open">
+              {article.title}
+            </button>
           </h3>
-          {/* 좋아요 / 댓글 수 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* 좋아요 / 댓글 수 — 카드를 덮는 .mv-card-open::after 위로 올려야 눌린다 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative', zIndex: 1 }}>
             <button
+              type="button"
               onClick={onLike}
+              aria-disabled={liked}
+              aria-label={liked ? `Liked, ${likeCount}` : likeCount > 0 ? `Like, ${likeCount}` : 'Like'}
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '5px 10px', borderRadius: 999,
@@ -1152,14 +1196,14 @@ function ArticleGridCard({ article, onOpen, magazineLabel, magazineCoverUrl, lik
             </button>
             {commentCount > 0 && (
               <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#9C8B7A', fontWeight: 600 }}>
-                <MessageCircle size={11} /> {commentCount}
+                <MessageCircle size={11} /> {commentCount}<span className="sr-only"> comments</span>
               </span>
             )}
           </div>
         </div>
       </div>
-      {/* 다운로드 버튼 오버레이 */}
-      <div style={{ position: 'absolute', bottom: '52px', right: '12px' }} onClick={e => e.stopPropagation()}>
+      {/* 다운로드 버튼 오버레이 — 카드(.mv-card)의 형제라 클릭이 카드로 번지지 않는다 */}
+      <div style={{ position: 'absolute', bottom: '52px', right: '12px' }}>
         <DownloadBtn
           targetRef={cardRef as React.RefObject<HTMLElement>}
           filename={`TheMHJ_${magazineLabel}_${article.title.slice(0, 20)}`}

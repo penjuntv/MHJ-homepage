@@ -298,7 +298,10 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
           </div>
         </section>
 
-        {/* 내지 그리드 */}
+        {/* 내지 그리드
+            썸네일(.mid-thumb)은 지면을 통째로 축소 렌더한 것이라 템플릿의 <h1>·본문 전문·표지 캐러셀 점
+            <button> 이 카드 링크 안에 들어온다. 그대로 두면 링크 이름이 기사 전문이 되고 제목 순서가
+            깨진다(axe heading-order, 2026-09-11). inert 로 보조기기·Tab 에서 빼고, 클릭은 감싼 링크가 받는다. */}
         {mainArticles.length > 0 && (
           <section style={{ marginTop: 'clamp(48px, 7vw, 80px)' }}>
             <h2 className="mid-section-label">
@@ -311,7 +314,7 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
                 href={`/magazine/${magazine.id}?page=1`}
                 className="mid-card"
               >
-                <div className="mid-thumb">
+                <div className="mid-thumb" inert>
                   <PageThumbnail pageType="cover" magazine={magazine} />
                 </div>
                 <div className="mid-card-meta">
@@ -331,7 +334,7 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
                 href={`/magazine/${magazine.id}?page=2`}
                 className="mid-card"
               >
-                <div className="mid-thumb">
+                <div className="mid-thumb" inert>
                   <PageThumbnail pageType="toc" magazine={magazine} articles={mainArticles} />
                 </div>
                 <div className="mid-card-meta">
@@ -358,7 +361,7 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
                     href={href}
                     className="mid-card"
                   >
-                    <div className="mid-thumb">
+                    <div className="mid-thumb" inert>
                       <PageThumbnail pageType="article" magazine={magazine} article={art} />
                     </div>
                     <div className="mid-card-meta">
