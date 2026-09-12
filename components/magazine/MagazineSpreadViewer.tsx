@@ -11,7 +11,7 @@ import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import { isLegacyPngIssue } from '@/lib/magazine-themes';
 import CoverPreview from './CoverPreview';
 import TocPreview from './TocPreview';
-import { MAG_PAGE_W, MAG_PAGE_H } from './canvas-constants';
+import { MAG_PAGE_W, MAG_PAGE_H, MAG_ASPECT } from './canvas-constants';
 import { useCanvasScale } from './useCanvasScale';
 
 interface PageItem {
@@ -51,7 +51,7 @@ function CoverPreviewWrapper({ magazine }: { magazine: Magazine }) {
 
 function CoverPage({ magazine }: { magazine: Magazine }) {
   return (
-    <MagazinePage bgColor={magazine.bg_color || '#FAF8F5'} showHeader={false} showFooter={false}>
+    <MagazinePage className="mv-page-fixed" bgColor={magazine.bg_color || '#FAF8F5'} showHeader={false} showFooter={false}>
       <div style={{ width: '100%', height: '100%', display: 'flex' }}>
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
           <div style={{
@@ -866,6 +866,10 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
             .mv-page-body { width: 100% !important; height: auto !important; }
             .mv-page-scale { width: 100% !important; transform: none !important; }
             .mv-page-wrap .mag-page-root { aspect-ratio: unset !important; height: auto !important; min-height: calc(100vh - 200px); overflow: visible !important; }
+            /* 표지는 내용 전체가 position:absolute 한 겹이라 흐름 높이가 0.
+               height:auto 루트 안의 height:100% 는 auto 로 계산되고(min-height 로는 % 높이가
+               확정되지 않음) 표지가 0px 로 붕괴해 bg 만 보인다 → 리플로우 대신 42:55 비율 유지. */
+            .mv-page-wrap .mag-page-root.mv-page-fixed { aspect-ratio: ${MAG_ASPECT} !important; min-height: 0 !important; overflow: hidden !important; }
           }
           @media (min-width: 768px) {
             .mv-touch-zone { display: none; }
