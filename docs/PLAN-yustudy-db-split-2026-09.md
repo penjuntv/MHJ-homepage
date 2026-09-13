@@ -1,7 +1,8 @@
 # YuStudy 데이터베이스 분리 계획 (2026-09)
 
 > 작성 2026-09-13 · 실측 기준 Supabase 프로젝트 `vpayqdatpqajsmalpfmq`(MHJ HOMEPAGE, ap-southeast-2 시드니)
-> 실행: Phase 0~3 은 YuStudy 저장소 세션, Phase 4 는 이 저장소 세션. **결정 D1~D7 승인 전에는 아무것도 만들지 않는다.**
+> 실행: Phase 0~3 은 YuStudy 저장소 세션, Phase 4 는 이 저장소 세션.
+> **상태(2026-09-13): D1~D7 전부 제안대로 승인(PeNnY). Phase 0 을 YuStudy 세션에 인계.** Phase 1(새 프로젝트 생성 = 과금 시작)은 Phase 0 보고를 PeNnY 가 확인한 뒤.
 
 ## 요약
 
@@ -158,13 +159,15 @@ supabase db dump --db-url "$OLD_DB_URL" -f data.sql --use-copy --data-only \
 
 ## 8. 결정
 
+2026-09-13 PeNnY 승인 — 아래 "제안" 열 그대로.
+
 | | 결정할 것 | 제안 |
 |---|---|---|
 | D1 | 분리 진행 · 새 프로젝트 월 $10 | 진행 |
 | D2 | 경로 | 경로 1(CLI). 경로 2 는 쓸 수 있을 때만 참고 |
 | D3 | 전환 창 | 평일 오전 학교 시간, 크론 시각(03:00 · 12:00 UTC) 피함 |
 | D4 | YuStudy Vercel 리전 `sin1` → `syd1` | 전환 때 함께 |
-| D5 | `cbfc0e30…@mhj.nz` 계정(로그인 0회) | 용도 확인 후 유지 또는 삭제 |
+| D5 | `cbfc0e30…@mhj.nz` 계정(로그인 0회) | 용도 확인 후 유지 또는 삭제 — 2026-09-01 00:05 UTC 생성 · 이메일 확인됨 · 메타데이터 없음 · 로그인·감사 기록 0 · 관리자 판정(`mhj_is_admin`)은 이 계정을 관리자로 보지 않는다. 세션 기록에서 만든 곳을 찾지 못함 → **PeNnY 확인 대기** |
 | D6 | 호출 0 인 엣지 함수 3개 | Phase 4 에서 삭제 |
 | D7 | 실행 주체 | Phase 0~3 YuStudy 세션 · Phase 4 홈페이지 세션 · DB 비밀번호가 필요한 명령은 PeNnY |
 
