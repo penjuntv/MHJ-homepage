@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase-browser';
 import type { Blog, BlogFaqItem } from '@/lib/types';
 import { preflightChecks, blockingFailures } from '@/lib/blog-preflight.mjs';
+import { flagsOf, HARD_FLAGS, FLAG_META } from '@/lib/seo-defects.mjs';
 import { stripHtml, sanitizeFaq } from '@/lib/content-html.mjs';
 import RelatedSuggestions from './RelatedSuggestions';
 import { BLOG_CATEGORIES, CATEGORY_TO_SLUG } from '@/lib/constants';
@@ -421,21 +422,43 @@ export default function BlogForm({ initial }: Props) {
       toast.warning(`권장 항목 ${toWarn.length}개 미완료: ${toWarn.slice(0, 3).map(c => c.label).join(', ')}${toWarn.length > 3 ? ' 외' : ''}`);
     }
 
-    const cleanFaq = sanitizeFaq(faq);
-
-    setSaving(true);
-    setError('');
-
-    // 예약발행 처리
+    /* 예약발행 처리 — 아래 하드 플래그 확인창이 shouldPublish 를 보므로 그보다 먼저 정한다. */
     let publishAt: string | null = null;
     let shouldPublish = form.published;
     if (scheduleMode === 'schedule' && scheduleAt) {
-      const nzDate = new Date(scheduleAt + ':00').toISOString();
-      publishAt = nzDate;
+      publishAt = new Date(scheduleAt + ':00').toISOString();
       shouldPublish = true;
     } else {
       publishAt = null;
     }
+
+    /* 주간 감사가 '실패'로 보고할 결함은 토스트가 아니라 확인창으로 짚는다.
+       배경(2026-09-14): D3 경고 모드(~10/08 차단 전환) 동안 발행된 글이 alt·내부링크 없이
+       나가면서 주간 site-audit 의 SEO 회귀가 하드 실패 → 이슈 #77. 토스트는 사라지고
+       아무도 못 본 채 게이트만 매주 빨개진다(매거진 넘침 경고가 오탐으로 무시된 전례와 같은 길).
+       발행을 막지는 않는다(D3 존중) — 다만 "이대로면 주간 감사가 실패한다"를 의식적으로 넘기게 한다.
+       판정은 lib/seo-defects.mjs 한 곳을 그대로 쓴다 — 감사와 폼이 갈라지지 않게. */
+    if (shouldPublish && !initial?.published) {
+      const hard = flagsOf({
+        content: form.content,
+        info_block_html: form.info_block_html,
+        meta_description: form.meta_description,
+      }).filter((f: string) => HARD_FLAGS.includes(f));
+
+      if (hard.length) {
+        const lines = hard.map((f: string) => `  · ${FLAG_META[f]?.label ?? f}`).join('\n');
+        const ok = window.confirm(
+          `이대로 발행하면 주간 사이트 감사가 실패로 보고합니다.\n\n${lines}\n\n` +
+          `발행은 가능합니다. 지금 고치면 감사가 깨끗하게 유지됩니다.\n\n그래도 발행할까요?`,
+        );
+        if (!ok) return;
+      }
+    }
+
+    const cleanFaq = sanitizeFaq(faq);
+
+    setSaving(true);
+    setError('');
 
     const payload = {
       ...form,
