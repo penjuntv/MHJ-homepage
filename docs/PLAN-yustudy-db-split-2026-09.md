@@ -2,7 +2,11 @@
 
 > 작성 2026-09-13 · 실측 기준 Supabase 프로젝트 `vpayqdatpqajsmalpfmq`(MHJ HOMEPAGE, ap-southeast-2 시드니)
 > 실행: Phase 0~3 은 YuStudy 저장소 세션, Phase 4 는 이 저장소 세션.
-> **상태(2026-09-13): D1~D7 전부 제안대로 승인(PeNnY). Phase 0 을 YuStudy 세션에 인계.** Phase 1(새 프로젝트 생성 = 과금 시작)은 Phase 0 보고를 PeNnY 가 확인한 뒤.
+> **상태(2026-09-14): 보류.** PeNnY 가 YuStudy 세션의 "0원 계획" ①안(분리 보류 + 무료 강화)을 채택 — D1(새 프로젝트)·9/23 전환·Phase 4 는 **취소**.
+> 적용된 것: YuStudy 함수 리전 `sin1`→`syd1`(`/profile` 중앙값 1,379→403ms) · YuStudy 콘텐츠 테이블 TRUNCATE 회수(YuStudy 마이그레이션 00029). D5(`…@mhj.nz` 계정 삭제)는 9/13 완료.
+> 남은 것: 사용처별 비밀 키 발급(PeNnY) · YuStudy DDL 은 홈페이지 한산 시간대(NZ 01~05시)에 · `public` 스키마 기본 권한 회수(홈페이지 세션 적용, PeNnY 승인 대기).
+> 다시 꺼낼 조건: YuStudy 를 가족 밖으로 열 때 · 관리자 키 유출 · StoryPress 정리로 서버 크레딧에 자리가 날 때 · Supabase 요금제 변경. 그때는 Phase 0 기준선만 새로 잰다.
+> (아래 본문은 2026-09-13 원안 그대로 보관)
 
 ## 요약
 
