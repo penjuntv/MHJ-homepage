@@ -110,7 +110,7 @@ M   ●          ●                ● +4w                          ● +8w
 | ☐ U-1 | **네이버 서치어드바이저 등록** | `docs/naver-quickstart-10min.md` 7단계 그대로. 소유확인 태그는 이미 심겨 있음 | 등록 완료 + 사이트맵 "가져온 URL 수" 스크린샷 |
 | ☐ U-2 | Bing Webmaster (GSC Import) · Daum 검색등록 | Q3·Q4 | 색인 URL 수 · IndexNow 수신 기록 |
 | ☐ U-3 | GSC 내보내기 | Q1 절차. **verification 토큰 2개 중 어느 속성이 살아 있는지** 먼저 | CSV 4개 + 색인 보고서 스크린샷 |
-| ☐ U-4 | Vercel | ① Functions Region → `syd1` 가능하면 변경(코드 0 으로 TTFB 개선) ② Speed Insights 30일 ③ Firewall 설정 | 스크린샷 3장 |
+| ◐ U-4 | Vercel | ① ~~Functions Region → `syd1`~~ **완료(W3-D, PR #75)** ② Speed Insights 30일 ③ Firewall 설정 | 스크린샷 2장 |
 | ☐ U-5 | AI 프로브 before | Q7 의 5문항 × 4엔진, 웹검색 켜고 | 인용 유무 20칸 표 |
 | ☐ U-6 | 결정 D1~D5 · Q9 | §2 | 답변 |
 
@@ -137,13 +137,13 @@ M   ●          ●                ● +4w                          ● +8w
 - **신규 주간 감사 ⑪** `scripts/audit-cache-headers.mjs`: sitemap 전 URL 의 `cache-control` 에 `no-store` 가 허용 목록(`scripts/qa/no-store-allowlist.json`, 근거 경로 필수) 밖에서 나오면 exit 1 — P-27 세 번째 재발 방지. 양성 대조군(허용 목록 비우고 exit 1) 실증 후 `site-audit.yml` 편입
 - Done: `audit-seo-regression.mjs` 가 OG 폴백 59 보고 · 검색 오버레이 QuickLink 7개 전부 카테고리 페이지 도착 · 새 감사 exit 코드 3종 실증
 
-**◐ W1-C · 홈 LCP** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w1c-home-lcp`) — F-C-02 · 노력 S · 1 PR
+**☑ W1-C · 홈 LCP** (2026-09-08 구현, PR #54 머지) — F-C-02 · 노력 S · 1 PR
 - **원인 확정**: 홈은 `HeroCarousel` 을 쓰지 않는다(import 0건, 죽은 컴포넌트). 실제 LCP 요소는 `app/(public)/page.tsx` `EditorialHero` 의 메인 `SafeImage` 이고 `priority` 가 없어 lazy 였다. `priority` + `fetchPriority="high"` 추가 → 로컬 prod 에서 `<link rel=preload as=image>` 생성, `loading` 속성 제거, 첫 이미지 요청이 내비게이션 +22ms. `heading-order`(홈 H1 = 히어로 글 제목)는 W2-A 에서.
 - 정리 후보(별건): `components/HeroCarousel.tsx` 는 어디서도 import 되지 않는다 — `lib/types.ts` 의 캐러셀 타입과 함께 삭제 검토.
   → 2026-09-11 매거진 키보드 정비(PR #71)에서 `HeroCarousel.tsx` 와 그것만 쓰던 `DetailModal.tsx` 를 삭제했다. `lib/types.ts` 의 캐러셀 타입(`HeroCarouselItem`·`HeroSlide`·`DetailItem`)은 남았다 — 별건.
 - Done: 라이브 홈 HTML 의 `EditorialHero` 메인 `<img>` 에 `loading` 속성 없음(eager) + `fetchpriority="high"` + `<link rel=preload as=image>` · 글·소개 페이지 히어로도 `fetchPriority="high"` · LH-desktop 홈 LCP < 800ms 는 배포 후 재측정
 
-**◐ W1-S · API 보안 하드닝** (2026-09-08 구현 완료, PR 대기 — 브랜치 `security/w1s-api-hardening`) — `06-frontend-backend.md` F5 · 노력 S~M · 1 PR
+**☑ W1-S · API 보안 하드닝** (2026-09-08 구현, PR #55 머지) — `06-frontend-backend.md` F5 · 노력 S~M · 1 PR
 - `/api/ai-seo`·`/api/ai-insight`(`blog_id` 없는 자유 호출 경로 제거)·`/api/carousel*` 8개: `hasAdminSession(request)`(revalidate 라우트에 이미 있음) 재사용
 - `/api/preview`: `CAPTURE_SECRET` 급 시크릿 요구 · `/api/carousel/proxy-image`: 호스트 allowlist(Supabase Storage·Unsplash) · `/api/view`: IP+slug 60초 쿨다운(comments 패턴 재사용)
 - 구현: 미들웨어 matcher 로 관리자 전용 API 8경로 게이트(JSON 401/403, `getUser`; 내비게이션은 리다이렉트; 갱신 쿠키 보존) — send-newsletter·send-test·magazine/capture 의 인라인 검사 3곳 제거 · 공개 `ai-insight` 에 발행 가드(draftMode 예외) · subscribe·track 에도 rate-limit · `/api/ai-insight` `blog_id` 필수 + IP 쿨다운(`lib/rate-limit.ts`) · `proxy-image` Storage 공개 경로 allowlist(`lib/image-proxy-allow.mjs`) · `/api/view` 삭제(호출처 0) · 공개 라우트 8개 `PUBLIC_ROUTE_OK` · source-guard `scripts/audit-api-auth.mjs`. 정리 후보: 호출처 0 인 `carousel/caption`·`carousel/generate`·`carousel-v3/preview`·`newsletter-preview`. 후속: anon RPC `increment_view_count` EXECUTE(핸드오프 §3 ①).
@@ -151,21 +151,21 @@ M   ●          ●                ● +4w                          ● +8w
 
 ### W2. 언어·정체성·엔티티 (2주차) ⛔ D1
 
-**◐ W2-A · 언어 신고 정합 + 홈 정체성** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w2a-language-identity`) — F-A-01 · H17 · F-E-02(2) · 노력 S · 1 PR
+**☑ W2-A · 언어 신고 정합 + 홈 정체성** (2026-09-08 구현, PR #56 머지 — 라이브 `lang="en-NZ"` 2026-09-17 확인) — F-A-01 · H17 · F-E-02(2) · 노력 S · 1 PR
 - `app/layout.tsx:104` `lang="en-NZ"` · `:36` `locale:'en_NZ'` · `blog/[slug]/page.tsx:252` `inLanguage:'en-NZ'` · 홈/storypress `['en','ko']` → `'en-NZ'`
 - 루트 `metadata` 의 한국어 `description`·`keywords`(라이브 미노출 죽은 코드) → 영어 description 으로 정리, `keywords` 삭제
 - 홈 `<title>`: `My Mairangi Journal — A Korean Family's School & Life Notes from Auckland's North Shore` (60자 내 조정) · description 동일 축
 - 홈 `<h1>` 을 정체성 문장으로 고정(시각적으로는 작게), 캐러셀 글 제목은 `<h2>` → `heading-order` 위반 해소
 - Done: 라이브 137 URL `lang` 전부 `en-NZ` · JSON-LD `inLanguage` 단일 · 홈 H1 고정 · LH `heading-order` 통과
 
-**◐ W2-B · 저자 박스 + 엔티티 그래프** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w2b-author-entity`) — F-D-07 · F-B-04(1,2) · F-B-05 · H12 · 노력 S~M · 1 PR
+**☑ W2-B · 저자 박스 + 엔티티 그래프** (2026-09-08 구현, PR #57 머지 — 라이브 글 페이지 `@id` 3종 2026-09-17 확인) — F-D-07 · F-B-04(1,2) · F-B-05 · H12 · 노력 S~M · 1 PR
 - `components/AuthorBox.tsx`: 사진 + "Yussi · Writer · Social work student, Massey University"(재학생 — 석사 취득 표기 금지) + 소개 1~2문장 + `/about` 링크. 글 본문 직후(인포블록 앞)
 - JSON-LD 정규화(`lib/seo.ts`): `Organization @id ${SITE}/#organization` name `My Mairangi Journal` alternateName `MHJ` · `WebSite @id ${SITE}/#website` · `Person @id ${SITE}/about#yussi`(jobTitle·alumniOf·knowsAbout; sameAs 는 URL 확보 시) · `Person @id ${SITE}/about#penny`(Editor, former journalist) · BlogPosting.author/publisher 는 `@id` 참조 · Article(매거진) 도 동일
 - `sameAs` 용 외부 프로필 URL 은 사용자에게 받는다(인스타·유튜브·링크드인 등). 없으면 Organization sameAs 만
 - **실명 P0**: 사이트 표기(PeNnY/Yussi/Min·Hyun·Jin)만. name-guard 훅이 막으면 우회 금지
 - Done: 80편 저자 박스 · `raw/jsonld` 재추출 시 `@id` 참조 80/80 · Rich Results Test 통과 스크린샷 · 3화면
 
-**◐ W2-C · 카테고리 허브 + 기둥 정렬** (2026-09-08 구현 완료, PR 대기 — 브랜치 `seo/w2c-category-hubs`) — F-A-06 · F-D-04 · F-E-05 · 노력 M · 1 PR
+**☑ W2-C · 카테고리 허브 + 기둥 정렬** (2026-09-08 구현, PR #58 머지) — F-A-06 · F-D-04 · F-E-05 · 노력 M · 1 PR
 - 구현(2026-09-08): 소개문·description·Start here 는 `lib/category-intros.ts` 코드 상수, `site_settings.category_intro_{slug}` 는 소개문 덮어쓰기 전용(관리자 CATEGORY INTROS 섹션). Start here 는 코드에서만 관리. 한글 병기는 D1(영어 정본)에 따라 보류
 - 카테고리 페이지 상단: 소개문 + "Start here" 3편 + 고유 description
 - 홈 기둥 셀 → `/blog/category/{slug}` · Local Guide 를 기둥에 편입(또는 4기둥을 7카테고리 축으로 재정의 — 사용자 선택) · 카테고리 라벨 한글 병기(D1 이 한국어 독자를 포함할 때)
@@ -179,7 +179,7 @@ M   ●          ●                ● +4w                          ● +8w
 - Done: `raw/meta-by-url.json` 재실행에서 `no-store` 17 → 9 · 8개 URL `x-vercel-cache` PRERENDER/HIT · TTFB 중앙값 < 400ms · 빌드표 `ƒ`→`○` · 주간 감사 ⑪ 허용 목록에 매거진 9개만 남김
 - 잔여(라이브 재측정): 배포 후 `no-store` 9 확인은 W1-B 의 감사 ⑪ 편입 시 함께.
 
-**◐ W3-B · 목록 CLS 0.19** (2026-09-08 구현 완료, PR 대기 — 브랜치 `perf/w3b-list-cls`; 원인 = `<style jsx>` 모바일 규칙이 SSR 에 안 실림, 실측 0.188 → 0.0001) — F-C-03 · 노력 S(원인 특정 후)
+**☑ W3-B · 목록 CLS 0.19** (2026-09-08 구현, PR #59 머지; 원인 = `<style jsx>` 모바일 규칙이 SSR 에 안 실림, 실측 0.188 → 0.0001) — F-C-03 · 노력 S(원인 특정 후)
 - 모바일 375px Playwright `PerformanceObserver('layout-shift')` 로 요소 특정 → 카드 이미지 `aspect-ratio` 고정 또는 필터 바 높이 예약
 - Done: LH-mobile `/blog`·카테고리 CLS < 0.1
 
@@ -189,7 +189,7 @@ M   ●          ●                ● +4w                          ● +8w
 - Done: `/magazine` 이미지 전송량 −50% · 폰트 CSS 92KB 감소 · 매거진 지면 픽셀 디프 0.00%
 - **실측 후 축소(2026-09-08, PR `perf/w3c-fonts-trim`)**: `/magazine`·`/magazine/[id]`(뷰어 `?page` 포함) 이미지 응답 **전부 `/_next/image`, RAW 0**(553KB·78KB) — 보고서의 "미최적화 20파일"은 이미지 파일형 기사(`article.pdf_url`)가 있을 때만 렌더되는 경로로 현재 발행 호에 없음 → 조건부 후속: 이미지형 기사를 발행하면 `MagazineViewer.tsx` `<img src={article.pdf_url}>` 2곳을 `nextImageUrl` 로. 폰트는 `document.fonts` 실측에서 Noto 4웨이트·Playfair 5페이스 **전부 사용 중**이라 줄일 수 없고, **Caveat 만 미사용 → 제거**. 진짜 지렛대(`@import` 체인 → `next/font` 셀프호스팅, 잔여 CLS 0.01 의 `adjustFontFallback`)는 리터럴 50곳+·캡처 파이프라인 때문에 L 급 별건으로 W6 뒤에.
 
-**☐ W3-D · 함수 리전** — U-4 결과에 따름. 가능하면 코드 0. 불가하면 기록만.
+**☑ W3-D · 함수 리전** — `vercel.json` `regions: ["syd1"]`(PR #75, 2026-09-13 머지). 운영 `x-vercel-id: syd1::syd1`, 검색 중앙값 1.24→0.21초, 함수발 Supabase REST p50 234→14ms. U-4 ① 은 이것으로 대체(코드 1줄).
 
 ### W4. SEO 운영 컬럼과 구조 (3~5주차) ⛔ D2 D3
 
@@ -457,6 +457,8 @@ M   ●          ●                ● +4w                          ● +8w
 
 각 대화 착수 전: `git fetch origin main` · `gh pr list` · `gh run list` (병행 세션 충돌 방지, 핸드오프 §5-8).
 
+**2026-09-17 이후**: 위 큐의 코드 웨이브는 전부 머지됐다(W1~W6, W3-D 포함). 남은 것은 W0 콘솔 작업(U-1~U-3·U-5, 사용자)과 W5 콘텐츠 정비(두 분)다. 주간 운영 순서·역할·체크포인트는 **`docs/SEO_OPS_LOOP.md`** 를 따른다. 실측 첫 스냅샷: `docs/measurements/traffic-2026-09-17.md`(주간 유기 세션 4→0→1, 네이버 0, 운영 컬럼 0/81).
+
 ---
 
 ## 6. 측정 체계
@@ -466,7 +468,7 @@ M   ●          ●                ● +4w                          ● +8w
 | **지금(before)** | G2 표 전부 + U-3·U-5 결과 | 보고서 + 사용자 자료 |
 | W1 배포 직후 | robots Allow · og:site_name · noindex · 감사 ⑪ | `audit-endpoints` + 크롤러 재실행 |
 | W3 배포 직후 | `no-store` 17→9 · TTFB | `raw/meta-by-url.json` 크롤러 재실행 |
-| 2026-09-16~ | 자체 유입 상위 글 | `mhj_top_pages(days=>14)` |
+| 2026-09-16~ 매주 월 | 유입 스냅샷(주간 유기 세션 · 유기 도착 글 · 상위 경로 · 구독자) | `node --env-file=.env.local scripts/report-traffic-snapshot.mjs --write` → `docs/measurements/traffic-*.md` |
 | **+4주 2026-10-06** | 색인 URL(G/B/N) · CWV 필드 · 유기 세션 · 구독 | GSC · Bing · 네이버 · Speed Insights · `page_events` |
 | **+8주 2026-11-03** | §0 목표표 전부 + AI 프로브 20문항 재실행 | 같음 + Q7 템플릿 |
 | 매주 | 주간 감사 ⑪ 포함 11종(⑫ 대비 · ⑬ 접근성 · ⑭ 검색 관련도 추가) | `site-audit.yml` |
