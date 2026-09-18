@@ -1,15 +1,18 @@
 {
-  "generated": "2026-09-16",
-  "total": 81,
+  "generated": "2026-09-18",
+  "total": 82,
   "h1_over": 0,
   "alt_missing": 3,
   "orphan": 10,
   "meta_missing": 0,
-  "thin": 36,
+  "thin": 37,
   "no_h2": 7,
   "no_geo": 23,
-  "og_fallback": 60,
+  "og_fallback": 61,
   "posts": {
+    "starting-school-in-new-zealand": [
+      "OG_FALLBACK"
+    ],
     "nz-ncea-is-changing-following-the-curriculum-shake-up": [
       "OG_FALLBACK"
     ],
@@ -26,8 +29,18 @@
       "NO_GEO",
       "OG_FALLBACK"
     ],
+    "our-library-haul": [
+      "ALT_MISSING",
+      "ORPHAN",
+      "NO_H2",
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
     "girls-001": [
       "THIN"
+    ],
+    "goodbye-for-a-while": [
+      "OG_FALLBACK"
     ],
     "100-days-of-schhol": [
       "ORPHAN",
@@ -35,21 +48,21 @@
       "NO_GEO",
       "OG_FALLBACK"
     ],
-    "goodbye-for-a-while": [
-      "OG_FALLBACK"
-    ],
     "ikea-nz-grown-ups-also-dream-at-ikea": [
       "OG_FALLBACK"
     ],
-    "landing-home": [
-      "THIN"
+    "y7-kahu-manu-new-way-of-learning": [
+      "NO_GEO",
+      "OG_FALLBACK"
     ],
-    "so-we-made-our-own": [
+    "the-word-cards": [
+      "ALT_MISSING",
       "THIN",
       "NO_GEO",
       "OG_FALLBACK"
     ],
-    "y7-kahu-manu-new-way-of-learning": [
+    "so-we-made-our-own": [
+      "THIN",
       "NO_GEO",
       "OG_FALLBACK"
     ],
@@ -57,8 +70,15 @@
       "THIN",
       "NO_GEO"
     ],
+    "morning-at-the-ellerslie-fairy-festival": [
+      "THIN",
+      "OG_FALLBACK"
+    ],
     "learning-aid-scholastic-book-club": [
       "OG_FALLBACK"
+    ],
+    "landing-home": [
+      "THIN"
     ],
     "locals-001": [
       "THIN"
@@ -73,6 +93,16 @@
       "THIN",
       "NO_GEO"
     ],
+    "a-quiet-week-before-the-break-ends": [
+      "THIN",
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
+    "shes-already-there": [
+      "THIN",
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
     "why-we-learn-at-home": [
       "THIN"
     ],
@@ -82,7 +112,13 @@
     "settlement-004": [
       "THIN"
     ],
-    "a-quiet-week-before-the-break-ends": [
+    "how-to-read-a-mid-year-report": [
+      "ALT_MISSING",
+      "ORPHAN",
+      "NO_H2",
+      "OG_FALLBACK"
+    ],
+    "the-app-we-dreamt-of": [
       "THIN",
       "NO_GEO",
       "OG_FALLBACK"
@@ -92,18 +128,6 @@
       "NO_GEO",
       "OG_FALLBACK"
     ],
-    "the-word-cards": [
-      "ALT_MISSING",
-      "THIN",
-      "NO_GEO",
-      "OG_FALLBACK"
-    ],
-    "how-to-read-a-mid-year-report": [
-      "ALT_MISSING",
-      "ORPHAN",
-      "NO_H2",
-      "OG_FALLBACK"
-    ],
     "year-7-science-social-studies-nz": [],
     "locals-002": [
       "THIN"
@@ -111,29 +135,12 @@
     "when-the-plan-meets-reality": [
       "NO_GEO"
     ],
-    "the-app-we-dreamt-of": [
-      "THIN",
-      "NO_GEO",
-      "OG_FALLBACK"
-    ],
     "education-001": [],
     "ncea-is-changing-no-more-levels-no-more-credits": [
       "OG_FALLBACK"
     ],
-    "shes-already-there": [
-      "THIN",
-      "NO_GEO",
-      "OG_FALLBACK"
-    ],
     "library-tour-glenfield-library": [
       "THIN",
-      "OG_FALLBACK"
-    ],
-    "our-library-haul": [
-      "ALT_MISSING",
-      "ORPHAN",
-      "NO_H2",
-      "NO_GEO",
       "OG_FALLBACK"
     ],
     "term-2-a-new-beginning": [
@@ -147,9 +154,6 @@
       "THIN",
       "OG_FALLBACK"
     ],
-    "starting-school-in-new-zealand": [
-      "OG_FALLBACK"
-    ],
     "y7-kahu-manu-2-life-in-pages": [
       "NO_H2",
       "NO_GEO",
@@ -159,13 +163,13 @@
       "NO_GEO",
       "OG_FALLBACK"
     ],
-    "setting-personal-routines": [],
     "holiday-home-learning-the-reading-bingo": [
       "ORPHAN",
       "THIN",
       "NO_GEO",
       "OG_FALLBACK"
     ],
+    "setting-personal-routines": [],
     "what-we-tried-nothing-quite-fit": [
       "OG_FALLBACK"
     ],
