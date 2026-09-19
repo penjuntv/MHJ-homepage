@@ -61,7 +61,7 @@ North Shore에는 아시아계가 많아 음식 가판도 그렇다. 꼬치와 �
 ### FAQ
 
 **Q. What day is the Albany Night Market?**
-A. Tuesday. It runs at North Harbour Stadium, Carpark H, from 5pm to 11pm, and entry is free.
+A. Tuesday. It runs at North Harbour Stadium, Carpark H, from 5pm until late, and entry is free.
 
 **Q. What time should we arrive at the Albany Night Market?**
 A. It opens at five and picks up around six, and gets busy fast after 6pm. Arrive around 5:30pm to browse without the crush, then circle back for food once you know what you want. Bring cash for smaller stalls; most vendors take card too.
@@ -70,9 +70,10 @@ A. It opens at five and picks up around six, and gets busy fast after 6pm. Arriv
 A. Skewers and dumplings are the best value on the strip. Tanghulu and Dubai chocolate for the kids, and combo meals or noodle boxes for the ride home.
 
 **Q. Is there an Auckland night market every night of the week?**
-A. Yes — a different suburb each night, from Kelston on Monday and Albany on Tuesday through to the Silo Park waterfront on Friday to Sunday. The full weekly schedule is in the guide at the bottom of the post.
+A. Yes — a different suburb each night, from Kelston on Monday and Albany on Tuesday through to Silverdale on Sunday. The full weekly schedule is in the guide at the bottom of the post.
 
 > 메모: 장소·시간·요일은 주최 측 사정으로 바뀔 수 있는 값이다. 인포블록의 일정표는 `fact-verify` 로 aucklandnightmarkets.co.nz 와 대조할 가치가 있다 — 이번 작업에서는 본문·인포블록을 건드리지 않았다.
+> **2026-09-19 fact-verify 후 수정**: 공식 일정은 모든 곳 "5pm–late" 이고 Silo Park 는 공식 목록에 없다(별개·계절 시장). 인포블록의 "5pm–11pm" → "5pm–late", Silo Park 세 줄 삭제, 위 FAQ 1·4번 답도 함께 고쳤다(라이브 반영 완료).
 
 ---
 
