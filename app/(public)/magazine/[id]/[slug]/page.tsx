@@ -7,6 +7,7 @@ import type { Article, Magazine } from '@/lib/types';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import MagazinePage from '@/components/magazine/MagazinePage';
 import MagazineCanvas from '@/components/magazine/MagazineCanvas';
+import { optimizeArticleImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
 
 export const revalidate = 600;
 
@@ -143,6 +144,9 @@ export default async function MagazineArticlePage(props: Props) {
     ],
   };
 
+  // 공개 화면으로 넘기는 이미지(배열·본문/사이드바 HTML 속 img)만 최적화 주소로 — 템플릿·PNG 파이프라인은
+  // 원본을 쓴다(lib/magazine-image.mjs). OG 이미지·JSON-LD 는 위에서 png_url/image_url 원본을 그대로 쓴다.
+  const view = optimizeArticleImages(article, MAG_IMAGE_WIDTH.page);
   const accentColor = magazine.accent_color || '#8A6B4F';
   const bgColor = magazine.bg_color || '#FDFCFA';
 
@@ -174,8 +178,8 @@ export default async function MagazineArticlePage(props: Props) {
                     template={article.template}
                     title={article.title}
                     author={article.author}
-                    content={article.content ?? ''}
-                    images={(article.article_images ?? []).filter(Boolean) as string[]}
+                    content={view.content ?? ''}
+                    images={(view.article_images ?? []).filter(Boolean) as string[]}
                     imagePositions={(article.image_positions ?? []) as string[]}
                     captions={(article.image_captions ?? []) as string[]}
                     accentColor={accentColor}
@@ -183,7 +187,7 @@ export default async function MagazineArticlePage(props: Props) {
                     kicker={article.kicker}
                     subtitle={article.subtitle}
                     sidebarTitle={article.sidebar_title}
-                    sidebarBody={article.sidebar_body}
+                    sidebarBody={view.sidebar_body}
                     directoryItems={article.directory_items}
                     quoteText={article.quote_text}
                     quoteAttribution={article.quote_attribution}

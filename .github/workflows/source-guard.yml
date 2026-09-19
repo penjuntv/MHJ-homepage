@@ -72,3 +72,7 @@ jobs:
       - name: proxy-image URL allowlist 테스트 (SSRF 차단)
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-image-proxy-allow.mjs
+
+      - name: 매거진 공개 이미지 최적화 규칙 테스트 (허용 폭 = next.config · remotePatterns 밖·SVG 제외)
+        if: ${{ !cancelled() }}
+        run: node scripts/qa/test-magazine-image.mjs

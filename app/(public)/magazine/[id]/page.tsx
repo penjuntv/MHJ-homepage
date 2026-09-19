@@ -7,6 +7,7 @@ import MagazineViewer from '@/components/MagazineViewer';
 import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
 import MagazineIssueDetail from '@/components/magazine/MagazineIssueDetail';
 import { isLegacyPngIssue } from '@/lib/magazine-themes';
+import { optimizeArticleImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -179,35 +180,41 @@ export default async function MagazineIssuePage(props: Props) {
     }
   }
 
-  /* 이슈 상세 페이지 (articles 모드 + ?page 없음) */
+  /* 공개 화면으로 넘기는 기사 이미지는 최적화 주소로(lib/magazine-image.mjs).
+     템플릿·PNG 파이프라인(app/internal/render)은 원본을 그대로 쓴다 — 여기서만 바꾼다.
+     쪽 수 계산(buildPageMap)·JSON-LD 는 원본 articles 로 한다(이미지 개수·이름만 쓰므로 결과는 같다). */
+  const forView = (width: number) => articles.map((a) => optimizeArticleImages(a, width));
+
+  /* 이슈 상세 페이지 (articles 모드 + ?page 없음) — 지면 썸네일이라 작은 폭 */
   if (isArticlesMode && !hasPageParam) {
     const pageMap = await buildPageMap(articles, { isLegacy });
     return (
       <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-        <MagazineIssueDetail magazine={magazine} articles={articles} pageMap={pageMap} />
+        <MagazineIssueDetail magazine={magazine} articles={forView(MAG_IMAGE_WIDTH.thumb)} pageMap={pageMap} />
       </>
     );
   }
 
-  /* Legacy PNG + ?page → SpreadViewer 직결 (MagazineViewer의 PDF 모드 우회, 중간 모달 제거) */
+  /* Legacy PNG + ?page → SpreadViewer 직결 (MagazineViewer의 PDF 모드 우회, 중간 모달 제거)
+     과월호는 스캔한 지면 이미지에 글자가 박혀 있어 한 단계 큰 폭 */
   if (isLegacy && articles.length > 0) {
     return (
       <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-        <MagazineSpreadViewer magazine={magazine} articles={articles} />
+        <MagazineSpreadViewer magazine={magazine} articles={forView(MAG_IMAGE_WIDTH.legacy)} />
       </>
     );
   }
 
-  /* PDF/empty 모드 또는 ?page 있을 때 → 기존 뷰어 경로 */
+  /* PDF/empty 모드 또는 ?page 있을 때 → 기존 뷰어 경로 (지면 한 쪽 크기) */
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <MagazineViewer magazine={magazine} articles={articles} />
+      <MagazineViewer magazine={magazine} articles={forView(MAG_IMAGE_WIDTH.page)} />
     </>
   );
 }

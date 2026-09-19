@@ -13,6 +13,7 @@ import CoverPreview from './CoverPreview';
 import TocPreview from './TocPreview';
 import { MAG_PAGE_W, MAG_PAGE_H, MAG_ASPECT } from './canvas-constants';
 import { useCanvasScale } from './useCanvasScale';
+import { optimizePageImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
 
 interface PageItem {
   type: 'cover' | 'toc' | 'article' | 'extra' | 'legacy-png';
@@ -175,7 +176,8 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
         const extraMap = new Map<number, ArticlePage[]>();
         (data ?? []).forEach(ep => {
           const arr = extraMap.get(ep.article_id) ?? [];
-          arr.push(ep as ArticlePage);
+          // 추가 쪽 이미지는 여기서 처음 불러오므로 서버 로더의 최적화를 못 거친다 — 같은 규칙을 여기서 적용.
+          arr.push(optimizePageImages(ep as ArticlePage, MAG_IMAGE_WIDTH.page));
           extraMap.set(ep.article_id, arr);
         });
 
