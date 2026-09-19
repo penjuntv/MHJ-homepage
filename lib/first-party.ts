@@ -7,7 +7,7 @@ import { trackEvent } from './analytics';
  *
  * /api/track 로 이벤트를 보낸다. GA(trackEvent)와 병행 사용.
  * 실패는 조용히 무시(추적이 UX를 막지 않게). 서버가 source/medium/device 를
- * referrer·UA·헤더로 재산출하므로 클라이언트는 referrer 만 실어 보낸다.
+ * referrer·UA·헤더·UTM 으로 재산출하므로 클라이언트는 referrer 와 UTM 원문만 실어 보낸다.
  */
 
 const SESSION_KEY = 'mhj_sid';
@@ -88,12 +88,40 @@ export function sendBeaconEvent(payload: TrackPayload): void {
   }
 }
 
+const UTM_KEY = 'mhj_utm';
+
+/**
+ * 도착 주소의 UTM(utm_source·utm_medium·utm_campaign)을 탭 세션 동안 기억해 모든 이벤트에 싣는다.
+ * 왜 기억하나: 사이트 안에서 페이지를 옮기면 주소에서 UTM 이 사라진다. 첫 화면만 인스타로 잡히고
+ * 두 번째 화면부터 direct 로 갈라지면 채널별 세션 수가 틀린다. 새 UTM 이 달린 주소로 다시 들어오면 그걸로 바꾼다.
+ * 판정·정규화는 서버(lib/traffic-source.ts)가 다시 한다 — 여기서는 모아서 보내기만.
+ */
+function currentUtm(): Record<string, string> | undefined {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const fresh: Record<string, string> = {};
+    for (const k of ['source', 'medium', 'campaign'] as const) {
+      const v = q.get(`utm_${k}`);
+      if (v) fresh[k] = v.slice(0, 80);
+    }
+    if (fresh.source) {
+      sessionStorage.setItem(UTM_KEY, JSON.stringify(fresh));
+      return fresh;
+    }
+    const saved = sessionStorage.getItem(UTM_KEY);
+    return saved ? (JSON.parse(saved) as Record<string, string>) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function buildBody(payload: TrackPayload): string {
   return JSON.stringify({
     ...payload,
     path: payload.path ?? window.location.pathname,
     sessionId: getSessionId(),
     referrer: document.referrer || '',
+    utm: currentUtm(),
   });
 }
 
