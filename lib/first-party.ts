@@ -94,6 +94,9 @@ const UTM_KEY = 'mhj_utm';
  * 도착 주소의 UTM(utm_source·utm_medium·utm_campaign)을 탭 세션 동안 기억해 모든 이벤트에 싣는다.
  * 왜 기억하나: 사이트 안에서 페이지를 옮기면 주소에서 UTM 이 사라진다. 첫 화면만 인스타로 잡히고
  * 두 번째 화면부터 direct 로 갈라지면 채널별 세션 수가 틀린다. 새 UTM 이 달린 주소로 다시 들어오면 그걸로 바꾼다.
+ * 저장할 때 그때의 document.referrer 를 함께 적어 둔다. 클라이언트 라우팅 중에는 document.referrer 가 바뀌지 않으므로
+ * 같으면 같은 도착의 연장이다. 다르면(같은 탭에서 구글 등을 거쳐 새로 들어옴) 새 도착이므로 저장본을 버린다 —
+ * 그러지 않으면 나중의 검색 유입이 앞선 인스타 UTM 으로 잘못 찍힌다.
  * 판정·정규화는 서버(lib/traffic-source.ts)가 다시 한다 — 여기서는 모아서 보내기만.
  */
 function currentUtm(): Record<string, string> | undefined {
@@ -104,12 +107,21 @@ function currentUtm(): Record<string, string> | undefined {
       const v = q.get(`utm_${k}`);
       if (v) fresh[k] = v.slice(0, 80);
     }
+    const ref = document.referrer || '';
     if (fresh.source) {
-      sessionStorage.setItem(UTM_KEY, JSON.stringify(fresh));
+      sessionStorage.setItem(UTM_KEY, JSON.stringify({ utm: fresh, ref }));
       return fresh;
     }
-    const saved = sessionStorage.getItem(UTM_KEY);
-    return saved ? (JSON.parse(saved) as Record<string, string>) : undefined;
+    const raw = sessionStorage.getItem(UTM_KEY);
+    if (!raw) return undefined;
+    const saved = JSON.parse(raw) as { utm?: Record<string, string>; ref?: string };
+    // 사이트 안 이동이면 referrer 가 자기 사이트다 — 그때도 같은 방문의 연장으로 본다.
+    const internal = (() => { try { return new URL(ref).host === window.location.host; } catch { return false; } })();
+    if (saved.ref !== ref && !internal) {
+      sessionStorage.removeItem(UTM_KEY);
+      return undefined;
+    }
+    return saved.utm;
   } catch {
     return undefined;
   }

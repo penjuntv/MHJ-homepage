@@ -2,13 +2,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { createAdminClient } from '@/lib/supabase';
-import { deriveTrafficSource, isBot, parseDevice, type Medium } from '@/lib/traffic-source';
+import { deriveTrafficSource, deriveSourceFromUtm, isBot, parseDevice, type Medium } from '@/lib/traffic-source';
 
 /**
  * MHJ 1st-party 분석 수집 엔드포인트.
  *
  * 공개 페이지의 AnalyticsBeacon·트래커가 POST. source/medium/device/country 는
- * 클라이언트를 신뢰하지 않고 서버에서 referrer·UA·geo 헤더로 재산출한다.
+ * 클라이언트를 신뢰하지 않고 서버에서 referrer·UTM·UA·geo 헤더로 재산출한다(UTM 은 정규화·허용 목록을 거친다).
  * 봇은 무삽입. 어떤 경우에도 204 로 응답(추적 실패가 UX·추적 클라이언트를 막지 않게).
  */
 
@@ -82,7 +82,9 @@ export async function POST(request: NextRequest) {
   const campaign = typeof utm?.campaign === 'string'
     ? utm.campaign.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 60)
     : '';
-  if (type === 'pageview' && campaign && medium !== 'internal' && utm?.source) {
+  // 출처가 실제로 UTM 에서 정해졌을 때만(원천이 유효하고 internal 이 아님) — 거부된 UTM 의 캠페인이 검색·직접 방문에 붙지 않게.
+  const utmDecided = medium !== 'internal' && deriveSourceFromUtm(utm) !== null;
+  if (type === 'pageview' && campaign && utmDecided) {
     meta = { ...((meta as Record<string, unknown> | null) ?? {}), utm_campaign: campaign };
   }
 
