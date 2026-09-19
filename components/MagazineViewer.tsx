@@ -7,6 +7,7 @@ import { X, ChevronLeft, ChevronRight, Download, List, BookOpen, Image as ImageI
 import DownloadBtn from '@/components/DownloadBtn';
 import SafeImage from '@/components/SafeImage';
 import type { Magazine, Article, ArticlePage } from '@/lib/types';
+import { optimizePageImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import MagazinePage from '@/components/magazine/MagazinePage';
 import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
@@ -97,7 +98,8 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
       .select('*')
       .eq('article_id', article.id)
       .order('page_number', { ascending: true })
-      .then(({ data }) => { setExtraPages((data ?? []) as ArticlePage[]); });
+      // 추가 쪽 이미지는 브라우저에서 처음 불러온다 — 서버 로더와 같은 최적화 규칙을 여기서 적용.
+      .then(({ data }) => { setExtraPages(((data ?? []) as ArticlePage[]).map((ep) => optimizePageImages(ep, MAG_IMAGE_WIDTH.page))); });
   }, [article.id]);
 
   const totalPages = 1 + extraPages.length;

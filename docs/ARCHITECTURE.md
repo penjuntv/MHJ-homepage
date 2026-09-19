@@ -132,7 +132,17 @@ Magazine · Article · ArticlePage · DirectoryItem · ArticleReaction · Blog �
 - IndexNow(`lib/indexnow.ts`)로 발행 시 색인 알림.
 
 ## 8. lib 유틸
-supabase(.ts/-browser) · site-settings · types · utils · constants · date-helpers · analytics · indexnow · pillars · magazine-themes · newsletter-template · welcome-emails · capture-magazine · storypress-faqs · validate-affiliate-links · carousel-v3/.
+supabase(.ts/-browser) · site-settings · types · utils · constants · date-helpers · analytics · indexnow · pillars · magazine-themes · magazine-image · newsletter-template · welcome-emails · capture-magazine · storypress-faqs · validate-affiliate-links · carousel-v3/.
+
+### 8.1 이미지 최적화 규칙 (2026-09-20)
+- 원격 원본(Supabase storage 등)을 공개 화면에 그대로 내보내지 않는다 — `/_next/image`(WebP·리사이즈)를 거친다.
+  블로그·갤러리는 `next/image`(SafeImage) 또는 `lib/image-url.ts` `nextImageUrl`.
+- **매거진은 템플릿을 고치지 않는다.** 지면 템플릿(`components/magazine/templates/*`)은 PNG 파이프라인
+  (`app/internal/render/*`)과 공유되므로 원본 `<img>` 를 유지하고, **공개 화면으로 데이터를 넘기기 직전**에
+  `lib/magazine-image.mjs` 로 주소만 바꾼다: 호 페이지 로더(썸네일 640 · 리더 1080 · 과월호 1920) · 기사 페이지 ·
+  `article_pages` 를 브라우저에서 불러오는 두 곳(SpreadViewer·MagazineViewer) · 검색 API(256). 본문/사이드바 HTML 속 `<img>` 도 포함.
+- 새 공개 매거진 화면을 만들면 같은 함수를 거칠 것. 폭은 `next.config.mjs` 의 `deviceSizes`/`imageSizes` 값만(`test-magazine-image.mjs` 가 대조).
+- 검증: `scripts/qa/live-functional-check.mjs` 가 300KB 넘는 원본 이미지를 결함으로 센다.
 
 ## 9. 환경변수 (`.env.local`, 서버 전용 키 클라이언트 노출 금지)
 ```
