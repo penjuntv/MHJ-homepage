@@ -30,7 +30,7 @@
 A. Up to 35 items at a time. Books are 28 days, magazines and board games 14 days, and there are no late fees. You can request a book from any branch for pick-up at your closest one, and return books to any branch.
 
 **Q. How do children get an Auckland Libraries card?**
-A. Children must register in person — bring photo ID. Cards are free for all ages and you get yours on the spot. Each of our children has their own card and borrows at the self-checkout kiosk.
+A. Under-18s must be accompanied by a parent or guardian with photo ID. Cards are free for all ages and you get yours on the spot. Each of our children has their own card and borrows at the self-checkout kiosk.
 
 **Q. What is there to do near Albany Village Library?**
 A. The MDW Playground, the Albany Village Path and Kell Park are right next door — open grass, a small stream along the path, and free-roaming chickens. The library itself runs Storytime, Rhymetime, Code Club and school holiday programmes.
@@ -67,12 +67,13 @@ Min과 Hyun은 늘 그렇듯 한국어 책 코너로 곧장 갔다. 최근 책�
 A. Yes — a generous selection, including plenty of recent titles. Korean titles are catalogued in romanised English on the library website, which makes searching hard, so we note which series each branch stocks and request them across the network later.
 
 **Q. Where do you park at Glenfield Library?**
-A. There is free covered parking beneath the library — the first hour is free — and limited street parking on Bentley Avenue opposite, reached by a pedestrian crossing. The path from the car park has an incline.
+A. There is covered parking beneath the library and limited street parking on Bentley Avenue opposite, reached by a pedestrian crossing. The path from the car park has an incline.
 
 **Q. Is there a Korean book club at Glenfield Library?**
 A. Yes, a regular Korean Bookchat meets in its own corner of the library. We happened to visit on the day it was running.
 
 > 메모: 주소·개관 시간·주차 요금 조건은 바뀌는 값이다. 주차 FAQ 는 인포블록 문구 그대로이니 대출 조건과 함께 `fact-verify` 대상. "Auckland's first enclosed shopping centre (1971), 98 stores" 는 몰에 대한 사실이라 옮기지 않았다. 북챗 요일·시간은 본문에 없어 쓰지 않았다.
+> **2026-09-19 fact-verify 후 수정**: 대출 조건(35권·28일·잡지/보드게임 14일·연체료 없음)·개관 시간·주소는 공식 페이지와 일치. "주차 첫 1시간 무료" 는 공식 확인이 안 돼 인포블록·FAQ 에서 뺐다(사용자 결정). 아이 카드 발급은 공식 규정("18세 미만은 보호자가 사진 신분증을 가지고 동반")으로 두 도서관 글의 인포블록·Albany FAQ 를 고쳤다(라이브 반영 완료).
 
 ---
 
