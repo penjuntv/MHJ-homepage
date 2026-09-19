@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { setTrackingOptOut } from '@/lib/first-party';
 import { Toaster } from 'sonner';
 import { supabase } from '@/lib/supabase-browser';
 import {
@@ -80,6 +81,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
       setReady(true);
       if (session) {
+        // 관리자로 로그인한 기기는 공개 페이지 방문도 1st-party 분석에서 뺀다(운영자 제외).
+        setTrackingOptOut(true);
         Promise.all([
           supabase.from('comments').select('*', { count: 'exact', head: true }).eq('approved', false),
           supabase.from('blogs').select('*', { count: 'exact', head: true }),

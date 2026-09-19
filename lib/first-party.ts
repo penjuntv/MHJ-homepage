@@ -11,6 +11,33 @@ import { trackEvent } from './analytics';
  */
 
 const SESSION_KEY = 'mhj_sid';
+const OPT_OUT_KEY = 'mhj_notrack';
+
+/**
+ * 운영자·테스트 기기 제외. 배포 실험의 외부 유입을 운영자 방문과 가르기 위해(2026-09-20).
+ * 이 기기에서 한 번 `?notrack=1` 로 열거나 관리자(/mhj-desk)에 로그인하면 localStorage 에 표시가 남고,
+ * 그 뒤로 이 브라우저는 /api/track 에 아무것도 보내지 않는다. `?notrack=0` 으로 해제.
+ * 앞으로의 기록에만 적용된다 — 과거 행은 건드리지 않는다. 시크릿 창·인앱 브라우저는 표시가 없어 다시 잡힌다.
+ */
+export function setTrackingOptOut(on: boolean): void {
+  try {
+    if (on) localStorage.setItem(OPT_OUT_KEY, '1');
+    else localStorage.removeItem(OPT_OUT_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+function isOptedOut(): boolean {
+  try {
+    const flag = new URLSearchParams(window.location.search).get('notrack');
+    if (flag === '1') setTrackingOptOut(true);
+    else if (flag === '0') setTrackingOptOut(false);
+    return localStorage.getItem(OPT_OUT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 /** 탭 세션 단위 익명 ID (쿠키 없음, sessionStorage 한정). */
 export function getSessionId(): string {
@@ -49,7 +76,7 @@ export interface TrackPayload {
 
 /** 표준 전송(페이지 이동·클릭 등). fetch keepalive 사용. */
 export function sendEvent(payload: TrackPayload): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || isOptedOut()) return;
   const body = buildBody(payload);
   try {
     fetch('/api/track', {
@@ -66,7 +93,7 @@ export function sendEvent(payload: TrackPayload): void {
 
 /** 언로드 시점 전송(체류시간 flush). sendBeacon 우선, 실패 시 keepalive fetch. */
 export function sendBeaconEvent(payload: TrackPayload): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || isOptedOut()) return;
   const body = buildBody(payload);
   try {
     if (navigator.sendBeacon) {
