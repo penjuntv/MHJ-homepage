@@ -7,10 +7,69 @@ import { trackEvent } from './analytics';
  *
  * /api/track 로 이벤트를 보낸다. GA(trackEvent)와 병행 사용.
  * 실패는 조용히 무시(추적이 UX를 막지 않게). 서버가 source/medium/device 를
- * referrer·UA·헤더로 재산출하므로 클라이언트는 referrer 만 실어 보낸다.
+ * referrer·UA·헤더·UTM 으로 재산출하므로 클라이언트는 referrer 와 UTM 원문만 실어 보낸다.
  */
 
 const SESSION_KEY = 'mhj_sid';
+const OPT_OUT_KEY = 'mhj_track_optout';
+/** 폐기된 1세대 키(`?notrack=1` 로도 켜졌다). 출처를 가릴 수 없어 신뢰하지 않고 지운다. */
+const LEGACY_OPT_OUT_KEY = 'mhj_notrack';
+
+/**
+ * 운영자·테스트 기기 제외 — 배포 실험의 외부 유입을 운영자 방문과 가르기 위해(2026-09-20).
+ *
+ * **이 브라우저에만** 적용된다(localStorage). 기기가 바뀌거나 시크릿 창·인앱 브라우저로 열면 다시 수집된다.
+ * 켜지는 경로는 **인증된 관리자 로그인 하나뿐**이다 — 주소만으로는 켜지지 않는다.
+ * 공개 URL(`?notrack=1`)로 켜지던 1세대 방식은 링크가 공유되면 독자까지 영구 제외돼 폐기했다.
+ * 상태 확인·해제는 관리자 인사이트 화면에서. 앞으로의 기록에만 적용되고 과거 행은 건드리지 않는다.
+ */
+export type OptOutState = 'admin' | 'off' | null;
+
+export function readOptOutState(): OptOutState {
+  try {
+    // 1세대 표시는 출처(운영자 로그인 vs 공유 링크)를 가릴 수 없다 → 지우고 무시한다.
+    if (localStorage.getItem(LEGACY_OPT_OUT_KEY) !== null) localStorage.removeItem(LEGACY_OPT_OUT_KEY);
+    const v = localStorage.getItem(OPT_OUT_KEY);
+    return v === 'admin' || v === 'off' ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 관리자 화면의 토글. `off` 는 "이 브라우저는 계속 수집" 이라는 명시 선택이라 로그인해도 다시 켜지지 않는다. */
+export function setOperatorOptOut(on: boolean): void {
+  try {
+    localStorage.setItem(OPT_OUT_KEY, on ? 'admin' : 'off');
+  } catch {
+    // ignore
+  }
+}
+
+/** 인증된 관리자 세션이 확인됐을 때만 호출. 운영자가 명시로 끈(`off`) 브라우저는 건드리지 않는다. */
+export function enableOperatorOptOutOnLogin(): void {
+  if (readOptOutState() === 'off') return;
+  setOperatorOptOut(true);
+}
+
+/**
+ * 주소에 남은 `notrack` 파라미터를 새로고침 없이 지운다(경로·나머지 쿼리·UTM·해시는 보존).
+ * 1세대 링크가 공유·북마크로 돌아다녀도 주소창에서 사라지게 — 이제 이 파라미터는 아무것도 켜지 않는다.
+ */
+export function stripNotrackParam(): void {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('notrack')) return;
+    url.searchParams.delete('notrack');
+    const qs = url.searchParams.toString();
+    window.history.replaceState(null, '', `${url.pathname}${qs ? `?${qs}` : ''}${url.hash}`);
+  } catch {
+    // ignore
+  }
+}
+
+function isOptedOut(): boolean {
+  return readOptOutState() === 'admin';
+}
 
 /** 탭 세션 단위 익명 ID (쿠키 없음, sessionStorage 한정). */
 export function getSessionId(): string {
@@ -49,7 +108,7 @@ export interface TrackPayload {
 
 /** 표준 전송(페이지 이동·클릭 등). fetch keepalive 사용. */
 export function sendEvent(payload: TrackPayload): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || isOptedOut()) return;
   const body = buildBody(payload);
   try {
     fetch('/api/track', {
@@ -66,7 +125,7 @@ export function sendEvent(payload: TrackPayload): void {
 
 /** 언로드 시점 전송(체류시간 flush). sendBeacon 우선, 실패 시 keepalive fetch. */
 export function sendBeaconEvent(payload: TrackPayload): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || isOptedOut()) return;
   const body = buildBody(payload);
   try {
     if (navigator.sendBeacon) {
@@ -88,12 +147,52 @@ export function sendBeaconEvent(payload: TrackPayload): void {
   }
 }
 
+const UTM_KEY = 'mhj_utm';
+
+/**
+ * 도착 주소의 UTM(utm_source·utm_medium·utm_campaign)을 탭 세션 동안 기억해 모든 이벤트에 싣는다.
+ * 왜 기억하나: 사이트 안에서 페이지를 옮기면 주소에서 UTM 이 사라진다. 첫 화면만 인스타로 잡히고
+ * 두 번째 화면부터 direct 로 갈라지면 채널별 세션 수가 틀린다. 새 UTM 이 달린 주소로 다시 들어오면 그걸로 바꾼다.
+ * 저장할 때 그때의 document.referrer 를 함께 적어 둔다. 클라이언트 라우팅 중에는 document.referrer 가 바뀌지 않으므로
+ * 같으면 같은 도착의 연장이다. 다르면(같은 탭에서 구글 등을 거쳐 새로 들어옴) 새 도착이므로 저장본을 버린다 —
+ * 그러지 않으면 나중의 검색 유입이 앞선 인스타 UTM 으로 잘못 찍힌다.
+ * 판정·정규화는 서버(lib/traffic-source.ts)가 다시 한다 — 여기서는 모아서 보내기만.
+ */
+function currentUtm(): Record<string, string> | undefined {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const fresh: Record<string, string> = {};
+    for (const k of ['source', 'medium', 'campaign'] as const) {
+      const v = q.get(`utm_${k}`);
+      if (v) fresh[k] = v.slice(0, 80);
+    }
+    const ref = document.referrer || '';
+    if (fresh.source) {
+      sessionStorage.setItem(UTM_KEY, JSON.stringify({ utm: fresh, ref }));
+      return fresh;
+    }
+    const raw = sessionStorage.getItem(UTM_KEY);
+    if (!raw) return undefined;
+    const saved = JSON.parse(raw) as { utm?: Record<string, string>; ref?: string };
+    // 사이트 안 이동이면 referrer 가 자기 사이트다 — 그때도 같은 방문의 연장으로 본다.
+    const internal = (() => { try { return new URL(ref).host === window.location.host; } catch { return false; } })();
+    if (saved.ref !== ref && !internal) {
+      sessionStorage.removeItem(UTM_KEY);
+      return undefined;
+    }
+    return saved.utm;
+  } catch {
+    return undefined;
+  }
+}
+
 function buildBody(payload: TrackPayload): string {
   return JSON.stringify({
     ...payload,
     path: payload.path ?? window.location.pathname,
     sessionId: getSessionId(),
     referrer: document.referrer || '',
+    utm: currentUtm(),
   });
 }
 

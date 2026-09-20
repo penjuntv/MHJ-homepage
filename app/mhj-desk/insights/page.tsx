@@ -3,6 +3,44 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase-browser';
 import { BarChart3, Globe, Clock, FileText, TrendingUp } from 'lucide-react';
+import { readOptOutState, setOperatorOptOut, type OptOutState } from '@/lib/first-party';
+
+/**
+ * 이 브라우저가 1st-party 분석 수집에서 빠져 있는지 보여 주고 끄고 켠다(2026-09-20).
+ * 배포 실험에서 외부 독자와 운영자 방문을 가르려면 운영자 기기가 빠져 있어야 한다.
+ * 설정은 **이 브라우저에만** 남는다 — 기기·브라우저마다 따로. 과거 기록은 바뀌지 않는다.
+ */
+function OperatorOptOutCard() {
+  const [state, setState] = useState<OptOutState>(null);
+  useEffect(() => { setState(readOptOutState()); }, []);
+  const excluded = state === 'admin';
+  return (
+    <div style={{ ...CARD, marginBottom: 20, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
+      <div style={{ minWidth: 200, flex: '1 1 260px' }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: '#0F172A', marginBottom: 4 }}>
+          이 브라우저 · 분석 수집 {excluded ? '제외됨' : '포함됨'}
+        </div>
+        <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.5 }}>
+          {excluded
+            ? '운영자 기기로 표시돼 공개 페이지 방문이 기록되지 않습니다. 설정은 이 브라우저에만 적용됩니다.'
+            : '이 브라우저의 방문이 방문자 통계에 함께 잡힙니다. 관리자로 로그인한 기기는 보통 제외합니다.'}
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => { setOperatorOptOut(!excluded); setState(!excluded ? 'admin' : 'off'); }}
+        style={{
+          padding: '9px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          border: `1px solid ${excluded ? '#CBD5E1' : '#2563EB'}`,
+          background: excluded ? '#fff' : '#2563EB',
+          color: excluded ? '#334155' : '#fff',
+        }}
+      >
+        {excluded ? '수집에 다시 포함' : '이 브라우저 제외'}
+      </button>
+    </div>
+  );
+}
 
 // ─── 타입 ───
 interface SourceRow { source: string; medium: string; sessions: number; pageviews: number; }
@@ -148,6 +186,8 @@ export default function InsightsPage() {
 
       {!err && !loading && (
         <>
+          <OperatorOptOutCard />
+
           {/* 요약 스탯 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 20 }}>
             <Stat icon={Globe} label="방문 세션" value={summary.totalSessions.toLocaleString()} />

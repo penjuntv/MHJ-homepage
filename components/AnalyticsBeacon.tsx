@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { sendEvent, sendBeaconEvent } from '@/lib/first-party';
+import { sendEvent, sendBeaconEvent, stripNotrackParam } from '@/lib/first-party';
 
 /**
  * MHJ 1st-party 분석 비콘.
@@ -26,6 +26,9 @@ export default function AnalyticsBeacon({ pageMeta }: {
 
   // 1) 페이지뷰 — 경로가 바뀔 때(첫 마운트 포함) 직전 경로 engagement flush 후 새 pageview
   useEffect(() => {
+    // 1세대 `?notrack=` 링크가 공유·북마크로 남아 있을 수 있다 → 주소에서만 지운다(수집 설정은 바꾸지 않는다).
+    stripNotrackParam();
+
     // 직전 경로의 체류시간 flush
     flush(pathRef.current);
 

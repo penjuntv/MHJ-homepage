@@ -6,11 +6,83 @@
  * referrer 문자열을 서버에서 다시 파싱한다.
  */
 
-export type Medium = 'organic' | 'social' | 'referral' | 'direct' | 'internal';
+export type Medium = 'organic' | 'social' | 'referral' | 'email' | 'direct' | 'internal';
 
 export interface TrafficSource {
   source: string; // 'google' | 'naver' | 'bing' | ... | 'direct' | '<host>'
   medium: Medium;
+}
+
+/** 배포 링크에 붙이는 UTM (docs/PLAN-distribution-2026-09.md §4·§5). 클라이언트가 보낸 값이라 서버에서 다시 거른다. */
+export interface Utm {
+  source?: unknown;
+  medium?: unknown;
+  campaign?: unknown;
+}
+
+// utm_source 별칭 → 표준 라벨. 배포 키트가 쓰는 이름(instagram·facebook·naverblog·newsletter·pinterest)과
+// 사람이 손으로 줄여 쓰는 이름을 한 라벨로 모은다 — 같은 채널이 여러 줄로 쪼개지지 않게.
+const UTM_SOURCE_ALIASES: Record<string, string> = {
+  ig: 'instagram', insta: 'instagram',
+  fb: 'facebook', meta: 'facebook',
+  kakao: 'kakaotalk', kakaotalk: 'kakaotalk', kt: 'kakaotalk',
+  naver_blog: 'naverblog', 'naver-blog': 'naverblog', blog_naver: 'naverblog',
+  email: 'newsletter', mail: 'newsletter', mairangi_notes: 'newsletter', 'mairangi-notes': 'newsletter',
+  pin: 'pinterest',
+  yt: 'youtube',
+};
+
+// 표준 라벨 → 기본 medium. utm_medium 이 없거나 허용 밖일 때 쓴다.
+const UTM_SOURCE_MEDIUM: Record<string, Medium> = {
+  instagram: 'social', facebook: 'social', threads: 'social', x: 'social', youtube: 'social',
+  kakaotalk: 'social', pinterest: 'social', linkedin: 'social', reddit: 'social', tiktok: 'social',
+  band: 'social', naverblog: 'social',
+  newsletter: 'email',
+};
+
+// utm_medium 으로 받아 주는 값. organic·direct·internal 은 링크로 주장할 수 없게 막는다(검색 유입 수치 오염 방지).
+const UTM_MEDIUM_ALLOWED: Record<string, Medium> = {
+  social: 'social', 'social-media': 'social', social_media: 'social',
+  email: 'email', newsletter: 'email',
+  referral: 'referral',
+};
+
+/** 소문자 · [a-z0-9._-] 만 · 40자. 남는 게 없으면 null. */
+function cleanUtm(v: unknown): string | null {
+  if (typeof v !== 'string') return null;
+  const s = v.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 40);
+  return s || null;
+}
+
+/**
+ * UTM 만으로 유입원을 정한다. utm_source 가 없거나 비면 null(→ referrer 판정으로 넘어간다).
+ * medium: utm_medium 이 허용 목록 안이면 그 값, 아니면 채널 기본값, 모르는 채널이면 referral.
+ */
+export function deriveSourceFromUtm(utm: Utm | null | undefined): TrafficSource | null {
+  if (!utm || typeof utm !== 'object') return null;
+  const raw = cleanUtm(utm.source);
+  if (!raw) return null;
+  const source = UTM_SOURCE_ALIASES[raw] ?? raw;
+  const m = cleanUtm(utm.medium);
+  const medium = (m && UTM_MEDIUM_ALLOWED[m]) || UTM_SOURCE_MEDIUM[source] || 'referral';
+  return { source, medium };
+}
+
+/**
+ * 유입원 최종 판정 — referrer 와 UTM 을 함께 본다.
+ * 1) 자기 사이트 안 이동(internal)은 그대로 internal — UTM 이 남아 있어도 새 유입이 아니다.
+ * 2) UTM 이 있으면 UTM 우선 — 인스타·카톡 인앱 브라우저는 referrer 를 지워서 referrer 만으로는 전부 direct 가 된다
+ *    (2026-09-02~19 세션 93 중 social·referral 0 — 측정 구멍, PLAN-distribution §5).
+ * 3) 없으면 referrer 판정.
+ */
+export function deriveTrafficSource(
+  referrer: string | null | undefined,
+  siteHost: string,
+  utm?: Utm | null,
+): TrafficSource {
+  const byRef = deriveSource(referrer, siteHost);
+  if (byRef.medium === 'internal') return byRef;
+  return deriveSourceFromUtm(utm) ?? byRef;
 }
 
 // 검색엔진 호스트 조각 → source 라벨 (organic)

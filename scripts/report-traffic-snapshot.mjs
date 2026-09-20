@@ -42,7 +42,12 @@ const weekOf = (iso) => {
   t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7));
   return t.toISOString().slice(0, 10);
 };
-const label = (r) => (r.medium === 'organic' ? `organic:${r.source}` : r.medium ?? '?');
+// 외부 유입(검색·SNS·추천·이메일)은 채널까지 쪼개 보여 준다 — 배포가 어느 채널에서 사람을 데려왔는지가 핵심 지표다
+// (docs/PLAN-distribution-2026-09.md §5). direct·internal 은 가족·QA·사이트 안 이동이라 한 칸으로 둔다.
+const EXTERNAL = new Set(['organic', 'social', 'referral', 'email']);
+const isExternal = (r) => EXTERNAL.has(r.medium);
+const label = (r) => (isExternal(r) ? `${r.medium}:${r.source}` : r.medium ?? '?');
+const MEDIUM_ORDER = ['organic', 'social', 'email', 'referral'];
 const addTo = (map, key, sid) => (map[key] ??= new Set()).add(sid);
 const sizes = (map) => Object.entries(map).map(([k, v]) => [k, v.size]).sort((a, b) => b[1] - a[1]);
 
@@ -51,22 +56,23 @@ const weekly = {};
 for (const r of rows) addTo((weekly[weekOf(r.created_at)] ??= {}), label(r), r.session_id);
 const weekKeys = Object.keys(weekly).sort();
 const srcKeys = [...new Set(weekKeys.flatMap((w) => Object.keys(weekly[w])))].sort((a, b) => {
-  const org = (k) => (k.startsWith('organic:') ? 0 : 1);
-  return org(a) - org(b) || a.localeCompare(b);
+  const rank = (k) => { const i = MEDIUM_ORDER.indexOf(k.split(':')[0]); return i < 0 ? 99 : i; };
+  return rank(a) - rank(b) || a.localeCompare(b);
 });
 
 // 2) 최근 N일 창
 const cutoff = Date.now() - DAYS * 864e5;
 const recent = rows.filter((r) => new Date(r.created_at).getTime() >= cutoff);
-const bySource = {}, byPath = {}, organicPath = {}, byCountry = {}, sessionsAll = new Set(), sessionsOrganic = new Set();
+const bySource = {}, byPath = {}, externalPath = {}, byCountry = {}, sessionsAll = new Set(), sessionsOrganic = new Set(), sessionsExternal = new Set();
 for (const r of recent) {
   sessionsAll.add(r.session_id);
   addTo(bySource, `${r.medium ?? '?'}/${r.source ?? '?'}`, r.session_id);
   addTo(byPath, r.path ?? '?', r.session_id);
   addTo(byCountry, r.country ?? '?', r.session_id);
-  if (r.medium === 'organic') {
-    sessionsOrganic.add(r.session_id);
-    addTo(organicPath, `${r.source} ${r.path}`, r.session_id);
+  if (r.medium === 'organic') sessionsOrganic.add(r.session_id);
+  if (isExternal(r)) {
+    sessionsExternal.add(r.session_id);
+    addTo(externalPath, `${r.medium}:${r.source} ${r.path}`, r.session_id);
   }
 }
 
@@ -79,31 +85,35 @@ const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Pacific/Auckland' })
 const out = [];
 out.push(`# 유입 스냅샷 — ${today}`, '');
 out.push(`> \`node --env-file=.env.local scripts/report-traffic-snapshot.mjs --write\` 로 다시 만든다. 수집 시작 ${COLLECTION_START.slice(0, 10)} · pageview ${rows.length}행.`);
-out.push(`> 마스터 플랜 §0 목표표의 "주간 유기 세션" 은 아래 **주간 표의 organic 열 합**이다.`, '');
+out.push(`> 핵심 지표는 **외부 유입**(organic + social + referral + email) — 배포 플랜 \`docs/PLAN-distribution-2026-09.md\` §5. 마스터 플랜의 "주간 유기 세션" 은 organic 합.`);
+out.push(`> social·email 은 UTM(\`?utm_source=instagram\` 등)으로도 잡힌다 — 인앱 브라우저는 referrer 를 지우므로 배포 링크에는 UTM 을 붙일 것.`, '');
 
 out.push('## 주간 세션 × 출처 (월요일 시작, UTC)', '');
-out.push(`| 주 | ${srcKeys.join(' | ')} | organic 합 |`);
-out.push(`|---|${srcKeys.map(() => '---').join('|')}|---|`);
+out.push(`| 주 | ${srcKeys.join(' | ')} | organic 합 | **외부 유입 합** |`);
+out.push(`|---|${srcKeys.map(() => '---').join('|')}|---|---|`);
 for (const w of weekKeys) {
   const cells = srcKeys.map((k) => weekly[w][k]?.size ?? 0);
   const organic = srcKeys.reduce((n, k, i) => n + (k.startsWith('organic:') ? cells[i] : 0), 0);
-  out.push(`| ${w} | ${cells.join(' | ')} | **${organic}** |`);
+  // 외부 유입 합은 세션 기준 합집합(한 세션이 여러 채널 줄에 걸쳐도 한 번만)
+  const ext = new Set(srcKeys.filter((k) => EXTERNAL.has(k.split(':')[0])).flatMap((k) => [...(weekly[w][k] ?? [])])).size;
+  out.push(`| ${w} | ${cells.join(' | ')} | ${organic} | **${ext}** |`);
 }
 out.push('');
 
 out.push(`## 최근 ${DAYS}일`, '');
 out.push(`| 지표 | 값 |`, `|---|---|`);
 out.push(`| 세션 | ${sessionsAll.size} |`);
-out.push(`| 유기 세션 | ${sessionsOrganic.size} |`);
+out.push(`| **외부 유입 세션** | **${sessionsExternal.size}** |`);
+out.push(`| 그중 검색(organic) | ${sessionsOrganic.size} |`);
 out.push(`| 구독자(행) | ${subscribers ?? '?'} |`);
 out.push(`| 출처(세션) | ${sizes(bySource).map(([k, n]) => `${k} ${n}`).join(' · ')} |`);
 out.push(`| 국가(세션) | ${sizes(byCountry).map(([k, n]) => `${k} ${n}`).join(' · ')} |`, '');
 
-out.push(`### 유기 유입이 도착한 글 (최근 ${DAYS}일)`, '');
-if (!Object.keys(organicPath).length) out.push('_없음_');
+out.push(`### 외부 유입이 도착한 글 (최근 ${DAYS}일)`, '');
+if (!Object.keys(externalPath).length) out.push('_없음_');
 else {
-  out.push('| 엔진 · 경로 | 세션 |', '|---|---|');
-  for (const [k, n] of sizes(organicPath)) out.push(`| ${k} | ${n} |`);
+  out.push('| 채널 · 경로 | 세션 |', '|---|---|');
+  for (const [k, n] of sizes(externalPath)) out.push(`| ${k} | ${n} |`);
 }
 out.push('');
 
@@ -118,7 +128,7 @@ if (WRITE) {
   mkdirSync(dir, { recursive: true });
   const file = new URL(`traffic-${today}.md`, dir);
   writeFileSync(file, md + '\n');
-  console.log(`docs/measurements/traffic-${today}.md 저장 — 세션 ${sessionsAll.size} · 유기 ${sessionsOrganic.size} (최근 ${DAYS}일)`);
+  console.log(`docs/measurements/traffic-${today}.md 저장 — 세션 ${sessionsAll.size} · 외부 유입 ${sessionsExternal.size}(검색 ${sessionsOrganic.size}) (최근 ${DAYS}일)`);
 } else {
   console.log(md);
 }

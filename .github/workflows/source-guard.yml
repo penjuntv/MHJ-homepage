@@ -72,3 +72,7 @@ jobs:
       - name: proxy-image URL allowlist 테스트 (SSRF 차단)
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-image-proxy-allow.mjs
+
+      - name: 유입원 판정 테스트 (referrer + UTM — 배포 링크가 social·email 로 잡히는지)
+        if: ${{ !cancelled() }}
+        run: node --experimental-strip-types scripts/qa/test-traffic-source.mjs
