@@ -1,0 +1,22 @@
+
+검색 관련도 — https://www.mhj.nz
+
+| 쿼리 | 글 결과 | 정답 수 | 1위 정답 | rel@3 | 상위 3개 |
+|---|---|---|---|---|---|
+| `library` | 8 | 4 | ✅ | 1.00 | 1. Our library haul · 2. [Library Tour] Birkenhead Library · 3. [Library Tour] Albany Village Library |
+| `lunch` | 8 | 2 | ✅ | 1.00 | 1. How to Pack a Lunch · 2. [Y1] What's in the Lunchbox? · 3. [Y1] 100 Days of Schhol |
+| `ncea` | 3 | 2 | ✅ | 1.00 | 1. [NZ] NCEA Is Changing: No More Levels, No More Credits · 2. [Edu] NCEA Is Changing: Following the Curriculum Shake-Up · 3. Growing without a Score |
+| `year 7` | 8 | 7 | ✅ | 1.00 | 1. [Y7] Understanding Year 7 · 2. [Y7] "Oh, Just You Today?" · 3. [Y7] Kahu Manu (1) New way of learning |
+| `rotorua` | 2 | 1 | ✅ | 1.00 | 1. A Short Family Trip to Rotorua · 2. Landing Home |
+| `school report` | 8 | 2 | ✅ | 1.00 | 1. [Edu] How To Read a Mid-year Report · 2. [Y1] First Term Report · 3. Starting School in New Zealand |
+| `storypress` | 2 | 2 | ✅ | 1.00 | 1. [Y1] She's Already There · 2. The App We Dreamt Of |
+| `reading` | 8 | 2 | ✅ | 1.00 | 1. Holiday Home Learning: The Reading Bingo · 2. Step up: Reading aloud · 3. Our library haul |
+| `matariki` | 1 | 1 | ✅ | 1.00 | 1. Matariki in the House |
+| `kpop` | 1 | 1 | ✅ | 1.00 | 1. IVE World Tour : SHOW WHAT I AM |
+| `how to pack a lunch` | 8 | 2 | ✅ | 1.00 | 1. How to Pack a Lunch · 2. [Y1] What's in the Lunchbox? · 3. [Y1] 100 Days of Schhol |
+| `the library` | 8 | 4 | ✅ | 1.00 | 1. Our library haul · 2. [Library Tour] Birkenhead Library · 3. [Library Tour] Albany Village Library |
+| `what is ncea` | 3 | 2 | ✅ | 1.00 | 1. [NZ] NCEA Is Changing: No More Levels, No More Credits · 2. [Edu] NCEA Is Changing: Following the Curriculum Shake-Up · 3. Growing without a Score |
+| `lunch in nz` | 8 | 2 | ✅ | 1.00 | 1. [Y1] What's in the Lunchbox? · 2. How to Pack a Lunch · 3. The Fox, the Storm, and the Bread Bowl |
+| `k-pop` | 8 | 1 | ✅ | 1.00 | 1. IVE World Tour : SHOW WHAT I AM · 2. Anzac Home Learning : The Red Poppy · 3. Popcorn, Blankets, and Movie Marathons |
+
+1위 정답 15/15 · 평균 rel@3 1.00 · 평균 응답 204ms
