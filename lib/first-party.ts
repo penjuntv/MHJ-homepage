@@ -11,32 +11,64 @@ import { trackEvent } from './analytics';
  */
 
 const SESSION_KEY = 'mhj_sid';
-const OPT_OUT_KEY = 'mhj_notrack';
+const OPT_OUT_KEY = 'mhj_track_optout';
+/** 폐기된 1세대 키(`?notrack=1` 로도 켜졌다). 출처를 가릴 수 없어 신뢰하지 않고 지운다. */
+const LEGACY_OPT_OUT_KEY = 'mhj_notrack';
 
 /**
- * 운영자·테스트 기기 제외. 배포 실험의 외부 유입을 운영자 방문과 가르기 위해(2026-09-20).
- * 이 기기에서 한 번 `?notrack=1` 로 열거나 관리자(/mhj-desk)에 로그인하면 localStorage 에 표시가 남고,
- * 그 뒤로 이 브라우저는 /api/track 에 아무것도 보내지 않는다. `?notrack=0` 으로 해제.
- * 앞으로의 기록에만 적용된다 — 과거 행은 건드리지 않는다. 시크릿 창·인앱 브라우저는 표시가 없어 다시 잡힌다.
+ * 운영자·테스트 기기 제외 — 배포 실험의 외부 유입을 운영자 방문과 가르기 위해(2026-09-20).
+ *
+ * **이 브라우저에만** 적용된다(localStorage). 기기가 바뀌거나 시크릿 창·인앱 브라우저로 열면 다시 수집된다.
+ * 켜지는 경로는 **인증된 관리자 로그인 하나뿐**이다 — 주소만으로는 켜지지 않는다.
+ * 공개 URL(`?notrack=1`)로 켜지던 1세대 방식은 링크가 공유되면 독자까지 영구 제외돼 폐기했다.
+ * 상태 확인·해제는 관리자 인사이트 화면에서. 앞으로의 기록에만 적용되고 과거 행은 건드리지 않는다.
  */
-export function setTrackingOptOut(on: boolean): void {
+export type OptOutState = 'admin' | 'off' | null;
+
+export function readOptOutState(): OptOutState {
   try {
-    if (on) localStorage.setItem(OPT_OUT_KEY, '1');
-    else localStorage.removeItem(OPT_OUT_KEY);
+    // 1세대 표시는 출처(운영자 로그인 vs 공유 링크)를 가릴 수 없다 → 지우고 무시한다.
+    if (localStorage.getItem(LEGACY_OPT_OUT_KEY) !== null) localStorage.removeItem(LEGACY_OPT_OUT_KEY);
+    const v = localStorage.getItem(OPT_OUT_KEY);
+    return v === 'admin' || v === 'off' ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 관리자 화면의 토글. `off` 는 "이 브라우저는 계속 수집" 이라는 명시 선택이라 로그인해도 다시 켜지지 않는다. */
+export function setOperatorOptOut(on: boolean): void {
+  try {
+    localStorage.setItem(OPT_OUT_KEY, on ? 'admin' : 'off');
+  } catch {
+    // ignore
+  }
+}
+
+/** 인증된 관리자 세션이 확인됐을 때만 호출. 운영자가 명시로 끈(`off`) 브라우저는 건드리지 않는다. */
+export function enableOperatorOptOutOnLogin(): void {
+  if (readOptOutState() === 'off') return;
+  setOperatorOptOut(true);
+}
+
+/**
+ * 주소에 남은 `notrack` 파라미터를 새로고침 없이 지운다(경로·나머지 쿼리·UTM·해시는 보존).
+ * 1세대 링크가 공유·북마크로 돌아다녀도 주소창에서 사라지게 — 이제 이 파라미터는 아무것도 켜지 않는다.
+ */
+export function stripNotrackParam(): void {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('notrack')) return;
+    url.searchParams.delete('notrack');
+    const qs = url.searchParams.toString();
+    window.history.replaceState(null, '', `${url.pathname}${qs ? `?${qs}` : ''}${url.hash}`);
   } catch {
     // ignore
   }
 }
 
 function isOptedOut(): boolean {
-  try {
-    const flag = new URLSearchParams(window.location.search).get('notrack');
-    if (flag === '1') setTrackingOptOut(true);
-    else if (flag === '0') setTrackingOptOut(false);
-    return localStorage.getItem(OPT_OUT_KEY) === '1';
-  } catch {
-    return false;
-  }
+  return readOptOutState() === 'admin';
 }
 
 /** 탭 세션 단위 익명 ID (쿠키 없음, sessionStorage 한정). */

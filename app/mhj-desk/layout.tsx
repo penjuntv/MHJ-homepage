@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { setTrackingOptOut } from '@/lib/first-party';
+import { enableOperatorOptOutOnLogin } from '@/lib/first-party';
 import { Toaster } from 'sonner';
 import { supabase } from '@/lib/supabase-browser';
 import {
@@ -81,8 +81,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
       setReady(true);
       if (session) {
-        // 관리자로 로그인한 기기는 공개 페이지 방문도 1st-party 분석에서 뺀다(운영자 제외).
-        setTrackingOptOut(true);
+        // 인증된 관리자 세션이 확인된 기기는 공개 페이지 방문도 1st-party 분석에서 뺀다(운영자 제외).
+        // 인사이트 화면에서 "수집 유지"로 끈 브라우저는 다시 켜지 않는다. 해제·상태는 그 화면에서.
+        enableOperatorOptOutOnLogin();
         Promise.all([
           supabase.from('comments').select('*', { count: 'exact', head: true }).eq('approved', false),
           supabase.from('blogs').select('*', { count: 'exact', head: true }),
