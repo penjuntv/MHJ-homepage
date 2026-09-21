@@ -324,7 +324,7 @@ Subscribe & Like for more heartwarming stories!
 ```
 ✏️ (이 영상 이야기 한두 줄 — 올릴 때 여기부터 채워 주세요)
 
-📖 더 긴 이야기 → https://www.mhj.nz/?utm_source=youtube&utm_campaign=video_desc
+📖 더 긴 이야기 → https://www.mhj.nz/yt
 
 뉴질랜드 오클랜드 마이랑이 베이에 사는 다섯 식구, 세 딸 Min · Hyun · Jin 의 기록입니다.
 A Korean family of five in Mairangi Bay, Auckland — three daughters, two languages, one long story of growing up in Aotearoa.
@@ -335,6 +335,7 @@ A Korean family of five in Mairangi Bay, Auckland — three daughters, two langu
 바꾼 것:
 - **실명 → Min · Hyun · Jin**, 각자의 **학년 삭제**, **노스쇼어 → 마이랑이 베이**(사이트 이름이 이미 공개한 동네)
 - **맨 윗줄을 비워 둠** — 유튜브는 설명의 첫 두 줄만 접힘 없이 보여 주고, 검색도 거기를 본다. 모든 영상이 같은 인사말로 시작하면 그 두 줄을 버린다
+- **짧은 주소 `https://www.mhj.nz/yt`** (2026-09-21 개정, PR #103) — 처음엔 UTM 을 통째로 넣었는데 보기 흉하다는 지적으로 바꿨다. `/yt` 는 사이트가 `/?utm_source=youtube&utm_campaign=video_desc` 로 307 넘겨 주므로 **기록은 똑같이 남는다.** 이미 고친 영상 12개의 긴 링크도 그대로 작동한다 — 다시 고칠 필요 없다
 - **사이트 링크 + UTM** — 영상 설명의 URL 은 눌린다. 이 한 줄이 들어가면 **앞으로 올리는 모든 영상이 추적되는 사이트 입구가 된다.** `utm_campaign=video_desc` 로 채널 링크(`channel_link`)와 구분해 셀 수 있다
 - **이메일 삭제** — 본문 평문 이메일은 봇이 긁어 간다. `맞춤설정 → 연락처 정보` 로 옮긴다(유튜브가 가려서 보여 준다)
 - "기자 출신 아빠" 문장은 개인정보 문제는 아니지만, 매 영상 하단에 반복될 문장으로는 길어 뺐다 — 넣고 싶으면 둘째 단락 끝에 붙이면 된다
