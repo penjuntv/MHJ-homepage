@@ -11,6 +11,10 @@ const nextConfig = {
       // UTM 이 없으면 direct 로 섞인다(lib/traffic-source.ts). 캠페인 이름이 바뀔 수 있으니
       // 브라우저가 영구 캐시하지 않게 307(임시)로 둔다.
       { source: '/yt', destination: '/?utm_source=youtube&utm_campaign=video_desc', permanent: false },
+      // 같은 이유의 인스타 프로필 링크 · 페이스북 프로필 소개란용 (2026-09-22).
+      // 인스타·페북 인앱 브라우저도 referrer 를 지운다.
+      { source: '/ig', destination: '/?utm_source=instagram&utm_campaign=bio', permanent: false },
+      { source: '/fb', destination: '/?utm_source=facebook&utm_campaign=profile', permanent: false },
     ];
 
     const map = [
