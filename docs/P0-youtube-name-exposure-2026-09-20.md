@@ -48,7 +48,29 @@ YouTube 앱 → 프로필 → **내 채널** → **채널 수정**(연필) → �
 
 ---
 
-## 3. 무엇으로 바꾸나 — 대체 문안 3안
+## 3. 무엇으로 바꾸나
+
+### 3-0. 최종본 — 이걸 쓴다 (2026-09-21 개정)
+
+아래 3안은 **고르라고 낸 것인데 셋 다 붙여넣어졌다.** 그 결과 같은 말을 세 번 하고(가족 소개 → 가족 소개 → 채널 소개) Auckland 가 두 번 나온다. 실명은 없으니 P0 는 해결됐지만, **유튜브는 첫 줄만 검색 결과·채널 카드에 보여 준다** — 지금 구조는 가장 약한 문장이 대표로 나간다.
+
+기존 내용을 전부 지우고 이것으로 교체:
+
+```
+A Korean family of five in Mairangi Bay, Auckland — three daughters, two languages, one long story of growing up in Aotearoa.
+
+From school runs and library afternoons to travel, food, and the small honest moments in between, this channel keeps the pieces of our life in New Zealand. Simple, warm, and real.
+
+Longer stories: www.mhj.nz
+```
+
+구조: 1줄 = 우리가 누구인가 / 2줄 = 여기서 뭘 보나 / 3줄 = 어디로 가나. 첫 줄만 잘려도 말이 된다.
+
+**Mairangi Bay 는 남겨도 된다.** 사이트 이름이 "My Mairangi Journal" 이라 이미 공개 브랜딩이다. §8-3b 에서 템플릿 A 의 동네를 뺀 것은 동네 자체가 아니라 **동네 + 아이별 학년(Year 6·5·1)** 조합 때문이었고, 그 조합은 채널 설명에는 없다.
+
+**같은 화면에서 둘 더**: ① **링크** 섹션(설명 아래)에 `www.mhj.nz` 가 맨 위인지 — 유튜브는 첫 링크만 프로필에 띄운다. ② **홈 탭**의 신규 방문자용 추천 영상이 비어 있지 않은지.
+
+### 3-1. (참고) 처음 낸 3안 — 고르는 용도였다
 
 원문의 리듬을 그대로 두고 이름만 바꾸는 게 1안이다. 셋 다 아이를 특정하지 않는다.
 
