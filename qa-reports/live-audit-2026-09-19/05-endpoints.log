@@ -1,0 +1,16 @@
+✅ robots.txt — AI 봇 4종 명시
+✅ sitemap.xml — 141 URL
+✅ /llms.txt — 4.3KB
+✅ /llms-full.txt — 90.1KB
+✅ feed.xml — item 20개
+✅ feed↔sitemap 일관성 — https://www.mhj.nz/blog/morning-at-the-ellerslie-fairy-festival
+✅ / — WebSite ✓
+✅ /about — Person ✓
+✅ /blog — Blog ✓
+✅ /magazine — 200
+✅ /gallery — BreadcrumbList ✓
+✅ /storypress — SoftwareApplication ✓
+✅ 샘플 블로그 schema — /blog/morning-at-the-ellerslie-fairy-festival
+✅ /api/og — image/png
+
+✅ 엔드포인트 전부 정상

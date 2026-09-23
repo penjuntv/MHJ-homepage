@@ -1,0 +1,219 @@
+✗·······✗·······✗✗✗✗✗✗✗··✗✗✗✗✗✗✗✗·······✗·······✗✗✗✗✗✗✗··············✗✗✗✗✗✗✗··············✗✗✗✗✗✗✗·······✗·······✗✗✗✗✗✗✗··✗✗✗✗✗✗✗·······✗·······✗✗✗✗✗✗✗
+
+점검 150화면 (호 9개: 2025-12, 2026-01, 2026-02, 2026-03, 2026-04, 2026-05, 2026-06, 2026-07, 2026-08) · 결함 62 · console.error 만 있는 화면 6
+
+✗ / [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 6장 8814KB (최대 2921KB)
+
+✗ /gallery [desktop/light] HTTP 200
+  오류: 라이트박스가 role="dialog"/aria-modal 없이 열림(화면 낭독기가 대화상자로 모름)
+
+✗ /magazine/2026-02 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 16장 10901KB (최대 3220KB)
+
+✗ /magazine/2026-03 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 12장 8141KB (최대 1814KB)
+
+✗ /magazine/2026-04 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 2장 1923KB (최대 1099KB)
+
+✗ /magazine/2026-05 [desktop/light] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-06 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 1장 2174KB (최대 2174KB)
+
+✗ /magazine/2026-07 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 14장 46926KB (최대 11556KB)
+
+✗ /magazine/2026-08 [desktop/light] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-02?page=1 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 3장 6919KB (최대 3220KB)
+
+✗ /magazine/2026-03?page=1 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 9장 4061KB (최대 507KB)
+
+✗ /magazine/2026-04?page=1 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 3장 2747KB (최대 1099KB)
+
+✗ /magazine/2026-05?page=1 [desktop/light] HTTP 200
+  오류: 발행된 호인데 리더에 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-06?page=1 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 5장 9458KB (최대 2174KB)
+
+✗ /magazine/2026-07?page=1 [desktop/light] HTTP 200
+  최적화 안 된 원본 이미지 11장 42193KB (최대 11556KB)
+
+✗ /magazine/2026-08?page=1 [desktop/light] HTTP 200
+  오류: 발행된 호인데 리더에 내용이 "COMING SOON" 뿐
+
+✗ / [desktop/dark] HTTP 200
+  최적화 안 된 원본 이미지 6장 8814KB (최대 2921KB)
+
+✗ /gallery [desktop/dark] HTTP 200
+  오류: 라이트박스가 role="dialog"/aria-modal 없이 열림(화면 낭독기가 대화상자로 모름)
+
+✗ /magazine/2026-02 [desktop/dark] HTTP 200
+  최적화 안 된 원본 이미지 16장 10901KB (최대 3220KB)
+
+✗ /magazine/2026-03 [desktop/dark] HTTP 200
+  최적화 안 된 원본 이미지 12장 8141KB (최대 1814KB)
+
+✗ /magazine/2026-04 [desktop/dark] HTTP 200
+  최적화 안 된 원본 이미지 2장 1923KB (최대 1099KB)
+
+✗ /magazine/2026-05 [desktop/dark] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-06 [desktop/dark] HTTP 200
+  최적화 안 된 원본 이미지 1장 2174KB (최대 2174KB)
+
+✗ /magazine/2026-07 [desktop/dark] HTTP 200
+  최적화 안 된 원본 이미지 14장 46926KB (최대 11556KB)
+
+✗ /magazine/2026-08 [desktop/dark] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-02 [tablet/light] HTTP 200
+  최적화 안 된 원본 이미지 16장 10901KB (최대 3220KB)
+
+✗ /magazine/2026-03 [tablet/light] HTTP 200
+  최적화 안 된 원본 이미지 12장 8141KB (최대 1814KB)
+
+✗ /magazine/2026-04 [tablet/light] HTTP 200
+  최적화 안 된 원본 이미지 2장 1923KB (최대 1099KB)
+
+✗ /magazine/2026-05 [tablet/light] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-06 [tablet/light] HTTP 200
+  최적화 안 된 원본 이미지 1장 2174KB (최대 2174KB)
+
+✗ /magazine/2026-07 [tablet/light] HTTP 200
+  최적화 안 된 원본 이미지 14장 46926KB (최대 11556KB)
+
+✗ /magazine/2026-08 [tablet/light] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-02 [tablet/dark] HTTP 200
+  최적화 안 된 원본 이미지 16장 10901KB (최대 3220KB)
+
+✗ /magazine/2026-03 [tablet/dark] HTTP 200
+  최적화 안 된 원본 이미지 12장 8141KB (최대 1814KB)
+
+✗ /magazine/2026-04 [tablet/dark] HTTP 200
+  최적화 안 된 원본 이미지 2장 1923KB (최대 1099KB)
+
+✗ /magazine/2026-05 [tablet/dark] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-06 [tablet/dark] HTTP 200
+  최적화 안 된 원본 이미지 1장 2174KB (최대 2174KB)
+
+✗ /magazine/2026-07 [tablet/dark] HTTP 200
+  최적화 안 된 원본 이미지 14장 46926KB (최대 11556KB)
+
+✗ /magazine/2026-08 [tablet/dark] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /gallery [mobile/light] HTTP 200
+  오류: 라이트박스가 role="dialog"/aria-modal 없이 열림(화면 낭독기가 대화상자로 모름)
+
+✗ /magazine/2026-02 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 16장 10901KB (최대 3220KB)
+
+✗ /magazine/2026-03 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 12장 8141KB (최대 1814KB)
+
+✗ /magazine/2026-04 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 2장 1923KB (최대 1099KB)
+
+✗ /magazine/2026-05 [mobile/light] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-06 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 1장 2174KB (최대 2174KB)
+
+✗ /magazine/2026-07 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 14장 46926KB (최대 11556KB)
+
+✗ /magazine/2026-08 [mobile/light] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-02?page=1 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 3장 6919KB (최대 3220KB)
+
+✗ /magazine/2026-03?page=1 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 9장 4061KB (최대 507KB)
+
+✗ /magazine/2026-04?page=1 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 3장 2747KB (최대 1099KB)
+
+✗ /magazine/2026-05?page=1 [mobile/light] HTTP 200
+  오류: 발행된 호인데 리더에 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-06?page=1 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 5장 9458KB (최대 2174KB)
+
+✗ /magazine/2026-07?page=1 [mobile/light] HTTP 200
+  최적화 안 된 원본 이미지 11장 42193KB (최대 11556KB)
+
+✗ /magazine/2026-08?page=1 [mobile/light] HTTP 200
+  오류: 발행된 호인데 리더에 내용이 "COMING SOON" 뿐
+
+✗ /gallery [mobile/dark] HTTP 200
+  오류: 라이트박스가 role="dialog"/aria-modal 없이 열림(화면 낭독기가 대화상자로 모름)
+
+✗ /magazine/2026-02 [mobile/dark] HTTP 200
+  최적화 안 된 원본 이미지 16장 10901KB (최대 3220KB)
+
+✗ /magazine/2026-03 [mobile/dark] HTTP 200
+  최적화 안 된 원본 이미지 12장 8141KB (최대 1814KB)
+
+✗ /magazine/2026-04 [mobile/dark] HTTP 200
+  최적화 안 된 원본 이미지 2장 1923KB (최대 1099KB)
+
+✗ /magazine/2026-05 [mobile/dark] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+✗ /magazine/2026-06 [mobile/dark] HTTP 200
+  최적화 안 된 원본 이미지 1장 2174KB (최대 2174KB)
+
+✗ /magazine/2026-07 [mobile/dark] HTTP 200
+  최적화 안 된 원본 이미지 14장 46926KB (최대 11556KB)
+
+✗ /magazine/2026-08 [mobile/dark] HTTP 200
+  오류: 발행된 호인데 내용이 "COMING SOON" 뿐
+
+— console.error (종류별) —
+  6회 · Failed to load resource: the server responded with a status of 404 ()
+     예: /this-page-does-not-exist-qa[desktop/light], /this-page-does-not-exist-qa[desktop/dark], /this-page-does-not-exist-qa[tablet/light]
+
+— 동작 기록 —
+  / · 검색 "year 7" → 결과 링크 12개  (desktop/light, desktop/dark)
+  /blog/fearless-four · FAQ 있음 · 한국어 요약 있음 · JSON-LD 4개(파싱 실패 0)  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /blog/how-to-read-a-mid-year-report · FAQ 있음 · 한국어 요약 있음 · JSON-LD 4개(파싱 실패 0)  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /blog/night-market-tuesdays · FAQ 있음 · 한국어 요약 있음 · JSON-LD 4개(파싱 실패 0)  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /gallery · 라이트박스 열림 · 대화상자 표시 없음  (desktop/light, desktop/dark, mobile/light, mobile/dark)
+  /magazine/2025-12 · PDF 뷰어 · 캔버스 그려짐  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /magazine/2026-01 · PDF 뷰어 · 캔버스 그려짐  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /magazine/2026-02 · 기사 목록형 · 기사 링크 7개 · 리더 링크 4개  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /magazine/2026-03 · 기사 목록형 · 기사 링크 5개 · 리더 링크 4개  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /magazine/2026-04 · 표지·차례형 · 기사 링크 0개 · 리더 링크 6개  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /magazine/2026-06 · 표지·차례형 · 기사 링크 0개 · 리더 링크 5개  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /magazine/2026-07 · 표지·차례형 · 기사 링크 0개 · 리더 링크 8개  (desktop/light, desktop/dark, tablet/light, tablet/dark, mobile/light, mobile/dark)
+  /magazine/2025-12?page=1 · PDF 뷰어 쪽 넘김 1 / 14 → 2 / 14  (desktop/light, mobile/light)
+  /magazine/2026-01?page=1 · PDF 뷰어 쪽 넘김 1 / 16 → 2 / 16  (desktop/light, mobile/light)
+  /magazine/2026-02?page=1 · 리더 · Next 3회 → URL 이동 확인 (?page=1 → ?page=2 → ?page=3 → ?page=4)  (desktop/light, mobile/light)
+  /magazine/2026-02?page=1 · ← 키: 이동  (desktop/light, mobile/light)
+  /magazine/2026-03?page=1 · 리더 · Next 3회 → URL 이동 확인 (?page=1 → ?page=2 → ?page=3 → ?page=4)  (desktop/light, mobile/light)
+  /magazine/2026-03?page=1 · ← 키: 이동  (desktop/light, mobile/light)
+  /magazine/2026-04?page=1 · 리더 · Next 3회 → URL 이동 확인 (?page=1 → ?page=2 → ?page=3 → ?page=4)  (desktop/light, mobile/light)
+  /magazine/2026-04?page=1 · ← 키: 이동  (desktop/light, mobile/light)
+  /magazine/2026-06?page=1 · 리더 · Next 3회 → URL 이동 확인 (?page=1 → ?page=2 → ?page=3 → ?page=4)  (desktop/light, mobile/light)
+  /magazine/2026-06?page=1 · ← 키: 이동  (desktop/light, mobile/light)
+  /magazine/2026-07?page=1 · 리더 · Next 3회 → URL 이동 확인 (?page=1 → ?page=2 → ?page=3 → ?page=4)  (desktop/light, mobile/light)
+  /magazine/2026-07?page=1 · ← 키: 이동  (desktop/light, mobile/light)
