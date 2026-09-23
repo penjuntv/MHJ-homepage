@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>배포 키트 1b</title>
+<style>
+:root{
+  --bg:#f6f4ef; --surface:#ffffff; --surface-2:#faf8f3; --text:#1d1b18; --muted:#6b665d; --faint:#9a948a;
+  --line:#e6e1d7; --accent:#b4532a; --accent-soft:#f6e7dd; --ok:#2f7a4f; --ok-soft:#e3f1e8;
+  --warn:#9a6b00; --warn-soft:#fbf1d6; --code:#f3f0e9; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141311; --surface:#1d1c19; --surface-2:#22211d; --text:#ece8e0; --muted:#a8a296; --faint:#77726a;
+    --line:#2f2d28; --accent:#e08a5f; --accent-soft:#3a2518; --ok:#6cc494; --ok-soft:#18301f;
+    --warn:#e4b94c; --warn-soft:#332910; --code:#262420; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141311; --surface:#1d1c19; --surface-2:#22211d; --text:#ece8e0; --muted:#a8a296; --faint:#77726a;
+  --line:#2f2d28; --accent:#e08a5f; --accent-soft:#3a2518; --ok:#6cc494; --ok-soft:#18301f;
+  --warn:#e4b94c; --warn-soft:#332910; --code:#262420; --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.65 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:40px 16px 96px}
+header h1{font-size:28px;line-height:1.25;margin:0 0 8px;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted)}
+.kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+
+.progress{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 0;margin:24px 0 8px;border-bottom:1px solid var(--line)}
+.progress-row{display:flex;align-items:center;gap:14px}
+.bar{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.count{font-variant-numeric:tabular-nums;font-weight:700;min-width:64px;text-align:right}
+
+.howto{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:24px 0;box-shadow:var(--shadow)}
+.howto h2{font-size:15px;margin:0 0 10px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13.5px;line-height:1.5}
+.steps li::before{content:counter(s);display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;margin-bottom:6px}
+.steps b{display:block}
+kbd{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px}
+
+section.group{margin-top:44px}
+.group-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px}
+.group-head h2{font-size:20px;margin:0}
+.pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.group-note{color:var(--muted);margin:0 0 16px}
+.before-box{background:var(--surface-2);border:1px dashed var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px;color:var(--muted);margin:0 0 16px}
+.before-box b{color:var(--text)}
+.name{background:var(--warn-soft);color:var(--warn);border-radius:4px;padding:0 4px;font-weight:600}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 14px;box-shadow:var(--shadow);overflow:hidden;transition:opacity .2s}
+.card.done{opacity:.55}
+.card-top{display:flex;gap:14px;padding:14px;align-items:center;border-bottom:1px solid var(--line)}
+.thumb{width:112px;aspect-ratio:16/9;border-radius:8px;background:var(--code) center/cover no-repeat;flex:none}
+.meta{flex:1;min-width:0}
+.meta .no{font-size:12px;color:var(--faint);font-weight:700;letter-spacing:.04em}
+.meta .t{font-weight:600;line-height:1.4;overflow-wrap:anywhere}
+.meta .sub{font-size:12.5px;color:var(--faint);margin-top:2px;font-variant-numeric:tabular-nums}
+.actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex:none}
+a.studio{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-size:13px;font-weight:700;color:#fff;background:var(--accent);padding:7px 12px;border-radius:8px;white-space:nowrap}
+a.studio:hover{opacity:.9}
+label.chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+label.chk input{width:16px;height:16px;accent-color:var(--ok)}
+
+.field{padding:14px}
+.field + .field{border-top:1px solid var(--line)}
+.field-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px}
+.field-label span{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field-label em{font-style:normal;font-size:12.5px;color:var(--faint);text-transform:none;letter-spacing:0;font-weight:400}
+.paste{position:relative;background:var(--code);border:1px solid var(--line);border-radius:10px;padding:12px 88px 12px 14px;white-space:pre-wrap;word-break:break-word;font:13.5px/1.6 ui-monospace,SFMono-Regular,Menlo,"Apple SD Gothic Neo",monospace;margin:0}
+.paste.long{max-height:220px;overflow:auto}
+.copy{position:absolute;top:8px;right:8px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:600 12.5px/1 inherit;font-family:inherit;padding:7px 11px;border-radius:7px;cursor:pointer}
+.copy:hover{border-color:var(--accent);color:var(--accent)}
+.copy.ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.diff{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:start;font-size:13.5px;margin:0 0 10px}
+.diff .k{font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:5px;margin-top:3px}
+.diff .k.from{background:var(--warn-soft);color:var(--warn)}
+.diff .k.to{background:var(--ok-soft);color:var(--ok)}
+.diff .v{overflow-wrap:anywhere}
+.note{font-size:12.5px;color:var(--faint);margin:8px 0 0}
+details{margin-top:10px}
+summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600}
+summary:hover{color:var(--accent)}
+
+.end{margin-top:48px;background:var(--ok-soft);border:1px solid var(--ok);border-radius:12px;padding:18px 20px}
+.end h2{margin:0 0 6px;font-size:16px;color:var(--ok)}
+.end p{margin:0}
+footer{margin-top:32px;font-size:12.5px;color:var(--faint)}
+
+@media (max-width:640px){
+  header h1{font-size:23px}
+  .steps{grid-template-columns:1fr 1fr}
+  .card-top{flex-wrap:wrap}
+  .thumb{width:96px}
+  .actions{flex-direction:row;width:100%;justify-content:space-between;align-items:center}
+  .paste{padding-right:14px;padding-top:44px}
+}
+</style>
+
+<style>
+.lead-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 0}
+.lead-stat div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.lead-stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.lead-stat span{font-size:12.5px;color:var(--muted)}
+.tabs{display:flex;gap:6px;margin:0 0 10px}
+.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 12.5px/1 inherit;font-family:inherit;padding:7px 12px;border-radius:99px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.lang[hidden]{display:none}
+table.rec{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+table.rec th,table.rec td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.rec th{background:var(--surface-2);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.warnbox{background:var(--warn-soft);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px;margin:12px 0}
+@media (max-width:640px){.lead-stat{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">실험 1b · 자체 채널 · 이번 주</div>
+  <h1>배포 키트 — Starting School in New Zealand</h1>
+  <p>페이스북·인스타에 이번 주 <b>글 링크 게시 1회</b>. 나머지 두 번은 자유롭게. 전부 붙여넣기만 하면 됩니다.</p>
+  <div class="lead-stat">
+    <div><b>10분</b><span>프로필 링크 2곳(한 번만) + 게시 2곳</span></div>
+    <div><b>13명</b><span>인스타 팔로워 — 도달 기대는 낮게</span></div>
+    <div><b>미확인</b><span>페북 프로필 친구 수 — 계정 안에서 확인 필요</span></div>
+  </div>
+</header>
+
+<section class="group">
+  <div class="group-head"><h2>① 프로필 링크 — 한 번만 바꾸면 계속 씁니다</h2><span class="pill">한 번만</span></div>
+  <p class="group-note">짧은 주소라 보기 깔끔하고, 누가 어디서 왔는지는 사이트가 알아서 기록합니다. 세 주소 모두 실제 사이트에서 작동 확인했습니다.</p>
+
+  <article class="card">
+    <div class="field">
+      <div class="field-label"><span>인스타 @mhj_nz — 프로필 링크</span><em>프로필 편집 → 링크 → 외부 링크 추가 · 제목 "My Mairangi Journal"</em></div>
+      <pre class="paste">https://www.mhj.nz/ig<button class="copy" data-k="ig_bio">복사</button></pre>
+    </div>
+    <div class="field">
+      <div class="field-label"><span>페이스북 minhyunjin.nz — 소개란 웹사이트</span><em>프로필 → 정보 → 연락처 및 기본 정보 → 웹사이트</em></div>
+      <pre class="paste">https://www.mhj.nz/fb<button class="copy" data-k="fb_bio">복사</button></pre>
+      <p class="note">지금 소개란의 www.mhj.nz 를 이 주소로 바꾸면 됩니다. 유튜브 채널 링크는 이미 되어 있습니다.</p>
+    </div>
+  </article>
+</section>
+
+<section class="group">
+  <div class="group-head"><h2>② 페이스북 게시물</h2><span class="pill">공개 범위: 전체 공개</span></div>
+  <p class="group-note">한국어·영어 중 하나만 고르세요. 친구 중 영어권이 많으면 영어가 맞습니다(유씨 답변 Q3 — 다른 부모들과는 영어로 교류).</p>
+  <article class="card">
+    <div class="field">
+      <div class="tabs" role="tablist" data-group="fb">
+        <button role="tab" aria-selected="true" data-lang="ko">한국어</button>
+        <button role="tab" aria-selected="false" data-lang="en">English</button>
+      </div>
+      <div class="lang" data-group="fb" data-lang="ko"><pre class="paste">뉴질랜드 학교, 서류로 보면 단순한데 막상 아이를 보내 보면 헷갈리는 게 많더라고요.
+
+만 5세 생일이 지나면 입학할 수 있고, 대략 5월 이후에 들어가면 그해는 Year 0, 이듬해가 Year 1이 돼요. 한국 학년으로 세면 한 해가 어긋나요.
+그리고 대부분 공립학교는 학군(Home Zone)이 있어서, 집 계약 전에 학군부터 봐야 해요.
+
+세 아이를 학교에 보내며 알게 된 걸 한 편에 정리했어요. 글 끝에 첫 등교 준비를 한 장으로 묶은 Starter Pack(한/영)도 있어요.
+
+https://www.mhj.nz/blog/starting-school-in-new-zealand?utm_source=facebook&amp;utm_campaign=starting-school<button class="copy" data-k="fb_ko">복사</button></pre></div>
+      <div class="lang" data-group="fb" data-lang="en" hidden><pre class="paste">New Zealand's school system looks simple on paper. It felt a lot less simple once we actually enrolled three kids.
+
+A few things worth knowing before day one: children can start school after they turn five; start after roughly May and that year counts as Year 0, not Year 1; and most state schools run a home zone — so check the zone before you sign a lease.
+
+We wrote it all down in one place, with a first-day Starter Pack (English / Korean) at the end.
+
+https://www.mhj.nz/blog/starting-school-in-new-zealand?utm_source=facebook&amp;utm_campaign=starting-school<button class="copy" data-k="fb_en">복사</button></pre></div>
+      <p class="note">붙여넣으면 아래에 글 미리보기 카드가 뜹니다. 카드가 뜬 뒤에는 본문의 긴 주소 줄을 지워도 카드는 남습니다 — 보기 깔끔하게 하려면 지우세요.</p>
+    </div>
+  </article>
+</section>
+
+<section class="group">
+  <div class="group-head"><h2>③ 인스타 — 게시물 + 스토리 링크</h2><span class="pill">게시물 캡션의 링크는 안 눌림</span></div>
+  <p class="group-note">인스타는 게시물 캡션의 주소가 눌리지 않습니다. 그래서 <b>게시물로 알리고, 스토리의 링크 스티커로 글에 보냅니다.</b></p>
+  <article class="card">
+    <div class="field">
+      <div class="field-label"><span>게시물 캡션</span><em>사진은 글 대표 이미지나 학교 가는 길 풍경 — 아이 얼굴은 쓰지 않기</em></div>
+      <div class="tabs" role="tablist" data-group="ig">
+        <button role="tab" aria-selected="true" data-lang="ko">한국어</button>
+        <button role="tab" aria-selected="false" data-lang="en">English</button>
+      </div>
+      <div class="lang" data-group="ig" data-lang="ko"><pre class="paste">뉴질랜드 학교 입학, 서류로 보면 단순한데 막상 해 보면 헷갈리는 것들 📝
+
+✔️ 만 5세 생일이 지나면 입학 가능
+✔️ 대략 5월 이후 입학 → 그해는 Year 0, 이듬해 Year 1
+✔️ 공립학교 대부분 학군(Home Zone) — 집 계약 전에 확인
+✔️ 전학 학년 배정은 정해진 규칙이 없어 학교에 직접
+
+세 아이 학교 보내며 알게 된 것 + 첫 등교 Starter Pack(한/영)
+👉 스토리 링크 또는 프로필 링크에서
+
+#뉴질랜드초등학교 #뉴질랜드이민 #뉴질랜드유학 #오클랜드 #NZschool #newzealandparents<button class="copy" data-k="ig_ko">복사</button></pre></div>
+      <div class="lang" data-group="ig" data-lang="en" hidden><pre class="paste">Starting school in New Zealand — simple on paper, less simple in real life 📝
+
+✔️ Kids can start after they turn five
+✔️ Start after roughly May → that year is Year 0, the next is Year 1
+✔️ Most state schools have a home zone — check before you sign a lease
+✔️ Mid-year transfers: no fixed rule for year placement, ask the school
+
+What we learned enrolling three kids + a first-day Starter Pack (EN/KO)
+👉 Link in story / bio
+
+#NZschool #newzealandparents #aucklandfamily #movingtonewzealand #kiwikids<button class="copy" data-k="ig_en">복사</button></pre></div>
+      <p class="note">카드 이미지가 필요하면 관리자 화면(/mhj-desk)의 캐러셀 도구로 이 글을 만들 수 있습니다.</p>
+    </div>
+    <div class="field">
+      <div class="field-label"><span>스토리 — 링크 스티커 URL</span><em>스토리 → 스티커 → 링크 · 스티커 문구 "학교 입학 정리 보기"</em></div>
+      <pre class="paste">https://www.mhj.nz/blog/starting-school-in-new-zealand?utm_source=instagram&utm_campaign=starting-school<button class="copy" data-k="ig_story">복사</button></pre>
+      <p class="note">스티커에는 문구만 보이고 이 긴 주소는 안 보입니다. 이 글로 바로 가고, "인스타 스토리에서 이 글로 왔다"가 따로 기록됩니다.</p>
+    </div>
+  </article>
+</section>
+
+<section class="group">
+  <div class="group-head"><h2>④ 올린 뒤 적어 둘 것</h2><span class="pill">7일 뒤 정리</span></div>
+  <p class="group-note">비워 두지 말고 "안 함"이라도 적습니다. 방문 숫자는 제가 봅니다 — 두 분은 <b>반응</b>만 적어 주세요.</p>
+  <table class="rec">
+    <thead><tr><th>항목</th><th>페이스북</th><th>인스타 게시물</th><th>인스타 스토리</th></tr></thead>
+    <tbody>
+      <tr><td>올린 날짜·시각</td><td></td><td></td><td></td></tr>
+      <tr><td>보인 수(도달 — 인스타는 인사이트에서)</td><td>개인 프로필이라 안 나옴</td><td></td><td></td></tr>
+      <tr><td>댓글·질문·DM</td><td></td><td></td><td></td></tr>
+      <tr><td>든 시간</td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="warnbox">
+    <b>숫자를 볼 때 하나 조심할 것</b> — 링크를 올리면 페이스북·유튜브·검색엔진이 <b>자동으로 그 링크를 한 번 열어 봅니다.</b>
+    9/21 유튜브 설명에 링크를 넣은 직후에도 "유튜브에서 온 방문" 8건이 찍혔는데, 전부 미국에서, 머문 시간 0초, 넷은 같은 1분 안에 들어왔습니다 — 사람이 아닙니다.
+    그래서 유입은 <b>머문 시간이 있는 방문</b>만 따로 세서 보고하겠습니다.
+  </div>
+</section>
+
+<footer>2026-09-22 작성 · 글 요약(summary_ko)에 있는 사실만 옮겼습니다 · 아이 이름은 넣지 않았습니다</footer>
+</div>
+
+<script>
+const CLIP = {"ig_bio": "https://www.mhj.nz/ig", "fb_bio": "https://www.mhj.nz/fb", "fb_ko": "뉴질랜드 학교, 서류로 보면 단순한데 막상 아이를 보내 보면 헷갈리는 게 많더라고요.\n\n만 5세 생일이 지나면 입학할 수 있고, 대략 5월 이후에 들어가면 그해는 Year 0, 이듬해가 Year 1이 돼요. 한국 학년으로 세면 한 해가 어긋나요.\n그리고 대부분 공립학교는 학군(Home Zone)이 있어서, 집 계약 전에 학군부터 봐야 해요.\n\n세 아이를 학교에 보내며 알게 된 걸 한 편에 정리했어요. 글 끝에 첫 등교 준비를 한 장으로 묶은 Starter Pack(한/영)도 있어요.\n\nhttps://www.mhj.nz/blog/starting-school-in-new-zealand?utm_source=facebook&utm_campaign=starting-school", "fb_en": "New Zealand's school system looks simple on paper. It felt a lot less simple once we actually enrolled three kids.\n\nA few things worth knowing before day one: children can start school after they turn five; start after roughly May and that year counts as Year 0, not Year 1; and most state schools run a home zone — so check the zone before you sign a lease.\n\nWe wrote it all down in one place, with a first-day Starter Pack (English / Korean) at the end.\n\nhttps://www.mhj.nz/blog/starting-school-in-new-zealand?utm_source=facebook&utm_campaign=starting-school", "ig_ko": "뉴질랜드 학교 입학, 서류로 보면 단순한데 막상 해 보면 헷갈리는 것들 📝\n\n✔️ 만 5세 생일이 지나면 입학 가능\n✔️ 대략 5월 이후 입학 → 그해는 Year 0, 이듬해 Year 1\n✔️ 공립학교 대부분 학군(Home Zone) — 집 계약 전에 확인\n✔️ 전학 학년 배정은 정해진 규칙이 없어 학교에 직접\n\n세 아이 학교 보내며 알게 된 것 + 첫 등교 Starter Pack(한/영)\n👉 스토리 링크 또는 프로필 링크에서\n\n#뉴질랜드초등학교 #뉴질랜드이민 #뉴질랜드유학 #오클랜드 #NZschool #newzealandparents", "ig_en": "Starting school in New Zealand — simple on paper, less simple in real life 📝\n\n✔️ Kids can start after they turn five\n✔️ Start after roughly May → that year is Year 0, the next is Year 1\n✔️ Most state schools have a home zone — check before you sign a lease\n✔️ Mid-year transfers: no fixed rule for year placement, ask the school\n\nWhat we learned enrolling three kids + a first-day Starter Pack (EN/KO)\n👉 Link in story / bio\n\n#NZschool #newzealandparents #aucklandfamily #movingtonewzealand #kiwikids", "ig_story": "https://www.mhj.nz/blog/starting-school-in-new-zealand?utm_source=instagram&utm_campaign=starting-school"};
+const fallbackCopy = (t) => { const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); let ok=false; try{ok=document.execCommand('copy');}catch(e){} ta.remove(); return ok; };
+document.addEventListener('click', async e => {
+  const tab = e.target.closest('.tabs button');
+  if (tab) {
+    const g = tab.parentElement.dataset.group, l = tab.dataset.lang;
+    tab.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', String(b === tab)));
+    document.querySelectorAll(`.lang[data-group="${g}"]`).forEach(d => d.hidden = d.dataset.lang !== l);
+    return;
+  }
+  const b = e.target.closest('button.copy'); if (!b) return;
+  const t = CLIP[b.dataset.k]; let ok=false;
+  try { await navigator.clipboard.writeText(t); ok=true; } catch(err) { ok = fallbackCopy(t); }
+  b.textContent = ok ? '복사됨 ✓' : '직접 선택'; b.classList.toggle('ok', ok);
+  setTimeout(() => { b.textContent='복사'; b.classList.remove('ok'); }, 1600);
+});
+</script>
+</body>
+</html>

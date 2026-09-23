@@ -119,6 +119,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     },
     twitter: { card: 'summary_large_image', title, description, ...(magazine.image_url ? { images: [magazine.image_url] } : {}) },
     alternates: { canonical: url },
+    // 준비 중인 호(published=false)는 서가·sitemap·검색에서 빠지지만 주소로는 열린다 — 편집 중 미리보기용.
+    // 그 주소가 어딘가에서 링크돼도 검색엔진이 "COMING SOON" 뿐인 얇은 페이지를 색인하지 않게 한다.
+    ...(magazine.published === false ? { robots: { index: false, follow: true } } : {}),
   };
 }
 

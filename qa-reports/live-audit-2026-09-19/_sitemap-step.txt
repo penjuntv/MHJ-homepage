@@ -1,0 +1,18 @@
+      - name: ① sitemap 전 URL 상태 확인
+        id: sitemap
+        timeout-minutes: 8
+        run: |
+          set -uo pipefail
+          curl -sf https://www.mhj.nz/sitemap.xml | grep -oE '<loc>[^<]+' | sed 's/<loc>//' > /tmp/urls.txt
+          total=$(wc -l < /tmp/urls.txt | tr -d ' ')
+          echo "sitemap URL: $total개"
+          # 직렬 curl 은 최악 135×30s=67분 — 잡 타임아웃은 '취소'라 실패 이슈조차 안 남는다. 8병렬로.
+          xargs -P 8 -I{} curl -s -o /dev/null -w '%{http_code} {}\n' -L --max-time 20 {} < /tmp/urls.txt > /tmp/status.txt
+          grep -v '^200 ' /tmp/status.txt > /tmp/bad.txt || true
+          if [ -s /tmp/bad.txt ]; then
+            echo "::error::200이 아닌 URL $(wc -l < /tmp/bad.txt | tr -d ' ')건"
+            cat /tmp/bad.txt
+            exit 1
+          fi
+          echo "전부 200 ✅"
+

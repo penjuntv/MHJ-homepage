@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>유튜브 영상 16개 수정표</title>
+<style>
+:root{
+  --bg:#f6f4ef; --surface:#ffffff; --surface-2:#faf8f3; --text:#1d1b18; --muted:#6b665d; --faint:#9a948a;
+  --line:#e6e1d7; --accent:#b4532a; --accent-soft:#f6e7dd; --ok:#2f7a4f; --ok-soft:#e3f1e8;
+  --warn:#9a6b00; --warn-soft:#fbf1d6; --code:#f3f0e9; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141311; --surface:#1d1c19; --surface-2:#22211d; --text:#ece8e0; --muted:#a8a296; --faint:#77726a;
+    --line:#2f2d28; --accent:#e08a5f; --accent-soft:#3a2518; --ok:#6cc494; --ok-soft:#18301f;
+    --warn:#e4b94c; --warn-soft:#332910; --code:#262420; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141311; --surface:#1d1c19; --surface-2:#22211d; --text:#ece8e0; --muted:#a8a296; --faint:#77726a;
+  --line:#2f2d28; --accent:#e08a5f; --accent-soft:#3a2518; --ok:#6cc494; --ok-soft:#18301f;
+  --warn:#e4b94c; --warn-soft:#332910; --code:#262420; --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.65 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:40px 16px 96px}
+header h1{font-size:28px;line-height:1.25;margin:0 0 8px;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted)}
+.kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+
+.progress{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 0;margin:24px 0 8px;border-bottom:1px solid var(--line)}
+.progress-row{display:flex;align-items:center;gap:14px}
+.bar{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.count{font-variant-numeric:tabular-nums;font-weight:700;min-width:64px;text-align:right}
+
+.howto{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:24px 0;box-shadow:var(--shadow)}
+.howto h2{font-size:15px;margin:0 0 10px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13.5px;line-height:1.5}
+.steps li::before{content:counter(s);display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;margin-bottom:6px}
+.steps b{display:block}
+kbd{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px}
+
+section.group{margin-top:44px}
+.group-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px}
+.group-head h2{font-size:20px;margin:0}
+.pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.group-note{color:var(--muted);margin:0 0 16px}
+.before-box{background:var(--surface-2);border:1px dashed var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px;color:var(--muted);margin:0 0 16px}
+.before-box b{color:var(--text)}
+.name{background:var(--warn-soft);color:var(--warn);border-radius:4px;padding:0 4px;font-weight:600}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 14px;box-shadow:var(--shadow);overflow:hidden;transition:opacity .2s}
+.card.done{opacity:.55}
+.card-top{display:flex;gap:14px;padding:14px;align-items:center;border-bottom:1px solid var(--line)}
+.thumb{width:112px;aspect-ratio:16/9;border-radius:8px;background:var(--code) center/cover no-repeat;flex:none}
+.meta{flex:1;min-width:0}
+.meta .no{font-size:12px;color:var(--faint);font-weight:700;letter-spacing:.04em}
+.meta .t{font-weight:600;line-height:1.4;overflow-wrap:anywhere}
+.meta .sub{font-size:12.5px;color:var(--faint);margin-top:2px;font-variant-numeric:tabular-nums}
+.actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex:none}
+a.studio{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-size:13px;font-weight:700;color:#fff;background:var(--accent);padding:7px 12px;border-radius:8px;white-space:nowrap}
+a.studio:hover{opacity:.9}
+label.chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+label.chk input{width:16px;height:16px;accent-color:var(--ok)}
+
+.field{padding:14px}
+.field + .field{border-top:1px solid var(--line)}
+.field-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px}
+.field-label span{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field-label em{font-style:normal;font-size:12.5px;color:var(--faint);text-transform:none;letter-spacing:0;font-weight:400}
+.paste{position:relative;background:var(--code);border:1px solid var(--line);border-radius:10px;padding:12px 88px 12px 14px;white-space:pre-wrap;word-break:break-word;font:13.5px/1.6 ui-monospace,SFMono-Regular,Menlo,"Apple SD Gothic Neo",monospace;margin:0}
+.paste.long{max-height:220px;overflow:auto}
+.copy{position:absolute;top:8px;right:8px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:600 12.5px/1 inherit;font-family:inherit;padding:7px 11px;border-radius:7px;cursor:pointer}
+.copy:hover{border-color:var(--accent);color:var(--accent)}
+.copy.ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.diff{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:start;font-size:13.5px;margin:0 0 10px}
+.diff .k{font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:5px;margin-top:3px}
+.diff .k.from{background:var(--warn-soft);color:var(--warn)}
+.diff .k.to{background:var(--ok-soft);color:var(--ok)}
+.diff .v{overflow-wrap:anywhere}
+.note{font-size:12.5px;color:var(--faint);margin:8px 0 0}
+details{margin-top:10px}
+summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600}
+summary:hover{color:var(--accent)}
+
+.end{margin-top:48px;background:var(--ok-soft);border:1px solid var(--ok);border-radius:12px;padding:18px 20px}
+.end h2{margin:0 0 6px;font-size:16px;color:var(--ok)}
+.end p{margin:0}
+footer{margin-top:32px;font-size:12.5px;color:var(--faint)}
+
+@media (max-width:640px){
+  header h1{font-size:23px}
+  .steps{grid-template-columns:1fr 1fr}
+  .card-top{flex-wrap:wrap}
+  .thumb{width:96px}
+  .actions{flex-direction:row;width:100%;justify-content:space-between;align-items:center}
+  .paste{padding-right:14px;padding-top:44px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">P0 · YouTube @mhj_nz</div>
+  <h1>기존 영상 16개 수정표</h1>
+  <p>영상별로 <b>Studio 열기 → 복사 → 붙여넣기 → 저장</b>만 하면 됩니다. 제목 4개 · 설명 12개. 약 15~20분.</p>
+</header>
+
+<div class="progress">
+  <div class="progress-row">
+    <div class="bar"><i id="bar"></i></div>
+    <div class="count" id="count">0 / 16</div>
+  </div>
+</div>
+
+<div class="howto">
+  <h2>공통 순서 — 모든 카드가 같습니다</h2>
+  <ol class="steps">
+    <li><b>Studio에서 열기</b>카드 오른쪽 주황 버튼. 그 영상의 수정 화면이 바로 열립니다</li>
+    <li><b>복사</b>회색 박스 오른쪽 위 <kbd>복사</kbd> 버튼</li>
+    <li><b>붙여넣기</b>Studio의 제목·설명 칸에서 <kbd>⌘A</kbd> 전체 선택 → <kbd>⌘V</kbd></li>
+    <li><b>저장</b>Studio 오른쪽 위 <kbd>저장</kbd> → 여기서 <b>완료</b> 체크</li>
+  </ol>
+</div>
+
+<!-- ───────── 제목 ───────── -->
+<section class="group" id="titles">
+  <div class="group-head"><h2>① 제목 4개</h2><span class="pill">제목 칸 전체 교체</span></div>
+  <p class="group-note">이름 부분만 바뀝니다. 나머지 문구는 그대로 두었습니다.</p>
+  <div id="list-titles"></div>
+</section>
+
+<!-- ───────── 템플릿 A ───────── -->
+<section class="group" id="tpl-a">
+  <div class="group-head"><h2>② 설명 — 템플릿 A · 9개</h2><span class="pill">설명 칸 전체 교체</span></div>
+  <p class="group-note">9개 영상의 설명이 <b>글자 하나 안 틀리고 같은</b> 소개문이었습니다. 아래 새 설명은 공통 부분은 같고, <b>첫 줄만 영상마다 다릅니다</b> — 유튜브는 설명의 첫 두 줄을 검색과 미리보기에 쓰기 때문입니다.</p>
+  <div class="before-box">
+    <b>지금 9개 모두 이렇게 시작합니다</b><br>
+    안녕하세요! <span class="name">[이름]</span>(Year 6), <span class="name">[이름]</span>(Year 5), <span class="name">[이름]</span>(예비 Year 1) 세 딸과 함께 뉴질랜드 <span class="name">노스쇼어</span>에서 살고 있는 가족입니다. … 💌 비즈니스 &amp; 문의: <span class="name">[이메일]</span> … three daughters: <span class="name">[이름], [이름], and [이름]</span>.<br><br>
+    <b>빠지는 것</b>: 실명 6곳(한글 3 · 로마자 3) · 아이별 학년 · 노스쇼어 · 본문 평문 이메일<br>
+    <b>들어가는 것</b>: 영상별 첫 줄 · Min · Hyun · Jin · 추적되는 사이트 링크
+  </div>
+  <div id="list-tpl-a"></div>
+</section>
+
+<!-- ───────── 템플릿 B ───────── -->
+<section class="group" id="tpl-b">
+  <div class="group-head"><h2>③ 설명 — 템플릿 B · 2개 (음악)</h2><span class="pill">두 줄만 수정</span></div>
+  <p class="group-note">가사가 길어서 전체 교체보다 <b>두 줄만 고치는 게</b> 빠르고 안전합니다. Studio 설명 칸 맨 아래 푸터에서 찾으세요. 전체 교체본도 펼쳐 볼 수 있게 넣었습니다.</p>
+  <div id="list-tpl-b"></div>
+</section>
+
+<!-- ───────── 일회성 ───────── -->
+<section class="group" id="one-off">
+  <div class="group-head"><h2>④ 설명 — 일회성 · 1개</h2><span class="pill">한 줄 수정</span></div>
+  <p class="group-note">설명 마지막 줄만 바꿉니다.</p>
+  <div id="list-one-off"></div>
+</section>
+
+<div class="end">
+  <h2>16개 다 하셨으면</h2>
+  <p>"다 했어" 한마디만 주세요. 로그아웃 상태 공개 페이지로 295개 전체를 다시 훑어 실명 0건인지 확인하겠습니다.</p>
+</div>
+
+<footer>
+  2026-09-21 작성 · 공개 페이지 기준 전수 조사(295개) 결과에서 실명이 나온 16개만 담았습니다 · 이 문서에는 실명을 적지 않았습니다(<span class="name">[이름]</span> 으로 가림)<br>
+  완료 체크는 이 브라우저에만 저장됩니다.
+</footer>
+
+</div>
+
+<script>
+const LINK = 'https://www.mhj.nz/?utm_source=youtube&utm_campaign=video_desc';
+const tplA = (first) => `${first}
+
+📖 더 긴 이야기 → ${LINK}
+
+뉴질랜드 오클랜드 마이랑이 베이에 사는 다섯 식구, 세 딸 Min · Hyun · Jin 의 기록입니다.
+A Korean family of five in Mairangi Bay, Auckland — three daughters, two languages, one long story of growing up in Aotearoa.
+
+📸 Instagram → https://instagram.com/mhj_nz`;
+
+const TITLES = [
+  { id:'0pN1VelwqUQ', kind:'Shorts', date:'2025-12-22', views:91,
+    before:'1minute a cappella song written and sung by <span class="name">[이름]</span>. #acapella #duet #cutekids',
+    after:'1minute a cappella song written and sung by Jin. #acapella #duet #kidsmusic',
+    note:'#cutekids → #kidsmusic 도 함께 바꿨습니다. 아이 외모를 묘사하는 태그라 채널 키워드에서 뺀 것과 같은 이유입니다. 원치 않으시면 #cutekids 그대로 두셔도 됩니다.' },
+  { id:'gUa0PhOtRcM', kind:'Shorts', date:'2024-04-24', views:212,
+    before:'뉴진스 아니고 <span class="name">[이름]</span>스 eta #randomdanceplay #newjeans #열심히',
+    after:'뉴진스 아니고 MHJ스 eta #randomdanceplay #newjeans #열심히',
+    note:'원래 말장난(뉴진스 → ○○스)을 살려 채널 이름 MHJ로 바꿨습니다. "Min스"로 하셔도 됩니다.' },
+  { id:'S5FBU3khyi0', kind:'Shorts', date:'', views:null,
+    before:'안녕 난 <span class="name">[이름]</span>이야~💕',
+    after:'안녕 난 Hyun이야~💕', note:'' },
+  { id:'XH6qv8kHWIs', kind:'Shorts', date:'', views:null,
+    before:'이 소리는 영어를 못해서 나는 소리가 아냐. 카메라가 부끄러워서 나는 소리야. 영어를 못하는건 부끄러운 일이 아니니까 by <span class="name">[이름]</span>',
+    after:'이 소리는 영어를 못해서 나는 소리가 아냐. 카메라가 부끄러워서 나는 소리야. 영어를 못하는건 부끄러운 일이 아니니까 by Min', note:'' },
+];
+
+const TPL_A = [
+  { id:'nLNTgunBISE', date:'2026-06-14', views:244, title:'2026 Adidas in yeoju oulet',
+    first:'2026년 한국 방문 중, 여주 아울렛 아디다스 매장에서.' },
+  { id:'GMTAOJ5PXpM', date:'2026-06-05', views:176, title:'Shopping for daughters at art box in Seoul',
+    first:'서울 아트박스에서 딸들 선물 고르기.' },
+  { id:'vZjzC_MyIPo', date:'2026-06-15', views:157, title:'Live 👉Yeoju Premium Oulet in Korea 🇰🇷 from🇳🇿',
+    first:'여주 프리미엄 아울렛 라이브 — 뉴질랜드에서 온 아빠의 쇼핑.' },
+  { id:'B714d0LGvwk', date:'2026-06-17', views:153, title:'06.2026 Premium oulet Shopping for daughters 🇰🇷✈️🇳🇿',
+    first:'2026년 6월, 프리미엄 아울렛에서 딸들 선물 쇼핑.' },
+  { id:'MrgPzXJTF3M', date:'2026-06-11', views:136, title:'Daiso tour for daughter’s gift in Seoul 🇰🇷to🇳🇿',
+    first:'서울 다이소에서 뉴질랜드로 가져갈 딸들 선물 고르기.' },
+  { id:'Zf0e_9dpG2k', date:'2026-06-06', views:127, title:'Daiso Tour at Starfield Mall, Korea 🇰🇷 | Live lovely life of Three Sisters in Auckland, NZ! 🇳🇿',
+    first:'스타필드 다이소 투어 — 딸들 선물 찾기.' },
+  { id:'Iu5BXX1Vjlw', date:'2026-06-15', views:102, title:'WORLD’S BEST Doenjang Jjigae? Ddo-sun-e-ne🇰🇷 Korean Soul Food LIVE 또순이네',
+    first:'또순이네 된장찌개, 한국 집밥 한 그릇.' },
+  { id:'HUGtem6HW4E', date:'2026-06-11', views:45, title:'Daiso tour for daughter’s gift',
+    first:'딸들 선물 고르러 다이소 한 바퀴.' },
+  { id:'RH4-yaz9GHM', date:'2026-06-05', views:45, title:'From Auckland to Seoul / hometown tour vlog🇳🇿to🇰🇷',
+    first:'오클랜드에서 서울로 — 예전 동네 다시 걷기.' },
+];
+
+const TPL_B = [
+  { id:'WknjSz3b-oY', date:'2026-05-25', views:381, title:'미소는 크게 miss u는 작게 🌅 | MHJ Family',
+    full:"멀리 있어도, 우린 잘 지내고 있어요. 🌅\n\n아빠가 잠시 한국에 가 있는 동안, 뉴질랜드에 남은 세 자매의 하루를 담은 노래예요.\n우리가 아침을 시작할 때 아빠는 잠들 시간, 우리가 잠들 때 아빠는 한창 환한 낮.\n서로 다른 시간을 살지만, 같은 하루를 함께하는 우리 가족의 이야기입니다.\n보고 싶은 마음은 작게, 미소는 크게. 다 잘 될 거예요. 🤍\n\n─────────────\n\n[가사]\n\ngood morning sunrise\n우린 또 아침\n누군 또 밤\n\n가방 메고 나와\n오늘도 정신없어\n머리 묶다 또 늦겠다\n손 꼭 잡고 걸어\n골목 끝 학교까지\n\n잘 잤냐고 한 줄\n사진 하나 보내\n이따 또 얘기해\n오늘 일 전부 다\n\n미소는 크게\nmiss u는 작게\n별일 없어 진짜로\n미소는 크게\nmiss u는 작게\n우린 잘 있어\n\ngood morning good night\ngood for you\n오늘도 우린\n\n우린 이제 졸린데\n거긴 한창 환한 낮\n좋겠다 더 놀겠네\n오늘도 반대네\n숙제 먼저 끝냈어\n칭찬은 아직이야\n조금만 기다려\n금방 또 만나\n\n멀어도 잘 커\n하루는 또 흘러\n보고 싶은 만큼\n한 뼘 더 자라\n\n미소는 크게\nmiss u는 작게\n별일 없어 진짜로\n미소는 크게\nmiss u는 작게\n우린 잘 있어\n\ngood morning good night\ngood for you\n오늘도 우린\n\n끊지 마 잠깐\n아 맞다 그 얘기\n까먹었다\n내일 또 하자\ngood night 잘 자\n작은 miss u\n\n미소는 크게\nmiss u는 작게\n자리 비워둘게\n미소는 크게\nmiss u는 작게\n할 얘기 남았는데\n\ngood morning good night\ngood for you\n다 잘 될 거야\n\ngood for you\n작은 miss u\n\n─────────────\n\n🎵 MHJ Family\n세 자매(Min·Hyun·Jin)와 함께 만드는 가족 음악 채널입니다.\n뉴질랜드에서 우리 가족의 일상과 마음을 노래로 담아요.\n💌 Contact: penjunetv@gmail.com\n\n🔗 Links\n🏠 Homepage: https://www.mhj.nz/?utm_source=youtube&utm_campaign=video_desc\n📸 Instagram: https://instagram.com/mhj_nz\n📘 Facebook: https://facebook.com/minhyunjin.nz\n🎵 TikTok: https://www.tiktok.com/@the_mhj" },
+  { id:'8NMCAnBX6dQ', date:'2026-06-15', views:107, title:'다 왔어? (Are We There Yet?) 🌅 우리 가족 노을빛 여행송 | MHJ Family',
+    full:"해변에서 \"집에 안 가!\" 떼쓰던 세 자매.\n그런데 차에 타자마자 — 빨리 가, 배고파, 졸려.\n자꾸 묻던 \"다 왔어?\"가 어느새 새근새근으로 바뀌고,\n\"여기 집이야\" 도착했는데 아무도 깨울 생각이 없네.\n\n뉴질랜드 바닷가에서 돌아오는 길, 모든 부모가 아는 그 순간을 담았어요.\n안 간다더니 다 잠든, 우리 집 차 안 풍경.\n\n─────────────\n\n🎵 가사\n\n한 번만 더 진짜 마지막\n오분만 더 진짜 진짜 마지막\n집에 안 갈래\n좀만 더 놀다 갈래\n\n안된대 가야한대\n이제 그만 가야한대\n신발 모래 털고\n차에 다 올라타고\n이제 집에 가야한대\n\n다 왔어? 다 왔어?\n아직 멀었어\n다 왔어? 다 왔어?\n집에 다 왔어?\n\n밖에선 집에\n안 간다더니\n차 타자마자 빨리 가래\n배고프대 졸리대\n언제 가 빨리 가\n자꾸자꾸 물어보네\n\n다 왔어? 다 왔어?\n거의 다 왔어\n다 왔어? 다 왔어?\n이제 진짜 다 왔어\n\n그러다가 갑자기\n세상 조용해져\n슬쩍 돌아보니\n모두 잠들었네\n\n다 왔어! 다 왔어!\n여기 집이야\n다 왔어! 다 왔어!\n여기 집인데\n아무도 깰 생각 안해\n\n그래\n이제 집이니까\n같이 좀만 쉬자\n이제 집이니까\n같이 좀만 자자\n\n─────────────\n\n🎵 MHJ Family\n세 자매(Min·Hyun·Jin)와 함께 만드는 가족 음악 채널입니다.\n뉴질랜드에서 우리 가족의 일상과 마음을 노래로 담아요.\n💌 Contact: penjunetv@gmail.com\n\n🔗 Links\n🏠 Homepage: https://www.mhj.nz/?utm_source=youtube&utm_campaign=video_desc\n📸 Instagram: https://instagram.com/mhj_nz\n📘 Facebook: https://facebook.com/minhyunjin.nz\n🎵 TikTok: https://www.tiktok.com/@the_mhj" },
+];
+
+const ONE_OFF = [
+  { id:'QcmS49qV90c', date:'2021-10-05', views:67, title:'생일축하노래 birthdaysong l 미니혀니(mini& hyuni)' },
+];
+
+/* ── helpers ── */
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const KEY = 'mhj-yt-fix-2026-09-21';
+let done = {};
+try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch(e) { done = {}; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e) {} };
+
+const CLIP = {}; let clipN = 0;
+const pasteBox = (text, long) => {
+  const k = 'c' + (clipN++); CLIP[k] = text;
+  return `<pre class="paste${long ? ' long' : ''}">${esc(text)}<button class="copy" data-k="${k}">복사</button></pre>`;
+};
+const sub = (v) => {
+  const bits = [];
+  if (v.kind) bits.push(v.kind);
+  if (v.date) bits.push(v.date);
+  if (v.views != null) bits.push('조회 ' + v.views.toLocaleString());
+  bits.push(v.id);
+  return bits.join(' · ');
+};
+const cardTop = (v, no, titleHtml) => `
+  <div class="card-top">
+    <div class="thumb" style="background-image:url('https://i.ytimg.com/vi/${v.id}/mqdefault.jpg')"></div>
+    <div class="meta">
+      <div class="no">${no}</div>
+      <div class="t">${titleHtml}</div>
+      <div class="sub">${sub(v)}</div>
+    </div>
+    <div class="actions">
+      <a class="studio" href="https://studio.youtube.com/video/${v.id}/edit" target="_blank" rel="noopener">Studio에서 열기 ↗</a>
+      <label class="chk"><input type="checkbox" data-id="${v.id}"${done[v.id] ? ' checked' : ''}> 완료</label>
+    </div>
+  </div>`;
+const card = (v, inner) => `<article class="card${done[v.id] ? ' done' : ''}" id="v-${v.id}">${inner}</article>`;
+
+/* ── render ── */
+document.getElementById('list-titles').innerHTML = TITLES.map((v,i) => card(v,
+  cardTop(v, `제목 ${i+1} / 4`, v.before) + `
+  <div class="field">
+    <div class="field-label"><span>새 제목</span><em>제목 칸 ⌘A → ⌘V</em></div>
+    <div class="diff"><span class="k from">지금</span><span class="v">${v.before}</span></div>
+    ${pasteBox(v.after)}
+    ${v.note ? `<p class="note">${v.note}</p>` : ''}
+  </div>`)).join('');
+
+document.getElementById('list-tpl-a').innerHTML = TPL_A.map((v,i) => card(v,
+  cardTop(v, `템플릿 A ${i+1} / 9`, esc(v.title)) + `
+  <div class="field">
+    <div class="field-label"><span>새 설명</span><em>설명 칸 ⌘A → ⌘V · 첫 줄만 영상마다 다름</em></div>
+    ${pasteBox(tplA(v.first))}
+  </div>`)).join('');
+
+document.getElementById('list-tpl-b').innerHTML = TPL_B.map((v,i) => card(v,
+  cardTop(v, `템플릿 B ${i+1} / 2`, esc(v.title)) + `
+  <div class="field">
+    <div class="field-label"><span>수정 1 — 이름</span><em>푸터 "🎵 MHJ Family" 바로 아래 줄</em></div>
+    <div class="diff"><span class="k from">지금</span><span class="v">세 자매(<span class="name">[이름]·[이름]·[이름]</span>)와 함께 만드는 가족 음악 채널입니다.</span></div>
+    ${pasteBox('세 자매(Min·Hyun·Jin)와 함께 만드는 가족 음악 채널입니다.')}
+  </div>
+  <div class="field">
+    <div class="field-label"><span>수정 2 — 링크</span><em>"🔗 Links" 아래 첫 줄 · 누가 들어왔는지 세기 위해</em></div>
+    <div class="diff"><span class="k from">지금</span><span class="v">🏠 Homepage: https://www.mhj.nz</span></div>
+    ${pasteBox('🏠 Homepage: https://www.mhj.nz/?utm_source=youtube&utm_campaign=video_desc')}
+    <details>
+      <summary>두 줄 찾기가 번거로우면 — 설명 전체 교체본 펼치기</summary>
+      <div style="margin-top:10px">${pasteBox(v.full, true)}</div>
+      <p class="note">가사·본문은 지금과 글자 하나 다르지 않고, 위 두 줄만 바뀐 버전입니다.</p>
+    </details>
+  </div>`)).join('');
+
+document.getElementById('list-one-off').innerHTML = ONE_OFF.map((v,i) => card(v,
+  cardTop(v, `일회성 1 / 1`, esc(v.title)) + `
+  <div class="field">
+    <div class="field-label"><span>마지막 줄 교체</span><em>설명 맨 아래 줄</em></div>
+    <div class="diff"><span class="k from">지금</span><span class="v"><span class="name">[이름]</span> &amp; <span class="name">[이름]</span> &amp; <span class="name">[이름]</span> 세자매의 특별한 순간들을 함께하세요</span></div>
+    ${pasteBox('Min & Hyun & Jin 세자매의 특별한 순간들을 함께하세요')}
+    <p class="note">선택 — 그 아래 줄에 사이트 링크를 하나 더 붙이면, 이 영상도 사이트 입구가 됩니다:</p>
+    ${pasteBox('📖 ' + LINK)}
+    <p class="note">제목의 "미니혀니(mini&amp; hyuni)"는 실명이 아니라 애칭이라 이 표에 넣지 않았습니다. 재생목록 애칭과 같이 두 분이 판단할 부분입니다.</p>
+  </div>`)).join('');
+
+/* ── progress ── */
+const TOTAL = TITLES.length + TPL_A.length + TPL_B.length + ONE_OFF.length;
+const refresh = () => {
+  const n = Object.values(done).filter(Boolean).length;
+  document.getElementById('count').textContent = `${n} / ${TOTAL}`;
+  document.getElementById('bar').style.width = (n / TOTAL * 100) + '%';
+};
+document.addEventListener('change', e => {
+  const c = e.target.closest('input[data-id]'); if (!c) return;
+  done[c.dataset.id] = c.checked; save();
+  document.getElementById('v-' + c.dataset.id)?.classList.toggle('done', c.checked);
+  refresh();
+});
+refresh();
+
+/* ── copy ── */
+const fallbackCopy = (t) => {
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch(e) {}
+  ta.remove(); return ok;
+};
+document.addEventListener('click', async e => {
+  const b = e.target.closest('button.copy'); if (!b) return;
+  const t = CLIP[b.dataset.k];
+  let ok = false;
+  try { await navigator.clipboard.writeText(t); ok = true; } catch(err) { ok = fallbackCopy(t); }
+  b.textContent = ok ? '복사됨 ✓' : '직접 선택';
+  b.classList.toggle('ok', ok);
+  setTimeout(() => { b.textContent = '복사'; b.classList.remove('ok'); }, 1600);
+});
+</script>
+</body>
+</html>

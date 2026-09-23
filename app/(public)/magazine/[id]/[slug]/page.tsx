@@ -102,6 +102,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       images: ogImage ? [ogImage] : undefined,
     },
     alternates: { canonical: url },
+    // 호가 준비 중(published=false)이면 그 안의 기사도 색인하지 않는다 — 호 페이지(../page.tsx)와 같은 규칙.
+    ...(magazine.published === false ? { robots: { index: false, follow: true } } : {}),
   };
 }
 

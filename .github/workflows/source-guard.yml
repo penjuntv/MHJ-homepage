@@ -76,3 +76,7 @@ jobs:
       - name: 매거진 공개 이미지 최적화 규칙 테스트 (허용 폭 = next.config · remotePatterns 밖·SVG 제외)
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-magazine-image.mjs
+
+      - name: 유입원 판정 테스트 (referrer + UTM — 배포 링크가 social·email 로 잡히는지)
+        if: ${{ !cancelled() }}
+        run: node --experimental-strip-types scripts/qa/test-traffic-source.mjs
