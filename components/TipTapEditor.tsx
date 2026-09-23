@@ -609,14 +609,25 @@ export default function TipTapEditor({ content, onChange, placeholder }: Props) 
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({ heading: { levels: [2, 3] } }),
+      // StarterKit v3 는 link 를 포함한다. 아래에서 LinkExtension 을 따로 설정해 쓰므로
+      // 여기서 끄지 않으면 link 확장이 두 번 등록되고("Duplicate extension names" 경고),
+      // 어느 쪽 HTMLAttributes 가 적용되는지 불확실해진다.
+      StarterKit.configure({ heading: { levels: [2, 3] }, link: false }),
       CustomImage,
       UnderlineExtension,
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      LinkExtension.configure({ openOnClick: false }),
+      // rel 을 명시하지 않으면 @tiptap/extension-link 기본값 'noopener noreferrer nofollow' 가 붙는다.
+      // nofollow 는 검색엔진에 "따라가지도 신호로 치지도 말라"는 표시라, 내부 링크에 붙으면
+      // 글끼리 연결한 링크망이 통째로 무시된다(2026-09-24: 기존 내부 링크 75개가 전부 그랬다).
+      // 링크 종류를 가리지 않으므로 외부 링크도 follow 가 된다 — 우리 외부 링크는 정부·도서관 등
+      // 선별된 곳이라 의도한 동작이다. 외부만 nofollow 로 되돌리려면 저장 시점 변환이 필요하다.
+      LinkExtension.configure({
+        openOnClick: false,
+        HTMLAttributes: { rel: 'noopener noreferrer' },
+      }),
       Placeholder.configure({ placeholder: placeholder || '글 내용을 입력하세요...' }),
       ImageGridNode,
       CustomYoutube.configure({
