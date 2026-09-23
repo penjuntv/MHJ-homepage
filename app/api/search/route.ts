@@ -5,6 +5,8 @@ import { tokenize, rankDocs, rankBlogHits, tokensIn, makeSnippet } from '@/lib/s
 import { BLOG_SEARCH_COLUMNS, BLOG_SEARCH_BODY_COLUMNS } from '@/lib/constants';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { retryTransient } from '@/lib/postgrest-retry.mjs';
+// 검색 썸네일은 60~120px 인데 원본(장당 최대 수 MB)을 그대로 내려보내고 있었다 — 2026-09-19 라이브 검증 P1.
+import { optimizeImageSrc, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
 import type { Blog, Article, Magazine } from '@/lib/types';
 
 const supabase = createClient(
@@ -142,7 +144,7 @@ export async function GET(req: NextRequest) {
     date: b.date,
     category: b.category,
     href: `/blog/${b.slug}`,
-    image_url: b.image_url ?? undefined,
+    image_url: optimizeImageSrc(b.image_url, MAG_IMAGE_WIDTH.search) ?? undefined,
   }));
 
   const articles = rankDocs(
@@ -157,7 +159,7 @@ export async function GET(req: NextRequest) {
       snippet: makeSnippet(a.content, tokens),
       date: a.date,
       href: `/magazine/${a.magazine_id}`,
-      image_url: a.image_url ?? undefined,
+      image_url: optimizeImageSrc(a.image_url, MAG_IMAGE_WIDTH.search) ?? undefined,
     });
   }
 
@@ -169,7 +171,7 @@ export async function GET(req: NextRequest) {
       title: m.title,
       snippet: `${m.year} ${m.month_name} Edition`,
       href: `/magazine/${m.id}`,
-      image_url: m.image_url ?? undefined,
+      image_url: optimizeImageSrc(m.image_url, MAG_IMAGE_WIDTH.search) ?? undefined,
     });
   }
 
