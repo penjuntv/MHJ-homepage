@@ -92,7 +92,9 @@ async function getArticles(magazineId: string): Promise<Article[]> {
     .select('*')
     .eq('magazine_id', magazineId)
     .eq('article_status', 'published')
-    .order('sort_order', { ascending: true });
+    .order('sort_order', { ascending: true })
+    // 번호가 겹쳐도 admin 목록(sort_order → id)과 같은 순서가 되도록. 뒤따르는 JS sort 는 안정 정렬이라 이 순서를 유지한다.
+    .order('id', { ascending: true });
   if (data?.length) return data;
   return magazineId === '2026-03' ? FALLBACK_ARTICLES : [];
 }

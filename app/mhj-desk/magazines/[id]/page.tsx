@@ -620,6 +620,9 @@ export default function MagazineDetailPage() {
     ));
     const failed = results.find(r => r.error);
     if (failed?.error) {
+      /* 일부만 저장됐으면 성공한 행은 화면에도 반영 — 화면과 DB 가 어긋난 채로 다음 이동을 계산하지 않게 */
+      const saved = new Set(changed.filter((_, i) => !results[i].error).map(art => art.id));
+      setArticles(prev => prev.map(art => saved.has(art.id) ? { ...art, sort_order: nextOrder.get(art.id)! } : art));
       showToast(`순서 저장 실패: ${failed.error.message}`);
       setReordering(false);
       return;
@@ -628,6 +631,16 @@ export default function MagazineDetailPage() {
     /* 열려 있는 편집 폼도 새 번호로 맞춘다 */
     setInlineForm(prev => (prev && selectedArtId && nextOrder.has(selectedArtId))
       ? { ...prev, sort_order: nextOrder.get(selectedArtId)! } : prev);
+    /* 공개 지면도 새 순서로 — saveArticle 과 같은 경로를 무효화한다 */
+    try {
+      await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paths: ['/magazine', `/magazine/${id}`, '/'], derived: true,
+        }),
+      });
+    } catch { /* revalidation 실패해도 순서 저장은 성공 */ }
     setReordering(false);
   }
 
