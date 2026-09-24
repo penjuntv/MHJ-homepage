@@ -76,8 +76,9 @@ export default function TextOnlyTemplate({
 
       <div
         style={{
+          /* 좌우 여백은 바깥 padding(--mag-page-padding-x)만 — 사이드바 등 다른 템플릿과 동일.
+             예전 maxWidth 67% 가 여백을 양쪽으로 한 번 더 먹여 유독 좁아 보였다. */
           width: '100%',
-          maxWidth: '67%',
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
