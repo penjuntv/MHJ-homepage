@@ -487,12 +487,19 @@ export default function MagazineDetailPage() {
     };
 
     if (!inlineIsNew && selectedArtId) {
-      const { error } = await supabase.from('articles').update(formToSave).eq('id', selectedArtId);
+      /* sort_order 는 저장하지 않는다 — 순서는 ↑↓ 버튼(moveArticle)만 바꾼다.
+         폼을 연 뒤 순서를 옮기고 저장하면, 폼에 남은 옛 번호가 덮어써서
+         번호가 겹치고(예: 5·5) 그 뒤로 이동이 막히던 원인이다. */
+      const { sort_order: _ignoredOrder, ...updatePayload } = formToSave;
+      void _ignoredOrder;
+      const { error } = await supabase.from('articles').update(updatePayload).eq('id', selectedArtId);
       if (error) { setFormError(error.message); setSavingArticle(false); return; }
-      setArticles(prev => prev.map(a => a.id === selectedArtId ? ({ ...a, ...formToSave } as Article) : a));
+      setArticles(prev => prev.map(a => a.id === selectedArtId ? ({ ...a, ...updatePayload } as Article) : a));
       showToast('기사가 저장되었습니다.');
     } else {
-      const { data, error } = await supabase.from('articles').insert(formToSave).select().single();
+      /* 새 기사는 저장 시점의 최댓값 + 1 — 폼을 연 사이 순서가 바뀌어도 겹치지 않게 */
+      const insertOrder = articles.length > 0 ? Math.max(...articles.map(a => a.sort_order ?? 0)) + 1 : 1;
+      const { data, error } = await supabase.from('articles').insert({ ...formToSave, sort_order: insertOrder }).select().single();
       if (error) { setFormError(error.message); setSavingArticle(false); return; }
       if (data) { setArticles(prev => [...prev, data]); setSelectedArtId(data.id); setInlineIsNew(false); }
       showToast('기사가 추가되었습니다.');
@@ -595,24 +602,32 @@ export default function MagazineDetailPage() {
     showToast('기사가 삭제되었습니다.');
   }
 
-  /* ─── 기사 순서 변경 ─── */
+  /* ─── 기사 순서 변경 ───
+     두 행의 sort_order 만 맞바꾸면, 값이 겹친 기사(예: 둘 다 5)끼리는 바꿔도 그대로라
+     그 기사를 기준으로 이동이 막힌다. 그래서 화면 순서대로 1..n 을 다시 매기고
+     값이 달라진 행만 저장한다 — 중복·빈 번호가 있어도 한 번 누르면 정리된다. */
   async function moveArticle(artId: number, dir: 'up' | 'down') {
-    const sorted = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const sorted = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.id - b.id);
     const idx = sorted.findIndex(a => a.id === artId);
     const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
-    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    if (idx < 0 || swapIdx < 0 || swapIdx >= sorted.length) return;
     setReordering(true);
-    const a = sorted[idx]; const b = sorted[swapIdx];
-    const aOrder = a.sort_order ?? idx; const bOrder = b.sort_order ?? swapIdx;
-    await Promise.all([
-      supabase.from('articles').update({ sort_order: bOrder }).eq('id', a.id),
-      supabase.from('articles').update({ sort_order: aOrder }).eq('id', b.id),
-    ]);
-    setArticles(prev => prev.map(art => {
-      if (art.id === a.id) return { ...art, sort_order: bOrder };
-      if (art.id === b.id) return { ...art, sort_order: aOrder };
-      return art;
-    }));
+    [sorted[idx], sorted[swapIdx]] = [sorted[swapIdx], sorted[idx]];
+    const nextOrder = new Map(sorted.map((art, i) => [art.id, i + 1]));
+    const changed = sorted.filter(art => art.sort_order !== nextOrder.get(art.id));
+    const results = await Promise.all(changed.map(art =>
+      supabase.from('articles').update({ sort_order: nextOrder.get(art.id) }).eq('id', art.id),
+    ));
+    const failed = results.find(r => r.error);
+    if (failed?.error) {
+      showToast(`순서 저장 실패: ${failed.error.message}`);
+      setReordering(false);
+      return;
+    }
+    setArticles(prev => prev.map(art => ({ ...art, sort_order: nextOrder.get(art.id) ?? art.sort_order })));
+    /* 열려 있는 편집 폼도 새 번호로 맞춘다 */
+    setInlineForm(prev => (prev && selectedArtId && nextOrder.has(selectedArtId))
+      ? { ...prev, sort_order: nextOrder.get(selectedArtId)! } : prev);
     setReordering(false);
   }
 
@@ -654,7 +669,7 @@ export default function MagazineDetailPage() {
     setFocusedPageIdx(null);
   }
 
-  const sortedArticles = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const sortedArticles = [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.id - b.id);
   const hasPdf = !!(magazine?.pdf_url);
   const accentCol = magazine?.accent_color ?? '#1A1A1A';
 
