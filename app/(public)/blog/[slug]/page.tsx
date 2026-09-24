@@ -545,6 +545,19 @@ export default async function BlogDetailPage(
               </nav>
             )}
 
+            {/* ── 인포블록 — 본문 앞. 2026-09-24 에 글 맨 끝(저자 박스 뒤)에서 올렸다.
+                GSC 페이지별 검색어를 보니 우리가 노출되는 질문은 전부 사실을 묻는 것이었는데
+                (몇 살에 입학하나 · consolidating 이 무슨 뜻인가 · 몇 학년이 배우나),
+                그 답을 정리해 둔 이 블록을 서사 뒤에 두면 찾아온 사람이 답을 만나기 전에 떠난다.
+                기준: docs/CONTENT-SEARCH-STANDARD-2026-09-24.md §2(네 층 중 2층 = 답 먼저). ── */}
+            {blog.info_block_html && (
+              <div
+                className="blog-info-block"
+                style={{ margin: '0 0 48px', fontSize: 'initial', lineHeight: 'initial' }}
+                dangerouslySetInnerHTML={{ __html: optimizeContentImages(blog.info_block_html) }}
+              />
+            )}
+
             {/* 3) 본문 */}
             <div style={{ position: 'relative' }}>
               {/* Scroll depth sentinels */}
@@ -588,17 +601,8 @@ export default async function BlogDetailPage(
               </section>
             )}
 
-            {/* ── 저자 박스 (사진·자격·소개) — 한국어 요약 뒤, 인포블록 앞 ── */}
+            {/* ── 저자 박스 (사진·자격·소개) — 한국어 요약 뒤 (인포블록은 본문 앞으로 옮겼다) ── */}
             <AuthorBox author={blog.author || 'Yussi'} />
-
-            {/* ── 인포블록 ── */}
-            {blog.info_block_html && (
-              <div
-                className="blog-info-block"
-                style={{ margin: '48px 0', fontSize: 'initial', lineHeight: 'initial' }}
-                dangerouslySetInnerHTML={{ __html: optimizeContentImages(blog.info_block_html) }}
-              />
-            )}
 
             {/* ── FAQ — 항상 펼쳐진 가시 Q&A. 접지 않는 이유: 같은 마크업이 FAQPage 리치 결과와
                 AI 답변 엔진 양쪽의 인용 대상이고, 접기는 얻는 것 없이 위험만 는다. ── */}
