@@ -11,15 +11,6 @@ interface Props {
   magazineHint?: string;
 }
 
-function isLightColor(hex: string): boolean {
-  const c = (hex || '').replace('#', '');
-  if (c.length !== 6) return false;
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 > 140;
-}
-
 export default function MagazineShelf({ magazines, magazineTitle, magazineHint }: Props) {
   return (
     <section className="ms-section">
@@ -58,8 +49,8 @@ export default function MagazineShelf({ magazines, magazineTitle, magazineHint }
 
 function BookSpine({ magazine, isLatest }: { magazine: Magazine; isLatest: boolean }) {
   const spineColor = magazine.bg_color ?? '#3a3025';
-  const isLight = isLightColor(spineColor);
-  const ink = isLight ? '#1A1A1A' : '#FDFCFA';
+  // 책등 글씨는 배경 밝기와 무관하게 검정으로 통일 (2026-09 PeNnY 결정)
+  const ink = '#1A1A1A';
 
   return (
     <Link

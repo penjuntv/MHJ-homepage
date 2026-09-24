@@ -207,7 +207,7 @@ export default function MagazineDetailPage() {
   const [magForm, setMagForm] = useState({
     title: '', editor: '', year: '', month_name: '', pdf_url: '', image_url: '',
     color_theme: 'ocean', cover_subtitle: '', contributors: [] as string[],
-    accent_color: '#1A1A1A', bg_color: '#F5F0EA', cover_filter: 'none', cover_copy: '',
+    accent_color: '#1A1A1A', bg_color: '#F5F0EA', sub_color: '#8B7D6B', cover_filter: 'none', cover_copy: '',
     cover_images: [] as string[], issue_number: '01',
   });
   const [savingMag, setSavingMag] = useState(false);
@@ -325,6 +325,7 @@ export default function MagazineDetailPage() {
       contributors: mag.contributors ?? [],
       accent_color: mag.accent_color ?? '#1A1A1A',
       bg_color: mag.bg_color ?? '#F5F0EA',
+      sub_color: mag.sub_color ?? '#8B7D6B',
       cover_filter: mag.cover_filter ?? 'none',
       cover_copy: mag.cover_copy ?? '',
       cover_images: mag.cover_images ?? [],
@@ -367,6 +368,8 @@ export default function MagazineDetailPage() {
       image_url: magForm.image_url || null, color_theme: magForm.color_theme,
       cover_subtitle: magForm.cover_subtitle, contributors: magForm.contributors,
       accent_color: magForm.accent_color, bg_color: magForm.bg_color,
+      // 직접 입력한 값이 #RRGGBB 가 아니면 저장하지 않는다(null → 기본색) — 오타가 표지 글씨색을 깨뜨리지 않게
+      sub_color: /^#[0-9a-fA-F]{6}$/.test(magForm.sub_color.trim()) ? magForm.sub_color.trim() : null,
       cover_filter: magForm.cover_filter,
       cover_copy: magForm.cover_copy, cover_images: magForm.cover_images,
       issue_number: magForm.issue_number,
@@ -874,6 +877,17 @@ export default function MagazineDetailPage() {
                     ))}
                   </div>
                 </div>
+                <p style={sectionTitle}>보조 글씨색 (부제·지역명·월)</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                  <input type="color" value={magForm.sub_color} onChange={e => setMagForm(p => ({ ...p, sub_color: e.target.value }))} style={{ width: '40px', height: '40px', borderRadius: '8px', border: '1px solid #F1F5F9', cursor: 'pointer', padding: '2px', flexShrink: 0 }} />
+                  <input value={magForm.sub_color} onChange={e => setMagForm(p => ({ ...p, sub_color: e.target.value }))} style={{ ...inputStyle, width: '130px', fontFamily: 'monospace' }} />
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {['#8B7D6B', '#1A1A1A', '#FDFCFA', '#FFF6C9', '#5A4A3A'].map(c => (
+                      <button key={c} type="button" onClick={() => setMagForm(p => ({ ...p, sub_color: c }))} title={c}
+                        style={{ width: '22px', height: '22px', borderRadius: '50%', cursor: 'pointer', border: 'none', background: c, outline: magForm.sub_color === c ? `3px solid #4F46E5` : '2px solid #E2E8F0', outlineOffset: '1px' }} />
+                    ))}
+                  </div>
+                </div>
                 <p style={sectionTitle}>사진 필터</p>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {COVER_FILTERS.map(f => (
@@ -942,6 +956,7 @@ export default function MagazineDetailPage() {
                   contributors={magForm.contributors} image_url={magForm.image_url}
                   cover_images={magForm.cover_images} accent_color={magForm.accent_color}
                   bg_color={magForm.bg_color}
+                  sub_color={magForm.sub_color}
                   cover_filter={magForm.cover_filter} issue_number={magForm.issue_number}
                 />
               </div>
@@ -1227,6 +1242,7 @@ export default function MagazineDetailPage() {
                     cover_images={magazine.cover_images ?? []}
                     accent_color={magazine.accent_color ?? '#1A1A1A'}
                     bg_color={magazine.bg_color ?? '#F5F0EA'}
+                    sub_color={magazine.sub_color ?? undefined}
                     cover_filter={magazine.cover_filter ?? 'none'}
                     issue_number={magazine.issue_number ?? ''}
                   />

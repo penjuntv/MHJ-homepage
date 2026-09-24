@@ -42,6 +42,7 @@ function CoverPreviewWrapper({ magazine }: { magazine: Magazine }) {
           cover_images={magazine.cover_images ?? []}
           accent_color={magazine.accent_color ?? '#1A1A1A'}
           bg_color={magazine.bg_color ?? '#F5F0EA'}
+          sub_color={magazine.sub_color ?? undefined}
           cover_filter={magazine.cover_filter ?? 'none'}
           issue_number={magazine.issue_number ?? ''}
         />

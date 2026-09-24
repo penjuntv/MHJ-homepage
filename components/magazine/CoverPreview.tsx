@@ -15,6 +15,7 @@ interface CoverPreviewProps {
   cover_images?: string[];
   accent_color?: string;
   bg_color?: string;
+  sub_color?: string;
   cover_filter?: string;
   issue_number?: string | number;
 }
@@ -30,6 +31,7 @@ export default function CoverPreview({
   cover_images = [],
   accent_color = '#1A1A1A',
   bg_color = '#F5F0EA',
+  sub_color = '#8B7D6B',
   cover_filter = 'none',
   issue_number,
 }: CoverPreviewProps) {
@@ -39,6 +41,8 @@ export default function CoverPreview({
 
   const copyText = cover_copy || cover_subtitle;
   const accentHex = accent_color || '#1A1A1A';
+  // 보조 글씨(the·부제·기여자·월·Vol·지역명) 색. 관리자에서 이슈별로 지정.
+  const subHex = sub_color || '#8B7D6B';
   const filterCss = getFilterCss(cover_filter);
   const isCarousel = allImages.length >= 2;
 
@@ -75,7 +79,7 @@ export default function CoverPreview({
           fontStyle: 'italic',
           fontWeight: 400,
           fontSize: '14px',
-          color: '#8B7D6B',
+          color: subHex,
           letterSpacing: '1px',
           lineHeight: 1,
           marginBottom: '4px',
@@ -97,7 +101,7 @@ export default function CoverPreview({
           fontSize: '8px',
           fontWeight: 700,
           letterSpacing: '5px',
-          color: '#8B7D6B',
+          color: subHex,
           textTransform: 'uppercase',
         }}>
           My Mairangi Journal
@@ -217,7 +221,7 @@ export default function CoverPreview({
           {copyText && (
             <div style={{
               fontSize: '11px',
-              color: '#8B7D6B',
+              color: subHex,
               marginTop: '6px',
               lineHeight: 1.4,
               overflow: 'hidden',
@@ -231,7 +235,7 @@ export default function CoverPreview({
           {contributors.length > 0 && (
             <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
               {contributors.map(c => (
-                <span key={c} style={{ fontSize: '10px', fontWeight: 700, color: '#8B7D6B', letterSpacing: '0.5px' }}>
+                <span key={c} style={{ fontSize: '10px', fontWeight: 700, color: subHex, letterSpacing: '0.5px' }}>
                   {c}
                 </span>
               )).reduce((acc: React.ReactNode[], el, i, arr) => {
@@ -246,7 +250,7 @@ export default function CoverPreview({
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
           <div style={{
             fontSize: '10px', fontWeight: 900, letterSpacing: '3px',
-            color: '#8B7D6B', textTransform: 'uppercase',
+            color: subHex, textTransform: 'uppercase',
           }}>
             {month_name}
           </div>
@@ -257,7 +261,7 @@ export default function CoverPreview({
             {year}
           </div>
           {issue_number && (
-            <div style={{ fontSize: '10px', color: '#8B7D6B', marginTop: '4px', fontWeight: 700 }}>
+            <div style={{ fontSize: '10px', color: subHex, marginTop: '4px', fontWeight: 700 }}>
               Vol.{issue_number}
             </div>
           )}
@@ -273,7 +277,7 @@ export default function CoverPreview({
           fontSize: '8px',
           fontWeight: 700,
           letterSpacing: '3px',
-          color: '#8B7D6B',
+          color: subHex,
           textTransform: 'uppercase',
         }}>
           Mairangi Bay · Auckland · New Zealand
