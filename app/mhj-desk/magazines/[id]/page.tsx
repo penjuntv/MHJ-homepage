@@ -104,6 +104,8 @@ const TEMPLATE_CATEGORIES: { key: string; label: string; templates: TemplateMeta
 /* 평탄화 (label lookup 호환) */
 const TEMPLATE_META: TemplateMeta[] = TEMPLATE_CATEGORIES.flatMap(c => c.templates);
 
+const EDITOR_OPTIONS = ['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'];
+
 /* Legacy 값 — 드롭다운에서 숨기되 기존 기사가 이 값을 가지면 안내 표시 */
 const LEGACY_TEMPLATES = [
   'text-only', 'essay', 'classic', 'split', 'photo-hero', 'photo-essay',
@@ -781,7 +783,7 @@ export default function MagazineDetailPage() {
                     <div><label style={labelStyle}>월</label><input value={magForm.month_name} onChange={e => setMagForm(p => ({ ...p, month_name: e.target.value }))} style={inputStyle} /></div>
                     <div><label style={labelStyle}>이슈 번호</label><input value={magForm.issue_number} onChange={e => setMagForm(p => ({ ...p, issue_number: e.target.value }))} style={inputStyle} /></div>
                   </div>
-                  <div><label style={labelStyle}>에디터</label><select value={magForm.editor} onChange={e => setMagForm(p => ({ ...p, editor: e.target.value }))} style={inputStyle}>{['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'].map(n => <option key={n} value={n}>{n}</option>)}</select></div>
+                  <div><label style={labelStyle}>에디터</label><select value={magForm.editor} onChange={e => setMagForm(p => ({ ...p, editor: e.target.value }))} style={inputStyle}>{/* 목록에 없는 기존 값(예: 'MHJ Family')도 항목으로 보여 준다 — 없으면 첫 항목이 표시돼 저장 시 에디터가 바뀐다 */}{[...(magForm.editor && !EDITOR_OPTIONS.includes(magForm.editor) ? [magForm.editor] : []), ...EDITOR_OPTIONS].map(n => <option key={n} value={n}>{n}</option>)}</select></div>
                   <div>
                     <label style={labelStyle}>표지 카피</label>
                     <textarea value={magForm.cover_copy} onChange={e => setMagForm(p => ({ ...p, cover_copy: e.target.value }))} rows={2} placeholder="이번 호 한 줄 카피..." style={{ ...inputStyle, resize: 'vertical' }} />
