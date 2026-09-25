@@ -108,6 +108,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const title = `${magazine.title} — ${magazine.year} ${magazine.month_name}`;
   const description = `MHJ ${magazine.year} ${magazine.month_name} Edition. Editor: ${magazine.editor}. 뉴질랜드 마이랑이 가족의 월간 매거진.`;
   const url = `${SITE_URL}/magazine/${params.id}`;
+  // 공개 호라도 기사·PDF 가 아직 없으면 "준비 중" 안내만 보인다 — 서가엔 두되 검색 색인은 채워진 뒤에.
+  const isEmptyIssue = !magazine.pdf_url && (await getArticles(params.id)).length === 0;
   return {
     title,
     description,
@@ -123,7 +125,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     alternates: { canonical: url },
     // 준비 중인 호(published=false)는 서가·sitemap·검색에서 빠지지만 주소로는 열린다 — 편집 중 미리보기용.
     // 그 주소가 어딘가에서 링크돼도 검색엔진이 "COMING SOON" 뿐인 얇은 페이지를 색인하지 않게 한다.
-    ...(magazine.published === false ? { robots: { index: false, follow: true } } : {}),
+    ...(magazine.published === false || isEmptyIssue ? { robots: { index: false, follow: true } } : {}),
   };
 }
 

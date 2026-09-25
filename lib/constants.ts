@@ -112,6 +112,7 @@ export const SUBSCRIBE_SOURCES = [
   'blog_detail',
   'mairangi_notes_index',
   'mairangi_notes_issue',
+  'magazine_coming_soon',
   'unknown',
 ] as const;
 export type SubscribeSource = (typeof SUBSCRIBE_SOURCES)[number];
