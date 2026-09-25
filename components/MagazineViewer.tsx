@@ -11,6 +11,9 @@ import { optimizePageImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import MagazinePage from '@/components/magazine/MagazinePage';
 import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
+import PageThumbnail from '@/components/magazine/PageThumbnail';
+import NewsletterCTA from '@/components/NewsletterCTA';
+import Link from 'next/link';
 import type { StyleOverrides } from '@/components/magazine/templates/shared';
 import { supabase } from '@/lib/supabase-browser';
 import { trackEvent } from '@/lib/analytics';
@@ -51,31 +54,67 @@ function getMode(magazine: Magazine, articles: Article[]): ViewerMode {
   return 'empty';
 }
 
-/* ─── 뉴질랜드 계절 테마 (Empty 모드) ─── */
-const SEASON_THEMES: Record<string, { bg: string; accent: string; label: string }> = {
-  Jan: { bg: 'linear-gradient(135deg, #0a1628 0%, #1a2a0a 100%)', accent: '#4ade80', label: 'Summer' },
-  Feb: { bg: 'linear-gradient(135deg, #1a0a28 0%, #0a1628 100%)', accent: '#60a5fa', label: 'Summer' },
-  Mar: { bg: 'linear-gradient(135deg, #1a0a0a 0%, #2a1a0a 100%)', accent: '#fb923c', label: 'Autumn' },
-  Apr: { bg: 'linear-gradient(135deg, #1a0a00 0%, #2a1400 100%)', accent: '#f59e0b', label: 'Autumn' },
-  May: { bg: 'linear-gradient(135deg, #1a1000 0%, #0a1a00 100%)', accent: '#d97706', label: 'Autumn' },
-  Jun: { bg: 'linear-gradient(135deg, #0a0a1a 0%, #0a1428 100%)', accent: '#93c5fd', label: 'Winter' },
-  Jul: { bg: 'linear-gradient(135deg, #000a1a 0%, #0a0a28 100%)', accent: '#818cf8', label: 'Winter' },
-  Aug: { bg: 'linear-gradient(135deg, #0a0a1a 0%, #1a0a28 100%)', accent: '#a78bfa', label: 'Winter' },
-  Sep: { bg: 'linear-gradient(135deg, #0a1a0a 0%, #1a280a 100%)', accent: '#86efac', label: 'Spring' },
-  Oct: { bg: 'linear-gradient(135deg, #0a1a00 0%, #1a2800 100%)', accent: '#4ade80', label: 'Spring' },
-  Nov: { bg: 'linear-gradient(135deg, #001a0a 0%, #0a2810 100%)', accent: '#34d399', label: 'Spring' },
-  Dec: { bg: 'linear-gradient(135deg, #0a1428 0%, #001a28 100%)', accent: '#38bdf8', label: 'Summer' },
+/* ─── 준비 중인 호 (Empty 모드) ───
+   표지는 있는데 기사가 아직 없는 호. 예전엔 월별 어두운 그라데이션에 흐린 "COMING SOON" 뿐이라
+   이 호가 어떤 호인지도, 왜 비었는지도, 어디로 가면 되는지도 알 수 없었다.
+   → 그 호의 실제 표지 + 편집실의 양해 글 + 다른 읽을거리·완성 알림. 색은 테마 변수만 써서
+   .dark .mv-root 전환을 그대로 따른다. */
+const MONTH_KO: Record<string, number> = {
+  Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12,
 };
 
 function EmptyPage({ magazine }: { magazine: Magazine }) {
-  const theme = SEASON_THEMES[magazine.month_name] ?? { bg: 'linear-gradient(135deg, #0f0f1a 0%, #1a0f2e 100%)', accent: 'rgba(255,255,255,0.4)', label: '' };
+  const monthNo = MONTH_KO[magazine.month_name];
+  const issueLabel = monthNo ? `${monthNo}월호` : '이번 호';
   return (
-    <div style={{ minHeight: '60vh', background: theme.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, padding: 40 }}>
-      {theme.label && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 6, textTransform: 'uppercase', color: theme.accent, opacity: 0.7 }}>{theme.label} {magazine.year}</span>}
-      <p style={{ fontSize: 'clamp(48px, 10vw, 96px)', fontWeight: 900, letterSpacing: -3, textTransform: 'uppercase', color: 'rgba(255,255,255,0.08)', lineHeight: 1, textAlign: 'center', margin: 0 }}>{magazine.month_name}</p>
-      <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: 5, textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', textAlign: 'center', margin: 0 }}>Coming Soon</p>
-      <p style={{ color: theme.accent, fontSize: 12, opacity: 0.5, margin: 0, textAlign: 'center' }}>{magazine.title}</p>
-    </div>
+    <section className="mv-soon" aria-labelledby="mv-soon-title">
+      <style>{`
+        .mv-soon { padding: clamp(40px, 7vw, 88px) 16px; }
+        .mv-soon-inner { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: clamp(32px, 6vw, 72px); align-items: center; }
+        .mv-soon-cover { border-radius: 4px; overflow: hidden; box-shadow: 0 2px 0 rgba(0,0,0,0.04), 0 12px 32px rgba(0,0,0,0.12); }
+        .mv-soon-kicker { display: block; font-size: 10px; font-weight: 800; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 16px; }
+        .mv-soon-title { font-family: 'Playfair Display', 'Noto Sans KR', serif; font-size: clamp(26px, 3.4vw, 36px); font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: var(--text); margin: 0 0 20px; word-break: keep-all; }
+        .mv-soon-body { font-size: 15px; line-height: 1.8; color: var(--text-secondary); margin: 0 0 12px; max-width: 34em; word-break: keep-all; }
+        .mv-soon-sign { font-family: 'Playfair Display', 'Noto Sans KR', serif; font-style: italic; font-size: 14px; color: var(--text); margin: 20px 0 28px; }
+        .mv-soon-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .mv-soon-btn { display: inline-flex; align-items: center; padding: 11px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; transition: opacity 0.2s ease; }
+        .mv-soon-btn:hover { opacity: 0.8; }
+        .mv-soon-btn--primary { background: var(--text); color: var(--bg); }
+        .mv-soon-btn--ghost { border: 1px solid var(--border-medium); color: var(--text); }
+        .mv-soon .newsletter-cta-inline { margin: 32px 0 0; text-align: left; max-width: 440px; }
+        .mv-soon .newsletter-cta-inline .cta-form { display: flex; }
+        @media (max-width: 767px) {
+          .mv-soon-inner { grid-template-columns: 1fr; text-align: left; }
+          .mv-soon-cover { width: min(220px, 60vw); margin: 0 auto; }
+        }
+      `}</style>
+      <div className="mv-soon-inner">
+        <div className="mv-soon-cover">
+          <PageThumbnail pageType="cover" magazine={magazine} />
+        </div>
+        <div>
+          <span className="mv-soon-kicker">In Preparation · {magazine.month_name} {magazine.year}</span>
+          <h2 id="mv-soon-title" className="mv-soon-title">이번 호는 아직<br />쓰이는 중입니다</h2>
+          <p className="mv-soon-body">
+            {issueLabel} 「{magazine.title.trim()}」는 표지까지 마쳤지만, 그 안에 담을 이야기는 아직 정리하고 있어요.
+          </p>
+          <p className="mv-soon-body">
+            기다리게 해 드려 죄송합니다. 다 채워지면 이 자리에서 바로 펼쳐 보실 수 있어요.
+          </p>
+          <p className="mv-soon-sign">— MHJ 편집실</p>
+          <div className="mv-soon-actions">
+            <Link href="/magazine" className="mv-soon-btn mv-soon-btn--primary">다른 호 둘러보기 →</Link>
+            <Link href="/blog" className="mv-soon-btn mv-soon-btn--ghost">저널 읽기</Link>
+          </div>
+          <NewsletterCTA
+            variant="inline-thin"
+            location="magazine_coming_soon"
+            copy="완성되면 가장 먼저 알려 드릴게요."
+            buttonText="알림 받기 →"
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 
