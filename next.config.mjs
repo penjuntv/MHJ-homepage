@@ -1,5 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 기본 보안 헤더 (2026-09-27 라이브 감사: HSTS 외 전무 — OWASP 기준 미달).
+  // CSP 는 인라인 스크립트(JSON-LD·테마 FOUC 방지)·GA·Supabase 출처 정리가 먼저라 별도 작업으로 남긴다.
+  // Permissions-Policy 에는 유튜브 임베드가 쓰는 autoplay·fullscreen·encrypted-media·picture-in-picture 를 넣지 않는다.
+  // HSTS 는 Vercel 이 이미 붙인다(max-age=63072000) — includeSubDomains 는 하위 도메인 전수 확인 전까지 보류.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()' },
+        ],
+      },
+    ];
+  },
   async redirects() {
     const staticRedirects = [
       { source: '/journal', destination: '/blog', permanent: true },
