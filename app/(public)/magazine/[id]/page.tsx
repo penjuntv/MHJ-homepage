@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG, orgRef } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, orgRef, schemaDate } from '@/lib/seo';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
@@ -101,15 +101,40 @@ async function getArticles(magazineId: string): Promise<Article[]> {
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
+const MONTH_FULL: Record<string, string> = {
+  Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April', May: 'May', Jun: 'June',
+  Jul: 'July', Aug: 'August', Sep: 'September', Oct: 'October', Nov: 'November', Dec: 'December',
+};
+
+/* 호 페이지 description — 페이지 언어(en-NZ)에 맞춘 영어, 실제 기사 제목으로 채운다.
+   예전 문구("MHJ 2026 Aug Edition. Editor: … 뉴질랜드 마이랑이 가족의 월간 매거진.")는 58자에 한국어가 섞였다(2026-09-27 감사). */
+function issueDescription(magazine: Magazine, articles: Article[]): string {
+  const month = MONTH_FULL[magazine.month_name] ?? magazine.month_name;
+  const head = `${magazine.title.trim()} — the ${month} ${magazine.year} issue of My Mairangi Journal, a family magazine from Mairangi Bay, Auckland.`;
+  const titles = articles
+    .filter((a) => a.article_type === 'article' || !a.article_type)
+    .map((a) => a.title.trim())
+    .filter(Boolean);
+  if (!titles.length) return head;
+  let inside = ' Inside:';
+  for (const [i, t] of titles.entries()) {
+    const next = `${inside}${i ? ',' : ''} ${t}`;
+    if ((head + next).length > 157) break;
+    inside = next;
+  }
+  return inside === ' Inside:' ? head : `${head}${inside}.`;
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const magazine = await getMagazine(params.id);
   if (!magazine) return {};
   const title = `${magazine.title} — ${magazine.year} ${magazine.month_name}`;
-  const description = `MHJ ${magazine.year} ${magazine.month_name} Edition. Editor: ${magazine.editor}. 뉴질랜드 마이랑이 가족의 월간 매거진.`;
+  const issueArticles = await getArticles(params.id);
+  const description = issueDescription(magazine, issueArticles);
   const url = `${SITE_URL}/magazine/${params.id}`;
   // 공개 호라도 기사·PDF 가 아직 없으면 "준비 중" 안내만 보인다 — 서가엔 두되 검색 색인은 채워진 뒤에.
-  const isEmptyIssue = !magazine.pdf_url && (await getArticles(params.id)).length === 0;
+  const isEmptyIssue = !magazine.pdf_url && issueArticles.length === 0;
   return {
     title,
     description,
@@ -165,7 +190,8 @@ export default async function MagazineIssuePage(props: Props) {
     hasPart: articles.map((a) => ({
       '@type': 'Article',
       name: a.title,
-      datePublished: a.date,
+      datePublished: schemaDate(a.date),
+      ...(a.slug ? { url: `${SITE_URL}/magazine/${params.id}/${a.slug}` } : {}),
     })),
   };
 

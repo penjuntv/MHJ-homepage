@@ -50,5 +50,19 @@ eq('utm 없음 → referrer 판정', deriveTrafficSource('https://www.bing.com/'
 eq('utm 비정상 → referrer 판정', deriveTrafficSource('https://l.facebook.com/', HOST, { source: '' }), S('facebook', 'social'));
 eq('둘 다 없음 → direct', deriveTrafficSource('', HOST, undefined), S('direct', 'direct'));
 
+// 4) AI 답변 엔진 (medium 'ai')
+eq('chatgpt.com referrer → ai', deriveSource('https://chatgpt.com/', HOST), S('chatgpt', 'ai'));
+eq('chat.openai.com → ai', deriveSource('https://chat.openai.com/c/1', HOST), S('chatgpt', 'ai'));
+eq('perplexity → ai', deriveSource('https://www.perplexity.ai/search?q=x', HOST), S('perplexity', 'ai'));
+eq('copilot → ai', deriveSource('https://copilot.microsoft.com/', HOST), S('copilot', 'ai'));
+eq('gemini 는 google 검색이 아니라 ai', deriveSource('https://gemini.google.com/app', HOST), S('gemini', 'ai'));
+eq('claude.ai → ai', deriveSource('https://claude.ai/chat/1', HOST), S('claude', 'ai'));
+eq('google 검색은 그대로 organic', deriveSource('https://www.google.com/search?q=x', HOST), S('google', 'organic'));
+eq('비슷한 호스트는 ai 아님', deriveSource('https://notchatgpt.com.evil.io/', HOST), S('notchatgpt.com.evil.io', 'referral'));
+eq('ChatGPT 인용 링크 utm_source=chatgpt.com → ai', deriveSourceFromUtm({ source: 'chatgpt.com' }), S('chatgpt', 'ai'));
+eq('utm_source=perplexity → ai', deriveSourceFromUtm({ source: 'perplexity' }), S('perplexity', 'ai'));
+eq('utm_medium=ai 는 주장 불가', deriveSourceFromUtm({ source: 'northshoremums', medium: 'ai' }), S('northshoremums', 'referral'));
+eq('referrer 없음 + chatgpt utm → ai', deriveTrafficSource('', HOST, { source: 'chatgpt.com' }), S('chatgpt', 'ai'));
+
 console.log(`\ntest-traffic-source: ${pass} 통과 · ${fail} 실패`);
 process.exit(fail ? 1 : 0);

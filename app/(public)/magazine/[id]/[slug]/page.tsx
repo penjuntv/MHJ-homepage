@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG, personRef, orgRef } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, personRef, orgRef, schemaDate } from '@/lib/seo';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -123,7 +123,7 @@ export default async function MagazineArticlePage(props: Props) {
     inLanguage: SITE_LANG,
     headline: article.title,
     author: personRef(article.author),
-    datePublished: article.date,
+    datePublished: schemaDate(article.date),
     image: article.png_url || article.image_url || magazine.image_url,
     mainEntityOfPage: `${SITE_URL}/magazine/${params.id}/${params.slug}`,
     isPartOf: {

@@ -70,10 +70,10 @@ const weekOf = (iso) => {
 };
 // 외부 유입(검색·SNS·추천·이메일)은 채널까지 쪼개 보여 준다 — 배포가 어느 채널에서 사람을 데려왔는지가 핵심 지표다
 // (docs/PLAN-distribution-2026-09.md §5). direct·internal 은 가족·QA·사이트 안 이동이라 한 칸으로 둔다.
-const EXTERNAL = new Set(['organic', 'social', 'referral', 'email']);
+const EXTERNAL = new Set(['organic', 'ai', 'social', 'referral', 'email']);
 const isExternal = (r) => EXTERNAL.has(r.medium);
 const label = (r) => (isExternal(r) ? `${r.medium}:${r.source}` : r.medium ?? '?');
-const MEDIUM_ORDER = ['organic', 'social', 'email', 'referral'];
+const MEDIUM_ORDER = ['organic', 'ai', 'social', 'email', 'referral'];
 const addTo = (map, key, sid) => (map[key] ??= new Set()).add(sid);
 const sizes = (map) => Object.entries(map).map(([k, v]) => [k, v.size]).sort((a, b) => b[1] - a[1]);
 
@@ -113,7 +113,7 @@ const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Pacific/Auckland' })
 const out = [];
 out.push(`# 유입 스냅샷 — ${today}`, '');
 out.push(`> \`node --env-file=.env.local scripts/report-traffic-snapshot.mjs --write\` 로 다시 만든다. 수집 시작 ${COLLECTION_START.slice(0, 10)} · pageview ${rows.length}행.`);
-out.push(`> 핵심 지표는 **외부 유입**(organic + social + referral + email) — 배포 플랜 \`docs/PLAN-distribution-2026-09.md\` §5. 마스터 플랜의 "주간 유기 세션" 은 organic 합.`);
+out.push(`> 핵심 지표는 **외부 유입**(organic + ai + social + referral + email) — 배포 플랜 \`docs/PLAN-distribution-2026-09.md\` §5. 마스터 플랜의 "주간 유기 세션" 은 organic 합.`);
 out.push(`> social·email 은 UTM(\`?utm_source=instagram\` 등)으로도 잡힌다 — 인앱 브라우저는 referrer 를 지우므로 배포 링크에는 UTM 을 붙일 것.`, '');
 
 out.push('## 주간 세션 × 출처 (월요일 시작, UTC)', '');
