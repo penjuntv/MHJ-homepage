@@ -6,7 +6,7 @@
  * referrer 문자열을 서버에서 다시 파싱한다.
  */
 
-export type Medium = 'organic' | 'social' | 'referral' | 'email' | 'direct' | 'internal';
+export type Medium = 'organic' | 'ai' | 'social' | 'referral' | 'email' | 'direct' | 'internal';
 
 export interface TrafficSource {
   source: string; // 'google' | 'naver' | 'bing' | ... | 'direct' | '<host>'
@@ -30,6 +30,12 @@ const UTM_SOURCE_ALIASES: Record<string, string> = {
   email: 'newsletter', mail: 'newsletter', mairangi_notes: 'newsletter', 'mairangi-notes': 'newsletter',
   pin: 'pinterest',
   yt: 'youtube',
+  // AI 답변 엔진은 인용 링크에 utm_source 를 붙인다(ChatGPT 검색 = `chatgpt.com`) — 호스트형 값을 라벨로 모은다.
+  'chatgpt.com': 'chatgpt', 'chat.openai.com': 'chatgpt', openai: 'chatgpt',
+  'perplexity.ai': 'perplexity', 'www.perplexity.ai': 'perplexity',
+  'copilot.microsoft.com': 'copilot',
+  'gemini.google.com': 'gemini',
+  'claude.ai': 'claude',
 };
 
 // 표준 라벨 → 기본 medium. utm_medium 이 없거나 허용 밖일 때 쓴다.
@@ -38,6 +44,7 @@ const UTM_SOURCE_MEDIUM: Record<string, Medium> = {
   kakaotalk: 'social', pinterest: 'social', linkedin: 'social', reddit: 'social', tiktok: 'social',
   band: 'social', naverblog: 'social',
   newsletter: 'email',
+  chatgpt: 'ai', perplexity: 'ai', copilot: 'ai', gemini: 'ai', claude: 'ai',
 };
 
 // utm_medium 으로 받아 주는 값. organic·direct·internal 은 링크로 주장할 수 없게 막는다(검색 유입 수치 오염 방지).
@@ -84,6 +91,22 @@ export function deriveTrafficSource(
   if (byRef.medium === 'internal') return byRef;
   return deriveSourceFromUtm(utm) ?? byRef;
 }
+
+// AI 답변 엔진 호스트 → source 라벨 (ai). 검색엔진보다 먼저 본다 — gemini.google.com 이 google 로 잡히지 않게.
+// utm_medium=ai 는 받지 않는다(UTM_MEDIUM_ALLOWED) — 링크 하나로 AI 유입을 주장할 수 없게.
+const AI_SOURCES: Array<[RegExp, string]> = [
+  [/(^|\.)chatgpt\.com$|(^|\.)chat\.openai\.com$/, 'chatgpt'],
+  [/(^|\.)perplexity\.ai$/, 'perplexity'],
+  [/(^|\.)copilot\.microsoft\.com$|(^|\.)copilot\.cloud\.microsoft$/, 'copilot'],
+  [/(^|\.)gemini\.google\.com$|(^|\.)bard\.google\.com$/, 'gemini'],
+  [/(^|\.)claude\.ai$/, 'claude'],
+  [/(^|\.)you\.com$/, 'you'],
+  [/(^|\.)phind\.com$/, 'phind'],
+  [/(^|\.)meta\.ai$/, 'metaai'],
+  [/(^|\.)chat\.deepseek\.com$/, 'deepseek'],
+  [/(^|\.)grok\.com$/, 'grok'],
+  [/(^|\.)chat\.mistral\.ai$/, 'mistral'],
+];
 
 // 검색엔진 호스트 조각 → source 라벨 (organic)
 const SEARCH_ENGINES: Array<[RegExp, string]> = [
@@ -138,6 +161,9 @@ export function deriveSource(referrer: string | null | undefined, siteHost: stri
     return { source: 'internal', medium: 'internal' };
   }
 
+  for (const [re, label] of AI_SOURCES) {
+    if (re.test(host)) return { source: label, medium: 'ai' };
+  }
   for (const [re, label] of SEARCH_ENGINES) {
     if (re.test(host)) return { source: label, medium: 'organic' };
   }

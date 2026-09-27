@@ -6,7 +6,7 @@
  * 이 본문을 각각 복제해 갖고 있었다.
  */
 import { notFound } from 'next/navigation';
-import { OG_BASE, ogImageFor, SITE_LANG, personRef, orgRef } from '@/lib/seo';
+import { OG_BASE, ogImageFor, SITE_LANG, personRef, orgRef, schemaDate } from '@/lib/seo';
 import type { Metadata } from 'next';
 import BlogLibrary from '@/components/BlogLibrary';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -123,7 +123,7 @@ export default async function BlogListPage({ categorySlug, page }: Props) {
       '@type': 'BlogPosting',
       headline: b.title,
       author: personRef(b.author),
-      datePublished: b.date,
+      datePublished: schemaDate(b.date),
       url: `${SITE_URL}/blog/${b.slug}`,
       image: b.og_image_url || b.image_url,
       description: b.meta_description || b.content.slice(0, 120),

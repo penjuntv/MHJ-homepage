@@ -107,6 +107,21 @@ export function personRef(name: string) {
  * 스크립트를 조기 종료시키지 못하게 한다(JSON.stringify 는 `<`·`/` 를 이스케이프하지 않는다).
  * 편집자 자유 입력(faq_json·meta 폴백)이 구조화 데이터에 들어오면서 실제 위험이 됐다.
  */
+/**
+ * 구조화 데이터용 날짜 — schema.org 는 ISO 8601 만 받는다.
+ * blogs.date·articles.date 는 화면 표기용 "2026.09.25." / "2026.08.24" 라 그대로 넣으면 무효 날짜가 된다
+ * (2026-09-27 라이브 감사: /blog·카테고리·매거진 37곳). 이미 ISO 면 그대로, 해석 못 하면 undefined(필드 생략).
+ */
+export function schemaDate(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  const s = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}([T ].*)?$/.test(s)) return s.replace(' ', 'T');
+  const m = s.match(/^(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})\.?$/);
+  if (!m) return undefined;
+  const [, y, mo, d] = m;
+  return `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
+}
+
 export function jsonLdScript(node: unknown): string {
   return JSON.stringify(node).replace(/</g, '\\u003c');
 }

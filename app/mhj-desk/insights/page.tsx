@@ -54,11 +54,12 @@ const SOURCE_LABELS: Record<string, string> = {
   facebook: 'Facebook', instagram: 'Instagram', threads: 'Threads', x: 'X(트위터)',
   youtube: 'YouTube', kakaotalk: '카카오톡', pinterest: 'Pinterest', linkedin: 'LinkedIn',
   reddit: 'Reddit', tiktok: 'TikTok', band: '밴드',
+  chatgpt: 'ChatGPT', perplexity: 'Perplexity', copilot: 'Copilot', gemini: 'Gemini', claude: 'Claude',
   direct: '직접 유입', internal: '(내부 이동)',
 };
 
 const MEDIUM_COLORS: Record<string, string> = {
-  organic: '#2563EB', social: '#DB2777', referral: '#7C3AED', direct: '#059669', internal: '#94A3B8',
+  organic: '#2563EB', ai: '#0891B2', social: '#DB2777', referral: '#7C3AED', direct: '#059669', internal: '#94A3B8',
 };
 
 function fmtDuration(ms: number): string {
