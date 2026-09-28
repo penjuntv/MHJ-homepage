@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { X, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
+import { useFocusTrap } from '@/lib/useFocusTrap';
 
 export type GalleryPhoto = {
   src: string;
@@ -62,6 +63,12 @@ export default function GalleryClient({ photos, galleryTitle, galleryDescription
   }, [prev, next]);
 
   const current = lightboxIndex !== null ? filtered[lightboxIndex] : null;
+
+  // 라이트박스를 화면 낭독기에 대화상자로 알리고 Tab 을 안에 가둔다 — 닫히면 연 카드로 포커스가 돌아간다
+  // (live-functional-check: role="dialog"/aria-modal 없이 열림, 2026-09-28). 트랩 등록이 포커스 이동보다 먼저여야 한다.
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, current !== null);
+  useEffect(() => { if (current) dialogRef.current?.focus(); }, [current]);
 
   return (
     <section style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 80px)', maxWidth: 1320, margin: '0 auto' }}>
@@ -138,7 +145,13 @@ export default function GalleryClient({ photos, galleryTitle, galleryDescription
       {/* ─── 라이트박스 ─── */}
       {current && (
         <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={current.title}
+          tabIndex={-1}
           style={{
+            outline: 'none',
             position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.94)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             padding: '48px clamp(24px, 6vw, 80px)',
