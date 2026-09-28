@@ -120,7 +120,7 @@ GSC 색인 보고서는 며칠 늦다 — 보고서상 미색인이던 `a-quiet-
 
 | # | 누가 | 일 | 왜 지금 |
 |---|---|---|---|
-| 1 | Claude(두 분 Chrome) | **GSC 색인 요청 2차 10건** — 후보: step-up-reading-aloud · word-fun-at-dinner · the-homework-book · library-tour-glenfield-library · the-first-play-date · season-of-cross-country · oh-just-you-today · anzac-home-learning-the-red-poppy · being-the-only-one · when-the-plan-meets-reality | 1차 9건(09-28) 다음 순서. 미색인 블로그 39편 중 남은 것 |
+| 1 | ✅ 09-29 완료 | **GSC 색인 요청 2차 10건**(누적 19건, 1차 09-28 9건) — 후보: step-up-reading-aloud · word-fun-at-dinner · the-homework-book · library-tour-glenfield-library · the-first-play-date · season-of-cross-country · oh-just-you-today · anzac-home-learning-the-red-poppy · being-the-only-one · when-the-plan-meets-reality | 1차 9건(09-28) 다음 순서. 미색인 블로그 39편 중 남은 것 |
 | 2 | ~~Claude(두 분 Chrome)~~ | ~~네이버 서치어드바이저 확인~~ ✅ 09-29 완료(§0-A) — 네이버 콘솔은 Claude 브라우저 두 종 모두 안전 제한으로 접속 불가, 두 분이 화면 보고 처리 | |
 | 3 | 두 분 | **Q4 콘텐츠** — `docs/CONTENT-BRIEF-2026-Q4.md`: 성적표 글 확장 11/15 · 여름방학 가이드 11/30 · 입학·개학 12/20 | 검색 순위는 2~3달 걸린다. 성적표 글은 클릭의 68%·AI 노출 1위 |
 | 4 | Claude | **10월 중순 재확인** — 1차 9편 색인 여부 · 미색인 수 재측정 | 요청 효과 측정 |
