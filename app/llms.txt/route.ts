@@ -110,7 +110,7 @@ export async function GET() {
     `- [Journal (Blog)](${SITE_URL}/blog): Weekly essays across seven categories — Little 15 Mins, Home Learning, Whānau, Settlement, Life in Aotearoa, Travelers, Local Guide`
   );
   lines.push(
-    `- [Magazine](${SITE_URL}/magazine): Quarterly editorial issues with long-form articles, photography, and design templates`
+    `- [Magazine](${SITE_URL}/magazine): Monthly family issues with long-form articles, photography, and design templates`
   );
   lines.push(
     `- [StoryPress](${SITE_URL}/storypress): The family's bilingual storybook app for children aged 3–8 (separate product, hosted at app.mhj.nz)`

@@ -23,7 +23,7 @@ import ScrollDepthTracker from './ScrollDepthTracker';
 import ReadingProgress from './ReadingProgress';
 import { formatDate, formatNZDate } from '@/lib/utils';
 import {
-  stripHtml, readingMinutes, addHeadingIds, wrapKeyTakeaways, sanitizeFaq, toParagraphs, splitForMidInsert
+  stripHtml, readingMinutes, addHeadingIds, wrapKeyTakeaways, sanitizeFaq, toParagraphs, splitForMidInsert, fillImageAlts
 } from '@/lib/content-html.mjs';
 
 export const revalidate = 600;
@@ -247,7 +247,7 @@ export default async function BlogDetailPage(
 
   // 본문 변환은 렌더 직전에만: 이미지 최적화 → H2 앵커 id(+목차 목록) → Key takeaways 박스.
   // 목차와 앵커가 같은 통과에서 나오므로 서로 어긋날 수 없다.
-  const { html: contentWithIds, headings } = addHeadingIds(optimizeContentImages(blog.content));
+  const { html: contentWithIds, headings } = addHeadingIds(fillImageAlts(optimizeContentImages(blog.content), blog.title));
   const articleHtml = wrapKeyTakeaways(contentWithIds);
   // 구독 CTA 를 본문 중간으로(2026-09-11 W6-C 결정 ②) — 끝까지 읽는 독자보다 중간에 닿는 독자가 많다.
   // 최상위 문단 사이에서만 자르고, 자를 곳이 없거나 편지·협찬 글이면 null → 예전처럼 끝에 둔다.
@@ -554,7 +554,7 @@ export default async function BlogDetailPage(
               <div
                 className="blog-info-block"
                 style={{ margin: '0 0 48px', fontSize: 'initial', lineHeight: 'initial' }}
-                dangerouslySetInnerHTML={{ __html: optimizeContentImages(blog.info_block_html) }}
+                dangerouslySetInnerHTML={{ __html: fillImageAlts(optimizeContentImages(blog.info_block_html), blog.title) }}
               />
             )}
 

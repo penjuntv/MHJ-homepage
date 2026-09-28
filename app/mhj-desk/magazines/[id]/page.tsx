@@ -106,6 +106,16 @@ const TEMPLATE_META: TemplateMeta[] = TEMPLATE_CATEGORIES.flatMap(c => c.templat
 
 const EDITOR_OPTIONS = ['PeNnY', 'Yussi', 'Min', 'Hyun', 'Jin'];
 
+/* 기사 개별 페이지(/magazine/[id]/[slug]) 주소. 2026-04~08 호 기사 17편이 slug 없이 발행돼 개별 페이지·색인이
+   없었다(2026-09-28 DB 백필). 규칙은 기존 slug 와 같다("Mum's Note" → mum-s-note). 같은 호 안에서 겹치면 -2, -3. */
+function articleSlugFor(title: string, issueArticles: Article[], selfId: number | null): string {
+  const base = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'article';
+  const taken = new Set(issueArticles.filter(a => a.id !== selfId && a.slug).map(a => a.slug as string));
+  let slug = base;
+  for (let i = 2; taken.has(slug); i++) slug = `${base}-${i}`;
+  return slug;
+}
+
 /* Legacy 값 — 드롭다운에서 숨기되 기존 기사가 이 값을 가지면 안내 표시 */
 const LEGACY_TEMPLATES = [
   'text-only', 'essay', 'classic', 'split', 'photo-hero', 'photo-essay',
@@ -495,8 +505,13 @@ export default function MagazineDetailPage() {
       /* sort_order 는 저장하지 않는다 — 순서는 ↑↓ 버튼(moveArticle)만 바꾼다.
          폼을 연 뒤 순서를 옮기고 저장하면, 폼에 남은 옛 번호가 덮어써서
          번호가 겹치고(예: 5·5) 그 뒤로 이동이 막히던 원인이다. */
-      const { sort_order: _ignoredOrder, ...updatePayload } = formToSave;
+      const { sort_order: _ignoredOrder, ...formPayload } = formToSave;
       void _ignoredOrder;
+      /* 발행 기사에 slug 가 없으면 이때 한 번 만든다 — 기존 slug 는 URL 이 바뀌지 않게 절대 덮지 않는다. */
+      const current = articles.find(a => a.id === selectedArtId);
+      const newSlug = !current?.slug && formPayload.article_status === 'published'
+        ? articleSlugFor(formPayload.title, articles, selectedArtId) : null;
+      const updatePayload = newSlug ? { ...formPayload, slug: newSlug } : formPayload;
       const { error } = await supabase.from('articles').update(updatePayload).eq('id', selectedArtId);
       if (error) { setFormError(error.message); setSavingArticle(false); return; }
       setArticles(prev => prev.map(a => a.id === selectedArtId ? ({ ...a, ...updatePayload } as Article) : a));
@@ -504,7 +519,9 @@ export default function MagazineDetailPage() {
     } else {
       /* 새 기사는 저장 시점의 최댓값 + 1 — 폼을 연 사이 순서가 바뀌어도 겹치지 않게 */
       const insertOrder = articles.length > 0 ? Math.max(...articles.map(a => a.sort_order ?? 0)) + 1 : 1;
-      const { data, error } = await supabase.from('articles').insert({ ...formToSave, sort_order: insertOrder }).select().single();
+      const insertSlug = formToSave.article_status === 'published' ? articleSlugFor(formToSave.title, articles, null) : null;
+      const { data, error } = await supabase.from('articles')
+        .insert({ ...formToSave, sort_order: insertOrder, ...(insertSlug ? { slug: insertSlug } : {}) }).select().single();
       if (error) { setFormError(error.message); setSavingArticle(false); return; }
       if (data) { setArticles(prev => [...prev, data]); setSelectedArtId(data.id); setInlineIsNew(false); }
       showToast('기사가 추가되었습니다.');

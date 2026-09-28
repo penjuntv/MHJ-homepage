@@ -36,7 +36,8 @@ function listDescription(categorySlug: string | null, page: number): string {
 export function buildBlogListMetadata(categorySlug: string | null, page: number): Metadata {
   const category = categorySlug ? SLUG_TO_CATEGORY[categorySlug] : null;
   const suffix = [category, page > 1 ? `Page ${page}` : null].filter(Boolean).join(' — ');
-  const title = suffix ? `Journal — ${suffix}` : 'Journal';
+  // 루트 제목은 검색 결과에서 무슨 글 모음인지 보이게(예전 'Journal — MHJ' 15자, 2026-09-28).
+  const title = suffix ? `Journal — ${suffix}` : 'Journal: School & Family Life in New Zealand';
   const canonical = listPageUrl(categorySlug, page);
   const description = listDescription(categorySlug, page);
 

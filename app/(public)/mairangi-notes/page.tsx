@@ -11,12 +11,12 @@ export const revalidate = 3600;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
-  title: 'Mairangi Notes — MHJ',
-  description: 'A weekly letter from our family in Mairangi Bay, Auckland.',
+  title: 'Mairangi Notes: A Weekly Family Letter',
+  description: 'Mairangi Notes — a weekly letter from a Korean family in Mairangi Bay, Auckland: school life, local finds and small moments from the North Shore.',
   openGraph: {
     ...OG_BASE,
-    title: 'Mairangi Notes — MHJ',
-    description: 'A weekly letter from our family in Mairangi Bay, Auckland.',
+    title: 'Mairangi Notes: A Weekly Family Letter',
+    description: 'Mairangi Notes — a weekly letter from a Korean family in Mairangi Bay, Auckland: school life, local finds and small moments from the North Shore.',
     url: `${SITE_URL}/mairangi-notes`,
   },
   alternates: { canonical: `${SITE_URL}/mairangi-notes` },

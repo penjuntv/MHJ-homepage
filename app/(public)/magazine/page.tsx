@@ -10,12 +10,12 @@ export const revalidate = 3600;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
-  title: 'Magazine',
-  description: 'MHJ Magazine — quarterly issues from a family in Mairangi Bay, Auckland. Stories, photos, and essays on life in Aotearoa.',
+  title: 'Magazine: Monthly Family Issues from Mairangi Bay',
+  description: 'MHJ Magazine — monthly issues from a Korean family in Mairangi Bay, Auckland. Stories, photos, and essays on school and family life in Aotearoa.',
   openGraph: {
     ...OG_BASE,
-    title: 'Magazine',
-    description: 'MHJ Magazine — quarterly issues from a family in Mairangi Bay, Auckland. Stories, photos, and essays on life in Aotearoa.',
+    title: 'Magazine: Monthly Family Issues from Mairangi Bay',
+    description: 'MHJ Magazine — monthly issues from a Korean family in Mairangi Bay, Auckland. Stories, photos, and essays on school and family life in Aotearoa.',
     url: `${SITE_URL}/magazine`,
   },
   alternates: { canonical: `${SITE_URL}/magazine` },
