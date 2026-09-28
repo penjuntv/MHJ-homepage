@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import {
   stripHtml, readingMinutes, slugifyHeading, addHeadingIds,
   wrapKeyTakeaways, sanitizeFaq, toParagraphs, isTakeawaysHeading,
-  absolutizeUrls, imageMimeOf, htmlToMarkdown, stripXmlIllegal, splitForMidInsert,
+  absolutizeUrls, imageMimeOf, htmlToMarkdown, stripXmlIllegal, splitForMidInsert, fillImageAlts,
 } from '../../lib/content-html.mjs';
 
 let failed = 0;
@@ -225,6 +225,15 @@ check('빈 문단은 세지 않는다(글자 있는 문단 3 → null)',
 check('주석은 깊이에 넣지 않는다',
   splitForMidInsert('<!-- x -->' + [1, 2, 3, 4, 5, 6].map((n) => P(`w ${n}`)).join(''))?.join(''),
   '<!-- x -->' + [1, 2, 3, 4, 5, 6].map((n) => P(`w ${n}`)).join(''));
+
+// fillImageAlts
+check('alt="" → 제목 기반', fillImageAlts('<p><img src="a.jpg" alt=""></p>', 'My Post'), '<p><img alt="My Post — photo 1" src="a.jpg"></p>');
+check('alt 없음 → 제목 기반, 순번', fillImageAlts('<img src="a"><img src="b">', 'T'), '<img alt="T — photo 1" src="a"><img alt="T — photo 2" src="b">');
+check('기존 alt 유지', fillImageAlts('<img alt="Kids at the beach" src="a">', 'T'), '<img alt="Kids at the beach" src="a">');
+check('공백뿐인 alt 는 채운다', fillImageAlts('<img alt="  " src="a">', 'T'), '<img alt="T — photo 1" src="a">');
+check('figcaption 우선', fillImageAlts('<figure><img src="a" alt=""><figcaption>Albany <b>library</b> entrance</figcaption></figure>', 'T'), '<figure><img alt="Albany library entrance" src="a"><figcaption>Albany <b>library</b> entrance</figcaption></figure>');
+check('따옴표 이스케이프', fillImageAlts('<img src="a">', 'Mum "says" hi'), '<img alt="Mum &quot;says&quot; hi — photo 1" src="a">');
+check('빈 입력', fillImageAlts('', 'T'), '');
 
 console.log(failed ? `\n🔴 ${failed} 실패` : '\n✅ 전부 통과');
 process.exit(failed ? 1 : 0);

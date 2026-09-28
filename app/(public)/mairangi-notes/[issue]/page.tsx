@@ -73,13 +73,18 @@ export async function generateMetadata(
   const params = await props.params;
   const nl = await getIssue(params.issue);
   if (!nl) return { title: 'Not Found' };
+  // preheader 는 메일함 미리보기용 한 줄이라 대개 몇 단어다(예: 'Fairy dust on the footpath', 25편 전부 70자 미만).
+  // 검색 결과용으로 호 번호와 뉴스레터 소개를 붙여 문맥을 준다(2026-09-28).
+  const pre = (nl.preheader ?? '').trim();
+  const intro = `Mairangi Notes #${nl.issue_number ?? nl.id} — a weekly letter from a Korean family in Mairangi Bay, Auckland.`;
+  const description = pre ? `${/[.!?]$/.test(pre) ? pre : `${pre}.`} ${intro}` : intro;
   return {
     title: `${nl.subject} — Mairangi Notes`,
-    description: nl.preheader || `Mairangi Notes Issue #${nl.issue_number}`,
+    description,
     openGraph: {
       ...OG_BASE,
       title: `${nl.subject} — Mairangi Notes`,
-      description: nl.preheader || '',
+      description,
       url: `${SITE_URL}/mairangi-notes/${nl.issue_number ?? nl.id}`,
       type: 'article',
     },

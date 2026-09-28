@@ -13,12 +13,12 @@ export const revalidate = 3600;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 export const metadata: Metadata = {
-  title: 'About',
+  title: 'About Us: A Korean Family in Mairangi Bay',
   description: 'Meet Yussi — a social work student, mother of three, and the writer behind MHJ. Stories from a Korean family in Mairangi Bay, Auckland.',
   authors: [{ name: 'Yussi' }],
   openGraph: {
     ...OG_BASE,
-    title: 'About',
+    title: 'About Us: A Korean Family in Mairangi Bay',
     description: 'Meet Yussi — a social work student, mother of three, and the writer behind MHJ.',
     url: `${SITE_URL}/about`,
   },
