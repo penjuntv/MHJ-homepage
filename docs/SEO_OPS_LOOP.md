@@ -19,7 +19,7 @@
 | **GSC 생성형 AI 노출** | **340 / 3개월** — 성적표 132 · Kahu Manu 51 · 입학 47 · KOS 36 | GSC → 실적 → "Google 검색의 생성형 AI" |
 | GSC 색인 | 색인 109 · 미색인 102(기준일 09-21) | 아래 "미색인" 참고 |
 | apex 리다이렉트 | `mhj.nz → www` **307 → 308**(Vercel 도메인 설정, 09-28 사용자 승인) | |
-| 네이버 서치어드바이저 | **미확인** | 다음 콘솔 확인 대상 |
+| 네이버 서치어드바이저 | **정리 완료(09-29)** — `http://www.mhj.nz` 소유확인 ✅ · 사이트맵 제출(06-18) ✅ · RSS `http://www.mhj.nz/feed.xml` 제출 ✅ · `app.mhj.nz`(StoryPress) 소유확인 ✅(메타 태그, mhj-storypress PR #59) · 리다이렉트라 확인 불가였던 `http://mhj.nz` 삭제 | 등록 사이트가 `http://` 라 제출 주소도 `http://` 로 넣어야 받는다(https 는 빨간 밑줄로 거부 → 308 로 https 에 도달). 네이버 웹검색에 홈·about·blog·magazine 등 6~7 URL 색인 확인. 영어 사이트라 유입 기대는 낮다 |
 
 **미색인 102 읽는 법**: robots 차단 42(태그 페이지·`/api` — 의도) · 리디렉션 4 · 404 1(`education-006`) · 중복/대체 2 는 정상. 실제 문제는 "발견됨/크롤링됨 — 색인 안 됨" 53 중 블로그 39편. 색인 글과 미색인 글의 길이(평균 465 vs 422 단어, 중앙값 같음)·내부 링크(1.0 vs 1.0)가 같다 → 글 품질이 아니라 **사이트 권위** 문제다. 일괄 보강으로 풀리지 않는다. 대응: GSC 색인 요청(하루 10건) + 색인된 강한 글에서 `related_slugs` 로 연결(09-28 27개).
 GSC 색인 보고서는 며칠 늦다 — 보고서상 미색인이던 `a-quiet-week-before-the-break-ends` 는 URL 검사로는 이미 색인돼 있었다.
@@ -121,7 +121,7 @@ GSC 색인 보고서는 며칠 늦다 — 보고서상 미색인이던 `a-quiet-
 | # | 누가 | 일 | 왜 지금 |
 |---|---|---|---|
 | 1 | Claude(두 분 Chrome) | **GSC 색인 요청 2차 10건** — 후보: step-up-reading-aloud · word-fun-at-dinner · the-homework-book · library-tour-glenfield-library · the-first-play-date · season-of-cross-country · oh-just-you-today · anzac-home-learning-the-red-poppy · being-the-only-one · when-the-plan-meets-reality | 1차 9건(09-28) 다음 순서. 미색인 블로그 39편 중 남은 것 |
-| 2 | Claude(두 분 Chrome) | **네이버 서치어드바이저 확인** — 등록·사이트맵 "가져온 URL 수" | §0-A 에서 유일하게 미확인 |
+| 2 | ~~Claude(두 분 Chrome)~~ | ~~네이버 서치어드바이저 확인~~ ✅ 09-29 완료(§0-A) — 네이버 콘솔은 Claude 브라우저 두 종 모두 안전 제한으로 접속 불가, 두 분이 화면 보고 처리 | |
 | 3 | 두 분 | **Q4 콘텐츠** — `docs/CONTENT-BRIEF-2026-Q4.md`: 성적표 글 확장 11/15 · 여름방학 가이드 11/30 · 입학·개학 12/20 | 검색 순위는 2~3달 걸린다. 성적표 글은 클릭의 68%·AI 노출 1위 |
 | 4 | Claude | **10월 중순 재확인** — 1차 9편 색인 여부 · 미색인 수 재측정 | 요청 효과 측정 |
 | 5 | 두 분 | AI 프로브 before(Q7) · `storypress_cta_text` · GA4 맞춤 측정기준 | 아래 9/17 표 4·5번에서 이월 |
