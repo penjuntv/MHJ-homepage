@@ -6,6 +6,26 @@
 
 ---
 
+## 0-A. 2026-09-28 갱신 — 콘솔을 직접 열어 본 결과
+
+> 아래 §0 의 "Bing 등록 여부 모름 · 콘솔은 두 분만" 은 **낡은 기록**이다. 09-28 사용자 Chrome(로그인 상태)에서 Claude in Chrome 으로 콘솔을 직접 열어 확인했다.
+> 상세 근거: `docs/CONTENT-BRIEF-2026-Q4.md`, PR #128~#132.
+
+| 항목 | 09-28 실측 | 비고 |
+|---|---|---|
+| **Bing Webmaster** | **등록돼 있음** · 사이트맵 143 URL 09-26 크롤 성공 · 3개월 클릭 9·노출 823 | 옛 `http://www.mhj.nz/sitemap.xml` 항목이 하나 남아 있다(무해) |
+| IndexNow | 자동 전송 147건(마지막 09-26) → Vercel `INDEXNOW_KEY` 설정 확인 | 발행 시 자동 |
+| **Copilot 인용**(Bing AI Performance) | **81회 / 3개월**(09-25 하루 10) | AI 에는 보인다. 유입은 0 — "인용돼도 안 눌림" |
+| **GSC 생성형 AI 노출** | **340 / 3개월** — 성적표 132 · Kahu Manu 51 · 입학 47 · KOS 36 | GSC → 실적 → "Google 검색의 생성형 AI" |
+| GSC 색인 | 색인 109 · 미색인 102(기준일 09-21) | 아래 "미색인" 참고 |
+| apex 리다이렉트 | `mhj.nz → www` **307 → 308**(Vercel 도메인 설정, 09-28 사용자 승인) | |
+| 네이버 서치어드바이저 | **미확인** | 다음 콘솔 확인 대상 |
+
+**미색인 102 읽는 법**: robots 차단 42(태그 페이지·`/api` — 의도) · 리디렉션 4 · 404 1(`education-006`) · 중복/대체 2 는 정상. 실제 문제는 "발견됨/크롤링됨 — 색인 안 됨" 53 중 블로그 39편. 색인 글과 미색인 글의 길이(평균 465 vs 422 단어, 중앙값 같음)·내부 링크(1.0 vs 1.0)가 같다 → 글 품질이 아니라 **사이트 권위** 문제다. 일괄 보강으로 풀리지 않는다. 대응: GSC 색인 요청(하루 10건) + 색인된 강한 글에서 `related_slugs` 로 연결(09-28 27개).
+GSC 색인 보고서는 며칠 늦다 — 보고서상 미색인이던 `a-quiet-week-before-the-break-ends` 는 URL 검사로는 이미 색인돼 있었다.
+
+---
+
 ## 0. 지금 어디에 있나 — 2026-09-17 실측
 
 **깔린 것(라이브 확인)**
@@ -41,7 +61,7 @@
 | | 두 분(편집·계정) | Claude(도구) |
 |---|---|---|
 | 콘텐츠 | 새 글 본문 · 보강 본문 · AI 초안(seo_title·summary_ko) **승인** · FAQ 문답 · 내부 링크 **삽입 결정** | 정비 큐 · 처방 목록 · 링크 후보 · AI 초안 · fact-verify · 실명 검사 |
-| 콘솔 | 네이버 서치어드바이저 · Bing Webmaster · GSC · GA4 (로그인 필요) | 절차서 · 결과 해석 · verification 코드 교체 |
+| 콘솔 | 로그인 · 저장/요청 버튼 **승인** | 두 분 Chrome 이 로그인돼 있으면 Claude in Chrome 으로 **직접 열람·조작**(숫자 읽기 · GSC 색인 요청 · 설정 변경은 누르기 전 확인) · 절차서 · 결과 해석 |
 | 측정 | 콘솔 숫자 3개를 주 1회 옮겨 적기 | 유입 스냅샷 · 감사 · 기준선 · SERP 프로브 |
 | 코드 | — | 감사·폼·렌더 회귀, 새 결함 유형의 게이트 편입 |
 
@@ -59,8 +79,8 @@
 | **화~목** | 두 분 | ④ 새 글 1편 | `docs/CONTENT_TEMPLATE.md` 순서대로. 폼 체크리스트 빨강 0 · 확인창 없이 발행되면 감사도 초록이다 |
 | | 두 분 | ⑤ 보강 2편 | 아래 **보강 절차** |
 | | Claude | ⑥ 발행·보강 직후 | `audit-seo-regression.mjs`(결함 수 확인) → 정비로 줄었으면 `--update-baseline` → `llms-txt-generator` 스킬로 llms-full 반영 확인 → 캐시 무효화는 폼이 한다 |
-| **금** | 두 분 | ⑦ 콘솔 3분 | 네이버 "사이트맵 가져온 URL 수·수집 현황" · Bing "색인된 페이지" · GSC "노출·클릭(7일)" — 숫자 3개를 그 주 `docs/measurements/traffic-*.md` 맨 아래에 한 줄 |
-| | Claude | ⑧ 새 글 색인 요청 | 네이버 "웹페이지 수집" 은 두 분이 URL 을 넣는다(로그인). IndexNow 는 발행 시 자동 |
+| **금** | Claude(두 분 Chrome) | ⑦ 콘솔 숫자 | GSC "노출·클릭(7일)"·"생성형 AI 노출" · Bing "색인된 페이지"·AI Performance "인용" · 네이버 "수집 현황" — 그 주 `docs/measurements/traffic-*.md` 맨 아래에 한 줄 |
+| | Claude(두 분 Chrome) | ⑧ 색인 요청 | GSC URL 검사 → "색인 생성 요청"(하루 ~10건, 건당 라이브 테스트 ~80초 — 결과 창이 늦게 떠도 Escape 금지). 요청 전 URL 검사로 이미 색인됐는지 먼저 본다. IndexNow(Bing)는 발행 시 자동 |
 
 **보강 절차(글 1편, 20~30분)** — `/mhj-desk` 글 편집 화면에서
 
@@ -96,7 +116,22 @@
 
 ---
 
-## 5. 지금 당장 — 이번 주(9/17~9/21) 할 일
+## 5. 지금 당장 — 이번 주(9/29~) 할 일
+
+| # | 누가 | 일 | 왜 지금 |
+|---|---|---|---|
+| 1 | Claude(두 분 Chrome) | **GSC 색인 요청 2차 10건** — 후보: step-up-reading-aloud · word-fun-at-dinner · the-homework-book · library-tour-glenfield-library · the-first-play-date · season-of-cross-country · oh-just-you-today · anzac-home-learning-the-red-poppy · being-the-only-one · when-the-plan-meets-reality | 1차 9건(09-28) 다음 순서. 미색인 블로그 39편 중 남은 것 |
+| 2 | Claude(두 분 Chrome) | **네이버 서치어드바이저 확인** — 등록·사이트맵 "가져온 URL 수" | §0-A 에서 유일하게 미확인 |
+| 3 | 두 분 | **Q4 콘텐츠** — `docs/CONTENT-BRIEF-2026-Q4.md`: 성적표 글 확장 11/15 · 여름방학 가이드 11/30 · 입학·개학 12/20 | 검색 순위는 2~3달 걸린다. 성적표 글은 클릭의 68%·AI 노출 1위 |
+| 4 | Claude | **10월 중순 재확인** — 1차 9편 색인 여부 · 미색인 수 재측정 | 요청 효과 측정 |
+| 5 | 두 분 | AI 프로브 before(Q7) · `storypress_cta_text` · GA4 맞춤 측정기준 | 아래 9/17 표 4·5번에서 이월 |
+
+### (지난 기록) 9/17~9/21 할 일 — 결과
+
+- 1번 콘솔 등록 확인: Bing·GSC ✅(09-28, §0-A) · 네이버 미확인
+- 2번 #77 ORPHAN: ✅ 09-17 반영·이슈 닫힘
+- 3번 보강 3편: ✅ 09-17(이후 13차까지 39편)
+- 4·5번: 미완 → 위 5번으로 이월
 
 병목 순서대로. 위가 안 되면 아래는 효과가 없다.
 
@@ -128,5 +163,5 @@
 - 무엇을 먼저 고칠지: `docs/W5-refit-queue.md` (월요일마다 재생성)
 - 새 글 뼈대: `docs/CONTENT_TEMPLATE.md`
 - 유입 스냅샷: `docs/measurements/traffic-*.md` (`scripts/report-traffic-snapshot.mjs`)
-- 콘솔 절차: `docs/naver-quickstart-10min.md` · `docs/naver-search-advisor-setup.md`
+- 콘솔 절차: `docs/naver-quickstart-10min.md` · `docs/naver-search-advisor-setup.md` · Q4 콘텐츠: `docs/CONTENT-BRIEF-2026-Q4.md`
 - 사용자 요청 항목 원문: `docs/self-diagnosis/2026-09-07-report/07-questions-for-user.md`
