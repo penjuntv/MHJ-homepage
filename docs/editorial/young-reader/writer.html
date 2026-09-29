@@ -113,7 +113,7 @@
 </head>
 <body data-tab="desk">
 <header class="top">
-  <h1>⌨️ 현이의 기자 책상<small>Hyun's Writing Desk</small></h1>
+  <h1>⌨️ <span id="deskName">현이의 기자 책상</span><small id="deskEn">Hyun's Writing Desk</small></h1>
   <div class="meter"><i id="meter"></i></div><span class="pct" id="pct">0%</span>
   <div class="tabs"><button data-t="desk" class="on">✏️ 쓰기</button><button data-t="preview">📰 미리보기</button></div>
 </header>
@@ -146,6 +146,16 @@
 
   <div id="blocks"></div>
 
+  <section class="card t-p" data-sec="src" data-lv="2">
+    <h2><span class="num">7</span>책 밖에서 확인하기 <span class="done-tag">✓ 완료</span><span class="en">Check another source</span></h2>
+    <p class="hint">4일째 쪽 ⑦번 칸 · 기사 끝에 "확인한 자료"로 실려요</p>
+    <label class="small">📚 자료 이름 (주소나 책 이름)</label><input type="text" data-k="srcName" placeholder="예: 어린이 백과사전 ○○ 항목 / Te Ara">
+    <div class="grid2">
+      <div><label class="small">✔ 책과 같은 점</label><textarea data-k="srcSame"></textarea></div>
+      <div><label class="small">✎ 다르거나 새로 안 것</label><textarea data-k="srcDiff"></textarea></div>
+    </div>
+  </section>
+
   <section class="card t-p" data-sec="photos">
     <h2>📷 사진 넣어 보기 <span class="en">Photos (preview only)</span></h2>
     <p class="hint">미리보기용이에요. 진짜 사진은 엄마아빠에게 따로 보내요. (저장되지 않아요)</p>
@@ -157,11 +167,15 @@
   </section>
 
   <section class="card t-g" data-sec="fix">
-    <h2>✨ 한 문장 더 좋게 <span class="done-tag">✓ 완료</span><span class="en">Make one sentence better</span></h2>
+    <h2>✨ <span data-lv="1">한 문장 더 좋게</span><span data-lv="2">두 문장 더 좋게</span> <span class="done-tag">✓ 완료</span><span class="en">Revise</span></h2>
     <p class="hint">종이에 쓴 문장 하나를 골라서, 옮겨 치면서 더 좋게 바꿔요. 더 짧게? 더 정확하게? 더 재미있게?</p>
     <div class="pair">
       <div class="field"><span class="flag ko" style="background:var(--soft)">전</span><textarea data-k="fixBefore" placeholder="종이에 쓴 문장 그대로"></textarea></div>
       <div class="field"><span class="flag ko" style="background:var(--g)">후</span><textarea data-k="fixAfter" placeholder="더 좋게 바꾼 문장 (위 칸에도 바꿔서 넣었나요?)"></textarea></div>
+    </div>
+    <div class="pair" data-lv="2" style="margin-top:14px">
+      <div class="field"><span class="flag ko" style="background:var(--soft)">전</span><textarea data-k="fixBefore2" placeholder="두 번째 문장 (영어 문장이면 더 좋아요)"></textarea></div>
+      <div class="field"><span class="flag ko" style="background:var(--g)">후</span><textarea data-k="fixAfter2" placeholder="더 좋게 바꾼 문장"></textarea></div>
     </div>
   </section>
 
@@ -183,7 +197,20 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const BLOCKS = [
+// 아이 설정 — 메일 꾸러미(render.mjs share)는 window.KID 를 파일에 박고, 직접 열 때는 ?kid=min
+const KIDS = {
+  hyun: { ko: '현이', en: 'Hyun', level: 1, byline: 'WORDS &amp; DRAWING BY HYUN · YEAR 5', key: 'hyun-monthly-book-v1' },
+  min: { ko: '민이', en: 'Min', level: 2, byline: 'WORDS BY MIN', key: 'min-monthly-book-v1' },
+};
+const KID = KIDS[window.KID || new URLSearchParams(location.search).get('kid')] || KIDS.hyun;
+const L2 = KID.level === 2;
+document.querySelectorAll('[data-lv]').forEach(el => { if (+el.dataset.lv !== KID.level) el.remove(); });
+document.title = `${KID.ko}의 기자 책상`;
+document.getElementById('deskName').textContent = `${KID.ko}의 기자 책상`;
+document.getElementById('deskEn').textContent = `${KID.en}'s Writing Desk${L2 ? ' · Level 2' : ''}`;
+const TARGET = L2 ? { ko: [400, 800], en: [120, 250] } : { ko: [200, 500], en: [60, 150] };
+
+const BLOCKS_L1 = [
   { n: 1, c: 't-g', ko: '궁금하게 시작하기', en: 'Hook', koPh: '여러분은 ___ 알고 있나요?', enPh: 'Did you know ___?', koChips: [], enChips: [] },
   { n: 2, c: 't-g', ko: '내 생각 한 문장', en: 'My big idea', koPh: '나는 ___ 라고 생각해요.', enPh: 'I think ___.', koChips: [], enChips: [] },
   { n: 3, c: 't-g', ko: '왜냐하면 (책 몇 쪽?)', en: 'Because', koPh: '왜냐하면 책 ___쪽에서 ___ 때문이에요.', enPh: 'Because on page ___, ___.', koChips: ['게다가', '예를 들면'], enChips: ['Also,', 'For example,'] },
@@ -191,15 +218,25 @@ const BLOCKS = [
   { n: 5, c: 't-p', ko: '뉴질랜드에 사는 나와 연결', en: 'Link to my life', koPh: '뉴질랜드에 사는 나는 ___.', enPh: 'Living in New Zealand, I ___.', koChips: ['우리 학교에서도', '우리 가족은'], enChips: ['At my school,', 'In my family,'] },
   { n: 6, c: 't-p', ko: '독자에게 질문하기', en: 'Ask my readers', koPh: '여러분이라면 ___?', enPh: 'What would you ___?', koChips: [], enChips: [] },
 ];
+const BLOCKS_L2 = [
+  { n: 1, c: 't-g', ko: '첫 문장으로 붙잡기', en: 'Hook', koPh: '질문 · 놀라운 사실 · 한 장면 중 하나로. 예) ___년, ___에서는 ___ 일이 벌어졌다.', enPh: 'Imagine ___. / In ___, ___.', koChips: [], enChips: [] },
+  { n: 2, c: 't-g', ko: '내 주장', en: 'My claim', koPh: '나는 ___ 라고 생각한다. 왜냐하면 ___ 때문이다.', enPh: 'I believe ___ because ___.', koChips: [], enChips: [] },
+  { n: 3, c: 't-g', ko: '근거 두 가지 (책 몇 쪽?)', en: 'Two pieces of evidence', koPh: '첫째, 책 ___쪽에서 ___. 둘째, ___.', enPh: 'First, on page ___, ___. Second, ___.', koChips: ['첫째,', '둘째,', '게다가', '예를 들어'], enChips: ['First,', 'Second,', 'Furthermore,', 'For example,'] },
+  { n: 4, c: 't-g', ko: '반론에 답하기', en: 'Answer the other side', koPh: '물론 ___ 라는 반론도 있다. 그러나 ___.', enPh: 'Some may argue that ___. However, ___.', koChips: ['반면에', '그러나', '그러므로'], enChips: ['On the other hand,', 'However,', 'Therefore,'] },
+  { n: 5, c: 't-p', ko: '왜 지금도 중요할까?', en: 'Why it matters today', koPh: '이 이야기가 오늘날에도 중요한 이유는 ___ 이다.', enPh: 'This still matters today because ___.', koChips: ['뉴질랜드에서도', '요즘 뉴스를 보면'], enChips: ['In New Zealand,', 'Today,'] },
+  { n: 6, c: 't-p', ko: '결론 + 독자에게 질문', en: 'Conclusion & question', koPh: '결국 ___. 여러분은 ___ 어떻게 생각하는가?', enPh: 'In the end, ___. What do you think about ___?', koChips: ['결국', '그러므로'], enChips: ['In the end,', 'Overall,'] },
+];
+const BLOCKS = L2 ? BLOCKS_L2 : BLOCKS_L1;
 const GENRES = [['history', '👑 역사'], ['story', '📜 이야기·고사성어'], ['geography', '🗺️ 지리'], ['culture', '🌏 문화'], ['society', '🤝 사회'], ['any', '📚 기타']];
 const CHECKS = [
-  '내 이름은 Hyun / 현이로만 썼어요',
+  `내 이름은 ${KID.en} / ${KID.ko}로만 썼어요`,
   '친구·학교·선생님 이름이 없어요',
   '책 문장을 길게 베끼지 않았어요',
   '한국어 글과 영어 글을 따로 썼어요 (번역 아님)',
   '소리 내어 한 번 읽어 봤어요',
+  ...(L2 ? ['사실과 내 의견을 구분해서 썼어요 ("책에 따르면" / "나는")'] : []),
 ];
-const KEY = 'hyun-monthly-book-v1';
+const KEY = KID.key;
 let S = {};
 try { S = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { S = {}; }
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
@@ -211,7 +248,7 @@ const v = k => (S[k] || '').trim();
 $('#blocks').innerHTML = BLOCKS.map(b => `
   <section class="card ${b.c}" data-sec="b${b.n}" style="margin-bottom:16px">
     <h2><span class="num">${b.n}</span>${b.ko} <span class="done-tag">✓ 완료</span><span class="en">${b.en}</span></h2>
-    <p class="hint">${b.n <= 4 ? '3일째' : '4일째'} 쪽 ${'①②③④⑤⑥'[b.n - 1]}번 칸 · 한 문장 더 붙여도 좋아요</p>
+    <p class="hint">${b.n <= 4 ? '3일째' : '4일째'} 쪽 ${'①②③④⑤⑥'[b.n - 1]}번 칸${L2 ? '' : ' · 한 문장 더 붙여도 좋아요'}</p>
     <div class="pair">
       <div class="field"><span class="flag ko">한</span><textarea data-k="k${b.n}" placeholder="${b.koPh}"></textarea></div>
       ${b.koChips.length ? `<div class="chips">${b.koChips.map(c => `<button class="chip" data-ins="k${b.n}">${c}</button>`).join('')}</div>` : ''}
@@ -219,14 +256,14 @@ $('#blocks').innerHTML = BLOCKS.map(b => `
       ${b.enChips.length ? `<div class="chips">${b.enChips.map(c => `<button class="chip" data-ins="e${b.n}">${c}</button>`).join('')}</div>` : ''}
     </div>
   </section>`).join('') + `<div class="card" style="background:transparent;border-style:dashed">
-    <div class="count">🇰🇷 한국어 <span id="koN">0</span>자 <span class="bar"><i id="koBar"></i></span> 목표 200~500자</div>
-    <div class="count">🇳🇿 English <span id="enN">0</span> words <span class="bar"><i id="enBar"></i></span> goal 60–150</div>
+    <div class="count">🇰🇷 한국어 <span id="koN">0</span>자 <span class="bar"><i id="koBar"></i></span> 목표 ${TARGET.ko[0]}~${TARGET.ko[1]}자</div>
+    <div class="count">🇳🇿 English <span id="enN">0</span> words <span class="bar"><i id="enBar"></i></span> goal ${TARGET.en[0]}–${TARGET.en[1]}</div>
   </div>`;
 
 $('#genres').innerHTML = GENRES.map(([k, l]) => `<button data-g="${k}">${l}</button>`).join('');
 $('#stars').innerHTML = [1, 2, 3, 4, 5].map(i => `<button data-s="${i}" aria-label="${i}점">★</button>`).join('');
 $('#checks').innerHTML = CHECKS.map((t, i) => `<label><input type="checkbox" data-c="${i}">${t}</label>`).join('');
-$('#photos').innerHTML = ['📖 책 표지', '🖍️ 내 그림', '📷 한 장 더'].map((t, i) =>
+$('#photos').innerHTML = ['📖 책 표지', L2 ? '🖍️ 그림·사진' : '🖍️ 내 그림', '📷 한 장 더'].map((t, i) =>
   `<label class="photo">${t}<br>눌러서 넣기<input type="file" accept="image/*" data-p="${i}"></label>`).join('');
 const photos = [null, null, null];
 
@@ -274,7 +311,9 @@ function missing() {
   if (!S.stars) m.push('⭐ 내 점수');
   if (!v('titleKo') || !v('titleEn')) m.push('⑧ 기사 제목 (한/EN)');
   BLOCKS.forEach(b => { if (!v('k' + b.n)) m.push(`${b.n}번 한국어`); if (!v('e' + b.n)) m.push(`${b.n}번 English`); });
-  if (!v('fixBefore') || !v('fixAfter')) m.push('✨ 한 문장 더 좋게');
+  if (!v('fixBefore') || !v('fixAfter')) m.push(L2 ? '✨ 고친 문장 1' : '✨ 한 문장 더 좋게');
+  if (L2 && (!v('fixBefore2') || !v('fixAfter2'))) m.push('✨ 고친 문장 2');
+  if (L2 && (!v('srcName') || !v('srcSame') || !v('srcDiff'))) m.push('⑦ 책 밖에서 확인하기');
   return m;
 }
 function update() {
@@ -282,19 +321,20 @@ function update() {
   document.querySelectorAll('#stars button').forEach(b => b.classList.toggle('on', +b.dataset.s <= (S.stars || 0)));
   // 완료 표시
   const secDone = {
-    book: v('bookTitle') && S.genre && S.stars, title: v('titleKo') && v('titleEn'), fix: v('fixBefore') && v('fixAfter'),
+    book: v('bookTitle') && S.genre && S.stars, title: v('titleKo') && v('titleEn'),
+    fix: v('fixBefore') && v('fixAfter') && (!L2 || (v('fixBefore2') && v('fixAfter2'))), src: v('srcName') && v('srcSame') && v('srcDiff'),
   };
   BLOCKS.forEach(b => secDone['b' + b.n] = v('k' + b.n) && v('e' + b.n));
   Object.entries(secDone).forEach(([k, d]) => document.querySelector(`[data-sec="${k}"]`)?.classList.toggle('done', !!d));
   // 진행률
-  const miss = missing(), total = 4 + 1 + BLOCKS.length * 2 + 1 + CHECKS.length;
+  const miss = missing(), total = 4 + 1 + BLOCKS.length * 2 + 1 + (L2 ? 2 : 0) + CHECKS.length;
   const checked = (S.checks || []).filter(Boolean).length;
   const pct = Math.round(((total - CHECKS.length - miss.length) + checked) / total * 100);
   $('#meter').style.width = pct + '%'; $('#pct').textContent = pct + '%';
   // 글자 수
   const ko = paras('k').join('').replace(/\s/g, '').length, en = paras('e').join(' ').split(/\s+/).filter(Boolean).length;
   $('#koN').textContent = ko; $('#enN').textContent = en;
-  $('#koBar').style.width = Math.min(100, ko / 2) + '%'; $('#enBar').style.width = Math.min(100, en / 0.6) + '%';
+  $('#koBar').style.width = Math.min(100, ko / TARGET.ko[0] * 100) + '%'; $('#enBar').style.width = Math.min(100, en / TARGET.en[0] * 100) + '%';
   // 보내기
   const ready = !miss.length && checked === CHECKS.length;
   $('#copy').disabled = $('#save').disabled = !ready;
@@ -309,10 +349,10 @@ function render() {
   const img = i => photos[i] ? `<img src="${photos[i]}" alt="">` : ['Cover', 'Drawing', 'Photo'][i];
   const ko = paras('k'), en = paras('e');
   $('#mag').innerHTML = `
-    <div class="kick"><span>HYUN'S MONTHLY BOOK</span><span>현이의 이달의 책${g ? ' · ' + g[1].split(' ').slice(1).join(' ') : ''}</span></div>
+    <div class="kick"><span>${KID.en.toUpperCase()}'S MONTHLY BOOK</span><span>${KID.ko}의 이달의 책${g ? ' · ' + g[1].split(' ').slice(1).join(' ') : ''}</span></div>
     <h3>${esc(v('titleKo')) || ph('기사 제목')}</h3>
     <p class="etitle">${esc(v('titleEn')) || ph('English headline')}</p>
-    <div class="by">WORDS &amp; DRAWING BY HYUN · YEAR 5</div>
+    <div class="by">${KID.byline}</div>
     <div class="pq">${esc(v('k2')) || ph('② 내 생각 한 문장이 여기 크게 나와요')}<span class="e">${esc(v('e2')) || ph('I think …')}</span></div>
     <div class="imgs"><div>${img(0)}</div><div>${img(1)}</div><div>${img(2)}</div></div>
     ${v('capKo') || v('capEn') ? `<p style="font-size:12px;color:#6b6259;margin-top:-10px">${esc(v('capKo'))} ${v('capEn') ? '· <i>' + esc(v('capEn')) + '</i>' : ''}</p>` : ''}
@@ -323,6 +363,7 @@ function render() {
       ${esc(v('bookTitle')) || ph('책 제목')}<br>
       ${esc(v('bookAuthor')) || ph('지은이')} · ${esc(v('bookPub')) || ph('출판사')}<br>
       ${'★'.repeat(S.stars || 0)}${'☆'.repeat(5 - (S.stars || 0))} · ${v('age') ? esc(v('age')) + '살 친구에게 추천' : ph('추천 나이')}
+      ${L2 ? `<br><br><b>확인한 자료 · Checked against</b>${esc(v('srcName')) || ph('⑦ 자료 이름')}` : ''}
     </div>`;
   // 마지막 문단의 질문을 굵게
   const last = (arr, sel) => { const ps = document.querySelectorAll(sel); if (arr.length && ps.length) ps[ps.length - 1].classList.add('q'); };
@@ -331,14 +372,16 @@ function render() {
 function exportText() {
   const g = GENRES.find(x => x[0] === S.genre);
   return [
-    '[현이의 이달의 책 · Hyun\'s Monthly Book]',
+    `[${KID.ko}의 이달의 책 · ${KID.en}'s Monthly Book${L2 ? ' · Level 2' : ''}]`,
     `책: ${v('bookTitle')} / ${v('bookAuthor')} / ${v('bookPub')}`,
     `종류: ${g ? g[1] : ''} · 점수: ${'★'.repeat(S.stars || 0)} · 추천: ${v('age')}살`,
     '', `제목(한): ${v('titleKo')}`, `Title(EN): ${v('titleEn')}`,
     '', '── 한국어 글 ──', ...paras('k').map(p => p + '\n'),
     '── English ──', ...paras('e').map(p => p + '\n'),
     '── 그림 설명 ──', `한: ${v('capKo')}`, `EN: ${v('capEn')}`,
+    ...(L2 ? ['── 책 밖에서 확인한 자료 ──', `자료: ${v('srcName')}`, `같은 점: ${v('srcSame')}`, `다르거나 새로 안 것: ${v('srcDiff')}`, ''] : []),
     '', '── 내가 고친 문장 ──', `전: ${v('fixBefore')}`, `후: ${v('fixAfter')}`,
+    ...(L2 ? [`전: ${v('fixBefore2')}`, `후: ${v('fixAfter2')}`] : []),
     '', '── 칸별 원본 (편집용) ──', ...BLOCKS.map(b => `${b.n}) ${v('k' + b.n)} | ${v('e' + b.n)}`),
   ].join('\n');
 }
@@ -350,7 +393,7 @@ $('#copy').onclick = async () => {
 $('#save').onclick = () => {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([exportText()], { type: 'text/plain;charset=utf-8' }));
-  a.download = `hyun-monthly-book-${new Date().toISOString().slice(0, 7)}.txt`; a.click();
+  a.download = `${KID.en.toLowerCase()}-monthly-book-${new Date().toISOString().slice(0, 7)}.txt`; a.click();
   toast('💾 파일로 저장했어요');
 };
 $('#reset').onclick = () => {

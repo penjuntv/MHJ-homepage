@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>현이의 이달의 책 인포그래픽</title>
+<title>이달의 책 인포그래픽</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,600&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -110,7 +110,7 @@ const T = {
       <div class="ko">${esc(p.ko)}</div>${p.img ? `<img src="${p.img}" alt="">` : ''}<div class="en">${esc(p.en)}</div></div>`).join('')}</div>
     <div class="mean"><b>뜻</b><span>${esc(d.meaning)}</span><div class="en">${esc(d.meaningEn)}${d.similar ? ` · cf. “${esc(d.similar)}”` : ''}</div></div>`,
   map: d => `
-    <div class="mp"><div class="pic">${d.image ? `<img src="${d.image}" alt="">` : '<span class="none">Hyun\'s map</span>'}</div>
+    <div class="mp"><div class="pic">${d.image ? `<img src="${d.image}" alt="">` : '<span class="none">Map</span>'}</div>
       <div class="pl">${d.places.map((p, i) => `<div><i><em>${i + 1}</em></i><b>${esc(p.name)}</b><span>${esc(p.why)}</span><span class="en">${esc(p.whyEn)}</span></div>`).join('')}</div></div>`,
   compare: d => `
     <div class="cp"><div></div>${d.cols.map(c => `<div class="h">${esc(c.ko)}<span class="en">${esc(c.en)}</span></div>`).join('')}
@@ -122,12 +122,15 @@ const T = {
     <div class="f3">${d.facts.map((f, i) => `<div class="fc"><div class="no">FACT 0${i + 1}</div><div class="big">${esc(f.num)}<small>${esc(f.unit)}</small></div>
       <div class="t">${esc(f.text)}</div><div class="en">${esc(f.textEn)}</div></div>`).join('')}</div>`,
 };
+// JSON 의 "kid": "min" 이면 민이 표기 (기본 현이)
+const KIDS = { hyun: { ko: '현이', en: 'Hyun' }, min: { ko: '민이', en: 'Min' } };
 window.render = d => {
+  const k = KIDS[d.kid] || KIDS.hyun;
   document.getElementById('canvas').innerHTML = `
-    <div class="kick"><span>HYUN'S MONTHLY BOOK</span><span>현이의 이달의 책 · ${esc(d.kind || KIND[d.type])}</span></div>
+    <div class="kick"><span>${k.en.toUpperCase()}'S MONTHLY BOOK</span><span>${k.ko}의 이달의 책 · ${esc(d.kind || KIND[d.type])}</span></div>
     <h1>${esc(d.title)}</h1><p class="sub">${esc(d.titleEn)}</p>
     <div class="body t-${d.type}">${T[d.type](d)}</div>
-    <div class="foot"><span>From Hyun's notebook · 현이의 취재 노트에서</span><span>${esc(d.book || '')}</span></div>`;
+    <div class="foot"><span>From ${k.en}'s notebook · ${k.ko}의 취재 노트에서</span><span>${esc(d.book || '')}</span></div>`;
   return document.fonts.ready.then(() => { const r = document.createElement('i'); r.id = 'ready'; document.body.append(r); });
 };
 </script>
