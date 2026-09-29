@@ -1,4 +1,4 @@
-# 매거진 변환 — 현이의 이달의 책 → mhj-desk
+# 매거진 변환 — 아이들의 이달의 책 (현이 · 민이) → mhj-desk
 
 **코드 변경 없음.** 기존 `right` 템플릿과 본문 이미지만 쓴다.
 
@@ -12,7 +12,7 @@
 | 사진 칸 ③ | 이미지 3 | 책 펼친 장면이나 손으로 쓴 워크시트 (얼굴 X) |
 | 인포그래픽 | **본문 안** 이미지 (한국어 글 뒤) | 2일째 쪽 → `infographic.html` PNG |
 | 인포블록 | `sidebar_title` = `이달의 책 · This Month's Book` | 책 제목 · 지은이 · 출판사 · ★ · 추천 나이 |
-| author | `Hyun` | 실명 금지 |
+| author | `Hyun` 또는 `Min` | 실명 금지 |
 | article_status | `draft` → 현이 승인 후 게시 | |
 
 ⚠️ **인포그래픽을 사진 칸에 넣지 않는다.** 사진 칸은 `object-fit: cover`로 잘리고 폭도 좁아서 글씨가 읽히지 않는다(`components/magazine/templates/ColumnLayoutTemplate.tsx`). 인포그래픽은 4:3 비율(1600×1200)로 뽑아 본문에 넣는다. 가장 작은 글씨가 30px이라 본문 폭(약 400px)에서도 읽힌다.
@@ -29,6 +29,7 @@
 In English
 [English] ①+② / ③ / ④ / ⑤ / **⑥ question**
 
+확인한 자료: … (민이 · Level 2 만)
 — 편집자 주: (필요할 때만)
 ```
 
@@ -49,7 +50,7 @@ docs/editorial/young-reader/magazine-conversion.md 대로 현이의 이달의 �
 [기자 책상 텍스트 붙여넣기]
 ```
 
-인포그래픽 JSON 형식은 `infographics/examples/*.json`을 그대로 따른다.
+인포그래픽 JSON 형식은 `infographics/examples/*.json`을 그대로 따른다. 민이 원고면 `"kid": "min"`을 넣는다(머리글·꼬리말 이름이 바뀜).
 
 | 2일째 쪽 | `type` |
 |---|---|

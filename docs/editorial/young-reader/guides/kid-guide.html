@@ -39,13 +39,14 @@
     <p><code>2_인쇄할-워크시트</code> 폴더에서 <b>내 책 종류</b> 파일 하나만 인쇄해.<br>
     역사책 → <code>역사책.pdf</code> · 고사성어책 → <code>이야기-고사성어책.pdf</code> · 잘 모르겠으면 → <code>어떤책이든.pdf</code></p></div></div>
 
-  <div class="step g"><div class="n">✏️</div><div><b>3. 하루에 한 쪽씩 (20분)</b>
-    <p>칸에 이미 앞말이 써 있어. <b>뒤만 채우면 돼.</b> 한국어 한 줄, 영어 한 줄!</p>
-    <div class="days"><span><i>📖</i>1일 책 만나기</span><span><i>🔍</i>2일 책 속으로</span><span><i>💭</i>3일 내 생각</span><span><i>🎨</i>4일 나와 연결</span></div></div></div>
+  <div class="step g"><div class="n">✏️</div><div><b>3. 하루에 한 쪽씩 (<span data-lv="1">20분</span><span data-lv="2">25분</span>)</b>
+    <p data-lv="1">칸에 이미 앞말이 써 있어. <b>뒤만 채우면 돼.</b> 한국어 한 줄, 영어 한 줄!</p>
+    <p data-lv="2">앞말을 따라 쓰되, 이번엔 <b>근거 두 개</b>와 <b>반론에 답하기</b>가 있어. 한국어는 매거진처럼 <b>"~다"체</b>로! 4일째엔 책 말고 <b>다른 자료 하나</b>로 확인해 봐.</p>
+    <div class="days"><span><i>📖</i>1일 책 만나기</span><span><i>🔍</i>2일 책 속으로</span><span><i>💭</i>3일 <span data-lv="1">내 생각</span><span data-lv="2">내 주장</span></span><span><i><span data-lv="1">🎨</span><span data-lv="2">🔎</span></i>4일 <span data-lv="1">나와 연결</span><span data-lv="2">연결·확인</span></span></div></div></div>
 
   <div class="step p"><div class="n">⌨️</div><div><b>4. 5일째: 기자 책상에 옮겨 치기</b>
     <p>컴퓨터에서 <code>3_기자책상.html</code>을 더블클릭해서 열어. 종이의 <b>같은 번호 칸</b>에 옮겨 치면 오른쪽에 <b>내 매거진 지면</b>이 생겨!<br>
-    옮기면서 문장 <b>하나</b>만 더 좋게 고치기 ✨</p></div></div>
+    옮기면서 문장 <b data-lv="1">하나</b><b data-lv="2">두 개</b>를 더 좋게 고치기 ✨</p></div></div>
 
   <div class="step c"><div class="n">📮</div><div><b>5. 보내기</b>
     <p>체크를 다 하면 <b>[📋 복사해서 보내기]</b> 버튼이 열려. 누르고 엄마아빠 카톡에 붙여넣기 하면 끝!<br>
@@ -59,5 +60,16 @@
       <li>복사가 안 되면 <b>[💾 파일로 저장]</b>을 눌러서 그 파일을 보내</li>
     </ul></div>
 </section>
+<script>
+  // ?kid=hyun|min — worksheet.html 의 KIDS 와 같은 키
+  const KIDS = { hyun: { ko: '현이', en: 'Hyun', level: 1 }, min: { ko: '민이', en: 'Min', level: 2 } };
+  const kid = KIDS[new URLSearchParams(location.search).get('kid')] || KIDS.hyun;
+  document.querySelectorAll('[data-lv]').forEach(el => { if (+el.dataset.lv !== kid.level) el.remove(); });
+  if (kid.en !== 'Hyun') {
+    const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n; (n = w.nextNode());) n.nodeValue = n.nodeValue.replaceAll('현이', kid.ko).replaceAll('Hyun', kid.en);
+    document.title = document.title.replace('현이', kid.ko);
+  }
+</script>
 </body>
 </html>
