@@ -200,7 +200,7 @@
 // 아이 설정 — 메일 꾸러미(render.mjs share)는 window.KID 를 파일에 박고, 직접 열 때는 ?kid=min
 const KIDS = {
   hyun: { ko: '현이', en: 'Hyun', level: 1, byline: 'WORDS &amp; DRAWING BY HYUN · YEAR 5', key: 'hyun-monthly-book-v1' },
-  min: { ko: '민이', en: 'Min', level: 2, byline: 'WORDS BY MIN', key: 'min-monthly-book-v1' },
+  min: { ko: '민이', en: 'Min', level: 2, byline: 'WORDS BY MIN · YEAR 7', key: 'min-monthly-book-v1' },
 };
 const KID = KIDS[window.KID || new URLSearchParams(location.search).get('kid')] || KIDS.hyun;
 const L2 = KID.level === 2;
@@ -208,7 +208,7 @@ document.querySelectorAll('[data-lv]').forEach(el => { if (+el.dataset.lv !== KI
 document.title = `${KID.ko}의 기자 책상`;
 document.getElementById('deskName').textContent = `${KID.ko}의 기자 책상`;
 document.getElementById('deskEn').textContent = `${KID.en}'s Writing Desk${L2 ? ' · Level 2' : ''}`;
-const TARGET = L2 ? { ko: [400, 800], en: [120, 250] } : { ko: [200, 500], en: [60, 150] };
+const TARGET = L2 ? { ko: [400, 800], en: [150, 300] } : { ko: [200, 500], en: [60, 150] };
 
 const BLOCKS_L1 = [
   { n: 1, c: 't-g', ko: '궁금하게 시작하기', en: 'Hook', koPh: '여러분은 ___ 알고 있나요?', enPh: 'Did you know ___?', koChips: [], enChips: [] },
