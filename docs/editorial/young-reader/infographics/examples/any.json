@@ -1,0 +1,11 @@
+{
+  "type": "facts3",
+  "title": "첨성대에 대해 알고 있었나요?",
+  "titleEn": "Did you know? Cheomseongdae in 3 numbers",
+  "book": "예시 · Sample",
+  "facts": [
+    { "num": "1,300", "unit": "년+", "text": "아주 오래전 신라 때 세워졌어요", "textEn": "Built over 1,300 years ago in Silla" },
+    { "num": "27", "unit": "단", "text": "돌을 27단으로 쌓았다고 해요", "textEn": "Stacked in 27 layers of stone" },
+    { "num": "1", "unit": "번째", "text": "동아시아에서 가장 오래된 천문대로 꼽혀요", "textEn": "Often called East Asia's oldest observatory" }
+  ]
+}

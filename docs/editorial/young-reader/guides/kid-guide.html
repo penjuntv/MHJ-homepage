@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>현이야, 이렇게 하면 돼!</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Gowun Dodum", sans-serif; color: #2b2622; }
+  .page { width: 210mm; height: 296mm; overflow: hidden; padding: 11mm 13mm; background: #fffdf9; display: flex; flex-direction: column; }
+  .en { font-family: "Nunito"; font-weight: 600; color: #8a8078; }
+  h1 { font-family: "Jua"; font-weight: 400; font-size: 30pt; margin: 0; text-align: center; }
+  .sub { text-align: center; font-size: 12pt; margin: 1.5mm 0 5mm; }
+  .step { display: grid; grid-template-columns: 17mm 1fr; gap: 5mm; align-items: start; border-radius: 14px; padding: 3.5mm 4.5mm; margin-bottom: 3mm; }
+  .step .n { width: 17mm; height: 17mm; border-radius: 50%; background: #fff; border: 2.5px solid #2b2622; display: grid; place-items: center; font-size: 25pt; }
+  .step > div > b:first-child { font-family: "Jua"; font-weight: 400; font-size: 17pt; display: block; }
+  .step p { margin: 1mm 0 0; font-size: 12pt; line-height: 1.5; }
+  .step .en { font-size: 10pt; }
+  .y { background: #fff4d4; } .b { background: #e7effd; } .g { background: #e2f4ea; } .p { background: #fde6ea; } .c { background: #f6ebdd; }
+  .days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; margin-top: 2mm; }
+  .days span { background: #fff; border-radius: 8px; padding: 1.5mm 2mm; font-size: 10.5pt; text-align: center; }
+  .days span i { font-style: normal; display: block; font-size: 15pt; }
+  code { white-space: nowrap; background: #fff; border: 1.5px solid #d8cfc4; border-radius: 6px; padding: .3mm 2mm; font-family: "Nunito"; font-size: 10.5pt; }
+  .help { margin-top: auto; border: 2.5px dashed #2b2622; border-radius: 14px; padding: 4mm 5mm; }
+  .help b { font-family: "Jua"; font-weight: 400; font-size: 15pt; }
+  .help ul { margin: 1mm 0 0; padding-left: 5mm; font-size: 11.5pt; line-height: 1.55; }
+</style>
+</head>
+<body>
+<section class="page">
+  <h1>현이야, 이렇게 하면 돼! ✨</h1>
+  <p class="sub">너는 이제 <b>MHJ 매거진 기자</b>야. 한 달에 책 한 권, 하루에 한 쪽이면 끝!<br><span class="en">You're an MHJ Magazine writer now. One book a month, one page a day.</span></p>
+
+  <div class="step y"><div class="n">📚</div><div><b>1. 책 읽기 + 포스트잇</b>
+    <p>읽다가 😮 놀라면 <b>노랑</b>, 🤔 궁금하면 <b>파랑</b>, 🙅 "나라면 안 해!" 싶으면 <b>빨강</b>을 붙여.</p></div></div>
+
+  <div class="step b"><div class="n">🖨️</div><div><b>2. 워크시트 뽑기 (엄마아빠랑)</b>
+    <p><code>2_인쇄할-워크시트</code> 폴더에서 <b>내 책 종류</b> 파일 하나만 인쇄해.<br>
+    역사책 → <code>역사책.pdf</code> · 고사성어책 → <code>이야기-고사성어책.pdf</code> · 잘 모르겠으면 → <code>어떤책이든.pdf</code></p></div></div>
+
+  <div class="step g"><div class="n">✏️</div><div><b>3. 하루에 한 쪽씩 (20분)</b>
+    <p>칸에 이미 앞말이 써 있어. <b>뒤만 채우면 돼.</b> 한국어 한 줄, 영어 한 줄!</p>
+    <div class="days"><span><i>📖</i>1일 책 만나기</span><span><i>🔍</i>2일 책 속으로</span><span><i>💭</i>3일 내 생각</span><span><i>🎨</i>4일 나와 연결</span></div></div></div>
+
+  <div class="step p"><div class="n">⌨️</div><div><b>4. 5일째: 기자 책상에 옮겨 치기</b>
+    <p>컴퓨터에서 <code>3_기자책상.html</code>을 더블클릭해서 열어. 종이의 <b>같은 번호 칸</b>에 옮겨 치면 오른쪽에 <b>내 매거진 지면</b>이 생겨!<br>
+    옮기면서 문장 <b>하나</b>만 더 좋게 고치기 ✨</p></div></div>
+
+  <div class="step c"><div class="n">📮</div><div><b>5. 보내기</b>
+    <p>체크를 다 하면 <b>[📋 복사해서 보내기]</b> 버튼이 열려. 누르고 엄마아빠 카톡에 붙여넣기 하면 끝!<br>
+    그다음은 엄마아빠가 매거진에 올려 줄 거야. 📰 짠!</p></div></div>
+
+  <div class="help"><b>🙋 막히면?</b>
+    <ul>
+      <li>칸이 어려우면 <b>한 줄만</b> 써도 괜찮아. 틀려도 OK!</li>
+      <li>친구·학교 이름은 쓰지 않기. 내 이름은 <b>Hyun / 현이</b>로만</li>
+      <li>기자 책상에 쓴 건 자동으로 저장돼. 창을 닫았다가 다시 열어도 그대로야</li>
+      <li>복사가 안 되면 <b>[💾 파일로 저장]</b>을 눌러서 그 파일을 보내</li>
+    </ul></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "type": "map",
+  "title": "현이가 그린 경주 지도",
+  "titleEn": "Hyun's map of Gyeongju, Silla's capital",
+  "book": "예시 · Sample",
+  "places": [
+    { "name": "첨성대", "why": "하늘을 관찰하던 곳이라고 전해져요", "whyEn": "Said to be for watching the sky" },
+    { "name": "불국사", "why": "통일신라 때 크게 지은 절", "whyEn": "A great temple from Unified Silla" },
+    { "name": "대릉원", "why": "커다란 옛 무덤이 모여 있어요", "whyEn": "Big royal tombs, like green hills" }
+  ]
+}

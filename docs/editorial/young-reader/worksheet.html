@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>현이의 이달의 책 워크시트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Nunito:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  :root {
+    --ink: #2b2622; --soft: #8a8078; --line: #cfc6bb; --paper: #fffdf9;
+    --y: #f2b632; --y-bg: #fff4d4;
+    --b: #4f86e8; --b-bg: #e7effd;
+    --g: #2f9e6e; --g-bg: #e2f4ea;
+    --p: #e8677b; --p-bg: #fde6ea;
+    --c: #b07a3c; --c-bg: #f6ebdd;
+  }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { margin: 0; background: #e9e4dc; }
+  body { font-family: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif; color: var(--ink); font-size: 12.5pt; line-height: 1.4; }
+  .en { font-family: "Nunito", sans-serif; font-weight: 600; }
+  .page { width: 210mm; height: 297mm; padding: 10mm 12mm 12mm; margin: 0 auto 8mm; background: var(--paper); position: relative; overflow: hidden; page-break-after: always; display: flex; flex-direction: column; }
+  @media print { html, body { background: none; } .page { margin: 0; } }
+  .page[hidden] { display: none; }
+
+  /* 머리 */
+  .head { display: flex; align-items: center; gap: 4mm; margin-bottom: 3.5mm; }
+  .badge { width: 17mm; height: 17mm; border-radius: 50%; display: grid; place-items: center; font-size: 25pt; flex: none; }
+  .head h1 { font-family: "Jua", sans-serif; font-weight: 400; font-size: 25pt; margin: 0; line-height: 1.1; }
+  .head h1 .en { display: block; font-size: 11pt; color: var(--soft); font-weight: 600; margin-top: 1mm; }
+  .head .day { margin-left: auto; text-align: right; font-family: "Jua"; font-size: 12pt; color: var(--soft); line-height: 1.3; }
+  .head .day b { display: block; font-size: 20pt; color: var(--ink); font-weight: 400; }
+  .tip { font-size: 10.5pt; color: var(--soft); margin: -2mm 0 4mm; }
+
+  /* 공통 부품 */
+  .card { border: 2.2px solid var(--ink); border-radius: 12px; padding: 3.5mm 4mm; background: #fff; }
+  .card + .card { margin-top: 3.2mm; }
+  .label { font-family: "Jua"; font-size: 13.5pt; display: flex; align-items: center; gap: 2mm; margin-bottom: 1.5mm; }
+  .label .en { font-size: 9.5pt; color: var(--soft); margin-left: auto; }
+  .num { width: 8.5mm; height: 8.5mm; border-radius: 50%; color: #fff; display: grid; place-items: center; font-family: "Nunito"; font-weight: 800; font-size: 12pt; flex: none; }
+  .ln { border-bottom: 1.6px dotted var(--line); height: 9.2mm; display: flex; align-items: flex-end; padding-bottom: 1mm; }
+  .ln.s { height: 8mm; }
+  .starter { font-size: 12pt; color: #5a524b; white-space: nowrap; }
+  .starter.en { font-size: 11pt; color: #6d655e; }
+  .flag { font-family: "Nunito"; font-weight: 800; font-size: 8pt; color: #fff; border-radius: 4px; padding: .4mm 1.6mm; margin-right: 2mm; flex: none; align-self: center; }
+  .flag.ko { background: var(--ink); } .flag.en2 { background: var(--soft); }
+  .row { display: grid; gap: 4mm; }
+  .r2 { grid-template-columns: 1fr 1fr; } .r3 { grid-template-columns: 1fr 1fr 1fr; } .r4 { grid-template-columns: repeat(4, 1fr); }
+  .box { border: 2px dashed var(--line); border-radius: 10px; position: relative; background: #fff; }
+  .box .in { position: absolute; top: 2mm; left: 3mm; font-size: 9.5pt; color: var(--soft); }
+  .chk { display: inline-flex; align-items: center; gap: 1.5mm; margin-right: 4mm; white-space: nowrap; }
+  .chk::before { content: ""; width: 5mm; height: 5mm; border: 2px solid var(--ink); border-radius: 4px; display: inline-block; background: #fff; }
+  .stars { font-size: 20pt; letter-spacing: 2mm; color: var(--line); }
+  .words { margin-top: auto; border-radius: 10px; padding: 2.5mm 4mm; font-size: 10pt; line-height: 1.6; }
+  .words b { font-family: "Jua"; font-weight: 400; font-size: 11pt; margin-right: 2mm; }
+  .foot { position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 8pt; color: #b3aaa0; font-family: "Nunito"; }
+  .mag { font-size: 9.5pt; border-radius: 999px; padding: 1mm 3.5mm; display: inline-block; margin-bottom: 3mm; }
+
+  /* 색 */
+  .t-y .badge, .t-y .num { background: var(--y); } .t-y .words, .t-y .mag { background: var(--y-bg); }
+  .t-b .badge, .t-b .num { background: var(--b); } .t-b .words, .t-b .mag { background: var(--b-bg); }
+  .t-g .badge, .t-g .num { background: var(--g); } .t-g .words, .t-g .mag { background: var(--g-bg); }
+  .t-p .badge, .t-p .num { background: var(--p); } .t-p .words, .t-p .mag { background: var(--p-bg); }
+  .t-c .badge { background: var(--c); }
+  .badge { background-clip: padding-box; }
+
+  /* 표지 */
+  .cover-top { text-align: center; padding: 2mm 0 1mm; }
+  .cover-top .kicker { font-family: "Nunito"; font-weight: 800; letter-spacing: .25em; font-size: 9pt; color: var(--c); }
+  .cover-top h1 { font-family: "Jua"; font-weight: 400; font-size: 38pt; margin: 2mm 0 0; }
+  .cover-top .en { font-size: 15pt; color: var(--soft); font-style: italic; }
+  .press { display: inline-block; margin-top: 4mm; border: 2.2px solid var(--ink); border-radius: 999px; padding: 1.5mm 6mm; font-family: "Jua"; font-size: 12pt; }
+  .trail { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; margin: 4mm 0 1mm; position: relative; }
+  .trail::before { content: ""; position: absolute; left: 8%; right: 8%; top: 9.5mm; border-top: 3px dashed var(--line); }
+  .stop { text-align: center; position: relative; }
+  .stop .dot { width: 19mm; height: 19mm; margin: 0 auto; border-radius: 50%; border: 2.4px solid var(--ink); background: #fff; display: grid; place-items: center; font-size: 21pt; position: relative; }
+  .stop .dot::after { content: "도장"; position: absolute; bottom: -1mm; right: -2mm; width: 9mm; height: 9mm; border-radius: 50%; border: 1.6px dashed var(--soft); background: var(--paper); font-size: 6.5pt; color: var(--soft); display: grid; place-items: center; font-family: "Gowun Dodum"; }
+  .stop b { display: block; font-family: "Jua"; font-weight: 400; font-size: 12.5pt; margin-top: 2.5mm; }
+  .stop span { font-size: 9pt; color: var(--soft); }
+  .rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+  .rule { border-radius: 12px; padding: 2.5mm 3mm; text-align: center; }
+  .rule .e { font-size: 18pt; }
+  .rule b { display: block; font-family: "Jua"; font-weight: 400; font-size: 13pt; margin: 1mm 0; }
+  .rule span { font-size: 10pt; color: #5a524b; }
+  .notes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+  .note { border-radius: 4px; padding: 3mm; min-height: 22mm; box-shadow: 0 1mm 0 rgba(0,0,0,.08); transform: rotate(-1deg); }
+  .note:nth-child(2) { transform: rotate(1.2deg); }
+  .note b { font-family: "Jua"; font-weight: 400; font-size: 14pt; display: block; }
+  .note span { font-size: 10pt; }
+  .sec { font-family: "Jua"; font-size: 15pt; margin: 4.5mm 0 2.5mm; display: flex; align-items: baseline; gap: 2mm; }
+  .sec .en { font-size: 9.5pt; color: var(--soft); }
+  .genres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5mm; }
+  .genre { border: 1.8px solid var(--line); border-radius: 10px; padding: 2mm 3mm; font-size: 10.5pt; display: flex; gap: 2mm; align-items: center; }
+  .genre i { font-style: normal; font-size: 16pt; }
+  .genre b { font-family: "Jua"; font-weight: 400; font-size: 12pt; display: block; }
+
+  /* 카메라 */
+  .cam { display: grid; grid-template-columns: 38mm 1fr; gap: 4mm; align-items: center; }
+  .cam .frame { height: 42mm; border: 2.2px solid var(--ink); border-radius: 10px; display: grid; place-items: center; background: repeating-linear-gradient(45deg, #fff, #fff 3mm, var(--y-bg) 3mm, var(--y-bg) 6mm); }
+  .cam .frame div { width: 22mm; height: 30mm; background: #fff; border: 2px solid var(--ink); border-radius: 2px 5px 5px 2px; display: grid; place-items: center; font-family: "Jua"; font-size: 9pt; box-shadow: 1.5mm 1.5mm 0 var(--y); }
+  .cam ol { margin: 0; padding: 0; list-style: none; }
+  .cam li { display: flex; align-items: center; gap: 2mm; font-size: 12pt; margin: 2mm 0; }
+
+  /* 스왑 페이지 부품 */
+  .tl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; position: relative; padding-top: 6mm; }
+  .tl::before { content: ""; position: absolute; left: 0; right: 0; top: 11mm; border-top: 3px solid var(--ink); }
+  .tl::after { content: "▶"; position: absolute; right: -2mm; top: 8.3mm; font-size: 12pt; }
+  .tl .st { position: relative; }
+  .tl .pin { width: 10mm; height: 10mm; border-radius: 50%; background: var(--b); border: 2.4px solid var(--ink); margin: 0 auto 3mm; color: #fff; display: grid; place-items: center; font-family: "Nunito"; font-weight: 800; }
+  .tl .yr { border: 2px solid var(--ink); border-radius: 8px; height: 10mm; display: flex; align-items: center; justify-content: flex-end; padding-right: 2mm; font-size: 10pt; background: #fff; }
+  .tl .ev { border: 2px dashed var(--line); border-radius: 8px; height: 58mm; margin-top: 2mm; background: #fff; position: relative; }
+  .person { display: grid; grid-template-columns: 24mm 1fr; gap: 3mm; }
+  .person .sym { height: 34mm; border: 2px dashed var(--line); border-radius: 10px; font-size: 8.5pt; color: var(--soft); display: grid; place-items: center; text-align: center; padding: 1mm; }
+  .comic { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .panel { border: 2.4px solid var(--ink); border-radius: 6px; height: 56mm; position: relative; background: #fff; }
+  .panel .tag { position: absolute; top: -1px; left: -1px; background: var(--ink); color: #fff; font-family: "Jua"; font-size: 11pt; padding: .5mm 3mm; border-radius: 5px 0 6px 0; }
+  .panel + .cap { margin-top: 0; }
+  .cap { border-bottom: 1.6px dotted var(--line); height: 9mm; }
+  .map { height: 88mm; border: 2.4px solid var(--ink); border-radius: 12px; position: relative; background: radial-gradient(circle at 1px 1px, #ddd4c8 1px, transparent 1.3px) 0 0/6mm 6mm, #fff; }
+  .map .compass { position: absolute; top: 3mm; right: 4mm; font-family: "Nunito"; font-weight: 800; font-size: 10pt; text-align: center; line-height: 1; }
+  .map .compass i { display: block; font-style: normal; font-size: 16pt; }
+  .cmp { width: 100%; border-collapse: separate; border-spacing: 2.5mm; margin: -2.5mm; width: calc(100% + 5mm); }
+  .cmp th { font-family: "Jua"; font-weight: 400; font-size: 13pt; padding: 2mm; border-radius: 10px; background: var(--b-bg); }
+  .cmp th .en { display: block; font-size: 8.5pt; color: var(--soft); }
+  .cmp td { border: 2px dashed var(--line); border-radius: 10px; height: 36mm; vertical-align: top; background: #fff; }
+  .cmp td.q { border: 0; width: 25mm; font-family: "Jua"; font-size: 13pt; vertical-align: middle; text-align: center; background: none; height: auto; }
+  .cmp td.q .en { display: block; font-size: 8.5pt; color: var(--soft); }
+  .flow .step { display: grid; grid-template-columns: 18mm 1fr; gap: 3mm; align-items: stretch; }
+  .flow .ico { border-radius: 12px; display: grid; place-items: center; font-size: 22pt; background: var(--b-bg); border: 2.2px solid var(--ink); }
+  .flow .arrow { text-align: left; padding-left: 6mm; font-size: 14pt; line-height: 1; margin: 1mm 0; color: var(--b); }
+  .fact { display: grid; grid-template-columns: 16mm 38mm 1fr; gap: 3mm; align-items: stretch; }
+  .fact .big { font-family: "Nunito"; font-weight: 800; font-size: 34pt; color: var(--b); line-height: 1; }
+  .fact + .fact { margin-top: 4mm; }
+</style>
+</head>
+<body>
+
+<!-- ============ 표지 ============ -->
+<section class="page t-c" data-page="cover">
+  <div class="cover-top">
+    <div class="kicker">MHJ MAGAZINE · YOUNG WRITER</div>
+    <h1>현이의 이달의 책</h1>
+    <div class="en">Hyun's Monthly Book</div>
+    <div class="press">🪪 기자 · Hyun &nbsp;|&nbsp; No. _____ &nbsp;|&nbsp; 20___ 년 ___ 월</div>
+  </div>
+
+  <div class="sec">🗺️ 오늘은 어디까지? <span class="en">My path — stamp each stop!</span></div>
+  <div class="trail">
+    <div class="stop"><div class="dot">📖</div><b>1일</b><span>책 만나기</span></div>
+    <div class="stop"><div class="dot">🔍</div><b>2일</b><span>책 속으로</span></div>
+    <div class="stop"><div class="dot">💭</div><b>3일</b><span>내 생각</span></div>
+    <div class="stop"><div class="dot">🎨</div><b>4일</b><span>나와 연결</span></div>
+    <div class="stop"><div class="dot">⌨️</div><b>5일</b><span>옮겨 치기</span></div>
+    <div class="stop"><div class="dot">📰</div><b>짠!</b><span>매거진에 실려요</span></div>
+  </div>
+  <p class="tip" style="text-align:center;margin-top:3mm">하루에 한 쪽, 20분이면 충분해요. 다 하면 동그라미에 도장이나 스티커! · <span class="en">One page a day, 20 minutes.</span></p>
+
+  <div class="sec">📌 읽으면서 붙여요 <span class="en">Sticky notes while reading</span></div>
+  <div class="notes">
+    <div class="note" style="background:#ffe98a"><b>😮 와, 진짜?</b><span>놀라거나 새로 안 것<br><span class="en">Wow!</span></span></div>
+    <div class="note" style="background:#bfe0ff"><b>🤔 왜 그랬지?</b><span>궁금한 것<br><span class="en">Why?</span></span></div>
+    <div class="note" style="background:#ffc4cd"><b>🙅 나라면 안 해!</b><span>동의가 안 되는 것 ← <b style="display:inline;font-size:10pt">최고의 글감</b><br><span class="en">I disagree</span></span></div>
+  </div>
+
+  <div class="sec">🤝 기자의 약속 3가지 <span class="en">Writer's promise</span></div>
+  <div class="rules">
+    <div class="rule" style="background:var(--y-bg)"><div class="e">🙈</div><b>이름은 Hyun만</b><span>친구·학교 이름은<br>쓰지 않아요</span></div>
+    <div class="rule" style="background:var(--g-bg)"><div class="e">✍️</div><b>내 말로 써요</b><span>책 문장을 길게<br>베끼지 않아요</span></div>
+    <div class="rule" style="background:var(--p-bg)"><div class="e">🌱</div><b>틀려도 OK</b><span>고치는 게<br>글쓰기예요</span></div>
+  </div>
+
+  <div class="sec">🔍 2일째 쪽은 책 종류에 따라 달라요 <span class="en">Pick your Day-2 page</span></div>
+  <div class="genres">
+    <div class="genre"><i>👑</i><div><b>역사</b>연표 + 인물 카드</div></div>
+    <div class="genre"><i>📜</i><div><b>이야기 · 고사성어</b>4컷 만화</div></div>
+    <div class="genre"><i>🗺️</i><div><b>지리</b>내가 그린 지도</div></div>
+    <div class="genre"><i>🌏</i><div><b>문화</b>비교표</div></div>
+    <div class="genre"><i>🤝</i><div><b>사회</b>문제 → 해결</div></div>
+    <div class="genre"><i>📚</i><div><b>어떤 책이든</b>새로 안 것 3가지</div></div>
+  </div>
+  <div class="foot"><span>MHJ · Hyun's Monthly Book · Worksheet v2</span><span>표지 Cover</span></div>
+</section>
+
+<!-- ============ 1일 책 만나기 ============ -->
+<section class="page t-y" data-page="1">
+  <div class="head"><div class="badge">📖</div><h1>책 만나기<span class="en">Meet the book</span></h1><div class="day">DAY<b>1</b></div></div>
+  <span class="mag">📰 이 쪽은 매거진의 <b>책 소개 상자</b>와 <b>표지 사진</b>이 돼요</span>
+
+  <div class="card">
+    <div class="label"><span class="num">1</span>책 제목 <span class="en">Title</span></div>
+    <div class="ln"></div>
+    <div class="row r2" style="margin-top:2mm">
+      <div><div class="label" style="font-size:11.5pt">✏️ 지은이 · 그린이 <span class="en">Author</span></div><div class="ln s"></div></div>
+      <div><div class="label" style="font-size:11.5pt">🏢 출판사 <span class="en">Publisher</span></div><div class="ln s"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">2</span>📷 표지 사진 미션 <span class="en">Cover photo mission</span></div>
+    <div class="cam">
+      <div class="frame"><div>책 표지</div></div>
+      <ol>
+        <li><span class="chk"></span>☀️ 밝은 창가에서 찍어요</li>
+        <li><span class="chk"></span>📐 책을 바닥에 똑바로 놓아요</li>
+        <li><span class="chk"></span>🙅 손이랑 얼굴은 안 나오게</li>
+        <li><span class="chk"></span>📤 엄마아빠에게 보냈어요</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">3</span>한 줄로 말하면? <span class="en">In one line</span></div>
+    <div class="ln"><span class="flag ko">한</span><span class="starter">이 책은 ________________ 에 대한 이야기예요.</span></div><div class="ln s"></div>
+    <div class="ln"><span class="flag en2">EN</span><span class="starter en">This book is about ________________.</span></div><div class="ln s"></div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">4</span>어떤 책이에요? 하나에 ✔ <span class="en">What kind of book?</span></div>
+    <div style="font-size:12pt;line-height:2">
+      <span class="chk">👑 역사</span><span class="chk">📜 이야기·고사성어</span><span class="chk">🗺️ 지리</span><br>
+      <span class="chk">🌏 문화</span><span class="chk">🤝 사회</span><span class="chk">📚 잘 모르겠어요</span>
+    </div>
+    <div class="tip" style="margin:1mm 0 0">→ 내일은 이 종류의 <b>2일째 쪽</b>을 써요</div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">5</span>내 점수는? <span class="en">My rating</span></div>
+    <div style="display:flex;align-items:center;gap:6mm">
+      <span class="stars">★★★★★</span><span style="font-size:10pt;color:var(--soft)">색칠해요</span>
+      <span style="margin-left:auto">👧 <b style="font-family:Jua;font-weight:400">몇 살 친구에게 추천?</b> ______ 살</span>
+    </div>
+  </div>
+  <div class="foot"><span>Hyun's Monthly Book</span><span>1일 · Day 1</span></div>
+</section>
+
+<!-- ============ 2일 역사 ============ -->
+<section class="page t-b" data-page="2" data-genre="history">
+  <div class="head"><div class="badge">👑</div><h1>책 속으로 · 역사<span class="en">Into the book · History</span></h1><div class="day">DAY<b>2</b></div></div>
+  <span class="mag">📰 이 쪽은 매거진의 <b>연표 그림(인포그래픽)</b>이 돼요</span>
+
+  <div class="card">
+    <div class="label"><span class="num">1</span>시간 여행 연표 <span class="en">Timeline</span></div>
+    <div class="tip" style="margin:0 0 1mm">책에서 중요한 일 4개를 <b>일어난 순서대로</b> 써요. 연도는 책에서 찾아요.</div>
+    <div class="tl">
+      <div class="st"><div class="pin">1</div><div class="yr">년</div><div class="ev"></div></div>
+      <div class="st"><div class="pin">2</div><div class="yr">년</div><div class="ev"></div></div>
+      <div class="st"><div class="pin">3</div><div class="yr">년</div><div class="ev"></div></div>
+      <div class="st"><div class="pin">4</div><div class="yr">년</div><div class="ev"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">2</span>인물 카드 2장 <span class="en">People cards</span></div>
+    <div class="row r2">
+      <div class="person"><div class="sym">이 사람을<br>나타내는<br>물건 그리기</div>
+        <div><div class="ln s">이름:</div><div class="ln s">한 일:</div><div class="ln s"></div><div class="stars" style="font-size:15pt;margin-top:1mm">★★★★★</div></div></div>
+      <div class="person"><div class="sym">이 사람을<br>나타내는<br>물건 그리기</div>
+        <div><div class="ln s">이름:</div><div class="ln s">한 일:</div><div class="ln s"></div><div class="stars" style="font-size:15pt;margin-top:1mm">★★★★★</div></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-style:dashed">
+    <div class="label">🥝 보너스 · 그때 뉴질랜드에서는? <span class="en">Meanwhile in Aotearoa</span></div>
+    <div class="tip" style="margin:0">힌트: 폴리네시아 사람들이 배를 타고 뉴질랜드에 처음 온 건 대략 1250~1300년쯤이라고 해요. 고려 시대예요!</div>
+    <div class="ln s"></div>
+  </div>
+
+  <div class="words"><b>🔤 영어 단어</b> 왕 king · 여왕 queen · 나라 kingdom · 전쟁 war · 통일하다 unite · 신분 rank · 백성 people · 세우다 found</div>
+  <div class="foot"><span>Hyun's Monthly Book</span><span>2일 · 역사 History</span></div>
+</section>
+
+<!-- ============ 2일 이야기·고사성어 ============ -->
+<section class="page t-b" data-page="2" data-genre="story">
+  <div class="head"><div class="badge">📜</div><h1>책 속으로 · 이야기<span class="en">Into the book · Story &amp; Idioms</span></h1><div class="day">DAY<b>2</b></div></div>
+  <span class="mag">📰 이 쪽은 매거진의 <b>4컷 이야기 그림</b>이 돼요</span>
+
+  <div class="card" style="display:grid;grid-template-columns:1fr 45mm;gap:4mm;align-items:end">
+    <div><div class="label"><span class="num">1</span>제일 마음에 든 이야기 (고사성어) <span class="en">My favourite</span></div><div class="ln"></div></div>
+    <div><div class="label" style="font-size:11pt">한자 (써도 되고 안 써도 돼요)</div><div class="ln"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">2</span>4컷 만화로 그려요 <span class="en">Tell it in 4 pictures</span></div>
+    <div class="comic">
+      <div><div class="panel"><span class="tag">① 처음에</span></div><div class="cap"></div></div>
+      <div><div class="panel"><span class="tag">② 그런데</span></div><div class="cap"></div></div>
+      <div><div class="panel"><span class="tag">③ 그래서</span></div><div class="cap"></div></div>
+      <div><div class="panel"><span class="tag">④ 마지막에</span></div><div class="cap"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">3</span>이 말의 뜻은? <span class="en">What it means</span></div>
+    <div class="ln s"><span class="flag ko">한</span><span class="starter">이 말은 ____________ 라는 뜻이에요.</span></div>
+    <div class="ln s"><span class="flag en2">EN</span><span class="starter en">It means ____________. &nbsp; 🥝 비슷한 영어 속담:</span></div>
+  </div>
+  <div class="foot"><span>Hyun's Monthly Book</span><span>2일 · 이야기 Story</span></div>
+</section>
+
+<!-- ============ 2일 지리 ============ -->
+<section class="page t-b" data-page="2" data-genre="geography">
+  <div class="head"><div class="badge">🗺️</div><h1>책 속으로 · 지리<span class="en">Into the book · Geography</span></h1><div class="day">DAY<b>2</b></div></div>
+  <span class="mag">📰 이 쪽은 매거진의 <b>지도 그림(인포그래픽)</b>이 돼요</span>
+
+  <div class="card">
+    <div class="label"><span class="num">1</span>내가 그린 지도 <span class="en">Draw the map</span></div>
+    <div class="tip" style="margin:0 0 2mm">책에 나온 곳을 그리고, 중요한 곳에 📍를 1, 2, 3 번호로 표시해요.</div>
+    <div class="map"><div class="compass"><i>⬆</i>N 북</div></div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">2</span>📍 여기가 특별한 이유 <span class="en">Why it's special</span></div>
+    <div class="ln s">📍1 &nbsp;장소:</div><div class="ln s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;왜?</div>
+    <div class="ln s">📍2 &nbsp;장소:</div><div class="ln s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;왜?</div>
+    <div class="ln s">📍3 &nbsp;장소:</div><div class="ln s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;왜?</div>
+  </div>
+
+  <div class="words"><b>🔤 영어 단어</b> 산 mountain · 강 river · 바다 sea · 섬 island · 도시 city · 날씨 weather · 북쪽 north · 남쪽 south</div>
+  <div class="foot"><span>Hyun's Monthly Book</span><span>2일 · 지리 Geography</span></div>
+</section>
+
+<!-- ============ 2일 문화 ============ -->
+<section class="page t-b" data-page="2" data-genre="culture">
+  <div class="head"><div class="badge">🌏</div><h1>책 속으로 · 문화<span class="en">Into the book · Culture</span></h1><div class="day">DAY<b>2</b></div></div>
+  <span class="mag">📰 이 쪽은 매거진의 <b>비교표 그림(인포그래픽)</b>이 돼요</span>
+
+  <div class="card">
+    <div class="label"><span class="num">1</span>무엇을 비교할까요? <span class="en">What am I comparing?</span></div>
+    <div class="ln"><span class="starter">책에 나온 ____________ (음식, 명절, 놀이, 옷 …)</span></div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">2</span>세 곳을 비교해요 <span class="en">Compare three places</span></div>
+    <table class="cmp">
+      <tr><th style="background:none"></th><th>📖 책 속<span class="en">In the book</span></th><th>🇰🇷 한국 지금<span class="en">Korea now</span></th><th>🇳🇿 뉴질랜드<span class="en">New Zealand</span></th></tr>
+      <tr><td class="q">뭐예요?<span class="en">What?</span></td><td></td><td></td><td></td></tr>
+      <tr><td class="q">어떻게?<span class="en">How?</span></td><td></td><td></td><td></td></tr>
+      <tr><td class="q">왜 해요?<span class="en">Why?</span></td><td></td><td></td><td></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">3</span>제일 신기한 차이 <span class="en">The coolest difference</span></div>
+    <div class="ln s"></div>
+  </div>
+  <div class="words"><b>🔤 영어 단어</b> 명절 festival · 전통 tradition · 음식 food · 옷 clothes · 놀이 game · 같다 same · 다르다 different</div>
+  <div class="foot"><span>Hyun's Monthly Book</span><span>2일 · 문화 Culture</span></div>
+</section>
+
+<!-- ============ 2일 사회 ============ -->
+<section class="page t-b" data-page="2" data-genre="society">
+  <div class="head"><div class="badge">🤝</div><h1>책 속으로 · 사회<span class="en">Into the book · Society</span></h1><div class="day">DAY<b>2</b></div></div>
+  <span class="mag">📰 이 쪽은 매거진의 <b>문제 → 해결 그림(인포그래픽)</b>이 돼요</span>
+
+  <div class="flow">
+    <div class="card step" style="display:grid;grid-template-columns:18mm 1fr;gap:3mm"><div class="ico">😟</div><div><div class="label" style="margin:0">어떤 문제가 있었나요? <span class="en">The problem</span></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div></div></div>
+    <div class="arrow">▼</div>
+    <div class="card step" style="display:grid;grid-template-columns:18mm 1fr;gap:3mm;margin-top:0"><div class="ico">🔍</div><div><div class="label" style="margin:0">왜 생겼을까요? <span class="en">Why did it happen?</span></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div></div></div>
+    <div class="arrow">▼</div>
+    <div class="card step" style="display:grid;grid-template-columns:18mm 1fr;gap:3mm;margin-top:0"><div class="ico">🧍</div><div><div class="label" style="margin:0">누가 힘들었나요? <span class="en">Who was affected?</span></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div></div></div>
+    <div class="arrow">▼</div>
+    <div class="card step" style="display:grid;grid-template-columns:18mm 1fr;gap:3mm;margin-top:0"><div class="ico">💡</div><div><div class="label" style="margin:0">어떻게 해결했나요? <span class="en">How was it solved?</span></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div></div></div>
+    <div class="arrow">▼</div>
+    <div class="card step" style="display:grid;grid-template-columns:18mm 1fr;gap:3mm;margin-top:0"><div class="ico">🙋</div><div><div class="label" style="margin:0">나라면 어떻게 할까요? <span class="en">What would I do?</span></div><div class="ln s"></div><div class="ln s"></div></div></div>
+  </div>
+  <div class="words" style="margin-top:4mm"><b>🔤 영어 단어</b> 문제 problem · 원인 cause · 해결 solution · 공평하다 fair · 돕다 help · 규칙 rule · 모두 everyone</div>
+  <div class="foot"><span>Hyun's Monthly Book</span><span>2일 · 사회 Society</span></div>
+</section>
+
+<!-- ============ 2일 어떤 책이든 ============ -->
+<section class="page t-b" data-page="2" data-genre="any">
+  <div class="head"><div class="badge">📚</div><h1>책 속으로 · 새로 안 것<span class="en">Into the book · 3 things I learned</span></h1><div class="day">DAY<b>2</b></div></div>
+  <span class="mag">📰 이 쪽은 매거진의 <b>"알고 있었나요? 3가지" 그림</b>이 돼요</span>
+
+  <div class="card">
+    <div class="label">새로 안 것 3가지 <span class="en">3 things I learned</span></div>
+    <div class="tip" style="margin:0 0 3mm">숫자가 나오면 꼭 적어요! (몇 년, 몇 명, 몇 km…) 숫자는 멋진 그림이 돼요.</div>
+    <div class="fact"><div class="big">1</div><div class="box" style="height:52mm"><span class="in">그림</span></div><div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div><div class="ln s">숫자:</div></div></div>
+    <div class="fact"><div class="big">2</div><div class="box" style="height:52mm"><span class="in">그림</span></div><div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div><div class="ln s">숫자:</div></div></div>
+    <div class="fact"><div class="big">3</div><div class="box" style="height:52mm"><span class="in">그림</span></div><div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div><div class="ln s">숫자:</div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="label">⭐ 이 중에 제일 놀란 건 몇 번? <span class="en">The most surprising one</span></div>
+    <div class="ln s"><span class="starter">___번! 왜냐하면</span></div>
+  </div>
+  <div class="foot"><span>Hyun's Monthly Book</span><span>2일 · 어떤 책이든 Any book</span></div>
+</section>
+
+<!-- ============ 3일 내 생각 ============ -->
+<section class="page t-g" data-page="3">
+  <div class="head"><div class="badge">💭</div><h1>내 생각<span class="en">What I think</span></h1><div class="day">DAY<b>3</b></div></div>
+  <span class="mag">📰 칸 ①~④를 이어 붙이면 <b>기사 앞부분</b>이 완성돼요! 앞말은 이미 써 있어요. 뒤만 채워요.</span>
+
+  <div class="card">
+    <div class="label"><span class="num">1</span>궁금하게 시작하기 <span class="en">Start with a hook</span></div>
+    <div class="ln"><span class="flag ko">한</span><span class="starter">여러분은 ____________ 알고 있나요?</span></div><div class="ln s"></div>
+    <div class="ln"><span class="flag en2">EN</span><span class="starter en">Did you know ____________?</span></div><div class="ln s"></div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="num">2</span>내 생각 한 문장 <span class="en">My big idea</span></div>
+    <div class="tip" style="margin:0">💡 "재미있었다"는 안 돼요. 누가 "아닌데?" 할 수 있는 생각이 최고!</div>
+    <div class="ln"><span class="flag ko">한</span><span class="starter">나는 ____________ 라고 생각해요.</span></div><div class="ln s"></div>
+    <div class="ln"><span class="flag en2">EN</span><span class="starter en">I think ____________.</span></div><div class="ln s"></div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="num">3</span>왜냐하면 (책 몇 쪽?) <span class="en">Because (page?)</span></div>
+    <div class="ln"><span class="flag ko">한</span><span class="starter">왜냐하면 책 ___쪽에서 ____________ 때문이에요.</span></div><div class="ln s"></div>
+    <div class="ln"><span class="flag en2">EN</span><span class="starter en">Because on page ___, ____________.</span></div><div class="ln s"></div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="num">4</span>하지만 반대로 생각하면? <span class="en">The other side</span></div>
+    <div class="ln"><span class="flag ko">한</span><span class="starter">어떤 사람은 ________ 라고 할 수도 있어요. 하지만 ________.</span></div><div class="ln s"></div>
+    <div class="ln"><span class="flag en2">EN</span><span class="starter en">Someone might say ________. But ________.</span></div><div class="ln s"></div>
+  </div>
+  <div class="words"><b>🔤 생각 단어</b> 용감한 brave · 지혜로운 wise · 공평한 fair · 불공평한 unfair · 중요한 important · 친절한 kind<br><b>💬 다 쓰면</b> 엄마아빠랑 15분 수다! "내 생각에 반대해 봐!"</div>
+  <div class="foot"><span>Hyun's Monthly Book</span><span>3일 · Day 3</span></div>
+</section>
+
+<!-- ============ 4일 나와 연결 ============ -->
+<section class="page t-p" data-page="4">
+  <div class="head"><div class="badge">🎨</div><h1>나와 연결 · 한 장면<span class="en">Connect &amp; draw</span></h1><div class="day">DAY<b>4</b></div></div>
+  <span class="mag">📰 칸 ⑤⑥이 <b>기사 마무리</b>, 그림은 <b>매거진 사진 칸</b>에 들어가요</span>
+
+  <div class="card">
+    <div class="label"><span class="num">5</span>뉴질랜드에 사는 나와 연결 <span class="en">Link to my life</span></div>
+    <div class="ln"><span class="flag ko">한</span><span class="starter">뉴질랜드에 사는 나는 ____________.</span></div><div class="ln s"></div>
+    <div class="ln"><span class="flag en2">EN</span><span class="starter en">Living in New Zealand, I ____________.</span></div><div class="ln s"></div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="num">6</span>독자에게 질문하기 <span class="en">Ask my readers</span></div>
+    <div class="ln"><span class="flag ko">한</span><span class="starter">여러분이라면 ____________?</span></div><div class="ln s"></div>
+    <div class="ln"><span class="flag en2">EN</span><span class="starter en">What would you ____________?</span></div><div class="ln s"></div>
+  </div>
+
+  <div class="card" style="flex:1;display:flex;flex-direction:column">
+    <div class="label"><span class="num">7</span>제일 기억나는 한 장면 <span class="en">My favourite scene</span></div>
+    <div class="box" style="flex:1;min-height:45mm"><span class="in">🖍️ 크게, 색칠까지! 사람은 뒷모습이나 옆모습으로 · Draw it big</span></div>
+    <div class="ln s"><span class="flag ko">한</span></div>
+    <div class="ln s"><span class="flag en2">EN</span></div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="num">8</span>내 기사 제목 <span class="en">My headline</span></div>
+    <div class="ln"><span class="flag ko">한</span></div>
+    <div class="ln"><span class="flag en2">EN</span></div>
+  </div>
+  <div class="foot"><span>Hyun's Monthly Book</span><span>4일 · Day 4 → 내일은 옮겨 치기!</span></div>
+</section>
+
+<script>
+  // ?genre=history|story|geography|culture|society|any|all  (기본 all)
+  const g = new URLSearchParams(location.search).get('genre') || 'all';
+  if (g !== 'all') document.querySelectorAll('[data-genre]').forEach(p => { if (p.dataset.genre !== g) p.remove(); });
+</script>
+</body>
+</html>
