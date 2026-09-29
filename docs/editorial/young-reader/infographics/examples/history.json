@@ -1,0 +1,17 @@
+{
+  "type": "timeline",
+  "title": "신라에서 고려까지, 4번의 큰일",
+  "titleEn": "From Silla to Goryeo in four big moments",
+  "book": "예시 · Sample",
+  "events": [
+    { "year": "BC 57", "label": "신라가 세워졌다고 전해져요", "labelEn": "Silla is said to be founded" },
+    { "year": "676", "label": "신라가 삼국 통일을 마쳐요", "labelEn": "Silla unites the Three Kingdoms" },
+    { "year": "918", "label": "왕건이 고려를 세워요", "labelEn": "Wang Geon founds Goryeo" },
+    { "year": "936", "label": "고려가 후삼국을 통일해요", "labelEn": "Goryeo reunites the land" }
+  ],
+  "people": [
+    { "name": "선덕여왕", "did": "신라 최초의 여왕. 첨성대가 이때 세워졌다고 해요", "score": 5 },
+    { "name": "김유신", "did": "삼국 통일을 이끈 장군", "score": 4 },
+    { "name": "왕건", "did": "고려를 세운 첫 번째 왕", "score": 4 }
+  ]
+}

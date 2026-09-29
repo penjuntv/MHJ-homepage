@@ -1,0 +1,13 @@
+{
+  "type": "flow",
+  "title": "골품제, 무엇이 문제였을까?",
+  "titleEn": "Silla's bone-rank system: what went wrong?",
+  "book": "예시 · Sample",
+  "steps": [
+    { "icon": "😟", "label": "문제", "text": "태어난 신분으로 할 수 있는 일이 정해졌어요", "textEn": "Your birth decided your job" },
+    { "icon": "🔍", "label": "왜?", "text": "높은 신분이 자리를 지키고 싶었어요", "textEn": "Top ranks wanted to keep power" },
+    { "icon": "🧍", "label": "누가 힘들었나?", "text": "능력 있는 6두품 사람들", "textEn": "Talented people of lower rank" },
+    { "icon": "💡", "label": "그 뒤에는?", "text": "고려는 과거 시험으로 사람을 뽑기 시작했어요", "textEn": "Goryeo later chose officials by exam" },
+    { "icon": "🙋", "label": "나라면?", "text": "잘하는 사람이 기회를 얻게 할 거예요", "textEn": "I'd give chances to the best person" }
+  ]
+}

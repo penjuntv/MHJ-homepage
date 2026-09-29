@@ -1,0 +1,13 @@
+{
+  "type": "compare",
+  "title": "새해 첫날, 세 곳의 풍경",
+  "titleEn": "New Year's Day in three places",
+  "book": "예시 · Sample",
+  "cols": [ { "ko": "책 속", "en": "In the book" }, { "ko": "한국 지금", "en": "Korea now" }, { "ko": "뉴질랜드", "en": "New Zealand" } ],
+  "rows": [
+    { "q": "뭐예요?", "qEn": "What?", "cells": ["설날 차례", "설날, 떡국", "New Year's Day"] },
+    { "q": "어떻게?", "qEn": "How?", "cells": ["조상께 인사", "세배하고 세뱃돈", "여름이라 비치 캠핑"] },
+    { "q": "왜 해요?", "qEn": "Why?", "cells": ["조상을 기억하려고", "한 살 더 먹는 날", "새해를 쉬며 즐기려고"] }
+  ],
+  "punch": "같은 새해인데, 뉴질랜드는 한여름이에요!"
+}

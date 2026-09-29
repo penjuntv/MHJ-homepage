@@ -1,0 +1,15 @@
+{
+  "type": "story4",
+  "title": "새옹지마 塞翁之馬",
+  "titleEn": "The old man at the border and his horse",
+  "book": "예시 · Sample",
+  "panels": [
+    { "ko": "국경 마을 노인의 말이 도망갔어요.", "en": "An old man's horse ran away." },
+    { "ko": "그런데 말이 더 좋은 말을 데리고 돌아왔어요!", "en": "But it came back with a better horse!" },
+    { "ko": "그 말을 타던 아들이 떨어져 다리를 다쳤어요.", "en": "His son fell off it and hurt his leg." },
+    { "ko": "그래서 아들은 전쟁에 나가지 않아도 됐어요.", "en": "So the son didn't have to go to war." }
+  ],
+  "meaning": "좋은 일과 나쁜 일은 미리 알 수 없어요",
+  "meaningEn": "You never know what's good luck or bad luck",
+  "similar": "a blessing in disguise"
+}
