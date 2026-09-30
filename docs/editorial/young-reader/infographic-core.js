@@ -72,7 +72,8 @@
   .ig .fc .en { font-size: 26px; margin-top: 12px; line-height: 1.35; }`;
 
   const esc = t => String(t ?? '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
-  const stars = n => '★'.repeat(n || 0) + '☆'.repeat(5 - (n || 0));
+  // 0~5 로 자른다 — 아이가 10 을 치면 repeat(-5) 로 전체 미리보기가 죽던 문제 (v1.0 검토 P0)
+  const stars = n => { n = Math.max(0, Math.min(5, Math.round(+n || 0))); return '★'.repeat(n) + '☆'.repeat(5 - n); };
   const KIND = { timeline: '한국사 이야기', story4: '고사성어 이야기', map: '지리 이야기', compare: '문화 이야기', flow: '사회 이야기', facts3: '알고 있었나요?' };
   const KIDS = { hyun: { ko: '현이', en: 'Hyun' }, min: { ko: '민이', en: 'Min' }, jin: { ko: '지니', en: 'Jin' } };
   const arr = a => (Array.isArray(a) ? a : []);

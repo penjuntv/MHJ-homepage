@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>이달의 책 운영 매뉴얼</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Noto+Serif+KR:wght@700;900&family=Nunito:wght@700;800&family=Jua&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Noto Sans KR", sans-serif; color: #1f1b17; font-size: 10.3pt; line-height: 1.6; }
+  .page { width: 210mm; height: 297mm; padding: 14mm 16mm 17mm; background: #fff; page-break-after: always; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .page:last-child { page-break-after: auto; }
+  .kick { font-family: "Nunito"; font-weight: 800; letter-spacing: .2em; font-size: 8.5pt; color: #b07a3c; display: flex; justify-content: space-between; border-bottom: 2px solid #1f1b17; padding-bottom: 2.5mm; }
+  h1 { font-family: "Noto Serif KR"; font-weight: 900; font-size: 21pt; line-height: 1.3; margin: 5mm 0 1.5mm; }
+  h1 .ch { font-family: "Nunito"; font-weight: 800; font-size: 11pt; color: #b07a3c; display: block; letter-spacing: .1em; }
+  .lead { color: #5a524b; margin: 0 0 3.5mm; }
+  h2 { font-family: "Noto Serif KR"; font-size: 12.5pt; margin: 4mm 0 1.5mm; display: flex; align-items: center; gap: 2.5mm; }
+  h2 .n { background: #1f1b17; color: #fff; border-radius: 50%; width: 6.5mm; height: 6.5mm; display: grid; place-items: center; font-family: "Nunito"; font-size: 9.5pt; flex: none; }
+  table { width: 100%; border-collapse: collapse; margin: 1mm 0; }
+  th, td { border-bottom: 1px solid #e3dbd0; padding: 1.7mm 2.2mm; text-align: left; vertical-align: top; }
+  th { background: #f5f0ea; font-size: 9.3pt; }
+  ul, ol { margin: 1mm 0; padding-left: 5mm; } li { margin: .7mm 0; }
+  code { font-family: "Nunito"; font-weight: 700; background: #f5f0ea; border-radius: 4px; padding: 0 1.4mm; font-size: 9.3pt; }
+  .ui { font-weight: 700; background: #eef2ff; color: #3730a3; border-radius: 4px; padding: 0 1.4mm; white-space: nowrap; }
+  .box { background: #f5f0ea; border-radius: 10px; padding: 3mm 4mm; margin: 2mm 0; }
+  .warn { background: #fde6ea; border-radius: 10px; padding: 3mm 4mm; margin: 2mm 0; }
+  .tip { background: #e2f4ea; border-radius: 10px; padding: 3mm 4mm; margin: 2mm 0; }
+  .shot { border: 1.5px solid #d9cfc2; border-radius: 8px; overflow: hidden; margin: 2mm 0; background: #f6f1e9; }
+  .shot img { display: block; width: 100%; }
+  .cap { font-size: 8.8pt; color: #6b6259; margin: -1mm 0 2mm; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; align-items: start; }
+  .p7 .igshot img { max-height: 128mm; object-fit: cover; object-position: bottom; }
+  .foot { position: absolute; bottom: 6mm; left: 16mm; right: 16mm; font-size: 8pt; color: #a3988c; display: flex; justify-content: space-between; font-family: "Nunito"; }
+  .toc li { display: flex; justify-content: space-between; border-bottom: 1px dotted #d9cfc2; padding: 1.3mm 0; list-style: none; }
+  .toc { padding: 0; }
+  .tree { font-family: "Nunito", "Noto Sans KR"; font-size: 9.6pt; line-height: 1.75; background: #f5f0ea; border-radius: 10px; padding: 3mm 5mm; white-space: pre; }
+  .cover { justify-content: center; text-align: center; background: #f5f0ea; }
+  .cover .big { font-family: "Noto Serif KR"; font-weight: 900; font-size: 36pt; line-height: 1.2; }
+  .cover .en { font-family: "Nunito"; font-weight: 700; color: #6b6259; font-size: 13pt; margin-top: 3mm; }
+  .cover .kids { display: flex; justify-content: center; gap: 8mm; margin: 12mm 0; }
+  .cover .kids div { background: #fff; border: 2px solid #1f1b17; border-radius: 12px; padding: 4mm 6mm; min-width: 38mm; }
+  .cover .kids b { display: block; font-family: "Jua"; font-weight: 400; font-size: 18pt; }
+  .step3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
+  .step3 div { border: 1.5px solid #1f1b17; border-radius: 10px; padding: 3mm; font-size: 9.5pt; }
+  .step3 b { font-family: "Noto Serif KR"; display: block; font-size: 11pt; margin-bottom: 1mm; }
+</style>
+</head>
+<body>
+
+<!-- 표지 -->
+<section class="page cover">
+  <div style="font-family:Nunito;font-weight:800;letter-spacing:.3em;color:#b07a3c;font-size:10pt">MHJ MAGAZINE · YOUNG WRITERS</div>
+  <div class="big" style="margin-top:6mm">이달의 책<br>운영 매뉴얼</div>
+  <div class="en">Monthly Book — how we run it</div>
+  <div class="kids">
+    <div><b>지니</b>Jin · Year 1<br>Level 0 · 듣고 말하기</div>
+    <div><b>현이</b>Hyun · Year 5<br>Level 1 · 칸 채워 쓰기</div>
+    <div><b>민이</b>Min · Year 7<br>Level 2 · 논증 쓰기</div>
+  </div>
+  <div style="color:#6b6259">아이들이 한 달에 책 한 권을 읽고, MHJ 매거진에 한국어·영어 글을 싣는 방법</div>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>2026년 10월</span></div>
+</section>
+
+<!-- 한눈에 + 목차 -->
+<section class="page">
+  <div class="kick"><span>MHJ MONTHLY BOOK · v1.0</span><span>시작하기 전에</span></div>
+  <h1>한눈에 보기</h1>
+  <p class="lead">아이들은 <b>하루 한 쪽, 5일</b>이면 기사 한 편을 씁니다. 종이에 먼저 쓰고, 기자 책상에 옮겨 치면서 한 번 더 다듬습니다. 엄마아빠는 질문하고, 사진을 모으고, 받은 파일을 매거진에 올립니다.</p>
+
+  <h2><span class="n">1</span>꾸러미 안에 든 것</h2>
+  <div class="tree">MHJ-이달의책-v1.0/
+├ 1_운영매뉴얼.pdf              ← 지금 이 문서
+├ 2_현이/   현이-안내.pdf · 워크시트/ (책 종류별 6개) · 현이-기자책상.html
+├ 3_민이/   민이-안내.pdf · 워크시트/ (책 종류별 6개) · 민이-기자책상.html
+├ 4_지니/   지니-워크시트.pdf · 지니-기자책상(엄마아빠용).html
+├ 5_가족북클럽/   가족토론-기록지.pdf
+└ 6_참고-인포그래픽-예시/   책 종류별 완성 예시 6장</div>
+
+  <h2><span class="n">2</span>처음 한 번만 할 일</h2>
+  <div class="step3">
+    <div><b>① 폴더 옮기기</b>zip을 풀어서 아이들이 쓰는 <b>컴퓨터</b>의 문서 폴더에 둡니다. 기자 책상은 그 컴퓨터에 글을 기억합니다.</div>
+    <div><b>② 크롬으로 열기</b>기자 책상 파일을 우클릭하고 <span class="ui">다음으로 열기 → Google Chrome</span>을 고릅니다. 한 번 해 두면 다음부터는 더블클릭으로 열립니다.</div>
+    <div><b>③ 포스트잇 3색</b>노랑·파랑·빨강 포스트잇을 책과 함께 둡니다. 읽으면서 붙이면 그게 글감이 됩니다.</div>
+  </div>
+
+  <h2><span class="n">3</span>차례</h2>
+  <ul class="toc">
+    <li><span>1. 세 아이, 세 레벨</span><span>3</span></li>
+    <li><span>2. 현이 · 민이 한 권 진행하기</span><span>4</span></li>
+    <li><span>3. 지니 한 권 진행하기</span><span>5</span></li>
+    <li><span>4. 기자 책상 사용법</span><span>6–7</span></li>
+    <li><span>5. 받은 파일을 매거진에 올리기</span><span>8</span></li>
+    <li><span>6. 가족 북클럽 달</span><span>9</span></li>
+    <li><span>7. 이럴 땐 이렇게 (문제 해결)</span><span>10</span></li>
+  </ul>
+  <div class="warn" style="margin-top:auto"><b>🚨 딱 하나만 기억한다면</b> · 매거진 어디에도 아이 실명은 쓰지 않습니다. 이름은 <b>지니/Jin · 현이/Hyun · 민이/Min</b>만 씁니다. 본문, 사진 캡션, <b>사진 파일 이름</b>, 그림 속 글씨까지 확인합니다.</div>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>2</span></div>
+</section>
+
+<!-- 1. 세 레벨 -->
+<section class="page">
+  <div class="kick"><span>MHJ MONTHLY BOOK · v1.0</span><span>1 · 세 아이, 세 레벨</span></div>
+  <h1><span class="ch">CHAPTER 1</span>세 아이, 세 레벨</h1>
+  <p class="lead">흐름은 같고, 아이마다 생각을 세우는 깊이만 다릅니다. 레벨은 학년이 아니라 <b>지금 할 수 있는 것</b>에 맞춥니다.</p>
+  <table>
+    <tr><th style="width:17%"></th><th>지니 · L0 (Year 1)</th><th>현이 · L1 (Year 5)</th><th>민이 · L2 (Year 7)</th></tr>
+    <tr><td><b>읽기</b></td><td>엄마아빠가 읽어 주기</td><td>혼자 읽기 + 포스트잇</td><td>혼자 읽기 + 포스트잇</td></tr>
+    <tr><td><b>쓰기</b></td><td>그리고 <b>말하기</b> → 부모가 받아 적기</td><td>앞말이 인쇄된 칸의 뒤를 채우기</td><td>앞말을 따라 쓰되 <b>근거 2개 · 반론에 답하기</b>, "~다"체</td></tr>
+    <tr><td><b>2일째 쪽</b></td><td>제일 좋은 장면 그리기</td><td colspan="2">책 종류별 6가지: 역사(연표) · 이야기/고사성어(4컷) · 지리(지도) · 문화(비교표) · 사회(문제→해결) · 어떤 책이든(새로 안 것 3가지). 매거진 <b>인포그래픽</b>이 됩니다</td></tr>
+    <tr><td><b>더 하는 것</b></td><td>—</td><td>한 문장 더 좋게 고치기</td><td><b>책 밖 자료 1개로 확인</b> · 두 문장 고치기</td></tr>
+    <tr><td><b>하루</b></td><td>10~15분 × 4번</td><td>20분 × 5일</td><td>25분 × 5일</td></tr>
+    <tr><td><b>분량</b></td><td>문답 6개</td><td>한 200~500자 · EN 60~150단어</td><td>한 400~800자 · EN 150~300단어</td></tr>
+    <tr><td><b>매거진</b></td><td>"지니에게 물었어요" 문답 + 그림 3장</td><td>칼럼 + 인포그래픽</td><td>칼럼 + 인포그래픽 + 확인한 자료</td></tr>
+  </table>
+
+  <h2><span class="n">★</span>한국어와 영어는 번역이 아닙니다</h2>
+  <p style="margin:0">같은 주장을 <b>독자를 바꿔</b> 두 번 씁니다. 한국어는 한국에 사는 사촌에게, 영어는 한국을 전혀 모르는 키위 친구에게 씁니다. 그래서 영어 글에는 배경 설명이 자연스럽게 들어갑니다. 영어 칸을 한국어의 번역으로 만들지 않게 해 주세요.</p>
+
+  <h2><span class="n">★</span>한 달 달력</h2>
+  <table>
+    <tr><th style="width:17%">주</th><th>아이</th><th>엄마아빠</th></tr>
+    <tr><td>1주</td><td>책 고르고 읽기 (포스트잇)</td><td>종류에 맞는 워크시트 인쇄. 지니는 읽어 주기</td></tr>
+    <tr><td>2주</td><td>워크시트 하루 한 쪽</td><td>3일째 끝나고 <b>15분 수다</b> · 사진 받기</td></tr>
+    <tr><td>3주</td><td>기자 책상에 옮겨 치기 → <b>📦 한 파일로 저장</b> → 카톡</td><td>파일 받기</td></tr>
+    <tr><td>4주</td><td>최종본 확인 ("내 글 맞아?")</td><td>mhj-desk에 올리고 호에 배치</td></tr>
+  </table>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>3</span></div>
+</section>
+
+<!-- 2. 현이·민이 -->
+<section class="page">
+  <div class="kick"><span>MHJ MONTHLY BOOK · v1.0</span><span>2 · 현이 · 민이</span></div>
+  <h1><span class="ch">CHAPTER 2</span>현이 · 민이 한 권 진행하기</h1>
+  <p class="lead">워크시트 PDF는 <b>책 한 권에 하나</b>만 인쇄합니다(5쪽). 종류가 애매하면 <code>어떤책이든.pdf</code>를 씁니다. 아이는 각자 폴더의 <code>안내.pdf</code> 한 장만 보면 됩니다.</p>
+  <table>
+    <tr><th style="width:15%">날</th><th style="width:40%">아이 (종이)</th><th>엄마아빠</th></tr>
+    <tr><td>1일 📖</td><td>책 정보 · 표지 사진 미션 · 한 줄 요약(민이: 작가의 메시지) · 별점</td><td><b>표지 사진</b> 받기 (밝은 곳, 바닥에 똑바로, 손·얼굴 없이)</td></tr>
+    <tr><td>2일 🔍</td><td>책 종류별 쪽 채우기 (연표·4컷·지도·비교표·문제→해결·3가지)</td><td>—</td></tr>
+    <tr><td>3일 💭</td><td>①첫 문장 ②내 생각/주장 ③근거(쪽수) ④반대편에 답하기</td><td><b>15분 수다</b> (아래 질문)</td></tr>
+    <tr><td>4일 🎨</td><td>⑤나와 연결 ⑥질문으로 끝내기 ⑦그림(민이: 책 밖 자료 확인 + 그림) ⑧제목</td><td>민이: 자료 찾기 도와주기 · <b>그림 사진</b> 받기</td></tr>
+    <tr><td>5일 ⌨️</td><td>기자 책상에 옮겨 치며 다듬기 → 📦 한 파일로 저장 → 카톡</td><td>파일 받기</td></tr>
+  </table>
+
+  <div class="cols">
+    <div>
+      <h2><span class="n">?</span>15분 수다 — 이 중 2~3개만</h2>
+      <ol>
+        <li>"빨간 포스트잇 붙인 데 보여줘. 너라면?"</li>
+        <li>"②번 네 생각에 반대해 볼게." → 짧게 반박하고 아이가 방어하게 둡니다. <b>이기지 마세요</b></li>
+        <li>"그 증거, 책 몇 쪽이야?"</li>
+        <li>"키위 친구한테 설명하려면 뭘 먼저 말해줘야 할까?"</li>
+      </ol>
+      <h2><span class="n">🔎</span>민이의 책 밖 자료</h2>
+      <p style="margin:0">찾는 건 같이 해 주고, 비교는 민이가 합니다. 한국사는 <b>우리역사넷</b>(국사편찬위원회)과 <b>국립중앙박물관</b> 누리집, 뉴질랜드는 <b>Te Ara</b>, 그 밖에는 어린이 백과사전을 권합니다. 질문은 "책이랑 다른 게 있어?" 하나면 됩니다.</p>
+    </div>
+    <div>
+      <h2><span class="n">✕</span>하지 말 것</h2>
+      <ul>
+        <li>주장을 대신 정해주기 → 대신 "다른 생각도 있을까?"</li>
+        <li>종이 단계에서 맞춤법 지적하기 (맞춤법은 매거진에 올릴 때 고칩니다)</li>
+        <li>영어 칸을 번역으로 만들기</li>
+        <li>만화의 각색을 "틀렸다"고 하기 → 대신 "이건 책이 꾸민 걸까?"</li>
+      </ul>
+      <h2><span class="n">♥</span>칭찬은 과정에</h2>
+      <ul>
+        <li>"반대편 입장을 먼저 써 준 게 진짜 기자 같다"</li>
+        <li>"근거에 쪽수까지 있어서 믿음이 간다"</li>
+        <li>"타자로 옮기면서 문장이 훨씬 선명해졌네" — 기자 책상의 <b>✨ 고친 문장</b> 칸을 보고</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>4</span></div>
+</section>
+
+<!-- 3. 지니 -->
+<section class="page">
+  <div class="kick"><span>MHJ MONTHLY BOOK · v1.0</span><span>3 · 지니</span></div>
+  <h1><span class="ch">CHAPTER 3</span>지니 한 권 진행하기</h1>
+  <p class="lead">지니는 아직 글을 읽지 못하니 <b>읽어 주고, 그리게 하고, 말한 것을 그대로 받아 적는</b> 기자입니다. 워크시트는 책 종류와 상관없이 한 벌(5쪽)입니다.</p>
+  <table>
+    <tr><th style="width:18%">쪽</th><th style="width:34%">지니</th><th>엄마아빠</th></tr>
+    <tr><td>표지</td><td>다 하면 스티커</td><td>책 고르기: 그림 많은 그림책이 제일 좋습니다. 언니들 책의 그림 많은 부분도 됩니다</td></tr>
+    <tr><td>1 · 들어요</td><td>표지 따라 그리기 · 얼굴 고르기 · 나온 인물</td><td>읽어 주기 (두세 번 읽으면 더 많이 말합니다) · 제목 써 주기</td></tr>
+    <tr><td>2 · 그려요</td><td>제일 좋았던 장면을 크게</td><td>"이 그림은 뭐야?" 대답을 <b>그대로</b></td></tr>
+    <tr><td>3 · 3컷</td><td>처음 · 그다음 · 마지막</td><td>칸마다 지니 말 적기</td></tr>
+    <tr><td>4 · 말해요</td><td>대답한 질문의 ⭐ 색칠</td><td><b>인터뷰 기록지</b>: 질문 6개, 대답 받아 적기</td></tr>
+  </table>
+  <h2><span class="n">✎</span>받아 적는 규칙</h2>
+  <ul>
+    <li><b>고치지 않습니다.</b> 틀린 말, 귀여운 말, 영어 섞인 말도 그대로 적습니다. 그게 이 코너의 맛입니다</li>
+    <li>정답을 알려 주거나 "~지?" 하고 유도하지 않습니다. 대답이 없으면 다른 날 다시 물어봅니다</li>
+    <li>영어로 대답하면 영어로 적습니다. 번역을 넣을 때는 끝에 <code>(번역)</code>이라고 붙입니다</li>
+  </ul>
+  <h2><span class="n">⌨</span>기자 책상 (엄마아빠가 입력)</h2>
+  <div class="shot"><img src="shots/jin.png" alt=""></div>
+  <p class="cap">지니 기자 책상: 인터뷰 기록지를 그대로 옮기면 오른쪽에 "지니에게 물었어요" 문답 지면이 생깁니다. ⑥번 한마디가 맨 위에 크게 실립니다. (화면은 예시)</p>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>5</span></div>
+</section>
+
+<!-- 4. 기자 책상 (1) -->
+<section class="page">
+  <div class="kick"><span>MHJ MONTHLY BOOK · v1.0</span><span>4 · 기자 책상 사용법 (1/2)</span></div>
+  <h1><span class="ch">CHAPTER 4</span>기자 책상 사용법</h1>
+  <p class="lead">종이에 쓴 것을 <b>같은 번호 칸</b>에 옮겨 치면, 오른쪽에 매거진 지면이 실시간으로 만들어집니다. 쓰는 대로 <b>그 컴퓨터에 자동 저장</b>됩니다.</p>
+  <div class="shot"><img src="shots/desk.png" alt=""></div>
+  <p class="cap">현이 기자 책상 (예시). 왼쪽은 입력 칸, 오른쪽은 매거진 미리보기, 맨 위 막대는 진행률입니다.</p>
+  <div class="cols">
+    <div>
+      <h2><span class="n">1</span>위에서부터 차례로</h2>
+      <ol>
+        <li><b>책 만나기</b>: 제목, 지은이, 책 종류, 별점</li>
+        <li><b>책 속으로 → 인포그래픽</b>: 2일째 쪽 옮기기 (다음 쪽)</li>
+        <li><b>기사 제목</b>, 그리고 <b>문장 칸 ①~⑥</b> (한/EN)</li>
+        <li>민이: <b>⑦ 책 밖에서 확인하기</b></li>
+        <li><b>사진</b> 3칸, <b>✨ 고친 문장</b>, <b>체크</b></li>
+      </ol>
+    </div>
+    <div>
+      <h2><span class="n">💡</span>코치 힌트</h2>
+      <div class="shot" style="margin-top:0"><img src="shots/coach.png" alt=""></div>
+      <p class="cap">칸 밑에 한 번에 하나씩 뜹니다. "재미있었다"는 감상, 쪽수 빠짐, 질문으로 끝내기 등을 짚어 줍니다. 보내기를 막지는 않습니다.</p>
+    </div>
+  </div>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>6</span></div>
+</section>
+
+<!-- 4. 기자 책상 (2) -->
+<section class="page p7">
+  <div class="kick"><span>MHJ MONTHLY BOOK · v1.0</span><span>4 · 기자 책상 사용법 (2/2)</span></div>
+  <h2 style="margin-top:3mm"><span class="n">2</span>2일째 쪽 → 인포그래픽</h2>
+  <div class="cols">
+    <div class="shot igshot" style="margin:0"><img src="shots/ig-form.png" alt=""></div>
+    <div>
+      <p style="margin-top:0">책 종류를 고르면 <b>종이 2일째 쪽과 같은 칸</b>이 나옵니다. 채우는 대로 아래에 매거진 인포그래픽이 그려집니다. 빈 칸은 그림에서 빠집니다.</p>
+      <p><span class="ui">🖼 인포그래픽 PNG 저장</span>으로 그림만 따로 받을 수도 있습니다. 한 파일로 저장할 때는 자동으로 같이 들어갑니다.</p>
+      <div class="tip">지리책은 아이가 그린 지도를 사진으로 넣으면 지도 자리에 들어갑니다. 인포그래픽을 만들 때는 <b>인터넷 연결</b>이 필요합니다.</div>
+    </div>
+  </div>
+
+  <h2><span class="n">3</span>📦 한 파일로 저장 → 카톡</h2>
+  <div class="cols">
+    <div>
+      <p style="margin-top:0">빈 칸이 남아 있으면 <b>무엇이 비었는지</b> 알려 주고, 버튼은 잠겨 있습니다. 다 채우고 체크를 마치면 열립니다.</p>
+      <ul>
+        <li><span class="ui">📦 한 파일로 저장</span>: 글·사진·인포그래픽이 든 <b>파일 하나</b>가 내려받아집니다. 이 파일을 카톡으로 엄마아빠에게 보내면 끝입니다</li>
+        <li><span class="ui">📋 글만 복사</span> / <span class="ui">💾 글만 저장</span>: 글만 급하게 보낼 때</li>
+        <li><span class="ui">새 책 시작하기</span>: 다음 달에 누릅니다. 지금 쓴 것이 지워지니 <b>저장한 뒤에만</b> 누릅니다</li>
+      </ul>
+    </div>
+    <div class="shot" style="margin:0"><img src="shots/send.png" alt=""></div>
+  </div>
+  <div class="warn"><b>사진과 글은 그 컴퓨터에만</b> 기억됩니다. 다른 컴퓨터에서 열면 빈 화면이 나옵니다. 한 아이는 늘 같은 컴퓨터, 같은 브라우저(크롬)에서 쓰게 해 주세요. 세 아이가 한 컴퓨터를 같이 써도 글은 섞이지 않습니다.</div>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>7</span></div>
+</section>
+
+<!-- 5. 매거진 -->
+<section class="page">
+  <div class="kick"><span>MHJ MONTHLY BOOK · v1.0</span><span>5 · 매거진에 올리기</span></div>
+  <h1><span class="ch">CHAPTER 5</span>받은 파일을 매거진에 올리기</h1>
+  <div class="cols">
+    <div>
+      <p class="lead" style="margin-top:0">카톡으로 받은 <code>…-monthly-book-….html</code>을 <b>컴퓨터에서</b> 엽니다. 매거진 지면이 그대로 보이고, 맨 아래 <b>편집용 원고 텍스트</b>를 펼치면 붙여 넣을 글이 있습니다.</p>
+      <ul>
+        <li><b>사진</b>: 지면 속 사진을 우클릭 → <span class="ui">이미지를 다른 이름으로 저장</span></li>
+        <li><b>인포그래픽</b>: 한국어 글 아래 큰 그림을 같은 방법으로 저장</li>
+        <li>파일 이름에 실명이 없는지 확인</li>
+      </ul>
+    </div>
+    <div class="shot" style="margin:0"><img src="shots/bundle.png" alt=""></div>
+  </div>
+  <h2><span class="n">1</span>mhj-desk에서 (약 20분)</h2>
+  <ol>
+    <li><b>매거진</b> → 이번 호 → <span class="ui">✍️ 기사 편집</span> → <span class="ui">+ 새 기사</span> · 상태 <span class="ui">초안</span></li>
+    <li>템플릿: 메인 기사 → <span class="ui">Right</span> (우측 이미지 3장) · 저자 <span class="ui">Hyun</span> / <span class="ui">Min</span> / <span class="ui">Jin</span> 중 하나</li>
+    <li><b>제목</b>: <code>한국어 제목 · English Title</code></li>
+    <li><b>사진 3칸</b>: 표지 · 그림 · 한 장 더 (지니: 표지 그림 · 제일 좋은 장면 · 3컷). 잘리면 9칸 위치 버튼으로 조정</li>
+    <li><b>인포블록</b>: Sidebar Title <code>이달의 책 · This Month's Book</code>, Body = 책 제목·지은이·출판사·★ (민이는 확인한 자료 한 줄도)</li>
+    <li><b>텍스트 본문</b>: ② 한 문장을 인용으로 맨 위에 → 한국어 글 → <b>인포그래픽 이미지</b> → 구분선 · <code>In English</code> → 영어 글 → 마지막 질문은 굵게. 지니는 문답 그대로</li>
+    <li><span class="ui">기사 추가</span> → <span class="ui">🔍 전체 미리보기</span>에서 넘친 곳 확인 → <b>아이에게 보여주고 승인</b> → <span class="ui">발행됨</span> · 호도 발행 상태인지 확인</li>
+  </ol>
+  <div class="cols">
+    <div class="box"><b>고치는 것</b> · 맞춤법과 띄어쓰기만 고칩니다. 사실이 틀리면 본문은 두고 끝에 <code>— 편집자 주: …</code>를 답니다.</div>
+    <div class="box"><b>안 고치는 것</b> · 아이의 단어, 비유, 문장 길이는 그대로 둡니다. 영어를 한국어에 맞춰 바꾸지 않습니다.</div>
+  </div>
+  <div class="warn"><b>인포그래픽은 사진 칸에 넣지 않습니다.</b> 사진 칸은 그림이 잘리고 폭이 좁아 글씨가 읽히지 않습니다. 반드시 본문 안에 넣습니다.</div>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>8</span></div>
+</section>
+
+<!-- 6. 북클럽 -->
+<section class="page">
+  <div class="kick"><span>MHJ MONTHLY BOOK · v1.0</span><span>6 · 가족 북클럽 달</span></div>
+  <h1><span class="ch">CHAPTER 6</span>가족 북클럽 달 — 세 아이, 한 권의 책</h1>
+  <p class="lead"><b>석 달에 한 번</b>은 세 자매가 같은 책을 읽습니다. 각자 자기 레벨 워크시트를 그대로 쓰고, <b>가족 토론 20분</b>만 더합니다. 같은 책을 Year 1·5·7이 어떻게 다르게 읽는지가 한 지면에 나란히 실립니다.</p>
+  <h2><span class="n">1</span>책 고르기: 세 겹이 있는 책</h2>
+  <p style="margin:0">그림이 많아야 하고(지니), 이야기가 뚜렷해야 하고(현이), 생각할 거리가 있어야 합니다(민이). 옛이야기·신화 그림책, 인물 이야기 그림책, 그림 많은 역사 만화의 한 편이 좋습니다. <b>누가 옳았는지 의견이 갈리는 장면</b>이 하나 있으면 최고입니다.</p>
+  <h2><span class="n">2</span>진행</h2>
+  <ul>
+    <li>1주 각자 읽기(지니는 읽어 주기). 한 번은 다 같이 소리 내어 읽어도 좋습니다</li>
+    <li>2~3주 각자 워크시트. 기자 책상에서 <span class="ui">📚 가족 북클럽 달</span>에 체크하면 매거진 머리글에 <b>FAMILY BOOK CLUB</b>이 붙습니다</li>
+    <li>3주 끝 <b>토론 저녁 20분</b>: <code>5_가족북클럽/가족토론-기록지.pdf</code>를 식탁에 놓고 진행합니다
+      <ol>
+        <li><b>막내부터</b> 말합니다: 지니 한마디 → 현이 생각 → 민이 주장</li>
+        <li>서로에게 질문 하나씩 합니다</li>
+        <li>👍👎 추천 투표를 하고, 그날 <b>제일 좋은 한마디</b>를 같이 고릅니다. 부모는 받아 적기만 합니다</li>
+      </ol></li>
+  </ul>
+  <h2><span class="n">3</span>매거진 지면 (같은 호에 연달아)</h2>
+  <table>
+    <tr><th style="width:20%">순서</th><th style="width:22%">템플릿</th><th>내용</th></tr>
+    <tr><td>여는 쪽</td><td><span class="ui">Middle</span></td><td>제목 "세 아이, 한 권의 책" · 사진 = 표지나 세 아이 그림 모음 · 본문 = 부모 소개 3~4문장 + 셋의 한 줄</td></tr>
+    <tr><td>1 · 2 · 3</td><td><span class="ui">Right</span> ×3</td><td>지니 문답 → 현이 칼럼 → 민이 논증 (평소와 같은 방법)</td></tr>
+    <tr><td>닫는 쪽</td><td><span class="ui">Little Notes</span></td><td>Quote = 식탁에서 나온 오늘의 한마디 · Signature = 말한 사람</td></tr>
+  </table>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>9</span></div>
+</section>
+
+<!-- 7. 문제 해결 -->
+<section class="page">
+  <div class="kick"><span>MHJ MONTHLY BOOK · v1.0</span><span>7 · 이럴 땐 이렇게</span></div>
+  <h1><span class="ch">CHAPTER 7</span>이럴 땐 이렇게</h1>
+  <table>
+    <tr><th style="width:38%">이런 일이</th><th>이렇게 합니다</th></tr>
+    <tr><td>기자 책상 글씨체가 이상하거나 인포그래픽이 안 만들어져요</td><td>인터넷 연결을 확인하고 <b>크롬</b>으로 여세요. 글꼴과 인포그래픽 도구를 인터넷에서 불러옵니다.</td></tr>
+    <tr><td>휴대폰·아이패드 메일에서 열었더니 이상해요</td><td>기자 책상은 <b>컴퓨터</b>에서만 씁니다. 받은 "한 파일"은 휴대폰에서 봐도 되지만, mhj-desk 작업은 컴퓨터에서 합니다.</td></tr>
+    <tr><td>어제 쓴 게 없어졌어요</td><td>다른 컴퓨터나 다른 브라우저로 열었을 가능성이 큽니다. 처음 쓰던 컴퓨터와 크롬으로 다시 여세요. 시크릿 창에서는 저장되지 않습니다.</td></tr>
+    <tr><td>보내기 버튼이 안 눌려요</td><td>버튼 위 분홍 상자에 <b>비어 있는 칸</b>이 나옵니다. 그 칸을 채우고 체크를 모두 하면 열립니다.</td></tr>
+    <tr><td>"저장 공간이 꽉 찼어요"가 떠요</td><td>세 아이의 기자 책상은 컴퓨터 안의 저장 공간 하나를 같이 씁니다. 지난 달 책을 📦로 저장해 보냈다면 그 아이 기자 책상에서 <span class="ui">새 책 시작하기</span>를 눌러 지난 글과 사진을 지워 주세요.</td></tr>
+    <tr><td>사진을 잘못 넣었어요 / 사진이 안 들어가요</td><td>사진 오른쪽 위 <b>✕</b>로 뺍니다. "못 읽어요"가 뜨면 사진 앱에서 JPG로 내보낸 뒤 넣습니다 (아이폰 HEIC 사진).</td></tr>
+    <tr><td>힌트가 계속 떠요</td><td>힌트는 제안일 뿐이라 보내기를 막지 않습니다. 아이가 고르게 두세요.</td></tr>
+    <tr><td>저장할 때 "인포그래픽 없이 저장할까요?"가 떠요</td><td>인터넷이 끊겨 그림을 못 만든 경우입니다. <b>취소</b>하고 인터넷 연결 후 다시 누르면 같이 들어갑니다.</td></tr>
+    <tr><td>다음 달 새 책을 시작하려면</td><td>지난 달 파일을 저장해 보냈는지 확인한 뒤 <span class="ui">새 책 시작하기</span>를 누릅니다.</td></tr>
+    <tr><td>책 종류를 잘못 골랐어요</td><td>다시 고르면 됩니다. 종류별로 따로 기억해서, 전에 채운 칸은 그 종류로 돌아가면 그대로 있습니다.</td></tr>
+    <tr><td>발행한 뒤 실명을 발견했어요</td><td>기사 상태를 바로 <span class="ui">초안</span>으로 바꾸고 PeNnY에게 알려 주세요. 검색 기록 정리까지 같이 합니다.</td></tr>
+    <tr><td>워크시트나 기자 책상을 바꾸고 싶어요</td><td>불편한 점을 한 달 동안 모아 PeNnY에게 주세요. <b>다음 버전(v1.1)에서 한 번에</b> 반영하고, 새 꾸러미로 한 번만 보냅니다.</td></tr>
+  </table>
+  <div class="box" style="margin-top:auto"><b>버전</b> · 이 꾸러미는 <b>v1.0</b>입니다. 파일마다 아래에 버전이 적혀 있습니다. 다음 버전이 나오기 전까지는 이 파일들만 쓰면 됩니다.</div>
+  <div class="foot"><span>MHJ · Monthly Book · v1.0</span><span>10</span></div>
+</section>
+</body>
+</html>

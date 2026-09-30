@@ -1,66 +1,48 @@
-# 아이들의 이달의 책 — 지니 (Level 0) · 현이 (Level 1) · 민이 (Level 2)
+# 아이들의 이달의 책 — v1.0
 
-아이들이 한 달에 책 한 권을 읽고, 한국어와 영어로 **각각** 매거진 칼럼을 쓰는 워크플로우.
+지니(L0, Year 1) · 현이(L1, Year 5) · 민이(L2, Year 7)가 한 달에 책 한 권을 읽고 MHJ 매거진에 한국어·영어 글을 싣는 워크플로우. **운영 방법은 전부 `guides/manual.html`(= 배포본의 `1_운영매뉴얼.pdf`)에 있다.** 이 README 는 관리용.
 
-| | 지니 · Level 0 (Jin, Y1) | 현이 · Level 1 (Hyun, Y5) | 민이 · Level 2 (Min, Y7) |
-|---|---|---|---|
-| 방식 | 아직 못 읽음 → **읽어 주고 · 그리고 · 말하면 부모가 받아 적기**. 워크시트 5쪽 한 벌(책 종류 무관), 매거진은 "지니에게 물었어요" 문답 | 스스로 쓰기 | 스스로 쓰기 |
-| 3일째 | 이야기 3컷 | 생각 한 줄 · 근거 1 · "하지만" | 주장+이유 · **근거 2** · **반론에 답하기** ("~다"체) |
-| 4일째 | 인터뷰 기록지 (부모) | 나와 연결 · 질문 · 그림 | 왜 지금 중요한가 · 결론+질문 · **책 밖 자료 1개로 확인** |
-| 기자 책상 | 부모 입력 화면 · 문답 지면 | 한 문장 고치기 · 한 200~500자 / EN 60~150 | 두 문장 고치기 · 한 400~800자 / EN 150~300 |
+## 배포 원칙
 
-아이 설정은 `worksheet.html`·`writer.html`·`guides/kid-guide.html`의 `KIDS`(같은 키)와 `render.mjs`의 `KIDS`에 있다. 새 아이를 추가하려면 네 곳에 한 줄씩 넣는다. 직접 열 때는 `?kid=min`.
-핵심은 **"칸 하나 = 기사 문장 하나"**. 칸을 순서대로 채우고 옮겨 치면 글이 되고, 쪽마다 매거진 재료(표지 사진·인포그래픽·그림)가 나온다.
+가족에게는 **점검을 끝낸 버전 꾸러미 하나만** 보낸다. 고칠 것은 모아서 다음 버전(v1.1…)에 한 번에 반영한다. 작은 수정마다 재전송하지 않는다.
 
-## 한눈에
+```bash
+node docs/editorial/young-reader/render.mjs release
+```
+
+→ `release/MHJ-이달의책-v1.0/` + `.zip` (약 17MB, Gmail 25MB 한도 안). 이 명령이 예시 인포그래픽 → 워크시트 PDF → 매뉴얼용 기자 책상 화면 사진(예시 데이터) → 매뉴얼·안내서 PDF → 꾸러미 폴더 → zip(한글 파일명 NFC + UTF-8 플래그)까지 한 번에 만든다.
 
 ```
-현이 (하루 20분)                                  부모 · Claude
-─────────────────────────────                    ─────────────────────────────
-1일 📖 책 만나기 ── 표지 사진 📷 ────────────────→ 사진 칸 ①
-2일 🔍 책 속으로 (종류별 쪽) ── 쪽 사진 📷 ──────→ Claude → 인포그래픽 PNG (본문 삽입)
-3일 💭 내 생각 ①~④  ┐
-4일 🎨 나와 연결 ⑤⑥ + 그림 📷 + 제목 ──────────→ 사진 칸 ②
-5일 ⌨️ writer.html 에 옮겨 치기 → [복사해서 보내기] → 카톡 → Claude → mhj-desk 기사 초안
-                                                  → 현이 최종 확인 → 발행
+MHJ-이달의책-v1.0/
+├ 1_운영매뉴얼.pdf
+├ 2_현이/  현이-안내.pdf · 워크시트/ (책 종류별 6) · 현이-기자책상.html
+├ 3_민이/  민이-안내.pdf · 워크시트/ (책 종류별 6) · 민이-기자책상.html
+├ 4_지니/  지니-워크시트.pdf · 지니-기자책상(엄마아빠용).html
+├ 5_가족북클럽/  가족토론-기록지.pdf
+└ 6_참고-인포그래픽-예시/
 ```
+
+**버전 올릴 때**: `render.mjs` 의 `VERSION`, 그리고 꼬리말의 `v1.0` (`grep -rn "v1.0" docs/editorial/young-reader --include=*.html`).
 
 ## 파일
 
-| 파일 | 누가 | 용도 |
-|---|---|---|
-| `print/<hyun|min>/worksheet-<종류>.pdf` | 아이 | **책 한 권 = PDF 한 개** 인쇄 (5쪽: 표지 · 1일 · 2일 종류별 · 3일 · 4일). 종류: `history` 역사 · `story` 이야기·고사성어 · `geography` 지리 · `culture` 문화 · `society` 사회 · `any` 어떤 책이든 |
-| `writer.html` | 아이 (지니는 부모) | **기자 책상**. 종이 칸을 옮겨 치면 매거진 지면이 실시간으로 만들어짐. 자동 저장·빈 칸 안내·체크 후 보내기 열림. **2.0**: ① 2일째 쪽 입력 → 브라우저에서 인포그래픽 PNG(html2canvas) ② 규칙 기반 코치 힌트(칸마다 하나, 막지 않음) ③ 사진 압축·기억 + **📦 한 파일로 저장**(글·사진·인포그래픽이 든 HTML 한 개, 열면 매거진 지면 · 안에 편집용 텍스트와 JSON) ④ 📚 가족 북클럽 달 표시 |
-| `parent-guide.md` | PeNnY · Yussi | 한 장. 15분 수다 질문과 하지 말 것 |
-| `magazine-conversion.md` | PeNnY + Claude | 원고 → 인포그래픽 → mhj-desk 기사. 복붙용 Claude 프롬프트 포함 |
-| `infographic-core.js` | 공용 | 인포그래픽 렌더러. `infographic.html`(render.mjs PNG)과 `writer.html`(브라우저 PNG)이 같이 씀. 메일용 기자 책상에는 `render.mjs share`가 안에 심는다 |
-| `guides/book-club.html` | 유씨 | **가족 북클럽 달**: 석 달에 한 번 세 자매가 같은 책 → 책 고르기, 토론 20분 진행, 매거진 지면 구성(Middle 여는 쪽 · Right ×3 · Little Notes 닫는 쪽) + 인쇄용 가족 토론 기록지 |
-| `infographic.html` + `infographics/` | Claude | 인포그래픽 틀 6종. `infographics/examples/` 에 종류별 예시 JSON (PNG는 레포 규칙상 `*.png` 무시 → 아래 명령으로 생성) |
-| `worksheet.html` · `render.mjs` | 관리 | 원본과 생성 스크립트 |
-
-## 메일로 보내기 📧
-
-`share/` 폴더에 받는 사람별로 정리되어 있다. **zip 하나씩 첨부하면 끝.**
-
-| 첨부 | 안에 든 것 |
+| 파일 | 역할 |
 |---|---|
-| `share/현이에게.zip` · `share/민이에게.zip` | 1_먼저-읽어요.pdf (한 장, 아이별) · 2_인쇄할-워크시트/ (책 종류별 6개) · 3_기자책상.html (아이 이름이 박혀 있음) |
-| `share/유씨에게.zip` | 1_유씨-가이드.pdf (네 장: 아이와 함께 / 사진·기자 책상 / 매거진에 올리기 / 지니) · 2_현이-워크시트/ · 2_민이-워크시트/ · 2_지니-워크시트.pdf · 3_{현이,민이,지니}-기자책상.html · 4_인포그래픽-예시/ · 5_가족북클럽.pdf |
+| `worksheet.html` | 인쇄 워크시트. `?kid=hyun\|min\|jin&genre=…`. L0 은 전용 5쪽, L1/L2 는 공통 4쪽 + 책 종류별 2일째 쪽 |
+| `writer.html` | 기자 책상 (단독 HTML). 아이별 localStorage 키(글 / `-photos`), 2일째 쪽 → 인포그래픽(html2canvas), 코치 힌트, 📦 한 파일 저장, 가족 북클럽 표시. 배포본에는 `window.KID` 와 `infographic-core.js` 가 안에 심긴다 |
+| `infographic-core.js` | 인포그래픽 렌더러 (CSS 는 `.ig` 안). `writer.html` 과 `infographic.html` 공용 |
+| `infographic.html` · `infographics/examples/*.json` | render.mjs 로 PNG 만들기 (1600×1200). JSON `"kid"` 로 이름 표기 |
+| `guides/manual.html` | 운영 매뉴얼 10쪽 (`guides/shots/` 화면 사진은 release 가 만든다) |
+| `guides/kid-guide.html` | 아이 안내 1쪽 (`?kid=`) |
+| `guides/book-club.html` | 가족 토론 기록지 1쪽 |
+| `magazine-conversion.md` | 받은 원고 → mhj-desk 변환 규칙 · Claude 프롬프트 |
+| `render.mjs` | `release` · `worksheets` · `infographic <json\|dir>` · `preview <dir> [kid]` |
 
-지니는 메일을 읽지 않으니 따로 꾸러미가 없다. 유씨 꾸러미에만 들어 있다.
+## 알아둘 제약
 
-`print/`·`share/`는 생성물이라 git에 올리지 않는다(`.gitignore`). 처음 받았거나 원본을 고친 뒤에는 아래 명령으로 만든다.
-
-## 다시 만들기 (repo 루트에서)
-
-```bash
-node docs/editorial/young-reader/render.mjs infographic docs/editorial/young-reader/infographics/examples && node docs/editorial/young-reader/render.mjs worksheets && node docs/editorial/young-reader/render.mjs share
-```
-
-```bash
-node docs/editorial/young-reader/render.mjs infographic docs/editorial/young-reader/infographics/examples
-```
-
-월별 실제 원고는 `infographics/<YYYY-MM>/` 에 JSON 을 두고 같은 명령으로 PNG 를 만든다.
-
-실명 규칙: 이 폴더, 원고, 이미지 파일명, 매거진 어디에도 아이 실명 금지. **현이 / Hyun**만.
+- 아이 설정(KIDS)은 `worksheet.html` · `writer.html` · `guides/kid-guide.html` · `render.mjs` 네 곳에 같은 키로 있다.
+- 크롬은 `file://` HTML 들이 localStorage 한 곳(약 5MB)을 같이 쓴다 → 세 아이 사진이 한 공간. 사진은 긴 변 1200px JPEG q0.72, "새 책 시작하기"가 글·사진을 모두 지운다. 꽉 차면 알림.
+- 기자 책상은 **크롬 권장** (Safari `file://` 저장·다운로드는 검증 안 됨). 글꼴·html2canvas 때문에 인터넷 필요.
+- 매거진 사진 칸은 `object-fit: cover` 로 잘린다 → 인포그래픽은 본문 이미지로.
+- `print/` `release/` `guides/shots/` 는 생성물(`.gitignore`), 레포는 `*.png` 무시.
+- 실명 금지: 지니/Jin · 현이/Hyun · 민이/Min 만.

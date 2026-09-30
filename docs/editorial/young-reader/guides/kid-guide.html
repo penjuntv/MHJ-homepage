@@ -8,7 +8,7 @@
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { margin: 0; font-family: "Gowun Dodum", sans-serif; color: #2b2622; }
-  .page { width: 210mm; height: 296mm; overflow: hidden; padding: 11mm 13mm; background: #fffdf9; display: flex; flex-direction: column; }
+  .page { position: relative; width: 210mm; height: 296mm; overflow: hidden; padding: 11mm 13mm 14mm; background: #fffdf9; display: flex; flex-direction: column; }
   .en { font-family: "Nunito"; font-weight: 600; color: #8a8078; }
   h1 { font-family: "Jua"; font-weight: 400; font-size: 30pt; margin: 0; text-align: center; }
   .sub { text-align: center; font-size: 12pt; margin: 1.5mm 0 5mm; }
@@ -36,7 +36,7 @@
     <p>읽다가 😮 놀라면 <b>노랑</b>, 🤔 궁금하면 <b>파랑</b>, 🙅 "나라면 안 해!" 싶으면 <b>빨강</b>을 붙여.</p></div></div>
 
   <div class="step b"><div class="n">🖨️</div><div><b>2. 워크시트 뽑기 (엄마아빠랑)</b>
-    <p><code>2_인쇄할-워크시트</code> 폴더에서 <b>내 책 종류</b> 파일 하나만 인쇄해.<br>
+    <p><code>워크시트</code> 폴더에서 <b>내 책 종류</b> 파일 하나만 인쇄해.<br>
     역사책 → <code>역사책.pdf</code> · 고사성어책 → <code>이야기-고사성어책.pdf</code> · 잘 모르겠으면 → <code>어떤책이든.pdf</code></p></div></div>
 
   <div class="step g"><div class="n">✏️</div><div><b>3. 하루에 한 쪽씩 (<span data-lv="1">20분</span><span data-lv="2">25분</span>)</b>
@@ -45,19 +45,20 @@
     <div class="days"><span><i>📖</i>1일 책 만나기</span><span><i>🔍</i>2일 책 속으로</span><span><i>💭</i>3일 <span data-lv="1">내 생각</span><span data-lv="2">내 주장</span></span><span><i><span data-lv="1">🎨</span><span data-lv="2">🔎</span></i>4일 <span data-lv="1">나와 연결</span><span data-lv="2">연결·확인</span></span></div></div></div>
 
   <div class="step p"><div class="n">⌨️</div><div><b>4. 5일째: 기자 책상에 옮겨 치기</b>
-    <p>컴퓨터에서 <code>3_기자책상.html</code>을 더블클릭해서 열어. 종이의 <b>같은 번호 칸</b>에 옮겨 치면 오른쪽에 <b>내 매거진 지면</b>이 생겨!<br>
+    <p>컴퓨터에서 <code>현이-기자책상.html</code>을 <b>크롬</b>으로 열어. 종이의 <b>같은 번호 칸</b>에 옮겨 치면 오른쪽에 <b>내 매거진 지면</b>이 생겨!<br>
     옮기면서 문장 <b data-lv="1">하나</b><b data-lv="2">두 개</b>를 더 좋게 고치기 ✨</p></div></div>
 
   <div class="step c"><div class="n">📮</div><div><b>5. 보내기</b>
-    <p>체크를 다 하면 <b>[📋 복사해서 보내기]</b> 버튼이 열려. 누르고 엄마아빠 카톡에 붙여넣기 하면 끝!<br>
+    <p>체크를 다 하면 <b>[📦 한 파일로 저장]</b> 버튼이 열려. 저장된 파일을 엄마아빠 카톡으로 보내면 끝!<br>
     그다음은 엄마아빠가 매거진에 올려 줄 거야. 📰 짠!</p></div></div>
 
+  <div style="position:absolute;bottom:5mm;left:13mm;right:13mm;display:flex;justify-content:space-between;font-family:Nunito;font-size:8pt;color:#b3aaa0"><span>MHJ · Hyun's Monthly Book · v1.0</span><span>현이 안내</span></div>
   <div class="help"><b>🙋 막히면?</b>
     <ul>
       <li>칸이 어려우면 <b>한 줄만</b> 써도 괜찮아. 틀려도 OK!</li>
       <li>친구·학교 이름은 쓰지 않기. 내 이름은 <b>Hyun / 현이</b>로만</li>
       <li>기자 책상에 쓴 건 자동으로 저장돼. 창을 닫았다가 다시 열어도 그대로야</li>
-      <li>복사가 안 되면 <b>[💾 파일로 저장]</b>을 눌러서 그 파일을 보내</li>
+      <li>보낼 땐 <b>[📦 한 파일로 저장]</b> → 그 파일 하나를 카톡으로 보내면 사진까지 한 번에 가</li>
     </ul></div>
 </section>
 <script>
