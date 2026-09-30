@@ -77,8 +77,11 @@ try {
       for (const [g, ko] of Object.entries(SHEETS)) copyFileSync(join(here, 'print', kid, `worksheet-${g}.pdf`), join(dir, `${ko}.pdf`));
     };
     // 기자 책상은 메일로 받아 더블클릭하므로 ?kid= 를 못 쓴다 → 아이 이름을 파일 안에 박는다
-    const writer = (kid, out) => writeFileSync(out,
-      readFileSync(join(here, 'writer.html'), 'utf8').replace('<head>', `<head>\n<script>window.KID = '${kid}';</script>`));
+    // 인포그래픽 렌더러(infographic-core.js)도 파일 안에 심는다 — 첨부 하나로 열려야 하므로
+    const core = readFileSync(join(here, 'infographic-core.js'), 'utf8');
+    const writer = (kid, out) => writeFileSync(out, readFileSync(join(here, 'writer.html'), 'utf8')
+      .replace('<head>', `<head>\n<script>window.KID = '${kid}';</script>`)
+      .replace('<script src="infographic-core.js"></script>', () => `<script>\n${core}</script>`));
     const mom = join(share, '유씨에게');
     mkdirSync(mom, { recursive: true });
     for (const [kid, ko] of Object.entries(KIDS)) {
@@ -96,6 +99,7 @@ try {
       writer(kid, join(mom, `3_${ko}-기자책상.html`));
     }
     await guide('yussi-guide.html', join(mom, '1_유씨-가이드.pdf'));
+    await guide('book-club.html', join(mom, '5_가족북클럽.pdf'));
     const ex = join(mom, '4_인포그래픽-예시');
     mkdirSync(ex);
     for (const g of Object.keys(SHEETS)) copyFileSync(join(here, 'infographics', 'examples', `${g}.png`), join(ex, `${SHEETS[g]}-예시.png`));

@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>현이의 기자 책상</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Nunito:wght@600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,500&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Nunito:wght@600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,500;1,600&family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<!-- 인포그래픽 PNG 를 브라우저에서 만든다 (인터넷 필요 — 글꼴도 같은 조건) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- 인포그래픽 렌더러: infographic.html 과 공용. 메일 꾸러미에는 render.mjs share 가 이 자리에 내용을 심는다 -->
+<script src="infographic-core.js"></script>
 <style>
   :root {
     --ink: #2b2622; --soft: #8a8078; --line: #e3dbd0; --bg: #f6f1e9; --card: #fffdf9;
@@ -99,6 +103,7 @@
   .mag .imgs div { aspect-ratio: 1; background: #eae2d6; display: grid; place-items: center; font-family: "Playfair Display"; font-style: italic; font-size: 12px; color: #a3988c; overflow: hidden; }
   .mag .imgs img { width: 100%; height: 100%; object-fit: cover; }
   .mag p { font-size: 15.5px; line-height: 1.85; margin: 0 0 12px; text-align: justify; word-break: keep-all; }
+  .mag .body p:first-child { display: flow-root; } /* 첫 문단이 한 줄이어도 드롭캡이 다음 문단을 밀지 않게 */
   .mag .body p:first-child::first-letter { font-size: 44px; float: left; line-height: 1; margin: 4px 8px 0 0; font-weight: 700; color: var(--accent); }
   .mag .eng { font-family: "Playfair Display", Georgia, serif; }
   .mag .eng p { font-size: 15px; line-height: 1.7; }
@@ -108,6 +113,19 @@
   .mag .info { border: 1.5px solid var(--mag-ink); padding: 12px 14px; margin-top: 20px; font-family: "Nunito"; font-size: 13px; line-height: 1.7; }
   .mag .info b { font-family: "Noto Serif KR"; font-size: 14px; display: block; margin-bottom: 4px; }
   .mag .ph { color: #b3a898; font-style: italic; }
+  .igwrap { width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 10px; border: 2px solid var(--line); margin-top: 12px; position: relative; background: #f5f0ea; }
+  .igscale { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+  .mag .igwrap { border: 0; border-radius: 0; margin: 18px 0; }
+  .igform { display: grid; gap: 10px; }
+  .iggroup { border: 1.5px dashed var(--line); border-radius: 10px; padding: 8px 10px; }
+  .iggroup b { font-family: "Jua"; font-weight: 400; font-size: 15px; display: block; margin-bottom: 4px; }
+  .igrow { display: grid; gap: 6px; grid-template-columns: repeat(var(--c), minmax(0, 1fr)); }
+  .igform input { font-size: 15px; padding: 6px 9px; }
+  @media (max-width: 560px) { .igrow { grid-template-columns: 1fr; } }
+  .coach { margin: 2px 0 0 38px; font-size: 13.5px; color: #8a4f00; background: #fff4d4; border-radius: 8px; padding: 5px 10px; display: none; }
+  .coach.show { display: block; }
+  .club { display: flex; gap: 10px; align-items: center; margin-top: 12px; padding: 8px 12px; border-radius: 10px; background: var(--b-bg); cursor: pointer; font-size: 15px; }
+  .club input { width: 20px; height: 20px; accent-color: var(--b); }
   @media (max-width: 560px) { .mag { padding: 24px 20px 28px; } .mag p { text-align: left; } .mag .kick { flex-direction: column; gap: 4px; } .mag h3 { font-size: 25px; } }
 </style>
 </head>
@@ -134,6 +152,15 @@
     <div class="genres" id="genres" data-nolv0></div>
     <label class="small">내 점수</label>
     <div class="stars" id="stars"></div>
+    <label class="club"><input type="checkbox" id="club"> 📚 이번 달은 <b>가족 북클럽 달</b>이에요 (세 자매가 같은 책)</label>
+  </section>
+
+  <section class="card t-b" data-sec="ig" data-nolv0>
+    <h2><span class="num">2</span>책 속으로 → 인포그래픽 <span class="done-tag">✓ 완료</span><span class="en">Day 2 · Infographic</span></h2>
+    <p class="hint" id="igHint">2일째 쪽을 보고 옮겨요. 채운 만큼 매거진 그림이 바로 만들어져요. 빈 칸은 그림에서 빠져요.</p>
+    <div id="igForm" class="igform"></div>
+    <div class="igwrap" id="igWrap"><div class="igscale"><div id="igPreview"></div></div></div>
+    <div class="actions"><button class="btn" id="igSave">🖼 인포그래픽 PNG 저장</button></div>
   </section>
 
   <section class="card t-p" data-sec="title">
@@ -158,7 +185,7 @@
 
   <section class="card t-p" data-sec="photos">
     <h2>📷 사진 넣어 보기 <span class="en">Photos (preview only)</span></h2>
-    <p class="hint">미리보기용이에요. 진짜 사진은 엄마아빠에게 따로 보내요. (저장되지 않아요)</p>
+    <p class="hint">넣은 사진은 이 컴퓨터에 기억되고, <b>📦 한 파일로 저장</b>할 때 글과 같이 가요.</p>
     <div class="photos" id="photos"></div>
     <div class="grid2" style="margin-top:8px">
       <div><label class="small">🖍️ 그림 설명 (한)</label><input type="text" data-k="capKo"></div>
@@ -184,10 +211,11 @@
     <div class="checks" id="checks"></div>
     <div class="missing" id="missing"></div>
     <div class="actions">
-      <button class="btn main" id="copy" disabled>📋 복사해서 보내기</button>
-      <button class="btn" id="save" disabled>💾 파일로 저장</button>
+      <button class="btn main" id="bundle" disabled>📦 한 파일로 저장</button>
+      <button class="btn" id="copy" disabled>📋 글만 복사</button>
+      <button class="btn" id="save" disabled>💾 글만 저장</button>
     </div>
-    <p class="hint" style="margin-top:10px">복사한 다음 카톡 대화창에 붙여넣기 하면 끝! · Copy, then paste into KakaoTalk.</p>
+    <p class="hint" style="margin-top:10px"><b>📦 한 파일로 저장</b> → 그 파일을 카톡으로 보내면 글·사진·인포그래픽이 한 번에 가요! 열면 매거진 지면 그대로 보여요.</p>
     <button class="reset" id="reset">새 책 시작하기 (지금 쓴 것 지우기)</button>
   </section>
 </div>
@@ -195,6 +223,7 @@
 <div class="preview-wrap"><article class="mag" id="mag"></article></div>
 </main>
 <div class="toast" id="toast"></div>
+<div id="igCapture" style="position:fixed;left:-20000px;top:0" aria-hidden="true"></div>
 
 <script>
 // 아이 설정 — 메일 꾸러미(render.mjs share)는 window.KID 를 파일에 박고, 직접 열 때는 ?kid=min
@@ -203,7 +232,8 @@ const KIDS = {
   min: { ko: '민이', en: 'Min', level: 2, byline: 'WORDS BY MIN · YEAR 7', key: 'min-monthly-book-v1' },
   jin: { ko: '지니', en: 'Jin', level: 0, byline: 'AS TOLD BY JIN · YEAR 1', key: 'jin-monthly-book-v1' },
 };
-const KID = KIDS[window.KID || new URLSearchParams(location.search).get('kid')] || KIDS.hyun;
+const KID_KEY = KIDS[window.KID || new URLSearchParams(location.search).get('kid')] ? (window.KID || new URLSearchParams(location.search).get('kid')) : 'hyun';
+const KID = KIDS[KID_KEY];
 const L2 = KID.level === 2, L0 = KID.level === 0;
 document.querySelectorAll('[data-lv]').forEach(el => { if (+el.dataset.lv !== KID.level) el.remove(); });
 if (L0) document.querySelectorAll('[data-nolv0]').forEach(el => el.remove());
@@ -268,8 +298,10 @@ $('#blocks').innerHTML = BLOCKS.map(b => `
     <p class="hint">${L0 ? `인터뷰 기록지 ${'①②③④⑤⑥'[b.n - 1]}번 · ${b.n === 6 ? '매거진에 크게 뽑히는 한마디' : '고치지 말고 그대로'}` : `${b.n <= 4 ? '3일째' : '4일째'} 쪽 ${'①②③④⑤⑥'[b.n - 1]}번 칸${L2 ? '' : ' · 한 문장 더 붙여도 좋아요'}`}</p>
     <div class="pair">
       <div class="field"><span class="flag ko">한</span><textarea data-k="k${b.n}" placeholder="${b.koPh}"></textarea></div>
+      <div class="coach" data-coach="k${b.n}"></div>
       ${b.koChips.length ? `<div class="chips">${b.koChips.map(c => `<button class="chip" data-ins="k${b.n}">${c}</button>`).join('')}</div>` : ''}
       <div class="field"><span class="flag enf">EN</span><textarea class="en" data-k="e${b.n}" placeholder="${b.enPh}"></textarea></div>
+      <div class="coach" data-coach="e${b.n}"></div>
       ${b.enChips.length ? `<div class="chips">${b.enChips.map(c => `<button class="chip" data-ins="e${b.n}">${c}</button>`).join('')}</div>` : ''}
     </div>
   </section>`).join('') + (L0 ? '' : `<div class="card" style="background:transparent;border-style:dashed">
@@ -282,7 +314,31 @@ $('#stars').innerHTML = [1, 2, 3, 4, 5].map(i => `<button data-s="${i}" aria-lab
 $('#checks').innerHTML = CHECKS.map((t, i) => `<label><input type="checkbox" data-c="${i}">${t}</label>`).join('');
 $('#photos').innerHTML = (L0 ? ['🖍️ 표지 그림', '🖍️ 제일 좋은 장면', '🎞️ 3컷'] : ['📖 책 표지', L2 ? '🖍️ 그림·사진' : '🖍️ 내 그림', '📷 한 장 더']).map((t, i) =>
   `<label class="photo">${t}<br>눌러서 넣기<input type="file" accept="image/*" data-p="${i}"></label>`).join('');
-const photos = [null, null, null];
+// 사진은 긴 변 1600px JPEG 로 줄여 따로 기억한다 (글 저장 키와 분리 — 글자 칠 때마다 사진을 다시 쓰지 않게)
+const PKEY = KEY + '-photos';
+let P = {};
+try { P = JSON.parse(localStorage.getItem(PKEY) || '{}') || {}; } catch (e) { P = {}; }
+const persistP = () => { try { localStorage.setItem(PKEY, JSON.stringify(P)); } catch (e) { toast('사진이 커서 기억은 못 했어요. 창을 닫기 전에 저장해요'); } };
+const photos = [P.p0 || null, P.p1 || null, P.p2 || null];
+function compress(file, max = 1600, q = 0.85) {
+  return new Promise((ok, no) => {
+    const r = new FileReader();
+    r.onerror = no;
+    r.onload = () => {
+      const im = new Image();
+      im.onerror = no;
+      im.onload = () => {
+        const k = Math.min(1, max / Math.max(im.width, im.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        ok(c.toDataURL('image/jpeg', q));
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
 
 // 값 채우기
 document.querySelectorAll('[data-k]').forEach(el => {
@@ -306,16 +362,122 @@ document.addEventListener('click', e => {
   }
   if (t) { document.body.dataset.tab = t.dataset.t; document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b === t)); window.scrollTo(0, 0); }
 });
-document.querySelectorAll('[data-p]').forEach(inp => inp.addEventListener('change', () => {
+const showPhoto = (i, src) => {
+  const box = document.querySelector(`[data-p="${i}"]`)?.closest('.photo'); if (!box) return;
+  box.querySelector('img')?.remove();
+  if (src) { const img = new Image(); img.src = src; box.prepend(img); }
+};
+photos.forEach((src, i) => showPhoto(i, src));
+document.querySelectorAll('[data-p]').forEach(inp => inp.addEventListener('change', async () => {
   const f = inp.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    photos[inp.dataset.p] = r.result;
-    const box = inp.closest('.photo'); box.querySelector('img')?.remove();
-    const img = new Image(); img.src = r.result; box.prepend(img); update();
-  };
-  r.readAsDataURL(f);
+  const i = +inp.dataset.p;
+  photos[i] = await compress(f); P['p' + i] = photos[i]; persistP();
+  showPhoto(i, photos[i]); update();
 }));
+$('#club').checked = !!S.club;
+$('#club').addEventListener('change', e => { S.club = e.target.checked; persist(); update(); });
+
+// ── 2일째 쪽 → 인포그래픽 (종이 2일째 쪽과 같은 칸) ──
+const SOC = [['😟', '문제'], ['🔍', '왜?'], ['🧍', '누가 힘들었나?'], ['💡', '어떻게 해결?'], ['🙋', '나라면?']];
+const IG = {
+  history: { type: 'timeline', title: '예: 신라에서 고려까지, 4번의 큰일', groups: [
+    { name: 'events', n: 4, label: i => `📍 ${i + 1}번 사건`, fields: [['year', '연도 (예: 676)'], ['label', '무슨 일 (한)'], ['labelEn', 'English']] },
+    { name: 'people', n: 2, label: i => `🧑 인물 ${i + 1}`, fields: [['name', '이름'], ['did', '한 일'], ['score', '⭐ 점수 1~5']] }] },
+  story: { type: 'story4', title: '예: 새옹지마 塞翁之馬', groups: [
+    { name: 'panels', n: 4, label: i => ['① 처음에', '② 그런데', '③ 그래서', '④ 마지막에'][i], fields: [['ko', '한 줄 (한)'], ['en', 'English']] }],
+    extra: [['meaning', '이 말의 뜻 (한)'], ['meaningEn', 'Meaning (EN)'], ['similar', '비슷한 영어 속담 (선택)']] },
+  geography: { type: 'map', title: '예: 내가 그린 경주 지도', image: true, groups: [
+    { name: 'places', n: 3, label: i => `📍 ${i + 1}`, fields: [['name', '장소'], ['why', '특별한 이유 (한)'], ['whyEn', 'English']] }] },
+  culture: { type: 'compare', title: '예: 새해 첫날, 세 곳의 풍경', groups: [
+    { name: 'rows', n: 3, label: i => ['뭐예요?', '어떻게?', '왜 해요?'][i], fields: [['c0', '📖 책 속'], ['c1', '🇰🇷 한국 지금'], ['c2', '🇳🇿 뉴질랜드']] }],
+    extra: [['punch', '제일 신기한 차이']] },
+  society: { type: 'flow', title: '예: 무엇이 문제였을까?', groups: [
+    { name: 'steps', n: 5, label: i => `${SOC[i][0]} ${SOC[i][1]}`, fields: [['text', '한'], ['textEn', 'English']] }] },
+  any: { type: 'facts3', title: '예: ○○에 대해 알고 있었나요?', groups: [
+    { name: 'facts', n: 3, label: i => `FACT ${i + 1}`, fields: [['num', '숫자'], ['unit', '단위'], ['text', '새로 안 것 (한)'], ['textEn', 'English']] }] },
+};
+const igStore = () => { S.ig = S.ig || {}; return (S.ig[S.genre] = S.ig[S.genre] || {}); };
+const igVal = k => ((S.ig || {})[S.genre] || {})[k]?.trim() || '';
+function igData() {
+  const spec = IG[S.genre]; if (L0 || !spec) return null;
+  const d = { type: spec.type, kid: KID_KEY, title: igVal('title') || v('bookTitle'), titleEn: igVal('titleEn'), book: v('bookTitle') };
+  for (const g of spec.groups) {
+    d[g.name] = [...Array(g.n)].map((_, i) => ({ _i: i, ...Object.fromEntries(g.fields.map(([k]) => [k, igVal(`${g.name}.${i}.${k}`)])) }))
+      .filter(o => g.fields.some(([k]) => o[k]));
+  }
+  (spec.extra || []).forEach(([k]) => { d[k] = igVal(k); });
+  if (spec.type === 'compare') {
+    d.cols = [{ ko: '책 속', en: 'In the book' }, { ko: '한국 지금', en: 'Korea now' }, { ko: '뉴질랜드', en: 'New Zealand' }];
+    d.rows = d.rows.map(r => ({ q: ['뭐예요?', '어떻게?', '왜 해요?'][r._i], qEn: ['What?', 'How?', 'Why?'][r._i], cells: [r.c0, r.c1, r.c2] }));
+  }
+  if (spec.type === 'flow') d.steps = d.steps.map(s => ({ ...s, icon: SOC[s._i][0], label: SOC[s._i][1] }));
+  if (spec.image) d.image = P.igimg || '';
+  return d;
+}
+const igCount = () => Object.values((S.ig || {})[S.genre] || {}).filter(x => (x || '').trim()).length;
+function buildIGForm() {
+  const box = $('#igForm'); if (!box) return;
+  const spec = IG[S.genre];
+  if (!spec) { box.innerHTML = '<p class="hint">👆 먼저 위에서 <b>어떤 책인지</b> 골라요. 그러면 2일째 쪽과 같은 칸이 나와요.</p>'; return; }
+  const inp = (k, ph, cls = '') => `<input type="text" data-ig="${k}" placeholder="${ph}" class="${cls}">`;
+  box.innerHTML = `<div class="grid2">${inp('title', spec.title)}${inp('titleEn', 'English title', 'en')}</div>` +
+    spec.groups.map(g => [...Array(g.n)].map((_, i) => `<div class="iggroup"><b>${g.label(i)}</b>
+      <div class="igrow" style="--c:${g.fields.length}">${g.fields.map(([k, ph]) => inp(`${g.name}.${i}.${k}`, ph, /En$|^en$/.test(k) ? 'en' : '')).join('')}</div></div>`).join('')).join('') +
+    (spec.extra ? `<div class="iggroup"><div class="igrow" style="--c:${spec.extra.length}">${spec.extra.map(([k, ph]) => inp(k, ph, /En$/.test(k) ? 'en' : '')).join('')}</div></div>` : '') +
+    (spec.image ? `<label class="photo" style="aspect-ratio:auto;padding:12px">🗺️ 내가 그린 지도 사진 넣기<input type="file" accept="image/*" id="igImg"></label>` : '');
+  box.querySelectorAll('[data-ig]').forEach(el => {
+    el.value = ((S.ig || {})[S.genre] || {})[el.dataset.ig] || '';
+    el.addEventListener('input', () => { igStore()[el.dataset.ig] = el.value; persist(); update(); });
+  });
+  $('#igImg')?.addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; P.igimg = await compress(f); persistP(); update(); });
+}
+function fitIG(wrap) {
+  const sc = wrap.querySelector('.igscale'); if (!sc) return;
+  sc.style.transform = `scale(${wrap.clientWidth / 1600})`;
+}
+let igShownGenre = '\u0000init';
+function renderIG() {
+  if (!$('#igForm')) return;
+  if (igShownGenre !== S.genre) { igShownGenre = S.genre; buildIGForm(); }
+  const d = igData();
+  $('#igWrap').style.display = d ? '' : 'none';
+  $('#igSave').style.display = d ? '' : 'none';
+  if (d) { MHJInfographic.mount($('#igPreview'), d); fitIG($('#igWrap')); }
+}
+window.addEventListener('resize', () => document.querySelectorAll('.igwrap').forEach(fitIG));
+async function makeIGPng() {
+  const d = igData(); if (!d || igCount() < 2) return null;
+  if (!window.html2canvas) { toast('인포그래픽 저장은 인터넷이 연결돼 있어야 해요'); return null; }
+  const el = $('#igCapture'); MHJInfographic.mount(el, d);
+  await document.fonts.ready;
+  const c = await html2canvas(el, { scale: 1, width: 1600, height: 1200, backgroundColor: '#f5f0ea', logging: false });
+  return c.toDataURL('image/png');
+}
+const stamp = () => new Date().toISOString().slice(0, 7);
+const download = (href, name) => { const a = document.createElement('a'); a.href = href; a.download = name; a.click(); };
+$('#igSave')?.addEventListener('click', async () => {
+  const png = await makeIGPng();
+  if (!png) { if (window.html2canvas) toast('칸을 두 개 이상 채워야 그림이 돼요'); return; }
+  download(png, `${KID.en.toLowerCase()}-infographic-${stamp()}.png`); toast('🖼 인포그래픽을 저장했어요');
+});
+
+// ── 코치 힌트: 규칙만, 한 칸에 하나씩, 보내기는 막지 않는다 ──
+function coach(key) {
+  const t = v(key); if (!t || L0) return '';
+  const n = +key.slice(1), en = key[0] === 'e';
+  if (en && /[가-힣]/.test(t)) return '💡 영어 칸에 한글이 있어요.';
+  if (!en && L2 && /요[.?!]?\s*$|요[.?!]\s/.test(t)) return '💡 매거진 문체 "~다"체로 바꿔 볼까? (~해요 → ~한다)';
+  if (n === 2 && !en && /재미(있|났)|재밌|좋았|최고/.test(t)) return '💡 "재미있었다"는 감상이에요. 누가 "아닌데?" 할 수 있는 생각으로 바꿔 볼까?';
+  if (n === 2 && en && /\b(fun|good|great|interesting|nice|cool)\b/i.test(t) && !/because/i.test(t)) return '💡 "It was fun" is a feeling. Try an idea someone could disagree with.';
+  if (n === 3 && !/\d/.test(t)) return en ? '💡 Add the page number: "on page __".' : '💡 책 몇 쪽인지 숫자를 넣어 볼까?';
+  if (n === 3 && L2 && !en && !/둘째/.test(t)) return '💡 근거가 하나뿐이에요. "둘째,"도 써 볼까?';
+  if (n === 3 && L2 && en && !/second/i.test(t)) return '💡 Add your second reason: "Second, …".';
+  if (n === 4 && !en && !(L2 ? /그러나|하지만/ : /하지만|그래도|그런데/).test(t)) return `💡 반대 의견 다음에 "${L2 ? '그러나' : '하지만'}"으로 내 대답을 붙여요.`;
+  if (n === 4 && en && !/\b(but|however|still)\b/i.test(t)) return '💡 After the other side, answer with "But…" or "However…".';
+  if (n === 6 && !/\?\s*$/.test(t)) return en ? '💡 End with a question mark (?).' : '💡 질문으로 끝내 볼까요? (?로 끝나게)';
+  if (!en && n >= 2 && n <= 5 && t.replace(/\s/g, '').length < 10) return '💡 한 문장만 더 붙여 볼까?';
+  return '';
+}
 
 function paras(prefix) {
   const t = n => v(prefix + n);
@@ -355,7 +517,10 @@ function update() {
   $('#koBar').style.width = Math.min(100, ko / TARGET.ko[0] * 100) + '%'; $('#enBar').style.width = Math.min(100, en / TARGET.en[0] * 100) + '%'; }
   // 보내기
   const ready = !miss.length && checked === CHECKS.length;
-  $('#copy').disabled = $('#save').disabled = !ready;
+  $('#copy').disabled = $('#save').disabled = $('#bundle').disabled = !ready;
+  document.querySelectorAll('[data-coach]').forEach(el => { const h = coach(el.dataset.coach); el.textContent = h; el.classList.toggle('show', !!h); });
+  document.querySelector('[data-sec="ig"]')?.classList.toggle('done', igCount() >= 3);
+  renderIG();
   const mEl = $('#missing');
   mEl.classList.toggle('show', !ready);
   mEl.innerHTML = miss.length ? `🙋 아직 비어 있는 곳: <b>${miss.slice(0, 6).join(' · ')}</b>${miss.length > 6 ? ` 외 ${miss.length - 6}개` : ''}` : '✅ 다 썼어요! 위 체크만 하면 보낼 수 있어요.';
@@ -368,7 +533,7 @@ function render() {
   const ko = paras('k'), en = paras('e');
   if (L0) return renderL0(g, ph, img);
   $('#mag').innerHTML = `
-    <div class="kick"><span>${KID.en.toUpperCase()}'S MONTHLY BOOK</span><span>${KID.ko}의 이달의 책${g ? ' · ' + g[1].split(' ').slice(1).join(' ') : ''}</span></div>
+    <div class="kick"><span>${S.club ? 'FAMILY BOOK CLUB · ' : ''}${KID.en.toUpperCase()}'S MONTHLY BOOK</span><span>${KID.ko}의 이달의 책${g ? ' · ' + g[1].split(' ').slice(1).join(' ') : ''}</span></div>
     <h3>${esc(v('titleKo')) || ph('기사 제목')}</h3>
     <p class="etitle">${esc(v('titleEn')) || ph('English headline')}</p>
     <div class="by">${KID.byline}</div>
@@ -376,6 +541,7 @@ function render() {
     <div class="imgs"><div>${img(0)}</div><div>${img(1)}</div><div>${img(2)}</div></div>
     ${v('capKo') || v('capEn') ? `<p style="font-size:12px;color:#6b6259;margin-top:-10px">${esc(v('capKo'))} ${v('capEn') ? '· <i>' + esc(v('capEn')) + '</i>' : ''}</p>` : ''}
     <div class="body">${ko.length ? ko.map(p => `<p>${esc(p)}</p>`).join('') : `<p>${ph('①~⑥ 한국어 칸을 채우면 여기에 글이 생겨요.')}</p>`}</div>
+    ${igCount() >= 2 ? '<div class="igwrap" id="magIG"><div class="igscale"><div></div></div></div>' : ''}
     <div class="div">In English</div>
     <div class="eng">${en.length ? en.map(p => `<p>${esc(p)}</p>`).join('') : `<p>${ph('Your English piece appears here.')}</p>`}</div>
     <div class="info"><b>이달의 책 · This Month's Book</b>
@@ -384,13 +550,15 @@ function render() {
       ${'★'.repeat(S.stars || 0)}${'☆'.repeat(5 - (S.stars || 0))} · ${v('age') ? esc(v('age')) + '살 친구에게 추천' : ph('추천 나이')}
       ${L2 ? `<br><br><b>확인한 자료 · Checked against</b>${esc(v('srcName')) || ph('⑦ 자료 이름')}` : ''}
     </div>`;
+  const mIG = $('#magIG');
+  if (mIG) { MHJInfographic.mount(mIG.querySelector('.igscale > div'), igData()); fitIG(mIG); }
   // 마지막 문단의 질문을 굵게
   const last = (arr, sel) => { const ps = document.querySelectorAll(sel); if (arr.length && ps.length) ps[ps.length - 1].classList.add('q'); };
   last(ko, '#mag .body p'); last(en, '#mag .eng p');
 }
 function renderL0(g, ph, img) {
   $('#mag').innerHTML = `
-    <div class="kick"><span>${KID.en.toUpperCase()}'S MONTHLY BOOK</span><span>${KID.ko}의 이달의 책</span></div>
+    <div class="kick"><span>${S.club ? 'FAMILY BOOK CLUB · ' : ''}${KID.en.toUpperCase()}'S MONTHLY BOOK</span><span>${KID.ko}의 이달의 책</span></div>
     <h3>${esc(v('titleKo')) || ph('기사 제목')}</h3>
     ${v('titleEn') ? `<p class="etitle">${esc(v('titleEn'))}</p>` : ''}
     <div class="by">${KID.byline}</div>
@@ -407,7 +575,7 @@ function renderL0(g, ph, img) {
 }
 function exportText() {
   if (L0) return [
-    `[${KID.ko}의 이달의 책 · ${KID.en}'s Monthly Book · Level 0 (받아 적기)]`,
+    `[${KID.ko}의 이달의 책 · ${KID.en}'s Monthly Book · Level 0 (받아 적기)${S.club ? ' · 가족 북클럽 달' : ''}]`,
     `책: ${v('bookTitle')} / ${v('bookAuthor')} / ${v('bookPub')}`, `점수: ${'★'.repeat(S.stars || 0)}`,
     '', `제목(한): ${v('titleKo')}`, `Title(EN): ${v('titleEn')}`,
     '', `── 한마디 (풀쿼트) ──`, v('k6'), v('e6'),
@@ -417,7 +585,7 @@ function exportText() {
   ].join('\n');
   const g = GENRES.find(x => x[0] === S.genre);
   return [
-    `[${KID.ko}의 이달의 책 · ${KID.en}'s Monthly Book${L2 ? ' · Level 2' : ''}]`,
+    `[${KID.ko}의 이달의 책 · ${KID.en}'s Monthly Book${L2 ? ' · Level 2' : ''}${S.club ? ' · 가족 북클럽 달' : ''}]`,
     `책: ${v('bookTitle')} / ${v('bookAuthor')} / ${v('bookPub')}`,
     `종류: ${g ? g[1] : ''} · 점수: ${'★'.repeat(S.stars || 0)} · 추천: ${v('age')}살`,
     '', `제목(한): ${v('titleKo')}`, `Title(EN): ${v('titleEn')}`,
@@ -434,6 +602,26 @@ function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add
 $('#copy').onclick = async () => {
   try { await navigator.clipboard.writeText(exportText()); toast('📋 복사 완료! 카톡에 붙여넣기 하세요'); }
   catch (e) { $('#save').click(); }
+};
+$('#bundle').onclick = async () => {
+  const png = await makeIGPng();
+  render();
+  const mag = $('#mag').cloneNode(true);
+  const w = mag.querySelector('#magIG');
+  if (w) w.outerHTML = png ? `<img src="${png}" alt="" style="width:100%;margin:18px 0;display:block">` : '';
+  const css = [...document.querySelectorAll('style')].map(x => x.textContent).join('\n');
+  const data = JSON.stringify({ kid: KID_KEY, savedAt: new Date().toISOString(), text: S, infographic: igData(), photos, infographicPng: png })
+    .replace(/</g, '\\u003c');
+  const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(KID.ko)}의 이달의 책 — ${esc(v('titleKo'))}</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,500&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>${css}
+body { padding: 24px 16px; } .mag { max-width: 720px; margin: 0 auto; } details { max-width: 720px; margin: 20px auto; font-size: 14px; } pre { white-space: pre-wrap; }</style></head>
+<body><article class="mag">${mag.innerHTML}</article>
+<details><summary>편집용 원고 텍스트 (mhj-desk 에 붙여 넣기)</summary><pre>${esc(exportText())}</pre></details>
+<script type="application/json" id="mhj-monthly-book">${data}<\/script></body></html>`;
+  download(URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' })), `${KID.en.toLowerCase()}-monthly-book-${stamp()}.html`);
+  toast('📦 한 파일로 저장했어요! 이 파일을 카톡으로 보내요');
 };
 $('#save').onclick = () => {
   const a = document.createElement('a');

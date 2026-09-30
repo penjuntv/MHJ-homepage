@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>가족 북클럽 달</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Noto+Serif+KR:wght@700;900&family=Nunito:wght@600;700;800&family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Noto Sans KR", sans-serif; color: #1f1b17; font-size: 10.5pt; line-height: 1.55; }
+  .page { width: 210mm; height: 297mm; padding: 13mm 15mm 16mm; background: #fff; page-break-after: always; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .kick { font-family: "Nunito"; font-weight: 800; letter-spacing: .2em; font-size: 8.5pt; color: #b07a3c; display: flex; justify-content: space-between; border-bottom: 2px solid #1f1b17; padding-bottom: 2.5mm; }
+  h1 { font-family: "Noto Serif KR"; font-weight: 900; font-size: 22pt; margin: 5mm 0 1mm; }
+  .lead { color: #6b6259; margin: 0 0 4mm; }
+  h2 { font-family: "Noto Serif KR"; font-size: 13pt; margin: 4mm 0 1.5mm; display: flex; align-items: center; gap: 2.5mm; }
+  h2 .n { background: #1f1b17; color: #fff; border-radius: 50%; width: 7mm; height: 7mm; display: grid; place-items: center; font-family: "Nunito"; font-size: 10pt; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border-bottom: 1px solid #e3dbd0; padding: 1.8mm 2.5mm; text-align: left; vertical-align: top; }
+  th { background: #f5f0ea; font-size: 9.5pt; }
+  ul, ol { margin: 1mm 0; padding-left: 5mm; } li { margin: .8mm 0; }
+  .ui { font-weight: 700; background: #eef2ff; color: #3730a3; border-radius: 4px; padding: 0 1.5mm; }
+  code { font-family: "Nunito"; font-weight: 700; background: #f5f0ea; border-radius: 4px; padding: 0 1.5mm; font-size: 9.5pt; }
+  .box { background: #f5f0ea; border-radius: 10px; padding: 3mm 4mm; }
+  .spread { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2mm; margin: 2mm 0; }
+  .spread div { border: 1.5px solid #1f1b17; border-radius: 6px; padding: 2mm; font-size: 8.8pt; line-height: 1.4; min-height: 26mm; }
+  .spread b { display: block; font-family: "Noto Serif KR"; font-size: 10pt; margin-bottom: 1mm; }
+  .spread i { font-style: normal; color: #b07a3c; font-family: "Nunito"; font-weight: 800; font-size: 8pt; }
+  .foot { position: absolute; bottom: 6mm; left: 15mm; right: 15mm; font-size: 8pt; color: #a3988c; display: flex; justify-content: space-between; font-family: "Nunito"; }
+
+  /* 2쪽: 토론 기록지 (아이들도 보는 쪽) */
+  .kid { font-family: "Gowun Dodum", sans-serif; font-size: 12pt; background: #fffdf9; }
+  .kid h1 { font-family: "Jua"; font-weight: 400; font-size: 26pt; margin: 3mm 0 0; text-align: center; }
+  .kid .sub { text-align: center; font-family: "Nunito"; font-weight: 600; color: #8a8078; margin-bottom: 4mm; }
+  .ln { border-bottom: 1.6px dotted #cfc6bb; height: 9mm; }
+  .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3.5mm; }
+  .col { border: 2.2px solid #2b2622; border-radius: 12px; padding: 3mm 3.5mm; background: #fff; }
+  .col .who { font-family: "Jua"; font-size: 15pt; display: flex; align-items: center; gap: 2mm; }
+  .col .who span { font-size: 18pt; }
+  .col .q { font-size: 10pt; color: #8a8078; margin: .5mm 0 0; }
+  .sec { font-family: "Jua"; font-size: 14pt; margin: 5mm 0 2mm; display: flex; align-items: baseline; gap: 2mm; }
+  .sec small { font-family: "Nunito"; font-size: 9.5pt; color: #8a8078; }
+  .y { background: #fff4d4; } .b { background: #e7effd; } .g { background: #e2f4ea; } .p { background: #fde6ea; }
+  .vote { display: flex; justify-content: space-around; font-size: 11.5pt; }
+  .vote div { text-align: center; } .vote b { font-family: "Jua"; font-weight: 400; display: block; font-size: 13pt; }
+  .vote span { font-size: 20pt; letter-spacing: 3mm; }
+</style>
+</head>
+<body>
+
+<section class="page">
+  <div class="kick"><span>MHJ MONTHLY BOOK</span><span>가족 북클럽 달 · 유씨용</span></div>
+  <h1>세 아이, 한 권의 책</h1>
+  <p class="lead"><b>석 달에 한 번</b>은 세 자매가 같은 책을 읽습니다. 각자 자기 레벨 워크시트를 그대로 쓰고, 여기에 <b>가족 토론 한 번</b>만 더합니다. 같은 책을 Year 1·5·7이 어떻게 다르게 읽는지가 지면에 나란히 실립니다. MHJ만 할 수 있는 기획입니다.</p>
+
+  <h2><span class="n">1</span>책 고르기: 세 겹이 있는 책</h2>
+  <table>
+    <tr><th style="width:22%">누구에게</th><th style="width:30%">필요한 것</th><th>이런 책</th></tr>
+    <tr><td>지니 (Y1)</td><td>그림이 많고 장면이 선명함</td><td rowspan="3">옛이야기·신화 그림책, 인물 이야기 그림책, 그림이 많은 역사 만화의 한 편. <b>누가 옳았는지 의견이 갈리는 장면</b>이 하나 있으면 최고입니다</td></tr>
+    <tr><td>현이 (Y5)</td><td>이야기 흐름이 뚜렷함</td></tr>
+    <tr><td>민이 (Y7)</td><td>생각할 거리 · 논쟁거리</td></tr>
+  </table>
+
+  <h2><span class="n">2</span>한 달 흐름</h2>
+  <table>
+    <tr><th style="width:18%">주</th><th>할 일</th></tr>
+    <tr><td>1주</td><td>각자 읽기. 지니는 읽어 주기. 한 번은 <b>다 같이 소리 내어</b> 읽어도 좋습니다</td></tr>
+    <tr><td>2~3주</td><td>각자 자기 워크시트(지니 L0 · 현이 L1 · 민이 L2). 기자 책상에서 <span class="ui">📚 가족 북클럽 달</span>에 체크</td></tr>
+    <tr><td>3주 끝</td><td><b>가족 토론 저녁 20분</b>. 다음 장 기록지를 식탁에 놓고 진행합니다</td></tr>
+    <tr><td>4주</td><td>매거진에 올리기 (아래 지면 구성)</td></tr>
+  </table>
+
+  <h2><span class="n">3</span>토론 진행 (20분)</h2>
+  <ol>
+    <li><b>막내부터</b> 말합니다. 지니 한마디 → 현이 생각 → 민이 주장. 언니들이 먼저 말하면 지니 말이 언니들 말을 따라갑니다</li>
+    <li>서로에게 <b>질문 하나씩</b> 합니다. 민이가 지니에게, 지니가 민이에게도 합니다</li>
+    <li>👍👎 추천 투표를 하고, 그날 나온 말 중 <b>제일 좋은 한마디</b>를 가족이 같이 고릅니다</li>
+    <li>부모는 받아 적기만 하고 결론은 내지 않습니다</li>
+  </ol>
+
+  <h2><span class="n">4</span>매거진 지면 구성 (mhj-desk, 코드 변경 없음)</h2>
+  <div class="spread">
+    <div><i>OPENER</i><b>세 아이, 한 권의 책</b><span class="ui">Middle</span> 사진 = 표지나 세 아이 그림 모음. 본문 = 부모 소개 3~4문장 + 셋의 한 줄</div>
+    <div><i>1</i><b>지니</b><span class="ui">Right</span> 문답 + 그림 3장</div>
+    <div><i>2</i><b>현이</b><span class="ui">Right</span> 칼럼 + 인포그래픽</div>
+    <div><i>3</i><b>민이</b><span class="ui">Right</span> 논증 + 확인한 자료</div>
+    <div><i>CLOSER</i><b>식탁에서 나온 말</b><span class="ui">Little Notes</span> Quote = 오늘의 한마디, Signature = 말한 사람</div>
+  </div>
+  <div class="box" style="margin-top:auto">기자 책상에서 <b>📚 가족 북클럽 달</b>에 체크하면 매거진 머리글에 <b>FAMILY BOOK CLUB</b>이 붙고, 받은 글 맨 위에도 "가족 북클럽 달"이 표시됩니다. 네 편을 같은 호에 연달아 배치하세요.</div>
+  <div class="foot"><span>MHJ · Monthly Book</span><span>다음 장: 가족 토론 기록지 (인쇄) →</span></div>
+</section>
+
+<section class="page kid">
+  <h1>📚 가족 북클럽 토론</h1>
+  <div class="sub">Family Book Club Night · 20___ 년 ___ 월</div>
+  <div class="ln" style="height:10mm;font-size:11pt;color:#8a8078;display:flex;align-items:flex-end">📖 책 제목:</div>
+
+  <div class="sec">① 차례대로 말해요 <small>Youngest first</small></div>
+  <div class="cols">
+    <div class="col y"><div class="who"><span>🖍️</span>지니</div><p class="q">이 책 한 마디로?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+    <div class="col b"><div class="who"><span>💭</span>현이</div><p class="q">내 생각은? 왜?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+    <div class="col g"><div class="who"><span>⚖️</span>민이</div><p class="q">내 주장은? 근거는?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+  </div>
+
+  <div class="sec">② 서로에게 질문 하나 <small>One question each</small></div>
+  <div class="cols">
+    <div class="col"><div class="who" style="font-size:12pt">지니 → ______</div><div class="ln"></div><div class="ln"></div></div>
+    <div class="col"><div class="who" style="font-size:12pt">현이 → ______</div><div class="ln"></div><div class="ln"></div></div>
+    <div class="col"><div class="who" style="font-size:12pt">민이 → ______</div><div class="ln"></div><div class="ln"></div></div>
+  </div>
+
+  <div class="sec">③ 친구에게 추천할까? <small>Vote</small></div>
+  <div class="col p vote"><div><b>지니</b><span>👍 👎</span></div><div><b>현이</b><span>👍 👎</span></div><div><b>민이</b><span>👍 👎</span></div><div><b>엄마 · 아빠</b><span>👍 👎</span></div></div>
+
+  <div class="sec">④ 오늘의 한마디 <small>Our favourite line tonight → 매거진 마지막 쪽</small></div>
+  <div class="col" style="border-style:dashed"><div class="ln" style="height:11mm"></div><div class="ln" style="height:11mm"></div><div style="text-align:right;margin-top:2mm">— 말한 사람: ________</div></div>
+
+  <div class="sec">⑤ 다음 북클럽 책 후보 <small>Next time</small></div>
+  <div class="cols"><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+  <div class="foot"><span>MHJ · Family Book Club</span><span>식탁에 놓고 써요</span></div>
+</section>
+</body>
+</html>
