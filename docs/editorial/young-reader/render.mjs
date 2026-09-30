@@ -1,7 +1,7 @@
-// 아이들의 이달의 책 (현이 Level 1 · 민이 Level 2) — 인쇄 PDF · 인포그래픽 PNG · 메일 꾸러미 생성
-//   node docs/editorial/young-reader/render.mjs worksheets        → print/<kid>/worksheet-<genre>.pdf 6종 + worksheet-all.pdf
+// 아이들의 이달의 책 (지니 Level 0 · 현이 Level 1 · 민이 Level 2) — 인쇄 PDF · 인포그래픽 PNG · 메일 꾸러미 생성
+//   node docs/editorial/young-reader/render.mjs worksheets        → print/<kid>/worksheet-<genre>.pdf 6종 + worksheet-all.pdf (지니는 worksheet-all.pdf 한 벌)
 //   node docs/editorial/young-reader/render.mjs infographic <json|폴더> → 같은 이름 .png (1600×1200, 4:3)
-//   node docs/editorial/young-reader/render.mjs share             → share/현이에게 · 민이에게 · 유씨에게 폴더 + .zip (메일 첨부용)
+//   node docs/editorial/young-reader/render.mjs share             → share/현이에게 · 민이에게 · 유씨에게 폴더 + .zip (메일 첨부용, 지니 것은 유씨에게만)
 //   node docs/editorial/young-reader/render.mjs preview <out-dir> [kid] → 워크시트 쪽별 PNG (검수용)
 import { chromium } from 'playwright';
 import { mkdirSync, existsSync, readFileSync, readdirSync, statSync, rmSync, copyFileSync, writeFileSync } from 'node:fs';
@@ -12,7 +12,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const GENRES = ['history', 'story', 'geography', 'culture', 'society', 'any'];
 // worksheet.html · writer.html · guides/kid-guide.html 의 KIDS 와 같은 키
-const KIDS = { hyun: '현이', min: '민이' };
+const KIDS = { hyun: '현이', min: '민이', jin: '지니' };
+// 지니(Level 0, Y1)는 아직 못 읽는다 → 책 종류별 쪽 없음, 자기 꾸러미 없음(유씨가 읽어 주고 받아 적음)
+const READS = kid => kid !== 'jin';
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const [, , mode, arg, arg2] = process.argv;
@@ -30,7 +32,7 @@ try {
     for (const kid of Object.keys(KIDS)) {
       const out = join(here, 'print', kid);
       mkdirSync(out, { recursive: true });
-      for (const g of [...GENRES, 'all']) {
+      for (const g of READS(kid) ? [...GENRES, 'all'] : ['all']) {
         await open(`${pathToFileURL(join(here, 'worksheet.html'))}?kid=${kid}&genre=${g}`);
         await page.pdf({ path: join(out, `worksheet-${g}.pdf`), format: 'A4', printBackground: true, preferCSSPageSize: true });
       }
@@ -80,6 +82,11 @@ try {
     const mom = join(share, '유씨에게');
     mkdirSync(mom, { recursive: true });
     for (const [kid, ko] of Object.entries(KIDS)) {
+      if (!READS(kid)) {
+        copyFileSync(join(here, 'print', kid, 'worksheet-all.pdf'), join(mom, `2_${ko}-워크시트.pdf`));
+        writer(kid, join(mom, `3_${ko}-기자책상.html`));
+        continue;
+      }
       const dir = join(share, `${ko}에게`);
       mkdirSync(dir, { recursive: true });
       await guide('kid-guide.html', join(dir, '1_먼저-읽어요.pdf'), kid);
@@ -101,7 +108,7 @@ with zipfile.ZipFile(d + '.zip', 'w', zipfile.ZIP_DEFLATED) as z:
             if f.startswith('.'): continue
             p = os.path.join(root, f)
             z.write(p, u.normalize('NFC', p))`;
-    const bundles = [...Object.values(KIDS).map(ko => `${ko}에게`), '유씨에게'];
+    const bundles = [...Object.entries(KIDS).filter(([k]) => READS(k)).map(([, ko]) => `${ko}에게`), '유씨에게'];
     for (const d of bundles) execFileSync('python3', ['-c', ZIP, d], { cwd: share });
     console.log('✓', bundles.map(d => `share/${d}.zip`).join(' · '));
   } else if (mode === 'preview') {

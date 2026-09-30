@@ -26,6 +26,19 @@
   body.lv2 .ln { height: 8.4mm; } body.lv2 .ln.s { height: 7.4mm; }
   body.lv2 .card { padding: 3mm 4mm; }
   .src { display: grid; grid-template-columns: 1fr 58mm; gap: 4mm; flex: 1; }
+  /* Level 0 (Year 1, 아직 못 읽음): 그림 중심, 글은 부모가 */
+  .l0-note { font-size: 10.5pt; background: var(--c-bg); border-radius: 10px; padding: 2.5mm 4mm; margin-bottom: 4mm; }
+  .l0-note b { font-family: "Jua"; font-weight: 400; }
+  .faces { display: flex; justify-content: space-around; font-size: 34pt; }
+  .faces span { width: 24mm; height: 24mm; border: 2.4px solid var(--ink); border-radius: 50%; display: grid; place-items: center; background: #fff; }
+  .panel3 { display: grid; grid-template-rows: repeat(3, 1fr); gap: 4mm; flex: 1; }
+  .panel3 .row3 { display: grid; grid-template-columns: 1fr 62mm; gap: 4mm; min-height: 0; }
+  .panel3 .panel { height: 100%; }
+  .qa { display: grid; grid-template-columns: 15mm 1fr; gap: 3mm; align-items: start; }
+  .qa + .qa { margin-top: 3mm; }
+  .qa .ic { width: 15mm; height: 15mm; border-radius: 50%; border: 2.2px solid var(--ink); display: grid; place-items: center; font-size: 18pt; background: #fff; }
+  .qa b { font-family: "Jua"; font-weight: 400; font-size: 13pt; }
+  .qa b .en { font-size: 9.5pt; color: var(--soft); margin-left: 2mm; }
 
   /* 머리 */
   .head { display: flex; align-items: center; gap: 4mm; margin-bottom: 3.5mm; }
@@ -530,6 +543,95 @@
   <div class="foot"><span>Hyun's Monthly Book · Level 2</span><span>4일 · Day 4 → 내일은 옮겨 치기!</span></div>
 </section>
 
+<!-- ============ Level 0 (Year 1 · 읽어 주고 받아 적기) ============ -->
+<section class="page t-c" data-page="cover" data-lv="0">
+  <div class="cover-top">
+    <div class="kicker">MHJ MAGAZINE · YOUNG WRITER</div>
+    <h1>지니의 이달의 책</h1>
+    <div class="en">Jin's Monthly Book</div>
+    <div class="press">🪪 기자 · Jin &nbsp;|&nbsp; 20___ 년 ___ 월</div><span class="lvl">LEVEL 0</span>
+  </div>
+  <div class="sec">🗺️ 오늘은 어디까지? <span class="en">Stamp each stop!</span></div>
+  <div class="trail" style="grid-template-columns:repeat(5,1fr)">
+    <div class="stop"><div class="dot">👂</div><b>들어요</b><span>책 읽어 주기</span></div>
+    <div class="stop"><div class="dot">🖍️</div><b>그려요</b><span>표지 · 좋은 장면</span></div>
+    <div class="stop"><div class="dot">🎞️</div><b>3컷</b><span>이야기 그리기</span></div>
+    <div class="stop"><div class="dot">💬</div><b>말해요</b><span>지니 인터뷰</span></div>
+    <div class="stop"><div class="dot">📰</div><b>짠!</b><span>매거진에 실려요</span></div>
+  </div>
+  <div class="l0-note" style="margin-top:8mm"><b>👨‍👩‍👧 엄마아빠에게</b> · 지니는 <b>듣고, 그리고, 말하는</b> 기자예요. 책은 읽어 주고, 글은 지니가 한 말을 <b>그대로</b> 받아 적어 주세요. 하루 한 쪽, 10~15분이면 충분해요. 인터뷰 기록지(4쪽)는 엄마아빠 쪽이에요.</div>
+  <div class="sec">🤝 지니의 약속 <span class="en">Jin's promise</span></div>
+  <div class="rules">
+    <div class="rule" style="background:var(--y-bg)"><div class="e" style="font-size:30pt">👂</div><b>끝까지 들어요</b></div>
+    <div class="rule" style="background:var(--g-bg)"><div class="e" style="font-size:30pt">🖍️</div><b>크게 그려요</b></div>
+    <div class="rule" style="background:var(--p-bg)"><div class="e" style="font-size:30pt">💬</div><b>생각을 말해요</b></div>
+  </div>
+  <div class="sec">📚 어떤 책이 좋을까? <span class="en">For Mum &amp; Dad</span></div>
+  <div class="l0-note" style="margin:0">그림이 많은 그림책이 제일 좋아요. 언니들이 읽는 책에서 <b>그림이 많은 부분만</b> 골라 읽어 줘도 돼요. 같은 책을 여러 번 읽어도 괜찮아요. 두 번째 들을 때 더 많이 말해요.</div>
+  <div class="box" style="flex:1;margin-top:5mm;display:grid;place-items:center;font-family:'Jua';font-size:20pt;color:var(--line)">🌟 다 하면 여기에 큰 스티커! 🌟</div>
+  <div class="foot"><span>MHJ · Jin's Monthly Book · Level 0</span><span>표지 Cover</span></div>
+</section>
+
+<section class="page t-y" data-page="1" data-lv="0">
+  <div class="head"><div class="badge">👂</div><h1>책 만나기<span class="en">Listen &amp; meet the book</span></h1><div class="day">DAY<b>1</b></div></div>
+  <span class="mag">📰 표지 그림은 매거진 <b>사진 칸</b>에 들어가요</span>
+  <div class="card" style="flex:1;display:flex;flex-direction:column">
+    <div class="label"><span class="num">1</span>🖍️ 책 표지를 따라 그려요 <span class="en">Draw the cover</span></div>
+    <div class="box" style="flex:1"></div>
+    <div class="ln s" style="font-size:10pt;color:var(--soft)">책 제목 (엄마아빠가 써요):</div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="num">2</span>이 책 어땠어? 동그라미! <span class="en">How was it?</span></div>
+    <div class="faces"><span>😍</span><span>😀</span><span>🙂</span><span>😐</span></div>
+  </div>
+  <div class="card" style="height:62mm;display:flex;flex-direction:column">
+    <div class="label"><span class="num">3</span>누가 나왔어? 그려 봐! <span class="en">Who was in the story?</span></div>
+    <div class="box" style="flex:1"></div>
+  </div>
+  <div class="foot"><span>Jin's Monthly Book</span><span>1 · 들어요</span></div>
+</section>
+
+<section class="page t-b" data-page="2" data-lv="0">
+  <div class="head"><div class="badge">🖍️</div><h1>제일 좋았던 장면<span class="en">My favourite part</span></h1><div class="day">DAY<b>2</b></div></div>
+  <span class="mag">📰 이 그림은 매거진 <b>사진 칸</b>에 크게 들어가요</span>
+  <div class="card" style="flex:1;display:flex;flex-direction:column">
+    <div class="label"><span class="num">1</span>🖍️ 크게, 색칠까지! <span class="en">Draw it big</span></div>
+    <div class="box" style="flex:1"></div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="num">2</span>💬 이 그림은 뭐야? <span class="en">What's happening?</span></div>
+    <div class="tip" style="margin:0">지니가 한 말을 <b>그대로</b> 적어 주세요 (한국어든 영어든)</div>
+    <div class="ln"></div><div class="ln"></div>
+  </div>
+  <div class="foot"><span>Jin's Monthly Book</span><span>2 · 그려요</span></div>
+</section>
+
+<section class="page t-g" data-page="3" data-lv="0">
+  <div class="head"><div class="badge">🎞️</div><h1>이야기 3컷<span class="en">The story in 3 pictures</span></h1><div class="day">DAY<b>3</b></div></div>
+  <span class="mag">📰 3컷 그림도 매거진 <b>사진 칸</b>에 들어갈 수 있어요</span>
+  <div class="panel3">
+    <div class="row3"><div class="panel"><span class="tag">① 처음에</span></div><div><div class="tip" style="margin:0">💬 지니가 한 말</div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></div>
+    <div class="row3"><div class="panel"><span class="tag">② 그다음에</span></div><div><div class="tip" style="margin:0">💬 지니가 한 말</div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></div>
+    <div class="row3"><div class="panel"><span class="tag">③ 마지막에</span></div><div><div class="tip" style="margin:0">💬 지니가 한 말</div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></div>
+  </div>
+  <div class="foot"><span>Jin's Monthly Book</span><span>3 · 3컷</span></div>
+</section>
+
+<section class="page t-p" data-page="4" data-lv="0">
+  <div class="head"><div class="badge">💬</div><h1>지니 인터뷰<span class="en">We asked Jin · 엄마아빠 쪽</span></h1><div class="day">DAY<b>4</b></div></div>
+  <div class="l0-note"><b>받아 적는 법</b> · 질문은 그대로 읽어 주고, 대답은 <b>고치지 않고 그대로</b> 적어요. 영어로 대답하면 영어로. 정답을 알려 주거나 "~지?" 하고 유도하지 않아요. 지니는 대답한 질문의 ⭐에 색칠!</div>
+  <div class="card" style="flex:1">
+    <div class="qa"><div class="ic">🧸</div><div><b>① 누가 나왔어? ⭐<span class="en">Who was in the story?</span></b><div class="ln s"></div><div class="ln s"></div></div></div>
+    <div class="qa"><div class="ic">🎬</div><div><b>② 무슨 일이 있었어? ⭐<span class="en">What happened?</span></b><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div></div></div>
+    <div class="qa"><div class="ic">💛</div><div><b>③ 제일 좋았던 건 뭐야? 왜? ⭐<span class="en">Favourite part? Why?</span></b><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div></div></div>
+    <div class="qa"><div class="ic">🙋</div><div><b>④ 지니라면 어떻게 했을 것 같아? ⭐<span class="en">What would you do?</span></b><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div></div></div>
+    <div class="qa"><div class="ic">👭</div><div><b>⑤ 친구한테 이 책 알려 줄래? 왜? ⭐<span class="en">Would you tell a friend?</span></b><div class="ln s"></div><div class="ln s"></div><div class="ln s"></div></div></div>
+    <div class="qa"><div class="ic">✨</div><div><b>⑥ 이 책을 한 마디로 말하면? ⭐<span class="en">The book in one word</span></b><div class="ln s"></div><div class="ln s"></div></div></div>
+  </div>
+  <div class="words"><b>📰 매거진에서는</b> ⑥이 크게 뽑힌 한마디가 되고, ①~⑤는 "지니에게 물었어요" 문답으로 실려요. 다 적으면 → 기자 책상(지니)에 옮겨 주세요.</div>
+  <div class="foot"><span>Jin's Monthly Book</span><span>4 · 말해요 (엄마아빠 기록)</span></div>
+</section>
+
 <script>
   // ?genre=history|story|geography|culture|society|any|all  (기본 all)
   const g = new URLSearchParams(location.search).get('genre') || 'all';
@@ -539,9 +641,12 @@
   const KIDS = {
     hyun: { ko: '현이', en: 'Hyun', level: 1 },
     min: { ko: '민이', en: 'Min', level: 2 },
+    jin: { ko: '지니', en: 'Jin', level: 0 },
   };
   const kid = KIDS[new URLSearchParams(location.search).get('kid')] || KIDS.hyun;
   document.body.classList.add('lv' + kid.level);
+  // Level 0 은 자기 쪽(data-lv="0")만 쓴다 — 공통 쪽·책 종류별 쪽 모두 빠짐
+  if (kid.level === 0) document.querySelectorAll('section.page:not([data-lv="0"])').forEach(el => el.remove());
   document.querySelectorAll('[data-lv]').forEach(el => { if (+el.dataset.lv !== kid.level) el.remove(); });
   if (kid.en !== 'Hyun') {
     const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
