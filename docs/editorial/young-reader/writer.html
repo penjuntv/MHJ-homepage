@@ -78,6 +78,8 @@
   .photo { aspect-ratio: 3 / 4; border: 2px dashed var(--line); border-radius: 10px; display: grid; place-items: center; text-align: center; font-size: 13px; color: var(--soft); cursor: pointer; overflow: hidden; position: relative; background: #fff; }
   .photo img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
   .photo input { display: none; }
+  .photo .rm { position: absolute; top: 6px; right: 6px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; border: 0; background: rgba(43,38,34,.8); color: #fff; font-size: 14px; cursor: pointer; }
+  .toast { max-width: calc(100vw - 32px); text-align: center; }
   .checks label { display: flex; gap: 10px; align-items: center; padding: 7px 0; cursor: pointer; font-size: 16px; }
   .checks input { width: 22px; height: 22px; accent-color: var(--g); }
   .missing { background: var(--p-bg); border-radius: 10px; padding: 10px 14px; font-size: 14px; margin: 10px 0 0; display: none; }
@@ -286,7 +288,10 @@ if (L0) CHECKS.splice(0, CHECKS.length,
 const KEY = KID.key;
 let S = {};
 try { S = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { S = {}; }
-const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+// 크롬은 컴퓨터 안의 HTML 파일들이 저장 공간(약 5MB)을 같이 쓴다 — 세 아이 사진이 함께 들어가므로 꽉 차면 알린다
+const FULL = '저장 공간이 꽉 찼어요. 지난 책은 "새 책 시작하기"로 지워 주세요 (먼저 📦 저장!)';
+let fullWarned = false;
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); fullWarned = false; } catch (e) { if (!fullWarned) { fullWarned = true; toast(FULL, 6000); } } };
 const $ = (s, r = document) => r.querySelector(s);
 const esc = t => String(t || '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 const v = k => (S[k] || '').trim();
@@ -318,9 +323,9 @@ $('#photos').innerHTML = (L0 ? ['🖍️ 표지 그림', '🖍️ 제일 좋은 
 const PKEY = KEY + '-photos';
 let P = {};
 try { P = JSON.parse(localStorage.getItem(PKEY) || '{}') || {}; } catch (e) { P = {}; }
-const persistP = () => { try { localStorage.setItem(PKEY, JSON.stringify(P)); } catch (e) { toast('사진이 커서 기억은 못 했어요. 창을 닫기 전에 저장해요'); } };
+const persistP = () => { try { localStorage.setItem(PKEY, JSON.stringify(P)); } catch (e) { toast('사진은 이번에만 들어가 있어요 — ' + FULL, 7000); } };
 const photos = [P.p0 || null, P.p1 || null, P.p2 || null];
-function compress(file, max = 1600, q = 0.85) {
+function compress(file, max = 1200, q = 0.72) {
   return new Promise((ok, no) => {
     const r = new FileReader();
     r.onerror = no;
@@ -362,17 +367,24 @@ document.addEventListener('click', e => {
   }
   if (t) { document.body.dataset.tab = t.dataset.t; document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b === t)); window.scrollTo(0, 0); }
 });
+const readPhoto = async f => {
+  try { return await compress(f); } catch (e) { toast('이 사진은 못 읽어요. 사진 앱에서 JPG로 내보낸 뒤 넣어 주세요', 6000); return null; }
+};
 const showPhoto = (i, src) => {
   const box = document.querySelector(`[data-p="${i}"]`)?.closest('.photo'); if (!box) return;
-  box.querySelector('img')?.remove();
-  if (src) { const img = new Image(); img.src = src; box.prepend(img); }
+  box.querySelectorAll('img, .rm').forEach(x => x.remove());
+  if (!src) return;
+  const img = new Image(); img.src = src; box.prepend(img);
+  const rm = document.createElement('button'); rm.className = 'rm'; rm.type = 'button'; rm.textContent = '✕'; rm.title = '사진 빼기';
+  rm.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); photos[i] = null; delete P['p' + i]; persistP(); showPhoto(i, null); update(); });
+  box.append(rm);
 };
 photos.forEach((src, i) => showPhoto(i, src));
 document.querySelectorAll('[data-p]').forEach(inp => inp.addEventListener('change', async () => {
-  const f = inp.files[0]; if (!f) return;
-  const i = +inp.dataset.p;
-  photos[i] = await compress(f); P['p' + i] = photos[i]; persistP();
-  showPhoto(i, photos[i]); update();
+  const f = inp.files[0]; inp.value = ''; if (!f) return;
+  const i = +inp.dataset.p, src = await readPhoto(f); if (!src) return;
+  photos[i] = src; P['p' + i] = src; persistP();
+  showPhoto(i, src); update();
 }));
 $('#club').checked = !!S.club;
 $('#club').addEventListener('change', e => { S.club = e.target.checked; persist(); update(); });
@@ -382,7 +394,7 @@ const SOC = [['😟', '문제'], ['🔍', '왜?'], ['🧍', '누가 힘들었나
 const IG = {
   history: { type: 'timeline', title: '예: 신라에서 고려까지, 4번의 큰일', groups: [
     { name: 'events', n: 4, label: i => `📍 ${i + 1}번 사건`, fields: [['year', '연도 (예: 676)'], ['label', '무슨 일 (한)'], ['labelEn', 'English']] },
-    { name: 'people', n: 2, label: i => `🧑 인물 ${i + 1}`, fields: [['name', '이름'], ['did', '한 일'], ['score', '⭐ 점수 1~5']] }] },
+    { name: 'people', n: 2, label: i => `🧑 인물 ${i + 1}`, fields: [['name', '이름'], ['did', '한 일'], ['score', '⭐ 점수 (1~5 숫자)']] }] },
   story: { type: 'story4', title: '예: 새옹지마 塞翁之馬', groups: [
     { name: 'panels', n: 4, label: i => ['① 처음에', '② 그런데', '③ 그래서', '④ 마지막에'][i], fields: [['ko', '한 줄 (한)'], ['en', 'English']] }],
     extra: [['meaning', '이 말의 뜻 (한)'], ['meaningEn', 'Meaning (EN)'], ['similar', '비슷한 영어 속담 (선택)']] },
@@ -429,7 +441,7 @@ function buildIGForm() {
     el.value = ((S.ig || {})[S.genre] || {})[el.dataset.ig] || '';
     el.addEventListener('input', () => { igStore()[el.dataset.ig] = el.value; persist(); update(); });
   });
-  $('#igImg')?.addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; P.igimg = await compress(f); persistP(); update(); });
+  $('#igImg')?.addEventListener('change', async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; const src = await readPhoto(f); if (!src) return; P.igimg = src; persistP(); update(); });
 }
 function fitIG(wrap) {
   const sc = wrap.querySelector('.igscale'); if (!sc) return;
@@ -454,7 +466,7 @@ async function makeIGPng() {
   return c.toDataURL('image/png');
 }
 const stamp = () => new Date().toISOString().slice(0, 7);
-const download = (href, name) => { const a = document.createElement('a'); a.href = href; a.download = name; a.click(); };
+const download = (href, name) => { const a = document.createElement('a'); a.href = href; a.download = name; a.click(); if (href.startsWith('blob:')) setTimeout(() => URL.revokeObjectURL(href), 10000); };
 $('#igSave')?.addEventListener('click', async () => {
   const png = await makeIGPng();
   if (!png) { if (window.html2canvas) toast('칸을 두 개 이상 채워야 그림이 돼요'); return; }
@@ -507,7 +519,8 @@ function update() {
   BLOCKS.forEach(b => secDone['b' + b.n] = v('k' + b.n) && (v('e' + b.n) || L0));
   Object.entries(secDone).forEach(([k, d]) => document.querySelector(`[data-sec="${k}"]`)?.classList.toggle('done', !!d));
   // 진행률
-  const miss = missing(), total = L0 ? 3 + 1 + BLOCKS.length + CHECKS.length : 4 + 1 + BLOCKS.length * 2 + 1 + (L2 ? 2 : 0) + CHECKS.length;
+  // 채울 칸 수 = missing() 이 셀 수 있는 항목 수 (L0: 제목·별점·기사 제목 + 대답 6 / L1: 책 3 + 제목 + 문장 12 + 고친 문장 / L2: + 고친 문장 2 + 자료)
+  const miss = missing(), total = (L0 ? 3 + BLOCKS.length : 4 + BLOCKS.length * 2 + 1 + (L2 ? 2 : 0)) + CHECKS.length;
   const checked = (S.checks || []).filter(Boolean).length;
   const pct = Math.round(((total - CHECKS.length - miss.length) + checked) / total * 100);
   $('#meter').style.width = pct + '%'; $('#pct').textContent = pct + '%';
@@ -598,15 +611,19 @@ function exportText() {
     '', '── 칸별 원본 (편집용) ──', ...BLOCKS.map(b => `${b.n}) ${v('k' + b.n)} | ${v('e' + b.n)}`),
   ].join('\n');
 }
-function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2200); }
+var toastTimer; // var: 초기 실행 중 toast 가 불려도 TDZ 에 걸리지 않게
+function toast(t, ms = 2400) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), ms); }
 $('#copy').onclick = async () => {
   try { await navigator.clipboard.writeText(exportText()); toast('📋 복사 완료! 카톡에 붙여넣기 하세요'); }
   catch (e) { $('#save').click(); }
 };
 $('#bundle').onclick = async () => {
   const png = await makeIGPng();
+  if (!png && igCount() >= 2 && !confirm('인포그래픽을 못 만들었어요 (인터넷 연결을 확인해요).\n인포그래픽 없이 저장할까요?')) return;
   render();
   const mag = $('#mag').cloneNode(true);
+  const imgs = mag.querySelector('.imgs');
+  if (imgs) { imgs.querySelectorAll(':scope > div').forEach(d => { if (!d.querySelector('img')) d.remove(); }); if (!imgs.children.length) imgs.remove(); else imgs.style.gridTemplateColumns = `repeat(${imgs.children.length}, 1fr)`; }
   const w = mag.querySelector('#magIG');
   if (w) w.outerHTML = png ? `<img src="${png}" alt="" style="width:100%;margin:18px 0;display:block">` : '';
   const css = [...document.querySelectorAll('style')].map(x => x.textContent).join('\n');
@@ -621,17 +638,16 @@ body { padding: 24px 16px; } .mag { max-width: 720px; margin: 0 auto; } details 
 <details><summary>편집용 원고 텍스트 (mhj-desk 에 붙여 넣기)</summary><pre>${esc(exportText())}</pre></details>
 <script type="application/json" id="mhj-monthly-book">${data}<\/script></body></html>`;
   download(URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' })), `${KID.en.toLowerCase()}-monthly-book-${stamp()}.html`);
-  toast('📦 한 파일로 저장했어요! 이 파일을 카톡으로 보내요');
+  toast('📦 한 파일로 저장했어요! 이 파일을 카톡으로 보내요', 4000);
 };
 $('#save').onclick = () => {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([exportText()], { type: 'text/plain;charset=utf-8' }));
-  a.download = `${KID.en.toLowerCase()}-monthly-book-${new Date().toISOString().slice(0, 7)}.txt`; a.click();
+  download(URL.createObjectURL(new Blob([exportText()], { type: 'text/plain;charset=utf-8' })), `${KID.en.toLowerCase()}-monthly-book-${stamp()}.txt`);
   toast('💾 파일로 저장했어요');
 };
 $('#reset').onclick = () => {
-  if (!confirm('지금까지 쓴 걸 모두 지우고 새 책을 시작할까요?\n(먼저 "복사해서 보내기"를 했는지 확인!)')) return;
-  S = {}; persist(); location.reload();
+  if (!confirm('지금까지 쓴 글과 사진을 모두 지우고 새 책을 시작할까요?\n(먼저 "📦 한 파일로 저장"을 했는지 확인!)')) return;
+  try { localStorage.removeItem(KEY); localStorage.removeItem(PKEY); } catch (e) {}
+  location.reload();
 };
 update();
 </script>

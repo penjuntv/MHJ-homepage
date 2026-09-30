@@ -1,3 +1,5 @@
-# render.mjs 생성물 — 메일 첨부용이라 커밋하지 않는다 (worksheets → share 로 다시 만든다)
+# render.mjs 생성물 — 레포에 넣지 않는다 (release 명령으로 다시 만든다)
 print/
 share/
+release/
+guides/shots/
