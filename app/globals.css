@@ -1219,6 +1219,8 @@ textarea::placeholder {
   color: var(--text);
 }
 .blog-summary-ko p:last-child { margin-bottom: 0; }
+/* 구독 박스 바로 뒤면 박스의 아래 선이 구분선이다 — 위 선·여백을 빼서 선이 두 줄 겹치지 않게(간격은 .blog-subscribe-slot 의 아래 여백이 맡는다). */
+.blog-subscribe-slot + .blog-summary-ko { margin-top: 0; padding-top: 0; border-top: 0; }
 
 /* FAQ — 항상 펼쳐진 Q&A. FAQPage JSON-LD 와 같은 내용이 화면에 보여야 한다. */
 .blog-faq {

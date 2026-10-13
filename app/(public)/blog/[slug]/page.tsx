@@ -589,7 +589,7 @@ export default async function BlogDetailPage(
             )}
 
             {/* ── 저자 박스 (사진·자격·소개) — 한국어 요약 뒤 (인포블록은 본문 앞으로 옮겼다) ── */}
-            <AuthorBox author={blog.author || 'Yussi'} />
+            <AuthorBox author={blog.author || 'Yussi'} flush={summaryParagraphs.length === 0} />
 
             {/* ── FAQ — 항상 펼쳐진 가시 Q&A. 접지 않는 이유: 같은 마크업이 FAQPage 리치 결과와
                 AI 답변 엔진 양쪽의 인용 대상이고, 접기는 얻는 것 없이 위험만 는다. ── */}
