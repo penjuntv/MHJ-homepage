@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr';
+import type { User } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { isAdminEmail } from '@/lib/admin';
 
 const PUBLIC_PATHS = [
   '/mhj-desk/login',
@@ -63,16 +65,22 @@ export async function middleware(request: NextRequest) {
       ? withCookies(NextResponse.json({ message }, { status }))
       : withCookies(NextResponse.redirect(new URL(redirectTo, request.url)));
 
-  let authed: boolean;
-  if (isApi && !SESSION_ONLY_API.has(pathname)) {
-    // API 는 getUser() — 서버가 JWT 를 검증한다(getSession 은 쿠키를 그대로 믿는다).
-    const { data: { user } } = await supabase.auth.getUser();
-    authed = !!user;
-  } else {
+  // 누가 로그인했나 — getUser() 는 서버가 JWT 를 검증한다(getSession 은 쿠키를 그대로 믿는다).
+  // 2026-10-13: 화면도 getUser() 다. 아래 관리자 확인이 이메일을 보는데, getSession 이면 이메일을 꾸민 쿠키가 통과하고
+  // 관리자 화면 일부(carousel-v3)는 서버에서 service_role 로 읽는다. 세션만 보는 건 SESSION_ONLY_API 하나(공개 Storage 경로만 프록시).
+  let user: User | null;
+  if (SESSION_ONLY_API.has(pathname)) {
     const { data: { session } } = await supabase.auth.getSession();
-    authed = !!session;
+    user = session?.user ?? null;
+  } else {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
   }
-  if (!authed) return deny(401, 'Unauthorized', '/mhj-desk/login');
+  if (!user) return deny(401, 'Unauthorized', '/mhj-desk/login');
+
+  // 관리자만 (2026-10-13) — 같은 Supabase 를 쓰는 YuStudy 는 가입이 열려 있어, 로그인만으로는 관리자가 아니다.
+  // 기준은 lib/admin.ts (DB 의 mhj_is_admin() 과 한 벌).
+  if (!isAdminEmail(user.email)) return deny(403, 'Forbidden', '/mhj-desk/login');
 
   // AAL 체크: MFA 등록됐지만 아직 인증 안 된 경우
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
