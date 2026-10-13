@@ -9,14 +9,15 @@ import { getAuthor } from '@/lib/seo';
  * Person @id 를 만들므로 "스키마엔 저자가 있는데 박스는 없는" 상태가 생기지 않는다.
  * DESIGN_RULES: 색은 토큰만, radius 는 §8.2 가 허용하는 프로필 원형뿐, 호버 없음, 간격 8의 배수(32·16·8).
  */
-export default function AuthorBox({ author }: { author: string }) {
+export default function AuthorBox({ author, flush = false }: { author: string; flush?: boolean }) {
   const a = getAuthor(author);
   if (!a) return null;
+  // flush — 바로 위에 이미 선이 있는 자리(구독 박스 직후)에서는 위 구분선·여백을 뺀다. 선이 두 줄 겹쳐 보이지 않게.
   // 이름이 붙은 <aside> 는 <article> 안에서도 complementary 랜드마크로 남는다 —
   // 레이아웃의 <main> 안이라 랜드마크가 중첩된다(DESIGN_RULES §15.5).
   return (
     <div
-      style={{ margin: '48px 0 0', borderTop: '1px solid var(--border)', padding: '32px 0 0', display: 'flex', gap: 16, alignItems: 'flex-start' }}
+      style={{ margin: flush ? 0 : '48px 0 0', borderTop: flush ? 0 : '1px solid var(--border)', padding: flush ? 0 : '32px 0 0', display: 'flex', gap: 16, alignItems: 'flex-start' }}
     >
       {a.image && (
         <div style={{ position: 'relative', width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
