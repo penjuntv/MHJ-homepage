@@ -2390,14 +2390,14 @@ a:hover .magazine-cover-shadow img {
   .adjacent-nav > div:empty { display: none; }
 }
 
-/* 본문 중간 구독 CTA 자리 — 앞뒤 본문과 숨 쉴 간격만. CTA 자체 모양은 .newsletter-cta-inline 그대로. */
-/* clear — 앞 조각의 떠 있는 사진(img[data-align=left|right])이 CTA 상자 옆으로 흘러들지 않게. */
-.blog-mid-cta { margin: 40px 0; clear: both; }
-.blog-mid-cta .latest-newsletter-hint { margin-top: 0; }
-/* CTA 자체의 위 여백(48px)은 글 끝 배치용이다 — 중간에서는 .blog-mid-cta 가 간격을 맡는다.
-   이게 없으면 "지난 편지" 힌트가 없는 글에서 위만 88px(40+48)로 벌어졌다. */
-.blog-mid-cta .newsletter-cta-inline { margin-top: 0; }
-.blog-mid-cta .latest-newsletter-hint + .newsletter-cta-inline { margin-top: 8px; }
+/* 블로그 구독 CTA 자리(본문 바로 뒤, 한국어 요약·저자 박스 앞) — 앞뒤와 숨 쉴 간격만. CTA 자체 모양은 .newsletter-cta-inline 그대로. */
+/* clear — 본문 끝의 떠 있는 사진(img[data-align=left|right])이 CTA 상자 옆으로 흘러들지 않게. */
+.blog-subscribe-slot { margin: 40px 0; clear: both; }
+.blog-subscribe-slot .latest-newsletter-hint { margin-top: 0; }
+/* CTA 자체의 위 여백(48px)은 다른 페이지 배치용이다 — 여기서는 .blog-subscribe-slot 이 간격을 맡는다.
+   이게 없으면 "지난 편지" 힌트가 없을 때 위만 88px(40+48)로 벌어진다. */
+.blog-subscribe-slot .newsletter-cta-inline { margin-top: 0; }
+.blog-subscribe-slot .latest-newsletter-hint + .newsletter-cta-inline { margin-top: 8px; }
 
 /* ─── Journal 그리드 편지 카드 ─── */
 .letter-card {

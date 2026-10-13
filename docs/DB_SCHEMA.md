@@ -203,7 +203,7 @@
 | name | text | YES | — | |
 | subscribed_at | timestamptz | YES | now() | |
 | active | boolean | YES | true | |
-| source | text | YES | 'website' | 가입한 구독 폼의 위치. 2026-09-11 W6-C 부터 앱이 값을 보낸다 — 허용 목록 `SUBSCRIBE_SOURCES`(lib/constants.ts: homepage_bottom · blog_mid · blog_detail · mairangi_notes_index · mairangi_notes_issue · unknown), 밖의 값은 서버가 `other` 로. 그 전 행은 15명 중 12명이 null, 3명 `website` |
+| source | text | YES | 'website' | 가입한 구독 폼의 위치. 2026-09-11 W6-C 부터 앱이 값을 보낸다 — 허용 목록 `SUBSCRIBE_SOURCES`(lib/constants.ts: homepage_bottom · blog_mid · blog_detail · mairangi_notes_index · mairangi_notes_issue · unknown), 밖의 값은 서버가 `other` 로. 2026-10-13 부터 블로그 CTA 는 본문 바로 뒤 한 곳(`blog_detail`)뿐 — `blog_mid` 는 더 생기지 않고, `blog_detail` 의 자리는 그 전엔 댓글 아래였다. 그 전 행은 15명 중 12명이 null, 3명 `website` |
 
 ---
 

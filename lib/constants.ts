@@ -108,8 +108,8 @@ export const isStoryPressCardCategory = (category: string): boolean =>
  */
 export const SUBSCRIBE_SOURCES = [
   'homepage_bottom',
-  'blog_mid',
-  'blog_detail',
+  'blog_mid',     // 2026-10-13 본문 중간 CTA 폐기 — 새로 쓰이지 않지만 기존 구독자 행이 이 값을 가진다
+  'blog_detail',  // 블로그 상세의 유일한 CTA. 2026-10-13 전엔 '댓글 아래', 이후엔 '본문 바로 뒤'
   'mairangi_notes_index',
   'mairangi_notes_issue',
   'magazine_coming_soon',

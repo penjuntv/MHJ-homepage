@@ -23,7 +23,7 @@ import ScrollDepthTracker from './ScrollDepthTracker';
 import ReadingProgress from './ReadingProgress';
 import { formatDate, formatNZDate } from '@/lib/utils';
 import {
-  stripHtml, readingMinutes, addHeadingIds, wrapKeyTakeaways, sanitizeFaq, toParagraphs, splitForMidInsert, fillImageAlts
+  stripHtml, readingMinutes, addHeadingIds, wrapKeyTakeaways, sanitizeFaq, toParagraphs, fillImageAlts
 } from '@/lib/content-html.mjs';
 
 export const revalidate = 600;
@@ -230,17 +230,6 @@ export default async function BlogDetailPage(
   ]);
   const latestNewsletter = latestNewsletterRes.data as { subject: string; issue_number: string } | null;
   const ctaCopyB = settings.newsletter_cta_copy_b || 'Be the first to receive our next letter.';
-  // 구독 CTA 한 벌 — 본문 중간(midSplit) 또는 글 끝 중 **한 곳에만** 그린다(글당 CTA 1개, cae305f 원칙 유지).
-  const subscribeBlock = (placement: 'blog_mid' | 'blog_detail') => (
-    <>
-      {latestNewsletter?.subject && (
-        <Link href={`/mairangi-notes/${latestNewsletter.issue_number}`} className="latest-newsletter-hint">
-          Last letter: &ldquo;{latestNewsletter.subject}&rdquo;
-        </Link>
-      )}
-      <NewsletterCTA variant="inline-thin" copy={ctaCopyB} location={placement} buttonText="Subscribe →" />
-    </>
-  );
 
   const isHtml = blog.content.includes('<') && blog.content.includes('>');
   const plainText = stripHtml(blog.content);
@@ -249,11 +238,6 @@ export default async function BlogDetailPage(
   // 목차와 앵커가 같은 통과에서 나오므로 서로 어긋날 수 없다.
   const { html: contentWithIds, headings } = addHeadingIds(fillImageAlts(optimizeContentImages(blog.content), blog.title));
   const articleHtml = wrapKeyTakeaways(contentWithIds);
-  // 구독 CTA 를 본문 중간으로(2026-09-11 W6-C 결정 ②) — 끝까지 읽는 독자보다 중간에 닿는 독자가 많다.
-  // 최상위 문단 사이에서만 자르고, 자를 곳이 없거나 편지·협찬 글이면 null → 예전처럼 끝에 둔다.
-  const midSplit = isHtml && !isLetter && !blog.is_sponsored ? splitForMidInsert(articleHtml) : null;
-  // 자르지 않으면 앞 조각이 본문 전체다 — 렌더는 한 갈래로(본문 div 의 속성을 두 번 쓰지 않게).
-  const [bodyHead, bodyTail]: [string, string | null] = midSplit ? [midSplit[0], midSplit[1]] : [articleHtml, null];
   // H2 가 3개 미만이면 목차가 본문보다 길어 보인다(실측: 84편 중 3개+ 는 31편).
   const toc = headings.length >= 3 ? headings : [];
   const minutes = readingMinutes(blog.content);
@@ -567,27 +551,30 @@ export default async function BlogDetailPage(
               <div id="scroll-depth-100" style={{ position: 'absolute', bottom: 0, height: 1 }} />
 
               {isHtml ? (
-                <>
-                  <div
-                    className="blog-content"
-                    /* 렌더 시점 변환만: <img> 최적화 경로 재작성(실측 2026-09: 1200px 원본이 656px 자리에 그대로
-                       나갔다) + H2 앵커 id + Key takeaways 박스. DB 원본은 건드리지 않는다. */
-                    dangerouslySetInnerHTML={{ __html: bodyHead }}
-                    suppressHydrationWarning
-                  />
-                  {bodyTail !== null && (
-                    <>
-                      <div className="blog-mid-cta">{subscribeBlock('blog_mid')}</div>
-                      {/* 뒤 조각은 `--cont` — 리드 글꼴·드롭캡을 또 받지 않게 globals.css 가 제외한다. */}
-                      <div className="blog-content blog-content--cont" dangerouslySetInnerHTML={{ __html: bodyTail }} suppressHydrationWarning />
-                    </>
-                  )}
-                </>
+                <div
+                  className="blog-content"
+                  /* 렌더 시점 변환만: <img> 최적화 경로 재작성(실측 2026-09: 1200px 원본이 656px 자리에 그대로
+                     나갔다) + H2 앵커 id + Key takeaways 박스. DB 원본은 건드리지 않는다. */
+                  dangerouslySetInnerHTML={{ __html: articleHtml }}
+                  suppressHydrationWarning
+                />
               ) : (
                 <div className="blog-content">
                   <p>{blog.content}</p>
                 </div>
               )}
+            </div>
+
+            {/* ── 구독 CTA — 글당 딱 하나, 본문이 끝난 바로 뒤(한국어 요약 앞, 요약이 없으면 저자 박스 앞).
+                2026-10-13 PeNnY 지시로 본문 중간 삽입(W6-C 결정 ②)을 폐기했다 — 읽는 흐름을 끊었다.
+                예전의 '중간에 못 넣은 글은 댓글 아래' 갈래도 없앴다. 댓글 아래로는 절대 내리지 않는다. ── */}
+            <div className="blog-subscribe-slot">
+              {latestNewsletter?.subject && (
+                <Link href={`/mairangi-notes/${latestNewsletter.issue_number}`} className="latest-newsletter-hint">
+                  Last letter: &ldquo;{latestNewsletter.subject}&rdquo;
+                </Link>
+              )}
+              <NewsletterCTA variant="inline-thin" copy={ctaCopyB} location="blog_detail" buttonText="Subscribe →" />
             </div>
 
             {/* ── 한국어 요약 (D1: 영어 정본 + 한국어 요약 블록) ──
@@ -703,9 +690,6 @@ export default async function BlogDetailPage(
               <CommentSection blogId={blog.id} />
             </div>
 
-            {/* 구독 CTA — 본문 중간에 넣지 못한 글(짧은 글·편지·협찬·비HTML)만 여기에 */}
-            {!midSplit && subscribeBlock('blog_detail')}
-
             {/* 이전·다음 — Next Story 카드와 합친 한 블록(2026-09-11 W6-C 결정 ①). 사진은 Next Story 에서,
                 양방향 링크는 이전/다음에서 — 크롤러가 아카이브 전체를 앞뒤로 걸어갈 수 있다. */}
             {(adjacent.prev || adjacent.next) && (
@@ -715,7 +699,7 @@ export default async function BlogDetailPage(
               </nav>
             )}
 
-            {/* 협찬 글에는 우리 제품 카드를 붙이지 않는다(중간 CTA 도 협찬 글은 뺀다). */}
+            {/* 협찬 글에는 우리 제품 카드를 붙이지 않는다. */}
             {!blog.is_sponsored && isStoryPressCardCategory(blog.category) && (
               <StoryPressPostCard
                 title={settings.storypress_title || 'StoryPress'}
