@@ -644,12 +644,15 @@ export default async function BlogDetailPage(
               </div>
             )}
 
-            {/* 푸터: Back + Share */}
+            {/* 푸터: Back + Share
+                marginTop 48 — 요약·FAQ·저자 박스와 같은 호흡(위 여백 48 → 선 → 안쪽 여백). 이게 없으면 FAQ·태그가 없는 글에서
+                저자 박스 맨 아랫줄(MORE ABOUT …)에 이 선이 0px 로 붙었다. 태그(marginBottom 48) 뒤에서는 여백이 겹쳐 48 그대로다. */}
             <footer style={{
               display: 'flex',
               flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignItems: 'center',
+              marginTop: 48,
               borderTop: '1px solid var(--border)',
               paddingTop: 48,
               paddingBottom: 48,
