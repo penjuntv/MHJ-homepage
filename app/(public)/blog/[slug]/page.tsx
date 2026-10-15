@@ -610,9 +610,9 @@ export default async function BlogDetailPage(
             {/* 읽기 완료 감지 sentinel — BlogReadTracker가 observe */}
             <div id="blog-read-sentinel" />
 
-            {/* 태그 */}
+            {/* 태그 — marginTop 32: 위 블록(FAQ 마지막 답 또는 저자 박스 맨 아랫줄)에 알약이 0px 로 붙던 것(태그 있는 80/88편 전부). */}
             {blog.tags && blog.tags.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 48 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 32, marginBottom: 48 }}>
                 {blog.tags.map(tag => (
                   <Link
                     key={tag}
