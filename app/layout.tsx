@@ -4,7 +4,6 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Toaster } from 'sonner';
 import { SITE_NAME, OG_LOCALE, SITE_LANG, SITE_DESCRIPTION, organizationNode, SITE_URL } from '@/lib/seo';
 
 const inter = Inter({
@@ -102,7 +101,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>{children}</ThemeProvider>
         <Analytics />
         <SpeedInsights />
-        <Toaster position="bottom-center" />
+        {/* sonner <Toaster> 는 관리자 레이아웃(app/mhj-desk/layout.tsx)에만 둔다 — 공개 페이지는 toast 를 쓰지 않는다.
+            루트에 두면 공개 페이지에도 sonner 가 실리고, 모듈이 평가되는 순간 <head> 에 CSS 를 덧붙이는데
+            그 순간이 하이드레이션과 겹치면 React #418 → 문서 전체 재렌더가 났다(2026-10-18 라이브 지연 시험:
+            sonner 만 늦춤 22/100 · 대조 0/100). */}
       </body>
     </html>
   );
