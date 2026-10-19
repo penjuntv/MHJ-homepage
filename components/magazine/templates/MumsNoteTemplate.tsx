@@ -1,6 +1,5 @@
 'use client';
-import { useId } from 'react';
-import type { NewTemplateProps } from './shared';
+import { scopedCss, type NewTemplateProps } from './shared';
 
 const FIXED_TITLE = "Mum's Note";
 
@@ -9,13 +8,41 @@ export default function MumsNoteTemplate({
   accentColor = '#8A6B4F',
   bgColor = '#FDFCFA',
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const bg = article.style_overrides?.bgColor ?? bgColor;
 
   const ornament = (article.article_images ?? []).filter(Boolean)[0] ?? article.image_url ?? '';
   const content =
     article.content ||
     '<p>여는 에세이 본문을 작성해 주세요. 첫 글자는 자동으로 드롭캡으로 표시됩니다.</p>';
+
+  const { uid, css } = scopedCss((id) => `
+    .mn-${id} p {
+      margin: 0 0 0.9em;
+      font-size: var(--mag-font-body);
+      line-height: 1.65;
+      color: var(--mag-body-color);
+    }
+    .mn-${id} p:last-child { margin-bottom: 0; }
+    .mn-${id} strong { font-weight: 700; }
+    .mn-${id} em { font-style: italic; }
+    .mn-${id} blockquote {
+      border-left: 2px solid ${accentColor}55;
+      padding: 0.1em 1em;
+      margin: 1em 0;
+      color: rgba(26,26,26,0.72);
+      font-style: italic;
+    }
+    .mn-${id} p:first-of-type::first-letter {
+      float: left;
+      font-family: "Playfair Display", "Noto Sans KR", serif;
+      font-weight: 900;
+      font-size: clamp(40px, 11cqw, 88px);
+      line-height: 0.85;
+      color: var(--mag-body-color);
+      margin-right: 0.12em;
+      margin-top: 0.04em;
+    }
+  `);
 
   return (
     <div
@@ -30,34 +57,7 @@ export default function MumsNoteTemplate({
         flexDirection: 'column',
       }}
     >
-      <style>{`
-        .mn-${uid} p {
-          margin: 0 0 0.9em;
-          font-size: var(--mag-font-body);
-          line-height: 1.65;
-          color: var(--mag-body-color);
-        }
-        .mn-${uid} p:last-child { margin-bottom: 0; }
-        .mn-${uid} strong { font-weight: 700; }
-        .mn-${uid} em { font-style: italic; }
-        .mn-${uid} blockquote {
-          border-left: 2px solid ${accentColor}55;
-          padding: 0.1em 1em;
-          margin: 1em 0;
-          color: rgba(26,26,26,0.72);
-          font-style: italic;
-        }
-        .mn-${uid} p:first-of-type::first-letter {
-          float: left;
-          font-family: "Playfair Display", "Noto Sans KR", serif;
-          font-weight: 900;
-          font-size: clamp(40px, 11cqw, 88px);
-          line-height: 0.85;
-          color: var(--mag-body-color);
-          margin-right: 0.12em;
-          margin-top: 0.04em;
-        }
-      `}</style>
+      <style>{css}</style>
 
       {/* 상단 타이틀 — 좌측 정렬 (MHJ 매거진 규칙) */}
       <div style={{ flexShrink: 0, textAlign: 'left', paddingBottom: '0.9em', borderBottom: '1px solid var(--mag-title-divider)' }}>

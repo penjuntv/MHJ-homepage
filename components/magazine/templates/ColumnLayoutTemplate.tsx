@@ -1,6 +1,5 @@
 'use client';
-import { useId } from 'react';
-import { getImageSlots, type NewTemplateProps } from './shared';
+import { getImageSlots, scopedCss, type NewTemplateProps } from './shared';
 
 /* 타이틀↔그리드 = 컬럼 gap = 이미지 gap 리듬 통일 */
 const GAP = 'clamp(16px, 4cqw, 32px)';
@@ -12,7 +11,6 @@ export default function ColumnLayoutTemplate({
   hideTitle,
   imageSide,
 }: NewTemplateProps & { imageSide: 'left' | 'right' }) {
-  const uid = useId().replace(/:/g, 'd');
   const bg = article.style_overrides?.bgColor ?? bgColor;
   const slots = getImageSlots(article, 3);
   const content = article.content || '<p>본문을 작성해 주세요. 이미지 3장이 측면 컬럼에 세로로 배치됩니다.</p>';
@@ -27,6 +25,70 @@ export default function ColumnLayoutTemplate({
      인포블록이 갑자기 나타날 수 있다. 여기서는 명시적으로 입력했을 때만 렌더한다. */
   const infoBody = article.sidebar_body?.trim() ?? '';
   const infoTitle = article.sidebar_title?.trim() ?? '';
+
+  const { uid, css } = scopedCss((id) => `
+    .col-body-${id} p {
+      margin: 0 0 0.9em;
+      font-size: var(--mag-font-body);
+      line-height: 1.65;
+      color: var(--mag-body-color);
+    }
+    .col-body-${id} p:last-child { margin-bottom: 0; }
+    /* 인포블록 타이포 — 본문보다 한 단계 작게(SidebarTemplate 과 동일 비율) */
+    .col-info-${id} p {
+      margin: 0 0 0.5em;
+      font-size: calc(var(--mag-font-body) * 0.92);
+      line-height: 1.55;
+      color: var(--mag-body-color);
+    }
+    .col-info-${id} p:last-child { margin-bottom: 0; }
+    .col-info-${id} ul, .col-info-${id} ol { margin: 0; padding-left: 1.1em; }
+    .col-info-${id} li {
+      margin-bottom: 0.3em;
+      font-size: calc(var(--mag-font-body) * 0.92);
+      line-height: 1.55;
+      color: var(--mag-body-color);
+    }
+    .col-info-${id} li:last-child { margin-bottom: 0; }
+    .col-info-${id} em { font-style: italic; }
+    .col-info-${id} strong { font-weight: 700; }
+    .col-body-${id} strong { font-weight: 700; }
+    .col-body-${id} em { font-style: italic; }
+    .col-body-${id} blockquote {
+      border-left: 2px solid ${accentColor}55;
+      padding: 0.1em 1em;
+      margin: 1em 0;
+      color: rgba(26,26,26,0.72);
+      font-style: italic;
+    }
+    ${article.style_overrides?.dropCap ? `
+    .col-body-${id} p:first-of-type::first-letter {
+      float: left;
+      font-family: "Playfair Display", "Noto Sans KR", serif;
+      font-weight: 900;
+      font-size: clamp(40px, 11cqw, 88px);
+      line-height: 0.85;
+      color: var(--mag-body-color);
+      margin-right: 0.12em;
+      margin-top: 0.04em;
+    }` : ''}
+    @container (max-width: 500px) {
+      .col-grid-${id} {
+        grid-template-columns: 1fr !important;
+      }
+      /* 1컬럼 모드: 세로 스택(flex 1 1 0)은 auto 행에서 높이 0으로
+         붕괴하므로, 1:1 정사각 3장 가로 스트립으로 전환 */
+      .col-imgs-${id} { order: -1 !important; flex-direction: row !important; flex-wrap: wrap !important; }
+      /* ⚠ :not(.col-info) 필수 — 인포블록도 .col-imgs 의 자식 div 라서,
+         제외하지 않으면 사진 슬롯 취급을 받아 1:1 정사각이 되고 가로 스트립에
+         끼어든다. 그러면 flex row 의 min-content 폭이 커져 1fr 트랙이 지면보다
+         넓어지고(실측 286px → 1056px) 본문이 가로로 잘린다. */
+      .col-imgs-${id} > div:not(.col-info-${id}) { aspect-ratio: 1 / 1; }
+      /* 인포블록은 사진 스트립 아래 제 줄을 차지한다 */
+      .col-info-${id} { flex: 1 0 100% !important; margin-top: 8px !important; }
+      .col-text-${id} { order: 0 !important; }
+    }
+  `);
 
   const imageColumn = (
     <div
@@ -132,69 +194,7 @@ export default function ColumnLayoutTemplate({
         flexDirection: 'column',
       }}
     >
-      <style>{`
-        .col-body-${uid} p {
-          margin: 0 0 0.9em;
-          font-size: var(--mag-font-body);
-          line-height: 1.65;
-          color: var(--mag-body-color);
-        }
-        .col-body-${uid} p:last-child { margin-bottom: 0; }
-        /* 인포블록 타이포 — 본문보다 한 단계 작게(SidebarTemplate 과 동일 비율) */
-        .col-info-${uid} p {
-          margin: 0 0 0.5em;
-          font-size: calc(var(--mag-font-body) * 0.92);
-          line-height: 1.55;
-          color: var(--mag-body-color);
-        }
-        .col-info-${uid} p:last-child { margin-bottom: 0; }
-        .col-info-${uid} ul, .col-info-${uid} ol { margin: 0; padding-left: 1.1em; }
-        .col-info-${uid} li {
-          margin-bottom: 0.3em;
-          font-size: calc(var(--mag-font-body) * 0.92);
-          line-height: 1.55;
-          color: var(--mag-body-color);
-        }
-        .col-info-${uid} li:last-child { margin-bottom: 0; }
-        .col-info-${uid} em { font-style: italic; }
-        .col-info-${uid} strong { font-weight: 700; }
-        .col-body-${uid} strong { font-weight: 700; }
-        .col-body-${uid} em { font-style: italic; }
-        .col-body-${uid} blockquote {
-          border-left: 2px solid ${accentColor}55;
-          padding: 0.1em 1em;
-          margin: 1em 0;
-          color: rgba(26,26,26,0.72);
-          font-style: italic;
-        }
-        ${article.style_overrides?.dropCap ? `
-        .col-body-${uid} p:first-of-type::first-letter {
-          float: left;
-          font-family: "Playfair Display", "Noto Sans KR", serif;
-          font-weight: 900;
-          font-size: clamp(40px, 11cqw, 88px);
-          line-height: 0.85;
-          color: var(--mag-body-color);
-          margin-right: 0.12em;
-          margin-top: 0.04em;
-        }` : ''}
-        @container (max-width: 500px) {
-          .col-grid-${uid} {
-            grid-template-columns: 1fr !important;
-          }
-          /* 1컬럼 모드: 세로 스택(flex 1 1 0)은 auto 행에서 높이 0으로
-             붕괴하므로, 1:1 정사각 3장 가로 스트립으로 전환 */
-          .col-imgs-${uid} { order: -1 !important; flex-direction: row !important; flex-wrap: wrap !important; }
-          /* ⚠ :not(.col-info) 필수 — 인포블록도 .col-imgs 의 자식 div 라서,
-             제외하지 않으면 사진 슬롯 취급을 받아 1:1 정사각이 되고 가로 스트립에
-             끼어든다. 그러면 flex row 의 min-content 폭이 커져 1fr 트랙이 지면보다
-             넓어지고(실측 286px → 1056px) 본문이 가로로 잘린다. */
-          .col-imgs-${uid} > div:not(.col-info-${uid}) { aspect-ratio: 1 / 1; }
-          /* 인포블록은 사진 스트립 아래 제 줄을 차지한다 */
-          .col-info-${uid} { flex: 1 0 100% !important; margin-top: 8px !important; }
-          .col-text-${uid} { order: 0 !important; }
-        }
-      `}</style>
+      <style>{css}</style>
 
       {/* 타이틀 + 구분선 — 좌측 정렬 (MHJ 매거진 규칙) */}
       {!hideTitle && (

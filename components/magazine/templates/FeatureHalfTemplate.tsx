@@ -1,6 +1,5 @@
 'use client';
-import { useId } from 'react';
-import { getImageSlots, type NewTemplateProps } from './shared';
+import { getImageSlots, scopedCss, type NewTemplateProps } from './shared';
 
 /* 상단 구분선↔본문 = 본문↔이미지 gap 리듬 통일 */
 const GAP = 'clamp(16px, 4cqw, 32px)';
@@ -11,11 +10,40 @@ export default function FeatureHalfTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const bg = article.style_overrides?.bgColor ?? bgColor;
   const [slot] = getImageSlots(article, 1);
   const content =
     article.content || '<p>본문을 작성해 주세요. 페이지 상단 다수를 본문이 차지하고, 하단에 풀블리드 이미지가 배치됩니다.</p>';
+
+  const { uid, css } = scopedCss((id) => `
+    .fh-${id} p {
+      margin: 0 0 0.9em;
+      font-size: var(--mag-font-body);
+      line-height: 1.65;
+      color: var(--mag-body-color);
+    }
+    .fh-${id} p:last-child { margin-bottom: 0; }
+    .fh-${id} strong { font-weight: 700; }
+    .fh-${id} em { font-style: italic; }
+    .fh-${id} blockquote {
+      border-left: 2px solid ${accentColor}55;
+      padding: 0.1em 1em;
+      margin: 1em 0;
+      color: rgba(26,26,26,0.72);
+      font-style: italic;
+    }
+    ${article.style_overrides?.dropCap ? `
+    .fh-${id} p:first-of-type::first-letter {
+      float: left;
+      font-family: "Playfair Display", "Noto Sans KR", serif;
+      font-weight: 900;
+      font-size: clamp(40px, 11cqw, 88px);
+      line-height: 0.85;
+      color: var(--mag-body-color);
+      margin-right: 0.12em;
+      margin-top: 0.04em;
+    }` : ''}
+  `);
 
   return (
     <div
@@ -30,35 +58,7 @@ export default function FeatureHalfTemplate({
         flexDirection: 'column',
       }}
     >
-      <style>{`
-        .fh-${uid} p {
-          margin: 0 0 0.9em;
-          font-size: var(--mag-font-body);
-          line-height: 1.65;
-          color: var(--mag-body-color);
-        }
-        .fh-${uid} p:last-child { margin-bottom: 0; }
-        .fh-${uid} strong { font-weight: 700; }
-        .fh-${uid} em { font-style: italic; }
-        .fh-${uid} blockquote {
-          border-left: 2px solid ${accentColor}55;
-          padding: 0.1em 1em;
-          margin: 1em 0;
-          color: rgba(26,26,26,0.72);
-          font-style: italic;
-        }
-        ${article.style_overrides?.dropCap ? `
-        .fh-${uid} p:first-of-type::first-letter {
-          float: left;
-          font-family: "Playfair Display", "Noto Sans KR", serif;
-          font-weight: 900;
-          font-size: clamp(40px, 11cqw, 88px);
-          line-height: 0.85;
-          color: var(--mag-body-color);
-          margin-right: 0.12em;
-          margin-top: 0.04em;
-        }` : ''}
-      `}</style>
+      <style>{css}</style>
 
       {/* 상단 타이틀 + 구분선 */}
       {!hideTitle && (

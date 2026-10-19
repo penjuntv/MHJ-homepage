@@ -1,6 +1,5 @@
 'use client';
-import { useId } from 'react';
-import { getImageSlots, type NewTemplateProps } from './shared';
+import { getImageSlots, scopedCss, type NewTemplateProps } from './shared';
 
 /* 상단↔이미지 = 이미지↔본문 gap 리듬 통일 (LittleNotes와 동일 패턴) */
 const GAP = 'clamp(16px, 4cqw, 32px)';
@@ -11,11 +10,40 @@ export default function MiddleTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const bg = article.style_overrides?.bgColor ?? bgColor;
   const [slot] = getImageSlots(article, 1);
   const content =
     article.content || '<p>본문을 작성해 주세요. 이미지는 타이틀 바로 아래에 풀블리드로 배치됩니다.</p>';
+
+  const { uid, css } = scopedCss((id) => `
+    .mid-${id} p {
+      margin: 0 0 0.9em;
+      font-size: var(--mag-font-body);
+      line-height: 1.65;
+      color: var(--mag-body-color);
+    }
+    .mid-${id} p:last-child { margin-bottom: 0; }
+    .mid-${id} strong { font-weight: 700; }
+    .mid-${id} em { font-style: italic; }
+    .mid-${id} blockquote {
+      border-left: 2px solid ${accentColor}55;
+      padding: 0.1em 1em;
+      margin: 1em 0;
+      color: rgba(26,26,26,0.72);
+      font-style: italic;
+    }
+    ${article.style_overrides?.dropCap ? `
+    .mid-${id} p:first-of-type::first-letter {
+      float: left;
+      font-family: "Playfair Display", "Noto Sans KR", serif;
+      font-weight: 900;
+      font-size: clamp(40px, 11cqw, 88px);
+      line-height: 0.85;
+      color: var(--mag-body-color);
+      margin-right: 0.12em;
+      margin-top: 0.04em;
+    }` : ''}
+  `);
 
   return (
     <div
@@ -30,35 +58,7 @@ export default function MiddleTemplate({
         flexDirection: 'column',
       }}
     >
-      <style>{`
-        .mid-${uid} p {
-          margin: 0 0 0.9em;
-          font-size: var(--mag-font-body);
-          line-height: 1.65;
-          color: var(--mag-body-color);
-        }
-        .mid-${uid} p:last-child { margin-bottom: 0; }
-        .mid-${uid} strong { font-weight: 700; }
-        .mid-${uid} em { font-style: italic; }
-        .mid-${uid} blockquote {
-          border-left: 2px solid ${accentColor}55;
-          padding: 0.1em 1em;
-          margin: 1em 0;
-          color: rgba(26,26,26,0.72);
-          font-style: italic;
-        }
-        ${article.style_overrides?.dropCap ? `
-        .mid-${uid} p:first-of-type::first-letter {
-          float: left;
-          font-family: "Playfair Display", "Noto Sans KR", serif;
-          font-weight: 900;
-          font-size: clamp(40px, 11cqw, 88px);
-          line-height: 0.85;
-          color: var(--mag-body-color);
-          margin-right: 0.12em;
-          margin-top: 0.04em;
-        }` : ''}
-      `}</style>
+      <style>{css}</style>
 
       {/* 상단 타이틀 + 구분선 — 좌측 정렬 (MHJ 매거진 규칙) */}
       {!hideTitle && (

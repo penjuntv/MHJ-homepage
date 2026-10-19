@@ -1,6 +1,5 @@
 'use client';
-import { useId } from 'react';
-import { getImageSlots, type NewTemplateProps } from './shared';
+import { getImageSlots, scopedCss, type NewTemplateProps } from './shared';
 
 /* 타이틀↔그리드 = 그리드↔본문 gap */
 const GAP = 'clamp(16px, 4cqw, 32px)';
@@ -15,10 +14,21 @@ export default function SpecialTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const bg = article.style_overrides?.bgColor ?? bgColor;
   const slots = getImageSlots(article, 9);
   const content = article.content;
+
+  const { uid, css } = scopedCss((id) => `
+    .sp-body-${id} p {
+      margin: 0 0 0.7em;
+      font-size: var(--mag-font-body);
+      line-height: 1.6;
+      color: var(--mag-body-color);
+      text-align: center;
+    }
+    .sp-body-${id} p:last-child { margin-bottom: 0; }
+    .sp-body-${id} em { font-style: italic; }
+  `);
 
   return (
     <div
@@ -33,17 +43,7 @@ export default function SpecialTemplate({
         flexDirection: 'column',
       }}
     >
-      <style>{`
-        .sp-body-${uid} p {
-          margin: 0 0 0.7em;
-          font-size: var(--mag-font-body);
-          line-height: 1.6;
-          color: var(--mag-body-color);
-          text-align: center;
-        }
-        .sp-body-${uid} p:last-child { margin-bottom: 0; }
-        .sp-body-${uid} em { font-style: italic; }
-      `}</style>
+      <style>{css}</style>
 
       {/* 타이틀 + 구분선 — 좌측 정렬 (MHJ 매거진 규칙) */}
       {!hideTitle && (

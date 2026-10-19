@@ -1,7 +1,7 @@
 'use client';
-import { useId } from 'react';
 import {
   getImageSlots,
+  scopedCss,
   overrideTitleClamp,
   overrideBodyClamp,
   overrideLineHeight,
@@ -14,7 +14,6 @@ export default function ClassicTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const [slot] = getImageSlots(article, 1);
   const caption = article.image_captions?.[0];
   const content =
@@ -34,6 +33,36 @@ export default function ClassicTemplate({
   const showDivider = so.divider !== false;
   const dividerW = so.dividerWeight ?? 1;
 
+  const { uid, css } = scopedCss((id) => `
+    .cls-body-${id} p {
+      margin: 0 0 0.85em;
+      font-size: ${bodyClamp};
+      line-height: ${lh};
+      color: #1A1A1A;
+    }
+    .cls-body-${id} strong { font-weight: 700; }
+    .cls-body-${id} em { font-style: italic; }
+    .cls-body-${id} blockquote {
+      border-left: 2px solid ${accentColor}55;
+      padding: 0.1em 1em;
+      margin: 1em 0;
+      color: rgba(26,26,26,0.72);
+      font-style: italic;
+    }
+    ${dropCap ? `
+    .cls-body-${id} p:first-of-type::first-letter {
+      float: left;
+      font-family: "Playfair Display", "Noto Sans KR", serif;
+      font-weight: 900;
+      font-size: ${dropFont};
+      color: ${accentColor};
+      line-height: 0.82;
+      margin-right: 0.12em;
+      margin-top: 0.06em;
+    }
+    ` : ''}
+  `);
+
   return (
     <div
       style={{
@@ -48,35 +77,7 @@ export default function ClassicTemplate({
         overflow: 'hidden',
       }}
     >
-      <style>{`
-        .cls-body-${uid} p {
-          margin: 0 0 0.85em;
-          font-size: ${bodyClamp};
-          line-height: ${lh};
-          color: #1A1A1A;
-        }
-        .cls-body-${uid} strong { font-weight: 700; }
-        .cls-body-${uid} em { font-style: italic; }
-        .cls-body-${uid} blockquote {
-          border-left: 2px solid ${accentColor}55;
-          padding: 0.1em 1em;
-          margin: 1em 0;
-          color: rgba(26,26,26,0.72);
-          font-style: italic;
-        }
-        ${dropCap ? `
-        .cls-body-${uid} p:first-of-type::first-letter {
-          float: left;
-          font-family: "Playfair Display", "Noto Sans KR", serif;
-          font-weight: 900;
-          font-size: ${dropFont};
-          color: ${accentColor};
-          line-height: 0.82;
-          margin-right: 0.12em;
-          margin-top: 0.06em;
-        }
-        ` : ''}
-      `}</style>
+      <style>{css}</style>
 
       {/* 좌 6col: 이미지 또는 여백 */}
       <div

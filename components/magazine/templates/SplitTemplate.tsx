@@ -1,6 +1,5 @@
 'use client';
-import { useId } from 'react';
-import { getImageSlots, type NewTemplateProps } from './shared';
+import { getImageSlots, scopedCss, type NewTemplateProps } from './shared';
 
 export default function SplitTemplate({
   article,
@@ -8,11 +7,28 @@ export default function SplitTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const allSlots = getImageSlots(article, 3);
   const slots = allSlots.filter((s) => s.src);
   const content = article.content || '<p>본문을 작성해 주세요.</p>';
   const hasImages = slots.length > 0;
+
+  const { uid, css } = scopedCss((id) => `
+    .split-body-${id} p {
+      margin: 0 0 0.85em;
+      font-size: clamp(11px, 2.26cqw, 14px);
+      line-height: 1.65;
+      color: #1A1A1A;
+    }
+    .split-body-${id} strong { font-weight: 700; }
+    .split-body-${id} em { font-style: italic; }
+    .split-body-${id} blockquote {
+      border-left: 2px solid ${accentColor}55;
+      padding: 0.1em 1em;
+      margin: 1em 0;
+      color: rgba(26,26,26,0.72);
+      font-style: italic;
+    }
+  `);
 
   return (
     <div
@@ -28,23 +44,7 @@ export default function SplitTemplate({
         overflow: 'hidden',
       }}
     >
-      <style>{`
-        .split-body-${uid} p {
-          margin: 0 0 0.85em;
-          font-size: clamp(11px, 2.26cqw, 14px);
-          line-height: 1.65;
-          color: #1A1A1A;
-        }
-        .split-body-${uid} strong { font-weight: 700; }
-        .split-body-${uid} em { font-style: italic; }
-        .split-body-${uid} blockquote {
-          border-left: 2px solid ${accentColor}55;
-          padding: 0.1em 1em;
-          margin: 1em 0;
-          color: rgba(26,26,26,0.72);
-          font-style: italic;
-        }
-      `}</style>
+      <style>{css}</style>
 
       {/* 좌 5col: 세로형 이미지 (1~3장 세로 스택) */}
       <div
