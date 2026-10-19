@@ -1,6 +1,5 @@
 'use client';
-import { useId } from 'react';
-import { getSidebarContent, type NewTemplateProps } from './shared';
+import { getSidebarContent, scopedCss, type NewTemplateProps } from './shared';
 
 /* 타이틀↔그리드 = 컬럼 gap 리듬 통일 */
 const GAP = 'clamp(16px, 4cqw, 32px)';
@@ -11,12 +10,50 @@ export default function SidebarTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const bg = article.style_overrides?.bgColor ?? bgColor;
   const { title: sidebarTitle, body: sidebarBody, main } = getSidebarContent(article);
   const content =
     main ||
     '<p>본문을 작성해 주세요. 우측 인포블록은 Sidebar Title / Sidebar Body 필드를 사용합니다.</p>';
+
+  const { uid, css } = scopedCss((id) => `
+    .sb-main-${id} p {
+      margin: 0 0 0.9em;
+      font-size: var(--mag-font-body);
+      line-height: 1.65;
+      color: var(--mag-body-color);
+    }
+    .sb-main-${id} p:last-child { margin-bottom: 0; }
+    .sb-main-${id} strong { font-weight: 700; }
+    .sb-main-${id} em { font-style: italic; }
+    .sb-main-${id} blockquote {
+      border-left: 2px solid ${accentColor}55;
+      padding: 0.1em 1em;
+      margin: 1em 0;
+      color: rgba(26,26,26,0.72);
+      font-style: italic;
+    }
+    .sb-main-${id} ul, .sb-main-${id} ol { padding-left: 1.3em; margin: 0 0 0.9em; }
+    .sb-main-${id} li { margin-bottom: 0.35em; font-size: var(--mag-font-body); line-height: 1.65; color: var(--mag-body-color); }
+    .sb-main-${id} img { max-width: 100%; height: auto; display: block; margin: 0.8em 0; }
+    .sb-side-${id} p {
+      margin: 0 0 0.7em;
+      font-size: calc(var(--mag-font-body) * 0.92);
+      line-height: 1.6;
+      color: var(--mag-body-color);
+    }
+    .sb-side-${id} p:last-child { margin-bottom: 0; }
+    .sb-side-${id} strong { font-weight: 700; }
+    .sb-side-${id} em { font-style: italic; }
+    .sb-side-${id} ul, .sb-side-${id} ol { padding-left: 1.2em; margin: 0 0 0.7em; }
+    .sb-side-${id} li { margin-bottom: 0.3em; font-size: calc(var(--mag-font-body) * 0.92); line-height: 1.6; color: var(--mag-body-color); }
+    .sb-side-${id} img { max-width: 100%; height: auto; display: block; margin: 0.7em 0; }
+    @container (max-width: 500px) {
+      .sb-grid-${id} { grid-template-columns: 1fr !important; }
+      .sb-main-col-${id} { order: 0 !important; }
+      .sb-side-col-${id} { order: 1 !important; }
+    }
+  `);
 
   return (
     <div
@@ -31,44 +68,7 @@ export default function SidebarTemplate({
         flexDirection: 'column',
       }}
     >
-      <style>{`
-        .sb-main-${uid} p {
-          margin: 0 0 0.9em;
-          font-size: var(--mag-font-body);
-          line-height: 1.65;
-          color: var(--mag-body-color);
-        }
-        .sb-main-${uid} p:last-child { margin-bottom: 0; }
-        .sb-main-${uid} strong { font-weight: 700; }
-        .sb-main-${uid} em { font-style: italic; }
-        .sb-main-${uid} blockquote {
-          border-left: 2px solid ${accentColor}55;
-          padding: 0.1em 1em;
-          margin: 1em 0;
-          color: rgba(26,26,26,0.72);
-          font-style: italic;
-        }
-        .sb-main-${uid} ul, .sb-main-${uid} ol { padding-left: 1.3em; margin: 0 0 0.9em; }
-        .sb-main-${uid} li { margin-bottom: 0.35em; font-size: var(--mag-font-body); line-height: 1.65; color: var(--mag-body-color); }
-        .sb-main-${uid} img { max-width: 100%; height: auto; display: block; margin: 0.8em 0; }
-        .sb-side-${uid} p {
-          margin: 0 0 0.7em;
-          font-size: calc(var(--mag-font-body) * 0.92);
-          line-height: 1.6;
-          color: var(--mag-body-color);
-        }
-        .sb-side-${uid} p:last-child { margin-bottom: 0; }
-        .sb-side-${uid} strong { font-weight: 700; }
-        .sb-side-${uid} em { font-style: italic; }
-        .sb-side-${uid} ul, .sb-side-${uid} ol { padding-left: 1.2em; margin: 0 0 0.7em; }
-        .sb-side-${uid} li { margin-bottom: 0.3em; font-size: calc(var(--mag-font-body) * 0.92); line-height: 1.6; color: var(--mag-body-color); }
-        .sb-side-${uid} img { max-width: 100%; height: auto; display: block; margin: 0.7em 0; }
-        @container (max-width: 500px) {
-          .sb-grid-${uid} { grid-template-columns: 1fr !important; }
-          .sb-main-col-${uid} { order: 0 !important; }
-          .sb-side-col-${uid} { order: 1 !important; }
-        }
-      `}</style>
+      <style>{css}</style>
 
       {/* 타이틀 + 구분선 — 좌측 정렬 (MHJ 매거진 규칙) */}
       {!hideTitle && (

@@ -1,6 +1,5 @@
 'use client';
-import { useId } from 'react';
-import { extractKicker, extractSubtitle, getImageSlots, overrideTitleClamp, type NewTemplateProps } from './shared';
+import { extractKicker, extractSubtitle, getImageSlots, overrideTitleClamp, scopedCss, type NewTemplateProps } from './shared';
 
 /* 배경 루미넌스로 어두운 배경 판정 (WCAG 근사) */
 function isDarkBg(hex: string): boolean {
@@ -18,7 +17,6 @@ export default function PhotoHeroTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const [slot] = getImageSlots(article, 1);
   const kicker = extractKicker(article) ?? 'Feature';
   const standfirst = extractSubtitle(article);
@@ -31,6 +29,16 @@ export default function PhotoHeroTemplate({
   const isDark = isDarkBg(bg);
   const ink = isDark ? '#FDFCFA' : '#1A1A1A';
   const warm = isDark ? 'rgba(253,252,250,0.6)' : '#9B9590';
+
+  const { uid, css } = scopedCss((id) => `
+    .hero-body-${id} p {
+      margin: 0;
+      font-size: clamp(11px, 2.26cqw, 14px);
+      font-style: italic;
+      line-height: 1.55;
+      color: ${isDark ? 'rgba(253,252,250,0.82)' : '#1A1A1A'};
+    }
+  `);
 
   return (
     <div
@@ -45,15 +53,7 @@ export default function PhotoHeroTemplate({
         textAlign: align,
       }}
     >
-      <style>{`
-        .hero-body-${uid} p {
-          margin: 0;
-          font-size: clamp(11px, 2.26cqw, 14px);
-          font-style: italic;
-          line-height: 1.55;
-          color: ${isDark ? 'rgba(253,252,250,0.82)' : '#1A1A1A'};
-        }
-      `}</style>
+      <style>{css}</style>
 
       {/* 상단 70%: Hero 이미지 */}
       <div

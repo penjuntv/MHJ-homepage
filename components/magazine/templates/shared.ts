@@ -74,6 +74,22 @@ export function overrideLineHeight(so: StyleOverrides | null | undefined, fallba
   return so?.lineHeight ? so.lineHeight / 100 : fallback;
 }
 
+/* 템플릿 <style> 의 스코프 클래스 ID — CSS 내용의 해시라서 서버·브라우저가 언제나 같은 값을 낸다.
+   useId() 는 트리 위치로 ID 를 만드는데, 매거진 이슈 페이지의 #418(하이드레이션 실패) 때
+   서버와 달라진 곳이 이 <style> 들뿐이었다(2026-10-19 라이브 시험). 그래서 위치와 무관한 ID 를 쓴다.
+   CSS 가 같으면 ID 도 같다 — 같은 규칙이 같은 클래스에 걸리는 것이라 겹쳐도 무해하다. */
+const SCOPE_TOKEN = '__MHJ_SCOPE__';
+export function scopedCss(build: (id: string) => string): { uid: string; css: string } {
+  const raw = build(SCOPE_TOKEN);
+  let h = 0x811c9dc5; // FNV-1a 32bit
+  for (let i = 0; i < raw.length; i++) {
+    h ^= raw.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  const uid = 's' + (h >>> 0).toString(36);
+  return { uid, css: raw.split(SCOPE_TOKEN).join(uid) };
+}
+
 export interface NewTemplateProps {
   article: ArticlePreviewData;
   accentColor?: string;

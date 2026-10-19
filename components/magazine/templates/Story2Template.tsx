@@ -1,6 +1,5 @@
 'use client';
-import { useId } from 'react';
-import { getImageSlots, type NewTemplateProps } from './shared';
+import { getImageSlots, scopedCss, type NewTemplateProps } from './shared';
 
 export default function Story2Template({
   article,
@@ -8,7 +7,6 @@ export default function Story2Template({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const allSlots = getImageSlots(article, 2);
   const slots = allSlots.filter((s) => s.src);
   const imgCount = slots.length;
@@ -21,6 +19,24 @@ export default function Story2Template({
   if (imgCount === 2) gridTemplate = '4fr 4fr 4fr';
   else if (imgCount === 1) gridTemplate = '6fr 6fr';
   else gridTemplate = '1fr';
+
+  const { uid, css } = scopedCss((id) => `
+    .s2-body-${id} p {
+      margin: 0 0 0.8em;
+      font-size: clamp(11px, 2.26cqw, 14px);
+      line-height: 1.62;
+      color: #1A1A1A;
+    }
+    .s2-body-${id} strong { font-weight: 700; }
+    .s2-body-${id} em { font-style: italic; }
+    .s2-body-${id} blockquote {
+      border-left: 2px solid ${accentColor}55;
+      padding: 0.1em 1em;
+      margin: 1em 0;
+      color: rgba(26,26,26,0.72);
+      font-style: italic;
+    }
+  `);
 
   return (
     <div
@@ -36,23 +52,7 @@ export default function Story2Template({
         overflow: 'hidden',
       }}
     >
-      <style>{`
-        .s2-body-${uid} p {
-          margin: 0 0 0.8em;
-          font-size: clamp(11px, 2.26cqw, 14px);
-          line-height: 1.62;
-          color: #1A1A1A;
-        }
-        .s2-body-${uid} strong { font-weight: 700; }
-        .s2-body-${uid} em { font-style: italic; }
-        .s2-body-${uid} blockquote {
-          border-left: 2px solid ${accentColor}55;
-          padding: 0.1em 1em;
-          margin: 1em 0;
-          color: rgba(26,26,26,0.72);
-          font-style: italic;
-        }
-      `}</style>
+      <style>{css}</style>
 
       {/* 이미지 컬럼들 */}
       {slots.map((slot, i) => (

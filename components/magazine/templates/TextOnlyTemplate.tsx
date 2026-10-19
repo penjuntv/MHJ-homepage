@@ -1,7 +1,5 @@
 'use client';
-import { useId } from 'react';
-import type { NewTemplateProps } from './shared';
-import { overrideTitleClamp, overrideBodyClamp, overrideLineHeight } from './shared';
+import { overrideTitleClamp, overrideBodyClamp, overrideLineHeight, scopedCss, type NewTemplateProps } from './shared';
 
 export default function TextOnlyTemplate({
   article,
@@ -9,7 +7,6 @@ export default function TextOnlyTemplate({
   bgColor = '#FDFCFA',
   hideTitle,
 }: NewTemplateProps) {
-  const uid = useId().replace(/:/g, 'd');
   const content =
     article.content ||
     '<p>에세이 본문을 작성해 주세요. 첫 글자는 자동으로 드롭캡으로 표시됩니다.</p>';
@@ -29,6 +26,37 @@ export default function TextOnlyTemplate({
   const showDivider = so.divider !== false; // 기본 on
   const dividerW = so.dividerWeight ?? 1;
 
+  const { uid, css } = scopedCss((id) => `
+    .essay-${id} { overflow: hidden; text-align: ${align}; }
+    .essay-${id} p {
+      margin: 0 0 1em;
+      font-size: ${bodyClamp};
+      line-height: ${lh};
+      color: #1A1A1A;
+    }
+    .essay-${id} strong { font-weight: 700; color: #1A1A1A; }
+    .essay-${id} em { font-style: italic; }
+    .essay-${id} blockquote {
+      border-left: 2px solid ${accentColor}55;
+      padding: 0.1em 1em;
+      margin: 1em 0;
+      color: rgba(26,26,26,0.72);
+      font-style: italic;
+    }
+    ${dropCap ? `
+    .essay-${id} p:first-of-type::first-letter {
+      float: left;
+      font-family: "Playfair Display", "Noto Sans KR", serif;
+      font-weight: 900;
+      font-size: ${dropFont};
+      color: ${accentColor};
+      line-height: 0.82;
+      margin-right: 0.12em;
+      margin-top: 0.08em;
+    }
+    ` : ''}
+  `);
+
   return (
     <div
       style={{
@@ -43,36 +71,7 @@ export default function TextOnlyTemplate({
         justifyContent: 'center',
       }}
     >
-      <style>{`
-        .essay-${uid} { overflow: hidden; text-align: ${align}; }
-        .essay-${uid} p {
-          margin: 0 0 1em;
-          font-size: ${bodyClamp};
-          line-height: ${lh};
-          color: #1A1A1A;
-        }
-        .essay-${uid} strong { font-weight: 700; color: #1A1A1A; }
-        .essay-${uid} em { font-style: italic; }
-        .essay-${uid} blockquote {
-          border-left: 2px solid ${accentColor}55;
-          padding: 0.1em 1em;
-          margin: 1em 0;
-          color: rgba(26,26,26,0.72);
-          font-style: italic;
-        }
-        ${dropCap ? `
-        .essay-${uid} p:first-of-type::first-letter {
-          float: left;
-          font-family: "Playfair Display", "Noto Sans KR", serif;
-          font-weight: 900;
-          font-size: ${dropFont};
-          color: ${accentColor};
-          line-height: 0.82;
-          margin-right: 0.12em;
-          margin-top: 0.08em;
-        }
-        ` : ''}
-      `}</style>
+      <style>{css}</style>
 
       <div
         style={{
