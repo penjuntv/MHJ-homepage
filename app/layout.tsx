@@ -101,10 +101,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>{children}</ThemeProvider>
         <Analytics />
         <SpeedInsights />
-        {/* sonner <Toaster> 는 관리자 레이아웃(app/mhj-desk/layout.tsx)에만 둔다 — 공개 페이지는 toast 를 쓰지 않는다.
-            루트에 두면 공개 페이지에도 sonner 가 실리고, 모듈이 평가되는 순간 <head> 에 CSS 를 덧붙이는데
-            그 순간이 하이드레이션과 겹치면 React #418 → 문서 전체 재렌더가 났다(2026-10-18 라이브 지연 시험:
-            sonner 만 늦춤 22/100 · 대조 0/100). */}
+        {/* sonner <Toaster> 는 관리자 레이아웃(app/mhj-desk/layout.tsx)에만 둔다 — 공개 페이지는 toast 를 쓰지 않는데
+            루트에 두면 모든 공개 페이지에 sonner(34KB)가 실린다.
+            참고: 2026-10-18 지연 시험(sonner 만 늦춤 22/100 · 대조 0/100)에서 매거진 #418 이 늘었지만, 원인은 sonner 의
+            <head> CSS 가 아니라 '썸네일 뒤쪽 스크립트가 늦게 오면 지면 템플릿 useId 가 서버와 달라지는 것'으로 보인다
+            — components/magazine/templates/shared.ts 의 scopedCss 참고(2026-10-19). */}
       </body>
     </html>
   );
