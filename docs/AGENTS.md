@@ -64,7 +64,12 @@
 | internal-link-suggester | 2026-05-30 | 발행 시 내부 링크 후보 추천 |
 | fact-verify | 2026-06-27 | 발행 전 사실 검증 게이트 (원본 `.agents/skills/`, `.claude/skills/` 는 심볼릭 링크) |
 | verify | 2026-09-11 | 로컬 실행·실측 레시피 — 워크트리 셋업, 서버 기동 패턴, 매거진 네 갈래·fixture, 하면 안 되는 것(`/verify` 용) |
+| llm-council | 2026-10-22 | 큰 결정을 자문역 5명 → 익명 상호 평가 → 의장 판결로 압박 테스트. 서브에이전트 11회. 기록은 `docs/decisions/` |
+| grilling | 2026-10-22 | 작업 전 범위·의도 합의 인터뷰 — 질문마다 추천 답, 사실은 직접 조회, 합의 요약 확인 전 실행 금지 |
+| grill-me | 2026-10-22 | `/grill-me` 로 grilling 을 직접 부르는 얇은 래퍼(모델 자동 호출 꺼짐) |
+| diagnosing-bugs | 2026-10-22 | 어려운 버그·성능 저하 진단 — "빨갛게 되는 명령"부터 만들고 가설 3~5개 → 계측 → 회귀 테스트(`scripts/qa/test-*.mjs`) |
 
 ### 위치 규칙
 - **원본이 `.agents/skills/` 인 스킬**: frontend-design · fact-verify. `.claude/skills/` 쪽은 심볼릭 링크(git mode 120000)다 — 원본을 지우면 링크가 전부 깨진다.
+- **외부 출처 스킬**: grilling · grill-me · diagnosing-bugs 는 `mattpocock/skills`(MIT, 커밋 5beb35b)의 한국어·MHJ 맞춤 번역본이다. 각 폴더의 `UPSTREAM-LICENSE` 를 지우지 말 것(MIT 고지 의무). 자동 업데이트하지 않는다 — 원본이 바뀌어도 검토 후 손으로 반영한다. llm-council 은 원본(Karpathy·Ole Lehmann)에 라이선스가 없어 문구 없이 방법론만 가져와 새로 썼다.
 - **Codex 변형본**: `.agents/skills/cc-prompt-gen` · `.agents/skills/llms-txt-generator` 는 `.claude/skills/` 의 동명 스킬을 Codex 용으로 문구만 치환("Claude Code"→"Codex")한 별도 사본이다. 내용을 고치면 양쪽 다 갱신할 것.
