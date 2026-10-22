@@ -25,6 +25,7 @@ import { formatDate, formatNZDate } from '@/lib/utils';
 import {
   stripHtml, readingMinutes, addHeadingIds, wrapKeyTakeaways, sanitizeFaq, toParagraphs, fillImageAlts
 } from '@/lib/content-html.mjs';
+import { searchTitle, schemaHeadline, ogImageAlt } from '@/lib/search-title.mjs';
 
 export const revalidate = 600;
 
@@ -167,7 +168,7 @@ export async function generateMetadata(
 
   const description = blog.meta_description || stripHtml(blog.content).slice(0, 160);
   // 검색·공유용 제목만 seo_title 로 갈아끼운다 — 지면의 <h1> 은 blog.title 그대로다(D2).
-  const metaTitle = blog.seo_title || blog.title;
+  const metaTitle = searchTitle(blog);
 
   const baseUrl = SITE_URL;
   const ogImage = blog.og_image_url
@@ -177,14 +178,14 @@ export async function generateMetadata(
   return {
     // seo_title 은 편집자가 SERP 길이에 맞춰 쓴 완성 제목이다 — 루트의 '%s — MHJ' 템플릿을 덧붙이면
     // 그 예산을 넘겨 잘린다. seo_title 이 없을 때만 템플릿을 태운다(기존 동작 유지).
-    title: blog.seo_title ? { absolute: metaTitle } : metaTitle,
+    title: blog.seo_title?.trim() ? { absolute: metaTitle } : metaTitle,
     description,
     openGraph: {
       ...OG_BASE,
       title: metaTitle,
       description,
       url: `${baseUrl}/blog/${blog.slug}`,
-      images: [{ url: ogImage, width: 1200, height: 630, alt: blog.og_image_alt || blog.title }],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: ogImageAlt(blog) }],
       type: 'article',
       authors: [blog.author],
       publishedTime: blog.created_at ?? undefined,
@@ -263,7 +264,8 @@ export default async function BlogDetailPage(
       // categoryHref 는 미매핑 카테고리(폐기 예정)에 /blog 를 돌려주므로 그때는 단계를 넣지 않는다 —
       // 2·3단계가 같은 URL 인 빵부스러기는 잘못된 신고다.
       ...(categoryUrl ? [{ '@type': 'ListItem', position: 3, name: blog.category, item: categoryUrl }] : []),
-      { '@type': 'ListItem', position: categoryUrl ? 4 : 3, name: blog.title },
+      // 마지막 단계는 화면 빵부스러기에 없다 — 지면 제목의 내부 표기([Edu] 등) 대신 검색 제목을 신고한다.
+      { '@type': 'ListItem', position: categoryUrl ? 4 : 3, name: searchTitle(blog) },
     ],
   };
 
@@ -274,7 +276,8 @@ export default async function BlogDetailPage(
       '@type': 'WebPage',
       '@id': `${SITE_URL}/blog/${blog.slug}`,
     },
-    headline: blog.title,
+    // <title> 과 같은 검색 제목 — 지면 제목의 내부 표기([Edu] 등)가 리치 결과로 새지 않게(2026-10-22).
+    headline: schemaHeadline(blog),
     description: blog.meta_description || plainText.slice(0, 160),
     // width/height 를 신고하지 않는다 — 원본이 1000×625~5628×3167 로 제각각이라
     // 1200×630 하드코딩은 사실과 달랐다(자체진단 F-A-09).
