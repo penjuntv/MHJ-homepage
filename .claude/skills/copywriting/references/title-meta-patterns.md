@@ -17,9 +17,9 @@ GSC 페이지별 검색어를 보면 MHJ 로 오는 검색은 거의 전부 **�
 | 누가 배우나 | `keeping ourselves safe junior primary` | 프로그램 이름 + "what it teaches" | 학년 구간 |
 | 제도 변화 | (예시) `ncea changes` | 제도 이름 + 무엇이 언제 바뀌나 | 바뀌는 것 하나와 시점(근거 있을 때만) |
 | 어떻게 하나 | (예시) `what to pack school lunch nz` | "How to ..." / "What to Pack ..." | 첫 단계 또는 핵심 한 가지 |
-| 시간·운영 | `albany library opening hours` | **쓰지 않는다** — 글에 답이 없으면 제목으로 못 고친다 | — |
+| 시간·운영 | `albany library opening hours` | **글에 답이 있을 때만** 장소 이름 + "Hours" | "open seven days" 수준까지만 — 구체 시각은 `fact-verify` 뒤 |
 
-마지막 줄이 중요하다. 의도가 어긋나면 손대지 않고 "의도 불일치"로 기록만 한다.
+마지막 줄이 중요하다. 글에 답이 없으면(의도 불일치) 손대지 않고 기록만 한다. 이 도서관 글은 9월 23일엔 답이 없었고 9월 28일 인포블록에 운영 시간이 들어갔다 — **판단은 늘 지금 라이브 글로 한다.**
 
 ## 2. 영어 제목 틀 (30~60자)
 
@@ -27,7 +27,7 @@ GSC 페이지별 검색어를 보면 MHJ 로 오는 검색은 거의 전부 **�
 |---|---|
 | `{제도/주제}: What {질문 핵심}?` | Starting School in New Zealand: What Age and Which Year? |
 | `{용어} on a NZ School Report: What It Means` | (예시) "Consolidating" on a NZ School Report: What It Means |
-| `{주제}: What This NZ {대상} {동사}` | Keeping Ourselves Safe: What This NZ School Programme Teaches |
+| `{주제}: The NZ {대상} Explained` | Keeping Ourselves Safe: The NZ School Programme Explained |
 | `{주제}: A Korean Family's / Migrant Parent's View` | NCEA Changes: A Migrant Parent's View of the NZ Shake-Up |
 | `What to {행동} for {학년/상황} at a NZ School` | (예시) What to Pack for Year 1 at a NZ School |
 | `{장소 이름}, {지역}: {경험 한 줄}` | A Fishing Day at Ruakākā Beach, Northland |

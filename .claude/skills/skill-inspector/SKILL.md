@@ -44,10 +44,15 @@ Apache License 2.0 — 전문은 같은 폴더의 UPSTREAM-LICENSE.
 # 커밋 고정 실행 (설치 없음). 처음 한 번은 Python 3.12 와 의존성을 내려받느라 1~2분 걸린다.
 ss() { uvx --python 3.12 --from git+https://github.com/NVIDIA/SkillSpector.git@11c8b48e35056602fad263438448e0ffb5be2776 skillspector "$@"; }
 
+cd "$SCRATCH/reports"   # 대상 폴더 밖에서 실행한다 — 대상의 pyproject.toml·uv.lock 을 uv 가 집어 들지 않게
 ss scan "$TARGET" --no-llm --format json --output "$SCRATCH/reports/<이름>.json"
+
+# 요약 한 줄 (키: .risk_assessment · .analysis_completeness · .issues[])
+python3 -I -c "import json,sys,collections as c;d=json.load(open(sys.argv[1]));r=d['risk_assessment'];a=d['analysis_completeness'];print(r['score'],r['severity'],r['recommendation'],'| coverage',a['coverage_percent'],a['status'],'|',dict(c.Counter(i['severity'] for i in d['issues'])))" "$SCRATCH/reports/<이름>.json"
 ```
 
-- `$SCRATCH` 는 세션 scratchpad 폴더. 보고서를 `/tmp` 나 repo 안에 두지 않는다.
+- `$TARGET` 은 검사할 폴더(저장소 루트 또는 `skills/<이름>/`)의 절대 경로, `$SCRATCH` 는 세션 scratchpad 폴더. 보고서를 `/tmp` 나 repo 안에 두지 않는다.
+- **exit 코드로 완전성을 판단하지 않는다.** 위험 판정(`DO_NOT_INSTALL` 등)이면 검사가 정상으로 끝나도 exit 1 이 나온다. 완전성은 `.analysis_completeness`(`coverage_percent`, `status`)와 `.execution_successful` 로 본다.
 - zsh 에서는 명령을 변수 하나에 담으면(`SS="uvx ..."`) 공백으로 안 쪼개져 exit 127 이 난다. 위처럼 **함수**로 쓴다.
 - SkillSpector 를 올릴 때는 새 커밋을 이 검사로 먼저 확인한 뒤 위 해시를 바꾼다.
 
@@ -56,8 +61,9 @@ ss scan "$TARGET" --no-llm --format json --output "$SCRATCH/reports/<이름>.jso
 1. **대상 정하기.** 로컬 폴더, 압축 파일, 저장소 URL 을 받는다. URL 이면 scratchpad 새 폴더에 받는다.
 2. **판정 단위는 "실제로 들일 스킬 폴더"다.** 저장소 전체를 스캔하면 테스트·설치 스크립트·문서까지 잡혀 점수가 부풀려진다.
    저장소 전체 한 번 + **들일 스킬 폴더(예: `skills/<이름>/`)만 한 번**, 두 번 돌려서 둘 다 보고한다.
-3. **정적 검사 실행.** exit 가 0 이 아니면 부분 보고서를 확인하고 수동 검토로 이어 간다. "정적 갈래 불완전"이라고 기록한다.
-4. **보고서 읽기.** 점수, 심각도, 권고, 규칙 ID, 파일·줄, `category`·`explanation` 을 뽑는다. `jq` 나 `python3 -I` 로 요약한다.
+3. **정적 검사 실행.** `.execution_successful` 이 false 이거나 `coverage_percent` 가 낮으면 "정적 갈래 불완전"으로 기록하고 수동 검토로 이어 간다.
+   **커버리지가 0%(또는 아주 낮은) 스캔의 점수는 판정 근거로 쓰지 않는다** — 표에 "점수 무효(커버리지 N%)"로 적는다.
+4. **보고서 읽기.** 점수, 심각도, 권고, 규칙 ID, 파일·줄, `category`·`explanation` 을 뽑는다(위 요약 한 줄). 발견 목록 키는 `.issues[]` 다.
 5. **원문 읽기.** 반드시 본다.
    - `SKILL.md`
    - 실행 파일·스크립트
@@ -67,6 +73,9 @@ ss scan "$TARGET" --no-llm --format json --output "$SCRATCH/reports/<이름>.jso
    - HIGH / CRITICAL 이 가리킨 파일
 
    MEDIUM 이라도 네트워크, 자격 증명, 환경변수, 파일 쓰기, 셸 실행, MCP 권한, 상주, 난독화, 사용자·맥락 유출과 관련되면 읽는다.
+
+   **코드가 커서 다 못 읽을 때**(수만 줄): 민감 모듈(쿠키·키체인·자격 증명·네트워크·설치·subprocess)을 먼저 끝까지 읽고, 나머지는 `grep` 으로 패턴만 훑는다. 보고서에 **판정 신뢰도(높음/중간/낮음)** 와 끝까지 읽은 파일 목록을 적는다.
+   zsh 에서는 glob 인자에 따옴표를 붙인다: `grep -rn --include='*.py' …` (안 붙이면 `no matches found` 로 실패).
 6. **의미 검토.** 코드가 설명과 맞는지 본다.
    - **목적 일치:** 설명이 약속한 일만 하는가?
    - **권한 일치:** 요구하는 도구·권한이 실제 동작에 맞는가?
@@ -76,7 +85,7 @@ ss scan "$TARGET" --no-llm --format json --output "$SCRATCH/reports/<이름>.jso
    - **상주:** cron, launch agent, 셸 프로필 훅, 시작 훅, 자기 파일을 고치는 코드, 숨은 상태를 만드는가?
    - **프롬프트 위험:** 안전 경계를 약하게 하거나, 동작을 숨기거나, 내부 지시를 드러내거나, 이후 대화를 조종하는가?
    - **트리거 위험:** 호출 문구가 너무 넓어서 상관없는 요청을 가로채는가? (우리 스킬 이름과 겹치는지도 본다: `ls .claude/skills`)
-   - **공급망:** 버전을 고정하지 않은 설치(`npx` 패키지명만, `@latest`), 수상한 패키지, 원격 스크립트를 내려받아 실행하는가?
+   - **공급망:** 버전을 고정하지 않은 설치(`npx` 패키지명만, `@latest`), 수상한 패키지, 원격 스크립트를 내려받아 실행하는가? 셋업 단계가 **동의 없이 전역 설치**(`brew install`, `npx -y`, `pip install`)를 하는가? 대상이 `.skillignore`·`.clawhubignore` 등으로 **"스캔 제외지만 설치는 되는"** 파일을 두고 있지 않은가?
    - **사용자 통제:** 민감하거나 파괴적인 동작에 분명한 사용자 동의가 있는가?
 7. **종합 판정.**
    - `APPROVE` — HIGH / CRITICAL 없음, 설명되지 않은 민감 동작 없음, 원문이 설명과 일치.
@@ -93,7 +102,7 @@ ss scan "$TARGET" --no-llm --format json --output "$SCRATCH/reports/<이름>.jso
 | 21–35 | 발견이 분명히 설명될 때만 받아들인다 |
 | 36–50 | 수동 검토 필수. 모든 우려가 설명되지 않으면 `CAUTION` |
 | 51–80 | 출처를 믿을 수 있고 모든 민감 동작이 필요할 때가 아니면 `REJECT` |
-| 81–100 | 기본 `REJECT` |
+| 81–100 | 기본 `REJECT`. 단, HIGH / CRITICAL **전부**를 원문으로 읽어 오탐으로 설명했고, 남은 실제 민감 동작이 모두 문서화·제한·사용자 통제 가능하면 `CAUTION` 까지 올릴 수 있다 — 그때는 설명한 발견 목록을 보고서에 빠짐없이 적는다 |
 
 > **실제 사례 (2026-10-22, im-not-ai):** 저장소 전체 100점·CRITICAL·DO_NOT_INSTALL, 스킬 폴더만 64점.
 > 원문을 읽어 보니 HIGH 는 전부 오탐이었다.
@@ -151,7 +160,11 @@ uv 가 없거나 내려받기가 실패하면 그렇다고 분명히 말하고, 
 
 ## 판정 뒤 — MHJ 스킬 들이기 절차
 
-`APPROVE` 또는 사용자가 받아들인 `CAUTION` 이면 이 순서로 들인다 (선례: grilling·diagnosing-bugs, PR #150).
+**먼저 갈래를 정한다.**
+- **문서형 스킬**(SKILL.md + 참고 문서 + 작은 보조 스크립트) → 아래 절차로 repo 에 들인다.
+- **엔진형 스킬**(수천 줄 이상의 실행 코드·외부 서비스 호출·셋업 설치가 딸린 것) → **repo 에는 들이지 않는다.** 꼭 필요하면 사용자 개인 영역(`~/.claude/skills`)에, 커밋 고정·민감 기능 끄기·셋업 생략 조건을 보고서 "조건" 칸에 적고 사용자가 정한다. (사례: 2026-10-22 `last30days` — 브라우저 쿠키 복호화·셋업 시 전역 설치 → CAUTION, repo 반입 안 함)
+
+문서형이고 `APPROVE` 또는 사용자가 받아들인 `CAUTION` 이면 이 순서로 들인다 (선례: grilling·diagnosing-bugs PR #150, marketingskills 4개 PR #152).
 1. 통째로 복사하지 않는다. **필요한 스킬만** 한국어·MHJ 맞춤 사본으로 `.claude/skills/<이름>/` 에 쓴다.
 2. SKILL.md 머리말 바로 아래 HTML 주석에 원본 경로·**커밋 해시**·라이선스·변경 요지를 적는다.
 3. 라이선스 전문을 `UPSTREAM-LICENSE` 로 같은 폴더에 둔다. 라이선스가 없는 원본은 문구를 가져오지 않고 방법론만 참고해 새로 쓴다.

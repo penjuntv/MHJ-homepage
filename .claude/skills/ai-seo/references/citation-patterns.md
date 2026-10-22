@@ -60,7 +60,7 @@
 {첫 문장에 답}. {보충 1~2문장}.
 ```
 
-- 질문 문장은 GSC 검색어에서 가져온다. 예: `keeping ourselves safe junior primary` → "Which year levels learn Keeping Ourselves Safe?" 답은 본문의 "Junior Primary (Years 0–3)" 구분(`gsc-2026-09-23.md` §11).
+- 질문 문장은 GSC 검색어에서 가져온다. 예: `keeping ourselves safe junior primary` → "Which year levels learn Keeping Ourselves Safe?" 답은 본문의 "Junior Primary (Years 0–3)" 구분(`gsc-2026-09-23.md` §11). **이 예시는 2026-09-24 에 이미 반영됐다** — 제안 전에 라이브 FAQ 와 겹치는지 먼저 본다.
 - 3~5개. 답은 50~100단어 안. 본문에 없는 답은 만들지 않는다.
 - FAQ 는 구글 클릭을 노리는 장치가 아니다(FAQ 리치 결과 2026-05-07 제거). 답을 꺼내 두는 장치다.
 
