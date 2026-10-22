@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>이달의 책 — 유씨 코치 카드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Serif+KR:wght@700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* 유씨 코치 카드 — 한 장짜리 이미지. 렌더: 폭 1200 × 2배 PNG (guides/coach-card.png) */
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e9e2d8; }
+  .card { width: 1200px; background: #f5f0ea; color: #1f1b17; font-family: "Noto Sans KR", sans-serif; font-size: 20px; line-height: 1.5; }
+  b { font-weight: 700; }
+  ul { margin: 0; padding-left: 20px; } li { margin: 2px 0; }
+
+  /* 머리 */
+  .top { background: #1f1b17; color: #fff; padding: 40px 56px 36px; }
+  .kick { font-family: "Nunito"; font-weight: 800; letter-spacing: .22em; font-size: 15px; color: #e0b277; display: flex; justify-content: space-between; border-bottom: 2px solid #4a423b; padding-bottom: 12px; }
+  h1 { font-family: "Noto Serif KR"; font-weight: 900; font-size: 48px; line-height: 1.28; margin: 24px 0 14px; }
+  h1 em { font-style: normal; color: #f2c46b; }
+  .lead { font-size: 22px; color: #d8cfc4; margin: 0; }
+  .lead b { color: #fff; }
+  .flow { display: flex; gap: 10px; margin-top: 22px; }
+  .flow span { background: #2f2924; border: 1.5px solid #4a423b; border-radius: 999px; padding: 6px 18px; font-weight: 700; font-size: 19px; }
+  .flow i { font-style: normal; color: #8f8478; align-self: center; }
+
+  .wrap { padding: 32px 56px 36px; }
+  h2 { font-family: "Noto Serif KR"; font-weight: 900; font-size: 29px; margin: 0 0 14px; display: flex; align-items: baseline; gap: 12px; }
+  h2 small { font-family: "Nunito"; font-weight: 800; font-size: 13px; letter-spacing: .18em; color: #b07a3c; }
+  section + section { margin-top: 32px; }
+
+  /* 왜 + 레벨: 두 줄 */
+  .why, .lv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .why > div { background: #fff; border-radius: 12px; padding: 16px 18px; border: 1.5px solid #e3dbd0; }
+  .why h3 { font-size: 21px; margin: 0 0 6px; font-weight: 900; }
+  .why p { margin: 0; font-size: 18px; color: #4f4740; }
+  .lv > div { background: #fff; border-radius: 12px; padding: 14px 18px; border-top: 6px solid var(--c); }
+  .lv .nm { font-weight: 900; font-size: 22px; display: flex; align-items: baseline; gap: 8px; }
+  .lv .nm span { font-family: "Nunito"; font-size: 13px; color: #8f8478; letter-spacing: .08em; }
+  .lv .nm em { font-style: normal; margin-left: auto; background: var(--bg); color: var(--c); font-size: 15px; border-radius: 6px; padding: 1px 9px; }
+  .lv p { margin: 6px 0 0; font-size: 17.5px; color: #4f4740; }
+  .lv .amt { margin-top: 8px; font-size: 16px; font-weight: 700; border-top: 1px dashed #e3dbd0; padding-top: 7px; }
+
+  /* 4단계 */
+  .step { display: grid; grid-template-columns: 92px 1fr; background: #fff; border-radius: 12px; overflow: hidden; border: 1.5px solid #e3dbd0; }
+  .step + .step { margin-top: 12px; }
+  .rail { background: var(--c); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .rail .n { font-family: "Nunito"; font-weight: 900; font-size: 50px; line-height: 1; }
+  .rail .wk { font-weight: 900; font-size: 17px; background: rgba(0,0,0,.18); border-radius: 999px; padding: 1px 12px; }
+  .body { padding: 16px 20px 16px; }
+  .hd { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .hd h3 { font-family: "Noto Serif KR"; font-weight: 900; font-size: 25px; margin: 0; }
+  .hd small { font-size: 16px; color: #8f8478; }
+  .res { margin-left: auto; display: inline-flex; gap: 8px; align-items: center; background: #1f1b17; color: #fff; border-radius: 999px; padding: 4px 16px 4px 5px; font-weight: 700; font-size: 16.5px; white-space: nowrap; }
+  .res i { font-style: normal; background: var(--c); border-radius: 999px; padding: 0 10px; font-size: 14px; font-weight: 900; }
+  .c3 { display: grid; grid-template-columns: 1.05fr 1.1fr .85fr; gap: 10px; }
+  .c3 > div { border-radius: 10px; padding: 11px 14px; font-size: 17.5px; line-height: 1.5; }
+  .lb { font-weight: 900; font-size: 15px; display: block; margin-bottom: 3px; letter-spacing: .02em; }
+  .k { background: var(--bg); } .k .lb { color: var(--c); }
+  .y { border: 1.5px solid #e3dbd0; } .y .lb { color: #1f1b17; }
+  .w { background: #fbf6e9; } .w .lb { color: #b07a3c; }
+  .dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; }
+  .dl b { color: var(--c); white-space: nowrap; }
+  .ui { font-weight: 700; background: #eef2ff; color: #3730a3; border-radius: 5px; padding: 0 6px; white-space: nowrap; }
+  ol.desk { margin: 0; padding: 0; list-style: none; counter-reset: d; }
+  ol.desk li { counter-increment: d; padding-left: 30px; position: relative; margin: 3px 0; }
+  ol.desk li::before { content: counter(d); position: absolute; left: 0; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--c); color: #fff; font-family: "Nunito"; font-weight: 900; font-size: 13px; display: grid; place-items: center; }
+  .fx { display: grid; gap: 6px; }
+  .fx div { border-radius: 8px; padding: 6px 12px; font-size: 16.5px; line-height: 1.4; } .fx b { display: block; font-size: 15px; }
+  .fx .ok { background: #e2f4ea; } .fx .no { background: #fde6ea; } .fx .ig { background: #eef2ff; }
+
+  /* 코치 */
+  .coach { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .coach > div { background: #fff; border-radius: 12px; padding: 16px 20px; border: 1.5px solid #e3dbd0; }
+  .coach h3 { font-size: 21px; font-weight: 900; margin: 0 0 8px; }
+  .q { background: #f5f0ea; border-radius: 8px; padding: 6px 12px; margin: 6px 0; font-size: 17.5px; font-weight: 700; }
+  .q span { font-weight: 400; font-size: 15.5px; color: #6b6259; }
+  .x { font-size: 17.5px; margin: 7px 0; } .x .bad { color: #b4233f; font-weight: 700; } .x .good { color: #2f7a52; }
+  .wl { margin-top: 10px; font-size: 16.5px; color: #8a5a22; background: #fbf6e9; border-radius: 8px; padding: 7px 12px; }
+  .praise { margin-top: 12px; background: #fff; border-radius: 12px; padding: 12px 20px; border: 1.5px solid #e3dbd0; display: flex; gap: 12px; align-items: center; font-size: 17px; }
+  .praise h3 { margin: 0; font-size: 19px; font-weight: 900; white-space: nowrap; }
+  .praise span { background: #fde6ea; border-radius: 999px; padding: 3px 13px; white-space: nowrap; }
+
+  /* 지니 · 규칙 */
+  .jin { background: #fff; border-radius: 12px; border: 1.5px solid #e3dbd0; border-left: 8px solid #e08a3c; padding: 14px 20px; }
+  .jin .path { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; font-size: 17px; }
+  .jin .path span { background: #fdf0e3; border-radius: 8px; padding: 3px 11px; font-weight: 700; }
+  .jin .path i { font-style: normal; color: #b9ad9f; }
+  .jin p { margin: 0; font-size: 17px; }
+  .rule { margin-top: 24px; background: #fde6ea; border-radius: 12px; padding: 14px 22px; font-size: 18px; display: flex; gap: 14px; align-items: center; }
+  .rule .big { font-size: 34px; }
+  .rule b.h { display: block; font-size: 21px; font-weight: 900; color: #9e1c37; }
+  .foot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 20px; font-family: "Nunito"; font-weight: 800; font-size: 13px; letter-spacing: .16em; color: #8f8478; border-top: 2px solid #1f1b17; padding-top: 12px; }
+  .foot b { font-family: "Noto Sans KR"; letter-spacing: 0; font-size: 16px; color: #4f4740; }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+
+  <div class="top">
+    <div class="kick"><span>MHJ MONTHLY BOOK</span><span>유씨 코치 카드 · v1.0</span></div>
+    <h1>아이 옆에서 이 순서만 따라 하면<br><em>한 달에 매거진 기사 한 편</em></h1>
+    <p class="lead">유씨는 <b>대신 써 주는 사람이 아니라, 질문하는 편집장</b>이에요. 아이가 쓰고, 유씨는 묻고 모아서 매거진에 올려요.</p>
+    <div class="flow"><span>📚 읽기</span><i>→</i><span>✏️ 종이에 쓰기</span><i>→</i><span>⌨️ 기자 책상에 옮겨 치기</span><i>→</i><span>📰 매거진에 싣기</span></div>
+  </div>
+
+  <div class="wrap">
+
+    <section>
+      <h2>왜 이렇게 하나요? <small>WHY THIS WORKS</small></h2>
+      <div class="why">
+        <div><h3>✍️ 두 번 쓰면 문장이 자라요</h3><p>종이에 손으로 한 번, 기자 책상에 옮겨 치며 한 번 더. <b>옮겨 치는 순간이 곧 고쳐 쓰기</b>예요.</p></div>
+        <div><h3>🌏 번역이 아니라 두 번 쓰기</h3><p>한국어는 한국 사촌에게, 영어는 한국을 모르는 키위 친구에게. <b>독자가 달라서 두 언어 모두 생각이 커요.</b></p></div>
+        <div><h3>📰 진짜 독자가 있어요</h3><p>매거진에 실리니까 숙제가 아니라 <b>기자의 일</b>이 돼요. 끝까지 쓰는 힘이 여기서 나와요.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>세 아이, 세 레벨 <small>SAME FLOW · DIFFERENT DEPTH</small></h2>
+      <div class="lv">
+        <div style="--c:#e08a3c;--bg:#fdf0e3"><div class="nm">지니<span>YEAR 1</span><em>L0 듣고 말하기</em></div>
+          <p>엄마아빠가 읽어 주고, 지니는 그리고 말해요. 말한 걸 <b>그대로 받아 적어요.</b></p><div class="amt">하루 10~15분 × 4번 · 문답 6개</div></div>
+        <div style="--c:#3f74c9;--bg:#e8effb"><div class="nm">현이<span>YEAR 5</span><em>L1 칸 채워 쓰기</em></div>
+          <p>앞말이 적힌 칸의 뒤를 채워요. <b>내 생각 + 근거(쪽수) + 반대편</b>까지.</p><div class="amt">하루 20분 × 5일 · 한 200~500자 · EN 60~150단어</div></div>
+        <div style="--c:#2f8a5f;--bg:#e2f4ea"><div class="nm">민이<span>YEAR 7</span><em>L2 논증 쓰기</em></div>
+          <p><b>근거 2개 · 반론에 답하기 · 책 밖 자료 1개</b>, "~다"체로.</p><div class="amt">하루 25분 × 5일 · 한 400~800자 · EN 150~300단어</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>한 달, 4단계 <small>ONE BOOK A MONTH</small></h2>
+
+      <div class="step" style="--c:#e4a521;--bg:#fdf5e0">
+        <div class="rail"><div class="n">1</div><div class="wk">1주</div></div>
+        <div class="body">
+          <div class="hd"><h3>책 읽기 + 포스트잇</h3><span class="res"><i>결과</i>포스트잇 붙은 책 + 워크시트 1부</span></div>
+          <div class="c3">
+            <div class="k"><span class="lb">아이가 하는 것</span>읽다가 붙여요<br>😮 놀라면 <b>노랑</b> · 🤔 궁금하면 <b>파랑</b><br>🙅 "나라면 안 해!" 싶으면 <b>빨강</b></div>
+            <div class="y"><span class="lb">👩 유씨가 옆에서</span><ul><li>책 종류에 맞는 워크시트 <b>한 부만</b> 인쇄 (애매하면 '어떤책이든')</li><li>지니는 두세 번 읽어 주기</li></ul></div>
+            <div class="w"><span class="lb">💡 왜?</span>붙인 포스트잇이 그대로 <b>글감</b>이 돼요. 빈 종이 앞에서 막히지 않아요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" style="--c:#3f74c9;--bg:#e8effb">
+        <div class="rail"><div class="n">2</div><div class="wk">2주</div></div>
+        <div class="body">
+          <div class="hd"><h3>종이 워크시트, 하루 한 쪽</h3><small>4일이면 기사 뼈대 완성</small><span class="res"><i>결과</i>다 채운 워크시트 + 사진 2~3장</span></div>
+          <div class="c3">
+            <div class="k"><span class="lb">아이가 하는 것</span><div class="dl">
+              <b>1일</b><span>책 정보 · 한 줄 요약 · 별점</span>
+              <b>2일</b><span>책 종류별 쪽 (연표·4컷·지도 등) → <b style="color:inherit">인포그래픽</b></span>
+              <b>3일</b><span>①첫 문장 ②내 생각 ③근거(책 몇 쪽) ④반대편에 답하기</span>
+              <b>4일</b><span>⑤나와 연결 ⑥질문으로 끝 ⑦그림 ⑧제목</span></div></div>
+            <div class="y"><span class="lb">👩 유씨가 옆에서</span><ul>
+              <li><b>1일</b> 표지 사진 찍기 (밝은 곳, 바닥에 똑바로, 손·얼굴 없이)</li>
+              <li><b>3일 끝나고</b> 15분 수다 (아래 질문 2~3개)</li>
+              <li><b>4일</b> 아이 그림 사진 찍기</li>
+              <li><b>민이</b> 책 밖 자료는 찾기만 같이 (우리역사넷·국립중앙박물관·Te Ara)</li></ul></div>
+            <div class="w"><span class="lb">💡 왜?</span>한 번에 한 쪽이라 부담이 없어요. 칸마다 앞말이 있어서 <b>따라 쓰기만 해도 논리적인 글의 순서</b>가 잡혀요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" style="--c:#2f8a5f;--bg:#e2f4ea">
+        <div class="rail"><div class="n">3</div><div class="wk">3주</div></div>
+        <div class="body">
+          <div class="hd"><h3>기자 책상에 옮겨 치기</h3><small>○○-기자책상.html</small><span class="res"><i>결과</i>📦 파일 1개 → 엄마아빠에게</span></div>
+          <div class="c3">
+            <div class="k"><span class="lb">아이가 하는 것</span>종이와 <b>같은 번호 칸</b>에 옮겨 쳐요. 오른쪽에 매거진 지면이 바로 생겨요. 💡 힌트 보고 스스로 고치고, ✨ '고친 문장' 칸까지 채우고, 체크하면 <span class="ui">📦 한 파일로 저장</span></div>
+            <div class="y"><span class="lb">👩 유씨가 옆에서</span><ul>
+              <li>옆에 앉아 <b>칸 순서만</b> 짚어 주기</li>
+              <li>💡 힌트를 따를지는 <b>아이가 고르게</b></li>
+              <li>버튼이 안 눌리면 → 분홍 상자가 <b>빈 칸</b>을 알려 줘요</li>
+              <li>찍어 둔 사진을 사진 칸에 넣게 도와주기</li></ul></div>
+            <div class="w"><span class="lb">💡 왜?</span>옮겨 치며 다시 읽는 게 <b>두 번째 고쳐 쓰기</b>예요. 글·사진·인포그래픽이 <b>파일 하나</b>로 묶여 빠지는 게 없어요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" style="--c:#d14d68;--bg:#fde6ea">
+        <div class="rail"><div class="n">4</div><div class="wk">4주</div></div>
+        <div class="body">
+          <div class="hd"><h3>매거진에 싣기</h3><small>유씨 · 약 20분</small><span class="res"><i>결과</i>발행된 기사 1편 🎉</span></div>
+          <div class="c3">
+            <div class="k" style="grid-column: span 1"><span class="lb">유씨가 하는 순서</span><ol class="desk">
+              <li>📦 파일 열기 → 사진·인포그래픽 <b>우클릭 → 다른 이름으로 저장</b></li>
+              <li><span class="ui">mhj-desk</span> 이번 호 → 기사 편집 → <b>+ 새 기사(초안)</b></li>
+              <li>템플릿 <b>Right</b> · 저자 <b>Hyun / Min / Jin</b></li></ol></div>
+            <div class="k"><span class="lb">&nbsp;</span><ol class="desk" style="counter-reset: d 3">
+              <li>제목(한·영) · 사진 3칸 · 인포블록 <b>'이달의 책'</b></li>
+              <li>본문: ② 인용 → 한국어 → <b>인포그래픽</b> → In English → 영어</li>
+              <li>🔍 전체 미리보기 → 아이에게 <b>"내 글 맞아?"</b> → 발행</li></ol></div>
+            <div class="fx">
+              <div class="ok"><b>✅ 고치는 것</b>맞춤법 · 띄어쓰기만</div>
+              <div class="no"><b>🚫 안 고치는 것</b>아이의 단어 · 비유 · 문장 길이</div>
+              <div class="ig"><b>🖼 인포그래픽은</b>사진 칸 말고 본문 안에</div>
+            </div>
+          </div>
+          <div class="w" style="margin-top:10px;border-radius:10px;padding:9px 14px;font-size:17.5px"><span class="lb" style="display:inline;margin-right:6px">💡 왜?</span>아이 목소리가 살아 있어야 <b>MHJ만의 기사</b>가 돼요. 마지막 "맞아?"를 아이가 승인하면 진짜 <b>'내 기사'</b>가 돼요.</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>옆에서 이렇게 <small>HOW TO COACH</small></h2>
+      <div class="coach">
+        <div>
+          <h3>💬 이렇게 물어봐 주세요</h3>
+          <div class="q">"빨간 포스트잇 붙인 데 보여줘. 너라면?"</div>
+          <div class="q">"②번 네 생각에 반대해 볼게." <span>— 짧게 반박하고 아이가 방어하게. 이기지 마세요</span></div>
+          <div class="q">"그 증거, 책 몇 쪽이야?"</div>
+          <div class="q">"키위 친구한테 설명하려면 뭘 먼저 말해 줘야 할까?"</div>
+          <div class="wl">💡 <b>왜?</b> 답을 주는 대신 물으면, 생각이 <b>아이 것</b>으로 남아요.</div>
+        </div>
+        <div>
+          <h3>✋ 이건 참아 주세요</h3>
+          <div class="x">✕ <span class="bad">주장을 대신 정해 주기</span> <span class="good">→ "다른 생각도 있을까?"</span></div>
+          <div class="x">✕ <span class="bad">종이 단계에서 맞춤법 지적</span> <span class="good">→ 매거진에 올릴 때 유씨가</span></div>
+          <div class="x">✕ <span class="bad">영어 칸을 한국어 번역으로</span> <span class="good">→ "키위 친구한테는?"</span></div>
+          <div class="x">✕ <span class="bad">만화 각색을 "틀렸다"고 하기</span> <span class="good">→ "이건 책이 꾸민 걸까?"</span></div>
+          <div class="wl">💡 <b>왜?</b> 처음부터 고치면 쓰기가 싫어져요. <b>고치는 건 마지막에.</b></div>
+        </div>
+      </div>
+      <div class="praise"><h3>♥ 칭찬은 과정에</h3><span>"반대편까지 쓴 게 진짜 기자 같다"</span><span>"쪽수까지 있어서 믿음이 간다"</span><span>"옮겨 치니 문장이 선명해졌네"</span></div>
+    </section>
+
+    <section>
+      <h2>지니는 이렇게 <small>JIN · LEVEL 0</small></h2>
+      <div class="jin">
+        <div class="path"><span>📖 두세 번 읽어 주기</span><i>→</i><span>🖍 제일 좋은 장면 그리기</span><i>→</i><span>🎞 3컷</span><i>→</i><span>🎤 질문 6개 받아 적기</span><i>→</i><span>⌨️ 기자 책상에 그대로 입력</span></div>
+        <p><b>받아 적는 규칙</b> — 고치지 않기(틀린 말·귀여운 말·영어 섞인 말 그대로) · "~지?" 하고 유도하지 않기 · 대답이 없으면 다른 날 다시. <span style="color:#a85d1c"><b>💡 왜?</b> 지니가 한 말 그대로가 이 코너의 맛이에요.</span></p>
+      </div>
+    </section>
+
+    <div class="rule"><div class="big">🚨</div><div><b class="h">딱 하나만 기억한다면 — 아이 실명은 어디에도 쓰지 않아요</b>이름은 <b>지니/Jin · 현이/Hyun · 민이/Min</b>만. 본문, 사진 설명, 사진 파일 이름, 그림 속 글씨까지 확인해요.</div></div>
+
+    <div class="foot"><b>더 자세한 건 꾸러미의 1_운영매뉴얼.pdf</b><span>MHJ · MONTHLY BOOK · COACH CARD v1.0</span></div>
+  </div>
+</div>
+</body>
+</html>
