@@ -38,7 +38,8 @@ MIT License, Copyright (c) 2025 Corey Haines — 전문은 같은 폴더의 UPST
 | 구조화 데이터 | BlogPosting · Organization/Person `@id` 엔티티 그래프 · FAQPage(라이브 확인) | `docs/SEO_OPS_LOOP.md` §0 · `gsc-2026-09-23.md` §11 |
 | Bing · IndexNow | 등록됨, 발행 시 자동 전송 | `SEO_OPS_LOOP.md` §0-A |
 | 네이버 서치어드바이저 | 소유확인·사이트맵·RSS 정리 완료(2026-09-29) | `SEO_OPS_LOOP.md` §0-A |
-| "답 먼저" 첫 문단 | 발행 폼이 첫 문단 40~60단어를 점검 | `lib/blog-preflight.mjs` (`answer_first`) |
+| "답 먼저" 첫 문단 | **장치만 있다.** 발행 폼이 첫 문단 단어 수(40~60)를 재지만 필수가 아니고, 그 문단이 답인지는 판단하지 않으며, 이미 발행된 글은 다시 재지 않는다 → **기존 글은 미충족일 수 있다. §3 4단계에서 글마다 확인** | `lib/blog-preflight.mjs` (`answer_first`) |
+| 인포블록 위치 | 본문 **앞**으로 올림(2026-09-24) | `app/(public)/blog/[slug]/page.tsx` 인포블록 주석 |
 | 수정일 신호 | `updated_at` → sitemap `lastmod`·`dateModified` | `seo-audit-runner` Gotchas |
 
 **다시 여는 조건은 하나** — 깨졌다는 증거(라이브 응답·감사 실패·콘솔 경고)가 있을 때. 그때도 이 스킬이 아니라 해당 스킬로 간다.
@@ -50,7 +51,7 @@ MIT License, Copyright (c) 2025 Corey Haines — 전문은 같은 폴더의 UPST
 | Copilot 인용(Bing AI Performance) | 81회 / 3개월 | `SEO_OPS_LOOP.md` §0-A (2026-09-28 기준) |
 | GSC "Google 검색의 생성형 AI" 노출 | 340 / 3개월 — 성적표 132 · Kahu Manu 51 · 입학 47 · KOS 36 | 같은 곳 |
 | AI 유입 세션 | `ai/chatgpt` 3 | `docs/measurements/traffic-2026-10-22.md` 출처 표 |
-| AI 프로브(Q7 5문항 × 4엔진) before 값 | **실측 없음** | `docs/PLAN-search-visibility-2026-09.md` U-5 미완 |
+| AI 프로브(고정 묶음, §3 2단계) before 값 | **실측 없음** | `docs/PLAN-search-visibility-2026-09.md` U-5 미완 |
 
 **읽는 법** — 보이기는 한다. 그런데 Copilot 인용 81회에 유입은 거의 없다. "인용돼도 안 눌림"이다. 그리고 **AI 프로브 before 값이 없어서** 무엇을 고쳐도 효과를 못 가린다. 그래서 첫 일은 늘 측정이다(§3).
 
@@ -77,6 +78,7 @@ MIT License, Copyright (c) 2025 Corey Haines — 전문은 같은 폴더의 UPST
 ### 1단계. 질문 목록 만들기
 
 - **고정 묶음(보고용)** — Q7 5문항을 그대로 쓴다(`docs/self-diagnosis/2026-09-07-report/07-questions-for-user.md`). 바꾸면 비교가 깨진다. 바꿀 때는 날짜와 이유를 적는다.
+- **글 하나만 볼 때** — 고정 묶음에 그 글 질문이 없으면, 그 글의 GSC 페이지별 검색어(측정 문서의 해당 절)로 영어 3~4개·한국어 2개를 만든다. 묶음 이름에 글 슬러그와 버전을 붙인다(예: `kos-v1`).
 - **탐색 묶음(돌아가며)** — GSC 실제 검색어를 사람이 AI 에게 묻는 말로 바꾼다. 예: `what does consolidating mean in school report` → "My child's NZ school report says 'consolidating'. What does that mean?" 키워드를 기계적으로 의문문으로 바꾸지 않는다.
 - **대조 질문** — 항상 나와야 하는 것("What is My Mairangi Journal?")과 절대 안 나와야 하는 무관한 질문 하나. 이 둘이 움직이면 우리 작업이 아니라 도구·엔진이 바뀐 것이다.
 - **한국어와 영어는 따로 잰다.** 질문 언어가 바뀌면 인용 출처가 바뀐다. 섞어서 평균 내지 않는다.
@@ -84,9 +86,10 @@ MIT License, Copyright (c) 2025 Corey Haines — 전문은 같은 폴더의 UPST
 
 ### 2단계. 돌리기
 
-- 엔진: ChatGPT(검색 켬) · Perplexity · Gemini · Claude(웹 검색 켬) · Copilot.
+- **고정 조건(바꾸지 않는다)**: Q7 원문의 4엔진 — ChatGPT(검색 켬) · Claude(웹 검색 켬) · Gemini · Perplexity — × 질문마다 **3회**. Q7 원문은 1회 캡처였지만 before 값이 아직 없으니 처음부터 3회로 시작한다.
+- **Copilot** 은 프로브 대신 Bing Webmaster 의 AI Performance 보고서(인용 수)로 본다.
 - **로그인 세션이 필요하다.** 두 분이 하거나, 사용자 Chrome 이 로그인돼 있으면 Claude in Chrome 으로 — 입력 전에 확인을 받는다.
-- **질문마다 3~5회, 매번 새 대화.** AI 답은 매번 다르다. 한 번은 일화지 측정이 아니다.
+- **매번 새 대화.** AI 답은 매번 다르다. 한 번은 일화지 측정이 아니다. 탐색 묶음은 3~5회 중 고르되 기록에 적는다.
 - 기록은 **비율과 표본 수**로: "인용 3/5 (n=5)". 4/5 → 3/5 는 소음, 4/5 → 0/5 가 한 달 이어지면 신호다.
 
 기록 표 (`docs/measurements/ai-probe-YYYY-MM-DD.md` 에 둔다):
@@ -109,24 +112,26 @@ MIT License, Copyright (c) 2025 Corey Haines — 전문은 같은 폴더의 UPST
 
 | 점검 | 기준 / 근거 |
 |---|---|
-| 첫 두세 줄에 질문의 답이 있나 | `CONTENT-SEARCH-STANDARD` §2 의 2층 · 폼 `answer_first` |
+| 첫 두세 줄에 질문의 답이 있나 | `docs/CONTENT-SEARCH-STANDARD-2026-09-24.md` §2 의 2층 · 폼 `answer_first` |
 | 문단 하나가 앞뒤 없이 읽어도 뜻이 서나 | AI 는 페이지가 아니라 **문단**을 뽑는다 |
 | H2 가 사람들이 묻는 문장 모양인가 | 입학 글 H2 `What age can a child start school — Year 0 or Year 1?` |
 | 사실에 출처(`govt.nz` 등)와 확인 날짜가 있나 | `fact-verify` |
-| FAQ 3~5개, 답은 본문에 있는 사실만 | `CONTENT-SEARCH-STANDARD` §2 4층 |
+| FAQ 3~5개, 답은 본문에 있는 사실만 | `docs/CONTENT-SEARCH-STANDARD-2026-09-24.md` §2 4층 |
 | 작성자(Yussi)와 직접 겪은 일이 드러나나 | 정부 사이트에 없는 우리 몫 |
 | 수정일이 보이나 | `updated_at` |
-| 사실 정리(인포블록)가 글 맨 아래에 묻혀 있지 않나 | 위로 올리는 것은 **레이아웃 변경 — 승인 필요**(`CONTENT-SEARCH-STANDARD` §5) |
+| 인포블록 첫 줄(부제)이 정의 문장 구실을 하나 — 본문과 범위가 어긋나지 않나 | 인포블록은 2026-09-24 부터 본문 **앞**에 있다(§0). 남은 일은 그 첫 줄이 "무엇이고 누가 대상인지"를 한 문장으로 말하는지다 |
 
 블록 모양(정의·단계·비교표·FAQ·근거 샌드위치)은 `references/citation-patterns.md`.
 
 ### 5단계. 고치기
 
 - **우선순위** — 이미 AI 노출이 있는 글부터: 성적표 · Kahu Manu · 입학 · Keeping Ourselves Safe(§1 표).
+- **직전 변경부터 확인** — 같은 글에 4~8주 안의 변경(FAQ·제목·본문)이 있으면, 그 전후 값(GSC·프로브)이 기록됐는지 먼저 본다. 없으면 제안만 내고 반영은 그 대조 뒤로 미룬다.
+- **인포블록**은 yussi-factory 가 만든 편집 산출물이라 Yussi 본문이 아니다 — 수정 **제안**은 할 수 있다(반영은 승인 뒤).
 - **이미 있는 사실을 꺼내기만** 한다. 새 사실이 필요하면 `[NEED: 출처]` 로 두고 사용자에게 묻는다.
 - **한 번에 한 곳.** 무엇이 효과였는지 가려야 한다.
 - Yussi 본문 문장은 다시 쓰지 않는다. 제목·첫 문단 제안·FAQ·H2 제안까지만, 반영은 승인 뒤.
-- 철을 탄다: 성적표는 4~5월, 입학은 9~10월, 개학 준비는 11~12월에 손본다(`CONTENT-SEARCH-STANDARD` §3).
+- 철을 탄다: 성적표는 4~5월, 입학은 9~10월, 개학 준비는 11~12월에 손본다(`docs/CONTENT-SEARCH-STANDARD-2026-09-24.md` §3). 철이 없는 글(예: Keeping Ourselves Safe — 학교마다 일정이 다르다)은 직전 변경 대조가 끝난 뒤 아무 때나.
 
 ### 6단계. 재측정
 
@@ -147,7 +152,7 @@ MIT License, Copyright (c) 2025 Corey Haines — 전문은 같은 폴더의 UPST
 - 키워드 반복은 AI 가시성을 오히려 떨어뜨린다는 결과가 같은 연구에 있다.
 
 **존재(AI 가 보는 곳에 있기)**
-- 유튜브 @mhj_nz(구독 117 · 영상 296, 2026-09-20 실측). AI 는 영상을 보지 않고 **글자 층**(제목·자막·설명·챕터·고정 댓글)을 읽는다. 질문 모양 제목, 고친 자막, 요점이 적힌 설명이 인용 재료다(설명·쇼츠 문안 쓰기는 → `social`). 실명 P0 재발 주의 — 채널 키워드는 공개 HTML 의 `og:video:tag` 로 확인(메모리 `project_owned_channel_reach`).
+- 유튜브 @mhj_nz(구독 117 · 영상 296, 2026-09-20 실측 — 메모리 `project_owned_channel_reach`, `docs/EXPERIMENT-NOW.md`). AI 는 영상을 보지 않고 **글자 층**(제목·자막·설명·챕터·고정 댓글)을 읽는다. 질문 모양 제목, 고친 자막, 요점이 적힌 설명이 인용 재료다(설명·쇼츠 문안 쓰기는 → `social`). 실명 P0 재발 주의 — 채널 키워드는 공개 HTML 의 `og:video:tag` 로 확인(메모리 `project_owned_channel_reach`).
 - 위키백과·레딧·링크드인·리뷰 사이트는 MHJ 에 거의 해당이 없다. 억지로 만들지 않는다.
 - **가짜 언급 금지** — 지어낸 수상·후기, 우리가 운영하는 "독립" 리뷰, 커뮤니티 도배, 우리에 대한 위키 직접 편집.
 
@@ -185,7 +190,9 @@ MIT License, Copyright (c) 2025 Corey Haines — 전문은 같은 폴더의 UPST
 
 ## 8. 결과 보고 형식
 
-1. 한 줄 결론 (예: "고정 5문항 × 5엔진 × 3회, mhj 인용 2/75, n=75")
+프로브를 못 돌렸으면 1~3번은 "실측 없음 — 프로브 제안: {질문 묶음 이름}" 한 줄로 갈음하고 4번부터 쓴다.
+
+1. 한 줄 결론 (예: "고정 5문항 × 4엔진 × 3회, mhj 인용 2/60, n=60")
 2. 질문별 표 — 인용 비율·인용된 우리 URL·함께 인용된 출처 상위
 3. 빠진 질문의 원인 판정(기술 / 이해 / 신뢰)
 4. 글별 꺼내기 쉬움 점검표와 **제안**(반영 전)
