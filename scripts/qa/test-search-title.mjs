@@ -62,5 +62,24 @@ const constants = readFileSync(new URL('../../lib/constants.ts', import.meta.url
 const card = (constants.match(/BLOG_CARD_COLUMNS =\s*'([^']+)'/) || [])[1] || '';
 check('목록 쿼리(BLOG_CARD_COLUMNS)가 seo_title 을 싣는다', card.split(',').map((c) => c.trim()).includes('seo_title'), true);
 
+/* ── RSS·llms.txt·llms-full.txt 의 글 제목(2026-10-23) ── */
+const columnsOf = (name) => ((constants.match(new RegExp(`${name} =\\s*'([^']+)'`)) || [])[1] || '')
+  .split(',').map((c) => c.trim());
+for (const name of ['BLOG_FEED_COLUMNS', 'BLOG_LLMS_COLUMNS', 'BLOG_LLMS_INDEX_COLUMNS']) {
+  check(`${name} 가 seo_title 을 싣는다`, columnsOf(name).includes('seo_title'), true);
+}
+const feed = readFileSync(new URL('../../app/feed.xml/route.ts', import.meta.url), 'utf8');
+const llms = readFileSync(new URL('../../app/llms.txt/route.ts', import.meta.url), 'utf8');
+const llmsFull = readFileSync(new URL('../../app/llms-full.txt/route.ts', import.meta.url), 'utf8');
+check('RSS: <title> 이 searchTitle', /<title>\$\{escapeXml\(searchTitle\(blog\)\)\}<\/title>/.test(feed), true);
+check('RSS: 글 <title> 에 blog.title 을 쓰지 않는다', /<title>\$\{escapeXml\(blog\.title\)\}/.test(feed), false);
+check('llms.txt: 대표 글 링크가 searchTitle', /- \[\$\{searchTitle\(blog\)\}\]/.test(llms), true);
+check('llms.txt: blogs select 가 상수(BLOG_LLMS_INDEX_COLUMNS)', (llms.match(/\.select\(BLOG_LLMS_INDEX_COLUMNS\)/g) || []).length, 2);
+check('llms.txt: blogs 에 인라인 select 문자열이 없다', /\.select\('slug, title/.test(llms), false);
+check('llms-full: 목록 링크가 searchTitle', /- \[\$\{searchTitle\(blog\)\}\]/.test(llmsFull), true);
+check('llms-full: 전문 머리가 searchTitle', /`### \$\{searchTitle\(b\)\}`/.test(llmsFull), true);
+check('세 라우트 어디에도 블로그 제목으로 .title 을 직접 쓰지 않는다',
+  [feed, llms, llmsFull].some((s) => /\$\{(blog|b)\.title\}|escapeXml\((blog|b)\.title\)/.test(s)), false);
+
 if (failed) { console.log(`\n🔴 ${failed}건 실패`); process.exit(1); }
 console.log('\n✅ 전부 통과');
