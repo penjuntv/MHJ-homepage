@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { htmlToMarkdown } from '@/lib/content-html.mjs';
 import { BLOG_LLMS_COLUMNS } from '@/lib/constants';
+import { searchTitle } from '@/lib/search-title.mjs';
 
 /**
  * MHJ llms-full.txt — 2026-05-30
@@ -118,7 +119,7 @@ export async function GET() {
       const desc = escapeMd(blog.meta_description);
       const date = formatDate(blog.created_at) || blog.date || '';
       lines.push(
-        `- [${blog.title}](${SITE_URL}/blog/${blog.slug})${
+        `- [${searchTitle(blog)}](${SITE_URL}/blog/${blog.slug})${
           date ? ` (${date})` : ''
         }${desc ? `: ${desc}` : ''}`
       );
@@ -210,7 +211,7 @@ export async function GET() {
       const body = htmlToMarkdown(b.content, SITE_URL, { headingOffset: 2 });
       if (!body) continue;
       const block = [
-        `### ${b.title}`,
+        `### ${searchTitle(b)}`,
         '',
         `Source: ${SITE_URL}/blog/${b.slug} · ${b.category} · ${formatDate(b.updated_at ?? b.created_at)}`,
         '',

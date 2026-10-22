@@ -173,7 +173,7 @@ export async function generateMetadata(
   const baseUrl = SITE_URL;
   const ogImage = blog.og_image_url
     ? blog.og_image_url
-    : `${baseUrl}/api/og?title=${encodeURIComponent(blog.title)}&category=${encodeURIComponent(blog.category)}&date=${encodeURIComponent(blog.date)}`;
+    : `${baseUrl}/api/og?title=${encodeURIComponent(metaTitle)}&category=${encodeURIComponent(blog.category)}&date=${encodeURIComponent(blog.date)}`;
 
   return {
     // seo_title 은 편집자가 SERP 길이에 맞춰 쓴 완성 제목이다 — 루트의 '%s — MHJ' 템플릿을 덧붙이면

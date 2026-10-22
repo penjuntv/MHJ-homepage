@@ -72,13 +72,20 @@ export const BLOG_DETAIL_COLUMNS =
  */
 export const BLOG_SITEMAP_COLUMNS = 'slug, created_at, updated_at';
 
-/** RSS 피드 전용(app/feed.xml) — 전문(content)까지 싣는다 */
+/**
+ * RSS 피드 전용(app/feed.xml) — 전문(content)까지 싣는다.
+ * seo_title: 피드의 <title> 은 searchTitle() — 지면 제목의 [Edu]·[Y7] 표기가 구독자에게 새지 않게(2026-10-23).
+ */
 export const BLOG_FEED_COLUMNS =
-  'id, title, author, date, image_url, category, slug, meta_description, content, created_at, publish_at, updated_at';
+  'id, title, seo_title, author, date, image_url, category, slug, meta_description, content, created_at, publish_at, updated_at';
 
-/** AI 인덱스 전용(app/llms-full.txt) — 상위 글의 전문 + 목록용 메타 */
+/** AI 인덱스 전용(app/llms-full.txt) — 상위 글의 전문 + 목록용 메타. 제목은 searchTitle()(seo_title) */
 export const BLOG_LLMS_COLUMNS =
-  'slug, title, meta_description, category, date, created_at, updated_at, content, view_count, summary_ko';
+  'slug, title, seo_title, meta_description, category, date, created_at, updated_at, content, view_count, summary_ko';
+
+/** AI 인덱스 요약판(app/llms.txt) 의 대표 글 목록 — 인라인 select 였던 것을 anon grant 감사 대상으로 옮겼다 */
+export const BLOG_LLMS_INDEX_COLUMNS =
+  'slug, title, seo_title, meta_description, category, view_count';
 
 /** 관련 글 카드(getRelatedBlogs) 전용 — 카드 컬럼보다 가벼운 최소 컬럼 */
 export const BLOG_RELATED_COLUMNS =

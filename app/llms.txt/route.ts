@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { BLOG_LLMS_INDEX_COLUMNS } from '@/lib/constants';
+import { searchTitle } from '@/lib/search-title.mjs';
 
 /**
  * MHJ llms.txt — 2026-05-30
@@ -35,7 +37,7 @@ export async function GET() {
 
   const { data: featuredBlogs } = await supabase
     .from('blogs')
-    .select('slug, title, meta_description, category, view_count')
+    .select(BLOG_LLMS_INDEX_COLUMNS)
     .eq('published', true)
     .eq('featured', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
@@ -48,7 +50,7 @@ export async function GET() {
     const excludeSlugs = pillarBlogs.map((b) => b.slug);
     const { data: topBlogs } = await supabase
       .from('blogs')
-      .select('slug, title, meta_description, category, view_count')
+      .select(BLOG_LLMS_INDEX_COLUMNS)
       .eq('published', true)
       .or(`publish_at.is.null,publish_at.lte.${now}`)
       .not(
@@ -147,7 +149,7 @@ export async function GET() {
     for (const blog of pillarBlogs) {
       const desc = (blog.meta_description ?? '').trim();
       lines.push(
-        `- [${blog.title}](${SITE_URL}/blog/${blog.slug})${
+        `- [${searchTitle(blog)}](${SITE_URL}/blog/${blog.slug})${
           desc ? `: ${desc}` : ''
         }`
       );

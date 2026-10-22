@@ -3,6 +3,7 @@ import { optimizeContentImages, nextImageUrl } from '@/lib/image-url';
 import { supabase } from '@/lib/supabase';
 import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo';
 import { BLOG_FEED_COLUMNS } from '@/lib/constants';
+import { searchTitle } from '@/lib/search-title.mjs';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
@@ -97,7 +98,7 @@ export async function GET() {
 
       return `
     <item>
-      <title>${escapeXml(blog.title)}</title>
+      <title>${escapeXml(searchTitle(blog))}</title>
       <link>${BASE_URL}/blog/${escapeXml(blog.slug)}</link>
       <guid isPermaLink="true">${BASE_URL}/blog/${escapeXml(blog.slug)}</guid>
       <description>${escapeXml(description)}</description>
