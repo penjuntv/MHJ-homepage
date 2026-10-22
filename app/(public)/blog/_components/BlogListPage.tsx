@@ -22,6 +22,7 @@ import {
 } from '../_lib/blog-list-data';
 import { SITE_URL, listPageUrl } from '../_lib/blog-list-urls';
 import { CATEGORY_INTROS, resolveCategoryIntro } from '@/lib/category-intros';
+import { schemaHeadline } from '@/lib/search-title.mjs';
 
 const LIST_DESCRIPTION =
   "Yussi's personal archive: observations from the everyday, perspectives on education, and essays from a life in progress.";
@@ -122,7 +123,7 @@ export default async function BlogListPage({ categorySlug, page }: Props) {
     publisher: orgRef(),
     blogPost: blogCards.slice(0, 10).map((b) => ({
       '@type': 'BlogPosting',
-      headline: b.title,
+      headline: schemaHeadline(b),
       author: personRef(b.author),
       datePublished: schemaDate(b.date),
       url: `${SITE_URL}/blog/${b.slug}`,
