@@ -21,6 +21,10 @@
 - 전체 레이아웃 변경 → Plan Mode 필수
 - 단순 버그 수정, 텍스트 수정 → 바로 실행
 
+## 판단 스킬 흐름 (Claude 가 스스로 고름 — CLAUDE.md 규칙 14)
+큰 결정 → "위원회 돌릴까요?" 묻고 `llm-council`(무엇을 할지) → 모호하면 `grilling`(범위 합의) → Plan Mode → 구현 → `/code-review` → `/verify`.
+작업 중 원인 안 보이는 버그 → 묻지 않고 `diagnosing-bugs`.
+
 ## MCP 사용 규칙
 - Supabase MCP: DDL은 apply_migration, DML/조회는 execute_sql
 - Vercel MCP: runtime_logs는 since: 24h만 작동
