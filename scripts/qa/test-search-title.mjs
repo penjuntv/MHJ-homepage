@@ -92,6 +92,27 @@ check('llms.txt: blogs select 가 상수(BLOG_LLMS_INDEX_COLUMNS)', (llms.match(
 check('llms.txt: blogs 에 인라인 select 문자열이 없다', /\.select\('slug, title/.test(llms), false);
 check('llms-full: 목록 링크가 searchTitle', /- \[\$\{searchTitle\(blog\)\}\]/.test(llmsFull), true);
 check('llms-full: 전문 머리가 searchTitle', /`### \$\{searchTitle\(b\)\}`/.test(llmsFull), true);
+/* ── 뉴스레터 글 카드(2026-10-24) — 구독자 메일의 제목·이미지 alt 에 [Y7] 이 나가지 않게 ── */
+for (const path of ['app/api/send-newsletter/route.ts', 'app/api/newsletter-preview/route.ts', 'app/api/send-test-newsletter/route.ts']) {
+  const src = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+  check(`${path}: 메인 글 카드 제목이 searchTitle`, /\{ \.\.\.mb, title: searchTitle\(mb\),/.test(src), true);
+  check(`${path}: 아카이브 글 카드 제목이 searchTitle`, /\{ \.\.\.ab, title: searchTitle\(ab\),/.test(src), true);
+  check(`${path}: 글 조회가 seo_title 을 싣는다(2곳)`, (src.match(/select\('title,seo_title,/g) || []).length, 2);
+}
+const compose = readFileSync(new URL('../../app/mhj-desk/newsletter/new/page.tsx', import.meta.url), 'utf8');
+check('작성 화면: 메인 글 카드 제목이 searchTitle', /title: searchTitle\(mainBlog\)/.test(compose), true);
+check('작성 화면: 아카이브 글 카드 제목이 searchTitle', /title: searchTitle\(archiveBlog\)/.test(compose), true);
+check('작성 화면: 글 목록 조회가 seo_title 을 싣는다', /\.select\('id, title, seo_title,/.test(compose), true);
+const blogForm = readFileSync(new URL('../../app/mhj-desk/blogs/_components/BlogForm.tsx', import.meta.url), 'utf8');
+check('글 편집 "뉴스레터로 발송": 메일 제목·글 카드 제목이 searchTitle',
+  (blogForm.match(/(subject|title): searchTitle\(form\)/g) || []).length, 2);
+{
+  // 저장(행 데이터)·AI 생성 요청은 지면 제목이 맞다 — /api/send-newsletter 로 보내는 블록만 본다.
+  const sendBlock = (blogForm.match(/fetch\('\/api\/send-newsletter'[\s\S]*?\}\),\s*\}\);/) || [])[0] || '';
+  check('글 편집 "뉴스레터로 발송": 발송 블록을 찾았다', sendBlock.length > 0, true);
+  check('글 편집 "뉴스레터로 발송": 지면 제목을 그대로 보내지 않는다', /form\.title\b/.test(sendBlock), false);
+}
+
 check('세 라우트 어디에도 블로그 제목으로 .title 을 직접 쓰지 않는다',
   [feed, llms, llmsFull].some((s) => /\$\{(blog|b)\.title\}|escapeXml\((blog|b)\.title\)/.test(s)), false);
 

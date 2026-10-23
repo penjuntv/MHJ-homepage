@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
 import { renderMailrangiNotes } from '@/lib/newsletter-template';
 import type { MailrangiNotesData } from '@/lib/newsletter-template';
+import { searchTitle } from '@/lib/search-title.mjs';
 import { Loader2, Eye, X, Upload, ArrowLeft, Send, FlaskConical } from 'lucide-react';
 import ImageCropModal from '@/components/admin/ImageCropModal';
 
@@ -14,6 +15,7 @@ import ImageCropModal from '@/components/admin/ImageCropModal';
 interface BlogMini {
   id: number;
   title: string;
+  seo_title?: string | null;
   slug: string;
   category: string;
   date: string;
@@ -296,7 +298,7 @@ export default function NewsletterComposePage() {
   useEffect(() => {
     supabase
       .from('blogs')
-      .select('id, title, slug, category, date, image_url, meta_description')
+      .select('id, title, seo_title, slug, category, date, image_url, meta_description')
       .eq('published', true)
       .order('created_at', { ascending: false })
       .then(({ data }) => setBlogs((data as BlogMini[]) ?? []));
@@ -475,7 +477,7 @@ export default function NewsletterComposePage() {
       noteTitle,
       noteBody,
       blog: mainEnabled && mainBlog
-        ? { title: mainBlog.title, slug: mainBlog.slug, category: mainBlog.category, date: mainBlog.date, image_url: mainBlog.image_url, excerpt: mainExcerpt }
+        ? { title: searchTitle(mainBlog), slug: mainBlog.slug, category: mainBlog.category, date: mainBlog.date, image_url: mainBlog.image_url, excerpt: mainExcerpt }
         : undefined,
       lunch: lunchEnabled ? { image: lunchImage, title: lunchTitle, body: lunchBody } : undefined,
       campus: campusEnabled ? { title: campusTitle, body: campusBody } : undefined,
@@ -485,7 +487,7 @@ export default function NewsletterComposePage() {
         ? { label: sponsorLabel || undefined, name: sponsorName, url: sponsorUrl || undefined, image: sponsorImage || undefined, body: sponsorBody }
         : undefined,
       archive: archiveEnabled && archiveBlog
-        ? { title: archiveBlog.title, slug: archiveBlog.slug, category: archiveBlog.category, image_url: archiveBlog.image_url, excerpt: archiveExcerpt }
+        ? { title: searchTitle(archiveBlog), slug: archiveBlog.slug, category: archiveBlog.category, image_url: archiveBlog.image_url, excerpt: archiveExcerpt }
         : undefined,
       unsubscribeUrl: 'https://www.mhj.nz/unsubscribe',
     };
@@ -706,7 +708,11 @@ export default function NewsletterComposePage() {
                 <img src={mainBlog.image_url} alt={mainBlog.title} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
               )}
               <div>
-                <p style={{ margin: '0 0 2px', fontWeight: 700, color: '#1a1a1a', fontSize: 13 }}>{mainBlog.title}</p>
+                {/* 메일에 실리는 제목(검색 제목)을 먼저 — 지면 제목이 다르면 작게 함께 보여 준다 */}
+                <p style={{ margin: '0 0 2px', fontWeight: 700, color: '#1a1a1a', fontSize: 13 }}>{searchTitle(mainBlog)}</p>
+                {searchTitle(mainBlog) !== mainBlog.title.trim() && (
+                  <p style={{ margin: '0 0 2px', color: '#94A3B8', fontSize: 11 }}>지면: {mainBlog.title}</p>
+                )}
                 <p style={{ margin: 0, color: '#818cf8', fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>{mainBlog.category} · {mainBlog.date}</p>
               </div>
             </div>
@@ -961,7 +967,10 @@ export default function NewsletterComposePage() {
                 <img src={archiveBlog.image_url} alt={archiveBlog.title} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
               )}
               <div>
-                <p style={{ margin: '0 0 2px', fontWeight: 700, color: '#1a1a1a', fontSize: 13 }}>{archiveBlog.title}</p>
+                <p style={{ margin: '0 0 2px', fontWeight: 700, color: '#1a1a1a', fontSize: 13 }}>{searchTitle(archiveBlog)}</p>
+                {searchTitle(archiveBlog) !== archiveBlog.title.trim() && (
+                  <p style={{ margin: '0 0 2px', color: '#94A3B8', fontSize: 11 }}>지면: {archiveBlog.title}</p>
+                )}
                 <p style={{ margin: 0, color: '#818cf8', fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>{archiveBlog.category} · {archiveBlog.date}</p>
               </div>
             </div>
