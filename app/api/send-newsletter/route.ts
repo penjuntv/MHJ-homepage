@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase';
+import { searchTitle } from '@/lib/search-title.mjs';
 import {
   generateNewsletterHTML,
   renderMailrangiNotes,
@@ -82,6 +83,7 @@ interface NewsletterRow {
 
 interface BlogData {
   title: string;
+  seo_title: string | null;
   slug: string;
   category: string;
   date: string;
@@ -95,10 +97,10 @@ async function buildFromRow(
 ): Promise<MailrangiNotesData> {
   const [mainRes, archiveRes] = await Promise.all([
     nl.main_blog_id
-      ? db.from('blogs').select('title,slug,category,date,image_url').eq('id', nl.main_blog_id).single()
+      ? db.from('blogs').select('title,seo_title,slug,category,date,image_url').eq('id', nl.main_blog_id).single()
       : Promise.resolve({ data: null }),
     nl.archive_blog_id
-      ? db.from('blogs').select('title,slug,category,date,image_url').eq('id', nl.archive_blog_id).single()
+      ? db.from('blogs').select('title,seo_title,slug,category,date,image_url').eq('id', nl.archive_blog_id).single()
       : Promise.resolve({ data: null }),
   ]);
   const mb = mainRes.data as BlogData | null;
@@ -110,7 +112,7 @@ async function buildFromRow(
     preheader:   nl.preheader    ?? '',
     noteTitle:   nl.note_title   ?? '',
     noteBody:    nl.note_body    ?? '',
-    blog: mb ? { ...mb, excerpt: nl.main_excerpt ?? '' } : undefined,
+    blog: mb ? { ...mb, title: searchTitle(mb), excerpt: nl.main_excerpt ?? '' } : undefined,
     lunch: nl.lunch_title
       ? { image: nl.lunch_image ?? '', title: nl.lunch_title, body: nl.lunch_body ?? '' }
       : undefined,
@@ -121,7 +123,7 @@ async function buildFromRow(
       ? { expression: nl.jin_expression, body: nl.jin_body ?? '', storypressUrl: nl.jin_storypress_url ?? '' }
       : undefined,
     locals:  nl.locals_json ?? undefined,
-    archive: ab ? { ...ab, excerpt: nl.archive_excerpt ?? '' } : undefined,
+    archive: ab ? { ...ab, title: searchTitle(ab), excerpt: nl.archive_excerpt ?? '' } : undefined,
     sponsor: nl.has_sponsor && nl.sponsor_name
       ? { label: nl.sponsor_label ?? undefined, name: nl.sponsor_name, url: nl.sponsor_url ?? undefined, image: nl.sponsor_image ?? undefined, body: nl.sponsor_body ?? '' }
       : undefined,

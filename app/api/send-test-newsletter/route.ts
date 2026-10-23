@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
+import { searchTitle } from '@/lib/search-title.mjs';
 import { renderMailrangiNotes } from '@/lib/newsletter-template';
 import type { MailrangiNotesData } from '@/lib/newsletter-template';
 
@@ -34,6 +35,7 @@ interface NewsletterFormData {
 
 interface BlogData {
   title: string;
+  seo_title: string | null;
   slug: string;
   category: string;
   date: string;
@@ -46,10 +48,10 @@ async function buildMailrangiData(
 ): Promise<MailrangiNotesData> {
   const [mainRes, archiveRes] = await Promise.all([
     form.main_blog_id
-      ? db.from('blogs').select('title,slug,category,date,image_url').eq('id', form.main_blog_id).single()
+      ? db.from('blogs').select('title,seo_title,slug,category,date,image_url').eq('id', form.main_blog_id).single()
       : Promise.resolve({ data: null }),
     form.archive_blog_id
-      ? db.from('blogs').select('title,slug,category,date,image_url').eq('id', form.archive_blog_id).single()
+      ? db.from('blogs').select('title,seo_title,slug,category,date,image_url').eq('id', form.archive_blog_id).single()
       : Promise.resolve({ data: null }),
   ]);
   const mb = mainRes.data as BlogData | null;
@@ -61,7 +63,7 @@ async function buildMailrangiData(
     preheader:   form.preheader    ?? '',
     noteTitle:   form.note_title   ?? '',
     noteBody:    form.note_body    ?? '',
-    blog: mb ? { ...mb, excerpt: form.main_excerpt ?? '' } : undefined,
+    blog: mb ? { ...mb, title: searchTitle(mb), excerpt: form.main_excerpt ?? '' } : undefined,
     lunch: form.lunch_title
       ? { image: form.lunch_image ?? '', title: form.lunch_title, body: form.lunch_body ?? '' }
       : undefined,
@@ -72,7 +74,7 @@ async function buildMailrangiData(
       ? { expression: form.jin_expression, body: form.jin_body ?? '', storypressUrl: form.jin_storypress_url ?? '' }
       : undefined,
     locals:  form.locals_json ?? undefined,
-    archive: ab ? { ...ab, excerpt: form.archive_excerpt ?? '' } : undefined,
+    archive: ab ? { ...ab, title: searchTitle(ab), excerpt: form.archive_excerpt ?? '' } : undefined,
     sponsor: form.has_sponsor && form.sponsor_name
       ? { label: form.sponsor_label ?? undefined, name: form.sponsor_name, url: form.sponsor_url ?? undefined, image: form.sponsor_image ?? undefined, body: form.sponsor_body ?? '' }
       : undefined,

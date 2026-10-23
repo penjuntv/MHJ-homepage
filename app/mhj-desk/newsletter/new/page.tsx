@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
 import { renderMailrangiNotes } from '@/lib/newsletter-template';
 import type { MailrangiNotesData } from '@/lib/newsletter-template';
+import { searchTitle } from '@/lib/search-title.mjs';
 import { Loader2, Eye, X, Upload, ArrowLeft, Send, FlaskConical } from 'lucide-react';
 import ImageCropModal from '@/components/admin/ImageCropModal';
 
@@ -14,6 +15,7 @@ import ImageCropModal from '@/components/admin/ImageCropModal';
 interface BlogMini {
   id: number;
   title: string;
+  seo_title?: string | null;
   slug: string;
   category: string;
   date: string;
@@ -296,7 +298,7 @@ export default function NewsletterComposePage() {
   useEffect(() => {
     supabase
       .from('blogs')
-      .select('id, title, slug, category, date, image_url, meta_description')
+      .select('id, title, seo_title, slug, category, date, image_url, meta_description')
       .eq('published', true)
       .order('created_at', { ascending: false })
       .then(({ data }) => setBlogs((data as BlogMini[]) ?? []));
@@ -475,7 +477,7 @@ export default function NewsletterComposePage() {
       noteTitle,
       noteBody,
       blog: mainEnabled && mainBlog
-        ? { title: mainBlog.title, slug: mainBlog.slug, category: mainBlog.category, date: mainBlog.date, image_url: mainBlog.image_url, excerpt: mainExcerpt }
+        ? { title: searchTitle(mainBlog), slug: mainBlog.slug, category: mainBlog.category, date: mainBlog.date, image_url: mainBlog.image_url, excerpt: mainExcerpt }
         : undefined,
       lunch: lunchEnabled ? { image: lunchImage, title: lunchTitle, body: lunchBody } : undefined,
       campus: campusEnabled ? { title: campusTitle, body: campusBody } : undefined,
@@ -485,7 +487,7 @@ export default function NewsletterComposePage() {
         ? { label: sponsorLabel || undefined, name: sponsorName, url: sponsorUrl || undefined, image: sponsorImage || undefined, body: sponsorBody }
         : undefined,
       archive: archiveEnabled && archiveBlog
-        ? { title: archiveBlog.title, slug: archiveBlog.slug, category: archiveBlog.category, image_url: archiveBlog.image_url, excerpt: archiveExcerpt }
+        ? { title: searchTitle(archiveBlog), slug: archiveBlog.slug, category: archiveBlog.category, image_url: archiveBlog.image_url, excerpt: archiveExcerpt }
         : undefined,
       unsubscribeUrl: 'https://www.mhj.nz/unsubscribe',
     };

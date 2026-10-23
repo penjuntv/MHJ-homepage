@@ -8,6 +8,7 @@ import type { Blog, BlogFaqItem } from '@/lib/types';
 import { preflightChecks, blockingFailures } from '@/lib/blog-preflight.mjs';
 import { flagsOf, HARD_FLAGS, FLAG_META } from '@/lib/seo-defects.mjs';
 import { stripHtml, sanitizeFaq } from '@/lib/content-html.mjs';
+import { searchTitle } from '@/lib/search-title.mjs';
 import RelatedSuggestions from './RelatedSuggestions';
 import { BLOG_CATEGORIES, CATEGORY_TO_SLUG } from '@/lib/constants';
 import { Upload, Loader2, Sparkles, Eye, Plus, X } from 'lucide-react';
@@ -497,10 +498,10 @@ export default function BlogForm({ initial }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subject: form.title,
+          subject: searchTitle(form),
           content: form.content,
           blogPost: {
-            title: form.title,
+            title: searchTitle(form),
             image_url: form.image_url,
             slug: form.slug,
             category: form.category,
