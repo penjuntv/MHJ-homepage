@@ -83,7 +83,7 @@
 | cover_caption | text | YES | — | 표지 캡션 |
 | letter_to | text | YES | — | 'M' / 'H' / 'J' — 편지 형식 글의 수신자 라벨 |
 | updated_at | timestamptz | NO | now() | 편집 컬럼 실제 변경 시 트리거 갱신 — dateModified/lastmod 원천 (W4-A 2026-09-08) |
-| seo_title | text | YES | — | `<title>`/og:title 전용 제목, 없으면 title (D2) |
+| seo_title | text | YES | — | 검색·공유 표면 전용 제목, 없으면 title (D2) — `<title>`·og:title·JSON-LD headline·og:image:alt·`/api/og` 그림·RSS·llms. 고르는 곳은 `lib/search-title.mjs` 한 곳(PR #154·#155, 2026-10-22) |
 | summary_ko | text | YES | — | 한국어 요약 블록 `<section lang="ko">` (D1) |
 | faq_json | jsonb | YES | — | `[{"q","a"}]` · CHECK `blogs_faq_json_shape`(배열 + 원소마다 q·a 문자열) · FAQPage JSON-LD |
 | related_slugs | text[] | YES | — | 편집자가 고른 관련 글 slug (존재 검증은 W4-C preflight) |
