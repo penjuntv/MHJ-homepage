@@ -9,7 +9,7 @@
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { searchTitle, schemaHeadline, ogImageAlt, HEADLINE_MAX } from '../../lib/search-title.mjs';
+import { searchTitle, schemaHeadline, ogImageAlt, HEADLINE_MAX, stripInternalLabel } from '../../lib/search-title.mjs';
 
 let failed = 0;
 const check = (name, got, want) => {
@@ -49,6 +49,17 @@ check('headline 에 [Edu] 가 남지 않는다', /^\[/.test(schemaHeadline(tagge
 check('og_image_alt 가 없으면 검색 제목', ogImageAlt(tagged), tagged.seo_title);
 check('og_image_alt 가 있으면 그것이 먼저', ogImageAlt({ ...tagged, og_image_alt: 'Two children reading at a desk' }), 'Two children reading at a desk');
 check('og_image_alt 가 공백뿐이면 검색 제목', ogImageAlt({ ...tagged, og_image_alt: ' ' }), tagged.seo_title);
+
+/* ── stripInternalLabel (본문 링크 문구용) ── */
+check('실측 표기 5종을 뗀다',
+  ['[Y1] The Homework Book', '[Y7] Understanding Year 7', '[Edu] Keeping Ourselves Safe', '[NZ] NCEA Is Changing', '[Y6] School Production']
+    .map(stripInternalLabel),
+  ['The Homework Book', 'Understanding Year 7', 'Keeping Ourselves Safe', 'NCEA Is Changing', 'School Production']);
+check('표기 없는 제목·중간 대괄호는 그대로',
+  [stripInternalLabel('Play date Friday'), stripInternalLabel('Notes [draft] here')], ['Play date Friday', 'Notes [draft] here']);
+check('빈 입력은 빈 문자열', [stripInternalLabel(''), stripInternalLabel(null)], ['', '']);
+check('각주 [1]·[PDF] 같은 정상 문구는 건드리지 않는다',
+  [stripInternalLabel('[1]'), stripInternalLabel('[PDF] Ministry guide')], ['[1]', '[PDF] Ministry guide']);
 
 /* ── 호출부가 지면 제목으로 되돌아가지 않았는지 ── */
 const detail = readFileSync(new URL('../../app/(public)/blog/[slug]/page.tsx', import.meta.url), 'utf8');
