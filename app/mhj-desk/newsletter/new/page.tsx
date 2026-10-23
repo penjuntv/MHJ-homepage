@@ -708,7 +708,11 @@ export default function NewsletterComposePage() {
                 <img src={mainBlog.image_url} alt={mainBlog.title} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
               )}
               <div>
-                <p style={{ margin: '0 0 2px', fontWeight: 700, color: '#1a1a1a', fontSize: 13 }}>{mainBlog.title}</p>
+                {/* 메일에 실리는 제목(검색 제목)을 먼저 — 지면 제목이 다르면 작게 함께 보여 준다 */}
+                <p style={{ margin: '0 0 2px', fontWeight: 700, color: '#1a1a1a', fontSize: 13 }}>{searchTitle(mainBlog)}</p>
+                {searchTitle(mainBlog) !== mainBlog.title.trim() && (
+                  <p style={{ margin: '0 0 2px', color: '#94A3B8', fontSize: 11 }}>지면: {mainBlog.title}</p>
+                )}
                 <p style={{ margin: 0, color: '#818cf8', fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>{mainBlog.category} · {mainBlog.date}</p>
               </div>
             </div>
@@ -963,7 +967,10 @@ export default function NewsletterComposePage() {
                 <img src={archiveBlog.image_url} alt={archiveBlog.title} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
               )}
               <div>
-                <p style={{ margin: '0 0 2px', fontWeight: 700, color: '#1a1a1a', fontSize: 13 }}>{archiveBlog.title}</p>
+                <p style={{ margin: '0 0 2px', fontWeight: 700, color: '#1a1a1a', fontSize: 13 }}>{searchTitle(archiveBlog)}</p>
+                {searchTitle(archiveBlog) !== archiveBlog.title.trim() && (
+                  <p style={{ margin: '0 0 2px', color: '#94A3B8', fontSize: 11 }}>지면: {archiveBlog.title}</p>
+                )}
                 <p style={{ margin: 0, color: '#818cf8', fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>{archiveBlog.category} · {archiveBlog.date}</p>
               </div>
             </div>
