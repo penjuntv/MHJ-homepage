@@ -10,9 +10,9 @@
 import assert from 'node:assert/strict';
 import {
   preflightChecks, blockingFailures, internalLinkCount,
-  firstParagraphWords, weakAltCount, hasKeyTakeaways,
+  firstParagraphWords, weakAltCount, hasKeyTakeaways, labeledLinkCount,
 } from '../../lib/blog-preflight.mjs';
-import { suggestLinks, scoreCandidate, normalizeTag, keywordsOf, viewCountP75 } from '../../lib/link-suggest.mjs';
+import { suggestLinks, scoreCandidate, normalizeTag, keywordsOf, viewCountP75, bodyLinkHtml } from '../../lib/link-suggest.mjs';
 import { containsForbiddenName, FORBIDDEN_SAMPLES } from '../../lib/name-guard.mjs';
 
 let failed = 0;
@@ -78,6 +78,32 @@ check('답 먼저 문단 40~60단어',
 check('내부 링크는 인포블록도 합산',
   idOf({ ...full, info_block_html: '<a href="/blog/a">a</a><a href="/blog/b">b</a>' }, 'internal_links').ok, true);
 check('관련 글 2개 이상', idOf({ ...full, related_slugs: ['a', 'b'] }, 'related').ok, true);
+
+/* ── 링크 문구의 내부 표기(2026-10-23 16편 17곳 정리 뒤 재발 방지) ── */
+check('라이브에 있던 모양 그대로 잡는다 — <strong>·<em> 안의 [Y1]·[NZ]',
+  labeledLinkCount('<p>Read More: <a target="_self" href="https://www.mhj.nz/blog/x"><strong>[Y1] Maths, Term 1 &amp; 2</strong></a> · '
+    + '<a href="https://www.mhj.nz/blog/y"><em>[NZ] NCEA Is Changing</em></a></p>'), 2);
+check('표기 없는 링크·본문 속 대괄호는 세지 않는다',
+  labeledLinkCount('<p>[Y7] 은 지면 표기다. <a href="/blog/x">Understanding Year 7</a> <a href="/blog/y">see [note]</a></p>'), 0);
+check('각주 [1]·[PDF] 링크는 오탐하지 않는다',
+  labeledLinkCount('<a href="#src1">[1]</a> <a href="https://www.education.govt.nz/x.pdf">[PDF] Ministry guide</a>'), 0);
+check('인포블록 링크도 합산',
+  idOf({ ...full, info_block_html: '<a href="/blog/a">[Edu] How To Read</a>' }, 'link_labels').hint,
+  '[Y7] 같은 표기로 시작하는 링크 1개 — 표기를 빼고 쓴다');
+check('표기 없으면 통과 · 경고만(저장 안 막음)',
+  [idOf(full, 'link_labels').ok, idOf(full, 'link_labels').required], [true, false]);
+
+/* ── 관리자 "링크 복사" 가 만드는 한 줄 ── */
+check('링크 문구는 내부 표기를 뗀 지면 제목 · 절대 주소',
+  bodyLinkHtml({ slug: 'year-7-intermediate-school-nz-curriculum', title: '[Y7] Understanding Year 7' }),
+  '<a href="https://www.mhj.nz/blog/year-7-intermediate-school-nz-curriculum" target="_self">Understanding Year 7</a>');
+check('제목의 < > & 는 이스케이프 — <Time After Time> 이 태그로 읽히지 않는다',
+  bodyLinkHtml({ slug: 'y6', title: '[Y6] School Production <Time After Time> & more' }, 'https://www.mhj.nz/'),
+  '<a href="https://www.mhj.nz/blog/y6" target="_self">School Production &lt;Time After Time&gt; &amp; more</a>');
+check('표기 없는 제목은 그대로', bodyLinkHtml({ slug: 'p', title: 'Play date Friday' }),
+  '<a href="https://www.mhj.nz/blog/p" target="_self">Play date Friday</a>');
+check('복사한 링크는 표기 경고에 걸리지 않는다',
+  labeledLinkCount(bodyLinkHtml({ slug: 'a', title: '[Edu] Keeping Ourselves Safe' })), 0);
 check('요약·takeaways 미충족이 기본',
   ['summary_ko', 'takeaways', 'related'].map((id) => idOf(full, id).ok), [false, false, false]);
 check('권장 미충족은 차단하지 않는다', blockingFailures(full), []);

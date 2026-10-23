@@ -15,7 +15,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase-browser';
 import { toast } from 'sonner';
 import { Link2, Plus, X, ArrowUp } from 'lucide-react';
-import { suggestLinks } from '@/lib/link-suggest.mjs';
+import { suggestLinks, bodyLinkHtml } from '@/lib/link-suggest.mjs';
+import { SITE_URL } from '@/lib/seo';
 
 interface Candidate {
   slug: string;
@@ -90,10 +91,22 @@ export default function RelatedSuggestions({ current, selected, onChange }: Prop
     onChange(next);
   };
   const copyLink = async (c: { slug: string; title: string }) => {
-    const html = `<a href="/blog/${c.slug}">${c.title}</a>`;
+    const html = bodyLinkHtml(c, SITE_URL);
     try {
-      await navigator.clipboard.writeText(html);
-      toast.success('본문에 붙여넣을 링크를 복사했습니다.');
+      // text/html 이 있어야 본문 에디터(TipTap)가 링크로 붙인다 — text/plain 뿐이면 `<a href…>` 글자가 그대로 박힌다.
+      // text/plain 은 손으로 쓰는 인포블록 HTML 칸용으로 같은 태그를 둔다.
+      let wroteHtml = false;
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard.write) {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([html], { type: 'text/plain' }),
+          })]);
+          wroteHtml = true;
+        } catch { /* text/html 쓰기를 막는 환경 — 아래 글자 복사로 */ }
+      }
+      if (!wroteHtml) await navigator.clipboard.writeText(html);
+      toast.success('링크를 복사했습니다 — 본문에 붙이면 링크로 들어갑니다.');
     } catch {
       toast.error('클립보드 복사 실패 — 링크: /blog/' + c.slug);
     }
