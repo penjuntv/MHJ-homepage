@@ -105,7 +105,7 @@ export default function AdminDashboard() {
     Promise.all([
       supabase.from('blogs').select('title, created_at').order('created_at', { ascending: false }).limit(3),
       supabase.from('subscribers').select('email, subscribed_at').order('subscribed_at', { ascending: false }).limit(3),
-      supabase.from('comments').select('author_name, created_at').order('created_at', { ascending: false }).limit(3),
+      supabase.from('comments').select('name, created_at').order('created_at', { ascending: false }).limit(3),
     ]).then(([{ data: blogs }, { data: subs }, { data: comments }]) => {
       const activities: RecentActivity[] = [
         ...(blogs ?? []).map((b: { title: string; created_at: string }) => ({
@@ -124,9 +124,9 @@ export default function AdminDashboard() {
           icon: UserPlus,
           color: '#10b981',
         })),
-        ...(comments ?? []).map((c: { author_name: string; created_at: string }) => ({
+        ...(comments ?? []).map((c: { name: string | null; created_at: string }) => ({
           type: 'comment' as const,
-          label: c.author_name || '익명',
+          label: c.name || '익명',
           sub: '댓글 작성',
           time: c.created_at,
           icon: MessageCircle,
