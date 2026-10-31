@@ -1,11 +1,13 @@
+import { unsubscribePageUrl } from './unsubscribe';
+
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function wrap(subject: string, preheader: string, body: string, email: string): string {
-  const unsubscribeUrl = `${siteUrl}/unsubscribe?email=${encodeURIComponent(email)}`;
+function wrap(subject: string, preheader: string, body: string, unsubscribeToken: string | null): string {
+  const unsubscribeUrl = unsubscribePageUrl(unsubscribeToken);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,7 +70,7 @@ export interface PopularPost { title: string; slug: string }
 
 export function generateWelcome1(
   name: string | null,
-  email: string,
+  unsubscribeToken: string | null,
   popularPosts: PopularPost[],
 ): { subject: string; html: string } {
   const greeting = name ? `Hi ${escapeHtml(name)}!` : 'Hi there!';
@@ -102,14 +104,14 @@ export function generateWelcome1(
 
   return {
     subject: 'Welcome to My Mairangi Journal',
-    html: wrap('Welcome to My Mairangi Journal', 'Welcome! Here are some stories our readers love.', body, email),
+    html: wrap('Welcome to My Mairangi Journal', 'Welcome! Here are some stories our readers love.', body, unsubscribeToken),
   };
 }
 
 /* ── 2통: Meet Yussi ── */
 export function generateWelcome2(
   name: string | null,
-  email: string,
+  unsubscribeToken: string | null,
 ): { subject: string; html: string } {
   const greeting = name ? `Hi ${escapeHtml(name)},` : 'Hi,';
 
@@ -140,14 +142,14 @@ export function generateWelcome2(
 
   return {
     subject: 'A little about me — and what\'s coming this week',
-    html: wrap('A little about me', 'Meet Yussi — the person behind My Mairangi Journal.', body, email),
+    html: wrap('A little about me', 'Meet Yussi — the person behind My Mairangi Journal.', body, unsubscribeToken),
   };
 }
 
 /* ── 3통: Every Friday in Your Inbox ── */
 export function generateWelcome3(
   name: string | null,
-  email: string,
+  unsubscribeToken: string | null,
 ): { subject: string; html: string } {
   const greeting = name ? `Hi ${escapeHtml(name)},` : 'Hi,';
 
@@ -200,6 +202,30 @@ export function generateWelcome3(
 
   return {
     subject: 'Every Friday, Mairangi Notes lands in your inbox',
-    html: wrap('Every Friday, Mairangi Notes', 'Here\'s what to expect from our weekly newsletter.', body, email),
+    html: wrap('Every Friday, Mairangi Notes', 'Here\'s what to expect from our weekly newsletter.', body, unsubscribeToken),
+  };
+}
+
+/* ── 옛 구독취소 링크(?email=)로 온 사람에게 보내는 확인 메일 — 받은 본인만 해지할 수 있게 ── */
+export function generateUnsubscribeConfirm(
+  unsubscribeToken: string,
+): { subject: string; html: string } {
+  const confirmUrl = unsubscribePageUrl(unsubscribeToken);
+  const body = `
+  <tr>
+    <td style="padding:40px 40px 36px;">
+      <h1 class="text-primary" style="margin:0 0 24px;font-family:'Playfair Display',Georgia,serif;font-size:28px;font-weight:900;letter-spacing:-0.5px;color:#1a1a1a;line-height:1.2;">Confirm your unsubscribe</h1>
+      <p class="text-primary" style="margin:0 0 28px;font-size:15px;line-height:1.7;color:#1a1a1a;">
+        Someone (hopefully you) asked to stop Mairangi Notes for this address. Click the button below to finish. If it wasn&rsquo;t you, just ignore this email &mdash; nothing will change.
+      </p>
+      <p style="margin:0;text-align:center;">
+        <a href="${confirmUrl}" style="display:inline-block;padding:12px 28px;background:#1a1a1a;color:#ffffff;font-family:Arial,sans-serif;font-size:13px;font-weight:700;text-decoration:none;border-radius:6px;letter-spacing:0.5px;">Unsubscribe</a>
+      </p>
+    </td>
+  </tr>`;
+
+  return {
+    subject: 'Confirm your unsubscribe from Mairangi Notes',
+    html: wrap('Confirm your unsubscribe', 'One click to stop Mairangi Notes.', body, unsubscribeToken),
   };
 }

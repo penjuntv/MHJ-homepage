@@ -7,6 +7,7 @@ import {
   renderMailrangiNotes,
 } from '@/lib/newsletter-template';
 import type { BlogPostInfo, MailrangiNotesData } from '@/lib/newsletter-template';
+import { unsubscribePageUrl, unsubscribeHeaders } from '@/lib/unsubscribe';
 
 async function loadNewsletterCtaSettings(
   db: ReturnType<typeof createAdminClient>,
@@ -189,15 +190,21 @@ export async function POST(req: NextRequest) {
   }
 
   /* ── 수신자 결정 ── */
-  let recipients: Array<{ email: string; name?: string }>;
+  let recipients: Array<{ email: string; name?: string | null; unsubscribe_token?: string | null }>;
   let skippedCount = 0; // 배달 불가로 걸러낸 주소 수
 
   if (test_email) {
-    recipients = [{ email: test_email }];
+    // 테스트 주소가 구독자면 그 토큰으로 — 구독취소 링크·원클릭 헤더까지 실물 그대로 확인된다
+    const { data: testSub } = await db
+      .from('subscribers')
+      .select('unsubscribe_token')
+      .eq('email', String(test_email).trim().toLowerCase())
+      .maybeSingle();
+    recipients = [{ email: test_email, unsubscribe_token: testSub?.unsubscribe_token ?? null }];
   } else {
     const { data: subscribers, error: subErr } = await db
       .from('subscribers')
-      .select('email, name')
+      .select('email, name, unsubscribe_token')
       .eq('active', true);
 
     if (subErr) return NextResponse.json({ error: subErr.message }, { status: 500 });
@@ -236,7 +243,7 @@ export async function POST(req: NextRequest) {
     const rendered = baseMailData
       ? renderMailrangiNotes({
           ...baseMailData,
-          unsubscribeUrl: `https://www.mhj.nz/unsubscribe?email=${encodeURIComponent(r.email)}`,
+          unsubscribeUrl: unsubscribePageUrl(r.unsubscribe_token),
         }, ctaOpts)
       : htmlBody;
     // UTM 자동 추가 (paths ① and ②만; 레거시 ③은 issueNumber 불명이므로 스킵)
@@ -249,6 +256,7 @@ export async function POST(req: NextRequest) {
       to: r.email,
       subject,
       html,
+      headers: unsubscribeHeaders(r.unsubscribe_token),
     };
   });
 

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
 import { generateWelcome1 } from '@/lib/welcome-emails';
+import { unsubscribeHeaders } from '@/lib/unsubscribe';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { SUBSCRIBE_SOURCES } from '@/lib/constants';
 
@@ -29,9 +30,11 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient();
 
-  const { error } = await supabase
+  const { data: inserted, error } = await supabase
     .from('subscribers')
-    .insert({ email: email.trim().toLowerCase(), name: name?.trim() || null, source: sourceLabel(source) });
+    .insert({ email: email.trim().toLowerCase(), name: name?.trim() || null, source: sourceLabel(source) })
+    .select('unsubscribe_token')
+    .single();
 
   if (error) {
     if (error.code === '23505') {
@@ -53,7 +56,7 @@ export async function POST(req: NextRequest) {
         .in('id', [18, 22, 28]);
 
       const popularPosts = (posts ?? []).map((p) => ({ title: p.title, slug: p.slug }));
-      const { subject, html } = generateWelcome1(name?.trim() || null, subscriberEmail, popularPosts);
+      const { subject, html } = generateWelcome1(name?.trim() || null, inserted?.unsubscribe_token ?? null, popularPosts);
 
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -66,6 +69,7 @@ export async function POST(req: NextRequest) {
           to: subscriberEmail,
           subject,
           html,
+          headers: unsubscribeHeaders(inserted?.unsubscribe_token),
         }),
       });
 

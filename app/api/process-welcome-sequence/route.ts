@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
 import { generateWelcome1, generateWelcome2, generateWelcome3 } from '@/lib/welcome-emails';
+import { unsubscribeHeaders } from '@/lib/unsubscribe';
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
   const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
   const { data: step0 } = await supabase
     .from('subscribers')
-    .select('email, name')
+    .select('email, name, unsubscribe_token')
     .eq('active', true)
     .eq('welcome_step', 0)
     .is('welcome_last_sent', null)
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
         .select('title, slug')
         .in('id', [18, 22, 28]);
       const popularPosts = (posts ?? []).map((p) => ({ title: p.title, slug: p.slug }));
-      const { subject, html } = generateWelcome1(sub.name, sub.email, popularPosts);
+      const { subject, html } = generateWelcome1(sub.name, sub.unsubscribe_token, popularPosts);
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -51,6 +52,7 @@ export async function GET(req: NextRequest) {
           to: sub.email,
           subject,
           html,
+          headers: unsubscribeHeaders(sub.unsubscribe_token),
         }),
       });
       if (res.ok) {
@@ -69,14 +71,14 @@ export async function GET(req: NextRequest) {
   const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString();
   const { data: step1 } = await supabase
     .from('subscribers')
-    .select('email, name')
+    .select('email, name, unsubscribe_token')
     .eq('active', true)
     .eq('welcome_step', 1)
     .lt('welcome_last_sent', threeDaysAgo);
 
   for (const sub of step1 ?? []) {
     try {
-      const { subject, html } = generateWelcome2(sub.name, sub.email);
+      const { subject, html } = generateWelcome2(sub.name, sub.unsubscribe_token);
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -88,6 +90,7 @@ export async function GET(req: NextRequest) {
           to: sub.email,
           subject,
           html,
+          headers: unsubscribeHeaders(sub.unsubscribe_token),
         }),
       });
       if (res.ok) {
@@ -106,14 +109,14 @@ export async function GET(req: NextRequest) {
   const fourDaysAgo = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString();
   const { data: step2 } = await supabase
     .from('subscribers')
-    .select('email, name')
+    .select('email, name, unsubscribe_token')
     .eq('active', true)
     .eq('welcome_step', 2)
     .lt('welcome_last_sent', fourDaysAgo);
 
   for (const sub of step2 ?? []) {
     try {
-      const { subject, html } = generateWelcome3(sub.name, sub.email);
+      const { subject, html } = generateWelcome3(sub.name, sub.unsubscribe_token);
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -125,6 +128,7 @@ export async function GET(req: NextRequest) {
           to: sub.email,
           subject,
           html,
+          headers: unsubscribeHeaders(sub.unsubscribe_token),
         }),
       });
       if (res.ok) {
