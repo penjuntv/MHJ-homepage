@@ -3,8 +3,11 @@
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 
-/** 분석 도구를 켜지 않는 경로 — 매거진 PNG 캡처 렌더러와 관리자. */
-const PRIVATE_PREFIXES = ['/internal/', '/mhj-desk'];
+/**
+ * 분석 도구를 켜지 않는 경로 — 매거진 PNG 캡처 렌더러와 관리자, 구독취소.
+ * `/unsubscribe?token=` 의 토큰은 구독자별 비밀값이라 GA page_location(쿼리 포함)에 남으면 안 된다(2026-10-31).
+ */
+const PRIVATE_PREFIXES = ['/internal/', '/mhj-desk', '/unsubscribe'];
 
 /**
  * 비공개 경로에서는 자식(분석 도구)을 그리지 않는다.
