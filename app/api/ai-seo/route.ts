@@ -10,6 +10,11 @@ import { containsForbiddenName, FORBIDDEN_NAME_MESSAGE } from '@/lib/name-guard.
  * 초안일 뿐이다: 결과는 폼 입력값으로 들어가고 편집자가 고쳐 저장한다(W4-C).
  * 모드마다 프롬프트·길이 예산이 다르므로 max_tokens 를 따로 잡는다 — 한국어 요약을 200토큰으로
  * 자르면 문장이 끊긴 채 저장된다.
+ *
+ * 모델 Claude Haiku 5.5(2026-10-31, 4.5 대비 약 1/10 가격). 4.5 와 다른 점 —
+ * 생각(thinking)이 기본으로 켜져 응답 앞에 thinking 블록이 올 수 있고, 그 토큰도 max_tokens 에 든다
+ * (그래서 예산에 생각 몫을 더했다), 같은 글이 토큰 약 30% 더 나온다, 안전 분류기가 거절(refusal)할 수 있다.
+ * 생각의 깊이는 effort 로만 조절한다(temperature 등은 400).
  */
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -17,7 +22,8 @@ const client = new Anthropic({
 
 const MODES = {
   description: {
-    maxTokens: 300,
+    maxTokens: 2000,
+    effort: 'low' as const,
     /** 응답 호환용 — 기존 호출자는 `meta_description` 키를 읽는다. */
     legacyKey: 'meta_description' as const,
     prompt: (title: string, content: string) =>
@@ -35,7 +41,8 @@ const MODES = {
 본문 요약: ${content.slice(0, 600)}`,
   },
   seo_title: {
-    maxTokens: 200,
+    maxTokens: 2000,
+    effort: 'low' as const,
     legacyKey: null,
     prompt: (title: string, content: string) =>
       `다음 글의 검색 결과용 제목을 **영어로** 한 줄 작성해줘.
@@ -55,7 +62,9 @@ const MODES = {
   },
   summary_ko: {
     // 라이브 최장 본문이 약 6,000자라 4,000자에서 자르면 5편이 뒷부분을 잃는다 — 넉넉히 잡는다.
-    maxTokens: 1500,
+    maxTokens: 4000,
+    // 실명 금지 같은 지시를 지켜야 해서 한 단계 높인다
+    effort: 'medium' as const,
     legacyKey: null,
     prompt: (title: string, content: string) =>
       `다음 영어 글을 읽는 한국인 독자를 위한 **한국어 요약**을 작성해줘.
@@ -96,13 +105,22 @@ export async function POST(req: NextRequest) {
     }
 
     const message = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-haiku-5-5',
       max_tokens: spec.maxTokens,
+      output_config: { effort: spec.effort },
       messages: [{ role: 'user', content: spec.prompt(String(title), String(content ?? '')) }],
     });
 
-    const first = message.content[0];
-    const text = first && first.type === 'text' ? first.text.trim() : '';
+    if (message.stop_reason === 'refusal') {
+      console.error('AI SEO: 모델이 거절했다 (mode:', key, ', category:', message.stop_details?.category, ')');
+      return NextResponse.json({ error: '모델이 이 글의 초안 생성을 거절했습니다. 직접 작성해 주세요.' }, { status: 422 });
+    }
+
+    // 응답이 thinking 블록으로 시작할 수 있다 — 위치가 아니라 종류로 읽는다
+    const text = message.content
+      .flatMap((b) => (b.type === 'text' ? [b.text] : []))
+      .join('')
+      .trim();
     if (!text) {
       return NextResponse.json({ error: '빈 응답' }, { status: 502 });
     }

@@ -103,7 +103,7 @@ carousel · carousel-v3 · comments · newsletter · subscribers · affiliates �
 
 ## 4. API 라우트 (`app/api/`) — 용도별
 
-- **AI**: `ai-insight`(Gemini 2.5 Flash, `@google/genai` — 블로그 감상평, DB 30일 캐시) · `ai-seo`(Claude Haiku 4.5, `@anthropic-ai/sdk` — 메타 생성) · `carousel/ai-layout`(Gemini — 10슬라이드 레이아웃).
+- **AI**: `ai-insight`(Gemini 2.5 Flash, `@google/genai` — 블로그 감상평, DB 30일 캐시) · `ai-seo`(Claude Haiku 5.5, `@anthropic-ai/sdk` 1.x — 메타·검색 제목·한국어 요약) · `carousel/ai-layout`(Gemini — 10슬라이드 레이아웃).
 - **Carousel/Magazine**: `carousel/*`(generate, caption, download, proxy-image, save-content) · `carousel-v3/*` · `magazine/capture`(puppeteer-core + chromium-min) · `og`(@vercel/og).
 - **콘텐츠/캐시**: `revalidate`(태그/경로 무효화) · `preview`·`preview-exit`(Draft Mode) · `search`. (`view` 는 2026-09-08 삭제 — 호출처 0. 조회수는 `ViewTracker.tsx` 가 anon RPC `increment_view_count` 를 직접 호출)
 - **뉴스레터/구독**: `subscribe` · `unsubscribe` · `send-newsletter`·`send-test-newsletter`·`newsletter-preview`(Resend) · `process-welcome-sequence`.
