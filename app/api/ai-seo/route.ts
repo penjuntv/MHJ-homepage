@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenAI } from '@google/genai';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { containsForbiddenName, FORBIDDEN_NAME_MESSAGE } from '@/lib/name-guard.mjs';
 
@@ -8,22 +8,18 @@ import { containsForbiddenName, FORBIDDEN_NAME_MESSAGE } from '@/lib/name-guard.
  * 인증은 middleware matcher 가 담당한다(관리자 전용, getUser + MFA).
  *
  * 초안일 뿐이다: 결과는 폼 입력값으로 들어가고 편집자가 고쳐 저장한다(W4-C).
- * 모드마다 프롬프트·길이 예산이 다르므로 max_tokens 를 따로 잡는다 — 한국어 요약을 200토큰으로
+ * 모드마다 프롬프트·길이 예산이 다르므로 출력 토큰 한도를 따로 잡는다 — 한국어 요약을 200토큰으로
  * 자르면 문장이 끊긴 채 저장된다.
  *
- * 모델 Claude Haiku 5.5(2026-10-31, 4.5 대비 약 1/10 가격). 4.5 와 다른 점 —
- * 생각(thinking)이 기본으로 켜져 응답 앞에 thinking 블록이 올 수 있고, 그 토큰도 max_tokens 에 든다
- * (그래서 예산에 생각 몫을 더했다), 같은 글이 토큰 약 30% 더 나온다, 안전 분류기가 거절(refusal)할 수 있다.
- * 생각의 깊이는 effort 로만 조절한다(temperature 등은 400).
+ * 모델 Gemini 2.5 Flash(2026-11-01 Claude 에서 전환) — 운영 Vercel 에 ANTHROPIC_API_KEY 가 없어 500 이던 것을,
+ * ai-insight·carousel 이 이미 쓰는 GOOGLE_AI_API_KEY 하나로 모은다. 짧은 초안이라 생각(thinking)은 끈다
+ * (thinkingBudget 0 — 켜 두면 그 토큰도 한도에 들어 답이 잘린다).
  */
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY ?? '' });
 
 const MODES = {
   description: {
-    maxTokens: 2000,
-    effort: 'low' as const,
+    maxTokens: 500,
     /** 응답 호환용 — 기존 호출자는 `meta_description` 키를 읽는다. */
     legacyKey: 'meta_description' as const,
     prompt: (title: string, content: string) =>
@@ -41,8 +37,7 @@ const MODES = {
 본문 요약: ${content.slice(0, 600)}`,
   },
   seo_title: {
-    maxTokens: 2000,
-    effort: 'low' as const,
+    maxTokens: 200,
     legacyKey: null,
     prompt: (title: string, content: string) =>
       `다음 글의 검색 결과용 제목을 **영어로** 한 줄 작성해줘.
@@ -62,9 +57,7 @@ const MODES = {
   },
   summary_ko: {
     // 라이브 최장 본문이 약 6,000자라 4,000자에서 자르면 5편이 뒷부분을 잃는다 — 넉넉히 잡는다.
-    maxTokens: 4000,
-    // 실명 금지 같은 지시를 지켜야 해서 한 단계 높인다
-    effort: 'medium' as const,
+    maxTokens: 2000,
     legacyKey: null,
     prompt: (title: string, content: string) =>
       `다음 영어 글을 읽는 한국인 독자를 위한 **한국어 요약**을 작성해줘.
@@ -104,23 +97,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '요청이 너무 잦습니다. 잠시 후 다시 시도하세요.' }, { status: 429 });
     }
 
-    const message = await client.messages.create({
-      model: 'claude-haiku-5-5',
-      max_tokens: spec.maxTokens,
-      output_config: { effort: spec.effort },
-      messages: [{ role: 'user', content: spec.prompt(String(title), String(content ?? '')) }],
+    if (!process.env.GOOGLE_AI_API_KEY) {
+      return NextResponse.json({ error: 'GOOGLE_AI_API_KEY 가 설정되지 않았습니다.' }, { status: 503 });
+    }
+
+    const result = await genAI.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: spec.prompt(String(title), String(content ?? '')),
+      config: { maxOutputTokens: spec.maxTokens, thinkingConfig: { thinkingBudget: 0 } },
     });
 
-    if (message.stop_reason === 'refusal') {
-      console.error('AI SEO: 모델이 거절했다 (mode:', key, ', category:', message.stop_details?.category, ')');
+    const finishReason = result.candidates?.[0]?.finishReason;
+    if (result.promptFeedback?.blockReason || finishReason === 'SAFETY') {
+      console.error('AI SEO: 모델이 차단했다 (mode:', key, ', reason:', result.promptFeedback?.blockReason ?? finishReason, ')');
       return NextResponse.json({ error: '모델이 이 글의 초안 생성을 거절했습니다. 직접 작성해 주세요.' }, { status: 422 });
     }
 
-    // 응답이 thinking 블록으로 시작할 수 있다 — 위치가 아니라 종류로 읽는다
-    const text = message.content
-      .flatMap((b) => (b.type === 'text' ? [b.text] : []))
-      .join('')
-      .trim();
+    const text = (result.text ?? '').trim();
     if (!text) {
       return NextResponse.json({ error: '빈 응답' }, { status: 502 });
     }
@@ -135,7 +128,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       text,
       // 모델이 토큰 한도에서 멈췄으면 문장이 끊겨 있다 — 편집자가 알아야 한다.
-      truncated: message.stop_reason === 'max_tokens',
+      truncated: finishReason === 'MAX_TOKENS',
       ...(spec.legacyKey ? { [spec.legacyKey]: text } : {}),
     });
   } catch (error) {
