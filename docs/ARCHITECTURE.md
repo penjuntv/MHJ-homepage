@@ -103,7 +103,7 @@ carousel · carousel-v3 · comments · newsletter · subscribers · affiliates �
 
 ## 4. API 라우트 (`app/api/`) — 용도별
 
-- **AI**: `ai-insight`(Gemini 2.5 Flash, `@google/genai` — 블로그 감상평, DB 30일 캐시) · `ai-seo`(Claude Haiku 5.5, `@anthropic-ai/sdk` 1.x — 메타·검색 제목·한국어 요약) · `carousel/ai-layout`(Gemini — 10슬라이드 레이아웃).
+- **AI**: `ai-insight`(Gemini 2.5 Flash, `@google/genai` — 블로그 감상평, DB 30일 캐시) · `ai-seo`(Gemini 2.5 Flash, `@google/genai` — 메타·검색 제목·한국어 요약, 2026-11-01 Claude 에서 전환) · `carousel/ai-layout`(Gemini — 10슬라이드 레이아웃).
 - **Carousel/Magazine**: `carousel/*`(generate, caption, download, proxy-image, save-content) · `carousel-v3/*` · `magazine/capture`(puppeteer-core + chromium-min) · `og`(@vercel/og).
 - **콘텐츠/캐시**: `revalidate`(태그/경로 무효화) · `preview`·`preview-exit`(Draft Mode) · `search`. (`view` 는 2026-09-08 삭제 — 호출처 0. 조회수는 `ViewTracker.tsx` 가 anon RPC `increment_view_count` 를 직접 호출)
 - **뉴스레터/구독**: `subscribe` · `unsubscribe` · `send-newsletter`·`send-test-newsletter`·`newsletter-preview`(Resend) · `process-welcome-sequence`.
@@ -148,8 +148,7 @@ supabase(.ts/-browser) · site-settings · types · utils · constants · date-h
 ```
 NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY        # 서버 전용
-GOOGLE_AI_API_KEY                # Gemini (ai-insight, carousel/ai-layout)
-ANTHROPIC_API_KEY                # Claude (ai-seo)
+GOOGLE_AI_API_KEY                # Gemini (ai-insight, carousel/ai-layout, ai-seo)
 RESEND_API_KEY                   # 뉴스레터
 CAPTURE_SECRET                   # /internal/render 캡처 게이트
 ```

@@ -7,7 +7,7 @@ Live: www.mhj.nz · Repo: penjuntv/MHJ-homepage · Supabase project: vpayqdatpqa
 
 ## 기술 스택 (package.json 과 어긋나기 쉬운 것만)
 Next.js 15.5 App Router · React 19 · Tailwind 3.4(v3 문법, `@theme` 아님) · TipTap 3.x.
-AI: Gemini 2.5 Flash = **`@google/genai`** (구 `@google/generative-ai` 아님 — AI Insight, carousel/ai-layout) · Claude Haiku 5.5(`claude-haiku-5-5`, effort 로 조절 — temperature 금지·응답은 블록 type 으로 읽기) = `@anthropic-ai/sdk` 1.x (ai-seo).
+AI: Gemini 2.5 Flash = **`@google/genai`** (구 `@google/generative-ai` 아님 — AI Insight, carousel/ai-layout, ai-seo). 키는 `GOOGLE_AI_API_KEY` 하나. ai-seo 는 2026-11-01 Claude 에서 옮겼다(운영에 `ANTHROPIC_API_KEY` 없음) — `@anthropic-ai/sdk` 는 더 이상 의존성이 아니다.
 **Resend 는 SDK 없음** — `api.resend.com` 에 fetch 로 직접 호출(`app/api/send-newsletter/route.ts`).
 `@supabase/supabase-js` 는 런타임 의존성이다(`lib/supabase.ts` 가 import). devDependencies 로 되돌리면 `--omit=dev` 설치에서 빌드가 깨진다.
 dev 는 **Turbopack 고정**(`next dev --turbopack -p 3003`) — webpack dev 의 `eval-source-map` 이 react-pdf/pdfjs `.mjs` 로드 시 `Object.defineProperty called on non-object` 로 죽어 과월호 PDF 뷰어가 안 뜬다. 프로덕션 빌드는 webpack 그대로라 무영향. **--turbopack 제거 금지.**
