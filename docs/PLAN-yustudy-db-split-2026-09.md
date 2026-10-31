@@ -149,6 +149,7 @@ supabase db dump --db-url "$OLD_DB_URL" -f data.sql --use-copy --data-only \
 - [ ] 주간 감사 허용 목록에서 YuStudy 뷰 2개 제거 · `_comment` 의 "YuStudy 와 공유" 문구 삭제 · `docs/DB_SCHEMA.md` · 핸드오프 문서
 - [ ] 어드바이저 재실행 · site-audit ⑨⑩ 수동 실행 · PostgREST 스키마 캐시 적재 시간과 릴레이션 수(70 → 18) 기록
 - [ ] YuStudy 저장소: `CLAUDE.md`(프로젝트 ID · "Singapore" 정정 · 규칙 7 삭제) · `.claude/rules/supabase-conventions.md` · `.claude/skills/supabase-queries` · `.agents/skills/db_verify.md` · `docs/DB_SCHEMA.md` · `supabase link` 다시(`supabase/.temp/project-ref`) — 옛 프로젝트 ID 를 적은 파일이 20개가 넘는다(`grep -rl vpayqdatpqajsmalpfmq`)
+- [ ] **홈페이지 Supabase 키를 새 체계로 교체** — 옛 `anon`·`service_role` JWT 키는 2026년 말 폐기 예정(`docs/research/tech-landscape-2026-10-31.md` §0-4). 대시보드에서 새 publishable·secret 키 발급 → Vercel env(`NEXT_PUBLIC_SUPABASE_ANON_KEY`·`SUPABASE_SERVICE_ROLE_KEY` 자리, 값 입력은 PeNnY) · `.env.local` · GitHub Actions secret(site-audit) 교체 → 라이브 확인 뒤 옛 키 비활성화. 분리 직후에 해야 YuStudy 가 옛 키를 쓰다 끊기는 일이 없다
 - [ ] (선택) 홈페이지 주간 감사 ⑨⑩(anon 쓰기·읽기 노출)을 YuStudy 프로젝트에도 — 분리하면 YuStudy 는 이 감시를 잃는다
 
 ## 6. 완료 기준
