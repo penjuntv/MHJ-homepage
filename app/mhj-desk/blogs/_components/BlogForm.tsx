@@ -129,12 +129,23 @@ function PublishChecklist({ draft, baselineFailures }: {
   );
 }
 
+/** URL 에 쓸 수 있는 slug — 영문 소문자·숫자를 하이픈 하나로 잇는다. */
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/**
+ * transliteration 은 마침표 같은 문장부호를 남긴다("Honestly, I got lost." → "honestly-i-got-lost.").
+ * 카톡·메일은 주소 끝 마침표를 문장부호로 보고 떼어 버려 공유받은 사람이 404 를 본다(2026-11-01).
+ */
+function cleanSlug(text: string) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
 function slugify(text: string) {
-  return romanizeSlugify(text, {
+  return cleanSlug(romanizeSlugify(text, {
     lowercase: true,
     separator: '-',
     ignore: [],
-  });
+  }));
 }
 
 export default function BlogForm({ initial }: Props) {
@@ -247,6 +258,10 @@ export default function BlogForm({ initial }: Props) {
   useEffect(() => {
     const slug = form.slug;
     if (!slug) { setSlugError(''); return; }
+    if (!SLUG_RE.test(slug)) {
+      setSlugError('영문 소문자·숫자·하이픈(-)만 쓸 수 있고, 끝에 마침표·하이픈이 오면 안 됩니다.');
+      return;
+    }
     if (slugCheckTimer.current) clearTimeout(slugCheckTimer.current);
     slugCheckTimer.current = setTimeout(async () => {
       setSlugChecking(true);
@@ -634,6 +649,7 @@ export default function BlogForm({ initial }: Props) {
           <input
             value={form.slug}
             onChange={e => set('slug', e.target.value)}
+            onBlur={() => { const c = cleanSlug(form.slug); if (c !== form.slug) set('slug', c); }}
             placeholder="url-friendly-slug"
             required
             style={{ ...inputStyle, borderColor: slugError ? '#FCA5A5' : '#F1F5F9' }}
