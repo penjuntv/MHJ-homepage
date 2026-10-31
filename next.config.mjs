@@ -23,6 +23,8 @@ const nextConfig = {
       { source: '/journal/:path*', destination: '/blog/:path*', permanent: true },
       // 삭제된 포스트 — Google이 404로 감지 (2026-06-18)
       { source: '/blog/education-006', destination: '/blog', permanent: true },
+      // 주소 끝 마침표 정리(2026-11-01) — 카톡·메일이 마침표를 떼어 공유 링크가 404 였다. 옛 주소로 들어와도 새 주소로.
+      { source: '/blog/honestly-i-got-lost.', destination: '/blog/honestly-i-got-lost', permanent: true },
       // 유튜브 영상 설명용 짧은 주소 (2026-09-21). 설명에는 www.mhj.nz/yt 만 보이게 하고,
       // 도착 주소에 UTM 을 붙여 유입원을 남긴다 — 유튜브 앱 인앱 브라우저는 referrer 를 지워서
       // UTM 이 없으면 direct 로 섞인다(lib/traffic-source.ts). 캠페인 이름이 바뀔 수 있으니
