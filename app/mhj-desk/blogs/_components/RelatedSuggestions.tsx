@@ -116,7 +116,7 @@ export default function RelatedSuggestions({ current, selected, onChange }: Prop
     <div style={{ padding: '20px 24px', background: 'white', borderRadius: 20 }}>
       <p style={{ ...labelStyle, marginBottom: 4 }}>관련 글 · 내부 링크</p>
       <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 16px' }}>
-        여기서 고른 글만 글 맨 아래 'You Might Also Like' 에 이 순서로 나옵니다(최대 3편). 안 고르면 그 블록이 뜨지 않습니다. 링크 복사는 본문에 직접 붙여넣는 용도입니다.
+        여기서 고른 글만 글 맨 아래 &ldquo;You Might Also Like&rdquo; 에 이 순서로 나옵니다(최대 3편). 안 고르면 그 블록이 뜨지 않습니다. 링크 복사는 본문에 직접 붙여넣는 용도입니다.
       </p>
 
       {/* 선택된 관련 글 */}
