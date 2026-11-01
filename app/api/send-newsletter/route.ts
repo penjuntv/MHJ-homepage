@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase';
@@ -8,6 +9,12 @@ import {
 } from '@/lib/newsletter-template';
 import type { BlogPostInfo, MailrangiNotesData } from '@/lib/newsletter-template';
 import { unsubscribePageUrl, unsubscribeHeaders } from '@/lib/unsubscribe';
+import { presendIssues } from '@/lib/newsletter-presend.mjs';
+
+/** 구독자별 링크를 넣기 전의 공통 본문 해시 — 테스트 메일로 확인한 본문과 전체 발송 본문을 대조한다. */
+function contentHash(html: string): string {
+  return createHash('sha256').update(html, 'utf8').digest('hex').slice(0, 16);
+}
 
 async function loadNewsletterCtaSettings(
   db: ReturnType<typeof createAdminClient>,
@@ -142,6 +149,8 @@ export async function POST(req: NextRequest) {
     blogPost?: BlogPostInfo;
     structured_data?: MailrangiNotesData;
     test_email?: string;
+    /** 테스트 발송 응답의 content_hash — 전체 발송 때 작성 화면이 돌려준다. */
+    approved_hash?: string;
   };
 
   const { newsletter_id, structured_data, content, blogPost, test_email } = body;
@@ -187,6 +196,19 @@ export async function POST(req: NextRequest) {
     if (!subject) return NextResponse.json({ error: 'subject required' }, { status: 400 });
     if (!content) return NextResponse.json({ error: 'content or structured_data required' }, { status: 400 });
     htmlBody = generateNewsletterHTML(subject, content, blogPost);
+  }
+
+  /* ── 발송 전 점검 (Mairangi Notes 전체 발송만) — lib/newsletter-presend.mjs ──
+     막히면 409 + 사유 목록. 발송도 DB 상태 변경도 하지 않는다. 레거시 ③(블로그 글 발송)은 대상이 아니다. */
+  const renderedHash = contentHash(htmlBody);
+  if (!test_email && baseMailData) {
+    const issues = presendIssues(baseMailData, { renderedHash, approvedHash: body.approved_hash });
+    if (issues.length) {
+      return NextResponse.json(
+        { error: `발송 전 점검에서 막혔습니다:\n· ${issues.join('\n· ')}`, presend_issues: issues },
+        { status: 409 },
+      );
+    }
   }
 
   /* ── 수신자 결정 ── */
@@ -331,7 +353,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({ ok: true, sent: successCount, failed: failedCount, skipped: skippedCount });
+    return NextResponse.json({ ok: true, sent: successCount, failed: failedCount, skipped: skippedCount, content_hash: renderedHash });
   } catch (err) {
     if (!test_email && dbId) {
       await db.from('newsletters').update({ status: 'failed' }).eq('id', dbId);

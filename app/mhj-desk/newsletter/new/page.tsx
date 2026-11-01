@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase-browser';
 import { renderMailrangiNotes } from '@/lib/newsletter-template';
 import type { MailrangiNotesData } from '@/lib/newsletter-template';
 import { searchTitle } from '@/lib/search-title.mjs';
+import { nzDateString, upcomingFridayNz } from '@/lib/newsletter-presend.mjs';
 import { Loader2, Eye, X, Upload, ArrowLeft, Send, FlaskConical } from 'lucide-react';
 import ImageCropModal from '@/components/admin/ImageCropModal';
 
@@ -222,10 +223,11 @@ export default function NewsletterComposePage() {
   const [preheader, setPreheader] = useState('');
   const [issueNumber, setIssueNumber] = useState(1);
   const issueTouchedRef = useRef(false);
-  const [issueDate, setIssueDate] = useState(() => {
-    const d = new Date();
-    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
-  });
+  // 발행일 = 발송하는 날의 뉴질랜드 날짜. 기본값은 다가오는 금요일 — 예전엔 "화면을 연 날"이라 목요일에 쓴 호가
+  // 목요일 날짜로 나갔다. 전체 발송 때 서버가 발송일과 대조한다(lib/newsletter-presend.mjs).
+  const [issueDate, setIssueDate] = useState(() => upcomingFridayNz());
+  // 테스트 메일로 확인한 본문의 해시. 비어 있으면 전체 발송이 막힌다 — 페이지를 새로 열면 다시 테스트해야 한다.
+  const [approvedHash, setApprovedHash] = useState('');
 
   /* ── §1 Yussi's Note ── */
   const [noteTitle, setNoteTitle] = useState('');
@@ -587,13 +589,24 @@ export default function NewsletterComposePage() {
     const json = await res.json();
     setTesting(false);
     if (!res.ok) { setError(json.error ?? '테스트 발송 실패'); return; }
-    showToast('penjunetv@gmail.com으로 테스트 발송 완료');
+    setApprovedHash(json.content_hash ?? '');
+    showToast('penjunetv@gmail.com으로 테스트 발송 완료 — 메일을 확인한 뒤 전체 발송하세요');
   }
 
   /* ── full send ── */
   async function handleFullSend() {
     if (!subject.trim() || !noteTitle.trim()) {
       setError('이메일 제목과 §1 Yussi\'s Note 제목은 필수입니다.');
+      return;
+    }
+    // 서버도 같은 점검을 한다 — 여기서는 확인창을 띄우기 전에 흔한 두 경우만 먼저 알려 준다.
+    const nzToday = nzDateString();
+    if (issueDate.trim() !== nzToday) {
+      setError(`발행일 ${issueDate || '(빈칸)'} 이 오늘 뉴질랜드 날짜 ${nzToday} 와 다릅니다. 발행일을 고치고 테스트 메일을 다시 보내 확인하세요.`);
+      return;
+    }
+    if (!approvedHash) {
+      setError('먼저 테스트 메일을 보내 최종본을 확인하세요. 전체 발송은 테스트 메일과 같은 본문일 때만 나갑니다.');
       return;
     }
     if (!confirm(`${subCount}명의 활성 구독자에게 발송하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;
@@ -605,6 +618,7 @@ export default function NewsletterComposePage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         newsletter_id: savedId,
+        approved_hash: approvedHash,
       }),
     });
     const json = await res.json();
@@ -664,6 +678,9 @@ export default function NewsletterComposePage() {
             </Field>
             <Field label="발행일 (예: 2026.03.27)" flex={1}>
               <Input value={issueDate} onChange={setIssueDate} placeholder="2026.03.27" />
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: '#64748B' }}>
+                보내는 날의 뉴질랜드 날짜여야 전체 발송이 됩니다 (오늘 {nzDateString()}).
+              </p>
             </Field>
           </Row>
           <div style={{ marginTop: 12 }}>
@@ -984,7 +1001,7 @@ export default function NewsletterComposePage() {
 
         {/* ── ERROR ── */}
         {error && (
-          <div style={{ padding: '14px 18px', background: '#FEF2F2', borderRadius: 12, fontSize: 13, color: '#EF4444', fontWeight: 600 }}>
+          <div style={{ padding: '14px 18px', background: '#FEF2F2', borderRadius: 12, fontSize: 13, color: '#EF4444', fontWeight: 600, whiteSpace: 'pre-line' }}>
             {error}
           </div>
         )}
