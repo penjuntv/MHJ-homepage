@@ -267,7 +267,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
               transition: 'all 0.2s', backdropFilter: 'blur(4px)',
               boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
             }}
-            aria-label="이전 페이지"
+            aria-label="Previous page"
           >
             <ChevronLeft size={22} />
           </button>
@@ -285,7 +285,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
               transition: 'all 0.2s', backdropFilter: 'blur(4px)',
               boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
             }}
-            aria-label="다음 페이지"
+            aria-label="Next page"
           >
             <ChevronRight size={22} />
           </button>
@@ -327,7 +327,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
               <MessageCircle size={13} />
               {comments.length > 0 && <span>{comments.length}<span className="sr-only"> comments</span></span>}
             </span>
-            <button type="button" onClick={onClose} aria-label="닫기" style={{ background: '#F5F0EB', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <button type="button" onClick={onClose} aria-label="Close" style={{ background: '#F5F0EB', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
               <X size={15} color="#6B5B4E" />
             </button>
           </div>
@@ -411,7 +411,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
                 type="button"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                aria-label="이전 페이지"
+                aria-label="Previous page"
                 style={{
                   width: 36, height: 36, borderRadius: '50%',
                   border: '1px solid #E8DDD4', background: 'white',
@@ -429,7 +429,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
                 type="button"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                aria-label="다음 페이지"
+                aria-label="Next page"
                 style={{
                   width: 36, height: 36, borderRadius: '50%',
                   border: '1px solid #E8DDD4', background: currentPage === totalPages ? 'white' : '#2C1F14',
@@ -517,7 +517,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="이미지 크게 보기"
+          aria-label="Enlarged image"
           onClick={(e) => { if (e.target === e.currentTarget) setLightboxIdx(null); }}
           style={{
             position: 'fixed', inset: 0, zIndex: 300,
@@ -528,7 +528,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
           {/* 닫기 */}
           <button
             onClick={() => setLightboxIdx(null)}
-            aria-label="닫기"
+            aria-label="Close"
             style={{
               position: 'absolute', top: 16, right: 16, zIndex: 310,
               width: 40, height: 40, borderRadius: '50%',
@@ -555,7 +555,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
             <button
               onClick={(e) => { e.stopPropagation(); setLightboxIdx(i => i !== null ? Math.max(0, i - 1) : null); }}
               disabled={lightboxIdx === 0}
-              aria-label="이전 이미지"
+              aria-label="Previous image"
               style={{
                 position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
                 width: 44, height: 44, borderRadius: '50%',
@@ -575,7 +575,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
           <img
             key={lightboxIdx}
             src={allImages[lightboxIdx]}
-            alt={`이미지 ${lightboxIdx + 1} / ${allImages.length}`}
+            alt={`Image ${lightboxIdx + 1} of ${allImages.length}`}
             style={{
               maxWidth: 'calc(100vw - 120px)', maxHeight: 'calc(100vh - 80px)',
               objectFit: 'contain', borderRadius: 4,
@@ -588,7 +588,7 @@ function ArticlePopup({ article, onClose, liked, likeCount, onLike, accentColor 
             <button
               onClick={(e) => { e.stopPropagation(); setLightboxIdx(i => i !== null ? Math.min(allImages.length - 1, i + 1) : null); }}
               disabled={lightboxIdx === allImages.length - 1}
-              aria-label="다음 이미지"
+              aria-label="Next image"
               style={{
                 position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
                 width: 44, height: 44, borderRadius: '50%',
@@ -781,15 +781,15 @@ function MagazineViewerLegacy({ magazine, articles }: Props) {
           )}
 
           <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="mag-mobile-btn" style={{ ...topBtn, display: 'none' }} title="목차">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="mag-mobile-btn" style={{ ...topBtn, display: 'none' }} title="Contents">
               <List size={15} />
             </button>
             {showPdf && magazine.pdf_url && (
-              <a href={magazine.pdf_url} download target="_blank" rel="noopener noreferrer" title="전체 PDF 다운로드" style={{ ...topBtn, textDecoration: 'none' }}>
+              <a href={magazine.pdf_url} download target="_blank" rel="noopener noreferrer" title="Download full PDF" style={{ ...topBtn, textDecoration: 'none' }}>
                 <Download size={15} />
               </a>
             )}
-            <button onClick={() => router.push('/magazine')} title="서가로 돌아가기" style={topBtn}>
+            <button onClick={() => router.push('/magazine')} title="Back to the shelf" style={topBtn}>
               <X size={15} />
             </button>
           </div>
@@ -836,7 +836,7 @@ function MagazineViewerLegacy({ magazine, articles }: Props) {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '85vh', padding: '40px 20px 28px', position: 'relative' }}>
 
                 {/* 이전 버튼 */}
-                <button onClick={goToPrev} disabled={currentPage <= 1} style={navBtn(currentPage <= 1, 'left')} aria-label="이전 페이지">
+                <button onClick={goToPrev} disabled={currentPage <= 1} style={navBtn(currentPage <= 1, 'left')} aria-label="Previous page">
                   <ChevronLeft size={20} />
                 </button>
 
@@ -869,7 +869,7 @@ function MagazineViewerLegacy({ magazine, articles }: Props) {
                 </div>
 
                 {/* 다음 버튼 */}
-                <button onClick={goToNext} disabled={pageCount > 0 && currentPage >= pageCount} style={navBtn(pageCount > 0 && currentPage >= pageCount, 'right')} aria-label="다음 페이지">
+                <button onClick={goToNext} disabled={pageCount > 0 && currentPage >= pageCount} style={navBtn(pageCount > 0 && currentPage >= pageCount, 'right')} aria-label="Next page">
                   <ChevronRight size={20} />
                 </button>
               </div>

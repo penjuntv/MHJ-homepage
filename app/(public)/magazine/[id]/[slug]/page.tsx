@@ -124,6 +124,8 @@ export default async function MagazineArticlePage(props: Props) {
     headline: article.title,
     author: personRef(article.author),
     datePublished: schemaDate(article.date),
+    // articles 에는 수정 시각 컬럼이 없다 — 발행 뒤 고친 기록이 없으므로 발행일을 그대로 쓴다.
+    dateModified: schemaDate(article.date),
     image: article.png_url || article.image_url || magazine.image_url,
     mainEntityOfPage: `${SITE_URL}/magazine/${params.id}/${params.slug}`,
     isPartOf: {
@@ -200,7 +202,7 @@ export default async function MagazineArticlePage(props: Props) {
           </article>
 
           <nav
-            aria-label="이전 · 다음 기사"
+            aria-label="Previous and next articles"
             style={{
               marginTop: 32,
               display: 'grid',

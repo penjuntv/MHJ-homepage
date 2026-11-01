@@ -21,12 +21,12 @@ export default async function NotFoundContent() {
         404
       </p>
       <h1 className="font-display" style={{ fontSize: 'clamp(24px, 4vw, 32px)', color: 'var(--text)', margin: 0 }}>
-        찾으시는 페이지가 없어요
+        We can’t find that page
       </h1>
       <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: 1.7, maxWidth: '420px', margin: 0 }}>
-        페이지가 이동되었거나 더 이상 존재하지 않습니다.
+        It may have moved, or it no longer exists.
         <br />
-        찾던 이야기를 검색하거나, 많이 읽힌 글에서 다시 시작해 보세요.
+        Search for the story you were after, or start again with a reader favourite.
       </p>
 
       <NotFoundSearch />
@@ -35,10 +35,10 @@ export default async function NotFoundContent() {
         <section aria-labelledby="nf-popular" style={{ width: '100%', maxWidth: 420, marginTop: 8, textAlign: 'left' }}>
           <h2
             id="nf-popular"
-            // 라틴 라벨용 대문자·넓은 자간을 한글에 주면 음절이 흩어진다(많 이 읽 힌 글) — 자간만 살짝.
-            style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-tertiary)', margin: '0 0 8px' }}
+            // 사이트는 en-NZ — 404 안내도 영어(2026-11-01). 라틴 라벨이라 위 카테고리 라벨과 같은 대문자·자간.
+            style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-tertiary)', margin: '0 0 8px' }}
           >
-            많이 읽힌 글
+            Most Read
           </h2>
           <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
             {popular.map((post, i) => (
@@ -76,7 +76,7 @@ export default async function NotFoundContent() {
           transition: 'opacity 0.2s ease',
         }}
       >
-        홈으로 돌아가기
+        Back to home
       </Link>
     </>
   );

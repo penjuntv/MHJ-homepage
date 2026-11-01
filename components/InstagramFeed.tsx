@@ -282,7 +282,7 @@ function FeedCard({
           src={nextImageUrl(mediaUrl, 256)}
           srcSet={nextImageSrcSet(mediaUrl, [256, 384, 640]) || undefined}
           sizes={`${CARD_W}px`}
-          alt="MHJ 가족 인스타그램 사진"
+          alt="MHJ family Instagram photo"
           loading="lazy"
           decoding="async"
           /* 최적화 경로가 실패해도 사진이 사라지지 않도록 원본으로 되돌린다 */

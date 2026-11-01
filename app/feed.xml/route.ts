@@ -103,7 +103,7 @@ export async function GET() {
       <guid isPermaLink="true">${BASE_URL}/blog/${escapeXml(blog.slug)}</guid>
       <description>${escapeXml(description)}</description>
       <content:encoded>${cdata(fullHtml)}</content:encoded>
-      <author>${escapeXml(blog.author)}</author>
+      <dc:creator>${escapeXml(blog.author)}</dc:creator>
       <category>${escapeXml(blog.category)}</category>
       <pubDate>${pubDate}</pubDate>${
         blog.updated_at ? `
@@ -117,7 +117,7 @@ export async function GET() {
     .join('');
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>${SITE_NAME}</title>
     <link>${BASE_URL}</link>

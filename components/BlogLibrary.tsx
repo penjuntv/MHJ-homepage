@@ -860,7 +860,7 @@ function Pagination({ currentPage, totalPages, hrefFor }: {
   const pages = getPageNumbers();
 
   return (
-    <nav aria-label="페이지 넘기기" style={{
+    <nav aria-label="Pagination" style={{
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',

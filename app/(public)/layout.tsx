@@ -37,7 +37,7 @@ export default async function PublicLayout({
     <>
       {/* 키보드 사용자는 페이지마다 네비 링크 10여 개를 지나야 본문에 닿는다.
           포커스를 받을 때만 나타난다(WCAG 2.4.1). */}
-      <a href="#main" className="skip-link">본문 바로가기</a>
+      <a href="#main" className="skip-link">Skip to content</a>
       <Navigation
         siteName={s.site_name}
         siteSubtitle={s.site_subtitle}

@@ -33,8 +33,8 @@ export default function NotFoundSearch() {
           type="search"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="찾던 이야기를 검색해 보세요"
-          aria-label="사이트 검색"
+          placeholder="Search our stories"
+          aria-label="Search the site"
           style={{
             flex: 1,
             minWidth: 0,
@@ -52,7 +52,7 @@ export default function NotFoundSearch() {
           type="submit"
           style={{ padding: '16px 24px', borderRadius: 8, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
         >
-          검색
+          Search
         </button>
       </form>
       <SearchOverlay open={open} onClose={() => setOpen(false)} initialQuery={query} />

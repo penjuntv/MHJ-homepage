@@ -70,7 +70,7 @@ export const BLOG_DETAIL_COLUMNS =
  * lib/constants.ts 의 BLOG_*_COLUMNS 만 보기 때문 — 라우트에 인라인으로 적은 select 는
  * anon grant 가드의 사각지대다(grant 누락 시 sitemap 이 블로그 0건으로 조용히 비어 나간다).
  */
-export const BLOG_SITEMAP_COLUMNS = 'slug, created_at, updated_at';
+export const BLOG_SITEMAP_COLUMNS = 'slug, category, created_at, updated_at';
 
 /**
  * RSS 피드 전용(app/feed.xml) — 전문(content)까지 싣는다.

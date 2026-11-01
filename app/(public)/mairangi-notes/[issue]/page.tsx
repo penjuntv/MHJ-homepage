@@ -115,6 +115,7 @@ export default async function NewsletterIssuePage(
     ...(nl.sent_at ? { datePublished: nl.sent_at, dateModified: nl.sent_at } : {}),
     author: personRef('Yussi'),
     publisher: orgRef(),
+    image: `${SITE_URL}/og-default.png`,
     isPartOf: {
       '@type': 'PublicationIssue',
       issueNumber: nl.issue_number ?? String(nl.id),
