@@ -71,63 +71,27 @@ async function getAdjacentBlogs(current: { id: number; date: string }): Promise<
 }
 
 /**
- * 관련 글 3편. 편집자가 고른 `related_slugs` 가 1순위(그 순서를 그대로 지킨다),
- * 부족분은 같은 카테고리 최신순 → 전체 최신순으로 채운다. 모든 단계에 발행·예약 게이트를 건다.
+ * 관련 글 — 편집자가 고른 `related_slugs` 만, 고른 순서대로 최대 3편(2026-11-01 PeNnY 결정).
+ * 예전엔 3칸이 안 차면 같은 카테고리·전체 최신 글로 자동으로 채웠다. 이제 안 고르면 블록이 뜨지 않는다.
+ * 발행·예약 게이트는 그대로 건다.
  */
-async function getRelatedBlogs(category: string, currentSlug: string, relatedSlugs?: string[] | null): Promise<Blog[]> {
-  const now = new Date().toISOString();
-
-  // ① 편집자 지정 — 존재하지 않거나 미발행인 slug 는 조용히 빠진다.
-  //    관리자 폼(RelatedSuggestions)이 저장 전에 그런 항목을 붉게 표시한다.
-  let picked: Blog[] = [];
+async function getRelatedBlogs(currentSlug: string, relatedSlugs?: string[] | null): Promise<Blog[]> {
+  // 존재하지 않거나 미발행인 slug 는 조용히 빠진다 — 관리자 폼(RelatedSuggestions)이 저장 전에 붉게 표시한다.
   // 중복 slug 는 같은 글을 두 번 렌더하고 React key 도 겹친다 — 먼저 유일하게 만든 뒤 자른다.
   const wanted = [...new Set((relatedSlugs ?? []).filter((sl) => typeof sl === 'string' && sl && sl !== currentSlug))].slice(0, 3);
-  if (wanted.length) {
-    const { data, error } = await supabase
-      .from('blogs')
-      .select(BLOG_RELATED_COLUMNS)
-      .eq('published', true)
-      .or(`publish_at.is.null,publish_at.lte.${now}`)
-      .in('slug', wanted);
-    if (error) console.error('getRelatedBlogs(related_slugs):', error.message);
-    // DB 는 순서를 보장하지 않는다 — 편집자가 적은 순서로 되돌린다.
-    picked = wanted
-      .map((sl) => (data ?? []).find((b) => b.slug === sl))
-      .filter((b): b is NonNullable<typeof b> => Boolean(b)) as Blog[];
-    if (picked.length >= 3) return picked.slice(0, 3);
-  }
+  if (!wanted.length) return [];
 
-  const { data: sameCategory, error: sameCategoryError } = await supabase
+  const { data, error } = await supabase
     .from('blogs')
     .select(BLOG_RELATED_COLUMNS)
     .eq('published', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .eq('category', category)
-    // 제외는 클라이언트에서 한다 — PostgREST `in` 목록은 값을 직접 따옴표로 감싸야 해서
-    // slug 에 " 나 , 가 섞이면 400 이 되고 관련글이 통째로 사라진다(라이브에 `honestly-i-got-lost.` 처럼
-    // 구두점이 들어간 slug 가 이미 있다). 여유분만 더 받아 온다.
-    .order('created_at', { ascending: false })
-    .limit(3 + picked.length + 1);
-  if (sameCategoryError) console.error('getRelatedBlogs(sameCategory):', sameCategoryError.message);
-
-  const taken = new Set([currentSlug, ...picked.map((b) => b.slug)]);
-  const sameCategoryRest = ((sameCategory ?? []) as Blog[]).filter((b) => !taken.has(b.slug));
-  const byCategory = [...picked, ...sameCategoryRest].slice(0, 3);
-  if (byCategory.length >= 3) return byCategory;
-
-  const needed = 3 - byCategory.length;
-  const exclude = new Set([currentSlug, ...byCategory.map((b) => b.slug)]);
-  const { data: recent, error: recentError } = await supabase
-    .from('blogs')
-    .select(BLOG_RELATED_COLUMNS)
-    .eq('published', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('created_at', { ascending: false })
-    .limit(needed + exclude.size);
-  if (recentError) console.error('getRelatedBlogs(recent):', recentError.message);
-
-  const fill = ((recent ?? []) as Blog[]).filter((b) => !exclude.has(b.slug)).slice(0, needed);
-  return [...byCategory, ...fill];
+    .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`)
+    .in('slug', wanted);
+  if (error) console.error('getRelatedBlogs(related_slugs):', error.message);
+  // DB 는 순서를 보장하지 않는다 — 편집자가 적은 순서로 되돌린다.
+  return wanted
+    .map((sl) => (data ?? []).find((b) => b.slug === sl))
+    .filter((b): b is NonNullable<typeof b> => Boolean(b)) as Blog[];
 }
 
 async function getBlog(slug: string): Promise<Blog | null> {
@@ -218,7 +182,7 @@ export default async function BlogDetailPage(
   const isLetter = Boolean(blog.letter_to);
   const adminDb = createPublicAdminClient();
   const [relatedBlogs, adjacent, latestNewsletterRes, settings] = await Promise.all([
-    getRelatedBlogs(blog.category, blog.slug, blog.related_slugs),
+    getRelatedBlogs(blog.slug, blog.related_slugs),
     getAdjacentBlogs(blog),
     adminDb
       .from('newsletters')

@@ -5,7 +5,7 @@
  *
  * 둘 다 "이 글과 가까운 발행 글" 목록이 필요하다. 목록을 한 번만 불러 점수를 매기고(lib/link-suggest.mjs),
  * 행마다 두 가지 행동을 준다:
- *   · 관련 글로 추가 → `related_slugs`(상세 페이지 하단 관련글이 이 순서를 지킨다, W4-B)
+ *   · 관련 글로 추가 → `related_slugs`(상세 페이지 하단 관련글은 이것만, 이 순서로 — 자동 채우기 없음 2026-11-01)
  *   · 링크 복사     → 본문에 붙여넣을 <a> 한 줄 (ORPHAN 재발 차단, 실측 80편 중 75편이 내부 링크 2개 미만)
  *
  * ⚠️ 본문을 대신 고치지 않는다 — 추천만 한다(.claude/skills/internal-link-suggester/SKILL.md Gotchas).
@@ -116,7 +116,7 @@ export default function RelatedSuggestions({ current, selected, onChange }: Prop
     <div style={{ padding: '20px 24px', background: 'white', borderRadius: 20 }}>
       <p style={{ ...labelStyle, marginBottom: 4 }}>관련 글 · 내부 링크</p>
       <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 16px' }}>
-        고른 글은 상세 페이지 하단에 이 순서로 나옵니다. 링크 복사는 본문에 직접 붙여넣는 용도입니다.
+        여기서 고른 글만 글 맨 아래 &ldquo;You Might Also Like&rdquo; 에 이 순서로 나옵니다(최대 3편). 안 고르면 그 블록이 뜨지 않습니다. 링크 복사는 본문에 직접 붙여넣는 용도입니다.
       </p>
 
       {/* 선택된 관련 글 */}
