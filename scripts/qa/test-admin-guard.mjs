@@ -21,9 +21,10 @@ const cases = [
   // middleware 가 판정을 실제로 쓰는지 — 빠지면 판정 함수만 남고 문은 열린다
   ['middleware 가 isAdminEmail 을 불러온다', /import \{ isAdminEmail \} from '@\/lib\/admin'/.test(mw), true],
   ['로그인 확인 뒤 관리자 아니면 403', /if \(!isAdminEmail\(user\.email\)\) return deny\(403,/.test(mw), true],
-  // getSession 은 쿠키를 검증하지 않는다 — 이메일을 꾸민 쿠키가 통과하지 않게, 세션만 보는 곳은 SESSION_ONLY_API 하나
-  ['getSession 은 SESSION_ONLY_API 분기 안에만', (mw.match(/getSession\(\)/g) ?? []).length === 1 && /if \(SESSION_ONLY_API\.has\(pathname\)\) \{\s*const \{ data: \{ session \} \} = await supabase\.auth\.getSession\(\);/.test(mw), true],
-  ['그 밖은 getUser()', /\} else \{\s*const \{ data \} = await supabase\.auth\.getUser\(\);\s*user = data\.user;/.test(mw), true],
+  // getSession 은 쿠키를 검증하지 않는다 — 이메일을 꾸민 쿠키가 통과하지 않게 전부 getUser().
+  // (세션만 보던 캐러셀 v2 이미지 프록시는 2026-11-01 v2 와 함께 삭제돼 예외가 없다)
+  ['middleware 에 getSession() 이 없다', /getSession\(\)/.test(mw), false],
+  ['로그인 확인은 getUser()', /const \{ data: \{ user \} \} = await supabase\.auth\.getUser\(\);/.test(mw), true],
 ];
 let failed = 0;
 for (const [n, got, want] of cases) { const p = got === want; if (!p) failed++; console.log(`${p ? '✅' : '🔴'} ${n}`); }
