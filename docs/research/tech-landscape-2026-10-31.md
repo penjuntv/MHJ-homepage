@@ -14,6 +14,7 @@
 | 2 | 뉴스레터 구독취소 | ✅ 완료 — 구독자별 토큰 + `List-Unsubscribe` 원클릭 헤더, 옛 `?email=` 링크는 확인 메일로 전환, `/unsubscribe` 에서 GA 끔 | PR #163 · DB `docs/sql/subscribers_unsubscribe_token_2026-10-31.sql` · 라이브 회귀 검사 6/6 · Gmail 실메일에 헤더 도착·DKIM/SPF/DMARC pass |
 | 3 | SEO 초안(ai-seo) 모델 | ✅ **Gemini 2.5 Flash 로 전환**(11-01). Haiku 5.5 교체(#164) 뒤 관리자 화면 실확인에서 500 — 운영 Vercel 에 `ANTHROPIC_API_KEY` 가 없었다. 사용자 결정으로 이미 키가 있는 Gemini 로 옮김, `@anthropic-ai/sdk` 제거. 관리자 화면에서 세 버튼 모두 200·초안 정상 | PR #164 → #167 |
 | 4 | Supabase 새 키 체계 | ⏳ YuStudy 분리 Phase 4 체크리스트에 명시(12월 첫 주, 연말 폐기 전) | PR #166 |
+| 6 | 라이브 감사 후속(11-01) | ✅ 주소 끝 마침표 글 404(공유 링크) 수정 + slug 형식 DB 제약(#169) · 미사용 코드 −2,450줄(#170) · SEO 작은 정비: 영어 화면 문구·404 canonical·SearchAction 제거·스키마 필드·RSS dc:creator·사이트맵 lastmod(#171). 라이브 126화면 결함 0. AVIF 는 11/21 Vercel 과금 전환 때문에 보류 | PR #169~#171 |
 | 5 | Next 15.x 다음 보안 릴리스(11-03 예정) | ⏳ 11-04 10:00 NZDT 예약 작업이 확인·PR 생성(머지는 사용자 확인 후) | 예약 `mhj-next-security-patch-2026-11-04` |
 
 ## 0. 결론 한 장
