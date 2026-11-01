@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr';
-import type { User } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { isAdminEmail } from '@/lib/admin';
@@ -9,10 +8,6 @@ const PUBLIC_PATHS = [
   '/mhj-desk/mfa-setup',
   '/mhj-desk/mfa-verify',
 ];
-
-// 세션 존재만 확인하는 API — 원격 JWT 재검증(getUser)까지는 과한 경로.
-// 이미지 프록시는 슬라이드 이미지마다 한 번씩 호출되고, 라우트 자체가 Storage 공개 경로 allowlist 로 잠겨 있다.
-const SESSION_ONLY_API = new Set(['/api/carousel/proxy-image']);
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -67,15 +62,8 @@ export async function middleware(request: NextRequest) {
 
   // 누가 로그인했나 — getUser() 는 서버가 JWT 를 검증한다(getSession 은 쿠키를 그대로 믿는다).
   // 2026-10-13: 화면도 getUser() 다. 아래 관리자 확인이 이메일을 보는데, getSession 이면 이메일을 꾸민 쿠키가 통과하고
-  // 관리자 화면 일부(carousel-v3)는 서버에서 service_role 로 읽는다. 세션만 보는 건 SESSION_ONLY_API 하나(공개 Storage 경로만 프록시).
-  let user: User | null;
-  if (SESSION_ONLY_API.has(pathname)) {
-    const { data: { session } } = await supabase.auth.getSession();
-    user = session?.user ?? null;
-  } else {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
-  }
+  // 관리자 화면 일부(carousel-v3)는 서버에서 service_role 로 읽는다. (세션만 보던 캐러셀 v2 이미지 프록시는 2026-11-01 v2 와 함께 삭제)
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return deny(401, 'Unauthorized', '/mhj-desk/login');
 
   // 관리자만 (2026-10-13) — 같은 Supabase 를 쓰는 YuStudy 는 가입이 열려 있어, 로그인만으로는 관리자가 아니다.
@@ -101,7 +89,6 @@ export const config = {
     '/mhj-desk/:path*',
     '/internal/render/:path*',
     '/api/ai-seo',
-    '/api/carousel/:path*',
     '/api/carousel-v3/:path*',
     '/api/preview',
     '/api/newsletter-preview',
