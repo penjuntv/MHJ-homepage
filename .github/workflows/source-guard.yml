@@ -74,6 +74,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-search-title.mjs
 
+      - name: 뉴스레터 발송 전 점검 테스트 (발행일·프리헤더·Local Guide·테스트 메일 대조)
+        if: ${{ !cancelled() }}
+        run: node scripts/qa/test-newsletter-presend.mjs
+
       - name: 사이트 검색 순위·토큰·스니펫 테스트 (W6-D)
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-search-rank.mjs

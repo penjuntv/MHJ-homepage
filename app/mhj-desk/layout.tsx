@@ -10,7 +10,7 @@ import {
   LayoutDashboard, FileText, BookOpen, Settings, Palette,
   LogOut, ExternalLink, Images, MessageCircle, Users,
   SearchCheck, LayoutList, Menu, Layers, BarChart3, Search, Link2,
-  LayoutGrid, Camera,
+  LayoutGrid, Camera, Mail,
 } from 'lucide-react';
 
 type NavItem = { type: 'item'; href: string; label: string; icon: React.ElementType; exact?: boolean; badge?: 'comments' | 'blogs' };
@@ -37,6 +37,7 @@ const NAV: NavEntry[] = [
 
   { type: 'group', label: '커뮤니티' },
   { type: 'item', href: '/mhj-desk/comments', label: '댓글', icon: MessageCircle, badge: 'comments' },
+  { type: 'item', href: '/mhj-desk/newsletter', label: '뉴스레터', icon: Mail },
   { type: 'item', href: '/mhj-desk/subscribers', label: '구독자', icon: Users },
   { type: 'item', href: '/mhj-desk/affiliates', label: '어필리에이트', icon: Link2 },
 
