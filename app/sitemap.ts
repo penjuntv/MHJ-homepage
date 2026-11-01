@@ -23,23 +23,6 @@ export const revalidate = 3600;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
-  // 정적 페이지
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, changeFrequency: 'weekly', priority: 1 },
-    { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/magazine`, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/blog`, changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/storypress`, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/gallery`, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/media-kit`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/mairangi-notes`, changeFrequency: 'weekly', priority: 0.8 },
-    ...Object.values(CATEGORY_TO_SLUG).map((slug) => ({
-      url: `${baseUrl}/blog/category/${slug}`,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    })),
-  ];
-
   // 동적 매거진 이슈
   const { data: magazines } = await supabase
     .from('magazines')
@@ -101,6 +84,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
     lastModified: n.sent_at,
   }));
+
+  // 정적 페이지 — lastmod 는 그 목록의 최신 항목 날짜를 쓴다. 날짜를 알 수 없는 페이지(about 등)는 비워 둔다:
+  // 매번 "지금"을 넣으면 Google 이 이 사이트의 lastmod 를 믿지 않게 된다(2026-11-01).
+  const latest = (dates: Array<string | null | undefined>) =>
+    dates.filter((d): d is string => !!d).sort().at(-1);
+  const blogDate = (b: { updated_at: string | null; created_at: string }) => b.updated_at ?? b.created_at;
+  const latestBlog = latest((blogs ?? []).map(blogDate));
+  const latestMagazine = latest([...(magazines ?? []).map((m) => m.created_at), ...(articleRows ?? []).map((a) => a.created_at)]);
+  const latestNewsletter = latest((newsletterRows ?? []).map((n) => n.sent_at));
+  const withDate = (date: string | undefined) => (date ? { lastModified: date } : {});
+
+  const staticPages: MetadataRoute.Sitemap = [
+    { url: baseUrl, changeFrequency: 'weekly', priority: 1, ...withDate(latest([latestBlog, latestMagazine, latestNewsletter])) },
+    { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/magazine`, changeFrequency: 'monthly', priority: 0.8, ...withDate(latestMagazine) },
+    { url: `${baseUrl}/blog`, changeFrequency: 'weekly', priority: 0.9, ...withDate(latestBlog) },
+    { url: `${baseUrl}/storypress`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/gallery`, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${baseUrl}/media-kit`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/mairangi-notes`, changeFrequency: 'weekly', priority: 0.8, ...withDate(latestNewsletter) },
+    ...Object.entries(CATEGORY_TO_SLUG).map(([category, slug]) => ({
+      url: `${baseUrl}/blog/category/${slug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+      ...withDate(latest((blogs ?? []).filter((b) => b.category === category).map(blogDate))),
+    })),
+  ];
 
   return [...staticPages, ...magazinePages, ...articlePages, ...blogPages, ...newsletterPages];
 }

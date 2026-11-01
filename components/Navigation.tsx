@@ -82,7 +82,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
   return (
     <>
       <nav
-        aria-label="주 메뉴"
+        aria-label="Main menu"
         className="fixed top-0 left-0 right-0 z-50 nav-backdrop"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
@@ -194,7 +194,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
             <button
               onClick={toggleMobile}
               style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '6px', padding: '4px' }}
-              aria-label={mobileOpen ? '메뉴 닫기' : '메뉴 열기'}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu"
             >
@@ -213,7 +213,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
       {mobileOpen && (
         <nav
           id="mobile-menu"
-          aria-label="모바일 메뉴"
+          aria-label="Mobile menu"
           className="fixed inset-0 z-40 flex flex-col items-center justify-center"
           style={{ gap: '24px', background: 'var(--bg)' }}
         >

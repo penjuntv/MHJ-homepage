@@ -699,7 +699,7 @@ export default async function BlogDetailPage(
             {/* 이전·다음 — Next Story 카드와 합친 한 블록(2026-09-11 W6-C 결정 ①). 사진은 Next Story 에서,
                 양방향 링크는 이전/다음에서 — 크롤러가 아카이브 전체를 앞뒤로 걸어갈 수 있다. */}
             {(adjacent.prev || adjacent.next) && (
-              <nav aria-label="이전 · 다음 글" className="adjacent-nav">
+              <nav aria-label="Previous and next posts" className="adjacent-nav">
                 {adjacent.prev ? <AdjacentCard post={adjacent.prev} direction="prev" /> : <div />}
                 {adjacent.next ? <AdjacentCard post={adjacent.next} direction="next" /> : <div />}
               </nav>

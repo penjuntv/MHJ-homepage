@@ -283,14 +283,8 @@ export default async function LandingPage() {
     description: SITE_DESCRIPTION,
     inLanguage: SITE_LANG,
     publisher: orgRef(),
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${SITE_URL}/blog?q={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
+    // SearchAction 은 뺐다(2026-11-01): Google 이 사이트링크 검색창을 2024-11 에 없앴고, /blog 는 ?q= 를 읽지 않아
+    // 가리키는 주소가 검색도 하지 않았다.
   };
 
   // Organization 전체 노드는 루트 layout 이 전 페이지에 낸다 — 여기서 중복 선언하지 않는다 (W2-B).

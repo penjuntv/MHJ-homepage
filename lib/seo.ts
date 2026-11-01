@@ -59,6 +59,7 @@ export const ORG_SAME_AS = [
   'https://www.instagram.com/mhj_nz/',
   'https://www.facebook.com/minhyunjin.nz/',
   'https://www.youtube.com/@mhj_nz',
+  'https://www.threads.net/@mhj_nz',
 ];
 export const ORG_LOGO = { '@type': 'ImageObject', url: `${SITE_URL}/icon-192.png`, width: 192, height: 192 };
 const ORG_ADDRESS = { '@type': 'PostalAddress', addressLocality: 'Mairangi Bay', addressRegion: 'Auckland', addressCountry: 'NZ' };

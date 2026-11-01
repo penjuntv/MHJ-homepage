@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG, orgRef, schemaDate } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, orgRef, personRef, schemaDate } from '@/lib/seo';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Magazine, Article } from '@/lib/types';
@@ -178,6 +178,8 @@ export default async function MagazineIssuePage(props: Props) {
     name: magazine.title,
     issueNumber: `${magazine.year}-${magazine.month_name}`,
     datePublished: magazine.created_at ?? `${magazine.year}`,
+    dateModified: magazine.created_at ?? `${magazine.year}`,
+    ...(magazine.editor ? { author: personRef(magazine.editor) } : {}),
     publisher: orgRef(),
     image: {
       '@type': 'ImageObject',

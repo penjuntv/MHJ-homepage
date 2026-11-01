@@ -121,7 +121,7 @@ function readerFlow() {
     if (await page.$('canvas')) {
       const ind = () => page.evaluate(() => [...document.querySelectorAll('button, span, div')].map((e) => e.textContent.trim()).find((t) => /^\d+\s*\/\s*\d+$/.test(t)) || '');
       const before = await ind();
-      await page.getByRole('button', { name: '다음 페이지' }).first().click({ timeout: 5000 }).catch((e) => out.errors.push(`PDF 다음 페이지 실패: ${String(e.message).slice(0, 60)}`));
+      await page.getByRole('button', { name: 'Next page' }).first().click({ timeout: 5000 }).catch((e) => out.errors.push(`PDF 다음 페이지 실패: ${String(e.message).slice(0, 60)}`));
       await page.waitForTimeout(1500);
       const after = await ind();
       out.notes.push(`PDF 뷰어 쪽 넘김 ${before} → ${after}`);
