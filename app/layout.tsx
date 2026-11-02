@@ -13,6 +13,11 @@ const inter = Inter({
   display: 'swap',
 });
 
+// Caveat 는 2026-09-08 W3-C 실측에서 어디서도 로드되지 않아 뺐다. 나머지 웨이트는 전부 실제 사용 중 —
+// Noto 400/500/700/900 매 페이지, Playfair 400·400i·700·700i·900. 줄이려면 디자인 변경이 필요하다(next/font 이전은 별건).
+const GOOGLE_FONTS_CSS =
+  'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap';
+
 const OG_IMAGE = `${SITE_URL}/api/og?title=MHJ&category=my%20mairangi`;
 
 export const metadata: Metadata = {
@@ -79,9 +84,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang={SITE_LANG} className={inter.variable} suppressHydrationWarning>
       <head>
-        {/* 폰트 연결 워밍업 — globals.css의 @import(fonts.googleapis→gstatic) 지연 단축 */}
+        {/* 폰트 연결 워밍업 — 아래 Google Fonts CSS(fonts.googleapis→gstatic) 지연 단축 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* 본문 Noto Sans KR · 제목 Playfair Display. globals.css 의 @import 로 두면 빌드가 next/font Inter 의 @font-face 를
+            그 앞에 합칠 때 브라우저가 @import 를 통째로 무시한다(2026-10-17 #148 부터 라이브 전부 시스템 글꼴).
+            CSS 합치는 순서에 기대지 않도록 <head> 에서 직접 건다 — scripts/qa/test-google-fonts.mjs 가 지킨다. */}
+        <link rel="stylesheet" href={GOOGLE_FONTS_CSS} />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
         <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)" />
