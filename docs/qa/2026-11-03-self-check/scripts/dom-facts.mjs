@@ -11,10 +11,12 @@ const cssFile = process.argv[3];
 const css = cssFile ? fs.readFileSync(cssFile, 'utf8') : null;
 const js = process.argv[4] ? fs.readFileSync(process.argv[4], 'utf8') : null;
 
+// BASE 로 대상 서버를 고른다(로컬 http://localhost:3003, Vercel 미리보기 등). 기본값은 라이브.
+const BASE = (process.env.BASE || 'https://www.mhj.nz').replace(/\/+$/, '');
 const PAGES = {
-  home: 'https://www.mhj.nz/',
-  blog: 'https://www.mhj.nz/blog/starting-school-in-new-zealand',
-  magazine: 'https://www.mhj.nz/magazine',
+  home: BASE + '/',
+  blog: BASE + '/blog/starting-school-in-new-zealand',
+  magazine: BASE + '/magazine',
 };
 // 색 묶음: Tailwind 인디고 계열(문서 6단계 + accent) / 브랜드 키트 브라운·그린
 const PALETTES = {

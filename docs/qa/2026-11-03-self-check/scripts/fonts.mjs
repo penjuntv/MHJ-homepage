@@ -8,7 +8,9 @@ const { chromium } = require('playwright');
 
 const out = process.argv[2];
 fs.mkdirSync(out, { recursive: true });
-const URL_ = 'https://www.mhj.nz/blog/starting-school-in-new-zealand';
+// BASE 로 대상 서버를 고른다(로컬 http://localhost:3003, Vercel 미리보기 등). 기본값은 라이브.
+const BASE = (process.env.BASE || 'https://www.mhj.nz').replace(/\/+$/, '');
+const URL_ = BASE + '/blog/starting-school-in-new-zealand';
 const GF = 'https://fonts.googleapis.com/css2?display=swap&family=';
 const VARIANTS = {
   // 지금 방문자가 보는 것: 웹폰트 없이 시스템 글꼴(이 Mac 은 Helvetica / Apple SD Gothic Neo)

@@ -17,7 +17,7 @@ await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
 if (cssFile) await page.addStyleTag({ content: fs.readFileSync(cssFile, 'utf8') });
 if (jsFile) await page.evaluate(fs.readFileSync(jsFile, 'utf8'));
 await page.waitForTimeout(1500);
-const r = spawnSync('npx', ['impeccable@4.8.0', 'detect', '--cdp', String(PORT), '--target', new URL(url).pathname === '/' ? 'mhj.nz' : new URL(url).pathname, '--json'],
+const r = spawnSync('npx', ['impeccable@4.8.0', 'detect', '--cdp', String(PORT), '--target', new URL(url).pathname === '/' ? new URL(url).host : new URL(url).pathname, '--json'],
   { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 fs.writeFileSync(out, r.stdout);
 console.log('exit', r.status, 'findings', (() => { try { return JSON.parse(r.stdout).length; } catch { return 'parse-fail: ' + r.stderr.slice(0, 300); } })());
