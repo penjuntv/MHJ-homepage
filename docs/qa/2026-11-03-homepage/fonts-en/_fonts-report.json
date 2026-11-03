@@ -1,0 +1,184 @@
+{
+  "capturedAt": "2026-11-03T03:25:50.328Z",
+  "url": "https://www.mhj.nz/blog/starting-school-in-new-zealand",
+  "variants": {
+    "e0-current-noto": {
+      "link": null,
+      "stack": null
+    },
+    "e1-source-serif-4": {
+      "link": "https://fonts.googleapis.com/css2?display=swap&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600",
+      "stack": "'Source Serif 4', 'Noto Sans KR', serif"
+    },
+    "e2-newsreader": {
+      "link": "https://fonts.googleapis.com/css2?display=swap&family=Newsreader:opsz,wght@6..72,400;6..72,600",
+      "stack": "'Newsreader', 'Noto Sans KR', serif"
+    },
+    "e3-literata": {
+      "link": "https://fonts.googleapis.com/css2?display=swap&family=Literata:opsz,wght@7..72,400;7..72,600",
+      "stack": "'Literata', 'Noto Sans KR', serif"
+    },
+    "e4-public-sans": {
+      "link": "https://fonts.googleapis.com/css2?display=swap&family=Public+Sans:wght@400;600",
+      "stack": "'Public Sans', 'Noto Sans KR', sans-serif"
+    }
+  },
+  "report": {
+    "e0-current-noto-1280": {
+      "fontFiles": 0,
+      "fontKB": 0,
+      "rendered": {
+        "body": [
+          "Noto Sans KR Thin(web)×494",
+          "Noto Sans KR Thin(web)×73"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×6",
+          "Noto Sans KR Thin(web)×612"
+        ]
+      }
+    },
+    "e0-current-noto-390": {
+      "fontFiles": 0,
+      "fontKB": 0,
+      "rendered": {
+        "body": [
+          "Noto Sans KR Thin(web)×489",
+          "Noto Sans KR Thin(web)×72"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×6",
+          "Noto Sans KR Thin(web)×601"
+        ]
+      }
+    },
+    "e1-source-serif-4-1280": {
+      "fontFiles": 2,
+      "fontKB": 119,
+      "rendered": {
+        "body": [
+          "Source Serif 4(web)×494",
+          "Source Serif 4(web)×73"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×5",
+          "Noto Sans KR Thin(web)×336",
+          "Source Serif 4(web)×1",
+          "Source Serif 4(web)×275"
+        ]
+      }
+    },
+    "e1-source-serif-4-390": {
+      "fontFiles": 2,
+      "fontKB": 119,
+      "rendered": {
+        "body": [
+          "Source Serif 4(web)×490",
+          "Source Serif 4(web)×72"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×5",
+          "Noto Sans KR Thin(web)×336",
+          "Source Serif 4(web)×1",
+          "Source Serif 4(web)×265"
+        ]
+      }
+    },
+    "e2-newsreader-1280": {
+      "fontFiles": 2,
+      "fontKB": 129,
+      "rendered": {
+        "body": [
+          "Newsreader 16pt(web)×495",
+          "Newsreader 16pt(web)×72"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×5",
+          "Noto Sans KR Thin(web)×336",
+          "Newsreader 16pt(web)×1",
+          "Newsreader 16pt(web)×275"
+        ]
+      }
+    },
+    "e2-newsreader-390": {
+      "fontFiles": 2,
+      "fontKB": 129,
+      "rendered": {
+        "body": [
+          "Newsreader 16pt(web)×491",
+          "Newsreader 16pt(web)×71"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×5",
+          "Noto Sans KR Thin(web)×336",
+          "Newsreader 16pt(web)×1",
+          "Newsreader 16pt(web)×266"
+        ]
+      }
+    },
+    "e3-literata-1280": {
+      "fontFiles": 2,
+      "fontKB": 84,
+      "rendered": {
+        "body": [
+          "Literata(web)×492",
+          "Literata(web)×73"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×5",
+          "Noto Sans KR Thin(web)×336",
+          "Literata(web)×1",
+          "Literata(web)×275"
+        ]
+      }
+    },
+    "e3-literata-390": {
+      "fontFiles": 2,
+      "fontKB": 84,
+      "rendered": {
+        "body": [
+          "Literata(web)×488",
+          "Literata(web)×72"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×5",
+          "Noto Sans KR Thin(web)×336",
+          "Literata(web)×1",
+          "Literata(web)×265"
+        ]
+      }
+    },
+    "e4-public-sans-1280": {
+      "fontFiles": 2,
+      "fontKB": 26,
+      "rendered": {
+        "body": [
+          "Public Sans Thin(web)×495",
+          "Public Sans Thin(web)×73"
+        ],
+        "ko": [
+          "Public Sans Thin(web)×275",
+          "Public Sans Thin(web)×1",
+          "Noto Sans KR Thin(web)×5",
+          "Noto Sans KR Thin(web)×336"
+        ]
+      }
+    },
+    "e4-public-sans-390": {
+      "fontFiles": 2,
+      "fontKB": 26,
+      "rendered": {
+        "body": [
+          "Public Sans Thin(web)×491",
+          "Public Sans Thin(web)×72"
+        ],
+        "ko": [
+          "Public Sans Thin(web)×265",
+          "Public Sans Thin(web)×1",
+          "Noto Sans KR Thin(web)×5",
+          "Noto Sans KR Thin(web)×336"
+        ]
+      }
+    }
+  }
+}
