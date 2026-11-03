@@ -1,0 +1,453 @@
+{
+  "capturedAt": "2026-11-03T02:32:33.182Z",
+  "base": "https://www.mhj.nz",
+  "report": {
+    "home-390": {
+      "url": "https://www.mhj.nz/",
+      "status": 200,
+      "fontResp": {
+        "googleapis": 1,
+        "gstatic": 5,
+        "gstaticKB": 38,
+        "other": [
+          "56da557e531d1081-s.p.woff2"
+        ]
+      },
+      "loadedFamilies": [
+        "Inter",
+        "Inter Fallback",
+        "Noto Sans KR",
+        "Playfair Display"
+      ],
+      "body": {
+        "tag": "p",
+        "text": "A power cut hit right as the birthday candles went out, and ",
+        "declared": "\"Noto Sans KR\", sans-serif",
+        "weight": "400"
+      },
+      "title": {
+        "tag": "h2",
+        "text": "Mum’s Birthday: Oddly Weary, Awfully Funny, Fondly Comfy",
+        "declared": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900"
+      },
+      "rendered": {
+        "body": [
+          {
+            "familyName": "Noto Sans KR Thin",
+            "postScriptName": "NotoSansKR-Thin_Regular",
+            "isCustomFont": true,
+            "glyphCount": 140
+          }
+        ],
+        "title": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayItalic-Bold",
+            "isCustomFont": true,
+            "glyphCount": 55
+          }
+        ]
+      }
+    },
+    "home-1194": {
+      "url": "https://www.mhj.nz/",
+      "status": 200,
+      "fontResp": {
+        "googleapis": 1,
+        "gstatic": 5,
+        "gstaticKB": 93,
+        "other": [
+          "56da557e531d1081-s.p.woff2"
+        ]
+      },
+      "loadedFamilies": [
+        "Inter",
+        "Inter Fallback",
+        "Noto Sans KR",
+        "Playfair Display"
+      ],
+      "body": {
+        "tag": "p",
+        "text": "A power cut hit right as the birthday candles went out, and ",
+        "declared": "\"Noto Sans KR\", sans-serif",
+        "weight": "400"
+      },
+      "title": {
+        "tag": "h2",
+        "text": "Mum’s Birthday: Oddly Weary, Awfully Funny, Fondly Comfy",
+        "declared": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900"
+      },
+      "rendered": {
+        "body": [
+          {
+            "familyName": "Noto Sans KR Thin",
+            "postScriptName": "NotoSansKR-Thin_Regular",
+            "isCustomFont": true,
+            "glyphCount": 140
+          }
+        ],
+        "title": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayItalic-Bold",
+            "isCustomFont": true,
+            "glyphCount": 55
+          }
+        ]
+      }
+    },
+    "home-1280": {
+      "url": "https://www.mhj.nz/",
+      "status": 200,
+      "fontResp": {
+        "googleapis": 1,
+        "gstatic": 5,
+        "gstaticKB": 61,
+        "other": [
+          "56da557e531d1081-s.p.woff2"
+        ]
+      },
+      "loadedFamilies": [
+        "Inter",
+        "Inter Fallback",
+        "Noto Sans KR",
+        "Playfair Display"
+      ],
+      "body": {
+        "tag": "p",
+        "text": "A power cut hit right as the birthday candles went out, and ",
+        "declared": "\"Noto Sans KR\", sans-serif",
+        "weight": "400"
+      },
+      "title": {
+        "tag": "h2",
+        "text": "Mum’s Birthday: Oddly Weary, Awfully Funny, Fondly Comfy",
+        "declared": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900"
+      },
+      "rendered": {
+        "body": [
+          {
+            "familyName": "Noto Sans KR Thin",
+            "postScriptName": "NotoSansKR-Thin_Regular",
+            "isCustomFont": true,
+            "glyphCount": 140
+          }
+        ],
+        "title": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayItalic-Bold",
+            "isCustomFont": true,
+            "glyphCount": 55
+          }
+        ]
+      }
+    },
+    "blog-390": {
+      "url": "https://www.mhj.nz/blog/starting-school-in-new-zealand",
+      "status": 200,
+      "fontResp": {
+        "googleapis": 1,
+        "gstatic": 14,
+        "gstaticKB": 16,
+        "other": [
+          "56da557e531d1081-s.p.woff2"
+        ]
+      },
+      "loadedFamilies": [
+        "Inter",
+        "Inter Fallback",
+        "Noto Sans KR",
+        "Playfair Display"
+      ],
+      "body": {
+        "tag": "p",
+        "text": "New Zealand's school system looks straightforward on paper, ",
+        "declared": "\"Noto Sans KR\", sans-serif",
+        "weight": "500"
+      },
+      "title": {
+        "tag": "h1",
+        "text": "Starting School in New Zealand",
+        "declared": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900"
+      },
+      "rendered": {
+        "body": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayRoman-Black",
+            "isCustomFont": true,
+            "glyphCount": 1
+          },
+          {
+            "familyName": "Noto Sans KR Thin",
+            "postScriptName": "NotoSansKR-Thin_Medium",
+            "isCustomFont": true,
+            "glyphCount": 328
+          }
+        ],
+        "title": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayRoman-Black",
+            "isCustomFont": true,
+            "glyphCount": 29
+          }
+        ]
+      }
+    },
+    "blog-1194": {
+      "url": "https://www.mhj.nz/blog/starting-school-in-new-zealand",
+      "status": 200,
+      "fontResp": {
+        "googleapis": 1,
+        "gstatic": 14,
+        "gstaticKB": 54,
+        "other": [
+          "56da557e531d1081-s.p.woff2"
+        ]
+      },
+      "loadedFamilies": [
+        "Inter",
+        "Inter Fallback",
+        "Noto Sans KR",
+        "Playfair Display"
+      ],
+      "body": {
+        "tag": "p",
+        "text": "New Zealand's school system looks straightforward on paper, ",
+        "declared": "\"Noto Sans KR\", sans-serif",
+        "weight": "500"
+      },
+      "title": {
+        "tag": "h1",
+        "text": "Starting School in New Zealand",
+        "declared": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900"
+      },
+      "rendered": {
+        "body": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayRoman-Black",
+            "isCustomFont": true,
+            "glyphCount": 1
+          },
+          {
+            "familyName": "Noto Sans KR Thin",
+            "postScriptName": "NotoSansKR-Thin_Medium",
+            "isCustomFont": true,
+            "glyphCount": 334
+          }
+        ],
+        "title": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayRoman-Black",
+            "isCustomFont": true,
+            "glyphCount": 29
+          }
+        ]
+      }
+    },
+    "blog-1280": {
+      "url": "https://www.mhj.nz/blog/starting-school-in-new-zealand",
+      "status": 200,
+      "fontResp": {
+        "googleapis": 1,
+        "gstatic": 14,
+        "gstaticKB": 101,
+        "other": [
+          "56da557e531d1081-s.p.woff2"
+        ]
+      },
+      "loadedFamilies": [
+        "Inter",
+        "Inter Fallback",
+        "Noto Sans KR",
+        "Playfair Display"
+      ],
+      "body": {
+        "tag": "p",
+        "text": "New Zealand's school system looks straightforward on paper, ",
+        "declared": "\"Noto Sans KR\", sans-serif",
+        "weight": "500"
+      },
+      "title": {
+        "tag": "h1",
+        "text": "Starting School in New Zealand",
+        "declared": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900"
+      },
+      "rendered": {
+        "body": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayRoman-Black",
+            "isCustomFont": true,
+            "glyphCount": 1
+          },
+          {
+            "familyName": "Noto Sans KR Thin",
+            "postScriptName": "NotoSansKR-Thin_Medium",
+            "isCustomFont": true,
+            "glyphCount": 334
+          }
+        ],
+        "title": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayRoman-Black",
+            "isCustomFont": true,
+            "glyphCount": 29
+          }
+        ]
+      }
+    },
+    "magazine-390": {
+      "url": "https://www.mhj.nz/magazine",
+      "status": 200,
+      "fontResp": {
+        "googleapis": 1,
+        "gstatic": 3,
+        "gstaticKB": 38,
+        "other": [
+          "56da557e531d1081-s.p.woff2"
+        ]
+      },
+      "loadedFamilies": [
+        "Inter",
+        "Noto Sans KR",
+        "Playfair Display"
+      ],
+      "body": {
+        "tag": "div",
+        "text": "AU REVOIR-UNTIL OUR PATHS CROSS AGAIN",
+        "declared": "\"Noto Sans KR\", sans-serif",
+        "weight": "400"
+      },
+      "title": {
+        "tag": "h1",
+        "text": "Magazine Shelf",
+        "declared": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900"
+      },
+      "rendered": {
+        "body": [
+          {
+            "familyName": "Noto Sans KR Thin",
+            "postScriptName": "NotoSansKR-Thin_Regular",
+            "isCustomFont": true,
+            "glyphCount": 37
+          }
+        ],
+        "title": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayRoman-Black",
+            "isCustomFont": true,
+            "glyphCount": 14
+          }
+        ]
+      }
+    },
+    "magazine-1194": {
+      "url": "https://www.mhj.nz/magazine",
+      "status": 200,
+      "fontResp": {
+        "googleapis": 1,
+        "gstatic": 3,
+        "gstaticKB": 38,
+        "other": [
+          "56da557e531d1081-s.p.woff2"
+        ]
+      },
+      "loadedFamilies": [
+        "Inter",
+        "Noto Sans KR",
+        "Playfair Display"
+      ],
+      "body": {
+        "tag": "div",
+        "text": "AU REVOIR-UNTIL OUR PATHS CROSS AGAIN",
+        "declared": "\"Noto Sans KR\", sans-serif",
+        "weight": "400"
+      },
+      "title": {
+        "tag": "h1",
+        "text": "Magazine Shelf",
+        "declared": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900"
+      },
+      "rendered": {
+        "body": [
+          {
+            "familyName": "Noto Sans KR Thin",
+            "postScriptName": "NotoSansKR-Thin_Regular",
+            "isCustomFont": true,
+            "glyphCount": 37
+          }
+        ],
+        "title": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayRoman-Black",
+            "isCustomFont": true,
+            "glyphCount": 14
+          }
+        ]
+      }
+    },
+    "magazine-1280": {
+      "url": "https://www.mhj.nz/magazine",
+      "status": 200,
+      "fontResp": {
+        "googleapis": 1,
+        "gstatic": 3,
+        "gstaticKB": 76,
+        "other": [
+          "56da557e531d1081-s.p.woff2"
+        ]
+      },
+      "loadedFamilies": [
+        "Inter",
+        "Noto Sans KR",
+        "Playfair Display"
+      ],
+      "body": {
+        "tag": "div",
+        "text": "AU REVOIR-UNTIL OUR PATHS CROSS AGAIN",
+        "declared": "\"Noto Sans KR\", sans-serif",
+        "weight": "400"
+      },
+      "title": {
+        "tag": "h1",
+        "text": "Magazine Shelf",
+        "declared": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900"
+      },
+      "rendered": {
+        "body": [
+          {
+            "familyName": "Noto Sans KR Thin",
+            "postScriptName": "NotoSansKR-Thin_Regular",
+            "isCustomFont": true,
+            "glyphCount": 37
+          }
+        ],
+        "title": [
+          {
+            "familyName": "Playfair Display",
+            "postScriptName": "PlayfairDisplayRoman-Black",
+            "isCustomFont": true,
+            "glyphCount": 14
+          }
+        ]
+      }
+    }
+  }
+}
