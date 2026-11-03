@@ -1,0 +1,1363 @@
+{
+  "capturedAt": "2026-11-02T20:49:09.300Z",
+  "css": null,
+  "viewport": "1280x800",
+  "palettes": {
+    "indigo": [
+      "#4F46E5",
+      "#6366F1",
+      "#818CF8",
+      "#A5B4FC",
+      "#C7D2FE",
+      "#EEF2FF",
+      "#312E81",
+      "#4338CA",
+      "#3730A3",
+      "#E0E7FF"
+    ],
+    "brownGreen": [
+      "#8A6B4F",
+      "#C9A882",
+      "#3E5F4A"
+    ]
+  },
+  "pages": {
+    "home-light": {
+      "url": "https://www.mhj.nz/",
+      "title": "My Mairangi Journal — A Korean Family's NZ School & Life Notes",
+      "isDark": false,
+      "vars": {
+        "accent": "#4F46E5",
+        "bg": "#FFFFFF",
+        "text": "#1A1A1A"
+      },
+      "bodyBg": "rgb(255, 255, 255)",
+      "h1": {
+        "text": "A KOREAN FAMILY’S SCHOOL & LIFE NOTES FROM MAIRANGI BAY, AUCKLAND",
+        "fontFamily": "\"Noto Sans KR\", sans-serif",
+        "weight": "900",
+        "style": "normal",
+        "size": "12px",
+        "transform": "uppercase",
+        "letterSpacing": "2px",
+        "color": "rgb(95, 110, 130)"
+      },
+      "body": {
+        "text": "A power cut hit right as the birthday candles went out, and Jin insists the celebration is",
+        "fontFamily": "\"Noto Sans KR\", sans-serif",
+        "weight": "400",
+        "style": "normal",
+        "size": "16px",
+        "transform": "none",
+        "letterSpacing": "normal",
+        "color": "rgb(95, 110, 130)"
+      },
+      "articleTitles": [
+        {
+          "text": "Mum’s Birthday: Oddly Weary, Awfully Funny, Fondly Comfy",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "32px",
+          "transform": "none",
+          "letterSpacing": "-1px",
+          "color": "rgb(26, 26, 26)"
+        },
+        {
+          "text": "Explore by Topic",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "28px",
+          "transform": "none",
+          "letterSpacing": "-0.5px",
+          "color": "rgb(26, 26, 26)"
+        },
+        {
+          "text": "From the Archive",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "32px",
+          "transform": "none",
+          "letterSpacing": "-0.5px",
+          "color": "rgb(26, 26, 26)"
+        },
+        {
+          "text": "Enjoy Your Stay",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "28px",
+          "transform": "none",
+          "letterSpacing": "-0.5px",
+          "color": "rgb(26, 26, 26)"
+        }
+      ],
+      "paint": {
+        "indigo": {
+          "total": 1,
+          "byHex": {
+            "#4F46E5": 1
+          },
+          "samples": [
+            {
+              "hex": "#4F46E5",
+              "prop": "border",
+              "tag": "a",
+              "cls": "skip-link",
+              "text": "Skip to content"
+            }
+          ]
+        },
+        "brownGreen": {
+          "total": 21,
+          "byHex": {
+            "#8A6B4F": 18,
+            "#C9A882": 3
+          },
+          "samples": [
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "M"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "H"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "J"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "div",
+              "cls": "home-pillars-rule",
+              "text": ""
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "h3",
+              "cls": "pillar-name",
+              "text": "StoryPress"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "h3",
+              "cls": "pillar-name",
+              "text": "Aotearoa"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "h3",
+              "cls": "pillar-name",
+              "text": "Home Learning"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "h3",
+              "cls": "pillar-name",
+              "text": "Whānau"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "div",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "div",
+              "cls": "",
+              "text": ""
+            }
+          ]
+        }
+      },
+      "uppercase": {
+        "count": 59,
+        "wideTracking": 59,
+        "samples": [
+          "A Korean family’s school & life notes fr",
+          "Life in Aotearoa · 30 Oct 2026",
+          "Read",
+          "Life in Aotearoa",
+          "Life in Aotearoa",
+          "Four Pillars",
+          "Latest",
+          "Life in Aotearoa",
+          "Life in Aotearoa",
+          "Little 15 Mins",
+          "Little 15 Mins",
+          "Local Guide",
+          "Life in Aotearoa",
+          "Local Guide",
+          "Life in Aotearoa"
+        ]
+      },
+      "middleDot": {
+        "textNodes": 27,
+        "visible": 16,
+        "samples": [
+          "LIFE IN AOTEAROA · 30 OCT 2026",
+          "by Yussi · READ",
+          "by Yussi · 4 views",
+          "by Yussi · 12 views",
+          "by Yussi · 11 views",
+          "by Yussi · 10 views · 2 Comments",
+          "by Yussi · 10 views · 2 Comments",
+          "by Yussi · 9 views",
+          "by Yussi · 8 views",
+          "aucklandlibraries · librarykids"
+        ]
+      },
+      "fontFamilyUse": {
+        "Noto Sans KR": 160,
+        "Inter": 6,
+        "Playfair Display": 22
+      },
+      "loadedFonts": [
+        "Inter",
+        "Inter Fallback"
+      ],
+      "visibleElements": 539
+    },
+    "home-dark": {
+      "url": "https://www.mhj.nz/",
+      "title": "My Mairangi Journal — A Korean Family's NZ School & Life Notes",
+      "isDark": true,
+      "vars": {
+        "accent": "#818CF8",
+        "bg": "#0A0A0A",
+        "text": "#F1F5F9"
+      },
+      "bodyBg": "rgb(10, 10, 10)",
+      "h1": {
+        "text": "A KOREAN FAMILY’S SCHOOL & LIFE NOTES FROM MAIRANGI BAY, AUCKLAND",
+        "fontFamily": "\"Noto Sans KR\", sans-serif",
+        "weight": "900",
+        "style": "normal",
+        "size": "12px",
+        "transform": "uppercase",
+        "letterSpacing": "2px",
+        "color": "rgb(148, 163, 184)"
+      },
+      "body": {
+        "text": "A power cut hit right as the birthday candles went out, and Jin insists the celebration is",
+        "fontFamily": "\"Noto Sans KR\", sans-serif",
+        "weight": "400",
+        "style": "normal",
+        "size": "16px",
+        "transform": "none",
+        "letterSpacing": "normal",
+        "color": "rgb(148, 163, 184)"
+      },
+      "articleTitles": [
+        {
+          "text": "Mum’s Birthday: Oddly Weary, Awfully Funny, Fondly Comfy",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "32px",
+          "transform": "none",
+          "letterSpacing": "-1px",
+          "color": "rgb(241, 245, 249)"
+        },
+        {
+          "text": "Explore by Topic",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "28px",
+          "transform": "none",
+          "letterSpacing": "-0.5px",
+          "color": "rgb(241, 245, 249)"
+        },
+        {
+          "text": "From the Archive",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "32px",
+          "transform": "none",
+          "letterSpacing": "-0.5px",
+          "color": "rgb(241, 245, 249)"
+        },
+        {
+          "text": "Enjoy Your Stay",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "28px",
+          "transform": "none",
+          "letterSpacing": "-0.5px",
+          "color": "rgb(241, 245, 249)"
+        }
+      ],
+      "paint": {
+        "indigo": {
+          "total": 1,
+          "byHex": {
+            "#818CF8": 1
+          },
+          "samples": [
+            {
+              "hex": "#818CF8",
+              "prop": "border",
+              "tag": "a",
+              "cls": "skip-link",
+              "text": "Skip to content"
+            }
+          ]
+        },
+        "brownGreen": {
+          "total": 21,
+          "byHex": {
+            "#C9A882": 17,
+            "#8A6B4F": 4
+          },
+          "samples": [
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "M"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "H"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "J"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "div",
+              "cls": "home-pillars-rule",
+              "text": ""
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "h3",
+              "cls": "pillar-name",
+              "text": "StoryPress"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "h3",
+              "cls": "pillar-name",
+              "text": "Aotearoa"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "h3",
+              "cls": "pillar-name",
+              "text": "Home Learning"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "h3",
+              "cls": "pillar-name",
+              "text": "Whānau"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "div",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "div",
+              "cls": "",
+              "text": ""
+            }
+          ]
+        }
+      },
+      "uppercase": {
+        "count": 59,
+        "wideTracking": 59,
+        "samples": [
+          "A Korean family’s school & life notes fr",
+          "Life in Aotearoa · 30 Oct 2026",
+          "Read",
+          "Life in Aotearoa",
+          "Life in Aotearoa",
+          "Four Pillars",
+          "Latest",
+          "Life in Aotearoa",
+          "Life in Aotearoa",
+          "Little 15 Mins",
+          "Little 15 Mins",
+          "Local Guide",
+          "Life in Aotearoa",
+          "Local Guide",
+          "Life in Aotearoa"
+        ]
+      },
+      "middleDot": {
+        "textNodes": 27,
+        "visible": 16,
+        "samples": [
+          "LIFE IN AOTEAROA · 30 OCT 2026",
+          "by Yussi · READ",
+          "by Yussi · 4 views",
+          "by Yussi · 12 views",
+          "by Yussi · 11 views",
+          "by Yussi · 10 views · 2 Comments",
+          "by Yussi · 10 views · 2 Comments",
+          "by Yussi · 9 views",
+          "by Yussi · 8 views",
+          "aucklandlibraries · librarykids"
+        ]
+      },
+      "fontFamilyUse": {
+        "Noto Sans KR": 160,
+        "Inter": 6,
+        "Playfair Display": 22
+      },
+      "loadedFonts": [
+        "Inter",
+        "Inter Fallback"
+      ],
+      "visibleElements": 543
+    },
+    "blog-light": {
+      "url": "https://www.mhj.nz/blog/starting-school-in-new-zealand",
+      "title": "Starting School in New Zealand: What Age and Which Year?",
+      "isDark": false,
+      "vars": {
+        "accent": "#4F46E5",
+        "bg": "#FFFFFF",
+        "text": "#1A1A1A"
+      },
+      "bodyBg": "rgb(255, 255, 255)",
+      "h1": {
+        "text": "STARTING SCHOOL IN NEW ZEALAND",
+        "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900",
+        "style": "normal",
+        "size": "48px",
+        "transform": "uppercase",
+        "letterSpacing": "-2px",
+        "color": "rgb(26, 26, 26)"
+      },
+      "body": {
+        "text": "Home Learning",
+        "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "300",
+        "style": "italic",
+        "size": "22px",
+        "transform": "none",
+        "letterSpacing": "0.44px",
+        "color": "rgb(138, 107, 79)"
+      },
+      "articleTitles": [
+        {
+          "text": "STARTING SCHOOL IN NEW ZEALAND",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "normal",
+          "size": "48px",
+          "transform": "uppercase",
+          "letterSpacing": "-2px",
+          "color": "rgb(26, 26, 26)"
+        },
+        {
+          "text": "Comments (2)",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "36px",
+          "transform": "none",
+          "letterSpacing": "-1px",
+          "color": "rgb(26, 26, 26)"
+        },
+        {
+          "text": "Every child has a story.\nLet them write it.",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "400",
+          "style": "italic",
+          "size": "28px",
+          "transform": "none",
+          "letterSpacing": "normal",
+          "color": "rgb(26, 26, 26)"
+        },
+        {
+          "text": "You Might Also Like",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "48px",
+          "transform": "none",
+          "letterSpacing": "-2px",
+          "color": "rgb(26, 26, 26)"
+        }
+      ],
+      "paint": {
+        "indigo": {
+          "total": 7,
+          "byHex": {
+            "#4F46E5": 7
+          },
+          "samples": [
+            {
+              "hex": "#4F46E5",
+              "prop": "border",
+              "tag": "a",
+              "cls": "skip-link",
+              "text": "Skip to content"
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "color",
+              "tag": "button",
+              "cls": "",
+              "text": "AI INSIGHT"
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "stroke",
+              "tag": "svg",
+              "cls": "lucide lucide-sparkles",
+              "text": ""
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "stroke",
+              "tag": "path",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "stroke",
+              "tag": "circle",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "color",
+              "tag": "a",
+              "cls": "underline underline underline-offset-2 decoration-1 decorati",
+              "text": "NZ School Starter Pack (English/Korean)"
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "color",
+              "tag": "a",
+              "cls": "underline underline underline-offset-2 decoration-1 decorati",
+              "text": "NZ School Starter Pack (English/Chinese)"
+            }
+          ]
+        },
+        "brownGreen": {
+          "total": 11,
+          "byHex": {
+            "#8A6B4F": 8,
+            "#C9A882": 3
+          },
+          "samples": [
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "M"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "H"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "J"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "a",
+              "cls": "",
+              "text": "Journal"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "p",
+              "cls": "blog-dateline font-display",
+              "text": "Home Learning"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": "Yussi"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "font-display",
+              "text": "MHJ"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            }
+          ]
+        }
+      },
+      "uppercase": {
+        "count": 49,
+        "wideTracking": 46,
+        "samples": [
+          "Home",
+          "Journal",
+          "Home Learning",
+          "Starting School in New Zealand",
+          "Yussi",
+          "Home Learning",
+          "AI Insight",
+          "On this page",
+          "MHJ SCHOOL GUIDE",
+          "Subscribe →",
+          "한국어 요약",
+          "Yussi",
+          "More about Yussi →",
+          "Frequently asked questions",
+          "#school"
+        ]
+      },
+      "middleDot": {
+        "textNodes": 4,
+        "visible": 2,
+        "samples": [
+          "Writer · Social work student, Massey University",
+          "FROM OUR FAMILY · STORYPRESS"
+        ]
+      },
+      "fontFamilyUse": {
+        "Noto Sans KR": 135,
+        "Inter": 6,
+        "Playfair Display": 12
+      },
+      "loadedFonts": [
+        "Inter",
+        "Inter Fallback"
+      ],
+      "visibleElements": 409
+    },
+    "blog-dark": {
+      "url": "https://www.mhj.nz/blog/starting-school-in-new-zealand",
+      "title": "Starting School in New Zealand: What Age and Which Year?",
+      "isDark": true,
+      "vars": {
+        "accent": "#818CF8",
+        "bg": "#0A0A0A",
+        "text": "#F1F5F9"
+      },
+      "bodyBg": "rgb(10, 10, 10)",
+      "h1": {
+        "text": "STARTING SCHOOL IN NEW ZEALAND",
+        "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900",
+        "style": "normal",
+        "size": "48px",
+        "transform": "uppercase",
+        "letterSpacing": "-2px",
+        "color": "rgb(241, 245, 249)"
+      },
+      "body": {
+        "text": "Home Learning",
+        "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "300",
+        "style": "italic",
+        "size": "22px",
+        "transform": "none",
+        "letterSpacing": "0.44px",
+        "color": "rgb(201, 168, 130)"
+      },
+      "articleTitles": [
+        {
+          "text": "STARTING SCHOOL IN NEW ZEALAND",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "normal",
+          "size": "48px",
+          "transform": "uppercase",
+          "letterSpacing": "-2px",
+          "color": "rgb(241, 245, 249)"
+        },
+        {
+          "text": "Comments (2)",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "36px",
+          "transform": "none",
+          "letterSpacing": "-1px",
+          "color": "rgb(241, 245, 249)"
+        },
+        {
+          "text": "Every child has a story.\nLet them write it.",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "400",
+          "style": "italic",
+          "size": "28px",
+          "transform": "none",
+          "letterSpacing": "normal",
+          "color": "rgb(241, 245, 249)"
+        },
+        {
+          "text": "You Might Also Like",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "48px",
+          "transform": "none",
+          "letterSpacing": "-2px",
+          "color": "rgb(241, 245, 249)"
+        }
+      ],
+      "paint": {
+        "indigo": {
+          "total": 7,
+          "byHex": {
+            "#818CF8": 3,
+            "#4F46E5": 4
+          },
+          "samples": [
+            {
+              "hex": "#818CF8",
+              "prop": "border",
+              "tag": "a",
+              "cls": "skip-link",
+              "text": "Skip to content"
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "color",
+              "tag": "button",
+              "cls": "",
+              "text": "AI INSIGHT"
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "stroke",
+              "tag": "svg",
+              "cls": "lucide lucide-sparkles",
+              "text": ""
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "stroke",
+              "tag": "path",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#4F46E5",
+              "prop": "stroke",
+              "tag": "circle",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#818CF8",
+              "prop": "color",
+              "tag": "a",
+              "cls": "underline underline underline-offset-2 decoration-1 decorati",
+              "text": "NZ School Starter Pack (English/Korean)"
+            },
+            {
+              "hex": "#818CF8",
+              "prop": "color",
+              "tag": "a",
+              "cls": "underline underline underline-offset-2 decoration-1 decorati",
+              "text": "NZ School Starter Pack (English/Chinese)"
+            }
+          ]
+        },
+        "brownGreen": {
+          "total": 11,
+          "byHex": {
+            "#C9A882": 10,
+            "#8A6B4F": 1
+          },
+          "samples": [
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "M"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "H"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "J"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "a",
+              "cls": "",
+              "text": "Journal"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "p",
+              "cls": "blog-dateline font-display",
+              "text": "Home Learning"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": "Yussi"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "font-display",
+              "text": "MHJ"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            }
+          ]
+        }
+      },
+      "uppercase": {
+        "count": 49,
+        "wideTracking": 46,
+        "samples": [
+          "Home",
+          "Journal",
+          "Home Learning",
+          "Starting School in New Zealand",
+          "Yussi",
+          "Home Learning",
+          "AI Insight",
+          "On this page",
+          "MHJ SCHOOL GUIDE",
+          "Subscribe →",
+          "한국어 요약",
+          "Yussi",
+          "More about Yussi →",
+          "Frequently asked questions",
+          "#school"
+        ]
+      },
+      "middleDot": {
+        "textNodes": 4,
+        "visible": 2,
+        "samples": [
+          "Writer · Social work student, Massey University",
+          "FROM OUR FAMILY · STORYPRESS"
+        ]
+      },
+      "fontFamilyUse": {
+        "Noto Sans KR": 135,
+        "Inter": 6,
+        "Playfair Display": 12
+      },
+      "loadedFonts": [
+        "Inter",
+        "Inter Fallback"
+      ],
+      "visibleElements": 413
+    },
+    "magazine-light": {
+      "url": "https://www.mhj.nz/magazine",
+      "title": "Magazine: Monthly Family Issues from Mairangi Bay — MHJ",
+      "isDark": false,
+      "vars": {
+        "accent": "#4F46E5",
+        "bg": "#FFFFFF",
+        "text": "#1A1A1A"
+      },
+      "bodyBg": "rgb(255, 255, 255)",
+      "h1": {
+        "text": "Magazine Shelf",
+        "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900",
+        "style": "normal",
+        "size": "40px",
+        "transform": "none",
+        "letterSpacing": "-0.4px",
+        "color": "rgb(26, 26, 26)"
+      },
+      "body": {
+        "text": "Scroll to explore",
+        "fontFamily": "Inter, sans-serif",
+        "weight": "400",
+        "style": "normal",
+        "size": "14px",
+        "transform": "none",
+        "letterSpacing": "normal",
+        "color": "rgb(118, 112, 105)"
+      },
+      "articleTitles": [
+        {
+          "text": "@MHJ Family on Instagram",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "40px",
+          "transform": "none",
+          "letterSpacing": "-1px",
+          "color": "rgb(26, 26, 26)"
+        }
+      ],
+      "paint": {
+        "indigo": {
+          "total": 1,
+          "byHex": {
+            "#4F46E5": 1
+          },
+          "samples": [
+            {
+              "hex": "#4F46E5",
+              "prop": "border",
+              "tag": "a",
+              "cls": "skip-link",
+              "text": "Skip to content"
+            }
+          ]
+        },
+        "brownGreen": {
+          "total": 10,
+          "byHex": {
+            "#8A6B4F": 7,
+            "#C9A882": 3
+          },
+          "samples": [
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "M"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "H"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "J"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "a",
+              "cls": "",
+              "text": "Magazine"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "shelf-book-badge",
+              "text": "LATEST"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "font-display",
+              "text": "MHJ"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            }
+          ]
+        }
+      },
+      "uppercase": {
+        "count": 43,
+        "wideTracking": 37,
+        "samples": [
+          "Latest",
+          "AUG 2026",
+          "My Mairangi Journal",
+          "Enjoy Your Stay",
+          "Aug",
+          "Mairangi Bay · Auckland · New Zealand",
+          "JUL 2026",
+          "My Mairangi Journal",
+          "Holiday",
+          "Jul",
+          "Mairangi Bay · Auckland · New Zealand",
+          "JUN 2026",
+          "My Mairangi Journal",
+          "On Stage",
+          "Jun"
+        ]
+      },
+      "middleDot": {
+        "textNodes": 12,
+        "visible": 6,
+        "samples": [
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND"
+        ]
+      },
+      "fontFamilyUse": {
+        "Noto Sans KR": 53,
+        "Inter": 10,
+        "Playfair Display": 39
+      },
+      "loadedFonts": [
+        "Inter"
+      ],
+      "visibleElements": 320
+    },
+    "magazine-dark": {
+      "url": "https://www.mhj.nz/magazine",
+      "title": "Magazine: Monthly Family Issues from Mairangi Bay — MHJ",
+      "isDark": true,
+      "vars": {
+        "accent": "#818CF8",
+        "bg": "#0A0A0A",
+        "text": "#F1F5F9"
+      },
+      "bodyBg": "rgb(10, 10, 10)",
+      "h1": {
+        "text": "Magazine Shelf",
+        "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+        "weight": "900",
+        "style": "normal",
+        "size": "40px",
+        "transform": "none",
+        "letterSpacing": "-0.4px",
+        "color": "rgb(253, 252, 250)"
+      },
+      "body": {
+        "text": "Scroll to explore",
+        "fontFamily": "Inter, sans-serif",
+        "weight": "400",
+        "style": "normal",
+        "size": "14px",
+        "transform": "none",
+        "letterSpacing": "normal",
+        "color": "rgba(253, 252, 250, 0.55)"
+      },
+      "articleTitles": [
+        {
+          "text": "@MHJ Family on Instagram",
+          "fontFamily": "\"Playfair Display\", \"Noto Sans KR\", serif",
+          "weight": "900",
+          "style": "italic",
+          "size": "40px",
+          "transform": "none",
+          "letterSpacing": "-1px",
+          "color": "rgb(241, 245, 249)"
+        }
+      ],
+      "paint": {
+        "indigo": {
+          "total": 1,
+          "byHex": {
+            "#818CF8": 1
+          },
+          "samples": [
+            {
+              "hex": "#818CF8",
+              "prop": "border",
+              "tag": "a",
+              "cls": "skip-link",
+              "text": "Skip to content"
+            }
+          ]
+        },
+        "brownGreen": {
+          "total": 10,
+          "byHex": {
+            "#C9A882": 9,
+            "#8A6B4F": 1
+          },
+          "samples": [
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "M"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "H"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "J"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "a",
+              "cls": "",
+              "text": "Magazine"
+            },
+            {
+              "hex": "#8A6B4F",
+              "prop": "color",
+              "tag": "span",
+              "cls": "shelf-book-badge",
+              "text": "LATEST"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "font-display",
+              "text": "MHJ"
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "background",
+              "tag": "span",
+              "cls": "",
+              "text": ""
+            },
+            {
+              "hex": "#C9A882",
+              "prop": "color",
+              "tag": "span",
+              "cls": "",
+              "text": "my mairangi"
+            }
+          ]
+        }
+      },
+      "uppercase": {
+        "count": 43,
+        "wideTracking": 37,
+        "samples": [
+          "Latest",
+          "AUG 2026",
+          "My Mairangi Journal",
+          "Enjoy Your Stay",
+          "Aug",
+          "Mairangi Bay · Auckland · New Zealand",
+          "JUL 2026",
+          "My Mairangi Journal",
+          "Holiday",
+          "Jul",
+          "Mairangi Bay · Auckland · New Zealand",
+          "JUN 2026",
+          "My Mairangi Journal",
+          "On Stage",
+          "Jun"
+        ]
+      },
+      "middleDot": {
+        "textNodes": 12,
+        "visible": 6,
+        "samples": [
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND",
+          "MAIRANGI BAY · AUCKLAND · NEW ZEALAND"
+        ]
+      },
+      "fontFamilyUse": {
+        "Noto Sans KR": 53,
+        "Inter": 10,
+        "Playfair Display": 39
+      },
+      "loadedFonts": [
+        "Inter"
+      ],
+      "visibleElements": 324
+    }
+  }
+}

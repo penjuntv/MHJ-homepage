@@ -1,0 +1,274 @@
+<title>MHJ 홈 5초 테스트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* MHJ 홈 첫 화면 A(현행)·B(시안) 5초 테스트 — StoryPress판 틀(2026-11-02)을 그대로 쓴다.
+   레이아웃: 진행자가 응답자에게 보여 주는 중립 화면. 테스트 대상(MHJ 홈)의 색을 섞지 않도록 차가운 회백색 + 파란 한 색. 한 번에 한 단계만 보인다. */
+:root {
+  --bg: #F3F5F7; --card: #FFFFFF; --ink: #18212B; --ink-2: #505B68; --rule: #D5DBE2;
+  --accent: #2153AE; --accent-wash: #E3EBF8; --ok: #1D6F4E; --warn: #8A5A00;
+  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #12171D; --card: #1A212A; --ink: #E5EAF0; --ink-2: #A8B2BE; --rule: #2C3641; --accent: #8DB3F4; --accent-wash: #1D2B41; --ok: #7FD0AA; --warn: #E8C068; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #12171D; --card: #1A212A; --ink: #E5EAF0; --ink-2: #A8B2BE; --rule: #2C3641; --accent: #8DB3F4; --accent-wash: #1D2B41; --ok: #7FD0AA; --warn: #E8C068; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.65;
+  word-break: keep-all; overflow-wrap: break-word;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px;
+}
+main { max-width: 38rem; margin: 0 auto; padding-top: 36px; }
+h1 { font-size: 1.7rem; line-height: 1.3; margin: 0 0 8px; text-wrap: balance; }
+h2 { font-size: 1.25rem; line-height: 1.4; margin: 0 0 14px; text-wrap: balance; }
+p { margin: 0 0 12px; }
+.muted { color: var(--ink-2); font-size: 0.92rem; }
+.card { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 22px clamp(16px, 4vw, 26px); margin: 18px 0; }
+fieldset { border: 0; padding: 0; margin: 0 0 18px; min-width: 0; }
+legend { font-weight: 600; margin-bottom: 8px; padding: 0; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.choices label { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--rule); border-radius: 6px; padding: 9px 13px; cursor: pointer; background: var(--card); }
+.choices input { accent-color: var(--accent); margin: 0; }
+.choices label:has(input:checked) { border-color: var(--accent); background: var(--accent-wash); }
+.q { margin-bottom: 18px; }
+.q label { display: block; font-weight: 600; margin-bottom: 6px; }
+textarea { width: 100%; min-height: 4.6em; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; resize: vertical; }
+textarea:focus, button:focus-visible, .choices label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn { font: inherit; font-weight: 600; border-radius: 6px; padding: 12px 20px; cursor: pointer; border: 1px solid var(--accent); }
+.btn.primary { background: var(--accent); color: var(--card); }
+.btn.ghost { background: transparent; color: var(--accent); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.lang { display: flex; gap: 6px; justify-content: flex-end; }
+.lang button { font: inherit; font-size: 0.86rem; background: transparent; color: var(--ink-2); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.lang button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.stage { position: fixed; inset: 0; background: #FFFFFF; z-index: 20; display: flex; align-items: center; justify-content: center; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.stage img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(0,0,0,.08); z-index: 21; }
+.bar i { display: block; height: 100%; width: 100%; background: #2153AE; transform-origin: left; }
+.thumbs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.thumbs figure { margin: 0; min-width: 0; }
+.thumbs img { width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 4px; display: block; }
+.thumbs figcaption { font-size: 0.86rem; color: var(--ink-2); margin-top: 4px; }
+pre.copybox { white-space: pre-wrap; font-family: var(--body); font-size: 0.86rem; background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; max-height: 18rem; overflow: auto; }
+.status { font-size: 0.9rem; margin-top: 10px; }
+.status.ok { color: var(--ok); } .status.warn { color: var(--warn); }
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--card); margin: 10px 0 14px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+details summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none !important; } }
+</style>
+
+<main id="app" aria-live="polite"></main>
+<div id="stage" class="stage" hidden><img id="shot" alt=""><div class="bar" aria-hidden="true"><i id="barfill"></i></div></div>
+
+<script>
+(function () {
+  var IMG = { A: { wide: "img/a-wide.png", phone: "img/a-phone.png" }, B: { wide: "img/b-wide.png", phone: "img/b-phone.png" } };
+  var T = {
+    ko: {
+      title: "MHJ 홈 5초 테스트",
+      intro: "진행자용 화면입니다. 응답자에게 기기를 건네거나 화면을 보여 주세요. 웹사이트 첫 화면 두 개를 각각 5초씩 보여 주고, 화면이 사라진 뒤 몇 가지를 묻습니다.",
+      privacy: "응답자의 이름·연락처는 적지 마세요. 답은 한두 문장이면 충분합니다.",
+      rel: "응답자는 누구인가요?", relOpts: { external: "처음 보는 분", acquaint: "지인", family: "가족" },
+      dev: "어떤 기기로 보나요?", devOpts: { phone: "폰", tablet: "태블릿", computer: "컴퓨터" },
+      start: "첫 번째 화면 보기 (5초)",
+      ready1: "준비되면 첫 번째 화면을 5초 동안 보여 줍니다.", ready2: "이제 두 번째 화면을 5초 동안 보여 줍니다.",
+      next2: "두 번째 화면 보기 (5초)",
+      after: function (n) { return n + "번째 화면에 대해 물어보세요 (화면은 다시 보여 주지 않습니다)"; },
+      q1: "이 사이트는 무엇을 하는 곳 같나요?", q2: "누가 쓰는 곳 같나요?", q3: "가장 먼저 눈에 들어온 것은 무엇이었나요?",
+      final: "마지막 질문", q4: "두 화면 중 어느 쪽이 더 믿음이 가나요?", q4Opts: { first: "첫 번째", second: "두 번째", same: "비슷함" },
+      q4why: "그렇게 고른 이유는?", q5: "(선택) 다음에 누르고 싶은 곳은 어디인가요?",
+      first: "첫 번째 화면", second: "두 번째 화면",
+      save: "응답 저장", saving: "저장하는 중…", saved: "저장했습니다. 다음 응답자를 받을 수 있습니다.",
+      noSave: "이 기기에서는 응답을 자동 저장할 수 없습니다. 아래 결과를 복사해 PeNnY에게 카톡으로 보내 주세요.",
+      saveFail: "저장하지 못했습니다. 아래 결과를 복사해 보내 주세요.",
+      copy: "결과 복사", copied: "복사했습니다.", selectHint: "선택했습니다. 복사 단축키를 누르세요.",
+      again: "다음 응답자 시작",
+      results: "결과 보기 (PeNnY 전용)", loading: "불러오는 중…", none: "아직 저장된 응답이 없습니다.",
+      need: "응답자 유형과 기기를 골라 주세요.", needQ4: "마지막 질문의 선택지를 골라 주세요."
+    },
+    en: {
+      title: "MHJ home page 5-second test",
+      intro: "This screen is for the person running the test. You will see two website front pages for 5 seconds each. After each one disappears, a few quick questions follow.",
+      privacy: "Please don't enter names or contact details. One or two sentences per answer is plenty.",
+      rel: "Who is answering?", relOpts: { external: "Someone new to the site", acquaint: "An acquaintance", family: "Family" },
+      dev: "Which device?", devOpts: { phone: "Phone", tablet: "Tablet", computer: "Computer" },
+      start: "Show the first page (5 s)",
+      ready1: "When ready, the first page shows for 5 seconds.", ready2: "Now the second page shows for 5 seconds.",
+      next2: "Show the second page (5 s)",
+      after: function (n) { return "About the " + (n === 1 ? "first" : "second") + " page (it won't be shown again)"; },
+      q1: "What is this site for?", q2: "Who do you think writes it?", q3: "What caught your eye first?",
+      final: "Last question", q4: "Which page feels more trustworthy?", q4Opts: { first: "The first", second: "The second", same: "About the same" },
+      q4why: "Why?", q5: "(Optional) Where would you tap next?",
+      first: "First page", second: "Second page",
+      save: "Save answers", saving: "Saving…", saved: "Saved. Ready for the next person.",
+      noSave: "Answers can't be saved automatically on this device. Copy the result below and send it to PeNnY.",
+      saveFail: "Saving failed. Copy the result below and send it instead.",
+      copy: "Copy result", copied: "Copied.", selectHint: "Selected. Press your copy shortcut.",
+      again: "Start the next person",
+      results: "Results (PeNnY only)", loading: "Loading…", none: "No answers saved yet.",
+      need: "Choose who is answering and the device.", needQ4: "Choose an answer for the last question."
+    }
+  };
+  var lang = "ko";
+  try { var s = localStorage.getItem("t5-lang"); if (s === "en" || s === "ko") lang = s; } catch (e) {}
+  var st, db = null, canWrite = null, isAdmin = false;
+  var app = document.getElementById("app");
+  var stage = document.getElementById("stage"), shot = document.getElementById("shot"), barfill = document.getElementById("barfill");
+
+  function fresh() {
+    var order = Math.random() < 0.5 ? ["A", "B"] : ["B", "A"];
+    st = { step: "setup", order: order, layout: window.innerWidth >= 700 ? "wide" : "phone", rel: "", dev: "", ans: [{}, {}], prefer: "", why: "", next: "" };
+  }
+  function t() { return T[lang]; }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function langBar() {
+    return '<div class="lang" role="group" aria-label="Language"><button type="button" data-lang="ko" aria-pressed="' + (lang === "ko") + '">한국어</button><button type="button" data-lang="en" aria-pressed="' + (lang === "en") + '">English</button></div>';
+  }
+  function radios(name, opts, cur) {
+    return '<div class="choices">' + Object.keys(opts).map(function (k) {
+      return '<label><input type="radio" name="' + name + '" id="' + name + '-' + k + '" value="' + k + '"' + (cur === k ? " checked" : "") + '>' + esc(opts[k]) + "</label>";
+    }).join("") + "</div>";
+  }
+  function qs(i) {
+    var a = st.ans[i];
+    return ["q1", "q2", "q3"].map(function (k) {
+      var id = "a" + i + k;
+      return '<div class="q"><label for="' + id + '">' + esc(t()[k]) + '</label><textarea id="' + id + '" data-i="' + i + '" data-k="' + k + '">' + esc(a[k] || "") + "</textarea></div>";
+    }).join("");
+  }
+  function src(v) { return IMG[v][st.layout]; }
+
+  function render() {
+    var L = t(), h = langBar();
+    if (st.step === "setup") {
+      h += "<h1>" + esc(L.title) + "</h1><p>" + esc(L.intro) + '</p><p class="muted">' + esc(L.privacy) + "</p>" +
+        '<div class="card"><fieldset><legend>' + esc(L.rel) + "</legend>" + radios("rel", L.relOpts, st.rel) + "</fieldset>" +
+        "<fieldset><legend>" + esc(L.dev) + "</legend>" + radios("dev", L.devOpts, st.dev) + "</fieldset>" +
+        '<p class="muted">' + esc(L.ready1) + '</p><div class="actions"><button class="btn primary" type="button" id="go1">' + esc(L.start) + '</button></div><p class="status warn" id="msg" hidden></p></div>' +
+        '<div id="admin"></div>';
+    } else if (st.step === "q1" || st.step === "q2") {
+      var i = st.step === "q1" ? 0 : 1;
+      h += '<div class="card"><h2>' + esc(L.after(i + 1)) + "</h2>" + qs(i) +
+        (i === 0 ? '<p class="muted">' + esc(L.ready2) + '</p><div class="actions"><button class="btn primary" type="button" id="go2">' + esc(L.next2) + "</button></div>"
+                 : '<div class="actions"><button class="btn primary" type="button" id="toFinal">' + esc(L.final) + "</button></div>") + "</div>";
+    } else if (st.step === "final") {
+      h += '<div class="card"><h2>' + esc(L.final) + '</h2><div class="thumbs"><figure><img src="' + src(st.order[0]) + '" alt="' + esc(L.first) + '"><figcaption>' + esc(L.first) + '</figcaption></figure><figure><img src="' + src(st.order[1]) + '" alt="' + esc(L.second) + '"><figcaption>' + esc(L.second) + "</figcaption></figure></div>" +
+        "<fieldset><legend>" + esc(L.q4) + "</legend>" + radios("prefer", L.q4Opts, st.prefer) + "</fieldset>" +
+        '<div class="q"><label for="why">' + esc(L.q4why) + '</label><textarea id="why">' + esc(st.why) + '</textarea></div>' +
+        '<div class="q"><label for="nexttap">' + esc(L.q5) + '</label><textarea id="nexttap">' + esc(st.next) + "</textarea></div>" +
+        '<div class="actions"><button class="btn primary" type="button" id="save">' + esc(L.save) + '</button></div><p class="status warn" id="msg" hidden></p></div>';
+    } else if (st.step === "done") {
+      h += '<div class="card"><p class="status ' + (st.savedOk ? "ok" : "warn") + '">' + esc(st.savedOk ? L.saved : (st.saveErr ? L.saveFail : L.noSave)) + "</p>" +
+        (st.savedOk ? "" : '<pre class="copybox" id="copybox">' + esc(summary()) + '</pre><div class="actions"><button class="btn ghost" type="button" id="copy">' + esc(L.copy) + '</button><span class="status" id="copymsg"></span></div>') +
+        '<div class="actions"><button class="btn primary" type="button" id="again">' + esc(L.again) + "</button></div></div>";
+    }
+    app.innerHTML = h;
+    wire();
+    if (st.step === "setup") renderAdmin();
+  }
+
+  function wire() {
+    app.querySelectorAll("[data-lang]").forEach(function (b) { b.onclick = function () { syncInputs(); lang = b.getAttribute("data-lang"); try { localStorage.setItem("t5-lang", lang); } catch (e) {} render(); }; });
+    app.querySelectorAll('input[name="rel"]').forEach(function (r) { r.onchange = function () { st.rel = r.value; }; });
+    app.querySelectorAll('input[name="dev"]').forEach(function (r) { r.onchange = function () { st.dev = r.value; }; });
+    app.querySelectorAll('input[name="prefer"]').forEach(function (r) { r.onchange = function () { st.prefer = r.value; }; });
+    var b;
+    if ((b = document.getElementById("go1"))) b.onclick = function () {
+      if (!st.rel || !st.dev) { var m = document.getElementById("msg"); m.textContent = t().need; m.hidden = false; return; }
+      show(st.order[0], "q1");
+    };
+    if ((b = document.getElementById("go2"))) b.onclick = function () { syncInputs(); show(st.order[1], "q2"); };
+    if ((b = document.getElementById("toFinal"))) b.onclick = function () { syncInputs(); st.step = "final"; render(); };
+    if ((b = document.getElementById("save"))) b.onclick = function () { syncInputs(); if (!st.prefer) { var m = document.getElementById("msg"); m.textContent = t().needQ4; m.hidden = false; return; } save(b); };
+    if ((b = document.getElementById("again"))) b.onclick = function () { fresh(); render(); window.scrollTo(0, 0); };
+    if ((b = document.getElementById("copy"))) b.onclick = function () {
+      var box = document.getElementById("copybox"), msg = document.getElementById("copymsg");
+      function sel() { var r = document.createRange(); r.selectNodeContents(box); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); msg.textContent = t().selectHint; }
+      try { navigator.clipboard.writeText(box.textContent).then(function () { msg.textContent = t().copied; }, sel); } catch (e) { sel(); }
+    };
+  }
+  function syncInputs() {
+    app.querySelectorAll("textarea[data-i]").forEach(function (ta) { st.ans[+ta.getAttribute("data-i")][ta.getAttribute("data-k")] = ta.value.trim(); });
+    var w = document.getElementById("why"); if (w) st.why = w.value.trim();
+    var n = document.getElementById("nexttap"); if (n) st.next = n.value.trim();
+  }
+
+  function show(v, nextStep) {
+    var img = new Image();
+    img.onload = img.onerror = function () {
+      shot.src = src(v); stage.hidden = false;
+      barfill.style.transition = "none"; barfill.style.transform = "scaleX(1)";
+      requestAnimationFrame(function () { requestAnimationFrame(function () { barfill.style.transition = "transform 5s linear"; barfill.style.transform = "scaleX(0)"; }); });
+      setTimeout(function () { stage.hidden = true; shot.removeAttribute("src"); st.step = nextStep; render(); window.scrollTo(0, 0); var f = app.querySelector("textarea"); if (f) f.focus(); }, 5000);
+    };
+    img.src = src(v);
+  }
+
+  function record() {
+    var r = { createdAt: new Date().toISOString(), lang: lang, relation: st.rel, device: st.dev, layout: st.layout, order: st.order.join(""),
+      prefer: st.prefer === "same" ? "same" : (st.prefer === "first" ? st.order[0] : st.order[1]), preferWhy: st.why, nextTap: st.next };
+    st.order.forEach(function (v, i) { r[v] = { position: i + 1, q1: st.ans[i].q1 || "", q2: st.ans[i].q2 || "", q3: st.ans[i].q3 || "" }; });
+    return r;
+  }
+  function summary() {
+    var r = record(), L = t();
+    var lines = ["[MHJ 홈 5초 테스트] " + r.createdAt, "relation=" + r.relation + " device=" + r.device + " layout=" + r.layout + " order=" + r.order + " lang=" + r.lang];
+    ["A", "B"].forEach(function (v) { lines.push("— " + v + " (" + r[v].position + "번째)", "Q1 " + r[v].q1, "Q2 " + r[v].q2, "Q3 " + r[v].q3); });
+    lines.push("— 선호: " + r.prefer, "이유: " + r.preferWhy, "다음 탭: " + r.nextTap);
+    return lines.join("\n");
+  }
+  function save(btn) {
+    if (!db || canWrite === false) { st.savedOk = false; st.saveErr = false; st.step = "done"; render(); return; }
+    btn.disabled = true; btn.textContent = t().saving;
+    db.collection("responses").add(record()).then(function () { st.savedOk = true; st.step = "done"; render(); },
+      function () { st.savedOk = false; st.saveErr = true; st.step = "done"; render(); });
+  }
+
+  // 자동 집계용 낱말: Q1 "가족 기록/매거진" + "뉴질랜드·오클랜드" 를 둘 다 말했나, Q2 "한국인 가족" 을 말했나.
+  var RX_WHAT = /가족|family|일기|기록|journal|블로그|blog|매거진|잡지|magazine|생활|life/i, RX_PLACE = /뉴질랜드|new zealand|\bnz\b|오클랜드|auckland|마이랑이|mairangi/i, RX_WHO = /한국|korean|가족|family|엄마|아빠|부모|parent|mum|mom/i;
+  function renderAdmin() {
+    var box = document.getElementById("admin");
+    if (!box || !db || !isAdmin) return;
+    var L = t();
+    box.innerHTML = '<details id="res"><summary>' + esc(L.results) + '</summary><div id="resbody"><p class="muted">' + esc(L.loading) + "</p></div></details>";
+    document.getElementById("res").addEventListener("toggle", function (e) { if (e.target.open) loadResults(); }, { once: true });
+  }
+  function loadResults() {
+    var body = document.getElementById("resbody"), timer = setTimeout(function () { body.innerHTML = '<p class="status warn">Timeout</p>'; }, 10000);
+    db.collection("responses").orderBy("createdAt", "asc").get().then(function (snap) {
+      clearTimeout(timer);
+      var rows = snap.docs.map(function (d) { return d.data() || {}; });
+      if (!rows.length) { body.innerHTML = '<p class="muted">' + esc(t().none) + "</p>"; return; }
+      var c = { A: { n: 0, both: 0, book3: 0, pref: 0 }, B: { n: 0, both: 0, book3: 0, pref: 0 }, same: 0 };
+      rows.forEach(function (r) { ["A", "B"].forEach(function (v) { var x = r[v] || {}; c[v].n++; if (RX_WHAT.test(x.q1 || "") && RX_PLACE.test(x.q1 || "")) c[v].both++; if (RX_WHO.test(x.q2 || "")) c[v].book3++; }); if (r.prefer === "A" || r.prefer === "B") c[r.prefer].pref++; else c.same++; });
+      var h = '<div class="tbl"><table><thead><tr><th>시안</th><th>Q1에 "가족·기록"+"뉴질랜드"</th><th>Q2에 "한국인 가족"</th><th>더 믿음이 감</th></tr></thead><tbody>' +
+        ["A", "B"].map(function (v) { return "<tr><td>" + v + (v === "A" ? " 현행" : " 시안 B") + '</td><td class="num">' + c[v].both + " / " + c[v].n + '</td><td class="num">' + c[v].book3 + " / " + c[v].n + '</td><td class="num">' + c[v].pref + "</td></tr>"; }).join("") +
+        '</tbody></table></div><p class="muted">비슷함 ' + c.same + "건. 단어 일치로 센 자동 집계라 원문을 함께 보세요. 응답 " + rows.length + "건은 방향 확인용이지 통계가 아닙니다.</p>";
+      h += rows.map(function (r, i) { return '<details><summary>#' + (i + 1) + " " + esc(r.relation) + " / " + esc(r.device) + " / " + esc(r.order) + " / 선호 " + esc(r.prefer) + "</summary>" +
+        ["A", "B"].map(function (v) { var x = r[v] || {}; return "<p><b>" + v + "</b> Q1 " + esc(x.q1) + "<br>Q2 " + esc(x.q2) + "<br>Q3 " + esc(x.q3) + "</p>"; }).join("") +
+        "<p>이유: " + esc(r.preferWhy) + "<br>다음 탭: " + esc(r.nextTap) + "</p></details>"; }).join("");
+      body.innerHTML = h;
+    }, function () { clearTimeout(timer); body.innerHTML = '<p class="status warn">불러오지 못했습니다.</p>'; });
+  }
+
+  fresh(); render();
+  if (window.claude && window.claude.use) {
+    window.claude.use("db").then(function (d) {
+      db = d;
+      return window.claude.use("user");
+    }).then(function (u) {
+      if (!u) return;
+      return Promise.all([u.can("data.write"), u.canEdit()]).then(function (v) { canWrite = v[0]; isAdmin = !!v[1]; if (st.step === "setup") renderAdmin(); });
+    }).catch(function () {});
+  }
+})();
+</script>
