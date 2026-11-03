@@ -1,0 +1,64 @@
+/* 시안 B 목업 — 라이브 페이지에 Playwright addStyleTag 로 덧입힌다. 코드 반영 아님(2026-11-03).
+   B = (1) 강조색을 브랜드 키트 그린으로 (2) 홈 h1 을 문장형 제목으로 (3) 메타에서 대문자·가운뎃점 제거.
+   값의 근거·명암비: ../STEP2_INVENTORY.md */
+
+/* ─── (1) 강조색: 인디고·보라 → MHJ Green ─────────────────────────────
+   라이트 #3E5F4A 7.14/6.74/6.31, 다크 #8FB39B 8.57/7.95/7.22 (흰·크림·warm / 다크 bg·surface·card) */
+:root { --accent: #3E5F4A !important; --callout-bg: #EEF3EF !important; }
+.dark { --accent: #8FB39B !important; --callout-bg: #18201B !important; }
+
+/* AI Insight 버튼 — 인라인 그라데이션(#EEF2FF→#F5F3FF)과 인디고 글자를 단색 면으로 */
+button[data-track="ai_insight_click"] {
+  background: #EEF3EF !important;
+  color: #3E5F4A !important;
+  border-color: rgba(62, 95, 74, 0.25) !important;
+}
+.dark button[data-track="ai_insight_click"] {
+  background: #18201B !important;
+  color: #8FB39B !important;
+  border-color: rgba(143, 179, 155, 0.3) !important;
+}
+[style*="color:#4F46E5"], [style*="color:#6366F1"], [style*="color:#3730A3"] { color: var(--accent) !important; }
+.dark .ai-insight-card { background: #18201B !important; }
+.dark .ai-insight-card p:last-of-type { color: #8FB39B !important; }
+.dark .ai-insight-card .font-display { color: #C9D9CE !important; }
+.ai-reflection { background: rgba(238, 243, 239, 0.4) !important; border-color: rgba(62, 95, 74, 0.1) !important; }
+.dark .ai-reflection { background: rgba(24, 32, 27, 0.3) !important; border-color: rgba(143, 179, 155, 0.15) !important; }
+.ai-reflection-text { color: #2F4A39 !important; }
+.dark .ai-reflection-text { color: #8FB39B !important; }
+.dark .comment-toast { background: rgba(143, 179, 155, 0.15) !important; color: #8FB39B !important; }
+
+/* ─── (2) 홈 h1: 12px 대문자 회색 꼬리표 → 문장형 제목 ─────────────────── */
+h1[style*="font-size:12px"][style*="text-transform:uppercase"] {
+  font-size: clamp(24px, 2.6vw, 34px) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.25 !important;
+  color: var(--text) !important;
+  max-width: 30ch;
+  text-wrap: balance;
+}
+
+/* ─── (3) 메타·라벨: 대문자 변환 해제 ──────────────────────────────────
+   대문자를 풀면 900 굵기·넓은 자간·10~11px 가 함께 어색해지므로 같이 정돈한다. */
+*, *::before, *::after { text-transform: none !important; }
+:is([style*="text-transform:uppercase"], [style*="text-transform: uppercase"], .uppercase,
+    .type-caption, .shelf-issue-label, .newsletter-cta-inline button[type="submit"], .mn-subscriber-count,
+    .mn-issue-num, .mn-back, .home-pillars-label, .pillar-empty, .adjacent-card-label, .letter-dateline,
+    .blog-breadcrumb a):not(h1):not(h2):not(h3) {
+  letter-spacing: 0.01em !important;
+}
+:is([style*="text-transform:uppercase"], .uppercase):is([style*="font-weight:900"], [style*="font-weight:800"], .font-black, .font-extrabold):not(h1):not(h2):not(h3) {
+  font-weight: 600 !important;
+}
+:is([style*="text-transform:uppercase"], .uppercase):is([style*="font-size:9px"], [style*="font-size:10px"], [style*="font-size:11px"], [class*="text-[9px]"], [class*="text-[10px]"], [class*="text-[11px]"]) {
+  font-size: 12px !important;
+}
+/* 제목에 걸린 대문자(블로그 h1 등)는 자간만 원래대로 */
+:is(h1, h2, h3):is([style*="text-transform:uppercase"], .uppercase) { letter-spacing: -0.01em !important; }
+
+/* (3) 메타의 점 구분자: 3px 원 span 은 숨기고(부모 gap 이 간격을 맡음), 브레드크럼은 빗금으로.
+   글자로 박힌 '·' 은 CSS 로 못 지워 mockup-B.js 가 쉼표로 바꾼다. */
+span[style*="width:3px;height:3px;border-radius:50%"] { display: none !important; }
+.blog-breadcrumb-sep { width: auto !important; height: auto !important; background: none !important; border-radius: 0 !important; }
+.blog-breadcrumb-sep::before { content: "/"; color: var(--text-tertiary); }

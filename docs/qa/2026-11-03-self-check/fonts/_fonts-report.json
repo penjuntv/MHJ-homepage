@@ -1,0 +1,140 @@
+{
+  "capturedAt": "2026-11-02T21:15:39.827Z",
+  "url": "https://www.mhj.nz/blog/starting-school-in-new-zealand",
+  "variants": {
+    "v0-current-system": {
+      "link": null,
+      "stack": null
+    },
+    "v1-noto-sans-kr": {
+      "link": "https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans+KR:wght@400;700",
+      "stack": "'Noto Sans KR', sans-serif"
+    },
+    "v2-source-serif-4": {
+      "link": "https://fonts.googleapis.com/css2?display=swap&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Noto+Serif+KR:wght@400;600",
+      "stack": "'Source Serif 4', 'Noto Serif KR', serif"
+    },
+    "v3-ibm-plex-sans-kr": {
+      "link": "https://fonts.googleapis.com/css2?display=swap&family=IBM+Plex+Sans+KR:wght@400;600",
+      "stack": "'IBM Plex Sans KR', sans-serif"
+    }
+  },
+  "report": {
+    "v0-current-system-1280": {
+      "fontFiles": 0,
+      "fontKB": 0,
+      "rendered": {
+        "body": [
+          "Helvetica(local)×73",
+          "Helvetica(local)×495"
+        ],
+        "ko": [
+          "Apple SD Gothic Neo(local)×6",
+          "Apple SD Gothic Neo(local)×612"
+        ]
+      }
+    },
+    "v0-current-system-390": {
+      "fontFiles": 0,
+      "fontKB": 0,
+      "rendered": {
+        "body": [
+          "Helvetica(local)×72",
+          "Helvetica(local)×491"
+        ],
+        "ko": [
+          "Apple SD Gothic Neo(local)×6",
+          "Apple SD Gothic Neo(local)×603"
+        ]
+      }
+    },
+    "v1-noto-sans-kr-1280": {
+      "fontFiles": 16,
+      "fontKB": 111,
+      "rendered": {
+        "body": [
+          "Noto Sans KR Thin(web)×494",
+          "Noto Sans KR Thin(web)×73"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×612",
+          "Noto Sans KR Thin(web)×6"
+        ]
+      }
+    },
+    "v1-noto-sans-kr-390": {
+      "fontFiles": 16,
+      "fontKB": 67,
+      "rendered": {
+        "body": [
+          "Noto Sans KR Thin(web)×489",
+          "Noto Sans KR Thin(web)×72"
+        ],
+        "ko": [
+          "Noto Sans KR Thin(web)×601",
+          "Noto Sans KR Thin(web)×6"
+        ]
+      }
+    },
+    "v2-source-serif-4-1280": {
+      "fontFiles": 15,
+      "fontKB": 335,
+      "rendered": {
+        "body": [
+          "Source Serif 4(web)×494",
+          "Source Serif 4(web)×73"
+        ],
+        "ko": [
+          "Noto Serif KR ExtraLight(web)×5",
+          "Noto Serif KR ExtraLight(web)×336",
+          "Source Serif 4(web)×1",
+          "Source Serif 4(web)×275"
+        ]
+      }
+    },
+    "v2-source-serif-4-390": {
+      "fontFiles": 15,
+      "fontKB": 338,
+      "rendered": {
+        "body": [
+          "Source Serif 4(web)×490",
+          "Source Serif 4(web)×72"
+        ],
+        "ko": [
+          "Noto Serif KR ExtraLight(web)×5",
+          "Noto Serif KR ExtraLight(web)×336",
+          "Source Serif 4(web)×1",
+          "Source Serif 4(web)×264"
+        ]
+      }
+    },
+    "v3-ibm-plex-sans-kr-1280": {
+      "fontFiles": 15,
+      "fontKB": 69,
+      "rendered": {
+        "body": [
+          "IBM Plex Sans KR SemiBold(web)×73",
+          "IBM Plex Sans KR(web)×494"
+        ],
+        "ko": [
+          "IBM Plex Sans KR SemiBold(web)×6",
+          "IBM Plex Sans KR(web)×612"
+        ]
+      }
+    },
+    "v3-ibm-plex-sans-kr-390": {
+      "fontFiles": 15,
+      "fontKB": 93,
+      "rendered": {
+        "body": [
+          "IBM Plex Sans KR SemiBold(web)×72",
+          "IBM Plex Sans KR(web)×490"
+        ],
+        "ko": [
+          "IBM Plex Sans KR SemiBold(web)×6",
+          "IBM Plex Sans KR(web)×601"
+        ]
+      }
+    }
+  }
+}
