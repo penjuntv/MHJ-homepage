@@ -30,6 +30,8 @@ interface Props {
 }
 
 const CATEGORIES: Blog['category'][] = [...BLOG_CATEGORIES];
+/** 글 폼의 "구독자에게 뉴스레터 발송" 체크박스. 2026-11-04 유씨 설문으로 숨김(계획서 F4). */
+const SHOW_NEWSLETTER_TOGGLE = false;
 
 /* ── 발행 전 체크리스트 ── */
 /** AI 초안 버튼 — 컴포넌트 밖에 둔다. 안에 두면 렌더마다 타입이 바뀌어 리마운트되고,
@@ -192,6 +194,16 @@ export default function BlogForm({ initial }: Props) {
       : ''
   );
   const [sendAsNewsletter, setSendAsNewsletter] = useState(false);
+  /** 새 글은 카테고리 기본값 없이 시작한다(유씨 설문 Q12 "기본값 없이 매번 고르기", 계획서 F1′).
+   *  form.category 는 타입상 비울 수 없어 내부값은 남겨 두고, "골랐는가" 를 따로 든다. */
+  const [categoryChosen, setCategoryChosen] = useState(isEdit);
+  const categoryRef = useRef<HTMLDivElement>(null);
+  /** 선택 칸(검색 제목·메타 설명·한국어 요약·FAQ·인포블록·관련 글)은 접어 둔다(F5).
+   *  값이 하나라도 있는 글은 펼친 채로 연다 — 접힌 칸에 든 값을 못 보고 지나치지 않게. */
+  const [extrasOpen, setExtrasOpen] = useState(() => !!(
+    initial?.seo_title || initial?.meta_description || initial?.summary_ko || initial?.info_block_html
+    || initial?.faq_json?.length || initial?.related_slugs?.length
+  ));
   const [aiMode, setAiMode] = useState<null | 'description' | 'seo_title' | 'summary_ko'>(null);
   const [infoBlockPreview, setInfoBlockPreview] = useState(false);
 
@@ -279,10 +291,10 @@ export default function BlogForm({ initial }: Props) {
   const autoSaveLabelTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 최신 상태를 ref로 추적 (interval이 stale closure를 참조하지 않도록)
-  const stateRef = useRef({ form, tags, scheduleMode, scheduleAt, coverCaption, faq, relatedSlugs });
+  const stateRef = useRef({ form, tags, scheduleMode, scheduleAt, coverCaption, faq, relatedSlugs, categoryChosen });
   useEffect(() => {
-    stateRef.current = { form, tags, scheduleMode, scheduleAt, coverCaption, faq, relatedSlugs };
-  }, [form, tags, scheduleMode, scheduleAt, coverCaption, faq, relatedSlugs]);
+    stateRef.current = { form, tags, scheduleMode, scheduleAt, coverCaption, faq, relatedSlugs, categoryChosen };
+  }, [form, tags, scheduleMode, scheduleAt, coverCaption, faq, relatedSlugs, categoryChosen]);
 
   // 마운트 시 임시저장 확인
   useEffect(() => {
@@ -296,9 +308,9 @@ export default function BlogForm({ initial }: Props) {
   useEffect(() => {
     const id = setInterval(() => {
       try {
-        const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa, coverCaption: cc, faq: fq, relatedSlugs: rs } = stateRef.current;
+        const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa, coverCaption: cc, faq: fq, relatedSlugs: rs, categoryChosen: ch } = stateRef.current;
         // content가 매우 클 경우 content_backup을 제외한 슬림 버전으로 저장 시도
-        const rest = { tags: t, scheduleMode: sm, scheduleAt: sa, coverCaption: cc, faq: fq, relatedSlugs: rs };
+        const rest = { tags: t, scheduleMode: sm, scheduleAt: sa, coverCaption: cc, faq: fq, relatedSlugs: rs, categoryChosen: ch };
         let serialized = JSON.stringify({ form: f, ...rest });
         if (serialized.length > 3_000_000) {
           // 3MB 초과 시 content만 제외하고 저장 (Supabase에 직접 저장된 본문은 안전)
@@ -319,9 +331,13 @@ export default function BlogForm({ initial }: Props) {
     try {
       const saved = sessionStorage.getItem(draftKey);
       if (!saved) return;
-      const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa, coverCaption: cc, faq: fq, relatedSlugs: rs } = JSON.parse(saved);
+      const { form: f, tags: t, scheduleMode: sm, scheduleAt: sa, coverCaption: cc, faq: fq, relatedSlugs: rs, categoryChosen: ch } = JSON.parse(saved);
       // 통째 교체하면 배포 전에 저장된 옛 초안이 새 컬럼(seo_title 등)을 지운다 — 병합한다.
       if (f) setForm(prev => ({ ...prev, ...f }));
+      // 이 칸이 생기기 전의 초안(ch 없음)은 "안 고름" 으로 둔다 — 기본값이 고른 것처럼 보이면 F1′ 이 무너진다.
+      if (ch === true) setCategoryChosen(true);
+      if (f && (f.seo_title || f.meta_description || f.summary_ko || f.info_block_html)
+        || (Array.isArray(fq) && fq.length) || (Array.isArray(rs) && rs.length)) setExtrasOpen(true);
       if (t) setTags(t);
       if (sm) setScheduleMode(sm);
       if (sa !== undefined) setScheduleAt(sa);
@@ -417,6 +433,14 @@ export default function BlogForm({ initial }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // 카테고리를 아직 안 골랐으면 저장 전에 알약으로 데려간다(F1′ — 기본값으로 조용히 들어가지 않게).
+    if (!categoryChosen) {
+      toast.error('카테고리를 골라 주세요.');
+      setError('카테고리를 골라 주세요 — 맨 위 알약 중 하나를 누르면 됩니다.');
+      categoryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     // ── 발행 전 체크리스트 유효성 검사 ──
     // 체크리스트와 같은 판정을 쓴다 — 두 목록이 갈라지면 "체크리스트는 통과인데 저장이 막히는" 일이 생긴다.
@@ -610,25 +634,34 @@ export default function BlogForm({ initial }: Props) {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
         {/* 카테고리 */}
-        <div>
-          <label style={labelStyle}>카테고리</label>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {CATEGORIES.map(c => (
-              <button
-                key={c} type="button"
-                onClick={() => set('category', c)}
-                style={{
-                  padding: '10px 20px', borderRadius: '999px', border: '1px solid',
-                  borderColor: form.category === c ? '#000' : '#F1F5F9',
-                  background: form.category === c ? '#000' : 'white',
-                  color: form.category === c ? 'white' : '#64748B',
-                  fontSize: '12px', fontWeight: 700, cursor: 'pointer',
-                }}
-              >
-                {c}
-              </button>
-            ))}
+        <div ref={categoryRef}>
+          <label style={labelStyle}>카테고리 *</label>
+          <div role="radiogroup" aria-label="카테고리" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Whānau 는 당분간 숨긴다(유씨 Q9). 그 서랍에 이미 있는 글을 고칠 때만 보인다 — 값이 사라져 보이지 않게. */}
+            {CATEGORIES.filter(c => c !== 'Whānau' || (isEdit && initial?.category === 'Whānau')).map(c => {
+              const on = categoryChosen && form.category === c;
+              return (
+                <button
+                  key={c} type="button" role="radio" aria-checked={on}
+                  onClick={() => { set('category', c); setCategoryChosen(true); setError(''); }}
+                  style={{
+                    padding: '10px 20px', borderRadius: '999px', border: '1px solid',
+                    borderColor: on ? '#000' : (categoryChosen ? '#F1F5F9' : '#CBD5E1'),
+                    background: on ? '#000' : 'white',
+                    color: on ? 'white' : '#64748B',
+                    fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  {c}
+                </button>
+              );
+            })}
           </div>
+          {!categoryChosen && (
+            <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>
+              이 글이 들어갈 서랍을 하나 골라 주세요.
+            </p>
+          )}
         </div>
 
         {/* 제목 */}
@@ -772,7 +805,16 @@ export default function BlogForm({ initial }: Props) {
           </Suspense>
         </div>
 
-        {/* ── SEO 섹션 ── */}
+        {/* ── 선택 칸 묶음(F5) — 필수 4칸 뒤에 접어 둔다. 저장 경로·검증은 그대로다. ── */}
+        <details
+          open={extrasOpen}
+          onToggle={e => setExtrasOpen((e.currentTarget as HTMLDetailsElement).open)}
+          style={{ background: 'white', borderRadius: 20, padding: extrasOpen ? '20px 24px 24px' : '18px 24px' }}
+        >
+          <summary style={{ cursor: 'pointer', listStyle: 'revert', fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>
+            더 보기 <span style={{ fontWeight: 400, color: '#94A3B8', fontSize: 12 }}>— 검색 제목 · 메타 설명 · 한국어 요약 · FAQ · 인포블록 · 관련 글 (모두 선택)</span>
+          </summary>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 20 }}>
         {(() => {
           const titleLen = form.title.length;
           const seoTitleLen = (form.seo_title ?? '').length;
@@ -1007,6 +1049,8 @@ export default function BlogForm({ initial }: Props) {
           selected={relatedSlugs}
           onChange={setRelatedSlugs}
         />
+          </div>
+        </details>
 
         {/* 태그 */}
         <div>
@@ -1116,8 +1160,9 @@ export default function BlogForm({ initial }: Props) {
           </button>
         </div>
 
-        {/* 뉴스레터 발송 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '18px 24px', background: 'white', borderRadius: '20px' }}>
+        {/* 뉴스레터 발송 — 폼에서 숨김(F4, 유씨 Q4 "뉴스레터는 매주 고정, 글마다 안 보냄").
+            발송 코드·/api/send-newsletter·뉴스레터 화면은 그대로다. 다시 보이려면 SHOW_NEWSLETTER_TOGGLE 하나만 켠다. */}
+        {SHOW_NEWSLETTER_TOGGLE && <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '18px 24px', background: 'white', borderRadius: '20px' }}>
           <input
             id="send-newsletter"
             type="checkbox"
@@ -1133,7 +1178,7 @@ export default function BlogForm({ initial }: Props) {
               이 글 발행 시 구독자에게 자동으로 이메일을 보냅니다 (RESEND_API_KEY 필요)
             </p>
           </label>
-        </div>
+        </div>}
 
         {/* 스폰서 콘텐츠 */}
         <div style={{ padding: '20px 24px', background: 'white', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
