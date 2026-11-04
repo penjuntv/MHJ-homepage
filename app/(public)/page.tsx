@@ -4,7 +4,7 @@ import { OG_BASE, SITE_LANG, SITE_DESCRIPTION, WEBSITE_ID, orgRef, yussiNode } f
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { ArrowRight } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, createPublicAdminClient } from '@/lib/supabase';
 import type { Blog, Magazine } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { formatDate } from '@/lib/utils';
@@ -19,16 +19,20 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 const HOME_TITLE = "My Mairangi Journal — A Korean Family's NZ School & Life Notes";
 
 /** 관리자 설정 `home_h1` 이 비어 있을 때의 문장. 검색 연속성을 위해 예전 꼬리표와 같은 말을 쓴다. */
-const DEFAULT_H1 = 'A Korean family’s school & life notes from Mairangi Bay, Auckland.';
+const DEFAULT_H1 = 'A Korean family’s school & life notes from Mairangi Bay, Auckland';
 
 /**
- * 홈의 "문 두 개"(계획서 v3 §2.3). DB 는 그대로 두고 기존 카테고리를 코드에서 묶는다.
- * Guides 는 조회 상위(안내 글이 오래 읽힌다), Our Days 는 최신순(일기는 새것이 궁금하다).
+ * 홈 구성(2026-11-05 유씨 미리보기 피드백 반영):
+ * 머리 문장 → 최신 글 1+4 → Guides 3 · 매거진 · StoryPress → 추천 5 → 서랍 줄 → 뉴스레터.
+ * Guides·추천은 관리자 설정 HOME 칸에서 직접 고르고, 비운 자리는 자동으로 채운다.
  */
+const HERO_SIZE = 5;
+const GUIDE_SIZE = 3;
+const PICK_SIZE = 5;
+/** Guides 자동 채움 후보 — 안내 글이 모인 기존 카테고리(DB 불변, 코드에서 묶음). */
 const GUIDE_CATEGORIES = ['Home Learning', 'Local Guide', 'Settlement'];
-const DAYS_CATEGORIES = ['Life in Aotearoa', 'Little 15 Mins'];
-const DOOR_SIZE = 4;
-const LATEST_SIZE = 6;
+/** 추천 자동 점수: 조회 1 + 승인 댓글 1개당 30. 댓글은 드물어서 무게를 크게 둔다. */
+const COMMENT_WEIGHT = 30;
 /** 서랍 줄에서 글이 이 수보다 적으면 숨기는 카테고리(유씨 Q9 "Whānau 는 당분간 빼놔도"). */
 const HIDE_WHEN_THIN = new Set(['Whānau']);
 
@@ -54,37 +58,46 @@ const FALLBACK_BLOGS: Blog[] = [
 
 /* ─── Data fetching ─── */
 
-async function getFeaturedPosts(): Promise<Blog[]> {
+/**
+ * 머리 1+4. 관리자 목록의 별(featured)로 고정한 글이 hero_order 순으로 먼저, 남은 자리는 최신 글.
+ * (예전엔 고정 글이 하나라도 있으면 고정 글만 냈다 — 자리가 5개로 늘어 빈칸이 생기지 않게 채운다.)
+ */
+async function getHeroPosts(): Promise<Blog[]> {
   const now = new Date().toISOString();
 
-  // 1) featured=true → hero_order 순서 우선, date 보조
-  const { data: featured, error: featuredError } = await supabase
-    .from('blogs')
-    .select(BLOG_CARD_COLUMNS)
-    .eq('published', true)
-    .eq('featured', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('hero_order', { ascending: true, nullsFirst: false })
-    .order('date', { ascending: false })
-    .limit(3);
+  const [{ data: featured, error: featuredError }, { data: latest, error: latestError }] = await Promise.all([
+    supabase
+      .from('blogs')
+      .select(BLOG_CARD_COLUMNS)
+      .eq('published', true)
+      .eq('featured', true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .order('hero_order', { ascending: true, nullsFirst: false })
+      .order('date', { ascending: false })
+      .limit(HERO_SIZE),
+    supabase
+      .from('blogs')
+      .select(BLOG_CARD_COLUMNS)
+      .eq('published', true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .order('date', { ascending: false })
+      .limit(HERO_SIZE),
+  ]);
+  if (featuredError) console.error('getHeroPosts(featured):', featuredError.message);
+  if (latestError) console.error('getHeroPosts(latest):', latestError.message);
 
-  if (featuredError) console.error('getFeaturedPosts(featured):', featuredError.message);
-  if (featured?.length) return featured as Blog[];
-
-  // 2) fallback: 최신 published 3개
-  const { data: latest, error: latestError } = await supabase
-    .from('blogs')
-    .select(BLOG_CARD_COLUMNS)
-    .eq('published', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('date', { ascending: false })
-    .limit(3);
-
-  if (latestError) console.error('getFeaturedPosts(latest):', latestError.message);
-  return (latest as Blog[]) ?? FALLBACK_BLOGS;
+  const out: Blog[] = [];
+  const seen = new Set<number>();
+  for (const b of [...((featured as Blog[]) ?? []), ...((latest as Blog[]) ?? [])]) {
+    if (out.length >= HERO_SIZE) break;
+    if (seen.has(b.id)) continue;
+    seen.add(b.id);
+    out.push(b);
+  }
+  return out.length ? out : FALLBACK_BLOGS;
 }
 
-/** 홈의 나머지 구역(문 두 개·최신·서랍 줄)이 모두 이 한 목록에서 나온다 — 발행 글 약 90편, 본문 없이. */
+/** Guides·추천·서랍 줄이 모두 이 한 목록에서 나온다 — 발행 글 약 90편, 본문 없이. */
 async function getPublishedIndex(): Promise<Blog[]> {
   const now = new Date().toISOString();
   const { data, error } = await supabase
@@ -95,6 +108,20 @@ async function getPublishedIndex(): Promise<Blog[]> {
     .order('date', { ascending: false });
   if (error) console.error('getPublishedIndex:', error.message);
   return (data as Blog[]) ?? [];
+}
+
+/** 승인 댓글 수. comments 는 anon 이 INSERT 만 가능(2026-09-06)이라 service_role 공개 클라이언트로 읽는다(ISR 호환). */
+async function getApprovedCommentCounts(): Promise<Record<number, number>> {
+  const { data, error } = await createPublicAdminClient()
+    .from('comments')
+    .select('blog_id')
+    .eq('approved', true);
+  if (error) console.error('getApprovedCommentCounts:', error.message);
+  const counts: Record<number, number> = {};
+  for (const row of (data ?? []) as { blog_id: number | null }[]) {
+    if (row.blog_id != null) counts[row.blog_id] = (counts[row.blog_id] ?? 0) + 1;
+  }
+  return counts;
 }
 
 async function getLatestMagazine(): Promise<Magazine | null> {
@@ -129,12 +156,27 @@ function take(pool: Blog[], used: Set<number>, n: number, pred: (b: Blog) => boo
   return picked;
 }
 
+/** 설정에 고른 slug 순서대로(발행 글만, 이미 쓴 글 제외) 먼저 넣고, 남은 자리는 auto 에서 채운다. */
+function curated(slugCsv: string | undefined, index: Blog[], used: Set<number>, n: number, auto: Blog[]): { posts: Blog[]; manual: number } {
+  const bySlug = new Map(index.map(b => [b.slug, b]));
+  const chosen: Blog[] = [];
+  for (const slug of (slugCsv ?? '').split(',').map(s => s.trim()).filter(Boolean)) {
+    const b = bySlug.get(slug);
+    if (!b || used.has(b.id) || chosen.length >= n) continue;
+    chosen.push(b);
+    used.add(b.id);
+  }
+  const manual = chosen.length;
+  return { posts: [...chosen, ...take(auto, used, n - manual)], manual };
+}
+
 /* ─── Page component ─── */
 
 export default async function LandingPage() {
-  const [heroBlogs, index, latestMag, settings] = await Promise.all([
-    getFeaturedPosts(),
+  const [heroBlogs, index, comments, latestMag, settings] = await Promise.all([
+    getHeroPosts(),
     getPublishedIndex(),
+    getApprovedCommentCounts(),
     getLatestMagazine(),
     getSiteSettings(),
   ]);
@@ -142,10 +184,16 @@ export default async function LandingPage() {
   const h1 = (settings.home_h1 || '').trim() || DEFAULT_H1;
 
   const used = new Set<number>(heroBlogs.map(b => b.id));
+
   const byViews = [...index].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0) || b.id - a.id);
-  const guides = take(byViews, used, DOOR_SIZE, b => GUIDE_CATEGORIES.includes(b.category));
-  const days = take(index, used, DOOR_SIZE, b => DAYS_CATEGORIES.includes(b.category));
-  const latest = take(index, used, LATEST_SIZE);
+  const guides = curated(settings.home_guides, index, used, GUIDE_SIZE,
+    byViews.filter(b => GUIDE_CATEGORIES.includes(b.category))).posts;
+
+  const score = (b: Blog) => (b.view_count ?? 0) + COMMENT_WEIGHT * (comments[b.id] ?? 0);
+  const byScore = [...index].sort((a, b) => score(b) - score(a) || b.id - a.id);
+  const picks = curated(settings.home_picks, index, used, PICK_SIZE, byScore);
+  // 직접 고른 글이 하나라도 있으면 "Picks", 전부 자동이면 "Popular" — 이름이 실제 선정 방식과 맞게.
+  const picksTitle = picks.manual > 0 ? 'Our Picks' : 'Popular';
 
   const counts: Record<string, number> = {};
   for (const b of index) counts[b.category] = (counts[b.category] ?? 0) + 1;
@@ -190,65 +238,110 @@ export default async function LandingPage() {
         <div id="scroll-depth-100" aria-hidden style={{ position: 'absolute', bottom: 0, height: 1 }} />
         <ScrollDepthTracker slug="home" />
 
-        {/* ═══════ §0. 사이트 정체성 문장 = 페이지의 유일한 H1 ═══════
+        {/* ═══════ §0. 머리 문장 = 페이지의 유일한 H1. 구역 제목과 같은 꼬리표 모양(유씨 피드백 6). ═══════
             히어로 글 제목이 H1 이면 홈의 주제가 매주 바뀐다(자체진단 H17). 문장은 관리자 설정 home_h1. */}
-        <div style={{ background: 'var(--bg-surface)' }}>
-          <div className="home-wrap" style={{ paddingTop: 28 }}>
-            <h1 className="font-display home-h1">{h1}</h1>
+        {/* flow-root: 제목의 아래 여백이 배경 밖으로 새어 대표 글 띠와 사이에 흰 줄이 생기지 않게 */}
+        <div style={{ background: 'var(--bg-surface)', display: 'flow-root' }}>
+          <div className="home-wrap" style={{ paddingTop: 32 }}>
+            <SectionLabel as="h1">{h1}</SectionLabel>
           </div>
         </div>
 
-        {/* ═══════ §1. 대표 글 1+2 (데스크톱은 첫 화면에 다음 구역 머리까지 보이게 낮춤) ═══════ */}
+        {/* ═══════ §1. 최신 글 1+4 — 따로 있던 Latest 를 합쳤다(유씨 피드백 1·2) ═══════ */}
         {heroBlogs.length > 0 && (
           <div style={{ background: 'var(--bg-surface)' }}>
-            <EditorialHero blogs={heroBlogs} />
+            <HomeHero blogs={heroBlogs} />
           </div>
         )}
 
-        {/* ═══════ §2. 문 두 개 — 찾으러 온 사람 / 가족 이야기를 보러 온 사람 ═══════ */}
-        {(guides.length > 0 || days.length > 0) && (
-          <section className="home-wrap home-section" aria-labelledby="home-doors-title">
-            <h2 id="home-doors-title" className="sr-only">Where to start</h2>
-            <div className="home-doors">
-              {guides.length > 0 && (
-                <HomeDoor
-                  id="guides"
-                  title="Guides — Start here"
-                  lede="NZ schools, year levels, reports and the places we found useful."
-                  posts={guides}
-                  hubs={GUIDE_CATEGORIES}
-                />
-              )}
-              {days.length > 0 && (
-                <HomeDoor
-                  id="days"
-                  title="Our Days"
-                  lede="The ordinary days of a Korean family in Mairangi Bay."
-                  posts={days}
-                  hubs={DAYS_CATEGORIES}
-                  extra={
-                    <Link
-                      href="/storypress"
-                      className="home-door-extra"
-                      data-track="storypress_click"
-                      data-track-location="home_door"
-                    >
-                      Jin&rsquo;s 15-minute stories are made with StoryPress <ArrowRight size={12} aria-hidden />
-                    </Link>
-                  }
-                />
-              )}
-            </div>
-          </section>
-        )}
+        {/* ═══════ §2. Guides 3 + 매거진 + StoryPress — 저널 밖으로 가는 길(유씨 피드백 3·4) ═══════ */}
+        <section className="home-wrap home-section" aria-label="Guides, magazine and StoryPress">
+          <div className="home-feature-row">
+            {guides.length > 0 && (
+              <div className="home-guides">
+                <SectionLabel>Guides — Start here</SectionLabel>
+                <p className="home-guides-lede">NZ schools, year levels, reports and the places we found useful.</p>
+                <ul className="home-guides-list">
+                  {guides.map(blog => (
+                    <li key={blog.id}>
+                      <Link
+                        href={`/blog/${blog.slug}`}
+                        className="home-guide-item"
+                        data-track="home_guide_click"
+                      >
+                        <div className="home-guide-thumb">
+                          <SafeImage src={blog.image_url} alt="" fill sizes="120px" className="object-cover" />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <span className="home-card-cat">{blog.category}</span>
+                          <p className="home-guide-title">{blog.title}</p>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-        {/* ═══════ §3. 최신 글 6 ═══════ */}
-        {latest.length > 0 && (
+            {latestMag && (
+              <Link href="/magazine" className="home-box home-box-magazine" data-track="home_magazine_click">
+                <span className="home-box-label">From the Magazine</span>
+                <div className="home-box-mag">
+                  <div className="home-box-cover magazine-cover-shadow">
+                    <SafeImage src={latestMag.image_url} alt={latestMag.title} fill sizes="120px" className="object-cover" />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <p className="font-display home-box-title">{latestMag.title}</p>
+                    <p className="home-box-meta">
+                      {latestMag.year} {latestMag.month_name}
+                      {latestMag.issue_number ? ` · Issue ${String(latestMag.issue_number).padStart(2, '0')}` : ''}
+                    </p>
+                    {magArticleCount > 0 && (
+                      <p className="home-box-meta">{magArticleCount} {magArticleCount === 1 ? 'story' : 'stories'} inside</p>
+                    )}
+                  </div>
+                </div>
+                <span className="home-box-cta">Browse issues <ArrowRight size={13} aria-hidden /></span>
+              </Link>
+            )}
+
+            <Link
+              href="/storypress"
+              className="home-box home-box-storypress"
+              data-track="storypress_click"
+              data-track-location="home_box"
+            >
+              <span className="home-box-label">StoryPress</span>
+              <p className="font-display home-box-title" style={{ whiteSpace: 'pre-line' }}>
+                {settings.storypress_title || 'Every child has a story.\nLet them write it.'}
+              </p>
+              {settings.pillar_storypress_intro && (
+                <p className="home-box-text">{settings.pillar_storypress_intro}</p>
+              )}
+              <span className="home-box-cta">See how it works <ArrowRight size={13} aria-hidden /></span>
+            </Link>
+          </div>
+        </section>
+
+        {/* ═══════ §3. 추천 5 — 직접 고른 글, 빈 자리는 조회수·댓글 많은 글 ═══════ */}
+        {picks.posts.length > 0 && (
           <section className="home-wrap home-section">
-            <SectionLabel>Latest</SectionLabel>
-            <div className="home-latest-grid">
-              {latest.map((blog) => (
-                <PostCard key={blog.id} blog={blog} />
+            <SectionLabel>{picksTitle}</SectionLabel>
+            <div className="home-picks">
+              {picks.posts.map(blog => (
+                <Link key={blog.id} href={`/blog/${blog.slug}`} className="home-pick" data-track="home_pick_click">
+                  <div className="home-pick-thumb">
+                    <SafeImage
+                      src={blog.image_url}
+                      alt={blog.title}
+                      fill
+                      sizes="(max-width: 1023px) 45vw, 230px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <span className="home-card-cat">{blog.category}</span>
+                  <h3 className="home-pick-title">{blog.title}</h3>
+                </Link>
               ))}
             </div>
           </section>
@@ -277,104 +370,7 @@ export default async function LandingPage() {
           </nav>
         )}
 
-        {/* ═══════ §5. Magazine Feature ═══════ */}
-        {latestMag && (
-          <section className="home-wrap home-section">
-            <Link
-              href="/magazine"
-              style={{
-                display: 'block',
-                padding: 'clamp(20px, 3vw, 24px) clamp(24px, 4vw, 32px)',
-                borderRadius: 12,
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border)',
-                textDecoration: 'none',
-                transition: 'opacity 0.3s ease',
-              }}
-            >
-              <div className="magazine-feature-grid">
-                {/* Cover */}
-                <div className="magazine-cover-shadow" style={{
-                  height: 180,
-                  aspectRatio: '3/4',
-                  width: 'auto',
-                  borderRadius: 8,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  flexShrink: 0,
-                }}>
-                  <SafeImage
-                    src={latestMag.image_url}
-                    alt={latestMag.title}
-                    fill
-                    sizes="135px"
-                    className="object-cover"
-                  />
-                </div>
-
-                {/* Info */}
-                <div>
-                  <p style={{
-                    fontSize: 11,
-                    fontWeight: 900,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                    marginBottom: 8,
-                  }}>
-                    From the Magazine
-                  </p>
-
-                  <h3 className="font-display" style={{
-                    fontSize: 'clamp(24px, 3vw, 28px)',
-                    fontWeight: 900,
-                    fontStyle: 'italic',
-                    color: 'var(--text)',
-                    letterSpacing: -0.5,
-                    lineHeight: 1.1,
-                    margin: '0 0 8px',
-                  }}>
-                    {latestMag.title}
-                  </h3>
-
-                  <p style={{
-                    fontSize: 14,
-                    color: 'var(--text-secondary)',
-                    marginBottom: 8,
-                  }}>
-                    {latestMag.year} {latestMag.month_name}
-                    {latestMag.issue_number ? ` · Issue ${String(latestMag.issue_number).padStart(2, '0')}` : ''}
-                  </p>
-
-                  {magArticleCount > 0 && (
-                    <p style={{
-                      fontSize: 14,
-                      color: 'var(--text-tertiary)',
-                      marginBottom: 12,
-                    }}>
-                      {magArticleCount} {magArticleCount === 1 ? 'story' : 'stories'} inside
-                    </p>
-                  )}
-
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 13,
-                    fontWeight: 900,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                  }}>
-                    Browse Issues <ArrowRight size={12} />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          </section>
-        )}
-
-        {/* ═══════ §6. Newsletter CTA — 홈에 한 곳 ═══════ */}
+        {/* ═══════ §5. Newsletter CTA — 홈에 한 곳 ═══════ */}
         <div style={{ marginTop: 72 }}>
           <NewsletterCTA reducedPadding buttonText="Subscribe →" location="homepage_bottom" copy={ctaCopyA} />
         </div>
@@ -384,260 +380,70 @@ export default async function LandingPage() {
   );
 }
 
-/* ─── Section label (홈 구역 머리 관례: 12px·900·자간·대문자 + 짧은 갈색 줄) ─── */
-function SectionLabel({ children }: { children: React.ReactNode }) {
+/* ─── 구역 제목: 12px·900·자간·대문자 + 짧은 갈색 줄. 머리 문장(h1)까지 모든 구역이 같은 모양을 쓴다. ─── */
+function SectionLabel({ children, as: Tag = 'h2' }: { children: React.ReactNode; as?: 'h1' | 'h2' }) {
   return (
-    <div style={{ marginBottom: 28 }}>
-      <h2 style={{
-        fontSize: 12,
-        fontWeight: 900,
-        letterSpacing: 5,
-        textTransform: 'uppercase',
-        color: 'var(--text-secondary)',
-        margin: 0,
-      }}>
-        {children}
-      </h2>
+    <div style={{ marginBottom: 24 }}>
+      <Tag className="home-label">{children}</Tag>
       <div style={{ width: 40, height: 2, background: 'var(--mhj-brown)', marginTop: 10 }} />
     </div>
   );
 }
 
-/* ─── Editorial Hero section ─── */
-function EditorialHero({ blogs }: { blogs: Blog[] }) {
+/* ─── 최신 글 1+4: 큰 글 하나 + 작은 카드 넷(썸네일 아래 글자) ─── */
+function HomeHero({ blogs }: { blogs: Blog[] }) {
   const main = blogs[0];
   const subs = blogs.slice(1);
 
   const mainExcerpt = main.meta_description || stripHtml(main.content).slice(0, 160);
 
   return (
-    <section className="home-wrap" style={{ paddingTop: 24, paddingBottom: 28 }}>
-      <div className="hero-editorial-grid">
-        {/* Main Featured */}
-        <div className="hero-main">
-          <Link href={`/blog/${main.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-            <div className="hero-main-media">
-              {/* 홈의 LCP 요소. priority 가 없으면 next/image 기본값 loading="lazy" 로 나가 첫 화면 이미지가
-                  하이드레이션 뒤에야 요청된다 — 자체진단 F-C-02 (LH-mobile LCP 9.8s). preload + fetchpriority=high. */}
-              <SafeImage
-                src={main.og_image_url || main.image_url}
-                alt={main.title}
-                fill
-                priority
-                fetchPriority="high"
-                sizes="(max-width: 1023px) calc(100vw - 40px), 720px"
-                className="object-cover"
-              />
-            </div>
+    <section className="home-wrap" style={{ paddingTop: 4, paddingBottom: 36 }}>
+      <div className="home-hero">
+        <Link href={`/blog/${main.slug}`} className="home-hero-main">
+          <div className="home-hero-media">
+            {/* 홈의 LCP 요소. priority 가 없으면 next/image 기본값 loading="lazy" 로 나가 첫 화면 이미지가
+                하이드레이션 뒤에야 요청된다 — 자체진단 F-C-02 (LH-mobile LCP 9.8s). preload + fetchpriority=high. */}
+            <SafeImage
+              src={main.og_image_url || main.image_url}
+              alt={main.title}
+              fill
+              priority
+              fetchPriority="high"
+              sizes="(max-width: 1023px) calc(100vw - 40px), 640px"
+              className="object-cover"
+            />
+          </div>
+          <div style={{ marginTop: 14 }}>
+            <span className="home-card-cat">
+              {main.category}
+              {main.date && ` · ${formatDate(main.date)}`}
+            </span>
+            <h2 className="font-display home-hero-title">{main.title}</h2>
+            {mainExcerpt && <p className="home-hero-excerpt">{mainExcerpt}</p>}
+          </div>
+        </Link>
 
-            <div style={{ marginTop: 14 }}>
-              <span style={{
-                fontSize: 12,
-                fontWeight: 600,
-                letterSpacing: 2,
-                textTransform: 'uppercase',
-                color: 'var(--text-secondary)',
-              }}>
-                {main.category}
-                {main.date && ` · ${formatDate(main.date)}`}
-              </span>
-
-              <h2
-                className="font-display"
-                style={{
-                  fontSize: 'clamp(24px, 3.2vw, 30px)',
-                  fontWeight: 900,
-                  fontStyle: 'italic',
-                  letterSpacing: -0.8,
-                  lineHeight: 1.12,
-                  color: 'var(--text)',
-                  margin: '6px 0',
-                }}
-              >
-                {main.title}
-              </h2>
-
-              {mainExcerpt && (
-                <p style={{
-                  fontSize: 15,
-                  color: 'var(--text-secondary)',
-                  lineHeight: 1.6,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  margin: '6px 0 0',
-                }}>
-                  {mainExcerpt}
-                </p>
-              )}
-            </div>
-          </Link>
-        </div>
-
-        {/* Sub Featured Cards */}
         {subs.length > 0 && (
-          <div className="hero-sub-cards">
-            {subs.map((blog) => (
-              <Link
-                key={blog.id}
-                href={`/blog/${blog.slug}`}
-                className="hero-sub-card"
-                style={{ textDecoration: 'none' }}
-              >
-                <div className="hero-sub-thumb" style={{
-                  position: 'relative',
-                  borderRadius: 6,
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                }}>
+          <div className="home-hero-subs">
+            {subs.map(blog => (
+              <Link key={blog.id} href={`/blog/${blog.slug}`} className="home-hero-sub">
+                <div className="home-hero-sub-thumb">
                   <SafeImage
                     src={blog.image_url}
                     alt={blog.title}
                     fill
-                    sizes="(max-width: 767px) 140px, 200px"
+                    sizes="(max-width: 639px) 45vw, (max-width: 1023px) 24vw, 290px"
                     className="object-cover"
                   />
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                  }}>
-                    {blog.category}
-                  </span>
-                  <p style={{
-                    fontSize: 15,
-                    fontWeight: 600,
-                    color: 'var(--text)',
-                    lineHeight: 1.4,
-                    margin: '4px 0 0',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}>
-                    {blog.title}
-                  </p>
-                </div>
+                <span className="home-card-cat">{blog.category}</span>
+                <p className="home-hero-sub-title">{blog.title}</p>
               </Link>
             ))}
           </div>
         )}
       </div>
     </section>
-  );
-}
-
-/* ─── 문 하나: 제목·한 줄 설명·글 4편(작은 썸네일 목록)·카테고리 허브 길 ─── */
-function HomeDoor({ id, title, lede, posts, hubs, extra }: {
-  id: string;
-  title: string;
-  lede: string;
-  posts: Blog[];
-  hubs: string[];
-  extra?: React.ReactNode;
-}) {
-  return (
-    <div className="home-door">
-      <h3 className="font-display home-door-title">{title}</h3>
-      <p className="home-door-lede">{lede}</p>
-      <ul className="home-door-list">
-        {posts.map(blog => (
-          <li key={blog.id}>
-            <Link
-              href={`/blog/${blog.slug}`}
-              className="home-door-item"
-              data-track="home_door_click"
-              data-track-door={id}
-            >
-              <div className="home-door-thumb">
-                <SafeImage src={blog.image_url} alt="" fill sizes="96px" className="object-cover" />
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <span className="home-door-cat">{blog.category}</span>
-                <p className="home-door-item-title">{blog.title}</p>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      <p className="home-door-hubs">
-        More in{' '}
-        {hubs.map((h, i) => (
-          <span key={h}>
-            {i > 0 && ' · '}
-            <Link href={categoryHref(h)}>{h}</Link>
-          </span>
-        ))}
-      </p>
-      {extra}
-    </div>
-  );
-}
-
-/* ─── Post card for Latest grid — 날짜·저자·조회수 없음(DESIGN_RULES §10.2). 제목 꼬리표는 그대로(유씨 Q7) ─── */
-function PostCard({ blog }: { blog: Blog }) {
-  return (
-    <Link
-      href={`/blog/${blog.slug}`}
-      className="blog-card-hover"
-      style={{
-        display: 'block',
-        borderRadius: 12,
-        border: '1px solid var(--border)',
-        background: 'var(--bg-card)',
-        padding: 12,
-        textDecoration: 'none',
-      }}
-    >
-      <div style={{
-        position: 'relative',
-        aspectRatio: '4/3',
-        borderRadius: 6,
-        overflow: 'hidden',
-      }}>
-        <SafeImage
-          src={blog.image_url}
-          alt={blog.title}
-          fill
-          sizes="(max-width: 639px) 100vw, (max-width: 767px) 50vw, 380px"
-          className="object-cover"
-          style={{ transition: 'transform 0.5s ease' }}
-        />
-      </div>
-
-      <div style={{ padding: '14px 6px 8px' }}>
-        <span style={{
-          display: 'block',
-          fontSize: 10,
-          fontWeight: 900,
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-          color: 'var(--text-secondary)',
-          marginBottom: 8,
-        }}>
-          {blog.category}
-        </span>
-
-        <h3 style={{
-          fontSize: 18,
-          fontWeight: 700,
-          color: 'var(--text)',
-          lineHeight: 1.4,
-          letterSpacing: -0.3,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          margin: 0,
-        }}>
-          {blog.title}
-        </h3>
-      </div>
-    </Link>
   );
 }

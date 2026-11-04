@@ -63,7 +63,9 @@ type EditorialSection = {
   fields: Array<{
     key: string;
     label: string;
-    type: 'input' | 'textarea' | 'date';
+    /** posts = 발행 글 중에서 count 편을 고르는 칸. 값은 slug 를 쉼표로 이은 글자(빈 칸은 자동). */
+    type: 'input' | 'textarea' | 'date' | 'posts';
+    count?: number;
     rows?: number;
     placeholder?: string;
   }>;
@@ -94,10 +96,12 @@ const EDITORIAL_SECTIONS: EditorialSection[] = [
   {
     id: 'home',
     title: 'HOME',
-    hint: '홈 맨 위 한 문장(페이지의 유일한 제목 h1). 비워 두면 기본 문장이 나갑니다. 검색 결과에도 영향을 주니 자주 바꾸지 마세요.',
+    hint: '홈 맨 위 문장과, 홈에 직접 골라 올리는 글. 고르지 않은 자리는 자동으로 채워집니다.',
     revalidatePaths: ['/'],
     fields: [
-      { key: 'home_h1', label: '홈 첫 문장 (h1)', type: 'input', placeholder: 'A Korean family’s school & life notes from Mairangi Bay, Auckland.' },
+      { key: 'home_h1', label: '홈 첫 문장 (h1) — 검색 결과에도 영향, 자주 바꾸지 마세요', type: 'input', placeholder: 'A Korean family’s school & life notes from Mairangi Bay, Auckland.' },
+      { key: 'home_guides', label: 'Guides 3편 — 비우면 안내 글 중 조회 상위', type: 'posts', count: 3 },
+      { key: 'home_picks', label: '추천 글 5편 — 비우면 조회수·댓글 많은 글', type: 'posts', count: 5 },
     ],
   },
   {
@@ -139,6 +143,50 @@ const EDITORIAL_SECTIONS: EditorialSection[] = [
 
 const EDITORIAL_KEYS = EDITORIAL_SECTIONS.flatMap(s => s.fields.map(f => f.key));
 
+type PostOption = { slug: string; title: string; category: string };
+
+/** 글 count 편을 고르는 드롭다운 줄. 값은 "slug1,slug2,…" — 빈 자리는 빈 글자로 남겨 순서를 지킨다. */
+function PostSlots({ count, value, options, onChange, selectStyle }: {
+  count: number;
+  value: string;
+  options: PostOption[];
+  onChange: (v: string) => void;
+  selectStyle: React.CSSProperties;
+}) {
+  const slots = Array.from({ length: count }, (_, i) => value.split(',')[i]?.trim() ?? '');
+  const update = (i: number, slug: string) => {
+    const next = [...slots];
+    next[i] = slug;
+    // 끝의 빈 자리는 잘라 "모두 비움 = 빈 글자(자동)" 이 되게 한다
+    while (next.length && !next[next.length - 1]) next.pop();
+    onChange(next.join(','));
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {slots.map((slug, i) => (
+        <select
+          key={i}
+          aria-label={`${i + 1}번째 글`}
+          value={slug}
+          onChange={e => update(i, e.target.value)}
+          style={{ ...selectStyle, padding: '12px 14px' }}
+        >
+          <option value="">{i + 1}. (자동)</option>
+          {options.map(o => (
+            <option key={o.slug} value={o.slug} disabled={o.slug !== slug && slots.includes(o.slug)}>
+              {i + 1}. [{o.category}] {o.title}
+            </option>
+          ))}
+          {/* 고른 글이 비공개로 바뀌었으면 목록에 없다 — 값이 사라져 보이지 않게 남겨 둔다 */}
+          {slug && !options.some(o => o.slug === slug) && (
+            <option value={slug}>{i + 1}. {slug} (비공개·삭제됨 — 홈에 안 나옴)</option>
+          )}
+        </select>
+      ))}
+    </div>
+  );
+}
+
 const ALL_KEYS = [...SETTING_KEYS, ...SOCIAL_KEYS, ...IMAGE_KEYS.map(i => i.key), ...EDITORIAL_KEYS];
 
 export default function SettingsPage() {
@@ -149,7 +197,18 @@ export default function SettingsPage() {
   const [uploading, setUploading] = useState<string | null>(null);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  useEffect(() => { loadSettings(); }, []);
+  /** HOME 의 "글 고르기" 칸 목록 — 발행 글 최신순. 홈은 발행 글만 그리므로 여기서도 발행 글만. */
+  const [postOptions, setPostOptions] = useState<PostOption[]>([]);
+
+  useEffect(() => {
+    loadSettings();
+    supabase
+      .from('blogs')
+      .select('slug, title, category')
+      .eq('published', true)
+      .order('date', { ascending: false })
+      .then(({ data }) => setPostOptions((data as PostOption[]) ?? []));
+  }, []);
 
   async function loadSettings() {
     setLoading(true);
@@ -336,6 +395,14 @@ export default function SettingsPage() {
                         rows={field.rows ?? 3}
                         placeholder={field.placeholder}
                         style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.7' }}
+                      />
+                    ) : field.type === 'posts' ? (
+                      <PostSlots
+                        count={field.count ?? 3}
+                        value={settings[field.key] ?? ''}
+                        options={postOptions}
+                        onChange={v => set(field.key, v)}
+                        selectStyle={inputStyle}
                       />
                     ) : field.type === 'date' ? (
                       <input
