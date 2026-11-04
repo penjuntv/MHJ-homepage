@@ -56,7 +56,7 @@ const SOCIAL_META: Record<string, { label: string; icon: React.ReactNode; placeh
 
 // 에디토리얼 섹션 (세션 1 추가) — 섹션별 개별 저장
 type EditorialSection = {
-  id: 'editor_note' | 'children' | 'pillar' | 'newsletter_cta' | 'category_intro';
+  id: 'editor_note' | 'children' | 'home' | 'storypress_card' | 'newsletter_cta' | 'category_intro';
   title: string;
   hint: string;
   revalidatePaths: string[];
@@ -92,15 +92,22 @@ const EDITORIAL_SECTIONS: EditorialSection[] = [
     ],
   },
   {
-    id: 'pillar',
-    title: 'PILLAR SUBTITLES',
-    hint: '홈 4개 기둥 그리드에 Playfair italic으로 표시되는 한 줄 소개',
+    id: 'home',
+    title: 'HOME',
+    hint: '홈 맨 위 한 문장(페이지의 유일한 제목 h1). 비워 두면 기본 문장이 나갑니다. 검색 결과에도 영향을 주니 자주 바꾸지 마세요.',
     revalidatePaths: ['/'],
     fields: [
-      { key: 'pillar_storypress_intro',   label: 'StoryPress (Little 15 Mins)',              type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
-      { key: 'pillar_aotearoa_intro',     label: 'Aotearoa (Travelers + Life in Aotearoa + Local Guide)',  type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
-      { key: 'pillar_homelearning_intro', label: 'Home Learning',                             type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
-      { key: 'pillar_whanau_intro',       label: 'Whānau (Whānau + Settlement)',              type: 'textarea', rows: 3, placeholder: '홈 기둥 그리드에 Playfair italic으로 표시됩니다. 1~2줄 권장.' },
+      { key: 'home_h1', label: '홈 첫 문장 (h1)', type: 'input', placeholder: 'A Korean family’s school & life notes from Mairangi Bay, Auckland.' },
+    ],
+  },
+  {
+    // 홈 "Four Pillars" 는 2026-11 개혁에서 없어졌다. 이 소개 문구만 글 페이지의 StoryPress 카드가 계속 쓴다.
+    id: 'storypress_card',
+    title: 'STORYPRESS CARD',
+    hint: '글 하단 StoryPress 카드에 표시되는 한 줄 소개',
+    revalidatePaths: ['/blog'],
+    fields: [
+      { key: 'pillar_storypress_intro', label: 'StoryPress 카드 소개', type: 'textarea', rows: 3, placeholder: '1~2줄 권장.' },
     ],
   },
   {

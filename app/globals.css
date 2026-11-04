@@ -823,16 +823,6 @@ textarea::placeholder {
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35) !important;
 }
 
-/* ─── 모바일 Most Read: 3개로 제한 ─── */
-@media (max-width: 767px) {
-  .most-read-item:nth-child(n+4) {
-    display: none;
-  }
-  .most-read-item:nth-child(3) {
-    border-bottom: none !important;
-  }
-}
-
 /* ─── B-2 Blog Library 리파인: hover 효과 ─── */
 
 /* 블로그 카드 제목 underline 슬라이드인 */
@@ -1674,6 +1664,13 @@ textarea::placeholder {
   align-items: flex-start;
   transition: opacity 0.2s ease;
 }
+@media (max-width: 767px) {
+  .hero-sub-card + .hero-sub-card {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+}
 
 .hero-sub-card:hover {
   opacity: 0.75;
@@ -1710,69 +1707,206 @@ textarea::placeholder {
   }
 }
 
+/* 대표 글 그림. 모바일·태블릿은 16:10 그대로. */
+.hero-main-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 데스크톱: 유씨 설문 Q16 "메인 기사가 너무 커서 다른 구성이 안 보인다"(2026-11-04).
+   1280×800 첫 화면에 대표 글 + 부 카드 2 + 다음 구역 머리가 함께 들어오도록 낮춘다.
+   예전 70:30 + 16:10 은 그림만 약 500px 이었다. */
 @media (min-width: 1024px) {
   .hero-editorial-grid {
     display: grid;
-    grid-template-columns: 70fr 30fr;
+    grid-template-columns: 58fr 42fr;
     gap: 40px;
-    align-items: stretch;
+    align-items: start;
   }
 
-  .hero-main {
-    height: 100%;
+  .hero-main-media {
+    aspect-ratio: auto;
+    width: 100%;
+    height: 300px;
   }
 
   .hero-sub-cards {
-    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 20px;
-    /* fallback minimum gap */
+    gap: 0;
   }
 
   .hero-sub-card {
-    flex-direction: column;
-    gap: 16px;
+    flex-direction: row;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
   }
+  .hero-sub-card:first-child { padding-top: 0; }
+  .hero-sub-card:last-child { border-bottom: none; }
 
   .hero-sub-thumb {
-    width: 100%;
+    width: 200px;
     aspect-ratio: 16 / 10;
     height: auto;
   }
 }
 
-/* Main: Latest Posts(2/3) + Sidebar(1/3) */
-.home-main-grid {
+/* ─── 홈 공통 폭 + 구역 간격 (2026-11 개혁 묶음 B) ─── */
+.home-wrap {
+  max-width: 1320px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding-left: clamp(20px, 4vw, 48px);
+  padding-right: clamp(20px, 4vw, 48px);
+}
+.home-section { padding-top: 56px; }
+@media (min-width: 768px) {
+  .home-section { padding-top: 72px; }
+}
+
+/* H1 — 꼬리표 한 줄(12px 대문자)이던 것을 읽히는 문장으로 */
+.home-h1 {
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+  color: var(--text);
+  max-width: 1000px;
+  margin: 0;
+}
+
+/* 문 두 개 — Guides / Our Days */
+.home-doors {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 48px;
+  gap: 40px;
+}
+@media (min-width: 900px) {
+  .home-doors { grid-template-columns: 1fr 1fr; gap: 48px; }
+}
+.home-door {
+  border-top: 2px solid var(--mhj-brown);
+  padding-top: 20px;
   min-width: 0;
 }
+.home-door-title {
+  font-size: clamp(24px, 2.6vw, 30px);
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  color: var(--text);
+  margin: 0;
+}
+.home-door-lede {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 8px 0 16px;
+}
+.home-door-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.home-door-list li + li { border-top: 1px solid var(--border); }
+.home-door-item {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 0;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease;
+}
+.home-door-item:hover { opacity: 0.75; }
+.home-door-thumb {
+  position: relative;
+  width: 96px;
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+}
+.home-door-cat {
+  display: block;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.home-door-item-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text);
+  margin: 4px 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.home-door-hubs {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 12px 0 0;
+}
+.home-door-hubs a {
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.home-door-hubs a:hover { opacity: 0.75; }
+.home-door-extra {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+.home-door-extra:hover { opacity: 0.75; }
 
-.home-main-grid>* {
-  min-width: 0;
+/* 서랍 줄 — 카테고리 7개, 이름 + 글 수 */
+.home-drawers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
-
-@media (min-width: 1024px) {
-  .home-main-grid {
-    grid-template-columns: 2fr 1fr;
-    gap: 48px;
-  }
+.home-drawer {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
 }
-
-/* Brand copy transition zone */
-.brand-copy-zone {
-  padding-top: 56px;
-  padding-bottom: 40px;
+.home-drawer:hover { opacity: 0.75; }
+.home-drawer-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
 }
-@media (min-width: 768px) {
-  .brand-copy-zone {
-    padding-top: 72px;
-    padding-bottom: 48px;
-  }
-}
+.home-drawer-all { color: var(--text-secondary); }
 
 /* Latest Posts 내부 2열 그리드 */
 .home-latest-grid {
@@ -1866,51 +2000,6 @@ a:hover .magazine-cover-shadow img {
 }
 .hero-sub-card:hover .hero-sub-thumb img {
   transform: scale(1.02);
-}
-
-/* Explore by Topic grid */
-.explore-topic-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-}
-
-@media (min-width: 640px) {
-  .explore-topic-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* 모바일 밀도 조정 — 카테고리당 1개만 노출 (Yussi 피드백) */
-@media (max-width: 639px) {
-  .explore-topic-grid > :nth-child(n+2) {
-    display: none;
-  }
-}
-
-.explore-topic-grid a:hover {
-  opacity: 0.92;
-}
-
-.explore-topic-grid a img {
-  transition: transform 0.5s ease;
-}
-
-.explore-topic-grid a:hover img {
-  transform: scale(1.02);
-}
-
-/* From the Archive hover */
-.archive-item:hover {
-  opacity: 0.85;
-}
-
-/* Most Read item: number color shift on hover */
-.most-read-item .font-display {
-  transition: color 0.3s ease;
-}
-.most-read-item:hover .font-display {
-  color: var(--text-secondary);
 }
 
 /* Related post card hover (blog/[slug]/RelatedCard.tsx) */
@@ -2213,123 +2302,6 @@ a:hover .magazine-cover-shadow img {
 /* ═══════════════════════════════════════════════════════════
    세션 5: 홈 4개 기둥 / Next Story / 편지 글 렌더링
    ═══════════════════════════════════════════════════════════ */
-
-/* ─── 홈 Pillars 그리드 ─── */
-.home-pillars {
-  max-width: 1320px;
-  margin: 96px auto 0;
-  padding: 0 clamp(20px, 4vw, 48px);
-}
-.home-pillars-header {
-  margin-bottom: 24px;
-}
-.home-pillars-label {
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin: 0 0 8px;
-}
-.home-pillars-rule {
-  width: 40px;
-  height: 2px;
-  background: var(--mhj-brown);
-}
-.pillar-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border: 0.5px solid var(--border-strong);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--bg);
-}
-.pillar-cell {
-  padding: 28px 24px 48px;
-  min-height: 260px;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  border-right: 0.5px solid var(--border-strong);
-  position: relative;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-  transition: background 0.18s ease;
-}
-.pillar-cell:last-child { border-right: none; }
-.pillar-cell:hover { background: var(--bg-surface); }
-
-.pillar-name {
-  font-family: 'Playfair Display', 'Noto Sans KR', serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 18px;
-  color: var(--mhj-brown);
-  line-height: 1.25;
-  margin: 0 0 10px;
-}
-.dark .pillar-name { color: var(--mhj-brown-dark); }
-
-.pillar-subtitle {
-  font-family: 'Playfair Display', 'Noto Sans KR', serif;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.55;
-  margin: 0 0 18px;
-}
-
-.pillar-latest-title {
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 12px;
-  color: var(--text);
-  line-height: 1.55;
-  margin: 0 0 4px;
-  flex: 1;
-}
-
-.pillar-latest-date {
-  font-family: var(--font-inter), Inter, sans-serif;
-  font-size: 10px;
-  color: var(--text-tertiary);
-}
-
-.pillar-read-arrow {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  font-family: var(--font-inter), Inter, sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: var(--mhj-brown);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-.dark .pillar-read-arrow { color: var(--mhj-brown-dark); }
-.pillar-cell:hover .pillar-read-arrow { opacity: 1; }
-
-.pillar-empty {
-  font-family: var(--font-inter), Inter, sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  margin-top: auto;
-}
-
-@media (max-width: 768px) {
-  .home-pillars { margin-top: 64px; padding: 0 20px; }
-  .pillar-grid { grid-template-columns: repeat(2, 1fr); }
-  .pillar-cell {
-    border-right: 0.5px solid var(--border-strong);
-    border-bottom: 0.5px solid var(--border-strong);
-    min-height: 220px;
-  }
-  .pillar-cell:nth-child(2n) { border-right: none; }
-  .pillar-cell:nth-last-child(-n+2) { border-bottom: none; }
-}
 
 /* ─── Blog 상세 이전·다음 카드 ───
    Next Story 카드(사진)와 이전/다음 텍스트 링크(양방향)를 한 블록으로 합쳤다 — 2026-09-11 W6-C 결정 ①. */
