@@ -9,14 +9,32 @@ import type { Blog, Magazine } from '@/lib/types';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { formatDate } from '@/lib/utils';
 import { getSiteSettings } from '@/lib/site-settings';
-import { PILLARS } from '@/lib/pillars';
-import { BLOG_CARD_COLUMNS, categoryHref } from '@/lib/constants';
+import { BLOG_CARD_COLUMNS, BLOG_CATEGORIES, categoryHref } from '@/lib/constants';
+import ScrollDepthTracker from './blog/[slug]/ScrollDepthTracker';
 
 export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
 
 const HOME_TITLE = "My Mairangi Journal — A Korean Family's NZ School & Life Notes";
+
+/** 관리자 설정 `home_h1` 이 비어 있을 때의 문장. 검색 연속성을 위해 예전 꼬리표와 같은 말을 쓴다. */
+const DEFAULT_H1 = 'A Korean family’s school & life notes from Mairangi Bay, Auckland';
+
+/**
+ * 홈 구성(2026-11-05 유씨 미리보기 피드백 반영):
+ * 머리 문장 → 최신 글 1+4 → Guides 3 · 매거진 · StoryPress → 추천 5 → 서랍 줄 → 뉴스레터.
+ * Guides·추천은 관리자 설정 HOME 칸에서 직접 고르고, 비운 자리는 자동으로 채운다.
+ */
+const HERO_SIZE = 5;
+const GUIDE_SIZE = 3;
+const PICK_SIZE = 5;
+/** Guides 자동 채움 후보 — 안내 글이 모인 기존 카테고리(DB 불변, 코드에서 묶음). */
+const GUIDE_CATEGORIES = ['Home Learning', 'Local Guide', 'Settlement'];
+/** 추천 자동 점수: 조회 1 + 승인 댓글 1개당 30. 댓글은 드물어서 무게를 크게 둔다. */
+const COMMENT_WEIGHT = 30;
+/** 서랍 줄에서 글이 이 수보다 적으면 숨기는 카테고리(유씨 Q9 "Whānau 는 당분간 빼놔도"). */
+const HIDE_WHEN_THIN = new Set(['Whānau']);
 
 export const metadata: Metadata = {
   // 브랜드명만 있던 제목("MHJ — my mairangi")은 어떤 검색 의도와도 맞지 않았다(자체진단 H17). 주제를 담는다.
@@ -40,85 +58,68 @@ const FALLBACK_BLOGS: Blog[] = [
 
 /* ─── Data fetching ─── */
 
-async function getFeaturedPosts(): Promise<Blog[]> {
+/**
+ * 머리 1+4. 관리자 목록의 별(featured)로 고정한 글이 hero_order 순으로 먼저, 남은 자리는 최신 글.
+ * (예전엔 고정 글이 하나라도 있으면 고정 글만 냈다 — 자리가 5개로 늘어 빈칸이 생기지 않게 채운다.)
+ */
+async function getHeroPosts(): Promise<Blog[]> {
   const now = new Date().toISOString();
 
-  // 1) featured=true → hero_order 순서 우선, date 보조
-  const { data: featured, error: featuredError } = await supabase
-    .from('blogs')
-    .select(BLOG_CARD_COLUMNS)
-    .eq('published', true)
-    .eq('featured', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('hero_order', { ascending: true, nullsFirst: false })
-    .order('date', { ascending: false })
-    .limit(3);
+  const [{ data: featured, error: featuredError }, { data: latest, error: latestError }] = await Promise.all([
+    supabase
+      .from('blogs')
+      .select(BLOG_CARD_COLUMNS)
+      .eq('published', true)
+      .eq('featured', true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .order('hero_order', { ascending: true, nullsFirst: false })
+      .order('date', { ascending: false })
+      .limit(HERO_SIZE),
+    supabase
+      .from('blogs')
+      .select(BLOG_CARD_COLUMNS)
+      .eq('published', true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .order('date', { ascending: false })
+      .limit(HERO_SIZE),
+  ]);
+  if (featuredError) console.error('getHeroPosts(featured):', featuredError.message);
+  if (latestError) console.error('getHeroPosts(latest):', latestError.message);
 
-  if (featuredError) console.error('getFeaturedPosts(featured):', featuredError.message);
-  if (featured?.length) return featured as Blog[];
-
-  // 2) fallback: 최신 published 3개
-  const { data: latest, error: latestError } = await supabase
-    .from('blogs')
-    .select(BLOG_CARD_COLUMNS)
-    .eq('published', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('date', { ascending: false })
-    .limit(3);
-
-  if (latestError) console.error('getFeaturedPosts(latest):', latestError.message);
-  return (latest as Blog[]) ?? FALLBACK_BLOGS;
-}
-
-async function getLatestPosts(excludeIds: number[]): Promise<Blog[]> {
-  const now = new Date().toISOString();
-  // PostCard 는 본문을 렌더하지 않는다 — content 를 빼 9행 전문 fetch 를 막는다.
-  let query = supabase
-    .from('blogs')
-    .select('id, category, title, author, date, image_url, slug, view_count, tags')
-    .eq('published', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('date', { ascending: false })
-    .limit(9);
-
-  if (excludeIds.length) {
-    query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+  const out: Blog[] = [];
+  const seen = new Set<number>();
+  for (const b of [...((featured as Blog[]) ?? []), ...((latest as Blog[]) ?? [])]) {
+    if (out.length >= HERO_SIZE) break;
+    if (seen.has(b.id)) continue;
+    seen.add(b.id);
+    out.push(b);
   }
-
-  const { data } = await query;
-  return (data ?? FALLBACK_BLOGS.slice(1)) as Blog[];
+  return out.length ? out : FALLBACK_BLOGS;
 }
 
-async function getMostReadBlogs(excludeIds: number[]): Promise<Blog[]> {
+/** Guides·추천·서랍 줄이 모두 이 한 목록에서 나온다 — 발행 글 약 90편, 본문 없이. */
+async function getPublishedIndex(): Promise<Blog[]> {
   const now = new Date().toISOString();
-  let query = supabase
+  const { data, error } = await supabase
     .from('blogs')
-    .select('id, title, category, slug')
+    .select('id, category, title, date, image_url, slug, view_count, tags')
     .eq('published', true)
     .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('view_count', { ascending: false })
-    .order('id', { ascending: false })
-    .limit(10);
-
-  if (excludeIds.length) {
-    query = query.not('id', 'in', `(${excludeIds.join(',')})`);
-  }
-
-  const { data } = await query;
-  return ((data ?? FALLBACK_BLOGS) as Blog[]).slice(0, 5);
+    .order('date', { ascending: false });
+  if (error) console.error('getPublishedIndex:', error.message);
+  return (data as Blog[]) ?? [];
 }
 
-async function getCommentCounts(blogIds: number[]): Promise<Record<number, number>> {
-  if (!blogIds.length) return {};
-  const { data } = await supabase
+/** 승인 댓글 수. comments 는 anon 이 INSERT 만 가능(2026-09-06)이라 service_role 공개 클라이언트로 읽는다(ISR 호환). */
+async function getApprovedCommentCounts(): Promise<Record<number, number>> {
+  const { data, error } = await createPublicAdminClient()
     .from('comments')
     .select('blog_id')
-    .eq('approved', true)
-    .in('blog_id', blogIds);
-
+    .eq('approved', true);
+  if (error) console.error('getApprovedCommentCounts:', error.message);
   const counts: Record<number, number> = {};
-  for (const row of data ?? []) {
-    counts[row.blog_id] = (counts[row.blog_id] ?? 0) + 1;
+  for (const row of (data ?? []) as { blog_id: number | null }[]) {
+    if (row.blog_id != null) counts[row.blog_id] = (counts[row.blog_id] ?? 0) + 1;
   }
   return counts;
 }
@@ -143,135 +144,64 @@ async function getMagazineArticleCount(magazineId: string): Promise<number> {
   return count ?? 0;
 }
 
-async function getCategoryPosts(excludeIds: number[]): Promise<Record<string, Blog[]>> {
-  const now = new Date().toISOString();
-  const { data } = await supabase
-    .from('blogs')
-    .select('id, category, title, date, image_url, slug, view_count')
-    .eq('published', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('date', { ascending: false });
-
-  if (!data) return {};
-
-  const allBlogs = data as Blog[];
-  // Count total per category (before exclusion)
-  const totalCounts: Record<string, number> = {};
-  for (const b of allBlogs) {
-    if (b.category) totalCounts[b.category] = (totalCounts[b.category] ?? 0) + 1;
+/** 위에서부터 차례로 쓴 글을 지워 가며 고른다 — 같은 글이 홈에 두 번 나오지 않는다. */
+function take(pool: Blog[], used: Set<number>, n: number, pred: (b: Blog) => boolean = () => true): Blog[] {
+  const picked: Blog[] = [];
+  for (const b of pool) {
+    if (picked.length >= n) break;
+    if (used.has(b.id) || !pred(b)) continue;
+    picked.push(b);
+    used.add(b.id);
   }
-
-  // Pick up to 2 per qualifying category, excluding already-shown posts
-  const excludeSet = new Set(excludeIds);
-  const grouped: Record<string, Blog[]> = {};
-  for (const blog of allBlogs) {
-    if (!blog.category || excludeSet.has(blog.id)) continue;
-    if ((totalCounts[blog.category] ?? 0) < 2) continue;
-    if (!grouped[blog.category]) grouped[blog.category] = [];
-    if (grouped[blog.category].length < 2) {
-      grouped[blog.category].push(blog);
-    }
-  }
-
-  // Only return categories that have at least 1 post to show
-  return Object.fromEntries(
-    Object.entries(grouped).filter(([, posts]) => posts.length > 0)
-  );
+  return picked;
 }
 
-async function getArchivePosts(excludeIds: number[], limit = 3): Promise<Blog[]> {
-  const now = new Date().toISOString();
-  const { data } = await supabase
-    .from('blogs')
-    .select('id, category, title, image_url, slug')
-    .eq('published', true)
-    .or(`publish_at.is.null,publish_at.lte.${now}`);
-
-  if (!data) return [];
-
-  const excludeSet = new Set(excludeIds);
-  const candidates = (data as Blog[]).filter(b => !excludeSet.has(b.id));
-
-  // Shuffle and pick
-  for (let i = candidates.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+/** 설정에 고른 slug 순서대로(발행 글만, 이미 쓴 글 제외) 먼저 넣고, 남은 자리는 auto 에서 채운다. */
+function curated(slugCsv: string | undefined, index: Blog[], used: Set<number>, n: number, auto: Blog[]): { posts: Blog[]; manual: number } {
+  const bySlug = new Map(index.map(b => [b.slug, b]));
+  const chosen: Blog[] = [];
+  for (const slug of (slugCsv ?? '').split(',').map(s => s.trim()).filter(Boolean)) {
+    const b = bySlug.get(slug);
+    if (!b || used.has(b.id) || chosen.length >= n) continue;
+    chosen.push(b);
+    used.add(b.id);
   }
-
-  return candidates.slice(0, limit);
+  const manual = chosen.length;
+  return { posts: [...chosen, ...take(auto, used, n - manual)], manual };
 }
-
-// 최신 편지 글 1편 (letter_to 가 채워진 글). 없으면 null → 섹션 미노출.
-async function getLatestLetter(): Promise<Blog | null> {
-  const now = new Date().toISOString();
-  const { data } = await supabase
-    .from('blogs')
-    .select('id, slug, content, letter_to')
-    .eq('published', true)
-    .not('letter_to', 'is', null)
-    .or(`publish_at.is.null,publish_at.lte.${now}`)
-    .order('date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return (data as Blog) ?? null;
-}
-
 
 /* ─── Page component ─── */
 
 export default async function LandingPage() {
-  const heroBlogs = await getFeaturedPosts();
-  const heroIds = heroBlogs.map(b => b.id);
-
-  const latest = await getLatestPosts(heroIds);
-  const latestExcludeIds = [...heroIds, ...latest.map(b => b.id)].filter(Boolean);
-
-  const [mostRead, latestMag, categoryPosts, settings, latestLetter] = await Promise.all([
-    getMostReadBlogs(latestExcludeIds),
+  const [heroBlogs, index, comments, latestMag, settings] = await Promise.all([
+    getHeroPosts(),
+    getPublishedIndex(),
+    getApprovedCommentCounts(),
     getLatestMagazine(),
-    getCategoryPosts(latestExcludeIds),
     getSiteSettings(),
-    getLatestLetter(),
   ]);
   const ctaCopyA = settings.newsletter_cta_copy_a || 'A quiet letter, a few times a month.';
+  const h1 = (settings.home_h1 || '').trim() || DEFAULT_H1;
 
-  // 세션 5: 4개 기둥 최신 글 1편씩 (letter_to IS NULL)
-  const admin = createPublicAdminClient();
-  const nowIso = new Date().toISOString();
-  const pillarPostsRaw = await Promise.all(
-    PILLARS.map((p) =>
-      admin
-        .from('blogs')
-        .select('title, slug, date, category')
-        .in('category', p.categories as unknown as string[])
-        .eq('published', true)
-        .is('letter_to', null)
-        .or(`publish_at.is.null,publish_at.lte.${nowIso}`)
-        .order('date', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-    )
-  );
-  const pillarPosts = PILLARS.map((pillar, i) => ({
-    pillar,
-    latest: pillarPostsRaw[i].data as { title: string; slug: string; date: string; category: string } | null,
-  }));
+  const used = new Set<number>(heroBlogs.map(b => b.id));
+
+  const byViews = [...index].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0) || b.id - a.id);
+  const guides = curated(settings.home_guides, index, used, GUIDE_SIZE,
+    byViews.filter(b => GUIDE_CATEGORIES.includes(b.category))).posts;
+
+  const score = (b: Blog) => (b.view_count ?? 0) + COMMENT_WEIGHT * (comments[b.id] ?? 0);
+  const byScore = [...index].sort((a, b) => score(b) - score(a) || b.id - a.id);
+  const picks = curated(settings.home_picks, index, used, PICK_SIZE, byScore);
+  // 직접 고른 글이 하나라도 있으면 "Picks", 전부 자동이면 "Popular" — 이름이 실제 선정 방식과 맞게.
+  const picksTitle = picks.manual > 0 ? 'Our Picks' : 'Popular';
+
+  const counts: Record<string, number> = {};
+  for (const b of index) counts[b.category] = (counts[b.category] ?? 0) + 1;
+  const drawers = BLOG_CATEGORIES
+    .map(c => ({ name: c as string, count: counts[c] ?? 0 }))
+    .filter(d => d.count > 0 && !(HIDE_WHEN_THIN.has(d.name) && d.count < 2));
 
   const magArticleCount = latestMag ? await getMagazineArticleCount(String(latestMag.id)) : 0;
-
-  // Collect all category post IDs for archive exclusion
-  const categoryPostIds = Object.values(categoryPosts).flat().map(b => b.id);
-  const allExcludeIds = [...latestExcludeIds, ...categoryPostIds];
-  const archivePosts = await getArchivePosts(allExcludeIds);
-
-  const allBlogIds = [
-    ...heroBlogs.map(b => b.id),
-    ...latest.map(b => b.id),
-    ...mostRead.map(b => b.id),
-    ...categoryPostIds,
-    ...archivePosts.map(b => b.id),
-  ].filter((id): id is number => typeof id === 'number');
-  const commentCounts = await getCommentCounts(allBlogIds);
 
   const websiteLd = {
     '@context': 'https://schema.org',
@@ -300,408 +230,148 @@ export default async function LandingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }}
       />
-      <div className="animate-fade-in">
+      {/* 스크롤 깊이 표식 — 글 페이지와 같은 추적기를 slug "home" 으로 쓴다(계획서 §4, 홈 깊이는 그동안 미측정). */}
+      <div className="animate-fade-in" style={{ position: 'relative' }}>
+        <div id="scroll-depth-25" aria-hidden style={{ position: 'absolute', top: '25%', height: 1 }} />
+        <div id="scroll-depth-50" aria-hidden style={{ position: 'absolute', top: '50%', height: 1 }} />
+        <div id="scroll-depth-75" aria-hidden style={{ position: 'absolute', top: '75%', height: 1 }} />
+        <div id="scroll-depth-100" aria-hidden style={{ position: 'absolute', bottom: 0, height: 1 }} />
+        <ScrollDepthTracker slug="home" />
 
-        {/* ═══════ §0. 사이트 정체성 문장 = 페이지의 유일한 H1 ═══════
-            히어로 글 제목이 H1 이면 홈의 주제가 매주 바뀐다(자체진단 H17·heading-order). 히어로가 비어도 남도록
-            조건 밖에 둔다. 스타일은 홈 라벨 관례(12px·900·자간 2·대문자·text-secondary). */}
-        <div style={{ background: 'var(--bg-surface)' }}>
-          <div style={{
-            maxWidth: 1320,
-            width: '100%',
-            boxSizing: 'border-box' as const,
-            margin: '0 auto',
-            padding: '32px clamp(20px, 4vw, 48px) 0',
-          }}>
-            <h1 style={{
-              fontSize: 12,
-              fontWeight: 900,
-              letterSpacing: 2,
-              textTransform: 'uppercase',
-              color: 'var(--text-secondary)',
-              margin: 0,
-            }}>
-              A Korean family&rsquo;s school &amp; life notes from Mairangi Bay, Auckland
-            </h1>
+        {/* ═══════ §0. 머리 문장 = 페이지의 유일한 H1. 구역 제목과 같은 꼬리표 모양(유씨 피드백 6). ═══════
+            히어로 글 제목이 H1 이면 홈의 주제가 매주 바뀐다(자체진단 H17). 문장은 관리자 설정 home_h1. */}
+        {/* flow-root: 제목의 아래 여백이 배경 밖으로 새어 대표 글 띠와 사이에 흰 줄이 생기지 않게 */}
+        <div style={{ background: 'var(--bg-surface)', display: 'flow-root' }}>
+          <div className="home-wrap" style={{ paddingTop: 32 }}>
+            <SectionLabel as="h1">{h1}</SectionLabel>
           </div>
         </div>
 
-        {/* ═══════ §1. Editorial Hero (full-bleed surface bg) ═══════ */}
+        {/* ═══════ §1. 최신 글 1+4 — 따로 있던 Latest 를 합쳤다(유씨 피드백 1·2) ═══════ */}
         {heroBlogs.length > 0 && (
           <div style={{ background: 'var(--bg-surface)' }}>
-            <EditorialHero blogs={heroBlogs} commentCounts={commentCounts} />
+            <HomeHero blogs={heroBlogs} />
           </div>
         )}
 
-        {/* ═══════ §1.5 Brand Copy (transition zone) ═══════ */}
-        <div
-          className="brand-copy-zone"
-          style={{
-            maxWidth: 1320,
-            width: '100%',
-            boxSizing: 'border-box' as const,
-            margin: '0 auto',
-            paddingLeft: 'clamp(20px, 4vw, 48px)',
-            paddingRight: 'clamp(20px, 4vw, 48px)',
-            borderTop: '1px solid var(--border)',
-          }}
-        >
-          <p
-            className="font-display"
-            style={{
-              fontSize: 'clamp(24px, 3vw, 36px)',
-              fontWeight: 900,
-              fontStyle: 'italic',
-              color: 'var(--text)',
-              lineHeight: 1.2,
-              margin: 0,
-            }}
-          >
-            A family archive from Mairangi Bay, Auckland.
-          </p>
-          <p style={{
-            fontSize: 15,
-            color: 'var(--text-secondary)',
-            lineHeight: 1.6,
-            margin: '12px 0 0',
-          }}>
-            Stories, images, and small records of a Korean family building a life in New Zealand.
-          </p>
-        </div>
-
-        {/* ═══════ §1.7. Pillars 4-column grid (세션 5) ═══════ */}
-        <section className="home-pillars">
-          <div className="home-pillars-header">
-            <p className="home-pillars-label">Four Pillars</p>
-            <div className="home-pillars-rule" />
-          </div>
-          <div className="pillar-grid">
-            {pillarPosts.map(({ pillar, latest }) => {
-              const subtitle = settings[pillar.subtitleKey] || '';
-              // 셀이 보여주는 최신 글의 카테고리 허브로 — 제목과 목적지가 일치한다. 글이 없으면 기둥 기본 허브.
-              const href = latest ? categoryHref(latest.category) : `/blog/category/${pillar.hubSlug}`;
-              return (
-                <Link
-                  key={pillar.id}
-                  href={href}
-                  className="pillar-cell"
-                  data-track="pillar_click"
-                  data-track-pillar={pillar.id}
-                  data-track-destination={href}
-                >
-                  <h3 className="pillar-name">{pillar.name}</h3>
-                  {subtitle && <p className="pillar-subtitle">{subtitle}</p>}
-                  {latest ? (
-                    <>
-                      <p className="pillar-latest-title">{latest.title}</p>
-                      <time className="pillar-latest-date">{formatDate(latest.date)}</time>
-                      <span className="pillar-read-arrow">EXPLORE →</span>
-                    </>
-                  ) : (
-                    <p className="pillar-empty">Coming soon</p>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ═══════ §2+3. Latest Posts + Sidebar ═══════ */}
-        <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '96px clamp(20px, 4vw, 48px) 0' }}>
-          <div style={{ marginBottom: 32 }}>
-            <p style={{
-              fontSize: 12,
-              fontWeight: 900,
-              letterSpacing: 5,
-              textTransform: 'uppercase',
-              color: 'var(--text-secondary)',
-              marginBottom: 8,
-            }}>
-              Latest
-            </p>
-            <div style={{ width: 40, height: 2, background: 'var(--mhj-brown)', marginTop: 8 }} />
-          </div>
-
-          <div className="home-main-grid">
-            {/* Left: Latest Posts */}
-            <div>
-              <div className="home-latest-grid">
-                {latest.map((blog) => (
-                  <PostCard key={blog.id} blog={blog} commentCount={commentCounts[blog.id] ?? 0} />
-                ))}
-              </div>
-
-              {/* View All Posts */}
-              <div style={{ marginTop: 32, textAlign: 'center' }}>
-                <Link
-                  href="/blog"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontSize: 11,
-                    fontWeight: 900,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                    transition: 'color 0.3s ease',
-                  }}
-                >
-                  View All Posts <ArrowRight size={14} />
-                </Link>
-              </div>
-            </div>
-
-            {/* Right: Sidebar — <aside> 는 <main> 안에서 complementary 랜드마크로 잡혀
-                랜드마크가 중첩된다(axe landmark-complementary-is-top-level). 사이드바는
-                본문의 일부지 본문과 나란한 별개 영역이 아니다. */}
-            <div style={{ position: 'sticky', top: 80, alignSelf: 'start' }}>
-              {/* About mini-card */}
-              <div style={{
-                padding: 24,
-                borderRadius: 12,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-              }}>
-                <p style={{
-                  fontSize: 10,
-                  fontWeight: 900,
-                  letterSpacing: 5,
-                  textTransform: 'uppercase',
-                  color: 'var(--text-tertiary)',
-                  marginBottom: 12,
-                }}>
-                  About
-                </p>
-                <p style={{
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: 'var(--text)',
-                  marginBottom: 4,
-                }}>
-                  Yussi
-                </p>
-                <p style={{
-                  fontSize: 14,
-                  color: 'var(--text-secondary)',
-                  lineHeight: 1.6,
-                  marginBottom: 16,
-                }}>
-                  Stories from a Korean family in Mairangi Bay, Auckland.
-                </p>
-                <Link
-                  href="/about"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 11,
-                    fontWeight: 900,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                  }}
-                >
-                  About Us <ArrowRight size={12} />
-                </Link>
-              </div>
-
-              {/* Most Read — 세 번째 */}
-              <div style={{ marginTop: 40 }}>
-                <div style={{ marginBottom: 24 }}>
-                  <p style={{
-                    fontSize: 12,
-                    fontWeight: 900,
-                    letterSpacing: 5,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-tertiary)',
-                    marginBottom: 8,
-                  }}>
-                    Most Read
-                  </p>
-                  <div style={{ width: 40, height: 2, background: 'var(--mhj-brown)', marginTop: 8 }} />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {mostRead.map((blog, i) => (
-                    <Link
-                      key={blog.id}
-                      href={`/blog/${blog.slug}`}
-                      className="most-read-item"
-                      style={{
-                        display: 'flex',
-                        gap: 16,
-                        alignItems: 'flex-start',
-                        padding: '16px 0',
-                        borderBottom: i < mostRead.length - 1 ? '1px solid var(--border)' : 'none',
-                        textDecoration: 'none',
-                        color: 'inherit',
-                        transition: 'opacity 0.3s ease',
-                      }}
-                    >
-                      <span
-                        className="font-display"
-                        style={{
-                          fontSize: 28,
-                          fontWeight: 900,
-                          color: 'var(--number-accent)',
-                          lineHeight: 1,
-                          minWidth: 32,
-                          flexShrink: 0,
-                        }}
+        {/* ═══════ §2. Guides 3 + 매거진 + StoryPress — 저널 밖으로 가는 길(유씨 피드백 3·4) ═══════ */}
+        <section className="home-wrap home-section" aria-label="Guides, magazine and StoryPress">
+          <div className="home-feature-row">
+            {guides.length > 0 && (
+              <div className="home-guides">
+                <SectionLabel>Guides — Start here</SectionLabel>
+                <p className="home-guides-lede">NZ schools, year levels, reports and the places we found useful.</p>
+                <ul className="home-guides-list">
+                  {guides.map(blog => (
+                    <li key={blog.id}>
+                      <Link
+                        href={`/blog/${blog.slug}`}
+                        className="home-guide-item"
+                        data-track="home_guide_click"
                       >
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <span style={{
-                          fontSize: 10,
-                          fontWeight: 900,
-                          letterSpacing: 2,
-                          textTransform: 'uppercase',
-                          color: 'var(--text-secondary)',
-                        }}>
-                          {blog.category}
-                        </span>
-                        <p style={{
-                          fontSize: 15,
-                          fontWeight: 700,
-                          color: 'var(--text)',
-                          lineHeight: 1.4,
-                          margin: '4px 0 0',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                        }}>
-                          {blog.title}
-                        </p>
-                      </div>
-                    </Link>
+                        <div className="home-guide-thumb">
+                          <SafeImage src={blog.image_url} alt="" fill sizes="120px" className="object-cover" />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <span className="home-card-cat">{blog.category}</span>
+                          <p className="home-guide-title">{blog.title}</p>
+                        </div>
+                      </Link>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
-            </div>
+            )}
+
+            {latestMag && (
+              <Link href="/magazine" className="home-box home-box-magazine" data-track="home_magazine_click">
+                <span className="home-box-label">From the Magazine</span>
+                <div className="home-box-mag">
+                  <div className="home-box-cover magazine-cover-shadow">
+                    <SafeImage src={latestMag.image_url} alt={latestMag.title} fill sizes="120px" className="object-cover" />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <p className="font-display home-box-title">{latestMag.title}</p>
+                    <p className="home-box-meta">
+                      {latestMag.year} {latestMag.month_name}
+                      {latestMag.issue_number ? ` · Issue ${String(latestMag.issue_number).padStart(2, '0')}` : ''}
+                    </p>
+                    {magArticleCount > 0 && (
+                      <p className="home-box-meta">{magArticleCount} {magArticleCount === 1 ? 'story' : 'stories'} inside</p>
+                    )}
+                  </div>
+                </div>
+                <span className="home-box-cta">Browse issues <ArrowRight size={13} aria-hidden /></span>
+              </Link>
+            )}
+
+            <Link
+              href="/storypress"
+              className="home-box home-box-storypress"
+              data-track="storypress_click"
+              data-track-location="home_box"
+            >
+              <span className="home-box-label">StoryPress</span>
+              <p className="font-display home-box-title" style={{ whiteSpace: 'pre-line' }}>
+                {settings.storypress_title || 'Every child has a story.\nLet them write it.'}
+              </p>
+              {settings.pillar_storypress_intro && (
+                <p className="home-box-text">{settings.pillar_storypress_intro}</p>
+              )}
+              <span className="home-box-cta">See how it works <ArrowRight size={13} aria-hidden /></span>
+            </Link>
           </div>
         </section>
 
-        {/* ═══════ §3.5 Explore by Topic ═══════ */}
-        {Object.keys(categoryPosts).length > 0 && (
-          <div style={{ background: 'var(--bg-warm)', width: '100%' }}>
-            <ExploreByTopic categoryPosts={categoryPosts} />
-          </div>
-        )}
-
-        {/* ═══════ §3.7 From the Archive ═══════ */}
-        {archivePosts.length > 0 && (
-          <FromTheArchive posts={archivePosts} />
-        )}
-
-        {/* ═══════ §3.8 A Letter Home (letter_to 글이 있을 때만) ═══════ */}
-        {latestLetter && (
-          <LetterHome letter={latestLetter} />
-        )}
-
-        {/* ═══════ §4. Magazine Feature ═══════ */}
-        {latestMag && (
-          <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '64px clamp(20px, 4vw, 48px) 0' }}>
-            <Link
-              href="/magazine"
-              style={{
-                display: 'block',
-                padding: 'clamp(20px, 3vw, 24px) clamp(24px, 4vw, 32px)',
-                borderRadius: 12,
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border)',
-                textDecoration: 'none',
-                transition: 'opacity 0.3s ease',
-              }}
-            >
-              <div className="magazine-feature-grid">
-                {/* Cover */}
-                <div className="magazine-cover-shadow" style={{
-                  height: 180,
-                  aspectRatio: '3/4',
-                  width: 'auto',
-                  borderRadius: 8,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  flexShrink: 0,
-                }}>
-                  <SafeImage
-                    src={latestMag.image_url}
-                    alt={latestMag.title}
-                    fill
-                    sizes="135px"
-                    className="object-cover"
-                  />
-                </div>
-
-                {/* Info */}
-                <div>
-                  <p style={{
-                    fontSize: 11,
-                    fontWeight: 900,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                    marginBottom: 8,
-                  }}>
-                    From the Magazine
-                  </p>
-
-                  <h3 className="font-display" style={{
-                    fontSize: 'clamp(24px, 3vw, 28px)',
-                    fontWeight: 900,
-                    fontStyle: 'italic',
-                    color: 'var(--text)',
-                    letterSpacing: -0.5,
-                    lineHeight: 1.1,
-                    margin: '0 0 8px',
-                  }}>
-                    {latestMag.title}
-                  </h3>
-
-                  <p style={{
-                    fontSize: 14,
-                    color: 'var(--text-secondary)',
-                    marginBottom: 8,
-                  }}>
-                    {latestMag.year} {latestMag.month_name}
-                    {latestMag.issue_number ? ` · Issue ${String(latestMag.issue_number).padStart(2, '0')}` : ''}
-                  </p>
-
-                  {magArticleCount > 0 && (
-                    <p style={{
-                      fontSize: 14,
-                      color: 'var(--text-tertiary)',
-                      marginBottom: 12,
-                    }}>
-                      {magArticleCount} {magArticleCount === 1 ? 'story' : 'stories'} inside
-                    </p>
-                  )}
-
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 13,
-                    fontWeight: 900,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                  }}>
-                    Browse Issues <ArrowRight size={12} />
-                  </span>
-                </div>
-              </div>
-            </Link>
+        {/* ═══════ §3. 추천 5 — 직접 고른 글, 빈 자리는 조회수·댓글 많은 글 ═══════ */}
+        {picks.posts.length > 0 && (
+          <section className="home-wrap home-section">
+            <SectionLabel>{picksTitle}</SectionLabel>
+            <div className="home-picks">
+              {picks.posts.map(blog => (
+                <Link key={blog.id} href={`/blog/${blog.slug}`} className="home-pick" data-track="home_pick_click">
+                  <div className="home-pick-thumb">
+                    <SafeImage
+                      src={blog.image_url}
+                      alt={blog.title}
+                      fill
+                      sizes="(max-width: 1023px) 45vw, 230px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <span className="home-card-cat">{blog.category}</span>
+                  <h3 className="home-pick-title">{blog.title}</h3>
+                </Link>
+              ))}
+            </div>
           </section>
         )}
 
-        {/* ═══════ §5. Newsletter CTA (full, hero-dark) ═══════ */}
-        <div style={{ marginTop: 96 }}>
+        {/* ═══════ §4. 서랍 줄 — 카테고리 7개 그대로(유씨 Q9), 순서 고정 ═══════ */}
+        {drawers.length > 0 && (
+          <nav className="home-wrap home-section" aria-label="Browse by topic">
+            <SectionLabel>Browse the journal</SectionLabel>
+            <ul className="home-drawers">
+              {drawers.map(d => (
+                <li key={d.name}>
+                  <Link href={categoryHref(d.name)} className="home-drawer" data-track="home_drawer_click" data-track-category={d.name}>
+                    <span>{d.name}</span>
+                    <span className="home-drawer-count">{d.count}</span>
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link href="/blog" className="home-drawer home-drawer-all">
+                  <span>All posts</span>
+                  <ArrowRight size={14} aria-hidden />
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        )}
+
+        {/* ═══════ §5. Newsletter CTA — 홈에 한 곳 ═══════ */}
+        <div style={{ marginTop: 72 }}>
           <NewsletterCTA reducedPadding buttonText="Subscribe →" location="homepage_bottom" copy={ctaCopyA} />
         </div>
 
@@ -710,588 +380,69 @@ export default async function LandingPage() {
   );
 }
 
-/* ─── Editorial Hero section ─── */
-function EditorialHero({ blogs, commentCounts }: { blogs: Blog[]; commentCounts: Record<number, number> }) {
+/* ─── 구역 제목: 12px·900·자간·대문자 + 짧은 갈색 줄. 머리 문장(h1)까지 모든 구역이 같은 모양을 쓴다. ─── */
+function SectionLabel({ children, as: Tag = 'h2' }: { children: React.ReactNode; as?: 'h1' | 'h2' }) {
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <Tag className="home-label">{children}</Tag>
+      <div style={{ width: 40, height: 2, background: 'var(--mhj-brown)', marginTop: 10 }} />
+    </div>
+  );
+}
+
+/* ─── 최신 글 1+4: 큰 글 하나 + 작은 카드 넷(썸네일 아래 글자) ─── */
+function HomeHero({ blogs }: { blogs: Blog[] }) {
   const main = blogs[0];
   const subs = blogs.slice(1);
 
-  function getExcerpt(blog: Blog): string {
-    if (blog.meta_description) return blog.meta_description;
-    return stripHtml(blog.content).slice(0, 160);
-  }
-
-  const mainExcerpt = getExcerpt(main);
-  const mainComments = commentCounts[main.id] ?? 0;
+  const mainExcerpt = main.meta_description || stripHtml(main.content).slice(0, 160);
 
   return (
-    <section style={{
-      maxWidth: 1320,
-      width: '100%',
-      boxSizing: 'border-box' as const,
-      margin: '0 auto',
-      padding: '32px clamp(20px, 4vw, 48px)',
-    }}>
-      <div className="hero-editorial-grid">
-        {/* Main Featured */}
-        <div className="hero-main">
-          <Link href={`/blog/${main.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-            <div style={{
-              position: 'relative',
-              aspectRatio: '16/10',
-              borderRadius: 12,
-              overflow: 'hidden',
-            }}>
-              {/* 홈의 LCP 요소. priority 가 없으면 next/image 기본값 loading="lazy" 로 나가 첫 화면 이미지가
-                  하이드레이션 뒤에야 요청된다 — 자체진단 F-C-02 (LH-mobile LCP 9.8s). preload + fetchpriority=high. */}
-              <SafeImage
-                src={main.og_image_url || main.image_url}
-                alt={main.title}
-                fill
-                priority
-                fetchPriority="high"
-                sizes="(max-width: 1024px) calc(100vw - 40px), 66vw"
-                className="object-cover"
-              />
-            </div>
+    <section className="home-wrap" style={{ paddingTop: 4, paddingBottom: 36 }}>
+      <div className="home-hero">
+        <Link href={`/blog/${main.slug}`} className="home-hero-main">
+          <div className="home-hero-media">
+            {/* 홈의 LCP 요소. priority 가 없으면 next/image 기본값 loading="lazy" 로 나가 첫 화면 이미지가
+                하이드레이션 뒤에야 요청된다 — 자체진단 F-C-02 (LH-mobile LCP 9.8s). preload + fetchpriority=high. */}
+            <SafeImage
+              src={main.og_image_url || main.image_url}
+              alt={main.title}
+              fill
+              priority
+              fetchPriority="high"
+              sizes="(max-width: 1023px) calc(100vw - 40px), 640px"
+              className="object-cover"
+            />
+          </div>
+          <div style={{ marginTop: 14 }}>
+            <span className="home-card-cat">
+              {main.category}
+              {main.date && ` · ${formatDate(main.date)}`}
+            </span>
+            <h2 className="font-display home-hero-title">{main.title}</h2>
+            {mainExcerpt && <p className="home-hero-excerpt">{mainExcerpt}</p>}
+          </div>
+        </Link>
 
-            <div style={{ marginTop: 16 }}>
-              <span style={{
-                fontSize: 12,
-                fontWeight: 600,
-                letterSpacing: 2,
-                textTransform: 'uppercase',
-                color: 'var(--text-secondary)',
-              }}>
-                {main.category}
-                {main.date && ` · ${formatDate(main.date)}`}
-              </span>
-
-              <h2
-                className="font-display"
-                style={{
-                  fontSize: 'clamp(26px, 4vw, 32px)',
-                  fontWeight: 900,
-                  fontStyle: 'italic',
-                  letterSpacing: -1,
-                  lineHeight: 1.1,
-                  color: 'var(--text)',
-                  margin: '8px 0',
-                }}
-              >
-                {main.title}
-              </h2>
-
-              {mainExcerpt && (
-                <p style={{
-                  fontSize: 16,
-                  color: 'var(--text-secondary)',
-                  lineHeight: 1.6,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  margin: '8px 0 0',
-                }}>
-                  {mainExcerpt}
-                </p>
-              )}
-
-              <span style={{ fontSize: 14, color: 'var(--text-tertiary)', marginTop: 12, display: 'block' }}>
-                by {main.author || 'Yussi'}
-                {mainComments > 0 && ` · ${mainComments} ${mainComments === 1 ? 'Comment' : 'Comments'}`}
-                {' · '}
-                <span style={{ fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                  Read <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
-                </span>
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Sub Featured Cards */}
         {subs.length > 0 && (
-          <div className="hero-sub-cards">
-            {subs.map((blog, i) => (
-              <Link
-                key={blog.id}
-                href={`/blog/${blog.slug}`}
-                className="hero-sub-card"
-                style={{
-                  textDecoration: 'none',
-                  paddingBottom: i < subs.length - 1 ? 20 : 0,
-                  borderBottom: i < subs.length - 1 ? '1px solid var(--border-tertiary, var(--border))' : 'none',
-                  paddingTop: i > 0 ? 20 : 0,
-                }}
-              >
-                <div className="hero-sub-thumb" style={{
-                  position: 'relative',
-                  borderRadius: 6,
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                }}>
+          <div className="home-hero-subs">
+            {subs.map(blog => (
+              <Link key={blog.id} href={`/blog/${blog.slug}`} className="home-hero-sub">
+                <div className="home-hero-sub-thumb">
                   <SafeImage
                     src={blog.image_url}
                     alt={blog.title}
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 140px, 200px"
+                    sizes="(max-width: 639px) 45vw, (max-width: 1023px) 24vw, 290px"
                     className="object-cover"
                   />
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                  }}>
-                    {blog.category}
-                  </span>
-                  <p style={{
-                    fontSize: 15,
-                    fontWeight: 600,
-                    color: 'var(--text)',
-                    lineHeight: 1.4,
-                    margin: '4px 0',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}>
-                    {blog.title}
-                  </p>
-                  <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
-                    by {blog.author || 'Yussi'}
-                  </span>
-                </div>
+                <span className="home-card-cat">{blog.category}</span>
+                <p className="home-hero-sub-title">{blog.title}</p>
               </Link>
             ))}
           </div>
         )}
-      </div>
-    </section>
-  );
-}
-
-/* ─── Post card for Latest grid ─── */
-function PostCard({ blog, commentCount }: { blog: Blog; commentCount: number }) {
-  return (
-    <Link
-      href={`/blog/${blog.slug}`}
-      className="blog-card-hover"
-      style={{
-        display: 'block',
-        borderRadius: 12,
-        border: '1px solid var(--border)',
-        background: 'var(--bg-card)',
-        padding: 12,
-        textDecoration: 'none',
-      }}
-    >
-      {/* Thumbnail */}
-      <div style={{
-        position: 'relative',
-        aspectRatio: '4/3',
-        borderRadius: 6,
-        overflow: 'hidden',
-      }}>
-        <SafeImage
-          src={blog.image_url}
-          alt={blog.title}
-          fill
-          /* 마지막 항 33vw → 220px (2026-09): 그리드가 max-width 컨테이너 안 3열이라
-             데스크탑 카드 실폭은 ~219px 고정인데 33vw(1440 기준 475px)로 요청해
-             w=640 파일을 받고 있었다. 실측 폭으로 교정. */
-          sizes="(max-width: 639px) 100vw, (max-width: 767px) 50vw, (max-width: 1024px) 33vw, 220px"
-          className="object-cover"
-          style={{ transition: 'transform 0.5s ease' }}
-        />
-      </div>
-
-      {/* Text */}
-      <div style={{ padding: '14px 6px 8px' }}>
-        {/* Category + Date row */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 8,
-          marginBottom: 8,
-        }}>
-          <span style={{
-            fontSize: 10,
-            fontWeight: 900,
-            letterSpacing: 2,
-            textTransform: 'uppercase',
-            color: 'var(--text-secondary)',
-          }}>
-            {blog.category}
-          </span>
-          <span style={{
-            fontSize: 11,
-            fontWeight: 400,
-            color: 'var(--text-secondary)',
-          }}>
-            {blog.date ? formatDate(blog.date) : ''}
-          </span>
-        </div>
-
-        {/* Title */}
-        <h3 style={{
-          fontSize: 18,
-          fontWeight: 700,
-          color: 'var(--text)',
-          lineHeight: 1.4,
-          letterSpacing: -0.3,
-          minHeight: '2.8em', /* 2줄 고정 — 1·2줄 제목 혼재 시 하단 태그/조회수 정렬 유지 */
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          margin: 0,
-        }}>
-          {blog.title}
-        </h3>
-
-        {/* 태그 — 조용한 점 구분, 최대 2개 (카테고리보다 약하게) */}
-        {blog.tags && blog.tags.length > 0 && (
-          <p style={{
-            fontSize: 10,
-            fontWeight: 400,
-            color: 'var(--text-tertiary)',
-            margin: '8px 0 0',
-            lineHeight: 1.5,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}>
-            {blog.tags.slice(0, 2).join(' · ')}
-          </p>
-        )}
-
-        {/* Author + Views + Comment count */}
-        <p style={{
-          fontSize: 11,
-          color: 'var(--text-tertiary)',
-          margin: '8px 0 0',
-        }}>
-          by {blog.author || 'Yussi'}
-          {(blog.view_count ?? 0) > 0 && ` · ${blog.view_count} ${blog.view_count === 1 ? 'view' : 'views'}`}
-          {commentCount > 0 && ` · ${commentCount} ${commentCount === 1 ? 'Comment' : 'Comments'}`}
-        </p>
-      </div>
-    </Link>
-  );
-}
-
-/* ─── A Letter Home section (편지 글이 있을 때만 노출) ─── */
-const LETTER_NAMES: Record<string, string> = { M: 'Min', H: 'Hyun', J: 'Jin' };
-
-function LetterHome({ letter }: { letter: Blog }) {
-  const toName = letter.letter_to ? (LETTER_NAMES[letter.letter_to] ?? letter.letter_to) : '';
-  const excerpt = (letter.content ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 220);
-
-  return (
-    <section style={{ maxWidth: 1320, width: '100%', boxSizing: 'border-box' as const, margin: '0 auto', padding: '96px clamp(20px, 4vw, 48px) 0' }}>
-      <Link
-        href={`/blog/${letter.slug}`}
-        className="blog-card-hover"
-        style={{
-          display: 'block',
-          borderRadius: 12,
-          border: '1px solid var(--border)',
-          background: 'var(--bg-warm)',
-          padding: 'clamp(32px, 5vw, 56px)',
-          textDecoration: 'none',
-        }}
-      >
-        <p style={{
-          fontSize: 10, fontWeight: 900, letterSpacing: 5,
-          textTransform: 'uppercase', color: 'var(--text-tertiary)',
-          margin: '0 0 20px',
-        }}>
-          A Letter Home
-        </p>
-
-        <h2 className="font-display" style={{
-          fontSize: 'clamp(28px, 4vw, 40px)',
-          fontWeight: 900, fontStyle: 'italic',
-          color: 'var(--text)', letterSpacing: -0.5, lineHeight: 1.1,
-          margin: '0 0 16px',
-        }}>
-          Dear {toName}.
-        </h2>
-
-        {excerpt && (
-          <p className="font-display" style={{
-            fontSize: 'clamp(16px, 1.6vw, 19px)',
-            fontStyle: 'italic', fontWeight: 300,
-            color: 'var(--text-secondary)',
-            lineHeight: 1.7, maxWidth: 640,
-            margin: '0 0 24px',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical' as const,
-            overflow: 'hidden',
-          }}>
-            {excerpt}…
-          </p>
-        )}
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <span className="font-display" style={{
-            fontSize: 14, fontStyle: 'italic',
-            color: 'var(--text-tertiary)',
-          }}>
-            — Mum, from Mairangi
-          </span>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            fontSize: 13, fontWeight: 900, letterSpacing: 2,
-            textTransform: 'uppercase', color: 'var(--text-secondary)',
-          }}>
-            Read the letter <ArrowRight size={12} />
-          </span>
-        </div>
-      </Link>
-    </section>
-  );
-}
-
-/* ─── Explore by Topic section ─── */
-function ExploreByTopic({ categoryPosts }: { categoryPosts: Record<string, Blog[]> }) {
-  return (
-    <section style={{
-      maxWidth: 1320,
-      width: '100%',
-      boxSizing: 'border-box' as const,
-      margin: '0 auto',
-      padding: '96px clamp(20px, 4vw, 48px) 96px',
-    }}>
-      <h2
-        className="font-display"
-        style={{
-          fontSize: 28,
-          fontWeight: 900,
-          fontStyle: 'italic',
-          letterSpacing: -0.5,
-          color: 'var(--text)',
-          marginBottom: 8,
-        }}
-      >
-        Explore by Topic
-      </h2>
-      <div style={{ width: 40, height: 2, background: 'var(--mhj-brown)', marginTop: 8, marginBottom: 48 }} />
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
-        {Object.entries(categoryPosts).map(([category, posts]) => (
-          <div key={category}>
-            {/* Category header */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 20,
-              paddingBottom: 12,
-              borderBottom: '1px solid var(--border)',
-            }}>
-              <h3 style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: 'var(--text)',
-                letterSpacing: -0.3,
-                margin: 0,
-              }}>
-                {category}
-              </h3>
-              <Link
-                href={categoryHref(category)}
-                style={{
-                  fontSize: 11,
-                  fontWeight: 900,
-                  letterSpacing: 2,
-                  textTransform: 'uppercase',
-                  color: 'var(--text-secondary)',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-              >
-                View All <ArrowRight size={12} />
-              </Link>
-            </div>
-
-            {/* Cards — 2 per row on desktop, 1 on mobile */}
-            <div className="explore-topic-grid">
-              {posts.map((blog) => (
-                <Link
-                  key={blog.id}
-                  href={`/blog/${blog.slug}`}
-                  className="blog-card-hover"
-                  style={{
-                    display: 'block',
-                    borderRadius: 12,
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-card)',
-                    padding: 12,
-                    textDecoration: 'none',
-                  }}
-                >
-                  <div style={{
-                    position: 'relative',
-                    aspectRatio: '16/10',
-                    borderRadius: 6,
-                    overflow: 'hidden',
-                  }}>
-                    <SafeImage
-                      src={blog.image_url}
-                      alt={blog.title}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div style={{ padding: '14px 6px 8px' }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: 8,
-                      marginBottom: 8,
-                    }}>
-                      <span style={{
-                        fontSize: 10,
-                        fontWeight: 900,
-                        letterSpacing: 2,
-                        textTransform: 'uppercase',
-                        color: 'var(--text-secondary)',
-                      }}>
-                        {blog.category}
-                      </span>
-                      <span style={{
-                        fontSize: 11,
-                        fontWeight: 400,
-                        color: 'var(--text-secondary)',
-                      }}>
-                        {blog.date ? formatDate(blog.date) : ''}
-                      </span>
-                    </div>
-                    <h3 style={{
-                      fontSize: 18,
-                      fontWeight: 700,
-                      color: 'var(--text)',
-                      lineHeight: 1.4,
-                      letterSpacing: -0.3,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      margin: 0,
-                    }}>
-                      {blog.title}
-                    </h3>
-                    {(blog.view_count ?? 0) > 0 && (
-                      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '8px 0 0' }}>
-                        {blog.view_count} {blog.view_count === 1 ? 'view' : 'views'}
-                      </p>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ─── From the Archive section ─── */
-function FromTheArchive({ posts }: { posts: Blog[] }) {
-  return (
-    <section style={{
-      maxWidth: 1320,
-      width: '100%',
-      boxSizing: 'border-box' as const,
-      margin: '0 auto',
-      padding: '96px clamp(20px, 4vw, 48px) 0',
-    }}>
-      <h2
-        className="font-display"
-        style={{
-          fontSize: 'clamp(24px, 3vw, 32px)',
-          fontWeight: 900,
-          fontStyle: 'italic',
-          color: 'var(--text)',
-          letterSpacing: -0.5,
-          marginBottom: 32,
-        }}
-      >
-        From the Archive
-      </h2>
-
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {posts.map((blog, i) => (
-          <Link
-            key={blog.id}
-            href={`/blog/${blog.slug}`}
-            className="archive-item"
-            style={{
-              display: 'flex',
-              gap: 20,
-              alignItems: 'center',
-              padding: '20px 0',
-              borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none',
-              textDecoration: 'none',
-              transition: 'opacity 0.3s ease',
-            }}
-          >
-            {/* Small thumbnail */}
-            <div style={{
-              position: 'relative',
-              width: 120,
-              height: 80,
-              borderRadius: 8,
-              overflow: 'hidden',
-              flexShrink: 0,
-            }}>
-              <SafeImage
-                src={blog.image_url}
-                alt={blog.title}
-                fill
-                sizes="120px"
-                className="object-cover"
-              />
-            </div>
-
-            {/* Text */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{
-                fontSize: 10,
-                fontWeight: 900,
-                letterSpacing: 2,
-                textTransform: 'uppercase',
-                color: 'var(--text-secondary)',
-              }}>
-                {blog.category}
-              </span>
-              <p style={{
-                fontSize: 15,
-                fontWeight: 700,
-                color: 'var(--text)',
-                lineHeight: 1.4,
-                margin: '4px 0 0',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}>
-                {blog.title}
-              </p>
-            </div>
-          </Link>
-        ))}
       </div>
     </section>
   );

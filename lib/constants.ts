@@ -103,7 +103,7 @@ export const CAROUSEL_BLOG_COLUMNS =
 /**
  * 글 끝에 StoryPress 카드를 붙이는 카테고리 — 아이 영어·학습 글(2026-09-11 W6-C).
  * `BlogCategory` 로 타입을 묶어 두어 카테고리 이름이 바뀌면 tsc 가 잡는다.
- * (홈 "Four Pillars" 의 StoryPress 기둥은 Little 15 Mins 하나뿐이다 — `lib/pillars.ts`. 카드는 학습 글 전반에 붙인다.)
+ * (홈 "Four Pillars" 와 `lib/pillars.ts` 는 2026-11 개혁에서 없어졌다. 카드는 학습 글 전반에 붙인다.)
  */
 const STORYPRESS_CARD_CATEGORIES: readonly BlogCategory[] = ['Little 15 Mins', 'Home Learning'];
 export const isStoryPressCardCategory = (category: string): boolean =>
