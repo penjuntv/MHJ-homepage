@@ -2,7 +2,7 @@
 export const BLOG_CATEGORIES = [
   'Little 15 Mins',
   'Home Learning',
-  'Whānau',
+  'School Log',
   'Settlement',
   'Life in Aotearoa',
   'Travelers',
@@ -15,7 +15,8 @@ export type BlogCategory = (typeof BLOG_CATEGORIES)[number];
 export const CATEGORY_TO_SLUG: Record<BlogCategory, string> = {
   'Little 15 Mins': 'little-15-mins',
   'Home Learning': 'home-learning',
-  'Whānau': 'whanau',
+  // 2026-11-06 'Whānau'(whanau) → 'School Log'. 옛 주소 /blog/category/whanau 는 next.config.mjs 에서 308.
+  'School Log': 'school-log',
   'Settlement': 'settlement',
   'Life in Aotearoa': 'life-in-aotearoa',
   'Travelers': 'travelers',
@@ -103,7 +104,7 @@ export const CAROUSEL_BLOG_COLUMNS =
 /**
  * 글 끝에 StoryPress 카드를 붙이는 카테고리 — 아이 영어·학습 글(2026-09-11 W6-C).
  * `BlogCategory` 로 타입을 묶어 두어 카테고리 이름이 바뀌면 tsc 가 잡는다.
- * (홈 "Four Pillars" 의 StoryPress 기둥은 Little 15 Mins 하나뿐이다 — `lib/pillars.ts`. 카드는 학습 글 전반에 붙인다.)
+ * (홈 "Four Pillars" 와 `lib/pillars.ts` 는 2026-11 개혁에서 없어졌다. 카드는 학습 글 전반에 붙인다.)
  */
 const STORYPRESS_CARD_CATEGORIES: readonly BlogCategory[] = ['Little 15 Mins', 'Home Learning'];
 export const isStoryPressCardCategory = (category: string): boolean =>

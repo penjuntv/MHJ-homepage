@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { Instagram } from 'lucide-react';
 import { nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
 
@@ -32,8 +33,12 @@ export default function InstagramFeed({ instagramUrl }: Props) {
   const draggedRef = useRef(false);
   const trackRef = useRef<HTMLDivElement>(null);
 
+  const onHome = usePathname() === '/';
+
   /* ── API fetch ── */
+  // 레이아웃이 페이지 이동 사이에도 살아 있으므로, 홈에서 시작해 다른 페이지로 옮겨 가면 그때 한 번 불러온다.
   useEffect(() => {
+    if (onHome || loaded) return;
     fetch('/api/instagram')
       .then(r => r.json())
       .then(data => {
@@ -41,7 +46,7 @@ export default function InstagramFeed({ instagramUrl }: Props) {
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
-  }, []);
+  }, [onHome, loaded]);
 
   /* ── Loop reset: 유효 범위 [N, 2N-1] 유지 ── */
   useEffect(() => {
@@ -152,6 +157,9 @@ export default function InstagramFeed({ instagramUrl }: Props) {
       document.removeEventListener('mouseup', onMouseUp);
     };
   }, [handleDragEnd]);
+
+  /* ── 홈에서는 그리지 않는다(2026-11 개혁 묶음 B, 유씨 설문 Q5 "없애도 됨"). 다른 공개 페이지는 그대로. ── */
+  if (onHome) return null;
 
   /* ── 포스트 없음 fallback ── */
   if (loaded && posts.length === 0) {

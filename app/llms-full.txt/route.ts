@@ -104,7 +104,7 @@ export async function GET() {
   const categoryOrder = [
     'Little 15 Mins',
     'Home Learning',
-    'Whānau',
+    'School Log',
     'Settlement',
     'Life in Aotearoa',
     'Travelers',

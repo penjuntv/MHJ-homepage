@@ -57,7 +57,7 @@
 | 컬럼 | 타입 | Null | 기본값 | 비고 |
 |------|------|------|--------|------|
 | id | integer | NO | serial | PK |
-| category | text | NO | — | CHECK: Little 15 Mins/Home Learning/Whanau/Settlement/Life in Aotearoa/Travelers/Local Guide |
+| category | text | NO | — | CHECK: Little 15 Mins/Home Learning/School Log/Settlement/Life in Aotearoa/Travelers/Local Guide (2026-11-06 Whānau → School Log, `docs/sql/category_school_log_2026-11-06.sql`) |
 | title | text | NO | — | |
 | author | text | NO | 'Yussi' | |
 | date | text | NO | — | |
