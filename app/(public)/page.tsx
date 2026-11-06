@@ -33,8 +33,8 @@ const PICK_SIZE = 5;
 const GUIDE_CATEGORIES = ['Home Learning', 'Local Guide', 'Settlement'];
 /** 추천 자동 점수: 조회 1 + 승인 댓글 1개당 30. 댓글은 드물어서 무게를 크게 둔다. */
 const COMMENT_WEIGHT = 30;
-/** 서랍 줄에서 글이 이 수보다 적으면 숨기는 카테고리(유씨 Q9 "Whānau 는 당분간 빼놔도"). */
-const HIDE_WHEN_THIN = new Set(['Whānau']);
+/** 서랍 줄에서 글이 이 수보다 적으면 숨기는 카테고리(유씨 Q9 "Whānau 는 당분간 빼놔도" — 2026-11-06 School Log 로 이름 변경). */
+const HIDE_WHEN_THIN = new Set(['School Log']);
 
 export const metadata: Metadata = {
   // 브랜드명만 있던 제목("MHJ — my mairangi")은 어떤 검색 의도와도 맞지 않았다(자체진단 H17). 주제를 담는다.
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
 const FALLBACK_BLOGS: Blog[] = [
   { id: 201, category: 'Settlement', title: 'Avocados at Mairangi Market', author: 'Yussi', date: '2026.03.12', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1200', content: 'New Zealand avocados are big and creamy. Every Sunday morning we head to the local market for the freshest produce.', slug: 'mairangi-avocado', published: true },
   { id: 202, category: 'Home Learning', title: 'The Weight of a Master\'s Degree', author: 'Yussi', date: '2026.03.05', image_url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200', content: 'Social work studies means endless reading and writing. Wrestling with academic texts in English sometimes makes my head spin.', slug: 'massey-masters', published: true },
-  { id: 203, category: 'Whānau', title: 'Kids Learning a New Language', author: 'Yussi', date: '2026.02.20', image_url: 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1200', content: 'The children who once stood speechless at school now come home chatting with friends.', slug: 'kids-language', published: true },
+  { id: 203, category: 'School Log', title: 'Kids Learning a New Language', author: 'Yussi', date: '2026.02.20', image_url: 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1200', content: 'The children who once stood speechless at school now come home chatting with friends.', slug: 'kids-language', published: true },
 ];
 
 /* ─── Data fetching ─── */

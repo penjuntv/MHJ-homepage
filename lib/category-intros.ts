@@ -40,9 +40,10 @@ export const CATEGORY_INTROS: Record<string, CategoryIntro> = {
     description: "Family places on Auckland's North Shore — libraries, parks, beaches, IKEA and Orewa — from a Korean family that moved here not long ago.",
     startHere: ['library-tour-albany-village-library', 'ikea-nz-grown-ups-also-dream-at-ikea', 'orewa-surf-sounds-2026-fireworks-at-shore'],
   },
-  whanau: {
-    intro: 'Whānau is the Māori word for extended family, and the lens we use for the bigger questions: raising children between two cultures, growing without a score, and what a family owes one another. Longer essays, fewer answers.',
-    description: 'Essays on family between two cultures: raising children in New Zealand as Korean parents, growing without a score, and what whānau means to us.',
+  // 2026-11-06 Whānau(whanau) → School Log. 관리자 덮어쓰기 키도 category_intro_school-log 로 바뀐다.
+  'school-log': {
+    intro: "School Log keeps the longer notes from our daughters' school years in New Zealand — the worries and small wins, growing without a score, and what a new school system is teaching all five of us. Written as it happens, not as advice.",
+    description: "Notes from three daughters' school years in New Zealand by a Korean family in Auckland — worries, small wins and growing without a score.",
     startHere: ['growing-without-a-score'],
   },
   travelers: {

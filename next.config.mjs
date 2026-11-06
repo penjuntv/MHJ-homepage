@@ -34,12 +34,21 @@ const nextConfig = {
       // 인스타·페북 인앱 브라우저도 referrer 를 지운다.
       { source: '/ig', destination: '/?utm_source=instagram&utm_campaign=bio', permanent: false },
       { source: '/fb', destination: '/?utm_source=facebook&utm_campaign=profile', permanent: false },
+      // 카테고리 이름 변경(2026-11-06) Whānau → School Log. 옛 허브·쪽 주소와 ?category=Whānau 를 새 주소로.
+      { source: '/blog/category/whanau', destination: '/blog/category/school-log', permanent: true },
+      { source: '/blog/category/whanau/page/:n', destination: '/blog/category/school-log/page/:n', permanent: true },
+      {
+        source: '/blog',
+        has: [{ type: 'query', key: 'category', value: 'Whānau' }],
+        destination: '/blog/category/school-log',
+        permanent: true,
+      },
     ];
 
     const map = [
       ['Little 15 Mins', 'little-15-mins'],
       ['Home Learning', 'home-learning'],
-      ['Whānau', 'whanau'],
+      ['School Log', 'school-log'],
       ['Settlement', 'settlement'],
       ['Life in Aotearoa', 'life-in-aotearoa'],
       ['Travelers', 'travelers'],
