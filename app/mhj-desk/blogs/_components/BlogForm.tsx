@@ -637,8 +637,8 @@ export default function BlogForm({ initial }: Props) {
         <div ref={categoryRef}>
           <label style={labelStyle}>카테고리 *</label>
           <div role="radiogroup" aria-label="카테고리" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {/* Whānau 는 당분간 숨긴다(유씨 Q9). 그 서랍에 이미 있는 글을 고칠 때만 보인다 — 값이 사라져 보이지 않게. */}
-            {CATEGORIES.filter(c => c !== 'Whānau' || (isEdit && initial?.category === 'Whānau')).map(c => {
+            {/* School Log(옛 Whānau, 2026-11-06 이름 변경)는 당분간 숨긴다(유씨 Q9). 그 서랍에 이미 있는 글을 고칠 때만 보인다 — 값이 사라져 보이지 않게. */}
+            {CATEGORIES.filter(c => c !== 'School Log' || (isEdit && initial?.category === 'School Log')).map(c => {
               const on = categoryChosen && form.category === c;
               return (
                 <button
