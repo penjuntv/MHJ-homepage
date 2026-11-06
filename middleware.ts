@@ -89,6 +89,7 @@ export const config = {
     '/mhj-desk/:path*',
     '/internal/render/:path*',
     '/api/ai-seo',
+    '/api/blogs/bulk-category',
     '/api/carousel-v3/:path*',
     '/api/preview',
     '/api/newsletter-preview',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase-browser';
@@ -8,6 +8,7 @@ import type { Blog } from '@/lib/types';
 import { Plus, Search, Pencil, Trash2, Eye, EyeOff, Star, LayoutGrid, List, TrendingUp, Award } from 'lucide-react';
 import { toast } from 'sonner';
 import { BLOG_CATEGORIES } from '@/lib/constants';
+import BulkCategoryBar, { SelectBox } from './_components/BulkCategoryBar';
 
 const CATEGORIES = ['All', ...BLOG_CATEGORIES];
 type StatusFilter = 'all' | 'published' | 'draft';
@@ -36,6 +37,9 @@ export default function AdminBlogsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [deleting, setDeleting] = useState<number | null>(null);
+  // 카테고리 일괄 변경용 선택 — 지금 보이는(필터된) 글 안에서만 유지한다(보이지 않는 글이 몰래 같이 옮겨지지 않게).
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const lastClickedRef = useRef<number | null>(null); // Shift+클릭 범위 선택의 기준점
 
   async function fetchBlogs() {
     setLoading(true);
@@ -45,7 +49,12 @@ export default function AdminBlogsPage() {
     if (statusFilter === 'published') q = q.eq('published', true);
     if (statusFilter === 'draft') q = q.eq('published', false);
     const { data } = await q;
-    setBlogs(data ?? []);
+    const rows: Blog[] = data ?? [];
+    setBlogs(rows);
+    setSelected(prev => {
+      const visible = new Set(rows.map(b => b.id));
+      return new Set([...prev].filter(id => visible.has(id)));
+    });
     setLoading(false);
   }
 
@@ -90,9 +99,31 @@ export default function AdminBlogsPage() {
     setDeleting(id);
     await supabase.from('blogs').delete().eq('id', id);
     setBlogs(prev => prev.filter(b => b.id !== id));
+    setSelected(prev => { const next = new Set(prev); next.delete(id); return next; });
     setDeleting(null);
     toast.success('글이 삭제되었습니다.');
   }
+
+  const selectedBlogs = blogs.filter(b => selected.has(b.id));
+  const allSelected = blogs.length > 0 && selectedBlogs.length === blogs.length;
+  const someSelected = selectedBlogs.length > 0 && !allSelected;
+  // Shift+클릭: 마지막으로 누른 글부터 이번 글까지(보이는 순서) 이번 글과 같은 상태로 — Gmail·WordPress 목록과 같은 동작.
+  const toggleSelect = (id: number, shiftKey = false) => {
+    const anchor = lastClickedRef.current;
+    lastClickedRef.current = id;
+    setSelected(prev => {
+      const next = new Set(prev);
+      const turnOn = !prev.has(id);
+      const a = anchor === null ? -1 : blogs.findIndex(b => b.id === anchor);
+      const z = blogs.findIndex(b => b.id === id);
+      const range = shiftKey && a >= 0 && z >= 0
+        ? blogs.slice(Math.min(a, z), Math.max(a, z) + 1).map(b => b.id)
+        : [id];
+      for (const rid of range) { if (turnOn) next.add(rid); else next.delete(rid); }
+      return next;
+    });
+  };
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(blogs.map(b => b.id)));
 
   const heroCount = blogs.filter(b => b.is_hero).length;
   const publishedCount = blogs.filter(b => b.published).length;
@@ -191,6 +222,18 @@ export default function AdminBlogsPage() {
         </div>
       </div>
 
+      {/* 카테고리 일괄 변경 — 로딩 중에도 내리지 않는다: 실행 뒤 목록을 다시 불러오는 동안 언마운트되면
+          결과·되돌리기 상태가 사라진다(2026-11-06 실화면 시험에서 발견). */}
+      <BulkCategoryBar
+        visibleCount={loading ? 0 : blogs.length}
+        selectedBlogs={selectedBlogs}
+        allSelected={allSelected}
+        someSelected={someSelected}
+        onToggleAll={toggleAll}
+        onClear={() => setSelected(new Set())}
+        onChanged={fetchBlogs}
+      />
+
       {/* 콘텐츠 */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: 80, color: '#CBD5E1', fontSize: 11, fontWeight: 900, letterSpacing: 4 }}>LOADING...</div>
@@ -256,7 +299,11 @@ export default function AdminBlogsPage() {
                 )}
 
                 {/* 액션 버튼 */}
-                <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
+                  <label style={{ marginRight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 44, cursor: 'pointer', fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    <SelectBox checked={selected.has(blog.id)} onChange={shift => toggleSelect(blog.id, shift)} label={`선택: ${blog.title}`} />
+                    선택
+                  </label>
                   <button onClick={() => toggleHero(blog)} title="히어로 토글" style={{
                     padding: '7px', borderRadius: 8, border: `1px solid ${blog.is_hero ? '#FEF3C7' : '#f1f5f9'}`,
                     background: blog.is_hero ? '#FFFBEB' : 'white', cursor: 'pointer', display: 'flex', alignItems: 'center',
@@ -299,6 +346,9 @@ export default function AdminBlogsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
             <thead>
               <tr style={{ background: '#fafafa', borderBottom: '1px solid #f1f5f9' }}>
+                <th style={{ padding: '12px 4px 12px 14px', width: 28 }}>
+                  <SelectBox checked={allSelected} indeterminate={someSelected} onChange={() => toggleAll()} label="보이는 글 전체 선택" hitArea />
+                </th>
                 {['', '', '글', '카테고리', '저자', '날짜', '상태', '조회', ''].map((h, i) => (
                   <th key={i} className={['카테고리', '저자', '날짜'].includes(h) ? 'hidden sm:table-cell' : ''} style={{ padding: '12px 14px', textAlign: 'left', fontSize: 9, fontWeight: 800, letterSpacing: 3, textTransform: 'uppercase', color: '#94a3b8' }}>{h}</th>
                 ))}
@@ -308,10 +358,15 @@ export default function AdminBlogsPage() {
               {blogs.map(blog => (
                 <tr key={blog.id} style={{
                   borderBottom: '1px solid #f8fafc',
+                  background: selected.has(blog.id) ? 'var(--callout-bg)' : undefined,
                   opacity: blog.published ? 1 : 0.65,
                 }}>
+                  {/* 선택 */}
+                  <td style={{ padding: '12px 4px 12px 14px', width: 28 }}>
+                    <SelectBox checked={selected.has(blog.id)} onChange={shift => toggleSelect(blog.id, shift)} label={`선택: ${blog.title}`} hitArea />
+                  </td>
                   {/* 히어로 별 */}
-                  <td style={{ padding: '12px 8px 12px 14px', width: 32 }}>
+                  <td style={{ padding: '12px 8px', width: 32 }}>
                     <button onClick={() => toggleHero(blog)} style={{
                       padding: '5px', borderRadius: 7, border: 'none',
                       background: 'none', cursor: 'pointer', display: 'flex',
