@@ -37,21 +37,30 @@ async function postMoves(items: Array<{ id: number; category: string }>): Promis
   return json as ApiResult;
 }
 
-/** 일부만 골랐을 때 가운데 줄(—)이 보이는 체크박스. indeterminate 는 속성이 아니라 DOM 프로퍼티라 ref 로 건다. */
-export function SelectBox({ checked, indeterminate = false, onChange, label }: {
-  checked: boolean; indeterminate?: boolean; onChange: () => void; label: string;
+/**
+ * 일부만 골랐을 때 가운데 줄(—)이 보이는 체크박스. indeterminate 는 속성이 아니라 DOM 프로퍼티라 ref 로 건다.
+ * onChange 에 Shift 가 눌렸는지 넘긴다(범위 선택). `hitArea` 면 44×44 터치 영역(DESIGN_RULES 터치 타겟)으로 감싼다.
+ */
+export function SelectBox({ checked, indeterminate = false, onChange, label, hitArea = false }: {
+  checked: boolean; indeterminate?: boolean; onChange: (shiftKey: boolean) => void; label: string; hitArea?: boolean;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => { if (ref.current) ref.current.indeterminate = indeterminate; }, [indeterminate]);
-  return (
+  const input = (
     <input
       ref={ref}
       type="checkbox"
       checked={checked}
-      onChange={onChange}
+      onChange={e => onChange((e.nativeEvent as MouseEvent).shiftKey === true)}
       aria-label={label}
       style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--accent)', margin: 0 }}
     />
+  );
+  if (!hitArea) return input;
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, margin: '-10px -6px', cursor: 'pointer' }}>
+      {input}
+    </label>
   );
 }
 
@@ -145,8 +154,8 @@ export default function BulkCategoryBar({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-      {/* 고르기 + 일괄 변경 막대 */}
-      <div
+      {/* 고르기 + 일괄 변경 막대 (보이는 글이 없으면 숨기되 아래 결과·되돌리기는 남긴다) */}
+      {visibleCount > 0 && <div
         role="region"
         aria-label="카테고리 일괄 변경"
         style={{
@@ -155,10 +164,13 @@ export default function BulkCategoryBar({
           background: 'var(--bg-card)', border: '1px solid var(--border-medium)',
         }}
       >
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 36, cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>
-          <SelectBox checked={allSelected} indeterminate={someSelected} onChange={onToggleAll} label="보이는 글 전체 선택" />
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 44, cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>
+          <SelectBox checked={allSelected} indeterminate={someSelected} onChange={() => onToggleAll()} label="보이는 글 전체 선택" />
           전체 선택 <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>({visibleCount}편)</span>
         </label>
+        {selectedCount === 0 && (
+          <span className="hidden sm:inline" style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Shift+클릭으로 범위 선택</span>
+        )}
 
         {selectedCount > 0 && (
           <>
@@ -189,7 +201,7 @@ export default function BulkCategoryBar({
             </button>
           </>
         )}
-      </div>
+      </div>}
 
       {/* 실행 결과 + 되돌리기 */}
       {outcome && (
