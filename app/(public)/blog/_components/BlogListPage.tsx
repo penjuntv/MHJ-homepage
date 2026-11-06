@@ -85,7 +85,7 @@ export default async function BlogListPage({ categorySlug, page }: Props) {
   const recent = await getRecentBlogsCached(category, featured?.id ?? null);
 
   // 허브 소개(설정 덮어쓰기는 lib/category-intros 가 처리). Start here 는 1쪽에서만, 2편 이상일 때만 —
-  // 글이 1편뿐인 카테고리(Whānau·Travelers)는 바로 아래 Featured 와 같은 글이라 목록이 의미 없다.
+  // 글이 1편뿐인 카테고리(School Log·Travelers)는 바로 아래 Featured 와 같은 글이라 목록이 의미 없다.
   const hub = categorySlug ? resolveCategoryIntro(categorySlug, s) : null;
   const startHere = hub && page === 1 && startHereRaw.length >= 2 ? startHereRaw : [];
 

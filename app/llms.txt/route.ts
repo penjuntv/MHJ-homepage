@@ -18,7 +18,7 @@ import { searchTitle } from '@/lib/search-title.mjs';
  * - 한·영 이중 언어 가족 niche (Korean immigrant family, Auckland)
  * - PeNnY (기자 출신) + Yussi (사회복지학 석사) 의 권위 명시
  * - StoryPress 앱 별도 도메인 안내
- * - Whānau / Settlement 카테고리 = 이민 사회복지 전문성 (citation 가치)
+ * - Settlement 카테고리 = 이민 사회복지 전문성 (citation 가치)
  *
  * 큐레이션 정책:
  * - 정적 핵심 페이지 8개 (about, magazine, blog, storypress, mairangi-notes, gallery, media-kit, home)
@@ -109,7 +109,7 @@ export async function GET() {
     `- [About](${SITE_URL}/about): The family behind MHJ — PeNnY, Yussi, and the three girls (Min, Hyun, Jin)`
   );
   lines.push(
-    `- [Journal (Blog)](${SITE_URL}/blog): Weekly essays across seven categories — Little 15 Mins, Home Learning, Whānau, Settlement, Life in Aotearoa, Travelers, Local Guide`
+    `- [Journal (Blog)](${SITE_URL}/blog): Weekly essays across seven categories — Little 15 Mins, Home Learning, School Log, Settlement, Life in Aotearoa, Travelers, Local Guide`
   );
   lines.push(
     `- [Magazine](${SITE_URL}/magazine): Monthly family issues with long-form articles, photography, and design templates`

@@ -125,7 +125,7 @@ const EDITORIAL_SECTIONS: EditorialSection[] = [
       { key: 'category_intro_settlement',       label: 'Settlement',       type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
       { key: 'category_intro_life-in-aotearoa', label: 'Life in Aotearoa', type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
       { key: 'category_intro_local-guide',      label: 'Local Guide',      type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
-      { key: 'category_intro_whanau',           label: 'Whānau',           type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
+      { key: 'category_intro_school-log',       label: 'School Log',       type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
       { key: 'category_intro_travelers',        label: 'Travelers',        type: 'textarea', rows: 4, placeholder: '비워 두면 기본 소개문' },
     ],
   },
