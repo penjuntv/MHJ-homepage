@@ -11,6 +11,12 @@ import { listPagePath } from '@/app/(public)/blog/_lib/blog-list-urls';
 
 const ALL_CATEGORIES = [...BLOG_CATEGORIES];
 
+/**
+ * 카드에 "N views" 를 보일지. 2026-11-08 PeNnY 지시로 끔 — 아직 숫자가 작아("2 views") 독자에게 역효과.
+ * 조회수 기록(ViewTracker)·관리자 화면 표시·Most Read 정렬은 그대로다. 숫자가 쌓이면 true 로 되돌린다.
+ */
+const SHOW_PUBLIC_VIEW_COUNT = false;
+
 interface Props {
   featuredBlog: Blog | null;
   recentBlogs: Blog[];
@@ -595,7 +601,7 @@ function BlogCard({ blog }: CardProps) {
             {blog.tags.slice(0, 2).join(' · ')}
           </p>
         )}
-        {(blog.view_count ?? 0) > 0 && (
+        {SHOW_PUBLIC_VIEW_COUNT && (blog.view_count ?? 0) > 0 && (
           <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '6px 0 0' }}>
             {blog.view_count} {blog.view_count === 1 ? 'view' : 'views'}
           </p>
