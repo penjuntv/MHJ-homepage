@@ -9,8 +9,9 @@
  * 화면마다 잰다: HTTP 상태 · 페이지 JS 오류 · console.error · 4xx/5xx 하위 요청 · 가로 넘침(스크롤바 생김) ·
  * 깨진 이미지(로드 실패) · 테마 적용(.dark) · 핵심 요소 존재.
  * 지면 점수표(docs/DESIGN_SCORECARD.md) 기계 항목 두 개도 함께 잰다:
- *   - 0.35초 첫 화면: 이동 시작 0.35초 뒤 화면을 바로 찍어(CDP, 글꼴 대기 없음) 테마와 반대 밝기가 화면 60% 이상이면
- *     "첫 화면 깜빡임"(다크인데 흰 화면 · 라이트인데 검은 화면). 그 시점에 문서가 아직 안 왔으면 판정 보류.
+ *   - 0.35초 첫 화면: 화면 녹화(CDP screencast)로 0.35초에 떠 있던 새 문서 프레임(아직 안 그려졌으면 첫 그림 프레임)을
+ *     골라, 테마와 반대 밝기가 화면 60% 이상이고 다 그린 화면보다 40%p 이상 많으면 "첫 화면 깜빡임"
+ *     (다크인데 흰 화면 · 라이트인데 검은 화면). 6초 안에 한 번도 안 그려지면 판정 보류.
  *   - 제목 글꼴 대체: h1~h3 의 첫 글꼴이 document.fonts 에 선언돼 있고, 그 제목 글자를 덮는 글꼴 파일이 실제로
  *     받아졌는지(status loaded). document.fonts.check() 는 없는 글꼴에도 true 라 쓰지 않는다(2026-11-09 실측).
  *     #148(10-17) 처럼 Google Fonts 가 통째로 빠져도 화면은 시스템 글꼴로 "그럴듯하게" 나와 3주를 몰랐다.
@@ -32,7 +33,8 @@ const SHOTS = arg('shots', '');
 const VIEWPORTS = { desktop: { width: 1440, height: 900 }, tablet: { width: 768, height: 1024 }, mobile: { width: 390, height: 844 } };
 const THEMES = ['light', 'dark'];
 const FIRST_FRAME_MS = 350;
-const FLASH_PCT = 60; // 테마와 반대 밝기 픽셀이 이 % 이상이면 깜빡임
+const FLASH_PCT = 60; // 0.35초 화면에서 테마와 반대 밝기 픽셀이 이 % 이상이고
+const FLASH_GAP = 40; // 다 그린 화면보다 이 %p 이상 많으면 깜빡임
 
 // PNG → 밝은(휘도 > 235)·어두운(< 40) 픽셀 비율(%). 4픽셀 간격 표본이면 충분하다.
 function brightness(buf) {
@@ -116,27 +118,37 @@ async function probe(ctx, path, view, theme, extra) {
   const out = { path, view, theme, status: 0, errors, consoleErrors, badReq, overflow: 0, brokenImages: [], themeOk: true, notes: [], rawHeavy, firstFrame: null, flash: '', fontFallback: [] };
   const shotName = path.replace(/[/?=&]+/g, '_').replace(/^_/, '') || 'home';
   try {
-    // ① 0.35초 첫 화면 — 같은 이동 안에서 문서 도착(commit) 직후부터 시계를 재고, CDP 로 즉시 찍는다
-    //    (page.screenshot 은 글꼴 로드를 기다려 0.35초를 지나 버린다)
+    // ① 0.35초 첫 화면 — 화면 녹화(CDP screencast)로 브라우저가 실제로 그린 프레임을 시각과 함께 받는다.
+    //    즉시 캡처(Page.captureScreenshot)는 로딩 중 렌더러가 바쁘면 0.5~2.8초 뒤 화면을 돌려줘 0.35초가 아니다.
+    //    page.screenshot 은 글꼴 로드까지 기다린다. (둘 다 2026-11-09 실측)
+    //    판정할 프레임 = 0.35초에 화면에 떠 있던 새 문서의 프레임. 0.35초까지 새 문서가 아직 한 번도 안 그려졌으면
+    //    (운영 사이트는 첫 그림이 보통 0.8초 안팎) 새 문서의 **첫 그림** 프레임 — 흰 화면 깜빡임은 첫 그림에 나타난다.
     const cdp = await ctx.newCDPSession(page);
+    const frames = [];
+    cdp.on('Page.screencastFrame', ({ data, metadata, sessionId }) => {
+      frames.push({ at: metadata.timestamp ? metadata.timestamp * 1000 : Date.now(), data });
+      cdp.send('Page.screencastFrameAck', { sessionId }).catch(() => {});
+    });
+    await cdp.send('Page.startScreencast', { format: 'png', everyNthFrame: 1 });
     const t0 = Date.now();
     const res = await page.goto(`${BASE}${path}`, { waitUntil: 'commit', timeout: 45000 });
     out.status = res?.status() ?? 0;
-    const commitMs = Date.now() - t0;
-    if (commitMs < FIRST_FRAME_MS) await page.waitForTimeout(FIRST_FRAME_MS - commitMs);
-    const shotMs = Date.now() - t0;
-    const ff = await cdp.send('Page.captureScreenshot', { format: 'png', optimizeForSpeed: true }).then((r) => Buffer.from(r.data, 'base64')).catch(() => null);
-    const capturedMs = Date.now() - t0;
-    const st = await page.evaluate(() => ({ body: !!document.body && document.body.childElementCount > 0, dark: document.documentElement.classList.contains('dark') })).catch(() => null);
+    const commitAt = Date.now();
+    const until = t0 + FIRST_FRAME_MS;
+    // 0.35초를 지난 새 문서 프레임이 하나 들어오면(=그 앞 프레임은 다 도착) 멈춘다. 최대 6초
+    while (Date.now() < t0 + 6000 && !(Date.now() > until && frames.some((f) => f.at > until && f.at >= commitAt))) await page.waitForTimeout(50);
+    await cdp.send('Page.stopScreencast').catch(() => {});
     await cdp.detach().catch(() => {});
-    if (ff) {
-      const b = brightness(ff);
-      out.firstFrame = { commitMs, shotMs, capturedMs, ...b, body: !!st?.body, darkClass: !!st?.dark };
-      if (SHOTS) writeFileSync(`${SHOTS}/${shotName}__${view}-${theme}__0350ms.png`, ff);
-      // 0.35초에 문서가 아직 없음(서버 응답 탓) · 캡처 자체가 0.6초를 넘김(렌더러가 바빠 0.35초 화면이 아님) → 판정 보류
-      if (commitMs > FIRST_FRAME_MS || !st?.body || capturedMs > 600) out.firstFrame.held = true;
-      else if (theme === 'dark' && b.brightPct >= FLASH_PCT) out.flash = `다크인데 0.35초 화면 밝은 픽셀 ${b.brightPct}%`;
-      else if (theme === 'light' && b.darkPct >= FLASH_PCT) out.flash = `라이트인데 0.35초 화면 어두운 픽셀 ${b.darkPct}%`;
+    const mine = frames.filter((f) => f.at >= commitAt);
+    const shown = mine.filter((f) => f.at <= until).at(-1) ?? mine[0];
+    out.firstFrame = { commitMs: commitAt - t0 };
+    if (!shown) out.firstFrame.held = true; // 6초 안에 새 문서가 한 번도 안 그려짐 — 판정 보류
+    else {
+      const ff = Buffer.from(shown.data, 'base64');
+      const frameMs = Math.round(shown.at - t0);
+      Object.assign(out.firstFrame, { frameMs, at350: shown.at <= until, ...brightness(ff) });
+      if (SHOTS) writeFileSync(`${SHOTS}/${shotName}__${view}-${theme}__${shown.at <= until ? '0350ms' : `first-${frameMs}ms`}.png`, ff);
+      // 깜빡임 판정은 ③ 다 그린 화면과 비교한 뒤에 한다
     }
     await page.waitForLoadState('domcontentloaded', { timeout: 45000 });
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => out.notes.push('networkidle 15s 초과'));
@@ -156,6 +168,16 @@ async function probe(ctx, path, view, theme, extra) {
     out.overflow = m.over > 1 ? m.over : 0;
     out.brokenImages = m.broken;
     out.themeOk = theme === 'dark' ? m.dark : !m.dark;
+    // ③ 깜빡임 = 0.35초 화면이 테마와 반대 밝기(60%+)이면서, 다 그린 화면보다 그 밝기가 40%p 이상 많을 때.
+    //    다 그린 화면도 같은 밝기면 깜빡임이 아니라 그 화면의 디자인이다
+    //    (2026-11-09 첫 실행: 매거진 리더는 라이트에서도 검은 배경 · 매거진 호 화면은 다크에서도 크림색 본문 → 24건 오탐)
+    if (out.firstFrame && !out.firstFrame.held) {
+      const fin = brightness(await page.screenshot());
+      const ff = out.firstFrame;
+      Object.assign(ff, { settledBrightPct: fin.brightPct, settledDarkPct: fin.darkPct });
+      if (theme === 'dark' && ff.brightPct >= FLASH_PCT && ff.brightPct - fin.brightPct >= FLASH_GAP) out.flash = `다크인데 ${ff.frameMs}ms 화면 밝은 픽셀 ${ff.brightPct}% (다 그린 뒤 ${fin.brightPct}%)`;
+      if (theme === 'light' && ff.darkPct >= FLASH_PCT && ff.darkPct - fin.darkPct >= FLASH_GAP) out.flash = `라이트인데 ${ff.frameMs}ms 화면 어두운 픽셀 ${ff.darkPct}% (다 그린 뒤 ${fin.darkPct}%)`;
+    }
     // ② 제목 글꼴 대체 — 404 화면도 우리 화면이라 똑같이 잰다
     out.fontFallback = await page.evaluate(headingFontFallbacks).catch((e) => [`글꼴 검사 실행 실패: ${String(e.message).slice(0, 80)}`]);
     if (extra) await extra(page, out);
@@ -324,10 +346,14 @@ for (const r of defects) {
 // 점수표 기계 항목 요약 — 위 결함 목록에도 이미 들어가 있다. 여기는 "몇 화면을 실제로 판정했나"를 남긴다.
 const framed = results.filter((r) => r.firstFrame);
 const held = framed.filter((r) => r.firstFrame.held);
-const slowest = framed.reduce((a, r) => (r.firstFrame.commitMs > (a?.firstFrame.commitMs ?? -1) ? r : a), null);
-console.log(`\n— 점수표 기계 항목 — 0.35초 첫 화면: 판정 ${framed.length - held.length} · 보류(문서 미도착) ${held.length} · 깜빡임 ${results.filter((r) => r.flash).length}` +
+const painted = framed.filter((r) => !r.firstFrame.held);
+const at350 = painted.filter((r) => r.firstFrame.at350).length;
+const firstMs = painted.map((r) => r.firstFrame.at350 ? null : r.firstFrame.frameMs).filter((v) => v != null).sort((a, b) => a - b);
+const slowest = painted.reduce((a, r) => (r.firstFrame.frameMs > (a?.firstFrame.frameMs ?? -1) ? r : a), null);
+console.log(`\n— 점수표 기계 항목 — 첫 화면: 판정 ${painted.length}(0.35초 프레임 ${at350} · 첫 그림 프레임 ${painted.length - at350}) · 보류(6초 안에 안 그려짐) ${held.length} · 깜빡임 ${results.filter((r) => r.flash).length}` +
   ` | 제목 글꼴 대체 ${results.filter((r) => r.fontFallback.length).length}화면` +
-  (slowest ? ` | 가장 늦은 문서 도착 ${slowest.firstFrame.commitMs}ms (${slowest.path} ${slowest.view}/${slowest.theme})` : ''));
+  (firstMs.length ? ` | 첫 그림 중앙값 ${firstMs[firstMs.length >> 1]}ms` : '') +
+  (slowest ? ` · 가장 늦은 첫 그림 ${slowest.firstFrame.frameMs}ms (${slowest.path} ${slowest.view}/${slowest.theme})` : ''));
 const cons = {};
 for (const r of results) for (const c of r.consoleErrors) (cons[c] ??= []).push(`${r.path}[${r.view}/${r.theme}]`);
 if (Object.keys(cons).length) {
