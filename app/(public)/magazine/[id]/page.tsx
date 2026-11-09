@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import { OG_BASE, SITE_LANG, orgRef, personRef, schemaDate } from '@/lib/seo';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import type { Magazine, Article } from '@/lib/types';
+import type { Magazine, Article, ArticlePage } from '@/lib/types';
 import MagazineViewer from '@/components/MagazineViewer';
 import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
 import MagazineIssueDetail from '@/components/magazine/MagazineIssueDetail';
 import { isLegacyPngIssue } from '@/lib/magazine-themes';
-import { optimizeArticleImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
+import { optimizeArticleImages, optimizePageImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -232,6 +232,8 @@ export default async function MagazineIssuePage(props: Props) {
     );
   }
 
+  const initialPage = Math.max(1, parseInt(searchParams?.page ?? '1', 10) || 1);
+
   /* Legacy PNG + ?page → SpreadViewer 직결 (MagazineViewer의 PDF 모드 우회, 중간 모달 제거)
      과월호는 스캔한 지면 이미지에 글자가 박혀 있어 한 단계 큰 폭 */
   if (isLegacy && articles.length > 0) {
@@ -239,7 +241,29 @@ export default async function MagazineIssuePage(props: Props) {
       <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-        <MagazineSpreadViewer magazine={magazine} articles={forView(MAG_IMAGE_WIDTH.legacy)} />
+        <MagazineSpreadViewer magazine={magazine} articles={forView(MAG_IMAGE_WIDTH.legacy)} initialPage={initialPage} />
+      </>
+    );
+  }
+
+  /* 기사형 호 + ?page → 리더(SpreadViewer). MagazineViewer 의 articles 갈래와 같은 화면인데,
+     추가 쪽(article_pages)을 서버에서 받아 넘겨 첫 HTML 에 그 쪽 지면이 바로 그려지게 한다
+     (브라우저에서 받을 때는 첫 그림이 검은 배경 + 화살표뿐이었다 — 2026-11-09 #193 깜빡임 검사). */
+  if (!magazine.pdf_url && articles.length > 0) {
+    const { data: extra, error: extraError } = await supabase
+      .from('article_pages')
+      .select('*')
+      .in('article_id', articles.map((a) => a.id))
+      .order('page_number', { ascending: true });
+    // 조회가 실패하면 undefined 로 넘겨 브라우저가 다시 받게 한다(빈 배열을 넘기면 추가 쪽이 조용히 사라진다).
+    const extraPages = extraError
+      ? undefined
+      : ((extra ?? []) as ArticlePage[]).map((ep) => optimizePageImages(ep, MAG_IMAGE_WIDTH.page));
+    return (
+      <>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+        <MagazineSpreadViewer magazine={magazine} articles={forView(MAG_IMAGE_WIDTH.page)} extraPages={extraPages} initialPage={initialPage} />
       </>
     );
   }
