@@ -167,6 +167,7 @@ export default function Footer({
               <Link
                 key={link.href}
                 href={link.href}
+                {...(link.href === '/storypress' ? { 'data-track': 'storypress_click', 'data-track-location': 'footer' } : {})}
                 className="font-bold uppercase transition-colors duration-300 hover:text-white"
                 style={{
                   fontSize: '14px',

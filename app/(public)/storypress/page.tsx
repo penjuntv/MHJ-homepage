@@ -45,7 +45,8 @@ export default async function StoryPressPage() {
     '@type': 'SoftwareApplication',
     name: 'StoryPress',
     applicationCategory: 'EducationalApplication',
-    operatingSystem: 'iOS, Android',
+    // 앱은 브라우저에서 바로 쓰는 웹앱(app.mhj.nz)이다 — 스토어 앱이 아니다.
+    operatingSystem: 'Web',
     description: 'An English storybook app for children aged 3–8. Every day, 4 new words — a story page — a real book by the end of 10 days.',
     url: `${SITE_URL}/storypress`,
     author: orgRef(),

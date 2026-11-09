@@ -9,6 +9,13 @@ import {
   Star, Heart,
 } from 'lucide-react';
 import StoryPressFAQ from '@/components/StoryPressFAQ';
+import { STORYPRESS_APP_URL, storyPressAppHref } from '@/lib/storypress-link';
+
+/**
+ * 위·아래 두 버튼 모두 같은 앱 주소(utm_medium=landing). 어느 버튼이었는지는 `data-track-location` 으로 가른다.
+ * GA `cta_click` 은 기존 보고서가 끊기지 않게 남겨 둔다 — 1st-party 쪽 이름은 `storypress_click` 하나로 통일.
+ */
+const LANDING_APP_HREF = storyPressAppHref(STORYPRESS_APP_URL, 'landing');
 
 interface Props {
   title: string;
@@ -191,7 +198,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a
-              href="https://app.mhj.nz"
+              href={LANDING_APP_HREF}
+              data-track="storypress_click"
+              data-track-location="landing_hero"
               onClick={() => trackEvent('cta_click', { location: 'hero' })}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', borderRadius: 999, background: '#1A1A1A', color: '#fff', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 16px 32px rgba(0,0,0,0.15)' }}
             >
@@ -823,7 +832,9 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </p>
 
           <a
-            href="https://app.mhj.nz"
+            href={LANDING_APP_HREF}
+            data-track="storypress_click"
+            data-track-location="landing_bottom"
             onClick={() => trackEvent('cta_click', { location: 'bottom' })}
             className="font-black uppercase"
             style={{

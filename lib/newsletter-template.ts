@@ -1,3 +1,5 @@
+import { storyPressAppHref } from './storypress-link';
+
 export interface BlogPostInfo {
   title: string;
   image_url: string;
@@ -464,7 +466,7 @@ export function renderMailrangiNotes(
       <table role="presentation" cellspacing="0" cellpadding="0" border="0">
         <tr>
           <td style="background:#1d4ed8;">
-            <a href="${escapeHtml(data.jin.storypressUrl)}"
+            <a href="${escapeHtml(storyPressAppHref(data.jin.storypressUrl, 'newsletter'))}"
                style="display:inline-block;padding:10px 24px;font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#ffffff;text-decoration:none;">
               StoryPress &rarr;
             </a>
