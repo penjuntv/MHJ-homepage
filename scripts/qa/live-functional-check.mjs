@@ -8,6 +8,12 @@
  *
  * 화면마다 잰다: HTTP 상태 · 페이지 JS 오류 · console.error · 4xx/5xx 하위 요청 · 가로 넘침(스크롤바 생김) ·
  * 깨진 이미지(로드 실패) · 테마 적용(.dark) · 핵심 요소 존재.
+ * 지면 점수표(docs/DESIGN_SCORECARD.md) 기계 항목 두 개도 함께 잰다:
+ *   - 0.35초 첫 화면: 이동 시작 0.35초 뒤 화면을 바로 찍어(CDP, 글꼴 대기 없음) 테마와 반대 밝기가 화면 60% 이상이면
+ *     "첫 화면 깜빡임"(다크인데 흰 화면 · 라이트인데 검은 화면). 그 시점에 문서가 아직 안 왔으면 판정 보류.
+ *   - 제목 글꼴 대체: h1~h3 의 첫 글꼴이 document.fonts 에 선언돼 있고, 그 제목 글자를 덮는 글꼴 파일이 실제로
+ *     받아졌는지(status loaded). document.fonts.check() 는 없는 글꼴에도 true 라 쓰지 않는다(2026-11-09 실측).
+ *     #148(10-17) 처럼 Google Fonts 가 통째로 빠져도 화면은 시스템 글꼴로 "그럴듯하게" 나와 3주를 몰랐다.
  * 매거진은 호마다 갈래를 판별해(기사 목록형 · 펼침 리더 · PDF 뷰어) 동작까지 몬다:
  *   리더 → "Next page" 3번 누르고 URL/쪽이 실제로 넘어가는지, PDF → 캔버스가 그려지는지.
  *
@@ -15,14 +21,63 @@
  * exit 0 = 결함 0 · exit 1 = 결함 있음 · exit 2 = 실행 실패
  */
 import pw from 'playwright';
+import { PNG } from 'pngjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const { chromium } = pw;
 const arg = (k, d) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=').slice(1).join('=') ?? d;
 const BASE = arg('base', 'https://www.mhj.nz').replace(/\/$/, '');
 const SHOTS = arg('shots', '');
-const VIEWPORTS = { desktop: { width: 1440, height: 900 }, tablet: { width: 820, height: 1180 }, mobile: { width: 390, height: 844 } };
+// 점수표 스크린샷 기준 폭 1440 / 768 / 390 (docs/DESIGN_SCORECARD.md). 태블릿은 2026-11-09 820 → 768(Tailwind md 경계).
+const VIEWPORTS = { desktop: { width: 1440, height: 900 }, tablet: { width: 768, height: 1024 }, mobile: { width: 390, height: 844 } };
 const THEMES = ['light', 'dark'];
+const FIRST_FRAME_MS = 350;
+const FLASH_PCT = 60; // 테마와 반대 밝기 픽셀이 이 % 이상이면 깜빡임
+
+// PNG → 밝은(휘도 > 235)·어두운(< 40) 픽셀 비율(%). 4픽셀 간격 표본이면 충분하다.
+function brightness(buf) {
+  const { width, height, data } = PNG.sync.read(buf);
+  let n = 0, bright = 0, dark = 0;
+  for (let y = 0; y < height; y += 4) for (let x = 0; x < width; x += 4) {
+    const i = (y * width + x) * 4;
+    const l = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+    n++; if (l > 235) bright++; else if (l < 40) dark++;
+  }
+  return { brightPct: Math.round((bright / n) * 100), darkPct: Math.round((dark / n) * 100) };
+}
+
+// 페이지 안에서 실행: 보이는 h1~h3 의 첫 글꼴이 실제로 받아졌는가. 반환 = 문제 목록(빈 배열이면 통과)
+async function headingFontFallbacks() {
+  await document.fonts.ready;
+  const norm = (s) => s.trim().replace(/^["']|["']$/g, '');
+  // 시스템 글꼴 이름(Tailwind font-sans 의 ui-sans-serif 등) — 내려받는 글꼴이 아니라 대체가 있을 수 없다
+  const GENERIC = /^(serif|sans-serif|monospace|cursive|fantasy|math|emoji|system-ui|ui-[\w-]+|-apple-system|BlinkMacSystemFont|Segoe UI|Roboto|Helvetica( Neue)?|Arial|Georgia|Times New Roman|inherit|initial)$/i;
+  const covers = (ur, cp) => (ur || 'U+0-10FFFF').split(',').some((part) => {
+    const s = part.trim().replace(/^U\+/i, '');
+    if (s.includes('?')) return cp >= parseInt(s.replace(/\?/g, '0'), 16) && cp <= parseInt(s.replace(/\?/g, 'F'), 16);
+    const [a, b] = s.split('-'); const lo = parseInt(a, 16); return cp >= lo && cp <= (b ? parseInt(b, 16) : lo);
+  });
+  const faces = {};
+  for (const f of document.fonts) (faces[norm(f.family)] ??= []).push(f);
+  const out = new Map();
+  const hs = [...document.querySelectorAll('h1, h2, h3')].filter((h) => h.textContent.trim() && h.getClientRects().length && getComputedStyle(h).visibility !== 'hidden').slice(0, 40);
+  for (const h of hs) {
+    const cs = getComputedStyle(h);
+    const fam = norm(cs.fontFamily.split(',')[0]);
+    if (GENERIC.test(fam)) continue;
+    const text = h.textContent.trim().slice(0, 80);
+    const label = `${h.tagName.toLowerCase()} "${text.slice(0, 24)}"`;
+    const list = faces[fam];
+    if (!list) { out.set(`${fam}|선언 없음`, `${label} → "${fam}" 선언 없음(시스템 글꼴로 대체)`); continue; }
+    const cps = [...text].map((c) => c.codePointAt(0)).filter((cp) => cp > 32);
+    const sameStyle = list.filter((f) => f.style === cs.fontStyle);
+    const pool = sameStyle.length ? sameStyle : list;
+    const needed = pool.filter((f) => cps.some((cp) => covers(f.unicodeRange, cp)));
+    if (!needed.length) continue; // 이 글꼴이 덮지 않는 글자뿐(예: 한글 제목의 Playfair) — 다음 글꼴 몫
+    if (!needed.some((f) => f.status === 'loaded')) out.set(`${fam}|미로드`, `${label} → "${fam}" 파일 미로드(${needed[0].status})`);
+  }
+  return [...out.values()];
+}
 
 // 계측 요청 — 가로채 204 로 돌려준다(요청 자체가 실패로 잡히지 않게).
 // 그 밖의 /api/* 는 **쓰기(GET 이 아닌 요청)만** 막는다 — 댓글 목록 같은 GET 까지 빈 응답으로 막으면
@@ -58,10 +113,32 @@ async function probe(ctx, path, view, theme, extra) {
     const kb = Number(r.headers()['content-length'] || 0) / 1024;
     if (kb > 300) rawHeavy.push({ kb: Math.round(kb), url: r.url().split('/').pop().slice(0, 50) });
   });
-  const out = { path, view, theme, status: 0, errors, consoleErrors, badReq, overflow: 0, brokenImages: [], themeOk: true, notes: [], rawHeavy };
+  const out = { path, view, theme, status: 0, errors, consoleErrors, badReq, overflow: 0, brokenImages: [], themeOk: true, notes: [], rawHeavy, firstFrame: null, flash: '', fontFallback: [] };
+  const shotName = path.replace(/[/?=&]+/g, '_').replace(/^_/, '') || 'home';
   try {
-    const res = await page.goto(`${BASE}${path}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    // ① 0.35초 첫 화면 — 같은 이동 안에서 문서 도착(commit) 직후부터 시계를 재고, CDP 로 즉시 찍는다
+    //    (page.screenshot 은 글꼴 로드를 기다려 0.35초를 지나 버린다)
+    const cdp = await ctx.newCDPSession(page);
+    const t0 = Date.now();
+    const res = await page.goto(`${BASE}${path}`, { waitUntil: 'commit', timeout: 45000 });
     out.status = res?.status() ?? 0;
+    const commitMs = Date.now() - t0;
+    if (commitMs < FIRST_FRAME_MS) await page.waitForTimeout(FIRST_FRAME_MS - commitMs);
+    const shotMs = Date.now() - t0;
+    const ff = await cdp.send('Page.captureScreenshot', { format: 'png', optimizeForSpeed: true }).then((r) => Buffer.from(r.data, 'base64')).catch(() => null);
+    const capturedMs = Date.now() - t0;
+    const st = await page.evaluate(() => ({ body: !!document.body && document.body.childElementCount > 0, dark: document.documentElement.classList.contains('dark') })).catch(() => null);
+    await cdp.detach().catch(() => {});
+    if (ff) {
+      const b = brightness(ff);
+      out.firstFrame = { commitMs, shotMs, capturedMs, ...b, body: !!st?.body, darkClass: !!st?.dark };
+      if (SHOTS) writeFileSync(`${SHOTS}/${shotName}__${view}-${theme}__0350ms.png`, ff);
+      // 0.35초에 문서가 아직 없음(서버 응답 탓) · 캡처 자체가 0.6초를 넘김(렌더러가 바빠 0.35초 화면이 아님) → 판정 보류
+      if (commitMs > FIRST_FRAME_MS || !st?.body || capturedMs > 600) out.firstFrame.held = true;
+      else if (theme === 'dark' && b.brightPct >= FLASH_PCT) out.flash = `다크인데 0.35초 화면 밝은 픽셀 ${b.brightPct}%`;
+      else if (theme === 'light' && b.darkPct >= FLASH_PCT) out.flash = `라이트인데 0.35초 화면 어두운 픽셀 ${b.darkPct}%`;
+    }
+    await page.waitForLoadState('domcontentloaded', { timeout: 45000 });
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => out.notes.push('networkidle 15s 초과'));
     // lazy 이미지까지 불러오도록 끝까지 한 번 내린다
     await page.evaluate(async () => {
@@ -79,8 +156,10 @@ async function probe(ctx, path, view, theme, extra) {
     out.overflow = m.over > 1 ? m.over : 0;
     out.brokenImages = m.broken;
     out.themeOk = theme === 'dark' ? m.dark : !m.dark;
+    // ② 제목 글꼴 대체 — 404 화면도 우리 화면이라 똑같이 잰다
+    out.fontFallback = await page.evaluate(headingFontFallbacks).catch((e) => [`글꼴 검사 실행 실패: ${String(e.message).slice(0, 80)}`]);
     if (extra) await extra(page, out);
-    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${path.replace(/[/?=&]+/g, '_').replace(/^_/, '') || 'home'}__${view}-${theme}.png`, fullPage: false });
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${shotName}__${view}-${theme}.png`, fullPage: false });
   } catch (e) {
     out.errors.push(`실행 오류: ${String(e.message).slice(0, 140)}`);
   }
@@ -206,7 +285,7 @@ const TARGETS = [
 ];
 
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
-const isDefect = (r) => r.status >= 400 || r.errors.length || r.badReq.length || r.overflow || r.brokenImages.length || !r.themeOk || r.rawHeavy.length;
+const isDefect = (r) => r.status >= 400 || r.errors.length || r.badReq.length || r.overflow || r.brokenImages.length || !r.themeOk || r.rawHeavy.length || r.flash || r.fontFallback.length;
 const results = [];
 for (const [view, vp] of Object.entries(VIEWPORTS)) {
   for (const theme of THEMES) {
@@ -239,7 +318,16 @@ for (const r of defects) {
   if (r.brokenImages.length) console.log('  깨진 이미지:', r.brokenImages.slice(0, 3).join(' | '));
   if (!r.themeOk) console.log('  테마 미적용');
   if (r.rawHeavy.length) console.log(`  최적화 안 된 원본 이미지 ${r.rawHeavy.length}장 ${r.rawHeavy.reduce((a, x) => a + x.kb, 0)}KB (최대 ${Math.max(...r.rawHeavy.map((x) => x.kb))}KB)`);
+  if (r.flash) console.log(`  첫 화면 깜빡임: ${r.flash} (문서 도착 ${r.firstFrame.commitMs}ms)`);
+  if (r.fontFallback.length) console.log('  제목 글꼴 대체:', r.fontFallback.slice(0, 3).join(' | '));
 }
+// 점수표 기계 항목 요약 — 위 결함 목록에도 이미 들어가 있다. 여기는 "몇 화면을 실제로 판정했나"를 남긴다.
+const framed = results.filter((r) => r.firstFrame);
+const held = framed.filter((r) => r.firstFrame.held);
+const slowest = framed.reduce((a, r) => (r.firstFrame.commitMs > (a?.firstFrame.commitMs ?? -1) ? r : a), null);
+console.log(`\n— 점수표 기계 항목 — 0.35초 첫 화면: 판정 ${framed.length - held.length} · 보류(문서 미도착) ${held.length} · 깜빡임 ${results.filter((r) => r.flash).length}` +
+  ` | 제목 글꼴 대체 ${results.filter((r) => r.fontFallback.length).length}화면` +
+  (slowest ? ` | 가장 늦은 문서 도착 ${slowest.firstFrame.commitMs}ms (${slowest.path} ${slowest.view}/${slowest.theme})` : ''));
 const cons = {};
 for (const r of results) for (const c of r.consoleErrors) (cons[c] ??= []).push(`${r.path}[${r.view}/${r.theme}]`);
 if (Object.keys(cons).length) {
