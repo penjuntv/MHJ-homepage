@@ -1,7 +1,8 @@
 // PUBLIC_ROUTE_OK: 1st-party 분석 비콘(공개). 봇 필터 + 이벤트 화이트리스트 + 2KB 상한.
 import { NextRequest, NextResponse } from 'next/server';
+import { unstable_cache } from 'next/cache';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
-import { createAdminClient } from '@/lib/supabase';
+import { createAdminClient, supabase } from '@/lib/supabase';
 import { deriveTrafficSource, deriveSourceFromUtm, isBot, parseDevice, slugFromBlogPath, type Medium } from '@/lib/traffic-source';
 
 /**
@@ -27,6 +28,37 @@ function clampInt(v: unknown, min: number, max: number): number | null {
   const n = typeof v === 'number' ? v : Number(v);
   if (!Number.isFinite(n)) return null;
   return Math.min(max, Math.max(min, Math.round(n)));
+}
+
+/**
+ * 지금 공개된 글의 slug 집합 — 경로에서 꺼낸 slug 가 진짜 글일 때만 blog_slug 로 남기려고 쓴다.
+ * 지워졌거나 비공개·예약 글 주소(`/blog/없는-글`)는 (public)/not-found 로 렌더돼 404 표시가 없으므로 경로만으로는 못 가른다.
+ * 5분 캐시 + 발행·수정 시 revalidateTag('blogs') 로 무효화(목록 캐시와 같은 규칙). 조회 실패면 null → 경로 값을 그대로 쓴다.
+ */
+const getPublishedBlogSlugs = unstable_cache(
+  async (): Promise<string[] | null> => {
+    const { data, error } = await supabase
+      .from('blogs')
+      .select('slug')
+      .eq('published', true)
+      .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`);
+    if (error) return null;
+    return (data ?? []).map((b) => b.slug as string);
+  },
+  ['track:published-slugs'],
+  { revalidate: 300, tags: ['blogs'] },
+);
+
+async function blogSlugForPath(path: string | null): Promise<string | null> {
+  const slug = slugFromBlogPath(path);
+  if (!slug) return null;
+  let known: string[] | null = null;
+  try {
+    known = await getPublishedBlogSlugs();
+  } catch {
+    known = null;
+  }
+  return known === null || known.includes(slug) ? slug : null;
 }
 
 function str(v: unknown, max: number): string | null {
@@ -89,13 +121,12 @@ export async function POST(request: NextRequest) {
   }
 
   const path = str(body.path, 500);
-  const is404 = (meta as Record<string, unknown> | null)?.status === 404;
   const row = {
     event_type: type,
     session_id: str(body.sessionId, 100),
     path,
-    // 404 표시가 붙은 pageview(없는 글 주소)는 글 집계에 섞지 않는다.
-    blog_slug: str(body.slug, 300) ?? (is404 ? null : slugFromBlogPath(path)),
+    // 글 컴포넌트가 slug 를 싣지 않은 이벤트(pageview·engagement·click·outbound)는 경로에서 채운다 — 공개된 글일 때만.
+    blog_slug: str(body.slug, 300) ?? await blogSlugForPath(path),
     referrer,
     source,
     medium: medium as Medium,
