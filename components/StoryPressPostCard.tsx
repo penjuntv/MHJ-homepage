@@ -1,3 +1,5 @@
+import { STORYPRESS_CTA_TEXT_DEFAULT, storyPressAppHref } from '@/lib/storypress-link';
+
 interface Props {
   title: string;
   intro: string;
@@ -15,7 +17,8 @@ interface Props {
  * (2026-09-11 W6-C 결정 ③: 계획서의 `subscribers.source='storypress'` 대체).
  */
 export default function StoryPressPostCard({ title, intro, ctaUrl, ctaText, category }: Props) {
-  const href = ctaUrl.trim() || '/storypress';
+  // 앱 주소면 utm_source=mhj&utm_medium=post_card 가 붙는다(`/storypress` 같은 사이트 안 주소는 그대로).
+  const href = storyPressAppHref(ctaUrl, 'post_card') || '/storypress';
   return (
     <section
       aria-labelledby="storypress-card-title"
@@ -59,7 +62,7 @@ export default function StoryPressPostCard({ title, intro, ctaUrl, ctaText, cate
           textDecoration: 'none',
         }}
       >
-        {ctaText || 'Learn more'} →
+        {ctaText || STORYPRESS_CTA_TEXT_DEFAULT} →
       </a>
     </section>
   );

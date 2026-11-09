@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { createAdminClient } from '@/lib/supabase';
-import { deriveTrafficSource, deriveSourceFromUtm, isBot, parseDevice, type Medium } from '@/lib/traffic-source';
+import { deriveTrafficSource, deriveSourceFromUtm, isBot, parseDevice, slugFromBlogPath, type Medium } from '@/lib/traffic-source';
 
 /**
  * MHJ 1st-party 분석 수집 엔드포인트.
@@ -88,11 +88,14 @@ export async function POST(request: NextRequest) {
     meta = { ...((meta as Record<string, unknown> | null) ?? {}), utm_campaign: campaign };
   }
 
+  const path = str(body.path, 500);
+  const is404 = (meta as Record<string, unknown> | null)?.status === 404;
   const row = {
     event_type: type,
     session_id: str(body.sessionId, 100),
-    path: str(body.path, 500),
-    blog_slug: str(body.slug, 300),
+    path,
+    // 404 표시가 붙은 pageview(없는 글 주소)는 글 집계에 섞지 않는다.
+    blog_slug: str(body.slug, 300) ?? (is404 ? null : slugFromBlogPath(path)),
     referrer,
     source,
     medium: medium as Medium,
