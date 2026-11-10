@@ -117,8 +117,9 @@ export default function BlogLibrary({
         )}
       </header>
 
-      {/* ═══════ Featured + Recent Stories ═══════ */}
-      {featuredBlog && (
+      {/* ═══════ Featured + Recent Stories — 전체 목록(/blog)에서만. 카테고리 허브는 Start here + 목록이 같은 일을 한다
+          (2026-11-10: 허브에서 같은 글이 최대 4번, 글 1편 서랍엔 "No recent stories" 빈 상자). ═══════ */}
+      {featuredBlog && !activeCategory && (
         <section style={{
           marginBottom: 96,
           marginLeft: 'calc(-1 * clamp(20px, 4vw, 48px))',
@@ -166,6 +167,9 @@ export default function BlogLibrary({
         paddingTop: 40,
         marginBottom: 40,
       }}>
+        {/* 목록 제목(화면엔 숨김) — 허브에서 Featured 를 뺀 뒤 Start here 가 없는 서랍(Travelers 등)은
+            h1 다음 카드 h3 로 건너뛰어 axe heading-order 가 났다(2026-11-10). */}
+        <h2 className="sr-only">All stories</h2>
         <CategoryFilter
           selected={selectedCat}
           hrefFor={(cat) => pageHref(cat === 'All' ? null : cat, 1)}
@@ -220,7 +224,8 @@ export default function BlogLibrary({
       )}
 
       {/* ═══════ Reader Favorites ═══════ */}
-      {readerFavorites && readerFavorites.length > 0 && (
+      {/* 허브에서는 다른 서랍 글만 오므로(BlogListPage) 2편 미만이면 띠를 그리지 않는다 */}
+      {readerFavorites && readerFavorites.length >= (activeCategory ? 2 : 1) && (
         <ReaderFavoritesSection
           blogs={readerFavorites}
         />
@@ -591,16 +596,7 @@ function BlogCard({ blog }: CardProps) {
         }}>
           {blog.title}
         </h3>
-        {/* 태그 — 조용한 점 구분, 최대 2개 (카테고리보다 약하게) */}
-        {blog.tags && blog.tags.length > 0 && (
-          <p style={{
-            fontSize: 10, fontWeight: 400, color: 'var(--text-tertiary)',
-            margin: '8px 0 0', lineHeight: 1.5,
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>
-            {blog.tags.slice(0, 2).join(' · ')}
-          </p>
-        )}
+        {/* 태그 줄은 2026-11-10 삭제 — "schoolreport · nzprimary" 처럼 내부 태그 글자가 독자에게 그대로 보였다 */}
         {SHOW_PUBLIC_VIEW_COUNT && (blog.view_count ?? 0) > 0 && (
           <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '6px 0 0' }}>
             {blog.view_count} {blog.view_count === 1 ? 'view' : 'views'}
@@ -761,7 +757,8 @@ function ReaderFavCard({ blog, rank }: { blog: Blog; rank: number }) {
       style={{
         display: 'block',
         textDecoration: 'none',
-        minWidth: 280,
+        /* minWidth 만 두면 긴 제목 카드가 430px 까지 늘었다(2026-11-10 실측) — 폭 고정 */
+        width: 280,
         flexShrink: 0,
         borderRadius: 6,
         background: 'var(--bg-card, var(--bg))',

@@ -69,8 +69,10 @@ export default async function BlogListPage({ categorySlug, page }: Props) {
 
   // Start here 의 slug 는 코드 상수라 설정을 기다릴 필요가 없다 — 첫 Promise.all 에 함께 태운다.
   const hubSlugs = categorySlug && CATEGORY_INTROS[categorySlug] ? CATEGORY_INTROS[categorySlug].startHere : [];
+  // 카테고리 허브는 Featured + Recent 블록을 그리지 않는다(2026-11-10 설계서 docs/specs/category-hub-2026-11.md):
+  // 허브에는 Start here 와 전체 목록이 이미 있어, 같은 글이 한 화면에 최대 4번 나왔다. 그래서 조회도 건너뛴다.
   const [featured, paginated, mostRead, s, categoryCounts, startHereRaw] = await Promise.all([
-    getFeaturedBlogCached(category),
+    category ? Promise.resolve(null) : getFeaturedBlogCached(null),
     getPaginatedBlogsCached(page, category),
     getMostReadBlogsCached(),
     getSiteSettings(),
@@ -82,10 +84,10 @@ export default async function BlogListPage({ categorySlug, page }: Props) {
   // 범위 밖 페이지는 얇은 빈 목록을 색인시키지 않고 404 로 끊는다.
   if (page > totalPages) notFound();
 
-  const recent = await getRecentBlogsCached(category, featured?.id ?? null);
+  const recent = category ? [] : await getRecentBlogsCached(null, featured?.id ?? null);
 
   // 허브 소개(설정 덮어쓰기는 lib/category-intros 가 처리). Start here 는 1쪽에서만, 2편 이상일 때만 —
-  // 글이 1편뿐인 카테고리(School Log·Travelers)는 바로 아래 Featured 와 같은 글이라 목록이 의미 없다.
+  // 글이 1편뿐인 카테고리(Travelers 등)는 바로 아래 목록과 같은 글이라 Start here 가 의미 없다.
   const hub = categorySlug ? resolveCategoryIntro(categorySlug, s) : null;
   const startHere = hub && page === 1 && startHereRaw.length >= 2 ? startHereRaw : [];
 
@@ -98,7 +100,8 @@ export default async function BlogListPage({ categorySlug, page }: Props) {
   const featuredCard = featured ? trimForList(featured) : null;
   const recentCards = recent.map(trimForList);
   const blogCards = paginated.blogs.map(trimForList);
-  const mostReadCards = mostRead.map(trimForList);
+  // 허브의 Reader Favorites 는 **다른 서랍**의 인기 글만 — 이 서랍 글은 위 목록에 이미 있다(같은 글 중복 제거).
+  const mostReadCards = (category ? mostRead.filter((b) => b.category !== category) : mostRead).map(trimForList);
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
