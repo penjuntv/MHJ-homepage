@@ -106,7 +106,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
           lineHeight: 1.6,
           marginBottom: 14,
         }}>
-          Weekly stories from our family in Mairangi Bay.
+          Stories from our family in Mairangi Bay.
         </p>
 
         {status === 'success' || status === 'duplicate' ? (
@@ -223,13 +223,14 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             fontSize: reducedPadding ? 'clamp(24px, 3.5vw, 36px)' : 'clamp(32px, 5vw, 56px)',
             fontWeight: 900,
             fontStyle: 'italic',
-            letterSpacing: -1.5,
+            letterSpacing: '-0.01em',
             color: isDarkVariant ? 'var(--newsletter-dark-text)' : 'var(--text)',
             lineHeight: 1.1,
             marginBottom: reducedPadding ? 24 : 16,
           }}
         >
-          Weekly stories from
+          {/* 2026-11-10: "Weekly" 삭제 — 위 문구(관리자 설정 "a few times a month")와 발송 주기가 어긋났다 */}
+          Stories from
           <br />Mairangi Bay.
         </h2>
 
@@ -242,7 +243,7 @@ export default function NewsletterCTA({ compact = false, reducedPadding = false,
             lineHeight: 1.7,
             marginBottom: 48,
           }}>
-            Weekly stories, school tips, and local guides from Mairangi Bay.
+            Family stories, school tips, and local guides from Mairangi Bay.
             <br />
             <span style={{ color: isDarkVariant ? 'var(--newsletter-muted)' : 'var(--text-tertiary)', fontSize: 13 }}>
               No spam. Unsubscribe anytime.
