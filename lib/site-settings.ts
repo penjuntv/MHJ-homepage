@@ -29,7 +29,8 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   contact_location: 'Mairangi Bay, Auckland, New Zealand',
   contact_email: 'hello@mhj.nz',
   magazine_title: 'Magazine Shelf',
-  magazine_hint: 'Scroll to explore',
+  // 2026-11-11: 'Scroll to explore' → 책 6권은 스크롤이 생기지 않았다. 마우스 있는 768 이상에서만 보인다(MagazineShelf)
+  magazine_hint: 'Hover a spine to see the cover',
   storypress_title: 'Every child has a story.\nLet them write it.',
   storypress_description: '',
   storypress_cta_url: '',
