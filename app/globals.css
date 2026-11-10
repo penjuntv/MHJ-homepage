@@ -1723,6 +1723,19 @@ textarea::placeholder {
   color: var(--text-secondary);
   margin: 0;
 }
+/* 머리 문장(h1)만 — 가족 소개 한 줄. 12px 대문자 꼬리표는 첫 화면에서 가장 작은 글자였고(태블릿 2줄·모바일 3줄),
+   크게 키운 시안(32px·2줄)은 과했다(PeNnY 2026-11-10). 중간안: 1440·768 한 줄, 390 두 줄.
+   최신 글 제목(Playfair 이탤릭 30px·900)보다 작고 가볍게 둔다. 구역 제목(h2)은 꼬리표 그대로. */
+h1.home-label {
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0;
+  line-height: 1.4;
+  text-transform: none;
+  color: var(--text);
+}
 
 /* 카드 공통 카테고리 줄 */
 .home-card-cat {
