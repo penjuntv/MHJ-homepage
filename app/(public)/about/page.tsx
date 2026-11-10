@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { OG_BASE, SITE_LANG, orgRef, PERSON_IDS, yussiNode, pennyNode, YUSSI_IMAGE_URL } from '@/lib/seo';
+import { OG_BASE, SITE_LANG, orgRef, PERSON_IDS, yussiNode, pennyNode, YUSSI_IMAGE_URL, YUSSI_IMAGE_RATIO } from '@/lib/seo';
+import { cssRatio, ratioKey, DAUGHTER_RATIO_CSS } from '@/lib/image-ratio';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -83,6 +84,10 @@ export default async function AboutPage() {
 
   const whoImage = s.about_who_image_url || s.about_image_url || '';
   const visionImage = s.about_image_url || '';
+  // 사진 틀 = 올린(크롭한) 비율 그대로 — 화면이 사진을 자르지 않는다(PeNnY 2026-11-10, lib/image-ratio.ts).
+  // 비율 기록이 없는 사진(손으로 넣은 URL 등)만 예전 4:5 틀.
+  const whoRatio = cssRatio(s.about_who_image_url ? s[ratioKey('about_who_image_url')] : s[ratioKey('about_image_url')]);
+  const visionRatio = cssRatio(s[ratioKey('about_image_url')]);
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -143,7 +148,7 @@ export default async function AboutPage() {
                 모바일 4:3 자르기는 2026-11-10 되돌림(PeNnY): 높은 나무와 하늘을 보여 주려고 일부러 세로로 찍은 사진이다.
                 사진은 올린 비율 그대로 보여 주는 쪽으로 간다(크롭 기능 설계 대기). */}
             <div style={{
-              aspectRatio: '4/5',
+              aspectRatio: whoRatio,
               borderRadius: 12,
               overflow: 'hidden',
               boxShadow: PHOTO_SHADOW,
@@ -235,7 +240,7 @@ export default async function AboutPage() {
             </div>
 
             <div style={{
-              aspectRatio: '4/5',
+              aspectRatio: visionRatio,
               borderRadius: 12,
               overflow: 'hidden',
               boxShadow: PHOTO_SHADOW,
@@ -284,7 +289,7 @@ export default async function AboutPage() {
 
               {/* 좌측: 프로필 사진 */}
               <div style={{
-                aspectRatio: '4/5',
+                aspectRatio: YUSSI_IMAGE_RATIO,
                 borderRadius: 12,
                 overflow: 'hidden',
                 boxShadow: PHOTO_SHADOW,
@@ -441,9 +446,9 @@ export default async function AboutPage() {
               {daughters.map((m) => (
                 <div key={m.id} style={{ textAlign: 'center' }}>
 
-                  {/* 프로필 이미지 — 4:5 (§4.1), radius 12px (§8.1), grayscale-hover 유지 (§12.1) */}
+                  {/* 프로필 이미지 — 세 장 모두 3:4(관리 화면 크롭이 3:4 로 잠김, PeNnY 2026-11-10), radius 12px (§8.1), grayscale-hover 유지 (§12.1) */}
                   <div style={{
-                    aspectRatio: '4/5',
+                    aspectRatio: DAUGHTER_RATIO_CSS,
                     borderRadius: 12,
                     overflow: 'hidden',
                     marginBottom: 32,

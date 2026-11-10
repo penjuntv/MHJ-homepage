@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase-browser';
 import { Loader2, Upload, Save, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import SafeImage from '@/components/SafeImage';
+import ImageCropModal from '@/components/admin/ImageCropModal';
+import { DAUGHTER_ASPECT, DAUGHTER_RATIO_CSS, PHOTO_ASPECTS } from '@/lib/image-ratio';
 
 interface Member {
   id: number;
@@ -21,6 +23,8 @@ export default function AdminFamilyPage() {
   const [saving, setSaving] = useState<number | null>(null);
   const [uploading, setUploading] = useState<number | null>(null);
   const [saved, setSaved] = useState<number | null>(null);
+  /** 크롭 창에 띄운 파일 — 세 딸은 3:4 고정(About 카드가 나란히 놓임, PeNnY 2026-11-10) */
+  const [pendingCrop, setPendingCrop] = useState<{ member: Member; file: File } | null>(null);
   const fileRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   useEffect(() => {
@@ -34,9 +38,10 @@ export default function AdminFamilyPage() {
     setMembers(prev => prev.map(m => m.id === id ? { ...m, [field]: value } : m));
   }
 
-  async function handlePhotoUpload(id: number, file: File) {
+  async function handlePhotoUpload(id: number, file: Blob, fileName: string) {
+    setPendingCrop(null);
     setUploading(id);
-    const ext = file.name.split('.').pop() ?? 'jpg';
+    const ext = fileName.split('.').pop() ?? 'jpg';
     const path = `family/member-${id}-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
     if (error) { toast.error('업로드 실패: ' + error.message); setUploading(null); return; }
@@ -113,8 +118,9 @@ export default function AdminFamilyPage() {
         {/* 사진 섹션 */}
         <div>
           <span style={labelStyle}>프로필 사진</span>
+          {/* 미리보기 틀 = 공개 About 과 같은 비율(세 딸 3:4) */}
           <div style={{
-            aspectRatio: '4/5',
+            aspectRatio: member.sort_order > 0 ? DAUGHTER_RATIO_CSS : '4/5',
             borderRadius: 16,
             overflow: 'hidden',
             background: '#F1F5F9',
@@ -151,7 +157,7 @@ export default function AdminFamilyPage() {
             style={{ display: 'none' }}
             onChange={e => {
               const file = e.target.files?.[0];
-              if (file) handlePhotoUpload(member.id, file);
+              if (file) setPendingCrop({ member, file });
               e.target.value = '';
             }}
           />
@@ -268,6 +274,30 @@ export default function AdminFamilyPage() {
           {daughters.map(member => renderMemberCard(member))}
         </div>
       </div>
+
+      {pendingCrop && (
+        pendingCrop.member.sort_order > 0 ? (
+          <ImageCropModal
+            imageFile={pendingCrop.file}
+            defaultAspect={DAUGHTER_ASPECT.value}
+            aspectOptions={[DAUGHTER_ASPECT]}
+            allowSkip={false}
+            note="About 페이지에서 세 딸 사진이 나란히 놓여 세 장 모두 3:4 로 맞춥니다. 사진 안에서 보일 부분을 고르세요."
+            onCropComplete={(blob, name) => handlePhotoUpload(pendingCrop.member.id, blob, name)}
+            // 모달은 자르기에 실패하면 onSkip(원본)을 부른다 — 세 딸은 3:4 가 깨지면 안 되므로 올리지 않고 알린다
+            onSkip={() => { toast.error('사진 자르기에 실패했습니다. 다시 시도해 주세요.'); setPendingCrop(null); }}
+            onCancel={() => setPendingCrop(null)}
+          />
+        ) : (
+          <ImageCropModal
+            imageFile={pendingCrop.file}
+            aspectOptions={PHOTO_ASPECTS}
+            onCropComplete={(blob, name) => handlePhotoUpload(pendingCrop.member.id, blob, name)}
+            onSkip={(file) => handlePhotoUpload(pendingCrop.member.id, file, file.name)}
+            onCancel={() => setPendingCrop(null)}
+          />
+        )
+      )}
 
     </div>
   );

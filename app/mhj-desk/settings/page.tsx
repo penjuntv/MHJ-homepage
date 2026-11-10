@@ -7,6 +7,8 @@ import { DEFAULT_SETTINGS, SETTING_DESCRIPTIONS } from '@/lib/site-settings';
 import { Loader2, Save, RotateCcw, Instagram, Facebook, Youtube, Upload, Image as ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import SafeImage from '@/components/SafeImage';
+import ImageCropModal from '@/components/admin/ImageCropModal';
+import { measureImage, ratioKey, PHOTO_ASPECTS } from '@/lib/image-ratio';
 
 // 표시 순서
 const SETTING_KEYS = [
@@ -187,7 +189,8 @@ function PostSlots({ count, value, options, onChange, selectStyle }: {
   );
 }
 
-const ALL_KEYS = [...SETTING_KEYS, ...SOCIAL_KEYS, ...IMAGE_KEYS.map(i => i.key), ...EDITORIAL_KEYS];
+// 이미지 칸은 비율 키(`<키>_ratio`, lib/image-ratio.ts)도 함께 저장 — URL 을 손으로 바꾸면 비율이 비워져야 한다
+const ALL_KEYS = [...SETTING_KEYS, ...SOCIAL_KEYS, ...IMAGE_KEYS.flatMap(i => [i.key, ratioKey(i.key)]), ...EDITORIAL_KEYS];
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -195,6 +198,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [savingSection, setSavingSection] = useState<string | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
+  /** 크롭 창에 띄운 파일 — 확정하면 handleImageUpload 로 */
+  const [pendingCrop, setPendingCrop] = useState<{ key: string; folder: string; file: File } | null>(null);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   /** HOME 의 "글 고르기" 칸 목록 — 발행 글 최신순. 홈은 발행 글만 그리므로 여기서도 발행 글만. */
@@ -274,22 +279,31 @@ export default function SettingsPage() {
     setSavingSection(null);
   }
 
-  async function handleImageUpload(imageKey: string, folder: string, file: File) {
+  /** 2026-11-10: 크롭 창에서 확정한 사진(또는 원본)을 올리고, 실제 가로·세로를 `<키>_ratio` 에 함께 저장.
+      공개 페이지는 이 비율 그대로 사진 틀을 그린다 — 화면이 사진을 자르지 않는다. */
+  async function handleImageUpload(imageKey: string, folder: string, blob: Blob, fileName: string) {
+    setPendingCrop(null);
     setUploading(imageKey);
-    const ext = file.name.split('.').pop() ?? 'jpg';
+    const ext = fileName.split('.').pop() ?? 'jpg';
     const path = `${folder}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    const size = await measureImage(blob);
+    const { error } = await supabase.storage.from('images').upload(path, blob, { upsert: true });
     if (error) {
       toast.error('업로드 실패: ' + error.message);
       setUploading(null);
       return;
     }
     const { data } = supabase.storage.from('images').getPublicUrl(path);
+    const ratio = size ? `${size.width}/${size.height}` : '';
     set(imageKey, data.publicUrl);
+    set(ratioKey(imageKey), ratio);
     setUploading(null);
     // 즉시 DB에도 저장
     await supabase.from('site_settings').upsert(
-      [{ key: imageKey, value: data.publicUrl, description: SETTING_DESCRIPTIONS[imageKey] ?? null }],
+      [
+        { key: imageKey, value: data.publicUrl, description: SETTING_DESCRIPTIONS[imageKey] ?? null },
+        { key: ratioKey(imageKey), value: ratio, description: SETTING_DESCRIPTIONS[ratioKey(imageKey)] ?? null },
+      ],
       { onConflict: 'key' }
     );
     toast.success('이미지가 업로드되었습니다.');
@@ -507,7 +521,7 @@ export default function SettingsPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <input
                         value={currentUrl}
-                        onChange={e => set(key, e.target.value)}
+                        onChange={e => { set(key, e.target.value); set(ratioKey(key), ''); }}
                         placeholder="이미지 URL (업로드 후 자동 입력)"
                         style={{ ...inputStyle, fontSize: '12px' }}
                       />
@@ -517,7 +531,7 @@ export default function SettingsPage() {
                             <SafeImage src={currentUrl} alt={label} fill style={{ objectFit: 'cover' }} sizes="80px" />
                           </div>
                           <button
-                            onClick={() => set(key, '')}
+                            onClick={() => { set(key, ''); set(ratioKey(key), ''); }}
                             style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid #FEE2E2', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EF4444', flexShrink: 0 }}
                             title="이미지 제거"
                           >
@@ -536,7 +550,7 @@ export default function SettingsPage() {
                         style={{ display: 'none' }}
                         onChange={e => {
                           const file = e.target.files?.[0];
-                          if (file) handleImageUpload(key, folder, file);
+                          if (file) setPendingCrop({ key, folder, file });
                           e.target.value = '';
                         }}
                       />
@@ -626,6 +640,16 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
+      {pendingCrop && (
+        <ImageCropModal
+          imageFile={pendingCrop.file}
+          aspectOptions={PHOTO_ASPECTS}
+          note="공개 페이지는 여기서 확정한 비율 그대로 보여 줍니다(화면이 다시 자르지 않음). 그대로 쓰려면 ‘원본 그대로’."
+          onCropComplete={(blob, name) => handleImageUpload(pendingCrop.key, pendingCrop.folder, blob, name)}
+          onSkip={(file) => handleImageUpload(pendingCrop.key, pendingCrop.folder, file, file.name)}
+          onCancel={() => setPendingCrop(null)}
+        />
+      )}
     </div>
   );
 }
