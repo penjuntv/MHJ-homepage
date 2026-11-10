@@ -127,6 +127,7 @@ MHJ는 **풀-와이드(full-width)**와 **콘텐츠 영역(contained)**을 섹�
 
 - Display/Headings: Playfair Display (serif)
 - Body/Label: Noto Sans KR (sans-serif)
+- **글 상세 본문만**: Literata (serif) → Noto Sans KR(한글) — `.blog-content` 와 FAQ 답. 메뉴·라벨·카드·소제목은 Noto 그대로 (D4, 2026-11-10 `docs/specs/blog-post-detail-2026-11.md`)
 
 ### 5.2 크기 체계
 
@@ -137,6 +138,7 @@ MHJ는 **풀-와이드(full-width)**와 **콘텐츠 영역(contained)**을 섹�
 | **섹션 제목 (type-h1)** | clamp(32px, 4vw, 48px) | --fs-h1 CSS 변수 |
 | **카드 제목** | 18px (고정) | 크기 변동 없이 일정 |
 | **본문** | 16px, line-height 1.7 | 한국어는 1.7이 최적 |
+| **글 상세 본문(Literata)** | 18px(390: 17px), 굵기 400, line-height 1.7 | 656px 폭에서 한 줄 영문 70~75자. 첫 문단 20px(390: 19px) |
 | **라벨/캡션** | 11px, letter-spacing 2px | uppercase, 회색 |
 | **메타 정보** | 13px | 날짜, 저자 등 |
 
@@ -828,3 +830,4 @@ node scripts/qa/audit-contrast.mjs  # 대비는 이쪽 담당(§6.3)
 | 2026-03-18 | 갤러리 그리드 반응형: CSS columns 기반 2(mobile)/3(tablet)/4(desktop), max-width 1400px | PeNnY + Claude |
 | 2026-04-01 | 브랜드 시스템 적용: MHJ 로고(Playfair+Inter), 브랜드 컬러(--mhj-brown), Blog→Journal 용어 변경, PWA 아이콘 교체 | PeNnY + Claude |
 | 2026-11-09 | §18 금지 목록·가족 사진 고르는 기준·페이지 설계서 7칸 양식 추가(다음 플랜 2단계). §12.2·§16 에서 연결. 점수표는 `docs/DESIGN_SCORECARD.md` | PeNnY + Claude |
+| 2026-11-10 | 글 상세 개편(다음 플랜 4단계 1번): 본문 Literata 18px·400(D4) · 제목 대문자 변환 해제·자간 -0.01em·줄 간격 1.08 · 메타 줄 카테고리 중복 삭제 · AI Insight 무채색(인디고는 아이콘만). 설계서 `docs/specs/blog-post-detail-2026-11.md` | PeNnY + Claude |

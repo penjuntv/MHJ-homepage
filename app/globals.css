@@ -887,21 +887,42 @@ textarea::placeholder {
 }
 
 /* 블로그 본문 기본 스타일 (blog/[slug]/page.tsx 인라인 style 대체) */
+/* 본문 서체 = Literata(D4, 2026-11-10 docs/specs/blog-post-detail-2026-11.md). 한글은 Noto 로 넘어간다.
+   18px·400 = 656px 폭에서 한 줄 영문 70~75자. 소제목·라벨은 아래에서 산세리프로 되돌린다. */
+/* 전역 `* { font-family: Noto }`(@layer base) 때문에 상속이 안 된다 — 자손 전부에 직접 건다. */
+.blog-content,
+.blog-content * {
+  font-family: 'Literata', 'Noto Sans KR', serif;
+}
 .blog-content {
-  font-size: 16px;
+  font-optical-sizing: auto;
+  font-size: 18px;
   color: var(--text);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.7;
+}
+@media (max-width: 640px) {
+  .blog-content { font-size: 17px; }
+}
+.blog-content h2,
+.blog-content h2 *,
+.blog-content h3,
+.blog-content h3 *,
+.blog-content h4,
+.blog-content h4 *,
+.blog-content .blog-cta *,
+.blog-content table * {
+  font-family: 'Noto Sans KR', sans-serif;
 }
 .blog-content p { margin: 0 0 24px; }
 /* 본문이 중간 구독 CTA 로 둘로 나뉘면 뒤 조각(`--cont`)의 첫 문단은 **글의 첫 문단이 아니다** —
    리드 글꼴·드롭캡을 또 받지 않게 여섯 규칙 모두에서 뺀다(2026-09-11 W6-C). */
 .blog-content:not(.blog-content--cont) > p:first-of-type {
-  font-size: 19px;
+  font-size: 20px;
   line-height: 1.65;
 }
 @media (max-width: 640px) {
-  .blog-content:not(.blog-content--cont) > p:first-of-type { font-size: 18px; }
+  .blog-content:not(.blog-content--cont) > p:first-of-type { font-size: 19px; }
 }
 .blog-content:not(.blog-content--cont) > p:first-of-type::first-letter {
   font-family: 'Playfair Display', 'Noto Sans KR', serif;
@@ -929,6 +950,46 @@ textarea::placeholder {
   word-break: keep-all;
 }
 .dark .blog-dateline { color: var(--mhj-brown-dark); }
+
+/* 블로그 상세 메타 줄(2026-11-10 설계서 §4) — 저자 · 날짜 · 읽는 시간, 갱신일은 아래 줄.
+   가운뎃점은 뒤 항목의 ::before 라 줄이 꺾이면 점이 다음 줄 맨 앞으로 함께 간다(앞줄 끝에 홀로 남지 않음). */
+.post-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  margin-bottom: 32px;
+}
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  row-gap: 4px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+}
+.post-meta > span + span::before {
+  content: '·';
+  margin: 0 10px;
+  color: var(--text-tertiary);
+}
+.post-meta-author {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.post-meta-updated { margin-top: 4px; font-weight: 500; }
+@media (max-width: 640px) {
+  .post-meta-insight { width: 100%; }
+}
+/* AiInsight 는 인라인 opacity(로딩 0.6)를 쓰므로 호버만 !important 로 덮는다 — §9 opacity 호버 */
+.ai-insight-btn:not(:disabled):hover { opacity: 0.7 !important; }
 
 /* MHJ 로고 hover — Min / Hyun / Jin stagger */
 .mhj-logo-letters {
@@ -1230,7 +1291,8 @@ textarea::placeholder {
 }
 .blog-faq dd {
   margin: 0;
-  font-size: 16px;
+  font-family: 'Literata', 'Noto Sans KR', serif;
+  font-size: 17px;
   line-height: 1.7;
   color: var(--text-secondary);
 }

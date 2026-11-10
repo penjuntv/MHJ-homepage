@@ -15,8 +15,9 @@ const inter = Inter({
 
 // Caveat 는 2026-09-08 W3-C 실측에서 어디서도 로드되지 않아 뺐다. 나머지 웨이트는 전부 실제 사용 중 —
 // Noto 400/500/700/900 매 페이지, Playfair 400·400i·700·700i·900. 줄이려면 디자인 변경이 필요하다(next/font 이전은 별건).
+// Literata(400·700·400i, opsz)는 글 상세 본문만 쓴다(D4, docs/specs/blog-post-detail-2026-11.md) — 파일은 쓰는 페이지에서만 받는다.
 const GOOGLE_FONTS_CSS =
-  'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap';
+  'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,700;1,7..72,400&display=swap';
 
 const OG_IMAGE = `${SITE_URL}/api/og?title=MHJ&category=my%20mairangi`;
 

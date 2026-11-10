@@ -47,27 +47,29 @@ export default function AiInsight({ blogId }: Props) {
           data-track="ai_insight_click"
           data-track-blog_id={blogId}
           disabled={loading}
+          className="ai-insight-btn"
+          /* 2026-11-10: 남색 그라디언트 배경·남색 글자 → 무채색(§18.1 금지 목록). 인디고는 아이콘에만(§12.1). */
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 10,
             padding: '12px 24px',
-            background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 100%)',
-            color: '#4F46E5',
+            background: 'transparent',
+            color: 'var(--text-secondary)',
             borderRadius: 999,
-            border: '1px solid rgba(79,70,229,0.2)',
+            border: '1px solid var(--border-medium)',
             fontSize: 11,
             fontWeight: 900,
             letterSpacing: 2,
             textTransform: 'uppercase' as const,
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.6 : 1,
-            transition: 'all 0.3s',
+            transition: 'opacity 0.2s ease',
           }}
         >
           {loading
             ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} />
-            : <Sparkles size={15} />}
+            : <Sparkles size={15} color="#6366F1" aria-hidden="true" />}
           {loading ? 'Analyzing...' : 'AI Insight'}
         </button>
       )}
@@ -78,19 +80,13 @@ export default function AiInsight({ blogId }: Props) {
           className="animate-zoom-in ai-insight-card"
           style={{
             position: 'relative',
-            background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 60%, #FDF4FF 100%)',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
             borderRadius: 12,
             padding: 'clamp(32px, 4vw, 48px) clamp(32px, 4vw, 56px)',
             overflow: 'hidden',
           }}
         >
-          {/* 다크 모드 그라디언트 오버레이 */}
-          <style>{`
-            .dark .ai-insight-card {
-              background: linear-gradient(135deg, rgba(79,70,229,0.15) 0%, rgba(109,40,217,0.1) 60%, rgba(147,51,234,0.08) 100%) !important;
-            }
-          `}</style>
-
           {/* 장식 따옴표 (배경) */}
           <span
             aria-hidden="true"
@@ -100,7 +96,8 @@ export default function AiInsight({ blogId }: Props) {
               left: 20,
               fontSize: 120,
               fontWeight: 900,
-              color: 'rgba(79,70,229,0.12)',
+              color: 'var(--text-tertiary)',
+              opacity: 0.25,
               lineHeight: 1,
               fontFamily: "'Playfair Display', 'Noto Sans KR', Georgia, serif",
               userSelect: 'none',
@@ -116,10 +113,14 @@ export default function AiInsight({ blogId }: Props) {
             fontWeight: 900,
             letterSpacing: 4,
             textTransform: 'uppercase',
-            color: '#6366F1',
+            color: 'var(--text-secondary)',
             marginBottom: 16,
             position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
           }}>
+            <Sparkles size={13} color="#6366F1" aria-hidden="true" />
             AI Reflection
           </p>
 
@@ -130,7 +131,7 @@ export default function AiInsight({ blogId }: Props) {
               fontSize: 'clamp(17px, 2vw, 22px)',
               fontWeight: 700,
               fontStyle: 'italic',
-              color: '#3730A3',
+              color: 'var(--text)',
               lineHeight: 1.65,
               position: 'relative',
               margin: 0,
@@ -148,7 +149,7 @@ export default function AiInsight({ blogId }: Props) {
               fontWeight: 900,
               letterSpacing: 3,
               textTransform: 'uppercase' as const,
-              color: '#818CF8',
+              color: 'var(--text-secondary)',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
