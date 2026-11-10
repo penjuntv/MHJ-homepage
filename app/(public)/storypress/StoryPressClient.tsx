@@ -168,9 +168,7 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* 배경 장식 원 */}
-        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 'clamp(200px, 35vw, 480px)', height: 'clamp(200px, 35vw, 480px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(253,186,116,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-5%', left: '-5%', width: 'clamp(120px, 25vw, 320px)', height: 'clamp(120px, 25vw, 320px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(167,243,208,0.25) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        {/* 배경 장식 원(빛나는 구) 2개는 2026-11-10 삭제 — DESIGN_RULES §18.1 금지 목록 */}
 
         {/* 좌: 텍스트 */}
         <div style={{ position: 'relative', zIndex: 1 }}>
@@ -179,10 +177,14 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
           </p>
           <h1
             className="font-display"
-            style={{ fontSize: 'clamp(56px, 10vw, 120px)', fontWeight: 900, fontStyle: 'italic', letterSpacing: -4, lineHeight: 0.88, color: 'var(--text)', marginBottom: 28, maxWidth: 800 }}
+            /* 2026-11-10: 줄마다 감싼 span 에 전역 `* { font-family: Noto }` 가 직접 걸려 제목이 Playfair 가 아니라
+               Noto Sans Black 으로 그려졌다(CDP 실측). span 은 글꼴을 물려받게 한다. 자간 -4px·줄 간격 0.88 은 줄이 겹쳐
+               (1440 "story." ↔ "Let them") 120px → 96px, -0.01em, 1.0 으로. */
+            style={{ fontSize: 'clamp(48px, 7vw, 96px)', fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.01em', lineHeight: 1.0, color: 'var(--text)', marginBottom: 28, maxWidth: 800 }}
           >
             {title.split('\n').map((line, i) => (
-              <span key={i} style={{ display: 'block' }}>{line}</span>
+              /* balance: "Let them write / it." 처럼 마지막 단어만 홀로 남지 않게 */
+              <span key={i} style={{ display: 'block', fontFamily: 'inherit', textWrap: 'balance' }}>{line}</span>
             ))}
           </h1>
           <p style={{ fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 500, color: 'var(--sp-body)', lineHeight: 1.65, marginBottom: 24, maxWidth: 480 }}>
@@ -202,13 +204,15 @@ export default function StoryPressClient({ title, description, heroImageUrl }: P
               data-track="storypress_click"
               data-track-location="landing_hero"
               onClick={() => trackEvent('cta_click', { location: 'hero' })}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', borderRadius: 999, background: '#1A1A1A', color: '#fff', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 16px 32px rgba(0,0,0,0.15)' }}
+              /* 2026-11-10: #1A1A1A 고정이라 다크에서 검은 바탕 위 검은 버튼 — 테마 변수로(라이트는 같은 모양) */
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', borderRadius: 999, background: 'var(--text)', color: 'var(--bg)', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
             >
               Let&apos;s Make a Book
             </a>
             <a
               href="#why-storypress"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '16px 32px', borderRadius: 999, background: 'rgba(255,255,255,0.7)', color: '#1A1A1A', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', border: '1px solid rgba(0,0,0,0.1)' }}
+              /* 2026-11-10: 반투명 흰 바탕 고정이라 다크에서 회색 "비활성" 버튼처럼 보였다 — 테두리만 있는 버튼으로 */
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '16px 32px', borderRadius: 999, background: 'transparent', color: 'var(--text)', fontSize: 12, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', border: '1px solid var(--border-strong)' }}
             >
               See How It Works <ChevronDown size={14} />
             </a>
