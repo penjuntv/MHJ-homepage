@@ -70,6 +70,12 @@ const container: React.CSSProperties = {
 /* ─ 섹션 vertical padding (§7: 96px/128px) ─ */
 const sectionPad = 'clamp(96px, 10vw, 128px) 0';
 
+/* 사진 그림자 — DESIGN_RULES §18.1 상한(카드 그림자). 예전 0 24px 64px / 0 16px 40px 는 넘었다(2026-11-10). */
+const PHOTO_SHADOW = '0 4px 20px rgba(0,0,0,0.08)';
+
+/* 제목 자간·줄 간격 — 전역 .type-h1 (-2px · 0.9) 은 Playfair 이탤릭에서 줄·글자가 닿는다. 이 페이지 제목만 푼다. */
+const HEADING_FIX: React.CSSProperties = { letterSpacing: '-0.01em', lineHeight: 1.1 };
+
 export default async function AboutPage() {
   const [allMembers, s] = await Promise.all([getFamilyMembers(), getSiteSettings()]);
 
@@ -133,12 +139,14 @@ export default async function AboutPage() {
             gap: 80,           /* 80 = 10×8 ✅ */
             alignItems: 'center',
           }}>
-            {/* 가족사진 — radius 12px (§8.1), vivid-hover 제거 (§12.2) */}
-            <div style={{
+            {/* 가족사진 — radius 12px (§8.1), vivid-hover 제거 (§12.2).
+                2026-11-10(docs/specs/about-2026-11.md): 그림자 0 24px 64px → §18.1 상한, 390 에선 4:3(.about-photo-wide)
+                — 4:5 사진(438px)이 모바일 첫 화면을 거의 차지해 제목은 맨 아래, 소개는 화면 밖이었다. */}
+            <div className="about-photo-wide" style={{
               aspectRatio: '4/5',
               borderRadius: 12,
               overflow: 'hidden',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.10)',
+              boxShadow: PHOTO_SHADOW,
               position: 'relative',
               background: 'linear-gradient(135deg, var(--bg-surface), var(--border))',
             }}>
@@ -175,7 +183,7 @@ export default async function AboutPage() {
               <p className="font-black uppercase" style={{ fontSize: '10px', letterSpacing: '5px', color: 'var(--text-tertiary)', marginBottom: '24px' }}>
                 WHO WE ARE
               </p>
-              <h1 className="font-display font-black type-h1" style={{ marginBottom: '40px', fontStyle: 'italic', color: 'var(--text)' }}>
+              <h1 className="font-display font-black type-h1" style={{ ...HEADING_FIX, marginBottom: '40px', fontStyle: 'italic', color: 'var(--text)' }}>
                 {s.about_who_title}
               </h1>
               <p className="type-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '24px' }}>
@@ -209,8 +217,11 @@ export default async function AboutPage() {
               }}>
                 Vision & Values
               </span>
-              <h2 className="type-display" style={{
-                textTransform: 'uppercase',
+              {/* 2026-11-10: 산세리프 대문자(type-display 자간 -3px·줄 간격 0.85, "ORA," 쉼표가 글자에 붙음) →
+                  페이지 다른 제목과 같은 Playfair 이탤릭. 저장 문구 "Kia ora, tauhou" 를 대문자로 바꾸지 않는다. */}
+              <h2 className="font-display font-black type-h1" style={{
+                ...HEADING_FIX,
+                fontStyle: 'italic',
                 marginBottom: 48,
                 color: 'var(--text)',
               }}>
@@ -223,11 +234,11 @@ export default async function AboutPage() {
               </p>
             </div>
 
-            <div style={{
+            <div className="about-photo-wide" style={{
               aspectRatio: '4/5',
               borderRadius: 12,
               overflow: 'hidden',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.10)',
+              boxShadow: PHOTO_SHADOW,
               position: 'relative',
             }}>
               <SafeImage
@@ -256,17 +267,10 @@ export default async function AboutPage() {
               }}>
                 The Family
               </p>
-              <p className="type-h1" style={{
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                lineHeight: 1,
-                color: 'var(--text)',
-              }}>
-                THE{' '}
-                <span className="font-display" style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--text-secondary)' }}>
-                  WRITER
-                </span>
-              </p>
+              {/* 2026-11-10: 산세리프 대문자 "THE" + 회색 이탤릭 "WRITER" 를 섞은 <p> → 진짜 h2, 한 가지 모양 */}
+              <h2 className="font-display font-black type-h1" style={{ ...HEADING_FIX, fontStyle: 'italic', color: 'var(--text)', margin: 0 }}>
+                The Writer
+              </h2>
             </div>
 
             {/* 2열 그리드: 사진(좌) + 텍스트(우) */}
@@ -283,7 +287,7 @@ export default async function AboutPage() {
                 aspectRatio: '4/5',
                 borderRadius: 12,
                 overflow: 'hidden',
-                boxShadow: '0 24px 64px rgba(0,0,0,0.10)',
+                boxShadow: PHOTO_SHADOW,
                 position: 'relative',
                 background: 'linear-gradient(135deg, var(--bg-surface), var(--border))',
               }}>
@@ -302,15 +306,15 @@ export default async function AboutPage() {
               {/* 우측: 텍스트 블록 */}
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
 
-                {/* 이름 */}
-                <h2 className="type-h2" style={{
+                {/* 이름 — 구역 제목 "The Writer"(h2) 아래라 h3 */}
+                <h3 className="type-h2" style={{
                   textTransform: 'uppercase',
                   letterSpacing: '0.08em',
                   marginBottom: 8,
                   color: 'var(--text)',
                 }}>
                   Yussi
-                </h2>
+                </h3>
 
                 {/* 직함 */}
                 <span className="type-caption" style={{
@@ -427,17 +431,9 @@ export default async function AboutPage() {
               }}>
                 The Members
               </p>
-              <p className="type-h1" style={{
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                lineHeight: 1,
-                color: 'var(--text)',
-              }}>
-                THE THREE{' '}
-                <span className="font-display" style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--text-secondary)' }}>
-                  DAUGHTERS
-                </span>
-              </p>
+              <h2 className="font-display font-black type-h1" style={{ ...HEADING_FIX, fontStyle: 'italic', color: 'var(--text)', margin: 0 }}>
+                The Three Daughters
+              </h2>
             </div>
 
             {/* 프로필 그리드 — 반응형 1→2→3열 (§3.1), radius 12px, grayscale-hover 유지 */}
@@ -451,7 +447,7 @@ export default async function AboutPage() {
                     borderRadius: 12,
                     overflow: 'hidden',
                     marginBottom: 32,
-                    boxShadow: '0 16px 40px rgba(0,0,0,0.08)',
+                    boxShadow: PHOTO_SHADOW,
                     position: 'relative',
                   }}>
                     {/* unoptimized={true} 제거(2026-09): picsum 폴백 전용 우회가 통짜로 박혀
