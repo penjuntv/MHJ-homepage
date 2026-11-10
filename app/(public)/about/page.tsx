@@ -139,10 +139,10 @@ export default async function AboutPage() {
             gap: 80,           /* 80 = 10×8 ✅ */
             alignItems: 'center',
           }}>
-            {/* 가족사진 — radius 12px (§8.1), vivid-hover 제거 (§12.2).
-                2026-11-10(docs/specs/about-2026-11.md): 그림자 0 24px 64px → §18.1 상한, 390 에선 4:3(.about-photo-wide)
-                — 4:5 사진(438px)이 모바일 첫 화면을 거의 차지해 제목은 맨 아래, 소개는 화면 밖이었다. */}
-            <div className="about-photo-wide" style={{
+            {/* 가족사진 — radius 12px (§8.1), vivid-hover 제거 (§12.2). 그림자는 §18.1 상한(2026-11-10).
+                모바일 4:3 자르기는 2026-11-10 되돌림(PeNnY): 높은 나무와 하늘을 보여 주려고 일부러 세로로 찍은 사진이다.
+                사진은 올린 비율 그대로 보여 주는 쪽으로 간다(크롭 기능 설계 대기). */}
+            <div style={{
               aspectRatio: '4/5',
               borderRadius: 12,
               overflow: 'hidden',
@@ -234,7 +234,7 @@ export default async function AboutPage() {
               </p>
             </div>
 
-            <div className="about-photo-wide" style={{
+            <div style={{
               aspectRatio: '4/5',
               borderRadius: 12,
               overflow: 'hidden',
