@@ -25,12 +25,15 @@ export default function MagazineShelf({ magazines, magazineTitle, magazineHint }
           <EmptyState />
         ) : (
           <>
-            {/* 데스크톱: 책장 bookshelf */}
+            {/* 데스크톱: 책장 bookshelf — 책등 줄 + 끝에 최신 호를 표지가 보이게 세워 둔다(face-out).
+                2026-11-11(docs/specs/magazine-shelf-2026-11.md): 선반 66% 가 비어 있었고, 표지는 호버해야만 보여
+                마우스 없는 태블릿은 표지를 볼 수 없었다. */}
             <div className="ms-bookshelf" aria-label="Magazine bookshelf">
               <div className="ms-bookshelf-books">
-                {magazines.map((m, i) => (
-                  <BookSpine key={m.id} magazine={m} isLatest={i === 0} />
+                {magazines.map((m) => (
+                  <BookSpine key={m.id} magazine={m} />
                 ))}
+                <FaceOutCover magazine={magazines[0]} />
               </div>
             </div>
 
@@ -47,7 +50,27 @@ export default function MagazineShelf({ magazines, magazineTitle, magazineHint }
   );
 }
 
-function BookSpine({ magazine, isLatest }: { magazine: Magazine; isLatest: boolean }) {
+/** 선반 끝에 세워 둔 최신 호 — 표지(42:55)를 자르지 않고 336×440(책 높이)으로. "Latest" 배지는 여기에만. */
+function FaceOutCover({ magazine }: { magazine: Magazine }) {
+  return (
+    <Link
+      href={`/magazine/${magazine.id}`}
+      className="shelf-faceout"
+      onClick={() => {
+        trackEvent('magazine_open', {
+          issue_id: magazine.id,
+          issue_title: magazine.title,
+        });
+      }}
+      aria-label={`Latest issue: ${magazine.title}, ${magazine.month_name} ${magazine.year}`}
+    >
+      <span className="shelf-faceout-badge">Latest</span>
+      <PageThumbnail pageType="cover" magazine={magazine} />
+    </Link>
+  );
+}
+
+function BookSpine({ magazine }: { magazine: Magazine }) {
   const spineColor = magazine.bg_color ?? '#3a3025';
   // 책등 글씨는 배경 밝기와 무관하게 검정으로 통일 (2026-09 PeNnY 결정)
   const ink = '#1A1A1A';
@@ -68,9 +91,7 @@ function BookSpine({ magazine, isLatest }: { magazine: Magazine; isLatest: boole
       }}
       aria-label={`Open ${magazine.title}, ${magazine.month_name} ${magazine.year}`}
     >
-      {isLatest && <span className="shelf-book-badge">Latest</span>}
-
-      {/* 기본: 책등 */}
+      {/* 기본: 책등 ("Latest" 배지는 선반 끝에 세운 표지로 옮겼다 — 같은 호에 두 번 붙지 않게) */}
       <div className="shelf-book-spine">
         <span className="shelf-book-spine-top">MHJ</span>
         <span className="shelf-book-spine-text">{magazine.title}</span>
@@ -129,8 +150,10 @@ function EmptyState() {
 }
 
 const SHELF_CSS = `
+/* 색은 테마 변수(2026-11-11): 예전 #FAF8F5·#1A1A1A 직접 지정 + html.dark 덮어쓰기는 다크에서
+   서가 구역(#1A1A1A)과 페이지(#0A0A0A)가 띠처럼 갈렸다. */
 .ms-section {
-  background: #FAF8F5;
+  background: var(--bg-surface);
   padding: clamp(48px, 6vw, 88px) 20px 64px;
   min-height: 70vh;
   box-sizing: border-box;
@@ -148,17 +171,22 @@ const SHELF_CSS = `
   font-family: "Playfair Display", "Noto Sans KR", serif;
   font-weight: 900;
   font-size: clamp(28px, 4.5vw, 40px);
-  color: #1A1A1A;
+  color: var(--text);
   letter-spacing: -0.01em;
   line-height: 1.05;
   margin: 0 0 12px;
 }
+/* 안내 문구는 책등 호버 이야기라 마우스가 있는 768 이상에서만(모바일 카드·태블릿 터치엔 맞지 않는 말) */
 .ms-hint {
+  display: none;
   font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #767069;
+  color: var(--text-secondary);
   margin: 0;
+}
+@media (hover: hover) and (min-width: 768px) {
+  .ms-hint { display: block; }
 }
 
 /* ── 데스크톱: Bookshelf ── */
@@ -293,27 +321,37 @@ const SHELF_CSS = `
   /* ISO 6357 / BS 6738: top-to-bottom, 제목과 방향 통일 */
 }
 
-.shelf-book-badge {
+/* ── 선반 끝 최신 호 표지(face-out) — 42:55 그대로 336×440(책 높이), 자르지 않는다 ── */
+.shelf-faceout {
+  position: relative;
+  display: block;
+  /* 남는 폭이 모자라면(768 태블릿) 비율 그대로 작아진다 — 옆으로 밀려 잘리지 않게. 높이는 폭 × 55/42 */
+  flex: 0 1 336px;
+  min-width: 150px;
+  margin-left: auto;          /* 책등 줄 끝, 선반 오른쪽으로 */
+  margin-right: 12px;
+  text-decoration: none;
+  box-shadow: 0 18px 32px -14px rgba(0,0,0,0.55), 0 4px 8px rgba(0,0,0,0.25);
+  transition: opacity 0.2s ease;
+}
+.shelf-faceout:hover,
+.shelf-faceout:focus-visible { opacity: 0.92; outline: none; }
+.shelf-faceout:focus-visible { box-shadow: 0 0 0 3px #FDFCFA, 0 18px 32px -14px rgba(0,0,0,0.55); }
+.shelf-faceout-badge {
   position: absolute;
   top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-  background: #FDFCFA;
-  color: #8A6B4F;
+  left: 10px;
+  z-index: 2;
+  background: #8A6B4F;
+  color: #FDFCFA;
   font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 2px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  white-space: nowrap;
-}
-/* badge(~28px) 아래에 MHJ 텍스트가 오도록 — 배지 있는 책에만 적용 */
-.shelf-book-badge ~ .shelf-book-spine .shelf-book-spine-top {
-  margin-top: 20px;
 }
 
 .shelf-book-cover {
@@ -426,7 +464,7 @@ const SHELF_CSS = `
   font-family: "Playfair Display", "Noto Sans KR", serif;
   font-weight: 700;
   font-size: 16px;
-  color: #1A1A1A;
+  color: var(--text);
   line-height: 1.25;
   margin: 0 0 4px;
   display: -webkit-box;
@@ -438,7 +476,7 @@ const SHELF_CSS = `
   font-family: "Inter", sans-serif;
   font-size: 12px;
   font-weight: 400;
-  color: #767069;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -448,10 +486,7 @@ const SHELF_CSS = `
   .ms-grid { display: none; }
 }
 
-/* ── 다크모드 (월넛) ── */
-html.dark .ms-section { background: #1A1A1A; }
-html.dark .ms-heading { color: #FDFCFA; }
-html.dark .ms-hint { color: rgba(253,252,250,0.55); }
+/* ── 다크모드 (월넛) — 바탕·글자는 위 변수가 맡고, 나무 선반만 덮어쓴다 ── */
 html.dark .ms-bookshelf {
   background: linear-gradient(180deg, #2a1f12 0%, #3a2a18 50%, #1e1408 100%);
   box-shadow:
@@ -462,10 +497,6 @@ html.dark .ms-bookshelf::after {
   background: linear-gradient(180deg, #0e0805 0%, #000 100%);
 }
 html.dark .shelf-book { filter: brightness(0.94); }
-html.dark .ms-card-title { color: #FDFCFA; }
-html.dark .ms-card-date { color: rgba(253,252,250,0.55); }
-html.dark .ms-empty-title { color: #FDFCFA; }
-html.dark .ms-empty-desc { color: rgba(253,252,250,0.55); }
 
 /* ── Empty ── */
 .ms-empty {
@@ -487,13 +518,13 @@ html.dark .ms-empty-desc { color: rgba(253,252,250,0.55); }
   font-weight: 900;
   font-style: italic;
   font-size: clamp(28px, 4vw, 40px);
-  color: #1A1A1A;
+  color: var(--text);
   margin: 0 0 10px;
 }
 .ms-empty-desc {
   font-family: "Inter", sans-serif;
   font-size: 14px;
-  color: #767069;
+  color: var(--text-secondary);
   margin: 0;
 }
 `;
