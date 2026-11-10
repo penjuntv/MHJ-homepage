@@ -1507,9 +1507,9 @@ textarea::placeholder {
 }
 
 /* dark mode: #0A0A0A = var(--bg) 동일 — text 색상은 white 유지 */
+/* backdrop-filter: blur(12px) 는 2026-11-10 삭제 — DESIGN_RULES §18.1(blur 는 네비게이션만) */
 .sp-faq-card {
   background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
 }
 
 .dark .sp-faq-card {
