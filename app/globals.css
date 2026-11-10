@@ -1687,6 +1687,12 @@ textarea::placeholder {
 
 /* 블로그 목록 Featured + Recent Stories 그리드 — 규칙이 초기 CSS 에 있어야 모바일 첫 페인트부터 1열이다.
    (예전엔 인라인 2열 + <style jsx> 모바일 규칙이라 하이드레이션 후 접히며 CLS 0.19 — 2026-09-08 W3-B) */
+/* About 가족사진·비전 사진 — 모바일에서만 4:5 → 4:3 (2026-11-10 docs/specs/about-2026-11.md).
+   4:5 사진(350×438px)이 390 첫 화면을 거의 차지해 제목은 맨 아래, 소개는 화면 밖이었다. 인라인 aspectRatio 를 이기려고 !important. */
+@media (max-width: 639px) {
+  .about-photo-wide { aspect-ratio: 4 / 3 !important; }
+}
+
 /* ── 목록 카드(/blog · 허브) — components/BlogLibrary.tsx BlogCard ──
    640px 이상: 사진(16:10) 위 · 글자 아래(예전 인라인 값 그대로). 640px 미만: 한 줄 카드(사진 112px 4:3 왼쪽).
    2026-11-10 /blog 설계서: 390 에서 큰 사진 카드 20장이 1쪽 10,405px 를 만들었다. (.featured-grid 는 블록과 함께 삭제) */
