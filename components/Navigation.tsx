@@ -14,6 +14,16 @@ const NAV_LINKS = [
   { label: 'StoryPress', href: '/storypress' },
 ];
 
+/**
+ * StoryPress 메뉴 클릭을 홈 상자·글 끝 카드와 같은 이름(`storypress_click`)으로 잰다 — `OutboundLinkTracker` 가 위임으로 잡는다.
+ * 메뉴 항목은 관리자(DB)에서 바뀔 수 있어 라벨이 아니라 주소로 가른다.
+ */
+function storyPressTrack(href: string, location: 'nav' | 'nav_mobile') {
+  return href === '/storypress'
+    ? { 'data-track': 'storypress_click', 'data-track-location': location }
+    : {};
+}
+
 interface NavItem {
   label: string;
   path: string;
@@ -147,6 +157,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
               <Link
                 key={link.href}
                 href={link.href}
+                {...storyPressTrack(link.href, 'nav')}
                 style={{
                   fontSize: '13px',
                   fontWeight: 400,
@@ -221,6 +232,7 @@ export default function Navigation({ socialInstagram, contactEmail, navigationIt
             <Link
               key={link.href}
               href={link.href}
+              {...storyPressTrack(link.href, 'nav_mobile')}
               onClick={closeMobile}
               style={{
                 fontSize: '28px',

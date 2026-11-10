@@ -190,3 +190,26 @@ export function parseDevice(ua: string | null | undefined): 'mobile' | 'tablet' 
   if (/mobi|iphone|ipod|android.*mobile|windows phone|blackberry|bb10|opera mini/.test(s)) return 'mobile';
   return 'desktop';
 }
+
+const BLOG_RESERVED_SEGMENTS = new Set(['page', 'category', 'tag']);
+
+/**
+ * `/blog/<slug>` 경로에서 글 slug 를 꺼낸다(목록·카테고리·태그·페이지 경로는 null).
+ * 왜: 페이지뷰·체류시간은 레이아웃의 AnalyticsBeacon 이 보내는데 slug 를 싣지 않는다 — 글 컴포넌트(스크롤·완독)만 싣는다.
+ * 그래서 2026-09 수집 시작부터 글 페이지의 pageview·engagement·click·outbound 가 전부 blog_slug=null 이었고,
+ * 관리자 Insights 의 글별 표(`mhj_content_engagement`)는 페이지뷰 0·체류 빈칸으로 나왔다(2026-11-09 확인).
+ * 비콘 하나하나를 고치는 대신 서버에서 경로로 채운다 — 이미 배포된 클라이언트 캐시도 바로 고쳐진다.
+ */
+export function slugFromBlogPath(path: string | null): string | null {
+  if (!path) return null;
+  const m = /^\/blog\/([^/?#]+)\/?$/.exec(path);
+  if (!m) return null;
+  let slug = m[1];
+  try {
+    slug = decodeURIComponent(slug);
+  } catch {
+    // 깨진 퍼센트 인코딩은 그대로 둔다
+  }
+  if (BLOG_RESERVED_SEGMENTS.has(slug)) return null;
+  return slug.slice(0, 300) || null;
+}

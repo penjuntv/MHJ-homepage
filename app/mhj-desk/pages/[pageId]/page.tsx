@@ -24,7 +24,7 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
         fields: [
           { key: 'storypress_title', label: 'StoryPress 제목', type: 'text', hint: '랜딩 페이지 StoryPress 섹션 제목' },
           { key: 'storypress_description', label: 'StoryPress 설명', type: 'textarea', hint: '랜딩 페이지 StoryPress 섹션 설명문' },
-          { key: 'storypress_cta_text', label: 'CTA 버튼 텍스트', type: 'text', hint: '예: Join the Waitlist' },
+          { key: 'storypress_cta_text', label: 'CTA 버튼 텍스트', type: 'text', hint: '예: Start your free book (글 끝 StoryPress 카드 버튼에 쓰인다)' },
           { key: 'storypress_cta_url', label: 'CTA 버튼 URL', type: 'url', hint: '비워두면 /storypress로 이동' },
         ],
       },
@@ -62,7 +62,7 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
         fields: [
           { key: 'storypress_title', label: '제목', type: 'text', hint: '예: StoryPress' },
           { key: 'storypress_description', label: '설명', type: 'textarea' },
-          { key: 'storypress_cta_text', label: 'CTA 버튼 텍스트', type: 'text', hint: '예: Join the Waitlist' },
+          { key: 'storypress_cta_text', label: 'CTA 버튼 텍스트', type: 'text', hint: '예: Start your free book (글 끝 StoryPress 카드 버튼에 쓰인다)' },
           { key: 'storypress_cta_url', label: 'CTA 버튼 URL', type: 'url', hint: '비워두면 /storypress로 이동' },
           { key: 'storypress_hero_image_url', label: '히어로 이미지', type: 'image' },
         ],

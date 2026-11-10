@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { supabase } from './supabase';
+import { STORYPRESS_CTA_TEXT_DEFAULT } from './storypress-link';
 
 export interface SiteSetting {
   key: string;
@@ -31,7 +32,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   storypress_title: 'Every child has a story.\nLet them write it.',
   storypress_description: '',
   storypress_cta_url: '',
-  storypress_cta_text: 'Join the Waitlist',
+  storypress_cta_text: STORYPRESS_CTA_TEXT_DEFAULT,
   storypress_hero_image_url: '',
   lunch_cta_label: 'Visit our Instagram →',
   lunch_cta_url: 'https://www.instagram.com/my.mairangi/',

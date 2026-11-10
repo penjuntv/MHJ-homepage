@@ -99,6 +99,56 @@ function TocPage({ magazine, articles }: {
 interface Props {
   magazine: Magazine;
   articles: Article[];
+  /** 서버에서 미리 받은 추가 쪽(article_pages, 이미지 최적화 완료). 있으면 브라우저에서 다시 받지 않는다. */
+  extraPages?: ArticlePage[];
+  /** URL ?page (1부터). 서버가 첫 HTML 에 바로 그 쪽을 그리도록 넘긴다. */
+  initialPage?: number;
+}
+
+/* 쪽 목록 — 렌더 중에 동기로 만든다(서버 HTML 에도 지면이 들어가도록).
+   예전엔 빈 배열로 시작해 브라우저에서 article_pages 를 받은 뒤에야 채워서,
+   첫 그림이 검은 배경 + 화살표뿐이었다(모바일은 지면 높이가 auto 라 0 으로 접힘, 2026-11-09 #193 깜빡임 검사).
+   extras 가 아직 없으면(null) 기사 첫 쪽만으로 만든다 — 표지·목차·첫 기사까지의 순서는 extras 와 무관하다. */
+function buildPages(sorted: Article[], isLegacyPng: boolean, extras: ArticlePage[] | null): PageItem[] {
+  if (sorted.length === 0) return [{ type: 'cover' }, { type: 'toc' }];
+
+  // Legacy PNG 이슈 (2025-12, 2026-01): 각 기사를 article_images[] 순서대로
+  // legacy-png 페이지로 확장. article_pages(extra)는 무시.
+  if (isLegacyPng) {
+    return [
+      { type: 'cover' },
+      { type: 'toc' },
+      ...sorted.flatMap((article): PageItem[] => {
+        const imgs = (article.article_images ?? []).filter(Boolean) as string[];
+        const list = imgs.length
+          ? imgs
+          : article.image_url
+            ? [article.image_url]
+            : [];
+        return list.map((src, i) => ({
+          type: 'legacy-png' as const,
+          article,
+          imageIndex: i,
+          imageUrl: src,
+        }));
+      }),
+    ];
+  }
+
+  const extraMap = new Map<number, ArticlePage[]>();
+  (extras ?? []).forEach(ep => {
+    const arr = extraMap.get(ep.article_id) ?? [];
+    arr.push(ep);
+    extraMap.set(ep.article_id, arr);
+  });
+  return [
+    { type: 'cover' },
+    { type: 'toc' },
+    ...sorted.flatMap(article => [
+      { type: 'article' as const, article },
+      ...(extraMap.get(article.id) ?? []).map(ep => ({ type: 'extra' as const, article, articlePage: ep })),
+    ]),
+  ];
 }
 
 const SWIPE_THRESHOLD = 0.22;   // 페이지 너비의 22% 이상 스와이프 시 넘김
@@ -110,16 +160,24 @@ const AUTO_HIDE_MS = 3000;
 const PAGE_W = MAG_PAGE_W;
 const PAGE_H = MAG_PAGE_H;
 
-export default function MagazineSpreadViewer({ magazine, articles }: Props) {
+export default function MagazineSpreadViewer({ magazine, articles, extraPages, initialPage }: Props) {
   const router = useRouter();
   const sorted = useMemo(
     () => [...articles].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
     [articles],
   );
+  const isLegacyPng = isLegacyPngIssue(magazine.id);
 
-  const [pages, setPages] = useState<PageItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
+  // 서버가 넘긴 extraPages 가 있으면 그대로(prop 이 바뀌면 따라간다), 없으면 브라우저에서 받은 것.
+  const [fetchedExtras, setExtras] = useState<ArticlePage[] | null>(null);
+  const extras = extraPages ?? fetchedExtras;
+  const pages = useMemo(() => buildPages(sorted, isLegacyPng, extras), [sorted, isLegacyPng, extras]);
+  const [currentPage, setCurrentPage] = useState(() =>
+    Math.min(Math.max((initialPage ?? 1) - 1, 0), pages.length - 1),
+  );
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
+  // 첫 쪽에는 넘김 애니메이션(투명 → 보임)을 걸지 않는다 — 첫 그림에서 지면이 투명하면 검은 화면과 같다.
+  const [animate, setAnimate] = useState(false);
   const [tocOpen, setTocOpen] = useState(false);
   const [liked, setLiked] = useState(false);
   const [showToast, setShowToast] = useState<string | null>(null);
@@ -133,69 +191,25 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
 
   const accentColor = magazine.accent_color || '#8A6B4F';
   const bgColor = magazine.bg_color || '#FDFCFA';
-  const isLegacyPng = isLegacyPngIssue(magazine.id);
 
-  /* ─── pages 로드 ─── */
+  /* ─── 추가 쪽 로드 (서버가 extraPages 를 안 넘긴 경우만) ─── */
   useEffect(() => {
+    if (isLegacyPng || extraPages) return;
     const ids = sorted.map(a => a.id);
-    if (ids.length === 0) {
-      setPages([{ type: 'cover' }, { type: 'toc' }]);
-      return;
-    }
-
-    // Legacy PNG 이슈 (2025-12, 2026-01): 각 기사를 article_images[] 순서대로
-    // legacy-png 페이지로 확장. article_pages(extra)는 무시.
-    if (isLegacyPng) {
-      const flat: PageItem[] = [
-        { type: 'cover' },
-        { type: 'toc' },
-        ...sorted.flatMap((article): PageItem[] => {
-          const imgs = (article.article_images ?? []).filter(Boolean) as string[];
-          const list = imgs.length
-            ? imgs
-            : article.image_url
-              ? [article.image_url]
-              : [];
-          return list.map((src, i) => ({
-            type: 'legacy-png' as const,
-            article,
-            imageIndex: i,
-            imageUrl: src,
-          }));
-        }),
-      ];
-      setPages(flat);
-      return;
-    }
-
+    if (ids.length === 0) return;
+    let cancelled = false;
     supabase
       .from('article_pages')
       .select('*')
       .in('article_id', ids)
       .order('page_number', { ascending: true })
       .then(({ data }) => {
-        const extraMap = new Map<number, ArticlePage[]>();
-        (data ?? []).forEach(ep => {
-          const arr = extraMap.get(ep.article_id) ?? [];
-          // 추가 쪽 이미지는 여기서 처음 불러오므로 서버 로더의 최적화를 못 거친다 — 같은 규칙을 여기서 적용.
-          arr.push(optimizePageImages(ep as ArticlePage, MAG_IMAGE_WIDTH.page));
-          extraMap.set(ep.article_id, arr);
-        });
-
-        const flat: PageItem[] = [
-          { type: 'cover' },
-          { type: 'toc' },
-          ...sorted.flatMap(article => {
-            const extra = extraMap.get(article.id) ?? [];
-            return [
-              { type: 'article' as const, article },
-              ...extra.map(ep => ({ type: 'extra' as const, article, articlePage: ep })),
-            ];
-          }),
-        ];
-        setPages(flat);
+        if (cancelled) return;
+        // 추가 쪽 이미지는 여기서 처음 불러오므로 서버 로더의 최적화를 못 거친다 — 같은 규칙을 여기서 적용.
+        setExtras((data ?? []).map(ep => optimizePageImages(ep as ArticlePage, MAG_IMAGE_WIDTH.page)));
       });
-  }, [magazine.id, sorted, isLegacyPng]);
+    return () => { cancelled = true; };
+  }, [sorted, isLegacyPng, extraPages]);
 
   /* ─── 고정 캔버스 스케일 (가용 영역에 contain) ─── 공용 훅.
      container 모드: min(1, (stageW−112)/620, stageH/812). 112 = 지면 바깥 좌우 화살표 여유. */
@@ -263,6 +277,7 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
   /* ─── 네비게이션 ─── */
   const goToPage = useCallback((n: number) => {
     if (n < 0 || n >= pages.length) return;
+    setAnimate(true);
     setDirection(n > currentPage ? 'next' : 'prev');
     setCurrentPage(n);
 
@@ -772,9 +787,11 @@ export default function MagazineSpreadViewer({ magazine, articles }: Props) {
               height: PAGE_H * pageScale,
               boxShadow: '0 8px 32px rgba(0,0,0,0.30), 0 2px 10px rgba(0,0,0,0.2)',
               overflow: 'hidden',
-              animation: direction === 'next'
-                ? 'mvSlideInRight 0.32s ease'
-                : 'mvSlideInLeft 0.32s ease',
+              animation: !animate
+                ? 'none'
+                : direction === 'next'
+                  ? 'mvSlideInRight 0.32s ease'
+                  : 'mvSlideInLeft 0.32s ease',
               touchAction: 'pan-y',
             }}
           >

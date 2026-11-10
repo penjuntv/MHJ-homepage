@@ -1,6 +1,9 @@
 import { unsubscribePageUrl } from './unsubscribe';
+import { STORYPRESS_APP_URL, storyPressAppHref } from './storypress-link';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz';
+/** 환영 메일 속 StoryPress 링크 — 뉴스레터 막내 칸과 같은 utm_medium=newsletter. */
+const STORYPRESS_WELCOME_HREF = storyPressAppHref(STORYPRESS_APP_URL, 'newsletter');
 
 function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -189,7 +192,7 @@ export function generateWelcome3(
         ${sectionRows}
       </table>
       <p class="text-primary" style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#1a1a1a;">
-        We also built something called <strong>StoryPress</strong> &mdash; a simple English learning app where Jin records the expressions she picks up at school. It's still early days, but it's become one of the most-loved parts of what we do.
+        We also built something called <a href="${STORYPRESS_WELCOME_HREF}" class="text-primary" style="color:#1a1a1a;font-weight:700;text-decoration:underline;">StoryPress</a> &mdash; a simple English learning app where Jin records the expressions she picks up at school. It's still early days, but it's become one of the most-loved parts of what we do.
       </p>
       <p class="text-secondary" style="margin:0 0 28px;font-size:15px;line-height:1.7;color:#525252;">
         That's it from me. Your next Mairangi Notes arrives this Friday. Grab a coffee and enjoy.
