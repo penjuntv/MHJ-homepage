@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import SafeImage from './SafeImage';
 import type { Blog } from '@/lib/types';
 import { BLOG_CATEGORIES, CATEGORY_TO_SLUG, type BlogCategory } from '@/lib/constants';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import { listPagePath } from '@/app/(public)/blog/_lib/blog-list-urls';
@@ -17,9 +17,12 @@ const ALL_CATEGORIES = [...BLOG_CATEGORIES];
  */
 const SHOW_PUBLIC_VIEW_COUNT = false;
 
+/*
+ * 2026-11-10: Featured + Recent Stories 블록 삭제(docs/specs/blog-list-2026-11.md). 별표(featured) 글이 0편이라
+ * 늘 최신 5편 = 바로 아래 목록 1~5번 = 홈 첫 화면 1+4 와 같은 글이었다. 허브는 #197 에서 먼저 뺐다.
+ * 관리자 별표는 홈 첫 화면(app/(public)/page.tsx getHeroPosts)이 계속 쓴다.
+ */
 interface Props {
-  featuredBlog: Blog | null;
-  recentBlogs: Blog[];
   blogs: Blog[];
   totalCount: number;
   currentPage: number;
@@ -38,8 +41,6 @@ interface Props {
 }
 
 export default function BlogLibrary({
-  featuredBlog,
-  recentBlogs,
   blogs,
   totalCount,
   currentPage,
@@ -117,50 +118,6 @@ export default function BlogLibrary({
         )}
       </header>
 
-      {/* ═══════ Featured + Recent Stories — 전체 목록(/blog)에서만. 카테고리 허브는 Start here + 목록이 같은 일을 한다
-          (2026-11-10: 허브에서 같은 글이 최대 4번, 글 1편 서랍엔 "No recent stories" 빈 상자). ═══════ */}
-      {featuredBlog && !activeCategory && (
-        <section style={{
-          marginBottom: 96,
-          marginLeft: 'calc(-1 * clamp(20px, 4vw, 48px))',
-          marginRight: 'calc(-1 * clamp(20px, 4vw, 48px))',
-          padding: 'clamp(32px, 4vw, 48px) clamp(20px, 4vw, 48px)',
-          background: 'var(--bg-featured)',
-          borderTop: '1px solid var(--border)',
-          borderBottom: '1px solid var(--border)',
-        }}>
-          {/* 그리드 규칙은 globals.css(.featured-grid). 인라인 2열 + <style jsx> 모바일 1열 조합은 App Router 에서
-              styled-jsx 가 서버 HTML 에 안 실려 하이드레이션 뒤에야 1열이 되며 CLS 0.19 를 냈다 (2026-09-08 W3-B). */}
-          <div className="featured-grid">
-            {/* Featured Story */}
-            <FeaturedCard blog={featuredBlog} />
-
-            {/* Recent Stories Sidebar */}
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <p style={{
-                fontSize: 11, fontWeight: 900, letterSpacing: 4,
-                textTransform: 'uppercase', color: 'var(--text-secondary)',
-                marginBottom: 24, flexShrink: 0,
-              }}>
-                Recent Stories
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                {recentBlogs.map((blog, i) => (
-                  <RecentStoryItem
-                    key={blog.id}
-                    blog={blog}
-                    isLast={i === recentBlogs.length - 1}
-                  />
-                ))}
-                {recentBlogs.length === 0 && (
-                  <p style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>No recent stories</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* ═══════ ALL STORIES + 카테고리 필터 ═══════ */}
       <div id="all-stories" style={{
         borderTop: '1px solid var(--border-medium)',
@@ -205,7 +162,7 @@ export default function BlogLibrary({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
           {blogs.map((b) => (
             b.letter_to
               ? <LetterCard key={b.id} blog={b} />
@@ -332,189 +289,6 @@ function CategoryFilter({ selected, hrefFor, totalCount, categoryCounts }: {
 }
 
 /* ════════════════════════════════════════════
-   Featured Card
-   ════════════════════════════════════════════ */
-/**
- * `<div onClick={router.push}>` 이었다 — 키보드로 열 수 없고, HTML 에 `<a href>` 가 남지 않아
- * 크롤러 눈에는 `/blog` 가 **어느 글로도 링크하지 않는 페이지**였다(라이브 실측: 글 링크 0개).
- * 하는 일이 이동뿐이라 진짜 링크가 맞다.
- */
-function FeaturedCard({ blog }: { blog: Blog }) {
-  const [hovered, setHovered] = useState(false);
-  const excerpt = blog.meta_description || blog.content.replace(/<[^>]+>/g, '').slice(0, 100) + '...';
-
-  return (
-    <Link
-      href={`/blog/${blog.slug}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        textDecoration: 'none',
-        color: 'inherit',
-        borderRadius: 12,
-        overflow: 'hidden',
-        cursor: 'pointer',
-        background: 'var(--bg-card, var(--bg))',
-        border: '1px solid var(--border)',
-        transition: 'border-color 0.3s ease',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
-    >
-      {/* 이미지 — 16:9 */}
-      <div style={{ aspectRatio: '16/9', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-        <SafeImage
-          src={blog.image_url}
-          alt={blog.title}
-          fill
-          sizes="(max-width: 767px) 100vw, 66vw"
-          className="object-cover"
-          priority
-          style={{
-            transform: hovered ? 'scale(1.02)' : 'scale(1)',
-            transition: 'transform 0.5s ease',
-          }}
-        />
-      </div>
-
-      {/* 텍스트 */}
-      <div style={{ padding: 'clamp(24px, 4vw, 40px)', display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
-        {/* 카테고리 + Featured */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
-            {blog.category}
-          </span>
-          <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-          <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
-            Featured
-          </span>
-        </div>
-
-        {/* 제목 — sans-serif, weight 700, 이탤릭 없음 */}
-        <h2
-          style={{
-            fontSize: 'clamp(22px, 3vw, 36px)',
-            fontWeight: 700,
-            letterSpacing: -0.5,
-            lineHeight: 1.2,
-            color: 'var(--text)',
-            margin: 0,
-          }}
-        >
-          {blog.title}
-        </h2>
-
-        <p style={{
-          fontSize: 15,
-          color: 'var(--text-secondary)',
-          lineHeight: 1.65,
-          overflow: 'hidden',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical' as const,
-        }}>
-          {excerpt}
-        </p>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>{blog.author}</span>
-          <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>{formatDate(blog.date)}</span>
-        </div>
-
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          fontSize: 11, fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase',
-          color: 'var(--accent)',
-        }}>
-          Read Story
-          <ArrowRight size={13} style={{ transition: 'transform 0.3s ease', transform: hovered ? 'translateX(4px)' : 'translateX(0)' }} />
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-/* ════════════════════════════════════════════
-   Recent Story Item — 썸네일 + 텍스트
-   ════════════════════════════════════════════ */
-/**
- * `<div onClick={router.push}>` 이었다 — 키보드로 열 수 없고, HTML 에 `<a href>` 가 남지 않아
- * 크롤러 눈에는 `/blog` 가 **어느 글로도 링크하지 않는 페이지**였다(라이브 실측: 글 링크 0개).
- * 하는 일이 이동뿐이라 진짜 링크가 맞다.
- */
-function RecentStoryItem({ blog, isLast }: { blog: Blog; isLast: boolean }) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <Link
-      href={`/blog/${blog.slug}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        textDecoration: 'none',
-        color: 'inherit',
-        padding: '20px 0',
-        borderBottom: isLast ? 'none' : '1px solid var(--border-medium)',
-        cursor: 'pointer',
-        display: 'flex',
-        gap: 16,
-        alignItems: 'flex-start',
-      }}
-    >
-      {/* 썸네일 */}
-      <div style={{
-        flexShrink: 0,
-        width: 56,
-        height: 56,
-        borderRadius: 8,
-        overflow: 'hidden',
-        position: 'relative',
-        background: 'var(--bg-surface)',
-      }}>
-        <SafeImage
-          src={blog.image_url}
-          alt={blog.title}
-          fill
-          sizes="56px"
-          className="object-cover"
-          style={{
-            transform: hovered ? 'scale(1.05)' : 'scale(1)',
-            transition: 'transform 0.4s ease',
-          }}
-        />
-      </div>
-
-      {/* 텍스트 */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <h3 style={{
-          fontSize: 14,
-          fontWeight: 700,
-          color: hovered ? 'var(--accent)' : 'var(--text)',
-          lineHeight: 1.45,
-          marginBottom: 6,
-          transition: 'color 0.2s ease',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical' as const,
-          overflow: 'hidden',
-        }}>
-          {blog.title}
-        </h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{formatDate(blog.date)}</span>
-          <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'var(--text-secondary)', flexShrink: 0 }} />
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: 1, textTransform: 'uppercase' }}>
-            {blog.category}
-          </span>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-/* ════════════════════════════════════════════
    Blog Card — 16:10, 이미지 독립 라운드, 카테고리+날짜 한 줄
    ════════════════════════════════════════════ */
 interface CardProps {
@@ -527,75 +301,30 @@ interface CardProps {
  * 하는 일이 이동뿐이라 진짜 링크가 맞다.
  */
 function BlogCard({ blog }: CardProps) {
-  const [hovered, setHovered] = useState(false);
-
+  // 모양은 globals.css .blog-card* — 1440·768 은 예전 그대로(사진 위 · 글자 아래),
+  // 640px 미만은 한 줄 카드(왼쪽 작은 사진 · 오른쪽 글자, 홈 가이드와 같은 꼴). 2026-11-10: 390 에서 큰 사진 카드
+  // 20장이 세로로 쌓여 /blog 1쪽이 10,405px 이었다. 미디어쿼리가 이겨야 해서 인라인 스타일을 클래스로 옮겼다.
+  // 호버(사진 scale 1.03 · 제목 밑줄)도 CSS 로 — 예전 useState 호버와 같은 값.
   return (
-    <Link
-      href={`/blog/${blog.slug}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'block',
-        textDecoration: 'none',
-        color: 'inherit',
-        borderRadius: 12,
-        background: 'var(--bg-card, var(--bg))',
-        border: '1px solid var(--border)',
-        cursor: 'pointer',
-        padding: 12,
-        transition: 'border-color 0.3s ease',
-      }}
-    >
-      {/* 이미지 — 독립 라운드 6px */}
-      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', borderRadius: 6 }}>
+    <Link href={`/blog/${blog.slug}`} className="blog-card">
+      <div className="blog-card-media">
         <SafeImage
           src={blog.image_url}
           alt={blog.title}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          sizes="(max-width: 639px) 112px, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
           className="object-cover"
-          style={{
-            transform: hovered ? 'scale(1.03)' : 'scale(1)',
-            transition: 'transform 0.5s ease',
-          }}
         />
       </div>
-
-      {/* 텍스트 */}
-      <div style={{ paddingTop: 12 }}>
-        {/* 카테고리 좌 / 날짜 우 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 }}>
-          <p style={{
-            fontSize: 10, fontWeight: 900, letterSpacing: 2,
-            textTransform: 'uppercase', color: 'var(--text-secondary)',
-            margin: 0, flexShrink: 0,
-          }}>
+      <div className="blog-card-body">
+        <div className="blog-card-meta">
+          <p className="blog-card-cat">
             {blog.category}
             {blog.is_sponsored && <span style={{ marginLeft: 6 }}>· AD</span>}
           </p>
-          <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-            {formatDate(blog.date)}
-          </span>
+          <span className="blog-card-date">{formatDate(blog.date)}</span>
         </div>
-        <h3 style={{
-          fontSize: 16,
-          fontWeight: 700,
-          color: 'var(--text)',
-          letterSpacing: -0.3,
-          lineHeight: 1.4,
-          margin: 0,
-          minHeight: '2.8em', /* 2줄 고정 — 1·2줄 제목 혼재 시 하단 태그/조회수 정렬 유지 */
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical' as const,
-          overflow: 'hidden',
-          textDecoration: hovered ? 'underline' : 'none',
-          textUnderlineOffset: '4px',
-          textDecorationThickness: '1px',
-          transition: 'text-decoration-color 0.3s ease',
-        }}>
-          {blog.title}
-        </h3>
+        <h3 className="blog-card-title">{blog.title}</h3>
         {/* 태그 줄은 2026-11-10 삭제 — "schoolreport · nzprimary" 처럼 내부 태그 글자가 독자에게 그대로 보였다 */}
         {SHOW_PUBLIC_VIEW_COUNT && (blog.view_count ?? 0) > 0 && (
           <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '6px 0 0' }}>
