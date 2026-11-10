@@ -47,8 +47,8 @@ export const SLUG_TO_CATEGORY: Record<string, BlogCategory> = Object.fromEntries
 export const BLOG_CARD_COLUMNS =
   'id, category, title, seo_title, author, date, image_url, content, slug, meta_description, og_image_url, published, view_count, tags, is_sponsored, letter_to, updated_at';
 
-/** 상세 페이지 이전·다음 사진 카드(2026-09-11 W6-C). 카드 컬럼은 본문(`content`)까지 실어 이웃 두 편에 쓰기엔 무겁다. */
-export const BLOG_ADJACENT_COLUMNS = 'id, title, slug, image_url, date';
+/** 상세 페이지 맨 아래 아카이브 이전·다음 글자 줄(2026-09-11 W6-C, 2026-11-09 사진 뺌). 카드 컬럼은 본문(`content`)까지 실어 이웃 두 편에 쓰기엔 무겁다. */
+export const BLOG_ADJACENT_COLUMNS = 'id, title, slug';
 
 /**
  * 사이트 검색(2026-09-11 W6-D). 후보는 가벼운 칸만 싣고 본문은 **거르기만** 한다 — 81편 본문을 검색마다 받을 이유가 없다.

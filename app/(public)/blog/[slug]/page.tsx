@@ -12,9 +12,9 @@ import StoryPressPostCard from '@/components/StoryPressPostCard';
 import { getSiteSettings } from '@/lib/site-settings';
 import { BLOG_DETAIL_COLUMNS, BLOG_RELATED_COLUMNS, categoryHref, BLOG_ADJACENT_COLUMNS, isStoryPressCardCategory } from '@/lib/constants';
 import { getNZSeasonLabel } from '@/lib/date-helpers';
-import { optimizeContentImages, nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
+import { optimizeContentImages } from '@/lib/image-url';
 import ViewTracker from './ViewTracker';
-import RelatedCard from './RelatedCard';
+import ContinueReading, { type ContinuePost, type DrawerPick } from './ContinueReading';
 import ShareButton from '@/components/ShareButton';
 import CommentSection from './CommentSection';
 import AiInsight from '@/components/AiInsight';
@@ -39,7 +39,7 @@ export async function generateStaticParams() {
   return (data ?? []).map((b) => ({ slug: b.slug }));
 }
 
-type AdjacentPost = { id: number; title: string; slug: string; image_url: string | null; date: string };
+type AdjacentPost = { id: number; title: string; slug: string };
 
 async function getAdjacentBlogs(current: { id: number; date: string }): Promise<{
   prev: AdjacentPost | null;
@@ -71,11 +71,85 @@ async function getAdjacentBlogs(current: { id: number; date: string }): Promise<
 }
 
 /**
- * 관련 글 — 편집자가 고른 `related_slugs` 만, 고른 순서대로 최대 3편(2026-11-01 PeNnY 결정).
- * 예전엔 3칸이 안 차면 같은 카테고리·전체 최신 글로 자동으로 채웠다. 이제 안 고르면 블록이 뜨지 않는다.
+ * 글 끝 이어 읽기의 "다음 글" — 같은 서랍(카테고리) 안에서 날짜순 바로 다음(더 새) 글.
+ * 서랍의 가장 새 글이면 바로 앞 글을 준다(2026-11-09 합의 Q2). 순서 키는 getAdjacentBlogs 와 같다(date, id).
+ */
+async function getDrawerNext(current: { id: number; date: string; category: string }): Promise<{
+  post: ContinuePost | null;
+  isEarlier: boolean;
+}> {
+  const now = new Date().toISOString();
+  const neighbour = (dir: 'newer' | 'older') => {
+    const op = dir === 'older' ? 'lt' : 'gt';
+    const ascending = dir === 'newer';
+    return supabase
+      .from('blogs')
+      .select(BLOG_RELATED_COLUMNS)
+      .eq('published', true)
+      .eq('category', current.category)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .or(`date.${op}."${current.date}",and(date.eq."${current.date}",id.${op}.${current.id})`)
+      .order('date', { ascending })
+      .order('id', { ascending })
+      .limit(1);
+  };
+  const [newerRes, olderRes] = await Promise.all([neighbour('newer'), neighbour('older')]);
+  if (newerRes.error) console.error('getDrawerNext newer:', newerRes.error.message);
+  if (olderRes.error) console.error('getDrawerNext older:', olderRes.error.message);
+  const newer = (newerRes.data?.[0] as ContinuePost | undefined) ?? null;
+  if (newer) return { post: newer, isEarlier: false };
+  return { post: (olderRes.data?.[0] as ContinuePost | undefined) ?? null, isEarlier: true };
+}
+
+/** 같은 서랍 최신 글 — 이어 읽기 3칸 중 편집자가 못 채운 칸에만 쓴다. 제외는 클라이언트에서(slug 따옴표 문제, f3dffb5 이전 주석). */
+async function getDrawerLatest(category: string): Promise<ContinuePost[]> {
+  const { data, error } = await supabase
+    .from('blogs')
+    .select(BLOG_RELATED_COLUMNS)
+    .eq('published', true)
+    .eq('category', category)
+    .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`)
+    .order('date', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(8);
+  if (error) console.error('getDrawerLatest:', error.message);
+  return (data ?? []) as ContinuePost[];
+}
+
+/**
+ * 서랍 3편 = 편집자가 고른 related_slugs(고른 순서) 먼저 → 비는 칸만 같은 서랍 최신 글(2026-11-09 합의 Q3).
+ * "다음 글"과 같은 글은 빼서 한 묶음 안에서 같은 글이 두 번 나오지 않게 한다.
+ */
+function pickDrawerThree(
+  currentSlug: string,
+  nextSlug: string | null,
+  editorPicks: ContinuePost[],
+  drawerLatest: ContinuePost[],
+): DrawerPick[] {
+  const taken = new Set<string>([currentSlug, ...(nextSlug ? [nextSlug] : [])]);
+  const out: DrawerPick[] = [];
+  for (const p of editorPicks) {
+    if (out.length >= 3) break;
+    if (taken.has(p.slug)) continue;
+    taken.add(p.slug);
+    out.push({ ...p, source: 'editor' });
+  }
+  for (const p of drawerLatest) {
+    if (out.length >= 3) break;
+    if (taken.has(p.slug)) continue;
+    taken.add(p.slug);
+    out.push({ ...p, source: 'drawer' });
+  }
+  return out;
+}
+
+/**
+ * 편집자가 고른 `related_slugs` — 고른 순서대로 최대 3편(2026-11-01 PeNnY 결정의 "고른 것이 먼저"는 그대로).
+ * 2026-11-09 부터 이 글들은 글 끝 이어 읽기의 서랍 3칸에 **먼저** 들어가고, 비는 칸만 같은 서랍 최신 글로 채운다
+ * (pickDrawerThree, 개혁 계획서 §2.4 · 합의 Q3). 맨 끝의 You Might Also Like 띠는 없앴다.
  * 발행·예약 게이트는 그대로 건다.
  */
-async function getRelatedBlogs(currentSlug: string, relatedSlugs?: string[] | null): Promise<Blog[]> {
+async function getRelatedBlogs(currentSlug: string, relatedSlugs?: string[] | null): Promise<ContinuePost[]> {
   // 존재하지 않거나 미발행인 slug 는 조용히 빠진다 — 관리자 폼(RelatedSuggestions)이 저장 전에 붉게 표시한다.
   // 중복 slug 는 같은 글을 두 번 렌더하고 React key 도 겹친다 — 먼저 유일하게 만든 뒤 자른다.
   const wanted = [...new Set((relatedSlugs ?? []).filter((sl) => typeof sl === 'string' && sl && sl !== currentSlug))].slice(0, 3);
@@ -91,7 +165,7 @@ async function getRelatedBlogs(currentSlug: string, relatedSlugs?: string[] | nu
   // DB 는 순서를 보장하지 않는다 — 편집자가 적은 순서로 되돌린다.
   return wanted
     .map((sl) => (data ?? []).find((b) => b.slug === sl))
-    .filter((b): b is NonNullable<typeof b> => Boolean(b)) as Blog[];
+    .filter((b): b is NonNullable<typeof b> => Boolean(b)) as ContinuePost[];
 }
 
 async function getBlog(slug: string): Promise<Blog | null> {
@@ -181,9 +255,11 @@ export default async function BlogDetailPage(
 
   const isLetter = Boolean(blog.letter_to);
   const adminDb = createPublicAdminClient();
-  const [relatedBlogs, adjacent, latestNewsletterRes, settings] = await Promise.all([
+  const [relatedBlogs, adjacent, drawerNext, drawerLatest, latestNewsletterRes, settings] = await Promise.all([
     getRelatedBlogs(blog.slug, blog.related_slugs),
     getAdjacentBlogs(blog),
+    getDrawerNext(blog),
+    getDrawerLatest(blog.category),
     adminDb
       .from('newsletters')
       .select('subject, issue_number')
@@ -195,6 +271,24 @@ export default async function BlogDetailPage(
   ]);
   const latestNewsletter = latestNewsletterRes.data as { subject: string; issue_number: string } | null;
   const ctaCopyB = settings.newsletter_cta_copy_b || 'Be the first to receive our next letter.';
+  const drawerPicks = pickDrawerThree(blog.slug, drawerNext.post?.slug ?? null, relatedBlogs, drawerLatest);
+
+  // StoryPress 카드 — 협찬 글에는 붙이지 않는다. Little 15 Mins 는 본문 바로 뒤(이어 읽기 위),
+  // Home Learning 은 이어 읽기·구독 바로 뒤(학교 안내 글이 많아 다음 안내 글이 먼저다). 2026-11-09 합의 Q5.
+  // 카드 안 문구·UTM 은 계획서 1단계 몫 — 여기서는 위치만 정한다.
+  const showStoryPress = !blog.is_sponsored && isStoryPressCardCategory(blog.category);
+  const storyPressFirst = showStoryPress && blog.category === 'Little 15 Mins';
+  const storyPressCard = showStoryPress ? (
+    <div className="blog-storypress-slot">
+      <StoryPressPostCard
+        title={settings.storypress_title || 'StoryPress'}
+        intro={settings.pillar_storypress_intro || ''}
+        ctaUrl={settings.storypress_cta_url || ''}
+        ctaText={settings.storypress_cta_text || ''}
+        category={blog.category}
+      />
+    </div>
+  ) : null;
 
   const isHtml = blog.content.includes('<') && blog.content.includes('>');
   const plainText = stripHtml(blog.content);
@@ -532,7 +626,18 @@ export default async function BlogDetailPage(
               )}
             </div>
 
-            {/* ── 구독 CTA — 글당 딱 하나, 본문이 끝난 바로 뒤(한국어 요약 앞, 요약이 없으면 저자 박스 앞).
+            {/* ── 글 끝 묶음(2026-11-09, 계획서 §4 3단계 A안): [StoryPress(Little 15 Mins)] → 이어 읽기 → 구독 한 줄.
+                검색으로 온 사람의 착지점은 글이고, 본문 끝이 그 사람이 실제로 닿는 마지막 자리다. ── */}
+            {storyPressFirst && storyPressCard}
+
+            <ContinueReading
+              category={blog.category}
+              next={drawerNext.post}
+              nextIsEarlier={drawerNext.isEarlier}
+              picks={drawerPicks}
+            />
+
+            {/* ── 구독 CTA — 글당 딱 하나, 이어 읽기 바로 뒤(한국어 요약 앞, 요약이 없으면 저자 박스 앞).
                 2026-10-13 PeNnY 지시로 본문 중간 삽입(W6-C 결정 ②)을 폐기했다 — 읽는 흐름을 끊었다.
                 예전의 '중간에 못 넣은 글은 댓글 아래' 갈래도 없앴다. 댓글 아래로는 절대 내리지 않는다. ── */}
             <div className="blog-subscribe-slot">
@@ -543,6 +648,8 @@ export default async function BlogDetailPage(
               )}
               <NewsletterCTA variant="inline-thin" copy={ctaCopyB} location="blog_detail" buttonText="Subscribe →" />
             </div>
+
+            {!storyPressFirst && storyPressCard}
 
             {/* ── 한국어 요약 (D1: 영어 정본 + 한국어 요약 블록) ──
                 평문이라 dangerouslySetInnerHTML 을 쓰지 않는다. lang 을 바꿔 크롤러에 언어를 알린다. */}
@@ -660,98 +767,35 @@ export default async function BlogDetailPage(
               <CommentSection blogId={blog.id} />
             </div>
 
-            {/* 이전·다음 — Next Story 카드와 합친 한 블록(2026-09-11 W6-C 결정 ①). 사진은 Next Story 에서,
-                양방향 링크는 이전/다음에서 — 크롤러가 아카이브 전체를 앞뒤로 걸어갈 수 있다. */}
+            {/* 아카이브 전체 날짜순 이전·다음 — 사진을 뺀 글자 한 줄(2026-11-09 합의 Q4). 독자의 "다음 글"은 위 이어 읽기가
+                맡고, 이 줄은 서랍을 넘어 아카이브 전체를 앞뒤로 잇는 크롤러 길로 남긴다. 꼬리표를 Older/Newer 로 바꿔
+                이어 읽기의 "Next in …"(같은 서랍)과 헷갈리지 않게 했다. */}
             {(adjacent.prev || adjacent.next) && (
-              <nav aria-label="Previous and next posts" className="adjacent-nav">
-                {adjacent.prev ? <AdjacentCard post={adjacent.prev} direction="prev" /> : <div />}
-                {adjacent.next ? <AdjacentCard post={adjacent.next} direction="next" /> : <div />}
+              <nav aria-label="Older and newer stories" className="adjacent-nav">
+                {adjacent.prev ? <AdjacentLink post={adjacent.prev} direction="prev" /> : <div />}
+                {adjacent.next ? <AdjacentLink post={adjacent.next} direction="next" /> : <div />}
               </nav>
-            )}
-
-            {/* 협찬 글에는 우리 제품 카드를 붙이지 않는다. */}
-            {!blog.is_sponsored && isStoryPressCardCategory(blog.category) && (
-              <StoryPressPostCard
-                title={settings.storypress_title || 'StoryPress'}
-                intro={settings.pillar_storypress_intro || ''}
-                ctaUrl={settings.storypress_cta_url || ''}
-                ctaText={settings.storypress_cta_text || ''}
-                category={blog.category}
-              />
             )}
           </article>
         </div>
-
-        {/* Related Posts */}
-        {relatedBlogs.length > 0 && (
-          <section style={{
-            padding: 'clamp(64px, 8vw, 96px) clamp(20px, 4vw, 32px)',
-            background: 'var(--bg-surface)',
-          }}>
-            <div style={{ maxWidth: 1320, margin: '0 auto' }}>
-              <div style={{ marginBottom: 48 }}>
-                <p className="font-black uppercase" style={{
-                  fontSize: 10,
-                  letterSpacing: 5,
-                  color: 'var(--text-tertiary)',
-                  marginBottom: 12,
-                }}>
-                  Continue Reading
-                </p>
-                <h2 className="font-display font-black" style={{
-                  fontSize: 'clamp(32px, 5vw, 48px)',
-                  letterSpacing: '-2px',
-                  lineHeight: 1,
-                  fontStyle: 'italic',
-                  color: 'var(--text)',
-                }}>
-                  You Might Also Like
-                </h2>
-              </div>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
-                gap: 24,
-              }}>
-                {relatedBlogs.map((related, i) => (
-                  <RelatedCard key={related.id} blog={related} position={i + 1} />
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
       </div>
     </>
   );
 }
 
-/** 이전·다음 사진 카드. 사진은 장식이라 alt="" — 제목이 링크 이름이다(같은 말을 두 번 읽지 않게). */
-function AdjacentCard({ post, direction }: { post: AdjacentPost; direction: 'prev' | 'next' }) {
+/** 아카이브 이전·다음 글자 링크. prev = 더 오래된 글, next = 더 새 글(getAdjacentBlogs 의 date 순). */
+function AdjacentLink({ post, direction }: { post: AdjacentPost; direction: 'prev' | 'next' }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
       className={`adjacent-card adjacent-card--${direction}`}
       data-track="next_read_click"
+      data-track-location="archive_line"
       data-track-direction={direction}
       data-track-slug={post.slug}
     >
-      {post.image_url && (
-        <span className="adjacent-card-image">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={nextImageUrl(post.image_url, 640)}
-            srcSet={nextImageSrcSet(post.image_url, [384, 640]) || undefined}
-            sizes="(max-width: 640px) 100vw, 340px"
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
-        </span>
-      )}
-      <span className="adjacent-card-label">{direction === 'prev' ? '← Previous' : 'Next →'}</span>
+      <span className="adjacent-card-label">{direction === 'prev' ? '← Older story' : 'Newer story →'}</span>
       <span className="adjacent-card-title">{post.title}</span>
-      <time className="adjacent-card-date">{formatDate(post.date)}</time>
     </Link>
   );
 }
