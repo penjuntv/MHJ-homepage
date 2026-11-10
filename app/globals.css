@@ -1723,6 +1723,19 @@ textarea::placeholder {
   color: var(--text-secondary);
   margin: 0;
 }
+/* 머리 문장(h1)만 — 가족 소개 한 줄. 12px 대문자 꼬리표는 첫 화면에서 가장 작은 글자였고(태블릿 2줄·모바일 3줄),
+   크게 키운 시안(32px·2줄)은 과했다(PeNnY 2026-11-10). 중간안: 1440·768 한 줄, 390 두 줄.
+   최신 글 제목(Playfair 이탤릭 30px·900)보다 작고 가볍게 둔다. 구역 제목(h2)은 꼬리표 그대로. */
+h1.home-label {
+  font-family: 'Playfair Display', 'Noto Sans KR', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0;
+  line-height: 1.4;
+  text-transform: none;
+  color: var(--text);
+}
 
 /* 카드 공통 카테고리 줄 */
 .home-card-cat {
@@ -1801,7 +1814,8 @@ textarea::placeholder {
   color: var(--text);
   margin: 4px 0 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  /* 2 → 3줄: 390·768 에서 "Oddly Weary, Awfull…" 처럼 단어 중간이 잘렸다(2026-11-10) */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1834,8 +1848,13 @@ textarea::placeholder {
   .home-feature-row { grid-template-columns: 1fr 1fr; gap: 24px; }
   .home-guides { grid-column: 1 / -1; }
 }
+/* 매거진·StoryPress 묶음 — 모바일·태블릿은 상자가 그리드 칸에 그대로 들어가고(contents),
+   데스크톱은 한 열로 쌓여 가이드 열 높이를 나눠 갖는다(2026-11-10: 칸마다 늘어나 빈 공간 약 180px). */
+.home-feature-side { display: contents; }
 @media (min-width: 1024px) {
-  .home-feature-row { grid-template-columns: 1.5fr 1fr 1fr; gap: 32px; align-items: stretch; }
+  .home-feature-row { grid-template-columns: 1.5fr 1fr; gap: 40px; align-items: stretch; }
+  .home-feature-side { display: flex; flex-direction: column; gap: 24px; }
+  .home-feature-side > .home-box { flex: 1 1 auto; }
 }
 .home-guides-lede {
   font-size: 14px;
@@ -1871,7 +1890,8 @@ textarea::placeholder {
   color: var(--text);
   margin: 4px 0 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  /* 2 → 3줄: 390 에서 "[Edu] How To Read a School Report: Mid-year and End-…" 가 잘렸다(2026-11-10) */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

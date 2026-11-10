@@ -283,6 +283,9 @@ export default async function LandingPage() {
               </div>
             )}
 
+            {/* 매거진·StoryPress 를 한 열로 쌓는다(데스크톱) — 각각 가이드 열 높이로 늘어나 상자 안에
+                약 180px 빈 공간이 생겼다(2026-11-10 설계서). 모바일·태블릿은 display: contents 로 지금 배치 그대로. */}
+            <div className="home-feature-side">
             {latestMag && (
               <Link href="/magazine" className="home-box home-box-magazine" data-track="home_magazine_click">
                 <span className="home-box-label">From the Magazine</span>
@@ -320,6 +323,7 @@ export default async function LandingPage() {
               )}
               <span className="home-box-cta">See how it works <ArrowRight size={13} aria-hidden /></span>
             </Link>
+            </div>
           </div>
         </section>
 
