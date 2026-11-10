@@ -452,16 +452,16 @@ export default async function BlogDetailPage(
             <p className="blog-dateline font-display">{blog.category}</p>
           )}
 
-          {/* 1) 대형 제목 */}
+          {/* 1) 대형 제목 — 원문 대소문자 그대로(2026-11-10 설계서: 대문자·자간 -2px·줄 간격 0.9 는 390 에서 단어가 붙었다) */}
           <h1
             className="font-display"
             style={{
               fontSize: 'clamp(32px, 5vw, 48px)',
               fontWeight: 900,
-              letterSpacing: '-2px',
-              lineHeight: 0.9,
-              textTransform: 'uppercase',
-              marginBottom: 8,
+              letterSpacing: '-0.01em',
+              lineHeight: 1.08,
+              marginBottom: 20,
+              textWrap: 'balance',
               wordBreak: 'keep-all',
               overflowWrap: 'break-word',
               hyphens: 'none',
@@ -471,55 +471,19 @@ export default async function BlogDetailPage(
             {blog.title}
           </h1>
 
-          {/* 1) 저자 · 날짜 · 카테고리 · AI Insight 버튼 한 줄 */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16,
-            flexWrap: 'wrap',
-            marginBottom: 32,
-          }}>
-            <span style={{
-              fontSize: 11,
-              fontWeight: 900,
-              color: 'var(--text)',
-              letterSpacing: 3,
-              textTransform: 'uppercase',
-            }}>
-              {blog.author}
-            </span>
-            <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
-              {publishedLabel}
-            </span>
-            <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
-              {minutes} min read
-            </span>
-            {updatedAt && (
-              <>
-                <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: 1 }}>
-                  Updated {updatedAt}
-                </span>
-              </>
-            )}
-            <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }} />
-            <Link
-              href={categoryHref(blog.category)}
-              style={{
-                fontSize: 11,
-                fontWeight: 900,
-                letterSpacing: 3,
-                textTransform: 'uppercase',
-                color: 'var(--text-secondary)',
-                textDecoration: 'none',
-              }}
-            >
-              {blog.category}
-            </Link>
-            {/* AI Insight 버튼 — 참고: REFERENCE_DESIGN DetailModal 위치 */}
-            <div style={{ marginLeft: 'auto' }}>
+          {/* 1) 저자 · 날짜 · 읽는 시간 (+ 갱신일 줄) · AI Insight.
+              카테고리는 빵부스러기·데이트라인에 이미 있어 메타 끝에서 뺐다(2026-11-10 설계서 — 한 화면에 3번).
+              가운뎃점은 항목 앞(::before)에 붙여, 줄이 꺾여도 앞줄 끝에 점만 홀로 남지 않게 한다. */}
+          <div className="post-meta-row">
+            <div>
+              <p className="post-meta">
+                <span className="post-meta-author">{blog.author}</span>
+                <span>{publishedLabel}</span>
+                <span>{minutes} min read</span>
+              </p>
+              {updatedAt && <p className="post-meta post-meta-updated">Updated {updatedAt}</p>}
+            </div>
+            <div className="post-meta-insight">
               <AiInsight title={blog.title} content={plainText} blogId={blog.id} />
             </div>
           </div>
