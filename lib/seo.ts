@@ -64,6 +64,8 @@ export const ORG_SAME_AS = [
 export const ORG_LOGO = { '@type': 'ImageObject', url: `${SITE_URL}/icon-192.png`, width: 192, height: 192 };
 const ORG_ADDRESS = { '@type': 'PostalAddress', addressLocality: 'Mairangi Bay', addressRegion: 'Auckland', addressCountry: 'NZ' };
 export const YUSSI_IMAGE_URL = 'https://vpayqdatpqajsmalpfmq.supabase.co/storage/v1/object/public/images/family/yussi_profile.png';
+/** 위 파일의 실제 크기 800×1100(2026-11-10 sharp 실측) — About 이 자르지 않고 이 비율로 그린다. 사진을 바꾸면 같이 바꿀 것. */
+export const YUSSI_IMAGE_RATIO = '800 / 1100';
 
 /**
  * 저자 레지스트리 — 저자 박스(components/AuthorBox.tsx)와 Person 노드·@id 가 전부 여기서 나온다.

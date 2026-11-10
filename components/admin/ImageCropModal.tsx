@@ -11,6 +11,12 @@ interface ImageCropModalProps {
   onSkip: (originalFile: File) => void;
   onCancel: () => void;
   defaultAspect?: number;
+  /** 비율 버튼 목록 — 없으면 아래 ASPECT_OPTIONS(블로그·매거진·뉴스레터 기존 값) */
+  aspectOptions?: { label: string; value: number | undefined }[];
+  /** false 면 "원본 그대로" 버튼을 숨긴다 — 비율을 꼭 맞춰야 하는 자리(About 세 딸 3:4) */
+  allowSkip?: boolean;
+  /** 비율 버튼 위 안내 한 줄 */
+  note?: string;
 }
 
 const ASPECT_OPTIONS: { label: string; value: number | undefined }[] = [
@@ -63,7 +69,11 @@ export default function ImageCropModal({
   onSkip,
   onCancel,
   defaultAspect,
+  aspectOptions,
+  allowSkip = true,
+  note,
 }: ImageCropModalProps) {
+  const options = aspectOptions ?? ASPECT_OPTIONS;
   const [imgSrc, setImgSrc] = useState('');
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [crop, setCrop] = useState<Crop>();
@@ -207,16 +217,21 @@ export default function ImageCropModal({
           )}
         </div>
 
+        {note && (
+          <p style={{ margin: 0, padding: '10px 20px 0', fontSize: 12, color: '#475569', lineHeight: 1.5, borderTop: '1px solid #F1F5F9' }}>
+            {note}
+          </p>
+        )}
         {/* Aspect buttons */}
         <div style={{
-          display: 'flex', gap: 8, padding: '12px 20px',
-          borderTop: '1px solid #F1F5F9',
+          display: 'flex', gap: 8, padding: '12px 20px', flexWrap: 'wrap',
+          borderTop: note ? 'none' : '1px solid #F1F5F9',
           alignItems: 'center',
         }}>
           <span style={{ fontSize: 12, color: '#64748B', fontWeight: 600, marginRight: 4 }}>
             비율:
           </span>
-          {ASPECT_OPTIONS.map((opt) => {
+          {options.map((opt) => {
             const isActive = aspect === opt.value;
             return (
               <button
@@ -241,16 +256,18 @@ export default function ImageCropModal({
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '12px 20px 16px', borderTop: '1px solid #F1F5F9',
         }}>
-          <button
-            onClick={() => onSkip(imageFile)}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontSize: 13, fontWeight: 600, color: '#94A3B8',
-              padding: '8px 0',
-            }}
-          >
-            원본 그대로
-          </button>
+          {allowSkip ? (
+            <button
+              onClick={() => onSkip(imageFile)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 13, fontWeight: 600, color: '#64748B',
+                padding: '8px 0',
+              }}
+            >
+              원본 그대로
+            </button>
+          ) : <span />}
           <button
             onClick={handleApply}
             disabled={!completedCrop || applying}

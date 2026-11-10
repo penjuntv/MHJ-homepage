@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase-browser';
 import { DEFAULT_SETTINGS } from '@/lib/site-settings';
 import { ArrowLeft, Save, Loader2, Upload, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
+import ImageCropModal from '@/components/admin/ImageCropModal';
+import { measureImage, ratioKey, PHOTO_ASPECTS } from '@/lib/image-ratio';
 
 /* ── 페이지별 편집 가능 섹션 설정 ── */
 type FieldType = 'text' | 'textarea' | 'image' | 'url';
@@ -40,7 +42,7 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
           { key: 'about_who_title', label: '섹션 제목', type: 'text', hint: '예: The Mairangi Family' },
           { key: 'about_who_description_en', label: '영문 소개', type: 'textarea', hint: '첫 번째 문단 (영문)' },
           { key: 'about_who_description_kr', label: '한글 소개', type: 'textarea', hint: '두 번째 문단 (한글)' },
-          { key: 'about_who_image_url', label: 'WHO WE ARE 대형 사진', type: 'image', hint: '좌측 4:5 비율 가족 사진' },
+          { key: 'about_who_image_url', label: 'WHO WE ARE 대형 사진', type: 'image', hint: '좌측 가족 사진 — 올릴 때 확정한 비율 그대로 보입니다' },
         ],
       },
       {
@@ -48,7 +50,7 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
         fields: [
           { key: 'about_vision_title', label: '비전 대형 타이틀', type: 'text', hint: '예: START TO GLOW' },
           { key: 'about_vision_description', label: '비전 설명 텍스트', type: 'textarea' },
-          { key: 'about_image_url', label: '비전 섹션 사진', type: 'image', hint: '우측 3:4 비율 이미지' },
+          { key: 'about_image_url', label: '비전 섹션 사진', type: 'image', hint: '우측 사진 — 올릴 때 확정한 비율 그대로 보입니다' },
         ],
       },
     ],
@@ -110,22 +112,29 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
   },
 };
 
-/* ── 이미지 업로드 버튼 ── */
+/* ── 이미지 업로드 버튼 ──
+   2026-11-10: 파일을 고르면 먼저 크롭 창(원본 그대로 · 3:4 · 4:5 · 4:3 · 1:1 · 16:10 · 자유)을 띄우고, 확정한 사진의
+   가로·세로를 재서 `<키>_ratio` 에 함께 넣는다(저장 버튼 때 같이 기록). 공개 페이지는 이 비율 그대로 사진 틀을 그린다
+   — 화면이 사진을 자르지 않는다(lib/image-ratio.ts). */
 function ImageField({ fieldKey, label, value, hint, onChange }: {
   fieldKey: string; label: string; value: string; hint?: string;
   onChange: (key: string, val: string) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [pending, setPending] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  async function upload(file: File) {
+  async function upload(blob: Blob, fileName: string) {
+    setPending(null);
     setUploading(true);
-    const ext = file.name.split('.').pop();
+    const ext = fileName.split('.').pop();
     const path = `site/${fieldKey}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    const size = await measureImage(blob);
+    const { error } = await supabase.storage.from('images').upload(path, blob, { upsert: true });
     if (error) { toast.error('업로드 실패: ' + error.message); setUploading(false); return; }
     const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
     onChange(fieldKey, publicUrl);
+    onChange(ratioKey(fieldKey), size ? `${size.width}/${size.height}` : '');
     setUploading(false);
   }
 
@@ -143,7 +152,8 @@ function ImageField({ fieldKey, label, value, hint, onChange }: {
         </div>
       )}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <input className="admin-input" value={value} onChange={e => onChange(fieldKey, e.target.value)} placeholder="이미지 URL" style={{ ...inputStyle, flex: 1 }} />
+        {/* URL 을 손으로 바꾸면 비율을 모르므로 비운다 — 공개 페이지는 예전 틀(4:5)로 돌아간다 */}
+        <input className="admin-input" value={value} onChange={e => { onChange(fieldKey, e.target.value); onChange(ratioKey(fieldKey), ''); }} placeholder="이미지 URL" style={{ ...inputStyle, flex: 1 }} />
         <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '12px 16px', borderRadius: 12, border: '1px solid #e2e8f0',
@@ -155,8 +165,18 @@ function ImageField({ fieldKey, label, value, hint, onChange }: {
         </button>
       </div>
       <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
-        onChange={e => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ''; }} />
+        onChange={e => { const f = e.target.files?.[0]; if (f) setPending(f); e.target.value = ''; }} />
       {hint && <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>{hint}</p>}
+      {pending && (
+        <ImageCropModal
+          imageFile={pending}
+          aspectOptions={PHOTO_ASPECTS}
+          note="공개 페이지는 여기서 확정한 비율 그대로 보여 줍니다(화면이 다시 자르지 않음). 그대로 쓰려면 ‘원본 그대로’."
+          onCropComplete={(blob, name) => upload(blob, name)}
+          onSkip={(file) => upload(file, file.name)}
+          onCancel={() => setPending(null)}
+        />
+      )}
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
     </div>
   );
@@ -177,7 +197,8 @@ export default function PageEditorPage() {
     if (!config) return;
     async function load() {
       setLoading(true);
-      const allKeys = config.sections.flatMap(s => s.fields.map(f => f.key));
+      // 이미지 칸은 비율 키(`<키>_ratio`)도 함께 읽고 저장한다
+      const allKeys = config.sections.flatMap(s => s.fields.flatMap(f => f.type === 'image' ? [f.key, ratioKey(f.key)] : [f.key]));
       const { data } = await supabase.from('site_settings').select('key, value').in('key', allKeys);
       const merged: Record<string, string> = {};
       allKeys.forEach(k => { merged[k] = DEFAULT_SETTINGS[k] ?? ''; });
