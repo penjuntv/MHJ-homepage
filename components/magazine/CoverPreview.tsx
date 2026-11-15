@@ -18,6 +18,8 @@ interface CoverPreviewProps {
   sub_color?: string;
   cover_filter?: string;
   issue_number?: string | number;
+  /** 첫 화면(LCP) 표지일 때만 — 첫 사진을 바로·우선 받는다. 기본 false(서가·관리·PNG 렌더는 그대로). */
+  priority?: boolean;
 }
 
 export default function CoverPreview({
@@ -34,6 +36,7 @@ export default function CoverPreview({
   sub_color = '#8B7D6B',
   cover_filter = 'none',
   issue_number,
+  priority = false,
 }: CoverPreviewProps) {
   const allImages = cover_images.filter(Boolean).length > 0
     ? cover_images.filter(Boolean)
@@ -131,7 +134,8 @@ export default function CoverPreview({
             srcSet={nextImageSrcSet(src, [256, 384, 640]) || undefined}
             sizes="420px"
             alt={i === 0 ? `${title} 표지` : ''}
-            loading="lazy"
+            loading={priority && i === 0 ? 'eager' : 'lazy'}
+            fetchPriority={priority && i === 0 ? 'high' : undefined}
             decoding="async"
             onError={(e) => {
               const img = e.currentTarget;

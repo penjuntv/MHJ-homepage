@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Magazine, Article } from '@/lib/types';
 import { ChevronLeft } from 'lucide-react';
 import PageThumbnail from './PageThumbnail';
+import DeferUntilNear from './DeferUntilNear';
 
 interface Props {
   magazine: Magazine;
@@ -263,7 +264,7 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
               style={{ background: magazine.bg_color || '#FAF8F5' }}
             >
               {/* 완성본 표지 레이아웃 (MHJ 로고 + 타이틀 + 발행월) */}
-              <PageThumbnail pageType="cover" magazine={magazine} />
+              <PageThumbnail pageType="cover" magazine={magazine} priority />
             </div>
           </div>
 
@@ -301,7 +302,9 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
         {/* 내지 그리드
             썸네일(.mid-thumb)은 지면을 통째로 축소 렌더한 것이라 템플릿의 <h1>·본문 전문·표지 캐러셀 점
             <button> 이 카드 링크 안에 들어온다. 그대로 두면 링크 이름이 기사 전문이 되고 제목 순서가
-            깨진다(axe heading-order, 2026-09-11). inert 로 보조기기·Tab 에서 빼고, 클릭은 감싼 링크가 받는다. */}
+            깨진다(axe heading-order, 2026-09-11). inert 로 보조기기·Tab 에서 빼고, 클릭은 감싼 링크가 받는다.
+            썸네일은 화면 근처에 와야 그린다(DeferUntilNear) — 첫 화면 밖 기사 사진이 표지와 대역폭을 다투지 않게.
+            위 히어로 표지는 첫 화면(LCP)이라 바로 그린다. */}
         {mainArticles.length > 0 && (
           <section style={{ marginTop: 'clamp(48px, 7vw, 80px)' }}>
             <h2 className="mid-section-label">
@@ -315,7 +318,9 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
                 className="mid-card"
               >
                 <div className="mid-thumb" inert>
-                  <PageThumbnail pageType="cover" magazine={magazine} />
+                  <DeferUntilNear>
+                    <PageThumbnail pageType="cover" magazine={magazine} />
+                  </DeferUntilNear>
                 </div>
                 <div className="mid-card-meta">
                   <p
@@ -335,7 +340,9 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
                 className="mid-card"
               >
                 <div className="mid-thumb" inert>
-                  <PageThumbnail pageType="toc" magazine={magazine} articles={mainArticles} />
+                  <DeferUntilNear>
+                    <PageThumbnail pageType="toc" magazine={magazine} articles={mainArticles} />
+                  </DeferUntilNear>
                 </div>
                 <div className="mid-card-meta">
                   <p
@@ -362,7 +369,9 @@ export default function MagazineIssueDetail({ magazine, articles, pageMap }: Pro
                     className="mid-card"
                   >
                     <div className="mid-thumb" inert>
-                      <PageThumbnail pageType="article" magazine={magazine} article={art} />
+                      <DeferUntilNear>
+                        <PageThumbnail pageType="article" magazine={magazine} article={art} />
+                      </DeferUntilNear>
                     </div>
                     <div className="mid-card-meta">
                       <p

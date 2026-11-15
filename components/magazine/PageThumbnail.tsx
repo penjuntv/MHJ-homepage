@@ -16,6 +16,7 @@ interface PageThumbnailProps {
   magazine: Magazine;
   article?: Article;          // pageType === 'article'
   articles?: Article[];       // pageType === 'toc' (목차 구성)
+  priority?: boolean;         // pageType === 'cover' 이고 첫 화면(LCP)일 때만
 }
 
 const NATIVE_W: Record<PageThumbnailType, number> = {
@@ -34,6 +35,7 @@ export default function PageThumbnail({
   magazine,
   article,
   articles,
+  priority = false,
 }: PageThumbnailProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.25);
@@ -130,6 +132,7 @@ export default function PageThumbnail({
             sub_color={magazine.sub_color ?? undefined}
             cover_filter={magazine.cover_filter ?? 'none'}
             issue_number={magazine.issue_number ?? ''}
+            priority={priority}
           />
         )}
 
