@@ -194,8 +194,9 @@ export default function InstagramFeed({ instagramUrl }: Props) {
     );
   }
 
-  if (!loaded || posts.length === 0) return null;
-
+  // 목록을 받기 전에도 같은 크기의 빈 칸으로 자리를 잡아 둔다. 예전엔 null 이었다가 목록이 오면 줄이 끼어들어,
+  // 바닥글이 첫 화면에 보이는 짧은 페이지(태블릿 서가 등)에서 바닥글을 밀어내 CLS 0.10 을 만들었다(2026-11-16 실측).
+  const placeholder = !loaded;
   const loopPosts = [...posts, ...posts, ...posts];
   const translateX = -STEP * currentIdx + dragDelta;
 
@@ -235,6 +236,13 @@ export default function InstagramFeed({ instagramUrl }: Props) {
           onTouchStart={(e) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY)}
           onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
         >
+          {placeholder && Array.from({ length: 8 }, (_, idx) => (
+            <div
+              key={`ph-${idx}`}
+              aria-hidden="true"
+              style={{ width: CARD_W, aspectRatio: '1 / 1', borderRadius: 12, background: 'var(--border)', flexShrink: 0 }}
+            />
+          ))}
           {loopPosts.map((post, idx) => (
             <FeedCard
               key={`${post.id}-${idx}`}
