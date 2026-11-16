@@ -32,6 +32,11 @@ export default function InstagramFeed({ instagramUrl }: Props) {
   const isHorizontalDrag = useRef<boolean | null>(null);
   const draggedRef = useRef(false);
   const trackRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  // 사진은 이 줄이 화면 가까이(200px) 올 때 받는다. 모든 공개 페이지 맨 아래에 붙는데, 짧은 페이지(서가 등)에선
+  // 브라우저의 lazy 여유 거리 안이라 첫 화면 사진과 회선을 나눠 쓰며 425KB 를 먼저 받고 있었다(2026-11-16 실측).
+  // 카드는 220px 정사각 고정이라 사진이 늦게 들어와도 자리는 그대로다.
+  const [near, setNear] = useState(false);
 
   const onHome = usePathname() === '/';
 
@@ -71,6 +76,18 @@ export default function InstagramFeed({ instagramUrl }: Props) {
       return () => cancelAnimationFrame(id);
     }
   }, [isTransitioning]);
+
+  /* ── 화면 가까이 왔는지 ── */
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (near || !el) return;
+    if (typeof IntersectionObserver === 'undefined') { setNear(true); return; }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { setNear(true); io.disconnect(); }
+    }, { rootMargin: '200px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [near, posts.length]);
 
   /* ── 4초 자동 스크롤 ── */
   useEffect(() => {
@@ -184,6 +201,7 @@ export default function InstagramFeed({ instagramUrl }: Props) {
 
   return (
     <section
+      ref={sectionRef}
       className="insta-section-bg"
       style={{ padding: 'clamp(40px, 7vw, 68px) 0', overflow: 'hidden' }}
       onMouseEnter={() => { isHoveredRef.current = true; }}
@@ -221,6 +239,7 @@ export default function InstagramFeed({ instagramUrl }: Props) {
             <FeedCard
               key={`${post.id}-${idx}`}
               mediaUrl={post.media_url}
+              showImage={near}
               instagramUrl={instagramUrl}
               draggedRef={draggedRef}
             />
@@ -250,10 +269,12 @@ export default function InstagramFeed({ instagramUrl }: Props) {
 /* ── FeedCard ── */
 function FeedCard({
   mediaUrl,
+  showImage,
   instagramUrl,
   draggedRef,
 }: {
   mediaUrl: string;
+  showImage: boolean;
   instagramUrl: string;
   draggedRef: React.MutableRefObject<boolean>;
 }) {
@@ -275,6 +296,7 @@ function FeedCard({
           aspectRatio: '1 / 1',
           borderRadius: 12,
           overflow: 'hidden',
+          background: 'var(--border)', /* 사진이 들어오기 전 빈 칸 자리 표시 */
           transform: hovered ? 'scale(1.03)' : 'scale(1)',
           transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s',
           boxShadow: hovered ? '0 16px 40px rgba(0,0,0,0.18)' : '0 2px 8px rgba(0,0,0,0.07)',
@@ -284,9 +306,10 @@ function FeedCard({
         {/* 카드는 CARD_W(220px) 정사각인데 원본은 800~1500px PNG 였다. 이 컴포넌트는
             (public) 레이아웃에 있어 **모든 공개 페이지**에 뜨고, 마퀴 루프 때문에
             같은 사진이 3벌 렌더된다. 2026-09 실측으로 페이지마다 약 20MB를 이것 하나가
-            차지하고 있었다. 표시 폭에 맞춰 받는다(레티나 고려해 2배까지).
-            eslint-disable-next-line @next/next/no-img-element */}
-        <img
+            차지하고 있었다. 표시 폭에 맞춰 받는다(레티나 고려해 2배까지). */}
+        {showImage && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
           src={nextImageUrl(mediaUrl, 256)}
           srcSet={nextImageSrcSet(mediaUrl, [256, 384, 640]) || undefined}
           sizes={`${CARD_W}px`}
@@ -300,7 +323,8 @@ function FeedCard({
           }}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           draggable={false}
-        />
+          />
+        )}
       </div>
     </a>
   );

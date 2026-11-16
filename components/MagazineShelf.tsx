@@ -40,7 +40,7 @@ export default function MagazineShelf({ magazines, magazineTitle, magazineHint }
             {/* 모바일: 3:4 카드 2열 그리드 폴백 */}
             <div className="ms-grid">
               {magazines.map((m, i) => (
-                <ShelfCard key={m.id} magazine={m} isLatest={i === 0} />
+                <ShelfCard key={m.id} magazine={m} isLatest={i === 0} aboveFold={i < 4} />
               ))}
             </div>
           </>
@@ -65,7 +65,8 @@ function FaceOutCover({ magazine }: { magazine: Magazine }) {
       aria-label={`Latest issue: ${magazine.title}, ${magazine.month_name} ${magazine.year}`}
     >
       <span className="shelf-faceout-badge">Latest</span>
-      <PageThumbnail pageType="cover" magazine={magazine} />
+      {/* 표지 사진 틀은 표지 폭의 0.886 — 선반 끝 표지 336px 일 때 296px(실측 2026-11-16) */}
+      <PageThumbnail pageType="cover" magazine={magazine} sizes="300px" fetchHigh />
     </Link>
   );
 }
@@ -102,13 +103,14 @@ function BookSpine({ magazine }: { magazine: Magazine }) {
 
       {/* Hover: 완성본 표지 (MHJ 로고 + 타이틀 + 발행월) */}
       <div className="shelf-book-cover">
-        <PageThumbnail pageType="cover" magazine={magazine} />
+        {/* 마우스를 올리면 책이 338px 로 펼쳐지고 사진은 298px 로 보인다(실측 2026-11-16) — 펼친 크기 기준 */}
+        <PageThumbnail pageType="cover" magazine={magazine} sizes="300px" />
       </div>
     </Link>
   );
 }
 
-function ShelfCard({ magazine, isLatest }: { magazine: Magazine; isLatest: boolean }) {
+function ShelfCard({ magazine, isLatest, aboveFold }: { magazine: Magazine; isLatest: boolean; aboveFold: boolean }) {
   return (
     <Link
       href={`/magazine/${magazine.id}`}
@@ -125,8 +127,10 @@ function ShelfCard({ magazine, isLatest }: { magazine: Magazine; isLatest: boole
         style={{ background: magazine.bg_color ?? '#FAF8F5' }}
       >
         {isLatest && <span className="ms-badge">Latest</span>}
-        {/* 완성본 표지 (MHJ 로고 + 타이틀 + 발행월) */}
-        <PageThumbnail pageType="cover" magazine={magazine} />
+        {/* 완성본 표지 (MHJ 로고 + 타이틀 + 발행월). 2열 카드 = (화면폭 − 여백 64) / 2, 사진 틀은 그 0.886
+            → 412px 화면에서 157px(실측). 768px 이상은 이 격자가 숨겨지고 lazy 라 받지 않는다.
+            첫 두 줄(4장)은 휴대폰 첫 화면이라 우선순위만 높인다 — LCP 가 이 표지들이 다 받아지는 시점이었다. */}
+        <PageThumbnail pageType="cover" magazine={magazine} sizes="calc((100vw - 64px) * 0.45)" fetchHigh={aboveFold} />
       </div>
       <div className="ms-meta">
         {/* 이 페이지의 h1 은 서가 제목이다 — 카드가 h3 면 h2 를 건너뛴다(axe heading-order). */}

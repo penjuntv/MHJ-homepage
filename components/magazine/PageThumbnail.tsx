@@ -17,6 +17,8 @@ interface PageThumbnailProps {
   article?: Article;          // pageType === 'article'
   articles?: Article[];       // pageType === 'toc' (목차 구성)
   priority?: boolean;         // pageType === 'cover' 이고 첫 화면(LCP)일 때만
+  sizes?: string;             // pageType === 'cover' — 표지 사진이 실제로 보이는 폭(서가처럼 작게 보이는 자리)
+  fetchHigh?: boolean;        // pageType === 'cover' — lazy 는 유지하고 우선순위만 높인다(CoverPreview 참고)
 }
 
 const NATIVE_W: Record<PageThumbnailType, number> = {
@@ -36,6 +38,8 @@ export default function PageThumbnail({
   article,
   articles,
   priority = false,
+  sizes,
+  fetchHigh = false,
 }: PageThumbnailProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.25);
@@ -133,6 +137,8 @@ export default function PageThumbnail({
             cover_filter={magazine.cover_filter ?? 'none'}
             issue_number={magazine.issue_number ?? ''}
             priority={priority}
+            sizes={sizes}
+            fetchHigh={fetchHigh}
           />
         )}
 

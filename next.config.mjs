@@ -106,7 +106,8 @@ const nextConfig = {
   images: {
     minimumCacheTTL: 2678400,
     formats: ['image/webp'],
-    deviceSizes: [640, 1080, 1920],
+    // 750: 휴대폰(폭 ~370px × 화면배율 1.75~2)이 640 을 살짝 넘으면 1080 으로 뛰던 것을 막는다(2026-11-16 홈 LCP 사진 100KB).
+    deviceSizes: [640, 750, 1080, 1920],
     imageSizes: [128, 256, 384],
     remotePatterns: [
       {
