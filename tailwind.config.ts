@@ -76,21 +76,24 @@ const config: Config = {
       },
 
       /* ─── 키프레임 애니메이션 ─── */
+      /* 시작 투명도는 0 이 아니라 0.01(눈에는 똑같다). Chrome 은 투명도 0 으로 그려진 것을 LCP 로 치지 않고,
+         효과가 끝나도 그 영역이 다시 그려질 때까지 기록을 미룬다 — 글 상세·홈의 첫 사진이 0.9초에 보이는데
+         LCP 는 글꼴 도착 후 재배치(2.7~2.9초)에야 잡혔다(2026-11-16 실측, 0.01 로 바꾸면 0.9초). 0 으로 되돌리지 말 것. */
       keyframes: {
         fadeIn: {
-          from: { opacity: "0" },
+          from: { opacity: "0.01" },
           to: { opacity: "1" },
         },
         slideUp: {
-          from: { opacity: "0", transform: "translateY(30px)" },
+          from: { opacity: "0.01", transform: "translateY(30px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
         slideRight: {
-          from: { opacity: "0", transform: "translateX(100%)" },
+          from: { opacity: "0.01", transform: "translateX(100%)" },
           to: { opacity: "1", transform: "translateX(0)" },
         },
         zoomIn: {
-          from: { opacity: "0", transform: "scale(0.95)" },
+          from: { opacity: "0.01", transform: "scale(0.95)" },
           to: { opacity: "1", transform: "scale(1)" },
         },
         spin: {
