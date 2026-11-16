@@ -20,6 +20,12 @@ interface CoverPreviewProps {
   issue_number?: string | number;
   /** 첫 화면(LCP) 표지일 때만 — 첫 사진을 바로·우선 받는다. 기본 false(서가·관리·PNG 렌더는 그대로). */
   priority?: boolean;
+  /** 사진의 실제 표시 폭(img sizes). 이 표지는 420px 로 그린 뒤 축소해 보이므로, 작게 보이는 자리(서가)는
+   *  호출부가 알려 줘야 큰 사진을 받지 않는다. 기본 '420px'(축소 없이 보이는 자리·관리·PNG 렌더 그대로). */
+  sizes?: string;
+  /** 첫 화면에 보일 수 있지만 숨겨질 수도 있는 자리(반응형으로 한쪽만 보이는 서가 격자) — loading 은 lazy 로 두어
+   *  숨겨진 쪽은 받지 않고, 보이는 쪽은 배치 직후 높은 우선순위로 받는다. */
+  fetchHigh?: boolean;
 }
 
 export default function CoverPreview({
@@ -37,6 +43,8 @@ export default function CoverPreview({
   cover_filter = 'none',
   issue_number,
   priority = false,
+  sizes = '420px',
+  fetchHigh = false,
 }: CoverPreviewProps) {
   const allImages = cover_images.filter(Boolean).length > 0
     ? cover_images.filter(Boolean)
@@ -132,10 +140,10 @@ export default function CoverPreview({
                원본이 실려 있었다(2026-09 실측: /magazine 이미지 36MB). 표시 폭에 맞춘다. */
             src={nextImageUrl(src, 384)}
             srcSet={nextImageSrcSet(src, [256, 384, 640]) || undefined}
-            sizes="420px"
+            sizes={sizes}
             alt={i === 0 ? `${title} 표지` : ''}
             loading={priority && i === 0 ? 'eager' : 'lazy'}
-            fetchPriority={priority && i === 0 ? 'high' : undefined}
+            fetchPriority={(priority || fetchHigh) && i === 0 ? 'high' : undefined}
             decoding="async"
             onError={(e) => {
               const img = e.currentTarget;

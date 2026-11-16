@@ -15,10 +15,10 @@
 
    ⚠ width 는 next.config.mjs 의 imageSizes/deviceSizes 에 있는 값만 쓸 것.
      목록에 없는 값을 주면 최적화 엔드포인트가 400 을 돌려준다.
-     현재 허용: 128 · 256 · 384 (imageSizes) / 640 · 1080 · 1920 (deviceSizes) */
+     현재 허용: 128 · 256 · 384 (imageSizes) / 640 · 750 · 1080 · 1920 (deviceSizes) */
 
 /** next.config 에 선언된 허용 폭. 이 목록 밖의 값은 /_next/image 가 거부한다. */
-export const NEXT_IMAGE_WIDTHS = [128, 256, 384, 640, 1080, 1920] as const;
+export const NEXT_IMAGE_WIDTHS = [128, 256, 384, 640, 750, 1080, 1920] as const;
 
 /** 최적화 대상이 아닌 src(데이터 URI·상대경로·빈 값)는 그대로 통과시킨다. */
 function isRemote(src: string | null | undefined): src is string {
