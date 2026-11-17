@@ -94,6 +94,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: node scripts/qa/test-google-fonts.mjs
 
+      - name: 홈 경로 판정 테스트 (Vercel ISR 재생성 때 서버 경로 /index — 2026-11-18 홈 #418)
+        if: ${{ !cancelled() }}
+        run: node scripts/qa/test-home-path.mjs
+
       - name: 유입원 판정 테스트 (referrer + UTM — 배포 링크가 social·email 로 잡히는지)
         if: ${{ !cancelled() }}
         run: node --experimental-strip-types scripts/qa/test-traffic-source.mjs
