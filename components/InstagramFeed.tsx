@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { Instagram } from 'lucide-react';
 import { nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
+import { isHomePath } from '@/lib/home-path.mjs';
 
 interface GalleryPost {
   id: string;
@@ -38,7 +39,8 @@ export default function InstagramFeed({ instagramUrl }: Props) {
   // 카드는 220px 정사각 고정이라 사진이 늦게 들어와도 자리는 그대로다.
   const [near, setNear] = useState(false);
 
-  const onHome = usePathname() === '/';
+  // `=== '/'` 금지 — Vercel 이 홈을 ISR 로 다시 만들 때 서버 경로가 '/index' 라 서버만 이 줄을 그려 #418 이 났다(lib/home-path.mjs).
+  const onHome = isHomePath(usePathname());
 
   /* ── API fetch ── */
   // 레이아웃이 페이지 이동 사이에도 살아 있으므로, 홈에서 시작해 다른 페이지로 옮겨 가면 그때 한 번 불러온다.
