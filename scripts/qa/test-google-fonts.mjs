@@ -89,7 +89,10 @@ check('preconnect 만 있으면 링크 0', fontLinks('<link rel="preconnect" hre
   check('globals.css 에 Google Fonts @import 없음 (빌드 합치기 순서에 따라 무시된다)', urlsOf(globals).filter((u) => u.includes('fonts.googleapis.com')), []);
   const layout = src('app/layout.tsx');
   const constUrl = (/GOOGLE_FONTS_CSS\s*=\s*['"]([^'"]+)['"]/.exec(layout) || [])[1] || '';
-  check('layout.tsx <head> 가 GOOGLE_FONTS_CSS 를 stylesheet 로 건다', /<link\s+rel="stylesheet"\s+href=\{GOOGLE_FONTS_CSS\}/.test(layout), true);
+  check('layout.tsx <head> 가 GOOGLE_FONTS_CSS 를 stylesheet 로 건다', /<link\s+id="gf-css"\s+rel="stylesheet"\s+href=\{GOOGLE_FONTS_CSS\}/.test(layout), true);
+  // 2026-11-18 비차단 전환: media="print" 로 받고 스크립트가 all 로 바꾼다. 스크립트가 빠지면 글꼴이 영영 적용되지 않는다.
+  check('비차단 글꼴 CSS — print 로 받고 all 로 바꾸는 스크립트가 같이 있다',
+    /href=\{GOOGLE_FONTS_CSS\}\s+media="print"/.test(layout) && /getElementById\('gf-css'\)/.test(layout) && /l\.media='all'/.test(layout) && /__html:\s*fontCssScript/.test(layout), true);
   check('GOOGLE_FONTS_CSS 가 두 서체 + display=swap', coversFamilies([constUrl]) && constUrl.includes('display=swap'), true);
 }
 

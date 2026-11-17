@@ -84,6 +84,16 @@ const themeScript = `
 })();
 `;
 
+// Google 글꼴 CSS 를 비차단으로 — 위 <link media="print"> 바로 뒤에서 실행된다. 이미 받았으면(캐시) 즉시, 아니면 load 때 all.
+const fontCssScript = `
+(function(){
+  var l=document.getElementById('gf-css');
+  if(!l) return;
+  var on=function(){l.media='all';};
+  if(l.sheet) on(); else l.addEventListener('load',on);
+})();
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang={SITE_LANG} className={inter.variable} suppressHydrationWarning>
@@ -94,7 +104,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* 본문 Noto Sans KR · 제목 Playfair Display. globals.css 의 @import 로 두면 빌드가 next/font Inter 의 @font-face 를
             그 앞에 합칠 때 브라우저가 @import 를 통째로 무시한다(2026-10-17 #148 부터 라이브 전부 시스템 글꼴).
             CSS 합치는 순서에 기대지 않도록 <head> 에서 직접 건다 — scripts/qa/test-google-fonts.mjs 가 지킨다. */}
-        <link rel="stylesheet" href={GOOGLE_FONTS_CSS} />
+        {/* 첫 그리기를 막지 않는다(2026-11-18): media="print" 로 받아 두고 도착하면 바로 all 로 바꾼다.
+            렌더링 차단이면 첫 그리기가 다른 서버의 이 CSS 를 기다리고, 그 순간 글꼴 파일이 한꺼번에 출발해
+            PageSpeed 모바일이 사진 LCP 앞에 글꼴을 전부 넣어 계산했다(글 상세 7초, docs/measurements/web-vitals-2026-11-16.md §6).
+            대가: 느린 망에서 첫 순간 대체 글꼴로 보였다가 바뀐다(display=swap 이라 원래도 글꼴 파일이 늦으면 같다). */}
+        <link id="gf-css" rel="stylesheet" href={GOOGLE_FONTS_CSS} media="print" suppressHydrationWarning />
+        <script dangerouslySetInnerHTML={{ __html: fontCssScript }} />
+        <noscript>
+          <link rel="stylesheet" href={GOOGLE_FONTS_CSS} />
+        </noscript>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
         <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)" />
