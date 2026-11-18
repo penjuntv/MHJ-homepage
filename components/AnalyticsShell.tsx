@@ -1,4 +1,4 @@
-import { GoogleAnalytics } from '@next/third-parties/google';
+import Script from 'next/script';
 import OutboundLinkTracker from '@/components/OutboundLinkTracker';
 import AnalyticsBeacon from '@/components/AnalyticsBeacon';
 import { GA_ID } from '@/lib/analytics';
@@ -17,7 +17,18 @@ export default function AnalyticsShell({ notFound = false }: {
     <PublicPathGate>
       <OutboundLinkTracker />
       <AnalyticsBeacon pageMeta={notFound ? { status: 404 } : undefined} />
-      <GoogleAnalytics gaId={GA_ID} />
+      {/* GA — gtag.js(179KB)는 페이지 로드가 끝난 뒤(lazyOnload) 받는다. @next/third-parties 의 <GoogleAnalytics> 는
+          afterInteractive 라 HTML 머리에 preload 가 들어가 CSS·대표 사진과 대역폭을 나눠 먹었다(2026-11-19, PageSpeed 사진 LCP).
+          gtag() 큐는 먼저 만들어 두므로 그사이 trackEvent 도 dataLayer 에 쌓였다가 gtag.js 가 오면 나간다.
+          되돌리지 말 것 — scripts/qa/test-ga-lazy.mjs */}
+      <Script
+        id="_next-ga-init"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `window.dataLayer=window.dataLayer||[];function gtag(){window.dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`,
+        }}
+      />
+      <Script id="_next-ga" src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="lazyOnload" />
     </PublicPathGate>
   );
 }
