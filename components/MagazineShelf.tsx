@@ -4,6 +4,34 @@ import Link from 'next/link';
 import type { Magazine } from '@/lib/types';
 import { trackEvent } from '@/lib/analytics';
 import PageThumbnail from '@/components/magazine/PageThumbnail';
+import { COVER_SRCSET_WIDTHS, COVER_SRC_WIDTH, firstCoverImage } from '@/components/magazine/CoverPreview';
+import { nextImageUrl, nextImageSrcSet } from '@/lib/image-url';
+
+// 표지 사진 표시 폭 — 아래 카드·선반 끝 표지와 미리 받기(preload)가 같은 값을 써야 같은 파일을 고른다.
+const GRID_COVER_SIZES = 'calc((100vw - 64px) * 0.45)';
+const FACEOUT_COVER_SIZES = '300px';
+
+/**
+ * 첫 화면 표지(LCP) 미리 받기. 서가는 휴대폰 격자와 데스크톱 책장을 둘 다 그리고 CSS 로 한쪽을 숨기므로
+ * 표지 <img> 는 숨겨진 쪽을 받지 않게 전부 loading="lazy" 다. lazy 사진은 배치가 끝나야 요청되어서
+ * PageSpeed 모바일이 첫 표지 앞에 JS·글꼴까지 넣어 LCP 를 3.6초로 계산했다(2026-11-18, 측정 문서 §9).
+ * media 로 보이는 쪽 한 장만 HTML 단계에서 바로 받는다. 768px 경계는 아래 SHELF_CSS 의 반응형 분기와 같다.
+ */
+function CoverPreload({ magazine, sizes, media }: { magazine: Magazine; sizes: string; media: string }) {
+  const src = firstCoverImage(magazine.cover_images, magazine.image_url);
+  if (!src) return null;
+  return (
+    <link
+      rel="preload"
+      as="image"
+      href={nextImageUrl(src, COVER_SRC_WIDTH)}
+      imageSrcSet={nextImageSrcSet(src, COVER_SRCSET_WIDTHS) || undefined}
+      imageSizes={sizes}
+      media={media}
+      fetchPriority="high"
+    />
+  );
+}
 
 interface Props {
   magazines: Magazine[];
@@ -25,6 +53,8 @@ export default function MagazineShelf({ magazines, magazineTitle, magazineHint }
           <EmptyState />
         ) : (
           <>
+            <CoverPreload magazine={magazines[0]} sizes={GRID_COVER_SIZES} media="(max-width: 767.98px)" />
+            <CoverPreload magazine={magazines[0]} sizes={FACEOUT_COVER_SIZES} media="(min-width: 768px)" />
             {/* 데스크톱: 책장 bookshelf — 책등 줄 + 끝에 최신 호를 표지가 보이게 세워 둔다(face-out).
                 2026-11-11(docs/specs/magazine-shelf-2026-11.md): 선반 66% 가 비어 있었고, 표지는 호버해야만 보여
                 마우스 없는 태블릿은 표지를 볼 수 없었다. */}
@@ -66,7 +96,7 @@ function FaceOutCover({ magazine }: { magazine: Magazine }) {
     >
       <span className="shelf-faceout-badge">Latest</span>
       {/* 표지 사진 틀은 표지 폭의 0.886 — 선반 끝 표지 336px 일 때 296px(실측 2026-11-16) */}
-      <PageThumbnail pageType="cover" magazine={magazine} sizes="300px" fetchHigh />
+      <PageThumbnail pageType="cover" magazine={magazine} sizes={FACEOUT_COVER_SIZES} fetchHigh />
     </Link>
   );
 }
@@ -130,7 +160,7 @@ function ShelfCard({ magazine, isLatest, aboveFold }: { magazine: Magazine; isLa
         {/* 완성본 표지 (MHJ 로고 + 타이틀 + 발행월). 2열 카드 = (화면폭 − 여백 64) / 2, 사진 틀은 그 0.886
             → 412px 화면에서 157px(실측). 768px 이상은 이 격자가 숨겨지고 lazy 라 받지 않는다.
             첫 두 줄(4장)은 휴대폰 첫 화면이라 우선순위만 높인다 — LCP 가 이 표지들이 다 받아지는 시점이었다. */}
-        <PageThumbnail pageType="cover" magazine={magazine} sizes="calc((100vw - 64px) * 0.45)" fetchHigh={aboveFold} />
+        <PageThumbnail pageType="cover" magazine={magazine} sizes={GRID_COVER_SIZES} fetchHigh={aboveFold} />
       </div>
       <div className="ms-meta">
         {/* 이 페이지의 h1 은 서가 제목이다 — 카드가 h3 면 h2 를 건너뛴다(axe heading-order). */}

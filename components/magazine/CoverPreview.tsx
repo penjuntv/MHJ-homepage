@@ -28,6 +28,15 @@ interface CoverPreviewProps {
   fetchHigh?: boolean;
 }
 
+/** 표지 첫 사진이 받는 폭 후보·기본 src 폭 — 아래 <img> 와 서가의 미리 받기(preload)가 같은 주소를 써야 한 번만 받는다. */
+export const COVER_SRCSET_WIDTHS = [256, 384, 640] as const;
+export const COVER_SRC_WIDTH = 384;
+
+/** 표지에 실제로 그려지는 첫 사진 원본(cover_images 첫 장, 없으면 image_url). */
+export function firstCoverImage(cover_images: (string | null | undefined)[] | null | undefined, image_url: string | null | undefined): string {
+  return (cover_images ?? []).filter(Boolean)[0] || image_url || '';
+}
+
 export default function CoverPreview({
   title,
   year,
@@ -138,8 +147,8 @@ export default function CoverPreview({
             /* 표지는 objectFit:cover 로 고정 박스를 채우므로 원본 해상도가 레이아웃에
                영향을 주지 않는다. 그런데 서가에서는 63px 로 보이는 자리에 최대 4284px
                원본이 실려 있었다(2026-09 실측: /magazine 이미지 36MB). 표시 폭에 맞춘다. */
-            src={nextImageUrl(src, 384)}
-            srcSet={nextImageSrcSet(src, [256, 384, 640]) || undefined}
+            src={nextImageUrl(src, COVER_SRC_WIDTH)}
+            srcSet={nextImageSrcSet(src, COVER_SRCSET_WIDTHS) || undefined}
             sizes={sizes}
             alt={i === 0 ? `${title} 표지` : ''}
             loading={priority && i === 0 ? 'eager' : 'lazy'}
