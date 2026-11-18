@@ -265,3 +265,36 @@ PageSpeed 공식, 모바일 `/magazine` 서로 다른 3회(4번째는 같은 보
 ### 남은 것
 - **PageSpeed 서버의 렌더링 지연 흔들림**(서가·사진 글·안내 글 공통) — 사진 도착 뒤 1초 넘게 안 그려지는 회차. 로컬에선 재현 안 됨. 원인 후보: 그 사이 주 스레드를 잡는 JS(TBT 140~300ms).
 - 서가 휴대폰 첫 줄 2칸을 모두 미리 받을지 — 1회차처럼 2번째 칸이 LCP 가 되는 경우를 막는다(사진 1장 약 16KB 추가).
+
+## 11. 렌더링 지연 조사 · GA 지연 받기 (PR #220, 2026-11-19 머지)
+
+PageSpeed 화면이 받는 원자료(관찰 기록)를 뜯어 보니 §7·§9·§10 의 "렌더링 지연 흔들림"은 두 갈래였다.
+
+1. **PageSpeed 서버 근처 Vercel 캐시가 빈 회차** — 문서와 CSS 한 장(`/_next/static/css/…`, 14KB gzip)이 각각 0.5~0.7초.
+   첫 그리기가 CSS 를 기다리니 그만큼 밀린다. 같은 페이지를 곧바로 다시 재면 CSS 0.1초·97점. **코드로 못 고치는 측정 흔들림.**
+   방문자는 대부분 뉴질랜드라 PageSpeed 서버 쪽 캐시는 자주 비어 있다.
+2. **사진이 첫 그리기보다 늦게 그려지는 회차** — 계산(Lantern)이 그 전에 출발한 요청을 전부 사진 앞에 넣는다.
+   안내 글 5.8초 회차: 실제 FCP 247ms · LCP 658ms 인데 계산 LCP 5.8초(72점). 앞에 들어간 것 중 가장 큰 것이 **GA(gtag.js 179KB)**.
+   `@next/third-parties` `<GoogleAnalytics>` 는 afterInteractive 라 App Router 가 HTML 머리에 `<link rel=preload as=script>` 를 넣어,
+   시작과 동시에 CSS·대표 사진과 같은 높은 우선순위로 받아지고 있었다.
+
+**고친 것(#220)** — `components/AnalyticsShell.tsx` 를 next/script 로 직접: 큐 초기화는 afterInteractive 그대로, gtag.js 는 `lazyOnload`(load 뒤 한가할 때).
+그사이 이벤트는 `dataLayer` 에 쌓였다가 함께 나간다. 회귀 검사 `scripts/qa/test-ga-lazy.mjs`(source-guard 편입, 고치기 전 실패 확인).
+
+**전후(미리보기 vs 운영, 느린 4G 150ms·1.6Mbps + CPU 4배, 4회 번갈아 중앙값, 412px):**
+
+| 페이지 | LCP 전 → 후 | load 전 → 후 |
+|---|---|---|
+| 사진 글 | 1.80 → **1.45초** | 5.3 → 4.3초 |
+| 안내 글 | 0.89 → 0.87초 | 5.6 → 5.1초 |
+| 서가 | 0.77 → 0.75초 | 3.8 → 2.9초 |
+
+**운영 반영 확인(머지 뒤)** — `BASE=https://www.mhj.nz node scripts/qa/test-ga-lazy.mjs` 전부 통과: `/`·`/magazine`·안내 글 HTML 에 gtag preload·script 태그 없음.
+(HTML 안 화면 데이터(RSC)에는 `strategy:"lazyOnload"` 설정 한 줄이 남는 게 정상 — `grep gtag/js` 개수로 판정하지 말 것.)
+
+**대가** — GA 방문 기록은 load 뒤 나간다. load 전에 떠난 방문은 GA 에 안 잡힌다(자체 기록 `/api/track` 은 그대로).
+
+### 남은 것
+- **PageSpeed 공식 재측정** — 11-19 머지 직후 시도했으나 Claude 창이 화면에 없어 분석이 멈춤. 사진 글·안내 글·서가 각 3회(서로 다른 보고서).
+- 갈래 ① 완화 후보: `experimental.inlineCss`(Next 15.5.28 에 있음) — CSS 를 HTML 에 넣어 요청 하나를 없앤다. 대신 모든 페이지 HTML 이 약 14KB(gzip) 커지고 CSS 를 브라우저 캐시로 재사용 못 함. 결재 필요.
+- 서가 휴대폰 첫 줄 2칸 미리 받기(§10).
