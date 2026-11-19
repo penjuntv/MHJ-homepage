@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { unstable_cache } from 'next/cache';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { createAdminClient, supabase } from '@/lib/supabase';
+import { sanitizeVitalsMeta } from '@/lib/web-vitals-meta';
 import { deriveTrafficSource, deriveSourceFromUtm, isBot, parseDevice, slugFromBlogPath, type Medium } from '@/lib/traffic-source';
 
 /**
@@ -21,7 +22,8 @@ const SITE_HOST = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mhj.nz')
   .replace(/\/.*$/, '');
 
 // 'click' = data-track 클릭(meta.name 이 이벤트명). event_type 은 CHECK 없는 text 라 마이그레이션 없이 늘릴 수 있다.
-const VALID_TYPES = new Set(['pageview', 'engagement', 'scroll', 'read_complete', 'outbound', 'click']);
+// 'vitals' = 실제 방문자 첫 로드 속도(FCP·LCP·TTFB·DCL·CLS·INP) 한 줄 — meta 는 lib/web-vitals-meta.ts 로만 거른다(2026-11-19).
+const VALID_TYPES = new Set(['pageview', 'engagement', 'scroll', 'read_complete', 'outbound', 'click', 'vitals']);
 const NO_CONTENT = new NextResponse(null, { status: 204 });
 
 function clampInt(v: unknown, min: number, max: number): number | null {
@@ -109,6 +111,11 @@ export async function POST(request: NextRequest) {
     }
   } else {
     meta = null;
+  }
+  // 속도 이벤트는 허용 항목·범위만 남긴다. 쓸 값이 없으면 행을 넣지 않는다.
+  if (type === 'vitals') {
+    meta = sanitizeVitalsMeta(body.meta);
+    if (!meta) return NO_CONTENT;
   }
   // 캠페인(어느 글·어느 배포였나)은 전용 칸이 없어 pageview 의 meta 에 남긴다 — UTM 으로 source 가 정해졌을 때만.
   const campaign = typeof utm?.campaign === 'string'

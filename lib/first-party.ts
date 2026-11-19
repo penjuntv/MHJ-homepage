@@ -95,7 +95,9 @@ export type TrackEventType =
   | 'scroll'
   | 'read_complete'
   | 'outbound'
-  | 'click';
+  | 'click'
+  /** 실제 방문자 속도(첫 로드 한 번) — components/WebVitalsBeacon.tsx, 값 정제 lib/web-vitals-meta.ts */
+  | 'vitals';
 
 export interface TrackPayload {
   type: TrackEventType;
