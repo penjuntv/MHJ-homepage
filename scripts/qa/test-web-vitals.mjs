@@ -38,6 +38,10 @@ eq('AnalyticsShell 에 WebVitalsBeacon 이 붙어 있다', /<WebVitalsBeacon\s*\
 const beacon = readFileSync(new URL('../../components/WebVitalsBeacon.tsx', import.meta.url), 'utf8');
 eq('측정 부품은 Next 내장 useReportWebVitals 를 쓴다(새 패키지 없음)', /from 'next\/web-vitals'/.test(beacon), true);
 eq('측정 부품은 sendBeaconEvent 로 보낸다(운영자 제외 설정을 따른다)', /sendBeaconEvent\(/.test(beacon), true);
+// 2026-11-20: 떠날 때 pagehide 가 visibilitychange 보다 먼저라 web-vitals LCP 가 비었다(운영 데스크톱 3/3).
+// 실제 브라우저 루프는 측정 문서 §16 — 여기서는 대체 관찰이 빠지지 않았는지만 지킨다.
+eq('LCP 를 직접도 관찰한다(pagehide 대비)', /observe\(\{\s*type:\s*'largest-contentful-paint'/.test(beacon), true);
+eq('보내기 직전 관찰 값으로 빈 LCP 를 채운다', /collected\.lcp === undefined && ownLcp !== undefined/.test(beacon), true);
 
 console.log(`\n${fail ? '❌' : '✅'} ${pass} 통과 · ${fail} 실패`);
 process.exit(fail ? 1 : 0);
