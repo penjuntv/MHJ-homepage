@@ -231,7 +231,7 @@
 | id | bigint | NO | identity | PK |
 | created_at | timestamptz | NO | now() | |
 | session_id | text | YES | — | 탭 세션 랜덤 UUID (개인 식별자 아님) |
-| event_type | text | NO | — | pageview \| engagement \| scroll \| read_complete \| outbound \| click — `click` 은 `data-track` 클릭, `meta.name` = 이벤트명(2026-09-11 W6-C). CHECK 없음 — 허용 목록은 `app/api/track` `VALID_TYPES` |
+| event_type | text | NO | — | pageview \| engagement \| scroll \| read_complete \| outbound \| click \| vitals — `click` 은 `data-track` 클릭, `meta.name` = 이벤트명(2026-09-11 W6-C). `vitals` = 실제 방문자 첫 로드 속도 한 줄(2026-11-19), `meta` = `{ fcp, lcp, ttfb, dcl, inp(ms 정수), cls, nav }` — `lib/web-vitals-meta.ts` 가 거른 값만. CHECK 없음 — 허용 목록은 `app/api/track` `VALID_TYPES` |
 | path | text | YES | — | |
 | blog_slug | text | YES | — | |
 | referrer | text | YES | — | |
