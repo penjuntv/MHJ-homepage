@@ -53,7 +53,11 @@ export default function MagazineShelf({ magazines, magazineTitle, magazineHint }
           <EmptyState />
         ) : (
           <>
-            <CoverPreload magazine={magazines[0]} sizes={GRID_COVER_SIZES} media="(max-width: 767.98px)" />
+            {/* 휴대폰 격자는 2열이라 첫 줄 두 칸이 같은 크기(412px 화면 157×125)다. 크기가 같으면 먼저 그려진 칸이 LCP 가 되어,
+                한 칸만 미리 받으면 다른 칸이 늦게 그려지는 회차에 그 칸의 늦은 요청으로 계산된다(측정 문서 §10 1회차). 두 칸 다 받는다. */}
+            {magazines.slice(0, 2).map((m) => (
+              <CoverPreload key={m.id} magazine={m} sizes={GRID_COVER_SIZES} media="(max-width: 767.98px)" />
+            ))}
             <CoverPreload magazine={magazines[0]} sizes={FACEOUT_COVER_SIZES} media="(min-width: 768px)" />
             {/* 데스크톱: 책장 bookshelf — 책등 줄 + 끝에 최신 호를 표지가 보이게 세워 둔다(face-out).
                 2026-11-11(docs/specs/magazine-shelf-2026-11.md): 선반 66% 가 비어 있었고, 표지는 호버해야만 보여
