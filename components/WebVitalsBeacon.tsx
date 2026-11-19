@@ -12,8 +12,11 @@ import { sendBeaconEvent } from '@/lib/first-party';
  * docs/measurements/web-vitals-2026-11-16.md §12.
  *
  * - Next 내장 `useReportWebVitals`(web-vitals 동봉) — 새 패키지 없음. 지표는 브라우저가 이미 잰 값을 읽기만 한다.
- * - 탭이 처음 숨겨질 때(닫기·다른 탭·앱 전환) 한 번만 보낸다. web-vitals 는 같은 순간 window 캡처 단계에서
- *   LCP·CLS 를 확정해 넘겨주므로(우리는 document 단계) 그 값까지 실린다.
+ * - 탭이 처음 숨겨질 때(닫기·다른 탭·앱 전환) 또는 떠날 때(pagehide) 한 번만 보낸다.
+ * - LCP 는 직접도 잰다(2026-11-20): 다른 사이트로 떠날 때 Chrome 은 pagehide 를 visibilitychange 보다 먼저 보내고,
+ *   web-vitals 는 LCP 를 visibilitychange(또는 클릭·키 입력)에서야 확정한다. 그래서 클릭 없이 떠난 방문은
+ *   LCP 없이 나갔다(운영 첫 4건 중 데스크톱 3건). web-vitals 값이 없으면 아래 관찰 값으로 채운다 —
+ *   web-vitals 와 같은 규칙: 첫 클릭·키 입력 전, 처음 숨겨지기 전의 마지막 후보.
  * - 페이지 안 이동(SPA)은 재지 않는다 — 첫 화면만. 경로는 처음 연 주소.
  * - 운영자 기기 제외는 sendBeaconEvent 가 따른다. 값 정제는 서버(lib/web-vitals-meta.ts)가 다시 한다.
  */
@@ -35,8 +38,33 @@ export default function WebVitalsBeacon() {
 
   useEffect(() => {
     const landingPath = window.location.pathname;
+
+    // LCP 직접 관찰(위 설명). 처음부터 숨겨진 채 열린 탭은 web-vitals 처럼 재지 않는다.
+    let ownLcp: number | undefined;
+    let lcpStopped = document.visibilityState === 'hidden';
+    let po: PerformanceObserver | undefined;
+    const takeLcp = (entries: PerformanceEntryList) => {
+      if (lcpStopped) return;
+      for (const e of entries) ownLcp = e.startTime;
+    };
+    const stopLcp = () => {
+      if (po) takeLcp(po.takeRecords());
+      lcpStopped = true;
+      po?.disconnect();
+    };
+    try {
+      po = new PerformanceObserver((list) => takeLcp(list.getEntries()));
+      po.observe({ type: 'largest-contentful-paint', buffered: true });
+    } catch {
+      po = undefined; // LCP 를 지원하지 않는 브라우저(사파리 일부)
+    }
+    addEventListener('keydown', stopLcp, { once: true, capture: true });
+    addEventListener('click', stopLcp, { once: true, capture: true });
+
     function flush() {
       if (sent) return;
+      stopLcp();
+      if (collected.lcp === undefined && ownLcp !== undefined && ownLcp > 0) collected.lcp = ownLcp;
       try {
         const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
         if (nav && nav.domContentLoadedEventEnd > 0) collected.dcl = nav.domContentLoadedEventEnd;
@@ -57,6 +85,9 @@ export default function WebVitalsBeacon() {
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pagehide', flush);
+      removeEventListener('keydown', stopLcp, { capture: true });
+      removeEventListener('click', stopLcp, { capture: true });
+      po?.disconnect();
     };
   }, []);
 
