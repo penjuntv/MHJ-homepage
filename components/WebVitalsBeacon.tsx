@@ -17,6 +17,8 @@ import { sendBeaconEvent } from '@/lib/first-party';
  *   web-vitals 는 LCP 를 visibilitychange(또는 클릭·키 입력)에서야 확정한다. 그래서 클릭 없이 떠난 방문은
  *   LCP 없이 나갔다(운영 첫 4건 중 데스크톱 3건). web-vitals 값이 없으면 아래 관찰 값으로 채운다 —
  *   web-vitals 와 같은 규칙: 첫 클릭·키 입력 전, 처음 숨겨지기 전의 마지막 후보.
+ * - CLS 도 같은 이유로 떠난 방문에선 빠졌다(운영 6/6) → 직접 잰다. web-vitals 와 같은 규칙: 입력 직후 밀림 제외,
+ *   1초 안에 이어진 밀림을 한 묶음(최대 5초)으로 더해 가장 큰 묶음 값. 밀림이 없으면 0.
  * - 페이지 안 이동(SPA)은 재지 않는다 — 첫 화면만. 경로는 처음 연 주소.
  * - 운영자 기기 제외는 sendBeaconEvent 가 따른다. 값 정제는 서버(lib/web-vitals-meta.ts)가 다시 한다.
  */
@@ -61,10 +63,43 @@ export default function WebVitalsBeacon() {
     addEventListener('keydown', stopLcp, { once: true, capture: true });
     addEventListener('click', stopLcp, { once: true, capture: true });
 
+    // CLS 직접 관찰(위 설명). 지원하지 않는 브라우저면 ownCls 는 undefined 로 남아 보내지 않는다.
+    let ownCls: number | undefined;
+    let clsSession = 0;
+    let clsFirst = 0;
+    let clsLast = 0;
+    let clsPo: PerformanceObserver | undefined;
+    const takeCls = (entries: PerformanceEntryList) => {
+      for (const e of entries as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) {
+        if (e.hadRecentInput) continue;
+        if (clsSession && e.startTime - clsLast < 1000 && e.startTime - clsFirst < 5000) {
+          clsSession += e.value;
+        } else {
+          clsSession = e.value;
+          clsFirst = e.startTime;
+        }
+        clsLast = e.startTime;
+        if (clsSession > (ownCls ?? 0)) ownCls = clsSession;
+      }
+    };
+    try {
+      // 미지원 브라우저(사파리·파이어폭스)는 observe 가 예외 없이 무시만 한다 → 먼저 확인해야 가짜 0 이 안 남는다
+      if (PerformanceObserver.supportedEntryTypes?.includes('layout-shift')) {
+        clsPo = new PerformanceObserver((list) => takeCls(list.getEntries()));
+        clsPo.observe({ type: 'layout-shift', buffered: true });
+        ownCls = 0;
+      }
+    } catch {
+      clsPo = undefined;
+      ownCls = undefined;
+    }
+
     function flush() {
       if (sent) return;
       stopLcp();
       if (collected.lcp === undefined && ownLcp !== undefined && ownLcp > 0) collected.lcp = ownLcp;
+      if (clsPo) takeCls(clsPo.takeRecords());
+      if (collected.cls === undefined && ownCls !== undefined) collected.cls = ownCls;
       try {
         const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
         if (nav && nav.domContentLoadedEventEnd > 0) collected.dcl = nav.domContentLoadedEventEnd;
@@ -88,6 +123,7 @@ export default function WebVitalsBeacon() {
       removeEventListener('keydown', stopLcp, { capture: true });
       removeEventListener('click', stopLcp, { capture: true });
       po?.disconnect();
+      clsPo?.disconnect();
     };
   }, []);
 
