@@ -42,6 +42,10 @@ eq('측정 부품은 sendBeaconEvent 로 보낸다(운영자 제외 설정을 �
 // 실제 브라우저 루프는 측정 문서 §16 — 여기서는 대체 관찰이 빠지지 않았는지만 지킨다.
 eq('LCP 를 직접도 관찰한다(pagehide 대비)', /observe\(\{\s*type:\s*'largest-contentful-paint'/.test(beacon), true);
 eq('보내기 직전 관찰 값으로 빈 LCP 를 채운다', /collected\.lcp === undefined && ownLcp !== undefined/.test(beacon), true);
+// 2026-11-20: CLS 도 같은 이유로 떠난 방문에서 빠졌다(운영 6/6).
+eq('CLS 를 직접도 관찰한다(pagehide 대비)', /observe\(\{\s*type:\s*'layout-shift'/.test(beacon), true);
+eq('CLS 는 지원 확인 뒤에만 잰다(미지원 브라우저 가짜 0 방지)', /supportedEntryTypes\?\.includes\('layout-shift'\)/.test(beacon), true);
+eq('보내기 직전 관찰 값으로 빈 CLS 를 채운다', /collected\.cls === undefined && ownCls !== undefined/.test(beacon), true);
 
 console.log(`\n${fail ? '❌' : '✅'} ${pass} 통과 · ${fail} 실패`);
 process.exit(fail ? 1 : 0);
