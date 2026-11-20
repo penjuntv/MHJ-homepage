@@ -19,6 +19,9 @@ import { sendBeaconEvent } from '@/lib/first-party';
  *   web-vitals 와 같은 규칙: 첫 클릭·키 입력 전, 처음 숨겨지기 전의 마지막 후보.
  * - CLS 도 같은 이유로 떠난 방문에선 빠졌다(운영 6/6) → 직접 잰다. web-vitals 와 같은 규칙: 입력 직후 밀림 제외,
  *   1초 안에 이어진 밀림을 한 묶음(최대 5초)으로 더해 가장 큰 묶음 값. 밀림이 없으면 0.
+ * - INP 도 같은 이유로 클릭한 뒤 떠난 방문에선 빠졌다(운영 6/6) → 직접 잰다. web-vitals 와 같은 규칙: 상호작용(interactionId)
+ *   마다 가장 긴 이벤트 시간, 그중 상호작용 50번마다 하나씩 가장 긴 것을 빼고 남은 최댓값(98번째 백분위 근사).
+ *   상호작용이 없으면 보내지 않는다(web-vitals 도 값이 없다).
  * - 페이지 안 이동(SPA)은 재지 않는다 — 첫 화면만. 경로는 처음 연 주소.
  * - 운영자 기기 제외는 sendBeaconEvent 가 따른다. 값 정제는 서버(lib/web-vitals-meta.ts)가 다시 한다.
  */
@@ -94,8 +97,41 @@ export default function WebVitalsBeacon() {
       ownCls = undefined;
     }
 
+    // INP 직접 관찰(위 설명). 미지원 브라우저(사파리 등)는 관찰하지 않는다 — web-vitals 와 같은 확인.
+    const interactions = new Map<number, number>();
+    const inpPos: PerformanceObserver[] = [];
+    const takeInp = (entries: PerformanceEntryList) => {
+      for (const e of entries as (PerformanceEntry & { interactionId?: number })[]) {
+        if (!e.interactionId) continue;
+        interactions.set(e.interactionId, Math.max(interactions.get(e.interactionId) ?? 0, e.duration));
+      }
+    };
+    try {
+      if ('PerformanceEventTiming' in window && 'interactionId' in PerformanceEventTiming.prototype) {
+        const ev = new PerformanceObserver((list) => takeInp(list.getEntries()));
+        ev.observe({ type: 'event', buffered: true, durationThreshold: 40 } as PerformanceObserverInit);
+        inpPos.push(ev);
+        const fi = new PerformanceObserver((list) => takeInp(list.getEntries()));
+        fi.observe({ type: 'first-input', buffered: true });
+        inpPos.push(fi);
+      }
+    } catch {
+      // ignore — INP 를 못 재면 보내지 않는다
+    }
+    const ownInp = (): number | undefined => {
+      for (const o of inpPos) takeInp(o.takeRecords());
+      if (!interactions.size) return undefined;
+      const durs = [...interactions.values()].sort((a, b) => b - a);
+      const count = (performance as Performance & { interactionCount?: number }).interactionCount || interactions.size;
+      return durs[Math.min(durs.length - 1, Math.floor(count / 50))];
+    };
+
     function flush() {
       if (sent) return;
+      if (collected.inp === undefined) {
+        const inp = ownInp();
+        if (inp !== undefined) collected.inp = inp;
+      }
       stopLcp();
       if (collected.lcp === undefined && ownLcp !== undefined && ownLcp > 0) collected.lcp = ownLcp;
       if (clsPo) takeCls(clsPo.takeRecords());
@@ -124,6 +160,7 @@ export default function WebVitalsBeacon() {
       removeEventListener('click', stopLcp, { capture: true });
       po?.disconnect();
       clsPo?.disconnect();
+      for (const o of inpPos) o.disconnect();
     };
   }, []);
 
