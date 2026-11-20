@@ -1,6 +1,7 @@
 'use client';
 
 import { trackEvent } from './analytics';
+import { isBot } from './traffic-source';
 
 /**
  * MHJ 1st-party 분석 — 클라이언트 전송 헬퍼.
@@ -69,6 +70,24 @@ export function stripNotrackParam(): void {
 
 function isOptedOut(): boolean {
   return readOptOutState() === 'admin';
+}
+
+/**
+ * 글 조회수(blogs.view_count)를 올려도 되는 방문인가 — 운영자 제외 기기·자동 브라우저·로봇이면 아니다(2026-11-20).
+ *
+ * 왜: 조회수는 글 페이지가 Supabase RPC 를 직접 불러 올린다. /api/track 은 서버에서 로봇을 거르지만(isBot)
+ * 조회수는 아무것도 거르지 않아서, 운영 사이트를 도는 테스트·주간 감사·속도 측정이 조회수를 크게 부풀렸다
+ * (테스트에 쓴 글 564회 vs 실제 페이지 열기 17회). 자동 브라우저(Playwright 등)는 navigator.webdriver 가 true 다.
+ * 로봇 판별은 서버와 같은 lib/traffic-source.ts isBot 을 쓴다. 앞으로의 조회수에만 적용된다.
+ */
+export function canCountView(): boolean {
+  if (typeof window === 'undefined' || isOptedOut()) return false;
+  try {
+    if (navigator.webdriver) return false;
+    return !isBot(navigator.userAgent);
+  } catch {
+    return false;
+  }
 }
 
 /** 탭 세션 단위 익명 ID (쿠키 없음, sessionStorage 한정). */
