@@ -43,9 +43,14 @@ check('결함 없는 글은 플래그 0', flags(), []);
 
 /* ── 기준선 8종 ── */
 check('H1_OVER — 본문에 h1', flags({ content: clean.content + '<h1>x</h1>' }).includes('H1_OVER'), true);
-check('ALT_MISSING — alt 없는 img', flags({ content: clean.content + '<img src="a">' }).includes('ALT_MISSING'), true);
+// 2026-11-22: 화면에 나가는 HTML 기준 — 글 화면이 빈 alt 를 캡션·'제목 — photo N' 으로 채운다(fillImageAlts).
+check('빈 alt 사진 — 화면에서 채워지므로 ALT_MISSING 아님', flags({ content: clean.content + '<img src="a">' }).includes('ALT_MISSING'), false);
+check('ALT_GENERIC — 캡션도 설명도 없으면 자동 대체문뿐', flags({ content: clean.content + '<img src="a">' }).includes('ALT_GENERIC'), true);
+check('ALT_GENERIC 아님 — 캡션이 있으면 캡션이 설명이 된다',
+  flags({ content: clean.content + '<figure class="blog-figure"><img src="a"><figcaption>A note from six years ago.</figcaption></figure>' }).includes('ALT_GENERIC'), false);
+check('ALT_GENERIC 은 soft(주간 게이트를 막지 않는다)', FLAG_META.ALT_GENERIC?.hard, false);
 check('alt 가 있으면 통과(길이는 안 본다 — 그건 폼의 목표치)',
-  flags({ content: clean.content + '<img src="a" alt="hi">' }).includes('ALT_MISSING'), false);
+  ['ALT_MISSING', 'ALT_GENERIC'].map((f) => flags({ content: clean.content + '<img src="a" alt="hi">' }).includes(f)), [false, false]);
 // 2026-11-22: 글 끝 Read More 칸(유씨 선택 related_slugs → 같은 카테고리 글)이 차면 링크가 있는 것이다.
 const noLinkBody = `<p>${'word '.repeat(420)}</p><h2>a</h2><h2>b</h2><p>Auckland</p>`;
 const orphanOf = (over, opts) => flagsOf({ ...clean, content: noLinkBody, ...over }, { now: NOW, ...opts }).includes('ORPHAN');
@@ -94,10 +99,10 @@ check('STOCK_IMAGE', flags({ image_url: 'https://images.unsplash.com/a.jpg' }).i
 /* ── 기준선 분리 ── */
 check('baselineFlagsOf 는 운영 지표를 뺀다',
   baselineFlagsOf({ ...clean, seo_title: '', summary_ko: '', faq_json: [], tags: [] }, { now: NOW }), []);
-check('기준선 항목은 8종', BASELINE_CHECKS.length, 8);
+check('기준선 항목은 9종(2026-11-22 alt_generic 추가)', BASELINE_CHECKS.length, 9);
 check('기준선 키는 seo-baseline.json 과 같은 이름',
   BASELINE_CHECKS.map((c) => c.key),
-  ['h1_over', 'alt_missing', 'orphan', 'meta_missing', 'thin', 'no_h2', 'no_geo', 'og_fallback']);
+  ['h1_over', 'alt_missing', 'orphan', 'meta_missing', 'thin', 'no_h2', 'no_geo', 'og_fallback', 'alt_generic']);
 check('hard 플래그 4종', HARD_FLAGS, ['H1_OVER', 'ALT_MISSING', 'ORPHAN', 'META_MISSING']);
 check('hard 는 전부 기준선 안에 있다', CHECKS.every((c) => !c.hard || c.baseline), true);
 check('모든 검사에 화면 라벨이 있다', CHECKS.every((c) => typeof c.label === 'string' && c.label.length > 0), true);
