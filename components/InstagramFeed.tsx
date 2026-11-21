@@ -252,6 +252,7 @@ export default function InstagramFeed({ instagramUrl }: Props) {
               showImage={near}
               instagramUrl={instagramUrl}
               draggedRef={draggedRef}
+              loopCopy={idx >= posts.length}
             />
           ))}
         </div>
@@ -282,18 +283,26 @@ function FeedCard({
   showImage,
   instagramUrl,
   draggedRef,
+  loopCopy,
 }: {
   mediaUrl: string;
   showImage: boolean;
   instagramUrl: string;
   draggedRef: React.MutableRefObject<boolean>;
+  /** 마퀴 반복용 2·3번째 벌 — 같은 링크가 화면 낭독기·탭 순서에 세 번씩 나오지 않게 숨긴다 */
+  loopCopy: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   return (
+    // 사진은 줄이 화면 가까이 와야 붙는다(showImage) — 그 전엔 링크 안이 비어 이름 없는 링크가 됐다
+    // (2026-11-22 주간 감사 ⑬ link-name 384건). 이름은 사진과 무관하게 링크에 직접 단다.
     <a
       href={instagramUrl}
       target="_blank"
       rel="noopener noreferrer"
+      aria-label="MHJ family photo on Instagram (opens in a new tab)"
+      aria-hidden={loopCopy || undefined}
+      tabIndex={loopCopy ? -1 : undefined}
       style={{ textDecoration: 'none', flexShrink: 0, display: 'block' }}
       onClick={(e) => { if (draggedRef.current) e.preventDefault(); }}
       draggable={false}
