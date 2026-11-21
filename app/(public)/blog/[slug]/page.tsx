@@ -14,7 +14,8 @@ import { BLOG_DETAIL_COLUMNS, BLOG_RELATED_COLUMNS, categoryHref, BLOG_ADJACENT_
 import { getNZSeasonLabel } from '@/lib/date-helpers';
 import { optimizeContentImages } from '@/lib/image-url';
 import ViewTracker from './ViewTracker';
-import ContinueReading, { type ContinuePost, type DrawerPick } from './ContinueReading';
+import ContinueReading, { type ContinuePost, type ReadMorePick } from './ContinueReading';
+import { pickReadMore, READ_MORE_SLOTS } from '@/lib/read-more-picks.mjs';
 import ShareButton from '@/components/ShareButton';
 import CommentSection from './CommentSection';
 import AiInsight from '@/components/AiInsight';
@@ -71,7 +72,7 @@ async function getAdjacentBlogs(current: { id: number; date: string }): Promise<
 }
 
 /**
- * 글 끝 이어 읽기의 "다음 글" — 같은 서랍(카테고리) 안에서 날짜순 바로 다음(더 새) 글.
+ * 글 끝 Read More 의 두 번째 후보(유씨 선택 다음) — 같은 서랍(카테고리) 안에서 날짜순 바로 다음(더 새) 글.
  * 서랍의 가장 새 글이면 바로 앞 글을 준다(2026-11-09 합의 Q2). 순서 키는 getAdjacentBlogs 와 같다(date, id).
  */
 async function getDrawerNext(current: { id: number; date: string; category: string }): Promise<{
@@ -101,7 +102,7 @@ async function getDrawerNext(current: { id: number; date: string; category: stri
   return { post: (olderRes.data?.[0] as ContinuePost | undefined) ?? null, isEarlier: true };
 }
 
-/** 같은 서랍 최신 글 — 이어 읽기 3칸 중 편집자가 못 채운 칸에만 쓴다. 제외는 클라이언트에서(slug 따옴표 문제, f3dffb5 이전 주석). */
+/** 같은 서랍 최신 글 — Read More 2칸 중 유씨 선택·다음 글로 못 채운 칸에만 쓴다. 제외는 클라이언트에서(slug 따옴표 문제, f3dffb5 이전 주석). */
 async function getDrawerLatest(category: string): Promise<ContinuePost[]> {
   const { data, error } = await supabase
     .from('blogs')
@@ -117,36 +118,9 @@ async function getDrawerLatest(category: string): Promise<ContinuePost[]> {
 }
 
 /**
- * 서랍 3편 = 편집자가 고른 related_slugs(고른 순서) 먼저 → 비는 칸만 같은 서랍 최신 글(2026-11-09 합의 Q3).
- * "다음 글"과 같은 글은 빼서 한 묶음 안에서 같은 글이 두 번 나오지 않게 한다.
- */
-function pickDrawerThree(
-  currentSlug: string,
-  nextSlug: string | null,
-  editorPicks: ContinuePost[],
-  drawerLatest: ContinuePost[],
-): DrawerPick[] {
-  const taken = new Set<string>([currentSlug, ...(nextSlug ? [nextSlug] : [])]);
-  const out: DrawerPick[] = [];
-  for (const p of editorPicks) {
-    if (out.length >= 3) break;
-    if (taken.has(p.slug)) continue;
-    taken.add(p.slug);
-    out.push({ ...p, source: 'editor' });
-  }
-  for (const p of drawerLatest) {
-    if (out.length >= 3) break;
-    if (taken.has(p.slug)) continue;
-    taken.add(p.slug);
-    out.push({ ...p, source: 'drawer' });
-  }
-  return out;
-}
-
-/**
- * 편집자가 고른 `related_slugs` — 고른 순서대로 최대 3편(2026-11-01 PeNnY 결정의 "고른 것이 먼저"는 그대로).
- * 2026-11-09 부터 이 글들은 글 끝 이어 읽기의 서랍 3칸에 **먼저** 들어가고, 비는 칸만 같은 서랍 최신 글로 채운다
- * (pickDrawerThree, 개혁 계획서 §2.4 · 합의 Q3). 맨 끝의 You Might Also Like 띠는 없앴다.
+ * 편집자가 고른 `related_slugs` — 고른 순서대로(2026-11-01 PeNnY 결정의 "고른 것이 먼저"는 그대로).
+ * 글 끝 Read More 2칸에 **먼저** 들어간다(lib/read-more-picks.mjs, 2026-11-22). 관리자 폼은 이제 2편까지만 고르지만,
+ * 예전에 3편을 고른 글이 있어 3편까지 읽는다 — 앞의 두 편이 미발행이면 세 번째가 대신 들어가고, 아니면 버려진다.
  * 발행·예약 게이트는 그대로 건다.
  */
 async function getRelatedBlogs(currentSlug: string, relatedSlugs?: string[] | null): Promise<ContinuePost[]> {
@@ -271,7 +245,7 @@ export default async function BlogDetailPage(
   ]);
   const latestNewsletter = latestNewsletterRes.data as { subject: string; issue_number: string } | null;
   const ctaCopyB = settings.newsletter_cta_copy_b || 'Be the first to receive our next letter.';
-  const drawerPicks = pickDrawerThree(blog.slug, drawerNext.post?.slug ?? null, relatedBlogs, drawerLatest);
+  const readMorePicks = pickReadMore(blog.slug, relatedBlogs, drawerNext.post, drawerLatest, READ_MORE_SLOTS) as ReadMorePick[];
 
   // StoryPress 카드 — 협찬 글에는 붙이지 않는다. Little 15 Mins 는 본문 바로 뒤(이어 읽기 위),
   // Home Learning 은 이어 읽기·구독 바로 뒤(학교 안내 글이 많아 다음 안내 글이 먼저다). 2026-11-09 합의 Q5.
@@ -594,12 +568,7 @@ export default async function BlogDetailPage(
                 검색으로 온 사람의 착지점은 글이고, 본문 끝이 그 사람이 실제로 닿는 마지막 자리다. ── */}
             {storyPressFirst && storyPressCard}
 
-            <ContinueReading
-              category={blog.category}
-              next={drawerNext.post}
-              nextIsEarlier={drawerNext.isEarlier}
-              picks={drawerPicks}
-            />
+            <ContinueReading category={blog.category} picks={readMorePicks} />
 
             {/* ── 구독 CTA — 글당 딱 하나, 이어 읽기 바로 뒤(한국어 요약 앞, 요약이 없으면 저자 박스 앞).
                 2026-10-13 PeNnY 지시로 본문 중간 삽입(W6-C 결정 ②)을 폐기했다 — 읽는 흐름을 끊었다.
@@ -732,8 +701,7 @@ export default async function BlogDetailPage(
             </div>
 
             {/* 아카이브 전체 날짜순 이전·다음 — 사진을 뺀 글자 한 줄(2026-11-09 합의 Q4). 독자의 "다음 글"은 위 이어 읽기가
-                맡고, 이 줄은 서랍을 넘어 아카이브 전체를 앞뒤로 잇는 크롤러 길로 남긴다. 꼬리표를 Older/Newer 로 바꿔
-                이어 읽기의 "Next in …"(같은 서랍)과 헷갈리지 않게 했다. */}
+                맡고(2026-11-22 부터 Read More 2칸), 이 줄은 서랍을 넘어 아카이브 전체를 앞뒤로 잇는 크롤러 길로 남긴다. */}
             {(adjacent.prev || adjacent.next) && (
               <nav aria-label="Older and newer stories" className="adjacent-nav">
                 {adjacent.prev ? <AdjacentLink post={adjacent.prev} direction="prev" /> : <div />}

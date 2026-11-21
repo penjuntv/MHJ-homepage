@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
 import { AlertCircle, AlertTriangle, CheckCircle2, Info, Loader2, Search } from 'lucide-react';
 import {
-  CHECKS, FLAG_META, FLAG_INPUT_FIELDS, flagsOf, severityOf, baselineStatusOf, isLive,
+  CHECKS, FLAG_META, FLAG_INPUT_FIELDS, flagsOf, severityOf, baselineStatusOf, isLive, sameCategoryOthersOf,
 } from '@/lib/seo-defects.mjs';
 
 /**
@@ -36,7 +36,7 @@ interface AuditSource {
   content: string | null; info_block_html: string | null; meta_description: string | null;
   og_image_url: string | null; seo_title: string | null; summary_ko: string | null; publish_at: string | null;
   faq_json: unknown; tags: string[] | null; image_url: string | null;
-  updated_at: string | null; created_at: string | null;
+  updated_at: string | null; created_at: string | null; related_slugs: string[] | null;
 }
 
 interface AuditRow {
@@ -78,6 +78,7 @@ export default function AdminSeoPage() {
     let cancelled = false;
     (async () => {
       const acc: AuditRow[] = [];
+      const sources: AuditSource[] = [];
       const now = Date.now();
       // 서버에서 끊어 받는다 — 84편이 200편이 돼도 한 응답에 전부 담기지 않는다.
       // 합계는 전 코퍼스를 봐야 나오므로 "끊어 받기"이지 "일부만 보기"는 아니다.
@@ -95,6 +96,7 @@ export default function AdminSeoPage() {
         const batch = (data ?? []) as unknown as AuditSource[];
         if (batch.length === 0) break;
         for (const b of batch) {
+          sources.push(b);
           acc.push({
             id: b.id, title: b.title, slug: b.slug, date: b.date,
             category: b.category, published: b.published,
@@ -108,6 +110,10 @@ export default function AdminSeoPage() {
         // 서버의 max-rows 가 PAGE_SIZE 보다 작을 때 첫 페이지에서 조용히 멈춘다(수치가 틀린 채로).
         from += batch.length;
       }
+      // ORPHAN 은 글 끝 Read More 칸이 차는지 봐야 한다 — 같은 카테고리 공개 글 수를 다 받은 뒤 다시 판정한다(2026-11-22).
+      // 주간 감사와 같게 '공개된 글' 끼리만 센다.
+      const othersOf = sameCategoryOthersOf(sources.filter((s) => isLive(s, now)));
+      sources.forEach((b, i) => { acc[i].flags = flagsOf(b, { sameCategoryOthers: othersOf(b) }); });
       if (!cancelled) setRows(acc);
     })();
     return () => { cancelled = true; };

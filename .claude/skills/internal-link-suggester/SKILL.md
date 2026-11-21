@@ -143,6 +143,10 @@ LIMIT 8;
 
 ## Gotchas
 
+- **(2026-11-22) 본문 끝에 "Read More:" 줄을 넣으라고 권하지 않는다.** 글 끝 Read More 묶음(같은 크기 박스 2편)이 그 일을 한다 —
+  유씨가 관리자 "Read More 글 고르기" 칸(`related_slugs`, 최대 2편)에서 고르고, 비는 칸은 같은 카테고리 다음 글·최신 글로 자동 채운다
+  (`lib/read-more-picks.mjs`). 이 스킬의 추천은 그 칸에 고를 후보로 쓴다. 주간 점검 ORPHAN 도 이 칸을 링크로 센다(`lib/seo-defects.mjs`).
+
 - **임베딩 미사용 (v1)**: 의미상 비슷한데 키워드 안 겹치는 글은 못 찾음. v2 에서 pgvector 도입 검토 (별도 PR).
 - **`carousel_series_name` 정합성**: 시리즈로 묶인 글이 적으면 (현재 거의 없음) 이 신호는 제로. featured/tags 가 주 신호.
 - **tags 표준화 안 됨**: 같은 의미의 태그가 다른 표기로 흩어짐 (e.g., "Year 7" vs "year-7" vs "year7"). seo-audit 에서 태그 표준화 점검 필요.

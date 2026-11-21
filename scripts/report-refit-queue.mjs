@@ -16,7 +16,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import { requireAdminClient, paged } from './lib/audit-shared.mjs';
-import { flagsOf, FLAG_META } from '../lib/seo-defects.mjs';
+import { flagsOf, FLAG_META, sameCategoryOthersOf } from '../lib/seo-defects.mjs';
 import { stripHtml, addHeadingIds, wrapKeyTakeaways } from '../lib/content-html.mjs';
 import { internalLinkCount, weakAltCount } from '../lib/blog-preflight.mjs';
 
@@ -31,8 +31,10 @@ function prescriptionsFor(b, facts) {
   if (has('H1_OVER')) out.push('본문 안의 `<h1>` 제거 — 페이지 제목과 충돌한다');
   if (has('META_MISSING')) out.push('meta_description 작성(120~160자)');
   if (has('ALT_MISSING')) out.push(`이미지 alt 채우기 — 설명이 없는 사진 ${facts.weakAlt}장`);
-  if (has('ORPHAN')) out.push('내부 링크 2개 이상(허브 1개 포함) — 지금 0개라 색인에서 고립돼 있다');
-  else if (facts.links < 2) out.push(`내부 링크 ${2 - facts.links}개 더(허브 1개 포함) — 현재 ${facts.links}개`);
+  // 2026-11-22: 본문에 링크를 더 넣으라고 하지 않는다 — 글 끝 Read More 2칸이 그 일을 한다(유씨가 관리자에서 고름).
+  const picked = (b.related_slugs ?? []).filter(Boolean).length;
+  if (has('ORPHAN')) out.push('Read More 칸이 비어 있다 — 관리자 "Read More 글 고르기"에서 2편 고르기(같은 카테고리에 다른 글이 없다)');
+  else if (picked < 2) out.push(`Read More ${2 - picked}편 더 고르기(선택) — 비는 칸은 같은 카테고리 글로 자동 채워진다`);
   if (has('THIN')) out.push(`본문 확장 — 현재 ${facts.words}단어, 400단어가 기준선`);
   if (has('NO_H2')) out.push(`H2 소제목 추가 — 현재 ${facts.h2}개`);
   else if (facts.h2 < 3) out.push(`H2 소제목 ${3 - facts.h2}개 더(1개는 질문형) — 현재 ${facts.h2}개`);
@@ -51,13 +53,14 @@ const db = requireAdminClient();
 const rows = [];
 for await (const b of paged(() =>
   db.from('blogs')
-    .select('slug, title, category, view_count, content, info_block_html, meta_description, og_image_url, seo_title, summary_ko, faq_json, tags, image_url, updated_at, created_at')
+    .select('slug, title, category, view_count, content, info_block_html, meta_description, og_image_url, seo_title, summary_ko, faq_json, tags, image_url, updated_at, created_at, related_slugs')
     .eq('published', true)
     .or('publish_at.is.null,publish_at.lte.now'),
 )) rows.push(b);
 
+const othersOf = sameCategoryOthersOf(rows);
 const scored = rows.map((b) => {
-  const flags = flagsOf(b);
+  const flags = flagsOf(b, { sameCategoryOthers: othersOf(b) });
   const both = `${b.content ?? ''}\n${b.info_block_html ?? ''}`;
   const facts = {
     words: stripHtml(b.content).split(/\s+/).filter(Boolean).length,
