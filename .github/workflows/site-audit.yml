@@ -37,9 +37,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Node 24(npm 11) — 2026-11-22. package-lock.json 은 npm 11 로 만들어진다(11-01 패키지 정리부터).
+      # npm 10(Node 22)의 `npm ci` 는 optional 인 @tiptap bubble/floating-menu 의 peer(@floating-ui/dom)가
+      # lock 에 없다고 설치를 거부해, 11-01~11-15 감사 14단계가 한 번도 돌지 못했다(이슈 #176).
+      # 로컬 개발도 Node 24·npm 11 이다. 22 로 되돌리지 말 것.
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - name: 의존성 설치
