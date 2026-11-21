@@ -5,8 +5,9 @@
  *
  * 둘 다 "이 글과 가까운 발행 글" 목록이 필요하다. 목록을 한 번만 불러 점수를 매기고(lib/link-suggest.mjs),
  * 행마다 두 가지 행동을 준다:
- *   · 관련 글로 추가 → `related_slugs`(상세 페이지 하단 관련글은 이것만, 이 순서로 — 자동 채우기 없음 2026-11-01)
- *   · 링크 복사     → 본문에 붙여넣을 <a> 한 줄 (ORPHAN 재발 차단, 실측 80편 중 75편이 내부 링크 2개 미만)
+ *   · 관련 글로 추가 → `related_slugs` — 글 끝 Read More 2칸에 이 순서로 먼저 나온다(2026-11-22 부터 2편까지).
+ *   · 링크 복사     → 본문에 붙여넣을 <a> 한 줄(선택). 2026-11-22 부터 주간 점검은 Read More 칸도 링크로 센다 —
+ *                     본문 끝에 Read More 줄을 따로 붙일 필요는 없다.
  *
  * ⚠️ 본문을 대신 고치지 않는다 — 추천만 한다(.claude/skills/internal-link-suggester/SKILL.md Gotchas).
  */
@@ -17,6 +18,7 @@ import { toast } from 'sonner';
 import { Link2, Plus, X, ArrowUp } from 'lucide-react';
 import { suggestLinks, bodyLinkHtml } from '@/lib/link-suggest.mjs';
 import { SITE_URL } from '@/lib/seo';
+import { READ_MORE_SLOTS } from '@/lib/read-more-picks.mjs';
 
 interface Candidate {
   slug: string;
@@ -80,7 +82,7 @@ export default function RelatedSuggestions({ current, selected, onChange }: Prop
 
   const add = (slug: string) => {
     if (selected.includes(slug)) return;
-    if (selected.length >= 3) { toast.warning('관련 글은 3편까지입니다.'); return; }
+    if (selected.length >= READ_MORE_SLOTS) { toast.warning(`Read More 는 ${READ_MORE_SLOTS}편까지입니다 — 하나를 빼고 고르세요.`); return; }
     onChange([...selected, slug]);
   };
   const remove = (slug: string) => onChange(selected.filter((s) => s !== slug));
@@ -114,9 +116,9 @@ export default function RelatedSuggestions({ current, selected, onChange }: Prop
 
   return (
     <div style={{ padding: '20px 24px', background: 'white', borderRadius: 20 }}>
-      <p style={{ ...labelStyle, marginBottom: 4 }}>관련 글 · 내부 링크</p>
+      <p style={{ ...labelStyle, marginBottom: 4 }}>Read More 글 고르기 · 내부 링크</p>
       <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 16px' }}>
-        여기서 고른 글이 본문 바로 뒤 &ldquo;Keep reading&rdquo; 의 서랍 3칸에 이 순서로 먼저 나옵니다(최대 3편). 비는 칸은 같은 카테고리 최신 글로 채우고, 같은 카테고리의 다음 글은 그 위에 따로 나옵니다. 링크 복사는 본문에 직접 붙여넣는 용도입니다.
+        여기서 고른 글이 본문 바로 뒤 &ldquo;Read More&rdquo; 2칸에 이 순서로 나옵니다(최대 {READ_MORE_SLOTS}편). 비는 칸은 같은 카테고리의 다음 글, 그다음 최신 글로 자동으로 채웁니다. 본문에 Read More 줄을 따로 쓸 필요는 없습니다(링크 복사는 본문 중간에 넣고 싶을 때만).
       </p>
 
       {/* 선택된 관련 글 */}
@@ -136,6 +138,7 @@ export default function RelatedSuggestions({ current, selected, onChange }: Prop
               <span style={{ flex: 1, color: missing ? '#B91C1C' : '#1A1A1A' }}>
                 {bySlug.get(slug)?.title ?? slug}
                 {missing && <span style={{ fontSize: 11, fontWeight: 700, marginLeft: 6 }}>발행되지 않았거나 슬러그가 바뀜</span>}
+                {!missing && i >= READ_MORE_SLOTS && <span style={{ fontSize: 11, fontWeight: 700, marginLeft: 6, color: '#B45309' }}>화면에 안 나옴 — {READ_MORE_SLOTS}편까지만 보입니다</span>}
               </span>
               <button type="button" onClick={() => moveUp(i)} disabled={i === 0}
                 title="위로" aria-label={`${slug} 위로`}

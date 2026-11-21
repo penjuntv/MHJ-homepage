@@ -37,7 +37,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { requireAdminClient, paged } from './lib/audit-shared.mjs';
 // 판정은 lib/seo-defects.mjs 한 곳에 있다 — 관리자 감사 페이지(app/mhj-desk/seo)가 같은 함수를 쓴다.
 // 여기서 다시 정의하면 화면과 주간 수치가 갈린다(2026-09-10 W4-D 에서 통합).
-import { BASELINE_CHECKS, HARD_FLAGS, baselineFlagsOf } from '../lib/seo-defects.mjs';
+import { BASELINE_CHECKS, HARD_FLAGS, baselineFlagsOf, sameCategoryOthersOf } from '../lib/seo-defects.mjs';
 
 const UPDATE = process.argv.includes('--update-baseline');
 const BASELINE_PATH = new URL('./qa/seo-baseline.json', import.meta.url);
@@ -45,13 +45,15 @@ const BASELINE_PATH = new URL('./qa/seo-baseline.json', import.meta.url);
 const db = requireAdminClient();
 const blogs = [];
 for await (const b of paged(() =>
-  db.from('blogs').select('slug,title,meta_description,content,info_block_html,og_image_url')
+  db.from('blogs').select('slug,title,category,meta_description,content,info_block_html,og_image_url,related_slugs')
     .eq('published', true).or('publish_at.is.null,publish_at.lte.now'),
 )) blogs.push(b);
 
 const posts = {};
 // 기준선에는 결함 플래그만 담는다 — 운영 지표(seo_title 없음 등)는 관리자 화면 전용이다.
-for (const b of blogs) posts[b.slug] = baselineFlagsOf(b);
+// 글 끝 Read More 칸이 차는지 보려면 같은 카테고리 글 수가 필요하다(ORPHAN, 2026-11-22).
+const othersOf = sameCategoryOthersOf(blogs);
+for (const b of blogs) posts[b.slug] = baselineFlagsOf(b, { sameCategoryOthers: othersOf(b) });
 
 const countFlag = (f) => Object.values(posts).filter((fl) => fl.includes(f)).length;
 const current = {

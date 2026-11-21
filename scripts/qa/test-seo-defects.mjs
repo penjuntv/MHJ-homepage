@@ -11,7 +11,7 @@
 import assert from 'node:assert/strict';
 import {
   flagsOf, baselineFlagsOf, CHECKS, BASELINE_CHECKS, HARD_FLAGS, FLAG_META, severityOf, isOgApi, STALE_DAYS,
-  baselineStatusOf, FLAG_INPUT_FIELDS, BASELINE_INPUT_FIELDS, isLive,
+  baselineStatusOf, FLAG_INPUT_FIELDS, BASELINE_INPUT_FIELDS, isLive, sameCategoryOthersOf,
 } from '../../lib/seo-defects.mjs';
 import { readFileSync } from 'node:fs';
 
@@ -46,9 +46,16 @@ check('H1_OVER — 본문에 h1', flags({ content: clean.content + '<h1>x</h1>' 
 check('ALT_MISSING — alt 없는 img', flags({ content: clean.content + '<img src="a">' }).includes('ALT_MISSING'), true);
 check('alt 가 있으면 통과(길이는 안 본다 — 그건 폼의 목표치)',
   flags({ content: clean.content + '<img src="a" alt="hi">' }).includes('ALT_MISSING'), false);
-check('ORPHAN — 내부 링크 0개', flags({ content: `<p>${'word '.repeat(420)}</p><h2>a</h2><h2>b</h2><p>Auckland</p>` }).includes('ORPHAN'), true);
-check('ORPHAN — 인포블록의 링크도 인정',
-  flags({ content: `<p>${'word '.repeat(420)}</p><h2>a</h2><h2>b</h2><p>Auckland</p>`, info_block_html: '<a href="/blog/y">y</a>' }).includes('ORPHAN'), false);
+// 2026-11-22: 글 끝 Read More 칸(유씨 선택 related_slugs → 같은 카테고리 글)이 차면 링크가 있는 것이다.
+const noLinkBody = `<p>${'word '.repeat(420)}</p><h2>a</h2><h2>b</h2><p>Auckland</p>`;
+const orphanOf = (over, opts) => flagsOf({ ...clean, content: noLinkBody, ...over }, { now: NOW, ...opts }).includes('ORPHAN');
+check('ORPHAN — 본문 링크 0 · 관련 글 0 · 같은 카테고리 다른 글 0', orphanOf({}, { sameCategoryOthers: 0 }), true);
+check('ORPHAN 아님 — 같은 카테고리 글이 있으면 Read More 칸이 찬다', orphanOf({}, { sameCategoryOthers: 3 }), false);
+check('ORPHAN 아님 — 유씨가 고른 관련 글이 있으면', orphanOf({ related_slugs: ['a'] }, { sameCategoryOthers: 0 }), false);
+check('ORPHAN 아님 — 빈 문자열만 든 관련 글은 안 친다', orphanOf({ related_slugs: [''] }, { sameCategoryOthers: 0 }), true);
+check('ORPHAN 아님 — 카테고리 수를 모르는 호출(글쓰기 폼)은 칸이 찬다고 본다', orphanOf({}, {}), false);
+check('같은 카테고리 다른 글 수', (() => { const f = sameCategoryOthersOf([{ category: 'A' }, { category: 'A' }, { category: 'B' }]); return [f({ category: 'A' }), f({ category: 'B' }), f({ category: 'C' })]; })(), [1, 0, 0]);
+check('ORPHAN — 인포블록의 링크도 인정', orphanOf({ info_block_html: '<a href="/blog/y">y</a>' }, { sameCategoryOthers: 0 }), false);
 check('META_MISSING', flags({ meta_description: '' }).includes('META_MISSING'), true);
 check('THIN — 400단어 미만', flags({ content: '<p>short</p><a href="/blog/x">x</a><p>Auckland</p>' }).includes('THIN'), true);
 check('NO_H2 — 400단어 이상인데 H2 2개 미만',

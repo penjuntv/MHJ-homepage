@@ -76,8 +76,9 @@ check('H2 는 takeaways 라벨을 빼고 센다',
 check('답 먼저 문단 40~60단어',
   [45, 20, 80].map((n) => idOf({ ...full, content: `<p>${'w '.repeat(n)}</p>` }, 'answer_first').ok), [true, false, false]);
 check('내부 링크는 인포블록도 합산',
-  idOf({ ...full, info_block_html: '<a href="/blog/a">a</a><a href="/blog/b">b</a>' }, 'internal_links').ok, true);
-check('관련 글 2개 이상', idOf({ ...full, related_slugs: ['a', 'b'] }, 'related').ok, true);
+  internalLinkCount(`${full.content ?? ''}<a href="/blog/a">a</a><a href="/blog/b">b</a>`) >= 2, true);
+check('본문 내부 링크 항목은 없다 — 글 끝 Read More 2칸이 대신한다(2026-11-22)', preflightChecks(full).some((c) => c.id === 'internal_links'), false);
+check('Read More 2편 고르기', idOf({ ...full, related_slugs: ['a', 'b'] }, 'related').ok, true);
 
 /* ── 링크 문구의 내부 표기(2026-10-23 16편 17곳 정리 뒤 재발 방지) ── */
 check('라이브에 있던 모양 그대로 잡는다 — <strong>·<em> 안의 [Y1]·[NZ]',
