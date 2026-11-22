@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-21",
+  "generated": "2026-11-22",
   "total": 94,
   "h1_over": 0,
   "alt_missing": 0,
@@ -9,8 +9,13 @@
   "no_h2": 16,
   "no_geo": 33,
   "og_fallback": 73,
-  "alt_generic": 42,
+  "alt_generic": 0,
   "posts": {
+    "walking-without-umbrellas": [
+      "NO_H2",
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
     "locals-001": [
       "THIN"
     ],
@@ -20,32 +25,24 @@
     "year-7-english-mathematics-nz": [
       "THIN"
     ],
+    "how-to-read-a-mid-year-report": [
+      "NO_H2",
+      "OG_FALLBACK"
+    ],
     "shes-already-there": [
       "THIN",
       "NO_GEO",
       "OG_FALLBACK"
     ],
     "morning-at-the-ellerslie-fairy-festival": [
-      "ALT_GENERIC",
       "THIN",
       "OG_FALLBACK"
     ],
     "goodbye-for-a-while": [
-      "ALT_GENERIC",
       "OG_FALLBACK"
     ],
     "girls-001": [
       "THIN"
-    ],
-    "how-to-read-a-mid-year-report": [
-      "NO_H2",
-      "OG_FALLBACK"
-    ],
-    "walking-without-umbrellas": [
-      "ALT_GENERIC",
-      "NO_H2",
-      "NO_GEO",
-      "OG_FALLBACK"
     ],
     "y6-school-production-time-after-time": [
       "NO_H2",
@@ -59,17 +56,20 @@
     "what-we-tried-nothing-quite-fit": [
       "OG_FALLBACK"
     ],
+    "popcorn-blankets-and-movie-marathons": [
+      "THIN",
+      "OG_FALLBACK"
+    ],
     "year-7-intermediate-school-nz-curriculum": [],
     "starting-school-in-new-zealand": [
       "OG_FALLBACK"
     ],
-    "oh-just-you-today": [
-      "OG_FALLBACK"
-    ],
     "trials-and-errors": [
-      "ALT_GENERIC",
       "THIN",
       "NO_GEO",
+      "OG_FALLBACK"
+    ],
+    "oh-just-you-today": [
       "OG_FALLBACK"
     ],
     "y7-kahu-manu-new-way-of-learning": [
@@ -79,7 +79,15 @@
     "learning-aid-scholastic-book-club": [
       "OG_FALLBACK"
     ],
+    "a-cookie-jar-of-numbers-jin-s-first-1-to-20": [
+      "THIN",
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
     "education-001": [],
+    "tricky-egg-hunt-for-easter": [
+      "OG_FALLBACK"
+    ],
     "being-the-only-one": [
       "NO_GEO",
       "OG_FALLBACK"
@@ -87,32 +95,19 @@
     "girls-003": [
       "THIN"
     ],
-    "tricky-egg-hunt-for-easter": [
-      "ALT_GENERIC",
-      "OG_FALLBACK"
-    ],
     "fearless-four": [
       "OG_FALLBACK"
     ],
-    "play-date-friday": [
-      "ALT_GENERIC",
-      "THIN",
-      "NO_GEO",
-      "OG_FALLBACK"
-    ],
     "library-tour-birkenhead-library": [
-      "ALT_GENERIC",
       "NO_GEO",
       "OG_FALLBACK"
     ],
     "library-tour-glenfield-library": [
-      "ALT_GENERIC",
       "THIN",
       "OG_FALLBACK"
     ],
-    "evenings-with-storypress": [
-      "ALT_GENERIC",
-      "NO_H2",
+    "play-date-friday": [
+      "THIN",
       "NO_GEO",
       "OG_FALLBACK"
     ],
@@ -123,41 +118,41 @@
       "NO_H2",
       "OG_FALLBACK"
     ],
+    "evenings-with-storypress": [
+      "NO_H2",
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
     "intermediate-guide-specialist-subjects": [
-      "ALT_GENERIC",
       "THIN",
       "OG_FALLBACK"
     ],
     "growing-without-a-score": [
       "OG_FALLBACK"
     ],
-    "holiday-home-learning-the-reading-bingo": [
-      "ALT_GENERIC",
-      "THIN",
+    "our-library-haul": [
+      "NO_H2",
       "NO_GEO",
       "OG_FALLBACK"
     ],
-    "our-library-haul": [
-      "ALT_GENERIC",
-      "NO_H2",
+    "holiday-home-learning-the-reading-bingo": [
+      "THIN",
       "NO_GEO",
       "OG_FALLBACK"
     ],
     "settlement-008": [
       "THIN"
     ],
-    "ive-world-tour-show-what-i-am": [
-      "ALT_GENERIC",
-      "NO_H2",
-      "OG_FALLBACK"
-    ],
     "the-app-we-dreamt-of": [
       "THIN",
       "NO_GEO",
       "OG_FALLBACK"
     ],
+    "ive-world-tour-show-what-i-am": [
+      "NO_H2",
+      "OG_FALLBACK"
+    ],
     "3-girls-3-colours-of-the-holidays-jin": [
-      "ALT_GENERIC",
       "NO_H2",
       "NO_GEO",
       "OG_FALLBACK"
@@ -165,34 +160,30 @@
     "season-of-cross-country": [
       "OG_FALLBACK"
     ],
-    "y1-maths-term-1-2": [
-      "OG_FALLBACK"
-    ],
-    "library-tour-albany-village-library": [
-      "ALT_GENERIC",
-      "OG_FALLBACK"
-    ],
     "children-grow-along-the-way": [
       "NO_H2",
       "OG_FALLBACK"
     ],
-    "popcorn-blankets-and-movie-marathons": [
-      "ALT_GENERIC",
-      "THIN",
+    "y1-maths-term-1-2": [
       "OG_FALLBACK"
     ],
-    "orewa-surf-sounds-2026-fireworks-at-shore": [
-      "ALT_GENERIC",
+    "library-tour-albany-village-library": [
       "OG_FALLBACK"
     ],
     "sweet-and-spooky-halloween": [
-      "ALT_GENERIC",
       "NO_H2",
       "NO_GEO",
       "OG_FALLBACK"
     ],
+    "orewa-surf-sounds-2026-fireworks-at-shore": [
+      "OG_FALLBACK"
+    ],
+    "100-days-of-schhol": [
+      "THIN",
+      "NO_GEO",
+      "OG_FALLBACK"
+    ],
     "relax-mum-relax": [
-      "ALT_GENERIC",
       "NO_H2",
       "NO_GEO",
       "OG_FALLBACK"
@@ -201,14 +192,7 @@
       "THIN",
       "OG_FALLBACK"
     ],
-    "100-days-of-schhol": [
-      "ALT_GENERIC",
-      "THIN",
-      "NO_GEO",
-      "OG_FALLBACK"
-    ],
     "mum-s-birthday-oddly-weary-awfully-funny-fondly-comfy": [
-      "ALT_GENERIC",
       "NO_H2",
       "NO_GEO",
       "OG_FALLBACK"
@@ -217,13 +201,11 @@
       "NO_GEO"
     ],
     "a-bead-tree-in-winter": [
-      "ALT_GENERIC",
       "THIN",
       "NO_GEO",
       "OG_FALLBACK"
     ],
     "the-word-cards": [
-      "ALT_GENERIC",
       "THIN",
       "NO_GEO",
       "OG_FALLBACK"
@@ -236,12 +218,10 @@
       "OG_FALLBACK"
     ],
     "families-in-parks-summer-fun": [
-      "ALT_GENERIC",
       "THIN",
       "OG_FALLBACK"
     ],
     "nz-keeping-ourselves-safe": [
-      "ALT_GENERIC",
       "OG_FALLBACK"
     ],
     "blessings-for-the-lost": [
@@ -249,27 +229,18 @@
       "OG_FALLBACK"
     ],
     "what-s-in-the-lunchbox": [
-      "ALT_GENERIC",
       "OG_FALLBACK"
     ],
     "nz-ncea-is-changing-following-the-curriculum-shake-up": [
       "OG_FALLBACK"
     ],
     "how-to-pack-a-lunch": [
-      "ALT_GENERIC",
-      "OG_FALLBACK"
-    ],
-    "a-cookie-jar-of-numbers-jin-s-first-1-to-20": [
-      "ALT_GENERIC",
-      "THIN",
-      "NO_GEO",
-      "OG_FALLBACK"
-    ],
-    "step-up-reading-aloud": [
       "OG_FALLBACK"
     ],
     "every-day-is-mother-s-day": [
-      "ALT_GENERIC",
+      "OG_FALLBACK"
+    ],
+    "step-up-reading-aloud": [
       "OG_FALLBACK"
     ],
     "girls-002": [
@@ -278,13 +249,16 @@
     ],
     "setting-personal-routines": [],
     "a-quiet-week-before-the-break-ends": [
-      "ALT_GENERIC",
       "THIN",
       "NO_GEO",
       "OG_FALLBACK"
     ],
     "ikea-nz-grown-ups-also-dream-at-ikea": [
-      "ALT_GENERIC",
+      "OG_FALLBACK"
+    ],
+    "3-girls-3-colours-of-the-holidays-hyun": [
+      "THIN",
+      "NO_GEO",
       "OG_FALLBACK"
     ],
     "word-fun-at-dinner": [
@@ -292,77 +266,61 @@
       "NO_GEO",
       "OG_FALLBACK"
     ],
+    "the-fox-the-storm-and-the-bread-bowl": [
+      "OG_FALLBACK"
+    ],
     "anzac-home-learning-the-red-poppy": [
       "OG_FALLBACK"
     ],
-    "3-girls-3-colours-of-the-holidays-hyun": [
-      "ALT_GENERIC",
-      "THIN",
-      "NO_GEO",
-      "OG_FALLBACK"
-    ],
-    "the-fox-the-storm-and-the-bread-bowl": [
-      "ALT_GENERIC",
-      "OG_FALLBACK"
-    ],
     "the-homework-book": [
-      "ALT_GENERIC",
       "NO_GEO",
       "OG_FALLBACK"
     ],
     "top-team-competition": [
-      "ALT_GENERIC",
       "OG_FALLBACK"
     ],
     "3-girls-3-colours-of-the-holidays-min": [
-      "ALT_GENERIC",
       "NO_H2",
       "NO_GEO",
       "OG_FALLBACK"
     ],
     "the-first-play-date": [
-      "ALT_GENERIC",
       "OG_FALLBACK"
     ],
     "a-slow-long-weekend": [
-      "ALT_GENERIC",
       "NO_GEO",
       "OG_FALLBACK"
     ],
     "love-you-too-mummy-monster": [
       "OG_FALLBACK"
     ],
-    "ncea-is-changing-no-more-levels-no-more-credits": [
-      "OG_FALLBACK"
-    ],
     "jins-first-term-report-year-1-nz": [
-      "THIN",
-      "OG_FALLBACK"
-    ],
-    "night-market-tuesdays": [
-      "ALT_GENERIC",
       "THIN",
       "OG_FALLBACK"
     ],
     "term-2-a-new-beginning": [
       "OG_FALLBACK"
     ],
+    "ncea-is-changing-no-more-levels-no-more-credits": [
+      "OG_FALLBACK"
+    ],
+    "night-market-tuesdays": [
+      "THIN",
+      "OG_FALLBACK"
+    ],
     "matariki-in-the-house": [
-      "ALT_GENERIC",
       "THIN",
       "OG_FALLBACK"
     ],
     "between-sunshine-and-gale-force": [
-      "ALT_GENERIC",
       "OG_FALLBACK"
     ],
+    "year-7-science-social-studies-nz": [],
     "y7-kahu-manu-2-life-in-pages": [
-      "ALT_GENERIC",
       "NO_H2",
       "NO_GEO",
       "OG_FALLBACK"
     ],
-    "year-7-science-social-studies-nz": [],
     "so-we-made-our-own": [
       "THIN",
       "NO_GEO",
