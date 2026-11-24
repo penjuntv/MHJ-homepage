@@ -71,8 +71,10 @@ async function getJournalPhotos(): Promise<GalleryPhoto[]> {
 async function getMagazinePhotos(): Promise<GalleryPhoto[]> {
   const { data } = await supabase
     .from('articles')
-    .select('title, slug, magazine_id, image_url, article_images, article_type, date')
+    // 숨김 호의 기사 사진은 뺀다 — 눌러도 기사 주소가 404 다(lib/magazine-visibility.ts)
+    .select('title, slug, magazine_id, image_url, article_images, article_type, date, magazines!inner(published)')
     .eq('article_status', 'published')
+    .eq('magazines.published', true)
     .order('date', { ascending: false });
 
   if (!data) return [];

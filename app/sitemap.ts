@@ -36,11 +36,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: m.created_at,
   }));
 
-  // 매거진 기사 (slug 있는 published만)
+  // 매거진 기사 (slug 있는 published만 · 숨김 호의 기사는 주소가 404 라 뺀다)
   const { data: articleRows } = await supabase
     .from('articles')
-    .select('magazine_id, slug, created_at')
+    .select('magazine_id, slug, created_at, magazines!inner(published)')
     .eq('article_status', 'published')
+    .eq('magazines.published', true)
     .not('slug', 'is', null);
 
   const articlePages: MetadataRoute.Sitemap = (articleRows ?? []).map((a) => ({

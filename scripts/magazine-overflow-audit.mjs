@@ -30,6 +30,9 @@
  * .mag-page-root 로 조판되는 호수만. 과월호 PDF 이슈(react-pdf)는 코드로 조판하지 않아
  * 대상이 아니며, 그런 호수는 요약에 "감사 대상 아님"으로 반드시 표시한다.
  * 호수 목록은 sitemap 에서 얻으므로 published=false 인 준비 중 호수는 --issues 로 지정한다.
+ * ⚠ 숨김 호의 공개 주소는 404 다(2026-11, lib/magazine-visibility.ts) — 라이브(--base 기본값)로는 못 연다.
+ *   숨김 호는 로컬에서 돈다:  MAGAZINE_SHOW_HIDDEN=1 npm run dev
+ *                              node scripts/magazine-overflow-audit.mjs --base=http://localhost:3003 --issues=2026-09
  */
 import { promises as fs } from 'fs';
 import path from 'path';

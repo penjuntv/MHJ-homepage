@@ -90,9 +90,11 @@ export async function GET(req: NextRequest) {
       .abortSignal(signal));
   const articleQuery = (signal: AbortSignal) => supabase
     .from('articles')
-    .select('id, title, content, date, image_url, magazine_id')
+    .select('id, title, content, date, image_url, magazine_id, magazines!inner(published)')
     // 공개 페이지 5곳과 같은 발행 가드 — 없으면 초안 기사 제목·본문이 검색으로 샌다
     .eq('article_status', 'published')
+    // 숨김 호의 기사도 뺀다 — 호를 숨기면 그 안의 기사 주소가 404 다(lib/magazine-visibility.ts)
+    .eq('magazines.published', true)
     .or(tokens.flatMap((t) => [`title.ilike.${ilike(t)}`, `content.imatch.${bodyMatch(t)}`]).join(','))
     .order('id', { ascending: false })
     .limit(50)
