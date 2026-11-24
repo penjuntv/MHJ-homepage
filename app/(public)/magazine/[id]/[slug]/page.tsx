@@ -3,11 +3,13 @@ import { OG_BASE, SITE_LANG, personRef, orgRef, schemaDate } from '@/lib/seo';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import type { Article, Magazine } from '@/lib/types';
+import type { Article, ArticlePage, Magazine } from '@/lib/types';
 import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import MagazinePage from '@/components/magazine/MagazinePage';
 import MagazineCanvas from '@/components/magazine/MagazineCanvas';
-import { optimizeArticleImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
+import ArticlePageHints from '@/components/magazine/ArticlePageHints';
+import type { StyleOverrides } from '@/components/magazine/templates/shared';
+import { optimizeArticleImages, optimizePageImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
 import { canViewIssue, isHiddenIssue } from '@/lib/magazine-visibility';
 import IssuePreviewBanner from '@/components/magazine/IssuePreviewBanner';
 
@@ -44,6 +46,18 @@ async function getArticle(magazineId: string, slug: string): Promise<Article | n
 async function getMagazine(id: string): Promise<Magazine | null> {
   const { data } = await supabase.from('magazines').select('*').eq('id', id).single();
   return data ?? null;
+}
+
+/* 추가 쪽(article_pages) — 리더(MagazineSpreadViewer)가 기사 첫 쪽 뒤에 이어 붙이는 것과 같은 행.
+   예전엔 이 페이지가 추가 쪽을 아예 받지 않아, 여러 쪽 기사도 첫 쪽만 보였다(2026-11).
+   조회가 실패하면 빈 배열 — 첫 쪽만이라도 보여 준다. */
+async function getExtraPages(articleId: number): Promise<ArticlePage[]> {
+  const { data } = await supabase
+    .from('article_pages')
+    .select('*')
+    .eq('article_id', articleId)
+    .order('page_number', { ascending: true });
+  return ((data ?? []) as ArticlePage[]).map((ep) => optimizePageImages(ep, MAG_IMAGE_WIDTH.page));
 }
 
 async function getSiblings(
@@ -124,7 +138,10 @@ export default async function MagazineArticlePage(props: Props) {
   if (!(await canViewIssue(magazine))) notFound();
   const isHiddenPreview = isHiddenIssue(magazine);
 
-  const { prev, next } = await getSiblings(params.id, article.sort_order ?? 0);
+  const [{ prev, next }, extraPages] = await Promise.all([
+    getSiblings(params.id, article.sort_order ?? 0),
+    getExtraPages(article.id),
+  ]);
 
   const articleLd = {
     '@context': 'https://schema.org',
@@ -162,6 +179,9 @@ export default async function MagazineArticlePage(props: Props) {
   const view = optimizeArticleImages(article, MAG_IMAGE_WIDTH.page);
   const accentColor = magazine.accent_color || '#8A6B4F';
   const bgColor = magazine.bg_color || '#FDFCFA';
+  // 글자 크기·줄 간격 등 기사별 조판 값 — 리더·어드민 미리보기·PNG 렌더가 모두 넘기는데 이 페이지만 빠져 있었다.
+  // 넘기지 않으면 같은 기사가 리더와 다르게 조판돼(넘침·잘림 위치가 달라진다) 첫 쪽·추가 쪽 모두에 넘긴다.
+  const styleOverrides = (article.style_overrides as StyleOverrides | null) ?? undefined;
 
   return (
     <>
@@ -179,37 +199,60 @@ export default async function MagazineArticlePage(props: Props) {
             </Link>
           </nav>
 
+          {/* 지면은 세로로 쌓는다 — 첫 쪽 + 추가 쪽(article_pages). 한 쪽짜리 기사는 예전과 같은 모습이다.
+              쪽마다 MagazineCanvas 를 따로 써서 지면 하나하나가 620×812 고정 캔버스로 조판된다(리더와 같은 렌더러).
+              scroll-margin-top = 고정 네비게이션(72) + 위 꺾쇠 자리 — 꺾쇠를 눌러 옮겼을 때 지면 머리가 가려지지 않게. */}
           <article>
-            <MagazineCanvas viewportHeightFraction={0.85}>
-              <div
-                style={{
-                  borderRadius: 12,
-                  overflow: 'hidden',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-                }}
-              >
-                <MagazinePage bgColor={bgColor}>
-                  <ArticlePageRenderer
-                    template={article.template}
-                    title={article.title}
-                    author={article.author}
-                    content={view.content ?? ''}
-                    images={(view.article_images ?? []).filter(Boolean) as string[]}
-                    imagePositions={(article.image_positions ?? []) as string[]}
-                    captions={(article.image_captions ?? []) as string[]}
-                    accentColor={accentColor}
-                    bgColor={bgColor}
-                    kicker={article.kicker}
-                    subtitle={article.subtitle}
-                    sidebarTitle={article.sidebar_title}
-                    sidebarBody={view.sidebar_body}
-                    directoryItems={article.directory_items}
-                    quoteText={article.quote_text}
-                    quoteAttribution={article.quote_attribution}
-                  />
-                </MagazinePage>
-              </div>
-            </MagazineCanvas>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+              {[null, ...extraPages].map((ep, i) => (
+                <div
+                  key={ep ? `extra-${ep.id ?? ep.page_number}` : 'first'}
+                  // ArticlePageHints 가 이 속성으로 지면을 찾는다(그 파일의 SHEET_SELECTOR 와 한 벌).
+                  data-article-sheet={i + 1}
+                  style={{ scrollMarginTop: 148 }}
+                >
+                  <MagazineCanvas viewportHeightFraction={0.85}>
+                    <div
+                      style={{
+                        borderRadius: 12,
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                      }}
+                    >
+                      <MagazinePage bgColor={bgColor}>
+                        {/* 추가 쪽에 넘기는 값은 리더(MagazineSpreadViewer.renderContent)와 같다 —
+                            템플릿·본문·사진은 그 쪽의 것, 제목은 숨기고 나머지는 기사의 것. */}
+                        <ArticlePageRenderer
+                          template={ep ? (ep.template ?? article.template ?? 'classic') : article.template}
+                          title={ep ? undefined : article.title}
+                          author={article.author}
+                          content={ep ? ep.content : (view.content ?? '')}
+                          images={ep
+                            ? ((ep.images ?? []).filter(Boolean) as string[])
+                            : ((view.article_images ?? []).filter(Boolean) as string[])}
+                          imagePositions={ep
+                            ? (ep.image_positions ?? [])
+                            : ((article.image_positions ?? []) as string[])}
+                          captions={ep ? (ep.captions ?? []) : ((article.image_captions ?? []) as string[])}
+                          accentColor={accentColor}
+                          bgColor={bgColor}
+                          hideTitle={!!ep}
+                          styleOverrides={styleOverrides}
+                          kicker={article.kicker}
+                          subtitle={article.subtitle}
+                          sidebarTitle={article.sidebar_title}
+                          sidebarBody={view.sidebar_body}
+                          directoryItems={article.directory_items}
+                          quoteText={article.quote_text}
+                          quoteAttribution={article.quote_attribution}
+                        />
+                      </MagazinePage>
+                    </div>
+                  </MagazineCanvas>
+                </div>
+              ))}
+            </div>
+            {extraPages.length > 0 && <ArticlePageHints total={1 + extraPages.length} />}
           </article>
 
           <nav
