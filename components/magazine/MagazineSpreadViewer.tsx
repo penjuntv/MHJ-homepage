@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Heart, Share2, List, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase-browser';
 import ArticlePageRenderer from './ArticlePageRenderer';
@@ -153,6 +154,10 @@ function buildPages(sorted: Article[], isLegacyPng: boolean, extras: ArticlePage
 
 const SWIPE_THRESHOLD = 0.22;   // 페이지 너비의 22% 이상 스와이프 시 넘김
 const AUTO_HIDE_MS = 3000;
+/* 사이트 고정 네비게이션 높이(components/Navigation.tsx 의 72px, z-50).
+   리더 상단 바는 그 바로 아래에 붙인다 — top:0 이던 때는 네비게이션(더 위층)에 통째로 가려
+   돌아가기·목차·좋아요·공유·닫기가 보이지도 눌리지도 않았다(2026-11). */
+const SITE_NAV_H = 72;
 
 /* 고정 캔버스: 지면은 항상 620×812(42:55)로 레이아웃하고 scale로만 축소.
    → 창 크기/줌과 무관하게 지면 내부 레이아웃·분량이 항상 동일.
@@ -300,12 +305,13 @@ export default function MagazineSpreadViewer({ magazine, articles, extraPages, i
       else if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
       else if (e.key === 'Escape') {
         if (tocOpen) setTocOpen(false);
-        else router.push('/magazine');
+        // 닫기(X)·돌아가기와 같은 곳 — 이 호의 기사 목록.
+        else router.push(`/magazine/${magazine.id}`);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [goNext, goPrev, router, tocOpen]);
+  }, [goNext, goPrev, router, tocOpen, magazine.id]);
 
   /* ─── 터치 스와이프 ─── */
   function onTouchStart(e: React.TouchEvent) {
@@ -485,39 +491,43 @@ export default function MagazineSpreadViewer({ magazine, articles, extraPages, i
         @keyframes mvSlideInLeft  { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
       `}</style>
 
-      {/* ── 상단 바 ── */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 40,
+      {/* ── 상단 바 ── 사이트 네비게이션 바로 아래(top: SITE_NAV_H)에 고정.
+          자동 숨김(uiVisible)은 제목·오른쪽 도구에만 건다 — 돌아가기는 항상 보인다
+          (모바일에는 마우스 움직임이 없어, 숨겨지면 이 호의 기사 목록으로 돌아갈 길이 안 보인다). */}
+      <div className="mv-top" style={{
+        position: 'fixed', top: SITE_NAV_H, left: 0, right: 0, zIndex: 40,
         padding: '14px 20px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
         background: `linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 100%)`,
-        backdropFilter: uiVisible ? 'blur(4px)' : undefined,
-        WebkitBackdropFilter: uiVisible ? 'blur(4px)' : undefined,
-        opacity: uiVisible || tocOpen ? 1 : 0,
-        pointerEvents: uiVisible || tocOpen ? 'auto' : 'none',
-        transition: 'opacity 280ms ease',
+        // 띠 자체는 클릭을 가로채지 않는다 — 안의 링크·버튼만 받는다.
+        pointerEvents: 'none',
       }}>
-        {/* 좌: 서가로 돌아가기 */}
-        <button
-          type="button"
-          onClick={() => router.push('/magazine')}
+        {/* 좌: 이 호의 기사 목록(호 상세)으로 돌아가기 — 항상 보인다. 서가(/magazine)는 바로 위 네비게이션에 있다. */}
+        <Link
+          href={`/magazine/${magazine.id}`}
+          className="mv-back"
+          aria-label={`Back to ${magazine.title} — all articles in this issue`}
           style={{
             display: 'flex', alignItems: 'center', gap: 5,
-            background: 'none', border: 'none', cursor: 'pointer',
             fontFamily: '"Inter", sans-serif',
             fontSize: 11, fontWeight: 600, letterSpacing: '0.2em',
-            textTransform: 'uppercase', color: barText,
+            textTransform: 'uppercase', color: barText, textDecoration: 'none',
             padding: '6px 8px', flexShrink: 0,
+            pointerEvents: 'auto',
           }}
         >
-          <ChevronLeft size={14} />
-          Magazine
-        </button>
+          <ChevronLeft size={14} aria-hidden />
+          Back to issue
+        </Link>
 
         {/* 중앙: 매거진 제목 */}
-        <div style={{ flex: 1, textAlign: 'center', minWidth: 0 }}>
+        <div className="mv-fade" style={{
+          flex: 1, textAlign: 'center', minWidth: 0,
+          opacity: uiVisible || tocOpen ? 1 : 0,
+          transition: 'opacity 280ms ease',
+        }}>
           {/* 리더 화면의 유일한 제목 — <p> 였을 때 페이지에 <h1> 이 없었다(axe page-has-heading-one). */}
-          <h1 style={{
+          <h1 className="mv-title" style={{
             fontFamily: '"Inter", sans-serif',
             fontSize: 14, fontWeight: 500, letterSpacing: '0.05em',
             color: barText,
@@ -528,7 +538,12 @@ export default function MagazineSpreadViewer({ magazine, articles, extraPages, i
         </div>
 
         {/* 우: 페이지 / TOC / 좋아요 / 공유 / 닫기 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+        <div className="mv-tools" style={{
+          display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0,
+          opacity: uiVisible || tocOpen ? 1 : 0,
+          pointerEvents: uiVisible || tocOpen ? 'auto' : 'none',
+          transition: 'opacity 280ms ease',
+        }}>
           <span style={{
             fontFamily: '"Inter", sans-serif',
             fontSize: 12, fontWeight: 400, letterSpacing: '0.05em',
@@ -692,6 +707,7 @@ export default function MagazineSpreadViewer({ magazine, articles, extraPages, i
             type="button"
             onClick={() => router.push(`/magazine/${magazine.id}`)}
             aria-label="Close"
+            className="mv-close"
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
               display: 'flex', alignItems: 'center',
@@ -877,7 +893,16 @@ export default function MagazineSpreadViewer({ magazine, articles, extraPages, i
         </div>
 
         <style>{`
+          .mv-back { opacity: 0.92; transition: opacity 200ms ease; }
+          .mv-back:hover, .mv-back:focus-visible { opacity: 1; }
           @media (max-width: 767px) {
+            /* 좁은 화면: 돌아가기 + 쪽 번호 + 도구가 한 줄에 들어가게 — 제목은 화면에서만 감추고(h1 은 남긴다),
+               닫기(X)는 돌아가기와 같은 곳으로 가므로 뺀다. */
+            .mv-top { padding: 10px 12px !important; gap: 8px !important; }
+            .mv-back { letter-spacing: 0.12em !important; padding: 6px 4px !important; }
+            .mv-tools { gap: 10px !important; }
+            .mv-close { display: none !important; }
+            .mv-title { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
             .mv-root { height: auto !important; min-height: 100vh; min-height: 100dvh; }
             .mv-nav-side { display: none !important; }
             .mv-mobile-bottom { display: flex !important; }
