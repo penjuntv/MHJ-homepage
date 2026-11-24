@@ -2,7 +2,9 @@
 import { draftMode } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-export async function GET() {
+export async function GET(request: Request) {
   (await draftMode()).disable();
-  redirect('/mhj-desk/blogs');
+  // 돌아갈 곳은 고정된 두 곳뿐 — 요청 값으로 주소를 만들지 않는다(오픈 리다이렉트 방지).
+  const to = new URL(request.url).searchParams.get('to');
+  redirect(to === 'magazines' ? '/mhj-desk/magazines' : '/mhj-desk/blogs');
 }

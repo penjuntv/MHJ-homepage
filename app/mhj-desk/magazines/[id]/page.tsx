@@ -751,7 +751,8 @@ export default function MagazineDetailPage() {
             </h1>
           </div>
         </div>
-        <a href={`/magazine/${id}`} target="_blank" rel="noreferrer"
+        {/* 숨김 호의 공개 주소는 404 다 — 미리보기(draftMode)를 켜고 들어간다(lib/magazine-visibility.ts). */}
+        <a href={magazine.published === false ? `/api/preview?magazine=${encodeURIComponent(id)}` : `/magazine/${id}`} target="_blank" rel="noreferrer"
           style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#1A1A1A', color: 'white', borderRadius: '999px', padding: '10px 20px', fontSize: '11px', fontWeight: 900, letterSpacing: '2px', textDecoration: 'none', textTransform: 'uppercase' }}>
           <ExternalLink size={13} /> 뷰어로 보기
         </a>

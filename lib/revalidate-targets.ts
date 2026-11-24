@@ -8,6 +8,9 @@
 export const DERIVED_PATHS = ['/sitemap.xml', '/feed.xml', '/llms.txt', '/llms-full.txt', '/gallery'] as const;
 
 // 동적 세그먼트는 'page' 타입으로 통째 갱신 — 카테고리 허브 7개·페이지네이션·호 상세.
+// '/magazine/[id]/[slug]'(기사 페이지, ISR 10분): 호를 숨기거나 기사를 고친 직후 옛 페이지가 남지 않게 한다.
+// 호출자는 '/magazine/<id>' 만 보내 왔고 기사 주소는 빠져 있어, 숨긴 호의 기사가 최대 10분 더 열려 있었다(2026-11).
 export const DERIVED_SEGMENTS = [
   '/blog/category/[slug]', '/blog/category/[slug]/page/[n]', '/blog/page/[n]', '/mairangi-notes/[issue]',
+  '/magazine/[id]/[slug]',
 ] as const;

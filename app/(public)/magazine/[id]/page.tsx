@@ -8,6 +8,8 @@ import MagazineSpreadViewer from '@/components/magazine/MagazineSpreadViewer';
 import MagazineIssueDetail from '@/components/magazine/MagazineIssueDetail';
 import { isLegacyPngIssue } from '@/lib/magazine-themes';
 import { optimizeArticleImages, optimizePageImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
+import { canViewIssue, isHiddenIssue } from '@/lib/magazine-visibility';
+import IssuePreviewBanner from '@/components/magazine/IssuePreviewBanner';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -129,6 +131,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const magazine = await getMagazine(params.id);
   if (!magazine) return {};
+  // 숨김 호는 제목·표지가 <title>·OG 로 새지 않게 메타데이터 단계에서 404 (관리자 미리보기만 통과).
+  if (!(await canViewIssue(magazine))) notFound();
   const title = `${magazine.title} — ${magazine.year} ${magazine.month_name}`;
   const issueArticles = await getArticles(params.id);
   const description = issueDescription(magazine, issueArticles);
@@ -148,9 +152,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     },
     twitter: { card: 'summary_large_image', title, description, ...(magazine.image_url ? { images: [magazine.image_url] } : {}) },
     alternates: { canonical: url },
-    // 준비 중인 호(published=false)는 서가·sitemap·검색에서 빠지지만 주소로는 열린다 — 편집 중 미리보기용.
-    // 그 주소가 어딘가에서 링크돼도 검색엔진이 "COMING SOON" 뿐인 얇은 페이지를 색인하지 않게 한다.
-    ...(magazine.published === false || isEmptyIssue ? { robots: { index: false, follow: true } } : {}),
+    // 숨김 호(published=false)는 여기까지 오면 관리자 미리보기뿐이다(위 canViewIssue) — 그래도 색인 금지를 남긴다.
+    // 공개 호라도 "COMING SOON" 뿐인 얇은 페이지는 검색엔진이 색인하지 않게 한다.
+    ...(isHiddenIssue(magazine) || isEmptyIssue ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -159,6 +163,10 @@ export default async function MagazineIssuePage(props: Props) {
   const params = await props.params;
   const magazine = await getMagazine(params.id);
   if (!magazine) notFound();
+  // 숨김 호는 주소를 직접 입력해도 404 — 관리자만 미리보기(/api/preview?magazine=<id>)로 본다.
+  // ?page=N 리더·리다이렉트도 이 아래에 있으므로 같이 막힌다.
+  if (!(await canViewIssue(magazine))) notFound();
+  const isHiddenPreview = isHiddenIssue(magazine);
 
   const articles = await getArticles(params.id);
 
@@ -227,6 +235,7 @@ export default async function MagazineIssuePage(props: Props) {
       <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+        {isHiddenPreview && <IssuePreviewBanner />}
         <MagazineIssueDetail magazine={magazine} articles={forView(MAG_IMAGE_WIDTH.thumb)} pageMap={pageMap} />
       </>
     );
@@ -273,6 +282,8 @@ export default async function MagazineIssuePage(props: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {/* 준비 중인 숨김 호는 대개 발행 기사가 아직 없어 이 갈래("COMING SOON")로 온다. */}
+      {isHiddenPreview && <IssuePreviewBanner />}
       <MagazineViewer magazine={magazine} articles={forView(MAG_IMAGE_WIDTH.page)} />
     </>
   );

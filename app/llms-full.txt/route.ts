@@ -62,8 +62,10 @@ export async function GET() {
       .order('id', { ascending: false }),
     supabase
       .from('articles')
-      .select('slug, title, subtitle, magazine_id, created_at')
+      // 숨김 호의 기사는 주소가 404 라 뺀다(lib/magazine-visibility.ts)
+      .select('slug, title, subtitle, magazine_id, created_at, magazines!inner(published)')
       .eq('article_status', 'published')
+      .eq('magazines.published', true)
       .not('slug', 'is', null)
       .order('created_at', { ascending: false }),
     supabase

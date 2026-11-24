@@ -8,6 +8,8 @@ import ArticlePageRenderer from '@/components/magazine/ArticlePageRenderer';
 import MagazinePage from '@/components/magazine/MagazinePage';
 import MagazineCanvas from '@/components/magazine/MagazineCanvas';
 import { optimizeArticleImages, MAG_IMAGE_WIDTH } from '@/lib/magazine-image.mjs';
+import { canViewIssue, isHiddenIssue } from '@/lib/magazine-visibility';
+import IssuePreviewBanner from '@/components/magazine/IssuePreviewBanner';
 
 export const revalidate = 600;
 
@@ -18,12 +20,14 @@ interface Props {
 }
 
 export async function generateStaticParams() {
+  // 숨김 호의 기사는 미리 만들지 않는다 — 요청이 오면 아래 canViewIssue 가 404 를 낸다.
   const { data } = await supabase
     .from('articles')
-    .select('magazine_id, slug')
+    .select('magazine_id, slug, magazines!inner(published)')
     .eq('article_status', 'published')
+    .eq('magazines.published', true)
     .not('slug', 'is', null);
-  return (data ?? []).map((a) => ({ id: a.magazine_id, slug: a.slug as string }));
+  return (data ?? []).map((a) => ({ id: a.magazine_id as string, slug: a.slug as string }));
 }
 
 async function getArticle(magazineId: string, slug: string): Promise<Article | null> {
@@ -75,6 +79,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     getMagazine(params.id),
   ]);
   if (!article || !magazine) return {};
+  // 숨김 호의 기사 제목·본문이 <title>·OG 로 새지 않게 메타데이터 단계에서 404 (관리자 미리보기만 통과).
+  if (!(await canViewIssue(magazine))) notFound();
 
   const url = `${SITE_URL}/magazine/${params.id}/${params.slug}`;
   const title = `${article.title} — ${magazine.title}`;
@@ -102,8 +108,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       images: ogImage ? [ogImage] : undefined,
     },
     alternates: { canonical: url },
-    // 호가 준비 중(published=false)이면 그 안의 기사도 색인하지 않는다 — 호 페이지(../page.tsx)와 같은 규칙.
-    ...(magazine.published === false ? { robots: { index: false, follow: true } } : {}),
+    // 숨김 호(published=false)는 여기까지 오면 관리자 미리보기뿐이다 — 그래도 색인 금지를 남긴다(호 페이지와 같은 규칙).
+    ...(isHiddenIssue(magazine) ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -114,6 +120,9 @@ export default async function MagazineArticlePage(props: Props) {
     getMagazine(params.id),
   ]);
   if (!article || !magazine) notFound();
+  // 숨김 호의 기사는 주소를 직접 입력해도 404 — 관리자만 미리보기로 본다(lib/magazine-visibility.ts).
+  if (!(await canViewIssue(magazine))) notFound();
+  const isHiddenPreview = isHiddenIssue(magazine);
 
   const { prev, next } = await getSiblings(params.id, article.sort_order ?? 0);
 
@@ -158,6 +167,8 @@ export default async function MagazineArticlePage(props: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+
+      {isHiddenPreview && <IssuePreviewBanner />}
 
       {/* 레이아웃의 <main> 안이라 여기서 또 <main> 을 쓰면 랜드마크가 중첩·중복된다. */}
       <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: '64px' }}>
